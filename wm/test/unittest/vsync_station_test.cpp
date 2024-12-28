@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include <vsync_station.h>
 #include <gtest/gtest.h>
+#include <vsync_station.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,21 +29,13 @@ public:
     void TearDown() override;
 };
 
-void VsyncStationTest::SetUpTestCase()
-{
-}
+void VsyncStationTest::SetUpTestCase() {}
 
-void VsyncStationTest::TearDownTestCase()
-{
-}
+void VsyncStationTest::TearDownTestCase() {}
 
-void VsyncStationTest::SetUp()
-{
-}
+void VsyncStationTest::SetUp() {}
 
-void VsyncStationTest::TearDown()
-{
-}
+void VsyncStationTest::TearDown() {}
 
 namespace {
 /**
@@ -148,6 +140,6 @@ HWTEST_F(VsyncStationTest, SetUiDvsyncSwitch, Function | SmallTest | Level3)
     vsyncStation->SetUiDvsyncSwitch(true);
     vsyncStation->SetUiDvsyncSwitch(false);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

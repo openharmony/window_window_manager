@@ -32,17 +32,13 @@ public:
     void TearDown() override;
 };
 
-void PictureInPictureOptionTest::SetUpTestCase() {
-}
+void PictureInPictureOptionTest::SetUpTestCase() {}
 
-void PictureInPictureOptionTest::TearDownTestCase() {
-}
+void PictureInPictureOptionTest::TearDownTestCase() {}
 
-void PictureInPictureOptionTest::SetUp() {
-}
+void PictureInPictureOptionTest::SetUp() {}
 
-void PictureInPictureOptionTest::TearDown() {
-}
+void PictureInPictureOptionTest::TearDown() {}
 
 namespace {
 
@@ -189,6 +185,6 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Lev
     option->SetTypeNodeEnabled(false);
     ASSERT_TRUE(!option->IsTypeNodeEnabled());
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

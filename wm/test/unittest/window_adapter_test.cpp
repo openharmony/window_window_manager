@@ -17,13 +17,13 @@
 #include "mock_RSIWindowAnimationController.h"
 
 #include "remote_animation.h"
+#include "scene_board_judgement.h"
 #include "session_manager.h"
 #include "starting_window.h"
-#include "window_transition_info.h"
-#include "window_property.h"
-#include "window_agent.h"
 #include "window_adapter.h"
-#include "scene_board_judgement.h"
+#include "window_agent.h"
+#include "window_property.h"
+#include "window_transition_info.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,21 +39,13 @@ public:
     void TearDown() override;
 };
 
-void WindowAdapterTest::SetUpTestCase()
-{
-}
+void WindowAdapterTest::SetUpTestCase() {}
 
-void WindowAdapterTest::TearDownTestCase()
-{
-}
+void WindowAdapterTest::TearDownTestCase() {}
 
-void WindowAdapterTest::SetUp()
-{
-}
+void WindowAdapterTest::SetUp() {}
 
-void WindowAdapterTest::TearDown()
-{
-}
+void WindowAdapterTest::TearDown() {}
 
 namespace {
 /**
@@ -264,9 +256,7 @@ HWTEST_F(WindowAdapterTest, RegisterSessionRecoverCallbackFunc, Function | Small
 {
     WindowAdapter windowAdapter;
     int32_t persistentId = 1;
-    auto testFunc = [] {
-        return WMError::WM_OK;
-    };
+    auto testFunc = [] { return WMError::WM_OK; };
     windowAdapter.RegisterSessionRecoverCallbackFunc(persistentId, testFunc);
     ASSERT_NE(windowAdapter.sessionRecoverCallbackFuncMap_[persistentId], nullptr);
 }
@@ -355,7 +345,7 @@ HWTEST_F(WindowAdapterTest, DestroyAndDisconnectSpecificSessionWithDetachCallbac
 HWTEST_F(WindowAdapterTest, UpdateModalExtensionRect, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
-    Rect rect { 1, 2, 3, 4 };
+    Rect rect{ 1, 2, 3, 4 };
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(token, nullptr);
     windowAdapter.UpdateModalExtensionRect(token, rect);
@@ -477,19 +467,19 @@ HWTEST_F(WindowAdapterTest, RecoverAndReconnectSceneSession, Function | SmallTes
     sptr<IWindowEventChannel> eventChannel;
     sptr<ISession> session = nullptr;
     sptr<IRemoteObject> token = nullptr;
-    auto ret1 = windowAdapter.RecoverAndReconnectSceneSession(
-        iSessionStage, eventChannel, nullptr, session, nullptr, token);
+    auto ret1 =
+        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
     ASSERT_EQ(ret1, WMError::WM_DO_NOTHING);
 
     windowAdapter.isProxyValid_ = true;
-    auto ret2 = windowAdapter.RecoverAndReconnectSceneSession(
-        iSessionStage, eventChannel, nullptr, session, nullptr, token);
+    auto ret2 =
+        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
     ASSERT_EQ(ret2, WMError::WM_DO_NOTHING);
 
     sptr<IRemoteObject> remotObject = nullptr;
     windowAdapter.windowManagerServiceProxy_ = iface_cast<IWindowManager>(remotObject);
-    auto ret3 = windowAdapter.RecoverAndReconnectSceneSession(
-        iSessionStage, eventChannel, nullptr, session, nullptr, token);
+    auto ret3 =
+        windowAdapter.RecoverAndReconnectSceneSession(iSessionStage, eventChannel, nullptr, session, nullptr, token);
     ASSERT_EQ(ret3, WMError::WM_DO_NOTHING);
 }
 
@@ -680,7 +670,7 @@ HWTEST_F(WindowAdapterTest, GetHostWindowRect, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
     int32_t hostWindowId = 0;
-    Rect rect = {0, 0, 0, 0};
+    Rect rect = { 0, 0, 0, 0 };
     auto ret = windowAdapter.GetHostWindowRect(hostWindowId, rect);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
@@ -747,8 +737,8 @@ HWTEST_F(WindowAdapterTest, CreateAndConnectSpecificSession, Function | SmallTes
     SystemSessionConfig systemConfig;
     sptr<IRemoteObject> token;
     int32_t id = 101; // 101 is persistentId
-    windowAdapter.CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
-        systemConfig, token);
+    windowAdapter.CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
     ASSERT_EQ(session, nullptr);
 }
 
@@ -804,7 +794,7 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
 HWTEST_F(WindowAdapterTest, GetDisplayIdByWindowId, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
-    const std::vector<uint64_t> windowIds = {1, 2};
+    const std::vector<uint64_t> windowIds = { 1, 2 };
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;
     auto err = windowAdapter.GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
     ASSERT_EQ(err, WMError::WM_OK);
@@ -863,6 +853,6 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
     auto err = windowAdapter.GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(err, WMError::WM_OK);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

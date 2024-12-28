@@ -16,10 +16,10 @@
 #include <gtest/gtest.h>
 #include "ability_context_impl.h"
 #include "display_manager_proxy.h"
+#include "mock_uicontent.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
-#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,20 +38,15 @@ public:
 
     static inline std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
-void WindowImplTest::SetUpTestCase()
-{
-}
+void WindowImplTest::SetUpTestCase() {}
 
-void WindowImplTest::TearDownTestCase()
-{
-}
+void WindowImplTest::TearDownTestCase() {}
 
-void WindowImplTest::SetUp()
-{
-}
+void WindowImplTest::SetUp() {}
 
 void WindowImplTest::TearDown()
 {
@@ -193,7 +188,7 @@ HWTEST_F(WindowImplTest, CreateWindow06, Function | SmallTest | Level2)
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("CreateWindow06");
-    struct Rect rect = {1, 2, 3u, 4u};
+    struct Rect rect = { 1, 2, 3u, 4u };
     option->SetWindowRect(rect);
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -1162,7 +1157,9 @@ HWTEST_F(WindowImplTest, SetTurnScreenOn02, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_FALSE(window->IsTurnScreenOn());
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2).WillOnce(Return(WMError::WM_OK))
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
+        .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetTurnScreenOn(true));
     ASSERT_TRUE(window->IsTurnScreenOn());
@@ -1219,8 +1216,11 @@ HWTEST_F(WindowImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_FALSE(window->IsKeepScreenOn());
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2).WillOnce(Return(WMError::WM_OK))
-        .WillOnce(Return(WMError::WM_OK));;
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
+        .WillOnce(Return(WMError::WM_OK))
+        .WillOnce(Return(WMError::WM_OK));
+    ;
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(true));
     ASSERT_TRUE(window->IsKeepScreenOn());
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(false));
@@ -1282,7 +1282,9 @@ HWTEST_F(WindowImplTest, SetBrightness02, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     ASSERT_EQ(UNDEFINED_BRIGHTNESS, window->GetBrightness());
-    EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(2).WillOnce(Return(WMError::WM_OK))
+    EXPECT_CALL(m->Mock(), UpdateProperty(_, _))
+        .Times(2)
+        .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->SetBrightness(MAXIMUM_BRIGHTNESS));
     ASSERT_EQ(MAXIMUM_BRIGHTNESS, window->GetBrightness());
@@ -1337,7 +1339,6 @@ HWTEST_F(WindowImplTest, RequestVsync, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
 
-
     EXPECT_CALL(m->Mock(), AddWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Show());
     std::shared_ptr<VsyncCallback> callback = std::make_shared<VsyncCallback>();
@@ -1366,8 +1367,7 @@ HWTEST_F(WindowImplTest, Create3, Function | SmallTest | Level3)
     option->SetBundleName("OK");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
 
-    std::shared_ptr<AbilityRuntime::AbilityContext> context =
-        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    std::shared_ptr<AbilityRuntime::AbilityContext> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     WMError res = window->Create(1, context);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARENT, res);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
@@ -1389,6 +1389,6 @@ HWTEST_F(WindowImplTest, SetRestoredRouterStack_0100, Function | SmallTest | Lev
     EXPECT_EQ(gettedStack, routerStack);
     EXPECT_TRUE(window->GetRestoredRouterStack().empty());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
