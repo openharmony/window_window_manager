@@ -2685,11 +2685,7 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
     WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_END_MOVE);
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d , errorCode: %{public}d",
           GetPersistentId(), static_cast<int>(errorCode));
-    if (errorCode == WSError::WS_ERROR_NULLPTR) {
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    } else {
-        return WmErrorCode::WM_OK;
-    }
+    return errorCode == WSError::WS_ERROR_NULLPTR ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::MainWindowCloseInner()
