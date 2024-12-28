@@ -556,7 +556,6 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, Function | SmallTes
     window_ = GetTestWindowImpl("CopyUniqueDensityParameter");
     ASSERT_NE(window_, nullptr);
     sptr<WindowSessionImpl> parentWindow = GetTestWindowImpl("CopyUniqueDensityParameter01");
-    ;
     ASSERT_NE(parentWindow, nullptr);
     window_->useUniqueDensity_ = false;
     window_->virtualPixelRatio_ = 1.0f;

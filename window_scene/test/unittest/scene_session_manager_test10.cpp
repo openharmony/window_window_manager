@@ -867,7 +867,7 @@ HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLockFree_02
     sceneSession->isVisible_ = false;
     ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
     ASSERT_EQ(ssm_->sessionMapDirty_, 0);
-    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());;
+    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
 }
 
 /**

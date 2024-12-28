@@ -40,7 +40,7 @@ private:
     std::recursive_mutex mutex_;
     sptr<AbstractScreenController> absScreenController_ = nullptr;
     sptr<AbstractDisplayController> absDisplayController_ = nullptr;
-    sptr<AbstractScreen> absScreen_ = nullptr;;
+    sptr<AbstractScreen> absScreen_ = nullptr;
     ScreenId defaultScreenId_ = 0;
     DisplayId defaultDisplayId_ = 0;
     sptr<AbstractDisplay> absDisplay_ = nullptr;
