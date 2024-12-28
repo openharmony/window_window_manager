@@ -517,7 +517,7 @@ napi_value JsWindow::SetTopmost(napi_env env, napi_callback_info info)
 /** @note @window.hierarchy */
 napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_HIERARCHY, "in");
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
@@ -3899,7 +3899,6 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "not allowed since window is not main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);

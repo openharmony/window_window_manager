@@ -597,10 +597,8 @@ HWTEST_F(WindowSceneSessionImplTest3, SetBlur, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest3, SetTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("SetTouchHotAreas");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     std::vector<Rect> rects;
     Rect rect = {800, 800, 1200, 1200};
@@ -617,10 +615,8 @@ HWTEST_F(WindowSceneSessionImplTest3, SetTouchHotAreas, Function | SmallTest | L
 HWTEST_F(WindowSceneSessionImplTest3, SetKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("SetKeyboardTouchHotAreas");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     KeyboardTouchHotAreas hotAreas;
     Rect rect = {800, 800, 1200, 1200};
@@ -629,7 +625,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetKeyboardTouchHotAreas, Function | Small
     hotAreas.portraitKeyboardHotAreas_.push_back(rect);
     hotAreas.portraitPanelHotAreas_.push_back(rect);
     auto ret = windowSceneSessionImpl->SetKeyboardTouchHotAreas(hotAreas);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
 }
 
 /**

@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#include "window_helper.h"
-#include "display_manager.h"
-#include "pointer_event.h"
-
 #include <gtest/gtest.h>
+#include <pointer_event.h>
+#include <ui/rs_surface_node.h>
+
+#include "display_manager.h"
+#include "input_event.h"
 #include "key_event.h"
+#include "mock/mock_session_stage.h"
+#include "pointer_event.h"
+#include "session/host/include/main_session.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
-#include "session/host/include/main_session.h"
+#include "window_helper.h"
 #include "wm_common.h"
-#include "mock/mock_session_stage.h"
-#include "input_event.h"
-#include <pointer_event.h>
-#include <ui/rs_surface_node.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,21 +59,16 @@ void SceneSessionLayoutTest::TearDown()
 
 namespace {
 /**
- * @tc.name: UpdateRect
+ * @tc.name: UpdateRect01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "UpdateRect";
-    info.bundleName_ = "UpdateRect";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
+    info.abilityName_ = "UpdateRect01";
+    info.bundleName_ = "UpdateRect01";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
@@ -86,41 +81,17 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
-/**
- * @tc.name: NotifyClientToUpdateRect01
- * @tc.desc: NotifyClientToUpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifyClientToUpdateRect01";
-    info.bundleName_ = "NotifyClientToUpdateRect01";
-    info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
-    sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-    sceneSession->sessionStage_ = mockSessionStage;
-    auto ret = sceneSession->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr);
-    ASSERT_EQ(ret, WSError::WS_OK);
-}
 
 /**
- * @tc.name: UpdateRect1
+ * @tc.name: UpdateRect02
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect1, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionLayoutTest, UpdateRect02, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "UpdateRect1";
-    info.bundleName_ = "UpdateRect1";
+    info.abilityName_ = "UpdateRect02";
+    info.bundleName_ = "UpdateRect02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->isActive_ = true;
 
@@ -146,6 +117,51 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect1, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
+/**
+ * @tc.name: UpdateRect03
+ * @tc.desc: UpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, UpdateRect03, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateRect03";
+    info.bundleName_ = "UpdateRect03";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+
+    WSRect rect = { 200, 200, 200, 200 };
+    session->winRect_ = rect;
+    session->SetClientRect(rect);
+    EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionLayoutTest"), WSError::WS_OK);
+
+    rect.posX_ = 100;
+    rect.posY_ = 100;
+    rect.width_ = 800;
+    rect.height_ = 800;
+    session->winRect_ = rect;
+    EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionLayoutTest"), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyClientToUpdateRect01
+ * @tc.desc: NotifyClientToUpdateRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyClientToUpdateRect01";
+    info.bundleName_ = "NotifyClientToUpdateRect01";
+    info.windowType_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+    sceneSession->sessionStage_ = mockSessionStage;
+    auto ret = sceneSession->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr);
+    ASSERT_EQ(ret, WSError::WS_OK);
+}
 
 /**
  * @tc.name: UpdateRectInner
@@ -172,34 +188,6 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRectInner01, Function | SmallTest | Level
 }
 
 /**
- * @tc.name: UpdateRect01
- * @tc.desc: UpdateRect
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateRect01";
-    info.bundleName_ = "UpdateRect01";
-    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session->property_, nullptr);
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-
-    WSRect rect = { 200, 200, 200, 200 };
-    session->winRect_ = rect;
-    session->SetClientRect(rect);
-    EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionLayoutTest"), WSError::WS_OK);
-
-    rect.posX_ = 100;
-    rect.posY_ = 100;
-    rect.width_ = 800;
-    rect.height_ = 800;
-    session->winRect_ = rect;
-    EXPECT_EQ(session->UpdateRect(rect, reason, "SceneSessionLayoutTest"), WSError::WS_OK);
-}
-
-/**
  * @tc.name: NotifyClientToUpdateRect
  * @tc.desc: NotifyClientToUpdateRect function01
  * @tc.type: FUNC
@@ -211,7 +199,6 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, Function | SmallTest 
     info.bundleName_ = "NotifyClientToUpdateRect";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
     session->moveDragController_ = nullptr;
     session->isKeyboardPanelEnabled_ = false;
     session->reason_ = SizeChangeReason::UNDEFINED;
@@ -223,8 +210,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, Function | SmallTest 
     UpdateAvoidAreaCallback func = [](const int32_t& persistentId) {
         return;
     };
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCallback->onUpdateAvoidArea_ = func;
     session->specificCallback_ = specificCallback;
     session->reason_ = SizeChangeReason::RECOVER;
@@ -243,7 +229,6 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, Function | SmallTest | L
     info.bundleName_ = "CheckAspectRatioValid";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
     WindowLimits windowLimits;
     ASSERT_NE(session->GetSessionProperty(), nullptr);
     session->GetSessionProperty()->SetWindowLimits(windowLimits);
@@ -276,7 +261,6 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid, Function | SmallTest | L
     EXPECT_EQ(WSError::WS_OK, session->SetAspectRatio(0.0f));
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
     WindowLimits limits = {8, 1, 6, 1, 1, 1.0f, 1.0f};
     property->SetWindowLimits(limits);
     session->SetSessionProperty(property);
@@ -300,7 +284,6 @@ HWTEST_F(SceneSessionLayoutTest, CheckAspectRatioValid02, Function | SmallTest |
     sceneSession->SetSessionProperty(property);
 
     WindowLimits windowLimits;
-    ASSERT_NE(sceneSession->GetSessionProperty(), nullptr);
     sceneSession->GetSessionProperty()->SetWindowLimits(windowLimits);
 
     SystemSessionConfig systemConfig;
@@ -338,8 +321,6 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, Function | SmallT
     info.isSystem_ = true;
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
     session->moveDragController_ = nullptr;
     session->isKeyboardPanelEnabled_ = false;
 
@@ -395,34 +376,11 @@ HWTEST_F(SceneSessionLayoutTest, HandleActionUpdateWindowLimits, Function | Smal
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
 
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    OHOS::Rosen::Session session(info);
-    session.property_ = nullptr;
-    sceneSession->HandleActionUpdateWindowLimits(property, action);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateWindowLimits(property, action);
-}
-
-/**
- * @tc.name: SetAspectRatio1
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, SetAspectRatio1, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetAspectRatio1";
-    info.bundleName_ = "SetAspectRatio1";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->isActive_ = true;
-    sceneSession->property_ = nullptr;
-    float ratio = 0.0001;
-    auto result = sceneSession->SetAspectRatio(ratio);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
+    WMError res = sceneSession->HandleActionUpdateWindowLimits(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -494,7 +452,6 @@ HWTEST_F(SceneSessionLayoutTest, SetAspectRatio4, Function | SmallTest | Level2)
     info.abilityName_ = "SetAspectRatio4";
     info.bundleName_ = "SetAspectRatio4";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -651,7 +608,6 @@ HWTEST_F(SceneSessionLayoutTest, SaveAspectRatio, Function | SmallTest | Level2)
     info.windowType_ = 1;
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
     ASSERT_EQ(true, sceneSession->SaveAspectRatio(0.1));
 
     sceneSession->sessionInfo_.bundleName_ = "";
@@ -671,15 +627,10 @@ HWTEST_F(SceneSessionLayoutTest, AdjustRectByAspectRatio, Function | SmallTest |
     info.abilityName_ = "Background01";
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
     sptr<SceneSession> sceneSession;
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    WSRect originalRect_ = { 0, 0, 0, 0 };
-    ASSERT_EQ(false, sceneSession->AdjustRectByAspectRatio(originalRect_));
+    WSRect originalRect = { 0, 0, 0, 0 };
+    ASSERT_EQ(false, sceneSession->AdjustRectByAspectRatio(originalRect));
 }
 
 } // namespace

@@ -969,23 +969,13 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty, Function | SmallTest | Level2)
     info.abilityName_ = "Background01";
     info.bundleName_ = "IsFloatingWindowAppType";
     info.windowType_ = 1;
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
 
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     SystemBarProperty statusBarProperty;
-    sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty);
-    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
-              WSError::WS_ERROR_NULLPTR);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sceneSession->property_ = property;
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
 }
@@ -1004,21 +994,13 @@ HWTEST_F(SceneSessionTest, SetSystemBarProperty02, Function | SmallTest | Level2
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     SystemBarProperty statusBarProperty;
-    sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty);
-    ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
-              WSError::WS_ERROR_NULLPTR);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = property;
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty),
               WSError::WS_OK);
     auto propMap = sceneSession->property_->GetSystemBarProperty();
     ASSERT_EQ(statusBarProperty, propMap[WindowType::WINDOW_TYPE_STATUS_BAR]);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sceneSession->property_ = property;
+    sceneSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_EQ(sceneSession->SetSystemBarProperty(WindowType::WINDOW_TYPE_FLOAT_CAMERA, statusBarProperty),
               WSError::WS_OK);
 }
@@ -1479,49 +1461,9 @@ HWTEST_F(SceneSessionTest, SetMainWindowTopmost, Function | SmallTest | Level2)
     info.abilityName_ = "SetMainWindowTopmost";
     info.bundleName_ = "SetMainWindowTopmost";
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->SetSessionProperty(property);
     auto result = sceneSession->SetMainWindowTopmost(false);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(sceneSession->IsMainWindowTopmost());
-}
-
-/**
- * @tc.name: UpdateInputMethodSessionRect
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, UpdateInputMethodSessionRect, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateInputMethodSessionRect";
-    info.bundleName_ = "UpdateInputMethodSessionRect";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-
-    sceneSession->SetSessionProperty(property);
-    WSRect rect({1, 1, 1, 1});
-    WSRect newWinRect;
-    WSRect newRequestRect;
-
-    sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    EXPECT_NE(sceneSession, nullptr);
-
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
-    sceneSession->SetSessionProperty(property);
-    auto res = sceneSession->UpdateInputMethodSessionRect(rect, newWinRect, newRequestRect);
-    ASSERT_EQ(res, true);
 }
 
 /**

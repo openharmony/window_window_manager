@@ -1682,7 +1682,16 @@ bool WindowSessionImpl::IsTopmost() const
 WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
 {
     if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     property_->SetMainWindowTopmost(isTopmost);
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
@@ -1765,6 +1774,18 @@ WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption)
     }
     avoidAreaOption = property_->GetAvoidAreaOption();
     return WMError::WM_OK;
+}
+
+/** @note @window.immersive */
+bool WindowSessionImpl::IsSystemWindow() const
+{
+    return WindowHelper::IsSystemWindow(GetType());
+}
+
+/** @note @window.immersive */
+bool WindowSessionImpl::IsAppWindow() const
+{
+    return WindowHelper::IsAppWindow(GetType());
 }
 
 WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
