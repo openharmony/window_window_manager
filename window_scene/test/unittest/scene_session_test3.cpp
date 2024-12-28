@@ -448,12 +448,12 @@ HWTEST_F(SceneSessionTest3, SetMainWindowTopmostChangeCallback, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
     NotifyMainWindowTopmostChangeFunc func;
-    sceneSession->SetMainWindowTopmostChangeCallback(func);
+    sceneSession->SetMainWindowTopmostChangeCallback(std::move(func));
 
     NotifyMainWindowTopmostChangeFunc func1 = [sceneSession](bool isTopmost) {
         return;
     };
-    sceneSession->SetMainWindowTopmostChangeCallback(func1);
+    sceneSession->SetMainWindowTopmostChangeCallback(std::move(func1));
     ASSERT_NE(nullptr, sceneSession->mainWindowTopmostChangeFunc_);
 }
 

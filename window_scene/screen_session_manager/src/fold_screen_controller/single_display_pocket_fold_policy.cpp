@@ -64,10 +64,10 @@ SingleDisplayPocketFoldPolicy::SingleDisplayPocketFoldPolicy(std::recursive_mute
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
 }
 
-void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status)
+void SingleDisplayPocketFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation)
 {
     if (status) {
-        pengdingTask_ = FOLD_TO_EXPAND_TASK_NUM;
+        pengdingTask_ = isOnBootAnimation ? FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM : FOLD_TO_EXPAND_TASK_NUM;
         startTimePoint_ = std::chrono::steady_clock::now();
         displayModeChangeRunning_ = status;
     } else {
@@ -312,6 +312,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
 {
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
+        SetdisplayModeChangeStatus(true, true);
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
         return;
     }
@@ -374,6 +375,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSes
 {
     SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
+        SetdisplayModeChangeStatus(true, true);
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
         return;
     }
@@ -467,6 +469,7 @@ void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
         ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
     } else if (currentState == FoldStatus::FOLDED) {
         RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(FoldStatus::FOLDED);
         ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
         RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
     } else {

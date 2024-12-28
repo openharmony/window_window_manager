@@ -309,7 +309,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_);
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_,
+        screenPropertyChangeType);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, directionInfo.notifyRotation_,
         screenPropertyChangeType);
 
@@ -504,6 +505,15 @@ FoldStatus ScreenSessionManagerClient::GetFoldStatus()
         return FoldStatus::UNKNOWN;
     }
     return screenSessionManager_->GetFoldStatus();
+}
+
+SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return SuperFoldStatus::UNKNOWN;
+    }
+    return screenSessionManager_->GetSuperFoldStatus();
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,

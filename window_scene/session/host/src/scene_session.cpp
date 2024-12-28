@@ -1312,15 +1312,16 @@ void SceneSession::SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChang
     }, __func__);
 }
 
-void SceneSession::SetMainWindowTopmostChangeCallback(const NotifyMainWindowTopmostChangeFunc& func)
+void SceneSession::SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func)
 {
-    PostTask([weakThis = wptr(this), func] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session or func is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s session or func is null", where);
             return;
         }
-        session->mainWindowTopmostChangeFunc_ = func;
+        session->mainWindowTopmostChangeFunc_ = std::move(func);
     }, __func__);
 }
 
@@ -2814,7 +2815,7 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
                 funcName, session->GetPersistentId(), session->winRect_.ToString().c_str());
             session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
-            session->ResetDragDirtyFlags();
+            session->ResetDirtyDragFlags();
         }
     });
 }
@@ -3029,6 +3030,9 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
         }
         sceneSession->winRect_ = rect;
         sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+        if (sceneSession->reason_ == SizeChangeReason::DRAG_END) {
+            sceneSession->isDragEnd_ = true; // isDragEnd_ only reset by Vsync, not flushuiparam
+        }
         return WSError::WS_OK;
     }, funcName);
 }
@@ -4498,25 +4502,19 @@ WMError SceneSession::HandleActionUpdateAnimationFlag(const sptr<WindowSessionPr
 WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        std::vector<Rect> touchHotAreas;
-        property->GetTouchHotAreas(touchHotAreas);
-        sessionProperty->SetTouchHotAreas(touchHotAreas);
-    }
+    std::vector<Rect> touchHotAreas;
+    property->GetTouchHotAreas(touchHotAreas);
+    GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
     return WMError::WM_OK;
 }
 
 WMError SceneSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    if (GetWindowType() != WindowType::WINDOW_TYPE_DIALOG) {
+    if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty != nullptr) {
-        sessionProperty->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
-    }
+    GetSessionProperty()->SetKeyboardTouchHotAreas(property->GetKeyboardTouchHotAreas());
     return WMError::WM_OK;
 }
 
@@ -4563,7 +4561,7 @@ WMError SceneSession::HandleActionUpdateRaiseenabled(const sptr<WindowSessionPro
 {
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty != nullptr) {
-        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, raiseenabled: %{public}d", GetPersistentId(),
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, raise enabled: %{public}d", GetPersistentId(),
             property->GetRaiseEnabled());
         sessionProperty->SetRaiseEnabled(property->GetRaiseEnabled());
     }
@@ -5145,7 +5143,8 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
 
 void SceneSession::ResetSizeChangeReasonIfDirty()
 {
-    if (IsDirtyWindow() && GetSizeChangeReason() != SizeChangeReason::DRAG) {
+    if (IsDirtyWindow() && GetSizeChangeReason() != SizeChangeReason::DRAG &&
+        GetSizeChangeReason() != SizeChangeReason::DRAG_END) {
         UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     }
 }
@@ -5157,7 +5156,15 @@ bool SceneSession::IsDirtyWindow()
 
 bool SceneSession::IsDirtyDragWindow()
 {
-    return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+    return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT) || isDragEnd_;
+}
+
+void SceneSession::ResetDirtyDragFlags()
+{
+    dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
+    if (reason_ == SizeChangeReason::DRAG_END) {
+        isDragEnd_ = false;
+    }
 }
 
 void SceneSession::NotifyUILostFocus()

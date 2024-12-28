@@ -24,6 +24,7 @@
 #include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
+const uint32_t FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM = 1;
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
 
 enum class DisplayModeChangeReason : uint32_t {
@@ -70,7 +71,7 @@ public:
      *    Avoid fold to expand process queues public interface
      */
     bool GetModeChangeRunningStatus();
-    virtual void SetdisplayModeChangeStatus(bool status){};
+    virtual void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false){};
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
     

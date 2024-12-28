@@ -236,6 +236,7 @@ public:
     float GetAspectRatio() const;
     WSError SetAspectRatio(float ratio) override;
     WSError SetSessionProperty(const sptr<WindowSessionProperty>& property);
+    WSError SetSessionPropertyForReconnect(const sptr<WindowSessionProperty>& property);
     const sptr<WindowSessionProperty>& GetSessionProperty() const { return property_; }
     void SetSessionRect(const WSRect& rect);
     WSRect GetSessionRect() const;
@@ -546,7 +547,6 @@ public:
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
     void ResetDirtyFlags();
-    void ResetDragDirtyFlags();
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;

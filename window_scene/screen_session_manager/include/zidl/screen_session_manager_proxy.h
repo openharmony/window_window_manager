@@ -145,6 +145,7 @@ public:
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
+    SuperFoldStatus GetSuperFoldStatus() override;
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
@@ -158,7 +159,8 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) override;
-    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation) override;
+    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
+        ScreenPropertyChangeType screenPropertyChangeType) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
     int32_t SetScreenOnDelayTime(int32_t delay) override;

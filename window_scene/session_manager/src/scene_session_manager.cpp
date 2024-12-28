@@ -8278,8 +8278,13 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     if (windowVisibilityListenerSessionSet_.find(windowId) != windowVisibilityListenerSessionSet_.end()) {
         session->NotifyWindowVisibility();
     }
-    windowVisibilityInfos.emplace_back(sptr<WindowVisibilityInfo>::MakeSptr(
-        windowId, session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType()));
+    auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(
+        windowId, session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType());
+    windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
+    windowVisibilityInfo->SetBundleName(session->GetSessionInfo().bundleName_);
+    windowVisibilityInfo->SetAbilityName(session->GetSessionInfo().abilityName_);
+    windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+    windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 
     visibilityInfo +=
         "[" + session->GetWindowName() + ", " + std::to_string(windowId) + ", " + std::to_string(visibleState) + "], ";
@@ -8649,9 +8654,14 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         sceneSession->SetRSVisible(false);
         sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
         sceneSession->ClearExtWindowFlags();
-        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
+        auto windowVisibilityInfo = new WindowVisibilityInfo(sceneSession->GetWindowId(),
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
-            WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType()));
+            WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType());
+        windowVisibilityInfo->SetAppIndex(sceneSession->GetSessionInfo().appIndex_);
+        windowVisibilityInfo->SetBundleName(sceneSession->GetSessionInfo().bundleName_);
+        windowVisibilityInfo->SetAbilityName(sceneSession->GetSessionInfo().abilityName_);
+        windowVisibilityInfo->SetIsSystem(sceneSession->GetSessionInfo().isSystem_);
+        windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 #ifdef MEMMGR_WINDOW_ENABLE
         memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(sceneSession->GetWindowId(),
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false));
@@ -10504,10 +10514,13 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                          static_cast<uint32_t>(hostRect.width_), static_cast<uint32_t>(hostRect.height_)};
             auto windowStatus = GetWindowStatus(session->GetWindowMode(), session->GetSessionState(),
                                                 session->GetSessionProperty());
-            infos.emplace_back(sptr<WindowVisibilityInfo>::MakeSptr(session->GetWindowId(), session->GetCallingPid(),
+            auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(session->GetWindowId(), session->GetCallingPid(),
                 session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType(), windowStatus, rect,
                 session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_,
-                session->IsFocused()));
+                session->IsFocused());
+            windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
+            windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+            infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
     };

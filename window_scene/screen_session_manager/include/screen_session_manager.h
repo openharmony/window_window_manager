@@ -242,6 +242,7 @@ public:
     bool IsCaptured() override;
 
     FoldStatus GetFoldStatus() override;
+    SuperFoldStatus GetSuperFoldStatus() override;
     bool GetTentMode();
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
@@ -285,7 +286,8 @@ public:
     std::shared_ptr<RSDisplayNode> GetDisplayNode(ScreenId screenId) override;
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) override;
-    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation) override;
+    void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
+        ScreenPropertyChangeType screenPropertyChangeType) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;

@@ -2858,8 +2858,13 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     IPCSkeleton::SetCallingIdentity(identity);
 }
 
-void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation)
+void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
+    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+        TLOGI(WmsLogTag::DMS, "ROTATION_END");
+        return;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"",
@@ -5247,6 +5252,8 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
+    TLOGI(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d, setmode: %{public}d",
+        SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), displayMode);
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
@@ -5512,6 +5519,16 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
         return FoldStatus::UNKNOWN;
     }
     return foldScreenController_->GetFoldStatus();
+}
+
+SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
+{
+    DmsXcollie dmsXcollie("DMS:GetSuperFoldStatus", XCOLLIE_TIMEOUT_10S);
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return SuperFoldStatus::UNKNOWN;
+    }
+    SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    return status;
 }
 
 bool ScreenSessionManager::GetTentMode()
