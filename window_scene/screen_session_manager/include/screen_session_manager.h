@@ -407,9 +407,8 @@ private:
     void PhyMirrorConnectWakeupScreen();
     bool IsScreenRestored(sptr<ScreenSession> screenSession);
     bool GetIsCurrentInUseById(ScreenId screenId);
-    bool GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
-        MultiScreenPositionOptions& mainScreenOption, MultiScreenPositionOptions& secondaryScreenOption);
-    void RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession);
+    bool GetMultiScreenInfo(MultiScreenInfo &info);
+    bool CheckMultiScreenInfo(MultiScreenInfo &info, sptr<ScreenSession> screenSession);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
@@ -417,6 +416,7 @@ private:
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
     void RecoverMultiScreenMode();
+    void RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
