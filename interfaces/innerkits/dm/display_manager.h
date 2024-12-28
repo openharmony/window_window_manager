@@ -684,8 +684,10 @@ public:
      *
      * @param screenId ScreenId used in virtual screen.
      * @param windowIdList The windowId list to shield on cast screen.
+     * @param surfaceIdList The surfaceId list to shield on cast screen.
     */
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {});
 
     /**
      * @brief When casting the screen, the display not be skipped after the physical screen is turned off.

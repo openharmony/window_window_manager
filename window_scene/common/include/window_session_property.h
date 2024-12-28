@@ -245,11 +245,11 @@ public:
     bool IsSystemKeyboard() const;
 
 private:
-    void setTouchHotAreasInner(std::vector<Rect>& touchHotAreas, const std::vector<Rect>& rects);
+    void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
     bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     bool MarshallingKeyboardTouchHotAreas(Parcel& parcel) const;
-    static void UnmarshallingTouchHotAreasInner(std::vector<Rect>& touchHotAreas, Parcel& parcel);
+    static void UnmarshallingTouchHotAreasInner(Parcel& parcel, std::vector<Rect>& touchHotAreas);
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     static void UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);

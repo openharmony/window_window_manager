@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
-const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
+const std::string WINDOW_RECT_CHANGE_CB = "rectChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";

@@ -2858,8 +2858,13 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
     IPCSkeleton::SetCallingIdentity(identity);
 }
 
-void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation)
+void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
+    ScreenPropertyChangeType screenPropertyChangeType)
 {
+    if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
+        TLOGI(WmsLogTag::DMS, "ROTATION_END");
+        return;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"",
@@ -5247,6 +5252,8 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
+    TLOGI(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d, setmode: %{public}d",
+        SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), displayMode);
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
@@ -5512,6 +5519,16 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
         return FoldStatus::UNKNOWN;
     }
     return foldScreenController_->GetFoldStatus();
+}
+
+SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
+{
+    DmsXcollie dmsXcollie("DMS:GetSuperFoldStatus", XCOLLIE_TIMEOUT_10S);
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return SuperFoldStatus::UNKNOWN;
+    }
+    SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    return status;
 }
 
 bool ScreenSessionManager::GetTentMode()
@@ -6325,29 +6342,46 @@ void ScreenSessionManager::RegisterApplicationStateObserver()
 #endif
 }
 
-void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
     TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64, screenId);
-    if (windowIdList.empty()) {
-        TLOGE(WmsLogTag::DMS, "WindowIdList is empty");
-        return;
-    }
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
         TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return;
+    }
+    if (windowIdList.empty()) {
+        TLOGI(WmsLogTag::DMS, "WindowIdList is empty");
+        rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceIdList);
         return;
     }
     if (!clientProxy_) {
         TLOGE(WmsLogTag::DMS, "clientProxy_ is nullptr");
         return;
     }
-    std::vector<uint64_t> surfaceNodeIds;
-    clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIds, true);
-    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIds);
+    std::vector<uint64_t> surfaceNodeIdsToRS;
+    clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIdsToRS, true);
+    if (!surfaceIdList.empty()) {
+        for (auto surfaceId : surfaceIdList) {
+            auto it = std::find(surfaceNodeIdsToRS.begin(), surfaceNodeIdsToRS.end(), surfaceId);
+            if (it != surfaceNodeIdsToRS.end()) {
+                continue;
+            }
+            surfaceNodeIdsToRS.push_back(surfaceId);
+        }
+    }
+    std::ostringstream oss;
+    oss << "surfaceNodeIdsToRS: ";
+    for (auto val : surfaceNodeIdsToRS) {
+        oss << val << " ";
+    }
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIdsToRS);
 }
 
 void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)

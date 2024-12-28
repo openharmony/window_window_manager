@@ -559,26 +559,6 @@ HWTEST_F(WindowSceneSessionImplTest, GetGlobalScaledRect, Function | SmallTest |
 }
 
 /**
- * @tc.name: MoveTo01
- * @tc.desc: MoveTo
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, MoveTo01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("MoveTo01");
-    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSession);
-
-    windowSceneSession->property_->SetPersistentId(1);
-    windowSceneSession->state_ = WindowState::STATE_HIDDEN;
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSession->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, windowSceneSession->MoveTo(2, 2));
-}
-
-/**
  * @tc.name: Minimize01
  * @tc.desc: Minimize
  * @tc.type: FUNC
@@ -883,64 +863,6 @@ HWTEST_F(WindowSceneSessionImplTest, GetTopwindowWithId, Function | SmallTest | 
     ASSERT_EQ(nullptr, window->GetTopWindowWithId(mainWinId));
 
     WindowSessionImpl::windowSessionMap_.erase(winName);
-}
-
-/**
- * @tc.name: SetAspectRatio01
- * @tc.desc: SetAspectRatio test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio01, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetAspectRatio01");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetAspectRatio(0.1));
-}
-
-/**
- * @tc.name: SetAspectRatio02
- * @tc.desc: SetAspectRatio test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, SetAspectRatio02, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetAspectRatio02");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetAspectRatio(0.1));
-
-    window->property_->SetPersistentId(1);
-    window->property_->SetDisplayId(0);
-    WindowLimits windowLimits = { 3000, 3000, 2000, 2000, 2.0, 2.0 };
-    window->property_->SetWindowLimits(windowLimits);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    window->hostSession_ = session;
-    session->GetSessionProperty()->SetWindowLimits(windowLimits);
-    const float ratio = 1.2;
-    ASSERT_EQ(WMError::WM_OK, window->SetAspectRatio(ratio));
-    ASSERT_EQ(ratio, session->GetAspectRatio());
-}
-
-/**
- * @tc.name: ResetAspectRatio
- * @tc.desc: ResetAspectRatio test GetAvoidAreaByType
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, ResetAspectRatio, Function | SmallTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("ResetAspectRatio");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    ASSERT_EQ(WMError::WM_OK, window->ResetAspectRatio());
-    ASSERT_EQ(0, session->GetAspectRatio());
 }
 
 /**

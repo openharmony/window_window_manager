@@ -534,6 +534,8 @@ RRect ScreenProperty::GetPhysicalTouchBounds()
 void ScreenProperty::SetPhysicalTouchBounds(bool isSecondaryDevice)
 {
     if (!isSecondaryDevice) {
+        physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
         return;
     }
     if (rotation_ == SECONDARY_ROTATION_90 || rotation_ == SECONDARY_ROTATION_270) {
@@ -561,11 +563,11 @@ void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode fol
     if (!isSecondaryDevice) {
         return;
     }
-    if (foldDisplayMode != FoldDisplayMode::FULL) {
+    if (foldDisplayMode == FoldDisplayMode::FULL) {
         if (rotation_ == SECONDARY_ROTATION_0 || rotation_ == SECONDARY_ROTATION_90) {
             inputOffsetY_ = SECONDARY_FULL_OFFSETY;
         }
-    } else if (foldDisplayMode != FoldDisplayMode::MAIN) {
+    } else if (foldDisplayMode == FoldDisplayMode::MAIN) {
         if (rotation_ == SECONDARY_ROTATION_180 || rotation_ == SECONDARY_ROTATION_270) {
             inputOffsetY_ = SECONDARY_MAIN_OFFSETY;
         }

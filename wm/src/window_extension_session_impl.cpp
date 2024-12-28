@@ -1317,6 +1317,17 @@ WSError WindowExtensionSessionImpl::NotifyDumpInfo(const std::vector<std::string
     return WSError::WS_OK;
 }
 
+bool WindowExtensionSessionImpl::IsPcWindow() const
+{
+    bool isPcWindow = false;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().IsPcWindow(isPcWindow);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "can't find isPcWindow, err: %{public}u",
+            static_cast<uint32_t>(ret));
+    }
+    return isPcWindow;
+}
+
 bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 {
     bool isPcOrPadFreeMultiWindowMode = false;

@@ -37,6 +37,8 @@ public:
         return WMError::WM_OK;
     }
 
+    bool IsPcWindow() const { return true; }
+
     bool IsPcOrPadFreeMultiWindowMode() const
     {
         return true;

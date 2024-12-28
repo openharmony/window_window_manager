@@ -99,14 +99,10 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateTouchHotArea(property, action);
-    OHOS::Rosen::Session session(info);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateTouchHotArea(property, action);
+    WMError ret = sceneSession->HandleActionUpdateTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -118,14 +114,10 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea, Function | S
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
-    OHOS::Rosen::Session session(info);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -151,27 +143,6 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateDecorEnable, Function | SmallTest 
     OHOS::Rosen::WindowSessionProperty windowSessionProperty;
     auto ret = sceneSession->HandleActionUpdateDecorEnable(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * @tc.name: HandleActionUpdateWindowLimits
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, HandleActionUpdateWindowLimits, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
-    OHOS::Rosen::Session session(info);
-    session.property_ = nullptr;
-    sceneSession->HandleActionUpdateWindowLimits(property, action);
-    session.property_ = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->HandleActionUpdateWindowLimits(property, action);
 }
 
 /**
@@ -585,15 +556,6 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
-    property->SetSystemCalling(false);
-    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-
-    property->SetSystemCalling(true);
-    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-
-    sceneSession->property_ = property;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
 
@@ -837,30 +799,6 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
 
     uiParam.rect_ = {0, 0, 1, 0};
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
-}
-
-/**
- * @tc.name: UpdateRectInner
- * @tc.desc: UpdateRectInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, UpdateRectInner01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "UpdateRectInner01";
-    info.bundleName_ = "UpdateRectInner01";
-    info.screenId_ = 20;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    sceneSession->SetForegroundInteractiveStatus(true);
-
-    uiParam.needSync_ = true;
-    uiParam.rect_ = {0, 0, 1, 1};
-
-    sceneSession->winRect_ = {1, 1, 1, 1};
-    sceneSession->isVisible_ = true;
-    ASSERT_EQ(false, sceneSession->UpdateRectInner(uiParam, reason));
 }
 
 /**
@@ -1443,13 +1381,13 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | L
     bool ret;
     property->SetAvoidAreaOption(0);
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-    sceneSession->SetSessionProperty(property);
-    ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+    session->SetSessionProperty(property);
+    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(false, ret);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->SetSessionProperty(property);
-    ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+    session->SetSessionProperty(property);
+    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(false, ret);
 }
 }

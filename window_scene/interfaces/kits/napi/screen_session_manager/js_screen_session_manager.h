@@ -54,6 +54,7 @@ private:
     static napi_value NotifyFoldToExpandCompletion(napi_env env, napi_callback_info info);
     static napi_value SetCameraStatus(napi_env env, napi_callback_info info);
     static napi_value GetFoldStatus(napi_env env, napi_callback_info info);
+    static napi_value GetSuperFoldStatus(napi_env env, napi_callback_info info);
     static napi_value GetScreenSnapshot(napi_env env, napi_callback_info info);
     static napi_value GetDeviceScreenConfig(napi_env env, napi_callback_info info);
 
@@ -70,6 +71,7 @@ private:
     napi_value OnSetCameraStatus(napi_env env, napi_callback_info info);
     napi_value OnNotifyFoldToExpandCompletion(napi_env env, const napi_callback_info info);
     napi_value OnGetFoldStatus(napi_env env, const napi_callback_info info);
+    napi_value OnGetSuperFoldStatus(napi_env env, const napi_callback_info info);
     napi_value OnGetScreenSnapshot(napi_env env, const napi_callback_info info);
     napi_value OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info);
 
