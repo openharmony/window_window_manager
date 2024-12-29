@@ -1225,7 +1225,6 @@ public:
 /**
  * Config of keyboard animation
  */
-
 class KeyboardAnimationCurve : public Parcelable {
 public:
     KeyboardAnimationCurve() = default;
