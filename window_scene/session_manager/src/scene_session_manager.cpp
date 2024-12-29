@@ -10580,8 +10580,8 @@ bool SceneSessionManager::IsOnVirtualDisplay(const sptr<SceneSession>& session)
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
-    int32_t lowerScreenPosY = 
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+    int32_t lowerScreenPosY = foldCreaseRect.height_ != 0 ?
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ : 0;
     return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
            session->GetSessionRect().posY_ >= lowerScreenPosY;
 }
@@ -10591,19 +10591,19 @@ bool SceneSessionManager::IsVirtualDisplayShow(const sptr<SceneSession>& session
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
-    int32_t lowerScreenPosY = 
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+    int32_t lowerScreenPosY = foldCreaseRect.height_ != 0 ?
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ : 0;
     return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
            session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= lowerScreenPosY;
 }
 
 WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect& hostRect)
 {
-    constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    int32_t lowerScreenPosY = 
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+    constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
+    int32_t lowerScreenPosY = foldCreaseRect.height_ != 0 ?
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ : 0;
     hostRect.posY_ -= lowerScreenPosY;
     return WMError::WM_OK;
 }
