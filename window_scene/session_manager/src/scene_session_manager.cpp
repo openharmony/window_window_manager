@@ -10607,6 +10607,7 @@ WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect hostRect
     int32_t lowerScreenPosY = 
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
     hostRect.posY_ -= lowerScreenPosY;
+    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
