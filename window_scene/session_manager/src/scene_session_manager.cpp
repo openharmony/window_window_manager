@@ -10512,15 +10512,16 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
         for (auto& iter : FiltedSessions) {
             auto session = iter.second;
             Rect globalRect;
+            sptr<WindowLayoutInfo> windowLayoutInfo;
             session->GetGlobalScaledRect(globalRect);
             WSRect hostRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
                 hostRect = session->GetSessionRect();
             if(isVirtualDisplay) {
                 TransGlobalRectToVirtualDisplayRect(hostRect);
             }
-            Rect rect = { hostRect.posX_, hostRect.posY_,
+            windowLayoutInfo->rect = { hostRect.posX_, hostRect.posY_,
                 static_cast<uint32_t>(hostRect.width_), static_cast<uint32_t>(hostRect.height_) };
-            infos.emplace_back(sptr<WindowLayoutInfo>::MakeSptr(rect));
+            infos.emplace_back(windowLayoutInfo);
         }
         return WMError::WM_OK;
     };
