@@ -1151,8 +1151,8 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-    constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
-    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+    static constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
+    static constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
     std::unordered_set<std::string> layoutInfoWhitelist = { "SCBSmartDock" };
     
     /*
