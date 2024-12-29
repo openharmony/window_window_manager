@@ -552,10 +552,8 @@ napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<s
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "arrayValue is null");
         return nullptr;
     }
-    uint32_t index = 0;
     for (size_t i = 0; i < infos.size(); i++) {
-        auto info = infos[i];
-        napi_set_element(env, arrayValue, index++, CreateJSWindowLayoutInfoObject(env, info));
+        napi_set_element(env, arrayValue, i, CreateJsWindowLayoutInfoObject(env, infos[i]));
     }
     return arrayValue;
 }
@@ -619,7 +617,7 @@ bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButto
     return !emptyParam;
 }
 
-napi_value CreateJSWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
+napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);

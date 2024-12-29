@@ -142,6 +142,11 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
     {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
+const std::unordered_set<std::string> layoutInfoWhitelist = { 
+    "SCBSmartDock",
+    "SCBExtScreenDock"
+};
+
 const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
 std::string GetCurrentTime()
@@ -10507,16 +10512,16 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
             displayId = DEFAULT_DISPLAY_ID;
             isVirtualDisplay = true;
         }
-        std::vector<std::pair<int32_t, sptr<SceneSession>>> FiltedSessions;
-        FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, FiltedSessions);
-        for (auto& iter : FiltedSessions) {
+        std::vector<std::pair<int32_t, sptr<SceneSession>>> filtedSessions;
+        FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filtedSessions);
+        for (auto& session : filtedSessions) {
             auto session = iter.second;
             Rect globalRect;
             sptr<WindowLayoutInfo> windowLayoutInfo;
             session->GetGlobalScaledRect(globalRect);
             WSRect hostRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
                 hostRect = session->GetSessionRect();
-            if(isVirtualDisplay) {
+            if (isVirtualDisplay) {
                 TransGlobalRectToVirtualDisplayRect(hostRect);
             }
             windowLayoutInfo->rect = { hostRect.posX_, hostRect.posY_,
@@ -10529,32 +10534,37 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
 }
 
 WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-    std::vector<std::pair<int32_t, sptr<SceneSession>>> FiltedSessions)
+    std::vector<std::pair<int32_t, sptr<SceneSession>>>& filtedSessions)
 {
-    for (auto& iter : sceneSessionMap_) {
-        auto session = iter.second;
-        bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto& iter : sceneSessionMap_) {
+            auto session = iter.second;
+            if (session == nullptr) {
+                continue;
+            }
+            bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
                 session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-        bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
-            IsOnVirtualDisplay(session) && session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-        if (session == nullptr || !IsWindowLayoutInfoNeeded(session) ||
-            session->GetSessionProperty()->GetDisplayId() != displayId ||
-            isNotVirtualDisplayNeed ||isNotDefaultDisplayNeed ||
-            session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
-            continue;
+            bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
+                IsOnVirtualDisplay(session) && session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
+            if (isNotVirtualDisplayNeed || isNotDefaultDisplayNeed || !IsWindowLayoutInfoNeeded(session) ||
+                session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
+                session->GetSessionProperty()->GetDisplayId() != displayId) {
+                continue;
+            }
+            filtedSessions.emplace_back(iter);
         }
-        FiltedSessions.emplace_back(iter);
     }
     CmpFunc cmp = [](std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs) {
         uint32_t lhsZOrder = lhs.second != nullptr ? lhs.second->GetZOrder() : 0;
         uint32_t rhsZOrder = rhs.second != nullptr ? rhs.second->GetZOrder() : 0;
         return lhsZOrder > rhsZOrder;
     };
-    std::sort(FiltedSessions.begin(), FiltedSessions.end(), cmp);
+    std::sort(filtedSessions.begin(), filtedSessions.end(), cmp);
     return WMError::WM_OK;
 }
 
-bool SceneSessionManager::IsWindowLayoutInfoNeeded(sptr<SceneSession> session)
+bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session)
 {
     std::string name = session->GetWindowName();
     int32_t checker = name.length() - 1;
@@ -10562,41 +10572,32 @@ bool SceneSessionManager::IsWindowLayoutInfoNeeded(sptr<SceneSession> session)
         name.erase(name.end() - 1);
         checker--;
     }
-    if (session->GetSessionInfo().isSystem_ || layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end()) {
-        return true;
-    }
-    return false;
+    return session->GetSessionInfo().isSystem_ || layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
 }
 
-bool SceneSessionManager::IsOnVirtualDisplay(sptr<SceneSession> session)
+bool SceneSessionManager::IsOnVirtualDisplay(const sptr<SceneSession>& session)
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
     int32_t lowerScreenPosY = 
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-        session->GetSessionRect().posY_ >= lowerScreenPosY) {
-        return true;
-    }
-    return false;
+    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+           session->GetSessionRect().posY_ >= lowerScreenPosY;
 }
 
-bool SceneSessionManager::IsVirtualDisplayShow(sptr<SceneSession> session)
+bool SceneSessionManager::IsVirtualDisplayShow(const sptr<SceneSession>& session)
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
     int32_t lowerScreenPosY = 
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-    session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= lowerScreenPosY) {
-        return true;
-    }
-    return false;
+    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+           session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= lowerScreenPosY;
 }
 
-WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect hostRect)
+WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect& hostRect)
 {
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =

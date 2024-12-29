@@ -1193,7 +1193,7 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
-    napi_get_cb_info (env, info, &argc, argv, nullptr, nullptr);
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -1216,10 +1216,10 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
             SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, CreateJsWindowLayoutInfoArrayObject(env, infos));
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "success");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "success");
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
-            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "failed");
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {

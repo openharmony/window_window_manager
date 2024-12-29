@@ -1779,7 +1779,7 @@ WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowLayoutInfo Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint64(displayId)) {
