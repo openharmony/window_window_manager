@@ -803,7 +803,8 @@ struct TitleButtonRect {
  * @brief Layout info for all windows on the screen.
  */
 struct WindowLayoutInfo : public Parcelable {
-    Rect rect = { 0, 0, 0, 0 };
+    static inline constexpr Rect EMPTY_RECT = { 0, 0, 0, 0 };
+    Rect rect = EMPTY_RECT;
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&

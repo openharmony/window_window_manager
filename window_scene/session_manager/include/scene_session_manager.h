@@ -749,11 +749,11 @@ private:
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
     WMError FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-        std::vector<std::pair<int32_t, sptr<SceneSession>>> processingSessions);
-    bool IsWindowLayoutInfoNeeded(sptr<SceneSession> session);
-    bool IsOnVirtualDisplay(sptr<SceneSession> session);
-    bool IsVirtualDisplayShow(sptr<SceneSession> session);
-    WMError TransGlobalRectToVirtualDisplayRect(WSRect hostRect);
+        std::vector<std::pair<int32_t, sptr<SceneSession>>>& processingSessions);
+    bool IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session);
+    bool IsOnVirtualDisplay(const sptr<SceneSession>& session);
+    bool IsVirtualDisplayShow(const sptr<SceneSession>& session);
+    WMError TransGlobalRectToVirtualDisplayRect(WSRect& hostRect);
 
     /*
      * Window Rotate Animation
@@ -1153,7 +1153,6 @@ private:
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
     static constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
     static constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
-    std::unordered_set<std::string> layoutInfoWhitelist = { "SCBSmartDock" };
     
     /*
      * Move Drag
