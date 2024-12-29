@@ -263,21 +263,6 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
-        case WindowManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO: {
-            uint64_t displayId = 0;
-            if (!data.ReadUint64(displayId)) {
-                WLOGFE("Failed to readInt32 displayId");
-                return ERR_INVALID_DATA;
-            }
-            std::vector<sptr<WindowLayoutInfo>> infos;
-            WMError errCode = GetAllWindowLayoutInfo(displayId, infos);
-            if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
-                WLOGFE("Write window layout infos failed");
-                return ERR_INVALID_DATA;
-            }
-            reply.WriteInt32(static_cast<int32_t>(errCode));
-            break;
-        }
         case WindowManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID: {
             std::vector<sptr<WindowVisibilityInfo>> infos;
             WMError errCode = GetVisibilityWindowInfo(infos);
