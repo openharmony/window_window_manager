@@ -679,35 +679,6 @@ WMError WindowManagerProxy::GetUnreliableWindowInfo(int32_t windowId,
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError WindowManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint64(displayId)) {
-        WLOGFE("Write displayId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        WLOGFE("remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO),
-        data, reply, option) != ERR_NONE) {
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
-        WLOGFE("read window layout infos failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(reply.ReadInt32());
-}
-
 WMError WindowManagerProxy::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     MessageParcel data;

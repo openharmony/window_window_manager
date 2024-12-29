@@ -1192,7 +1192,7 @@ struct TitleButtonRect {
 /*
  * @class WindowLayoutInfo
  *
- * @brief Info for all windos on the screen.
+ * @brief Info for all windows on the screen.
  */
 class WindowLayoutInfo : public Parcelable {
 public:
