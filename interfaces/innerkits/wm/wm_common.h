@@ -1190,36 +1190,30 @@ struct TitleButtonRect {
 };
 
 /*
- * @class WindowLayoutInfo
+ * @struct WindowLayoutInfo
  *
- * @brief Info for all windows on the screen.
+ * @brief Layout info for all windows on the screen.
  */
-class WindowLayoutInfo : public Parcelable {
-public:
-    WindowLayoutInfo() = default;
-    WindowLayoutInfo(Rect rect) : rect_(rect) {};
-
-    ~WindowLayoutInfo() = default;
-
+struct WindowLayoutInfo : public Parcelable {
+    Rect rect = { 0, 0, 0, 0 };
     virtual bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteInt32(rect_.posX_) && parcel.WriteInt32(rect_.posY_) &&
-            parcel.WriteUint32(rect_.width_) && parcel.WriteUint32(rect_.height_);
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
-
+  
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
-        auto WindowLayoutInfo = new (std::nothrow) (class WindowLayoutInfo)();
-        if (WindowLayoutInfo == nullptr) {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) ||
+            !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            delete windowLayoutInfo;
             return nullptr;
         }
-
-        WindowLayoutInfo->rect_ = { parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() };
-
-        return WindowLayoutInfo;
+        return windowLayoutInfo;
     }
-
-    Rect rect_ = { 0, 0, 0, 0 };
 };
 
 /**

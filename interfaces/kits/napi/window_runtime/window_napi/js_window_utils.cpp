@@ -623,7 +623,7 @@ napi_value CreateJSWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutI
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect_));
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
     return objValue;
 }
 
