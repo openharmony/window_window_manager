@@ -10563,12 +10563,11 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
 
 bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session)
 {
+    constexpr int32_t GROUP_ONE = 1;
     std::string name = session->GetWindowName();
-    int32_t checker = name.length() - 1;
-    while(checker != -1 && isdigit(name[checker])) {
-        name.erase(name.end() - 1);
-        checker--;
-    }
+    std::regex pattern("^(.*?)(\\d+)$");
+    std::smatch matches;
+    name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
     return session->GetSessionInfo().isSystem_ || layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
 }
 
