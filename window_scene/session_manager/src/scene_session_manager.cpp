@@ -10537,7 +10537,7 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
     for (auto& iter : sceneSessionMap_) {
         auto session = iter.second;
         bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
-                session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID
+                session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
         bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
             IsOnVirtualDisplay(session) && session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
         if (session == nullptr || !IsWindowLayoutInfoNeeded(session) ||
@@ -10606,7 +10606,7 @@ WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect hostRect
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     int32_t lowerScreenPosY = 
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    hostRect.posY_ -= lowerScreenPosY
+    hostRect.posY_ -= lowerScreenPosY;
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)

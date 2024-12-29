@@ -1795,7 +1795,7 @@ WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
         SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO), data, reply, option) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WidnowLayoutInfo>(reply, infos)) {
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read window layout info failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
