@@ -10512,10 +10512,9 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
             displayId = DEFAULT_DISPLAY_ID;
             isVirtualDisplay = true;
         }
-        std::vector<std::pair<int32_t, sptr<SceneSession>>> filtedSessions;
+        std::vector<sptr<SceneSession>> filtedSessions;
         FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filtedSessions);
         for (auto& session : filtedSessions) {
-            auto session = iter.second;
             Rect globalRect;
             sptr<WindowLayoutInfo> windowLayoutInfo;
             session->GetGlobalScaledRect(globalRect);
@@ -10534,7 +10533,7 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
 }
 
 WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-    std::vector<std::pair<int32_t, sptr<SceneSession>>>& filtedSessions)
+    std::vector<sptr<SceneSession>>& filtedSessions)
 {
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -10552,13 +10551,11 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
                 session->GetSessionProperty()->GetDisplayId() != displayId) {
                 continue;
             }
-            filtedSessions.emplace_back(iter);
+            filtedSessions.emplace_back(session);
         }
     }
-    CmpFunc cmp = [](std::pair<int32_t, sptr<SceneSession>>& lhs, std::pair<int32_t, sptr<SceneSession>>& rhs) {
-        uint32_t lhsZOrder = lhs.second != nullptr ? lhs.second->GetZOrder() : 0;
-        uint32_t rhsZOrder = rhs.second != nullptr ? rhs.second->GetZOrder() : 0;
-        return lhsZOrder > rhsZOrder;
+    WindowLayoutInfoCmpFunc cmp = [](sptr<SceneSession>& lhs, sptr<SceneSession>& rhs) {
+        return lhs->GetZOrder() > rhs->GetZOrder();
     };
     std::sort(filtedSessions.begin(), filtedSessions.end(), cmp);
     return WMError::WM_OK;
@@ -10581,7 +10578,8 @@ bool SceneSessionManager::IsOnVirtualDisplay(const sptr<SceneSession>& session)
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
     int32_t lowerScreenPosY = foldCreaseRect.height_ != 0 ?
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ : 0;
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
+        defaultDisplayRect.height_;
     return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
            session->GetSessionRect().posY_ >= lowerScreenPosY;
 }
@@ -10592,7 +10590,8 @@ bool SceneSessionManager::IsVirtualDisplayShow(const sptr<SceneSession>& session
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
     int32_t lowerScreenPosY = foldCreaseRect.height_ != 0 ?
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ : 0;
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
+        defaultDisplayRect.height_;
     return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
            session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= lowerScreenPosY;
 }
@@ -10603,7 +10602,8 @@ WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect& hostRec
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
     int32_t lowerScreenPosY = foldCreaseRect.height_ != 0 ?
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ : 0;
+        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
+        defaultDisplayRect.height_;
     hostRect.posY_ -= lowerScreenPosY;
     return WMError::WM_OK;
 }
