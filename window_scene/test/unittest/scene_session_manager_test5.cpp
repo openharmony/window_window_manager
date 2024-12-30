@@ -1250,9 +1250,9 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    property->FloatingWindowAppType(true);
+    property->SetFloatingWindowAppType(true);
     ssm_->shouldHideNonSecureFloatingWindows_.store(true);
-    ssm_->systemConfig_.windowUIType = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
