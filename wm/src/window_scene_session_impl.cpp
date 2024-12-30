@@ -838,12 +838,20 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
 
 bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    bool ret = false;
+    bool isConsumed = false;
     if (auto uiContent = GetUIContentSharedPtr()) {
-        ret = uiContent->ProcessKeyEvent(keyEvent, true);
+        isConsumed = uiContent->ProcessKeyEvent(keyEvent, true);
     }
     RefreshNoInteractionTimeoutMonitor();
-    return ret;
+    if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
+         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && isConsumed &&
+        keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
+        TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, keyCode:%{public}d, isConsumed:%{public}d",
+            GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
+        NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
+    }
+    SetWatchGestureConsumed(isConsumed);
+    return isConsumed;
 }
 
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()

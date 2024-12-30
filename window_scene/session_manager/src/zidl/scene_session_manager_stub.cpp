@@ -197,6 +197,10 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetAppDragResizeType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_APP_DRAG_RESIZE_TYPE):
             return HandleGetAppDragResizeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_GESTURE_CONSUME_RESULT):
+            return HandleWatchGestureConsumeResult(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE):
+            return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
         default:
@@ -1062,6 +1066,41 @@ int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, Me
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleWatchGestureConsumeResult(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t keyCode = 0;
+    if (!data.ReadInt32(keyCode)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "read keyCode failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isConsumed = false;
+    if (!data.ReadBool(isConsumed)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "read isConsumed failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    WMError ret = NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleWatchFocusActiveChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isActive = false;
+    if (!data.ReadBool(isActive)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isActive failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
+    WMError ret = NotifyWatchFocusActiveChange(isActive);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
