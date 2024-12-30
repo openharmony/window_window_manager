@@ -1257,7 +1257,7 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
         systemConfig, token);
     ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);
-    ssm_->systemConfig_.windowUIType = WindowUIType::INVALID_WINDOW;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
 }
 
 /**
