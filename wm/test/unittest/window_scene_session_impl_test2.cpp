@@ -1794,7 +1794,7 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, Function | SmallT
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsWindowRectAutoSave002");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
@@ -1812,6 +1812,6 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, Function | SmallT
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

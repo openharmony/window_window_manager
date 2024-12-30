@@ -1634,7 +1634,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen03, Function | SmallTest
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowName("SetLayoutFullScreen03");
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     WMError res = window->SetLayoutFullScreen(false);
