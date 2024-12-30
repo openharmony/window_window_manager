@@ -10539,15 +10539,15 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session == nullptr) {
                 continue;
             }
-            bool IsOnVirtualDisplay = session->GetSessionRect().posY_ >= GetLowerScreenPosY() &&
-                PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED;
-            bool IsVirtualDisplayShow = session->GetSessionRect().posY_ >= lowerScreenPosY &&
-                PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED;
+            bool IsOnVirtualDisplay = PcFoldScreenManager::GetInstance().IsSuperFoldDisplayDevice() &&
+                session->GetSessionRect().posY_ >= GetLowerScreenPosY();
+            bool IsVirtualDisplayShow = PcFoldScreenManager::GetInstance().IsSuperFoldDisplayDevice() &&
+                session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= GetLowerScreenPosY();
             bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow &&
                 session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
             bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
                 IsOnVirtualDisplay && session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-            if (isNotVirtualDisplayNeed || isNotDefaultDisplayNeed || !IsWindowLayoutInfoNeeded ||
+            if (isNotVirtualDisplayNeed || isNotDefaultDisplayNeed || !IsWindowLayoutInfoNeeded(session) ||
                 session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
                 session->GetSessionProperty()->GetDisplayId() != displayId) {
                 continue;
@@ -10562,6 +10562,15 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
     });
 }
 
+int32_t SceneSessionManager::GetLowerScreenPosY()
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
+    return foldCreaseRect.height_ != 0 ?
+           defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
+           defaultDisplayRect.height_;
+}
 bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session)
 {
     constexpr int32_t GROUP_ONE = 1;
@@ -10572,14 +10581,16 @@ bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& ses
     return !session->GetSessionInfo().isSystem_ || LAYOUT_INFO_WHITELIST.find(name) != LAYOUT_INFO_WHITELIST.end();
 }
 
-int32_t SceneSessionManager::GetLowerScreenPosY()
+bool SceneSessionManager::IsOnVirtualDisplay(const sptr<SceneSession>& session)
 {
-    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-        PcFoldScreenManager::GetInstance().GetDisplayRects();
-    constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
-    return foldCreaseRect.height_ != 0 ?
-           defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
-           defaultDisplayRect.height_;
+    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+           session->GetSessionRect().posY_ >= GetLowerScreenPosY();
+}
+
+bool SceneSessionManager::IsVirtualDisplayShow(const sptr<SceneSession>& session)
+{
+    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+           session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= GetLowerScreenPosY();
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
