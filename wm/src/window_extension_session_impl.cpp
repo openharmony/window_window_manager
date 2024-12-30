@@ -29,6 +29,7 @@
 #include "singleton_container.h"
 #include "window_adapter.h"
 #include "input_transfer_station.h"
+#include "ui_extension/provider_data_handler.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -65,11 +66,17 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
+    dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
 }
 
 WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
 {
     WLOGFI("[WMSCom] %{public}d, %{public}s", GetPersistentId(), GetWindowName().c_str());
+}
+
+std::shared_ptr<IDataHandler> WindowExtensionSessionImpl::GetExtensionDataHandler() const
+{
+    return dataHandler_;
 }
 
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
@@ -87,6 +94,12 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     SetDefaultDisplayIdIfNeed();
     // Since here is init of this window, no other threads will rw it.
     hostSession_ = iSession;
+
+    if (dataHandler_) {
+        dataHandler_->SetEventHandler(handler_);
+        dataHandler_->SetRemoteProxyObject(iSession->AsObject());
+    }
+
     context_ = context;
     if (context_) {
         abilityToken_ = context_->GetToken();
@@ -1337,6 +1350,17 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
             static_cast<uint32_t>(ret));
     }
     return isPcOrPadFreeMultiWindowMode;
+}
+
+void WindowExtensionSessionImpl::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
+    if (dataHandler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "dataHandler_ is null");
+        reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::NULL_PTR));
+        return;
+    }
+    dataHandler_->NotifyDataConsumer(data, reply);
 }
 } // namespace Rosen
 } // namespace OHOS
