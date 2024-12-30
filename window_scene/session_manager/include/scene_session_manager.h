@@ -114,7 +114,6 @@ using WindowChangedFunc = std::function<void(int32_t persistentId, WindowUpdateT
 using TraverseFunc = std::function<bool(const sptr<SceneSession>& session)>;
 using CmpFunc = std::function<bool(std::pair<int32_t, sptr<SceneSession>>& lhs,
     std::pair<int32_t, sptr<SceneSession>>& rhs)>;
-using WindowLayoutInfoCmpFunc = std::function<bool(sptr<SceneSession>& lhs, sptr<SceneSession>& rhs)>;
 using ProcessStartUIAbilityErrorFunc = std::function<void(int32_t startUIAbilityError)>;
 using NotifySCBAfterUpdateFocusFunc = std::function<void()>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
@@ -749,12 +748,12 @@ private:
     void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
-    WMError FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+    void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
         std::vector<sptr<SceneSession>>& filtedSessions);
     bool IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session);
     bool IsOnVirtualDisplay(const sptr<SceneSession>& session);
     bool IsVirtualDisplayShow(const sptr<SceneSession>& session);
-    WMError TransGlobalRectToVirtualDisplayRect(WSRect& hostRect);
+    void TransGlobalRectToVirtualDisplayRect(WSRect& hostRect);
 
     /*
      * Window Rotate Animation
