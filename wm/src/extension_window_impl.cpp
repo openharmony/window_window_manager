@@ -16,6 +16,7 @@
 #include "extension_window_impl.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "want.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -81,10 +82,10 @@ WMError ExtensionWindowImpl::OccupyEvents(int32_t eventFlags)
     }
 
     AAFwk::Want want;
-    want.SetParam("type": std::string("OccupyEvents"));
-    want.SetParam("eventFlags": static_cast<int32_t>(eventFlags));
+    want.SetParam("type", std::string("OccupyEvents"));
+    want.SetParam("eventFlags", static_cast<int32_t>(eventFlags));
     constexpr int32_t customId = 1001;
-    bool result = dataHandler->SendDataAsync(SubSystenId::ARKUI_UIEXT, customId, want);
+    bool result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, customId, want);
     if (!result)
     {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
