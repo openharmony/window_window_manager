@@ -186,7 +186,7 @@ void KeyboardSession::OnKeyboardPanelUpdated()
 void KeyboardSession::OnCallingSessionUpdated()
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
@@ -245,11 +245,11 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
             }
         }
         if (session->keyboardCallback_ == nullptr ||
-            session->keyboardCallback_->onCallingSessionIdChange_ == nullptr) {
+            session->keyboardCallback_->onCallingSessionIdChange == nullptr) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "KeyboardCallback_, callingSessionId: %{public}d", callingSessionId);
             return;
         }
-        session->keyboardCallback_->onCallingSessionIdChange_(callingSessionId);
+        session->keyboardCallback_->onCallingSessionIdChange(callingSessionId);
     }, "SetCallingSessionId");
     return;
 }
@@ -312,20 +312,20 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
 
 sptr<SceneSession> KeyboardSession::GetSceneSession(uint32_t persistentId)
 {
-    if (keyboardCallback_ == nullptr || keyboardCallback_->onGetSceneSession_ == nullptr) {
+    if (keyboardCallback_ == nullptr || keyboardCallback_->onGetSceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Get scene session failed, persistentId: %{public}d", persistentId);
         return nullptr;
     }
-    return keyboardCallback_->onGetSceneSession_(persistentId);
+    return keyboardCallback_->onGetSceneSession(persistentId);
 }
 
 int32_t KeyboardSession::GetFocusedSessionId()
 {
-    if (keyboardCallback_ == nullptr || keyboardCallback_->onGetFocusedSessionId_ == nullptr) {
+    if (keyboardCallback_ == nullptr || keyboardCallback_->onGetFocusedSessionId == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardCallback_ is nullptr, get focusedSessionId failed!");
         return INVALID_WINDOW_ID;
     }
-    return keyboardCallback_->onGetFocusedSessionId_();
+    return keyboardCallback_->onGetFocusedSessionId();
 }
 
 void KeyboardSession::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
@@ -398,7 +398,7 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
@@ -461,7 +461,7 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
 void KeyboardSession::RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
@@ -526,7 +526,7 @@ void KeyboardSession::EnableCallingSessionAvoidArea()
 
 void KeyboardSession::NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason)
 {
-    if (!(systemConfig_.IsPcWindow())) {
+    if (!systemConfig_.IsPcWindow()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "this device is not pc.");
         return;
     }
@@ -534,12 +534,12 @@ void KeyboardSession::NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeR
         TLOGI(WmsLogTag::WMS_KEYBOARD, "this is not system keyboard, id: %{public}d.", GetPersistentId());
         return;
     }
-    if (keyboardCallback_ == nullptr || keyboardCallback_->onSystemKeyboardAvoidChange_ == nullptr) {
+    if (keyboardCallback_ == nullptr || keyboardCallback_->onSystemKeyboardAvoidChange == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "SystemKeyboardAvoidChange callback is nullptr, id: %{public}d.",
             GetPersistentId());
         return;
     }
-    keyboardCallback_->onSystemKeyboardAvoidChange_(GetScreenId(), reason);
+    keyboardCallback_->onSystemKeyboardAvoidChange(GetScreenId(), reason);
 }
 
 void KeyboardSession::OpenKeyboardSyncTransaction()

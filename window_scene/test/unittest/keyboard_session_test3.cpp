@@ -155,7 +155,7 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, Function |
     sptr<SceneSession> sceneSession = GetSceneSession("TestSceneSession", "TestSceneSession");
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->persistentId_ = 100;
-    keyboardSession->keyboardCallback_->onGetSceneSession_ =
+    keyboardSession->keyboardCallback_->onGetSceneSession =
         [sceneSession](uint32_t callingSessionId)->sptr<SceneSession> {
             if (sceneSession->persistentId_ != callingSessionId) {
                 return nullptr;
@@ -169,7 +169,7 @@ HWTEST_F(KeyboardSessionTest3, UseFocusIdIfCallingSessionIdInvalid01, Function |
     ASSERT_EQ(resultId, 100);
 
     keyboardSession->GetSessionProperty()->SetCallingSessionId(101);
-    keyboardSession->keyboardCallback_->onGetFocusedSessionId_ = []()->int32_t {
+    keyboardSession->keyboardCallback_->onGetFocusedSessionId = []()->int32_t {
         return 100;
     };
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
@@ -294,7 +294,7 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, Function | SmallTest |
     sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     EXPECT_NE(callingSession, nullptr);
     ASSERT_NE(keyboardSession->keyboardCallback_, nullptr);
-    keyboardSession->keyboardCallback_->onGetSceneSession_ =
+    keyboardSession->keyboardCallback_->onGetSceneSession =
         [callingSession](int32_t persistentId)->sptr<SceneSession> {
         return callingSession;
     };
@@ -310,6 +310,25 @@ HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated01, Function | SmallTest |
     ASSERT_EQ(keyboardSession->GetKeyboardGravity(), SessionGravity::SESSION_GRAVITY_FLOAT);
     keyboardSession->OnCallingSessionUpdated();
     ASSERT_EQ(keyboardSession->state_, SessionState::STATE_FOREGROUND);
+}
+
+/**
+ * @tc.name: OnCallingSessionUpdated02
+ * @tc.desc: test function : OnCallingSessionUpdated
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, OnCallingSessionUpdated02, Function | SmallTest | Level1)
+{
+    auto keyboardSession = GetKeyboardSession("OnCallingSessionUpdated02",
+        "OnCallingSessionUpdated02");
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+    keyboardSession->OnCallingSessionUpdated();
+    ASSERT_EQ(keyboardSession->state_, SessionState::STATE_DISCONNECT);
+
+    keyboardSession->ActivateKeyboardAvoidArea(false, false);
+    ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
+    keyboardSession->OnCallingSessionUpdated();
+    ASSERT_EQ(keyboardSession->state_, SessionState::STATE_DISCONNECT);
 }
 }  // namespace
 }  // namespace Rosen

@@ -585,11 +585,12 @@ public:
     bool IsMissionHighlighted();
 
     /*
-     * system keyboard
+     * Keyboard
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
     void ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid);
+    bool IsKeyboardAvoidAreaActive() const;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -703,11 +704,11 @@ protected:
      */
     NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
 
-    /**
-     * keyboard Window
+    /*
+     * Keyboard
      */
-    virtual void EnableCallingSessionAvoidArea() {};
-    virtual void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {};
+    virtual void EnableCallingSessionAvoidArea() {}
+    virtual void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
     bool keyboardAvoidAreaActive_ = true;
 
 private:
