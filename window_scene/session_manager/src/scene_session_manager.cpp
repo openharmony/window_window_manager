@@ -10516,13 +10516,12 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
         FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filtedSessions);
         for (auto& session : filtedSessions) {
             Rect globalRect;
-            sptr<WindowLayoutInfo> windowLayoutInfo;
             session->GetGlobalScaledRect(globalRect);
             WSRect hostRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
-                hostRect = session->GetSessionRect();
             if (isVirtualDisplay) {
                 TransGlobalRectToVirtualDisplayRect(hostRect);
             }
+            auto windowLayoutInfo = sptr<WindowLayoutInfo>::MakeSptr();
             windowLayoutInfo->rect = { hostRect.posX_, hostRect.posY_,
                 static_cast<uint32_t>(hostRect.width_), static_cast<uint32_t>(hostRect.height_) };
             infos.emplace_back(windowLayoutInfo);
@@ -10554,7 +10553,7 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
             filtedSessions.emplace_back(session);
         }
     }
-    WindowLayoutInfoCmpFunc cmp = [](sptr<SceneSession>& lhs, sptr<SceneSession>& rhs) {
+    WindowLayoutInfoCmpFunc cmp = [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs) {
         return lhs->GetZOrder() > rhs->GetZOrder();
     };
     std::sort(filtedSessions.begin(), filtedSessions.end(), cmp);
