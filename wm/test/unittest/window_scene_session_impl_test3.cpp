@@ -1671,7 +1671,7 @@ HWTEST_F(WindowSceneSessionImplTest3, Show03, Function | SmallTest | Level2)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
+    windowSceneSessionImpl->property_->SetWindowState(WindowState::STATE_SHOWN);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     auto reason = static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH);
     auto ret = windowSceneSessionImpl->Show(reason, false, true);
