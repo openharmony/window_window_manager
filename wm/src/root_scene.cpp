@@ -320,12 +320,12 @@ void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, A
     }
 }
 
-bool WindowSessionImpl::IsSystemWindow() const
+bool RootScene::IsSystemWindow() const
 {
     return WindowHelper::IsSystemWindow(GetType());
 }
 
-bool WindowSessionImpl::IsAppWindow() const
+bool RootScene::IsAppWindow() const
 {
     return WindowHelper::IsAppWindow(GetType());
 }
