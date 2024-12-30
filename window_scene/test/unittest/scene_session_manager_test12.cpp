@@ -217,8 +217,6 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource04, Function | Sma
 HWTEST_F(SceneSessionManagerTest12, RequestKeyboardPanelSession, Function | SmallTest | Level2)
 {
     sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(nullptr, ssm);
-
     std::string panelName = "SystemKeyboardPanel";
     ASSERT_NE(nullptr, ssm->RequestKeyboardPanelSession(panelName, 0)); // 0 is screenId
     ssm->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -256,8 +254,8 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | Sma
     keyboardInfo.bundleName_ = "CreateKeyboardPanelSession03";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, nullptr, nullptr);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
-
     sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+
     // the keyboard panel enabled flag of ssm is false
     ssm->CreateKeyboardPanelSession(keyboardSession);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
@@ -290,8 +288,8 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession04, Function | Sma
     keyboardInfo.bundleName_ = "CreateKeyboardPanelSession04";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, nullptr, nullptr);
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
-
     sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+
     // the keyboard panel enabled flag of ssm is true
     ssm->isKeyboardPanelEnabled_ = true;
     ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
@@ -313,7 +311,6 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_01, Function
 {
     ASSERT_NE(nullptr, ssm_);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
@@ -837,6 +834,129 @@ HWTEST_F(SceneSessionManagerTest12, ShiftAppWindowPointerEvent_04, Function | Sm
     ssm_->sceneSessionMap_.erase(sourceSceneSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(otherSourceSession->GetPersistentId());
     ssm_->sceneSessionMap_.erase(otherTargetSession->GetPersistentId());
+}
+
+/**
+ * @tc.name: GetKeyboardSession
+ * @tc.desc: test GetKeyboardSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetKeyboardSession, Function | SmallTest | Level3)
+{
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "GetKeyboardSession";
+    info.bundleName_ = "GetKeyboardSession";
+    info.windowType_ = 2105; // 2105 is WINDOW_TYPE_INPUT_METHOD_FLOAT
+    info.screenId_ = 1; // 1 is screenId
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_EQ(false, keyboardSession->IsSystemKeyboard());
+    ssm->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
+    sptr<KeyboardSession> systemKeyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    systemKeyboardSession->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, systemKeyboardSession->IsSystemKeyboard());
+    ssm->sceneSessionMap_.insert({ systemKeyboardSession->GetPersistentId(), systemKeyboardSession });
+
+    ASSERT_EQ(nullptr, ssm->GetKeyboardSession(DISPLAY_ID_INVALID, false));
+    ASSERT_NE(nullptr, ssm->GetKeyboardSession(keyboardSession->GetScreenId(), false));
+    ASSERT_NE(nullptr, ssm->GetKeyboardSession(systemKeyboardSession->GetScreenId(), true));
+}
+
+/**
+ * @tc.name: UpdateKeyboardAvoidAreaActive
+ * @tc.desc: test UpdateKeyboardAvoidAreaActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateKeyboardAvoidAreaActive, Function | SmallTest | Level3)
+{
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "UpdateKeyboardAvoidAreaActive";
+    info.bundleName_ = "UpdateKeyboardAvoidAreaActive";
+    info.windowType_ = 2105; // 2105 is WINDOW_TYPE_INPUT_METHOD_FLOAT
+    info.screenId_ = 1; // 1 is screenId
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
+    keyboardSession->GetSessionProperty()->SetDisplayId(info.screenId_);
+    ASSERT_EQ(false, keyboardSession->IsSystemKeyboard());
+    ssm->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
+    sptr<KeyboardSession> systemKeyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(nullptr, systemKeyboardSession->GetSessionProperty());
+    systemKeyboardSession->GetSessionProperty()->SetDisplayId(info.screenId_);
+    systemKeyboardSession->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, systemKeyboardSession->IsSystemKeyboard());
+    ssm->sceneSessionMap_.insert({ systemKeyboardSession->GetPersistentId(), systemKeyboardSession });
+
+    ssm->UpdateKeyboardAvoidAreaActive(DISPLAY_ID_INVALID, true);
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
+    ssm->UpdateKeyboardAvoidAreaActive(systemKeyboardSession->GetScreenId(), false);
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
+    ssm->UpdateKeyboardAvoidAreaActive(systemKeyboardSession->GetScreenId(), true);
+    ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
+}
+
+/**
+ * @tc.name: HandleKeyboardAvoidChange
+ * @tc.desc: test HandleKeyboardAvoidChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, HandleKeyboardAvoidChange, Function | SmallTest | Level3)
+{
+    sptr<SceneSessionManager> ssm = sptr<SceneSessionManager>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "HandleKeyboardAvoidChange";
+    info.bundleName_ = "HandleKeyboardAvoidChange";
+    info.windowType_ = 2105; // 2105 is WINDOW_TYPE_INPUT_METHOD_FLOAT
+    info.screenId_ = 1; // 1 is screenId
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
+    keyboardSession->GetSessionProperty()->SetDisplayId(info.screenId_);
+    ASSERT_EQ(false, keyboardSession->IsSystemKeyboard());
+    ssm->sceneSessionMap_.insert({ keyboardSession->GetPersistentId(), keyboardSession });
+    sptr<KeyboardSession> systemKeyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+    ASSERT_NE(nullptr, systemKeyboardSession->GetSessionProperty());
+    systemKeyboardSession->GetSessionProperty()->SetDisplayId(info.screenId_);
+    systemKeyboardSession->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, systemKeyboardSession->IsSystemKeyboard());
+    ssm->sceneSessionMap_.insert({ systemKeyboardSession->GetPersistentId(), systemKeyboardSession });
+
+    ssm->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ssm->HandleKeyboardAvoidChange(keyboardSession, keyboardSession->GetScreenId(),
+                                   SystemKeyboardAvoidChangeReason::KEYBOARD_CREATED);
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+
+    ssm->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm->HandleKeyboardAvoidChange(keyboardSession, keyboardSession->GetScreenId(),
+                                   SystemKeyboardAvoidChangeReason::KEYBOARD_CREATED);
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+
+    ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
+                                    SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
+    ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
+
+    ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
+                                    SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
+    ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
+
+    ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
+                                    SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE);
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
+
+    ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
+                                    SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT);
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
+
+    ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
+                                    SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
+    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
 }
 }
 } // namespace Rosen

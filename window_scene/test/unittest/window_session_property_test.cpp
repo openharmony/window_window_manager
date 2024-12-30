@@ -1348,8 +1348,6 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
 HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetIsSystemKeyboard(false);
     ASSERT_EQ(false, property->IsSystemKeyboard());
     property->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, property->IsSystemKeyboard());

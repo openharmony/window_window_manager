@@ -1678,6 +1678,28 @@ HWTEST_F(SceneSessionTest5, CheckSubSessionShouldFollowParent, Function | SmallT
     sceneSession->CheckSubSessionShouldFollowParent(displayIdDiff);
     EXPECT_EQ(subSession->shouldFollowParentWhenShow_, false);
 }
+
+/**
+ * @tc.name: ActivateKeyboardAvoidArea01
+ * @tc.desc: test ActivateKeyboardAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ActivateKeyboardAvoidArea01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "ActivateKeyboardAvoidArea01";
+    info.abilityName_ = "ActivateKeyboardAvoidArea01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(false, true);
+    ASSERT_EQ(false, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(false, false);
+    ASSERT_EQ(false, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(true, true);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(true, false);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
+}
 }
 }
 }
