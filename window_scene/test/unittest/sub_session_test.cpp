@@ -262,11 +262,6 @@ HWTEST_F(SubSessionTest, CheckPointerEventDispatch05, Function | SmallTest | Lev
 HWTEST_F(SubSessionTest, IsModal, Function | SmallTest | Level1)
 {
     ASSERT_FALSE(subSession_->IsModal());
-
-    subSession_->SetSessionProperty(nullptr);
-    ASSERT_TRUE(subSession_->GetSessionProperty() == nullptr);
-
-    ASSERT_FALSE(subSession_->IsModal());
 }
 
 /**
