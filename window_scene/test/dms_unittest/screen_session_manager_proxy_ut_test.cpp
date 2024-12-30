@@ -837,5 +837,6 @@ HWTEST_F(ScreenSessionManagerProxyUtTest, NotifyDisplayEvent, Function | SmallTe
     func();
     ASSERT_EQ(resultValue, 1);
 }
-
+}
+}
 }
