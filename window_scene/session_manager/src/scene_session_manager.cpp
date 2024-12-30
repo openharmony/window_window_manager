@@ -3574,6 +3574,42 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
     outsideDownEventFunc_ = func;
 }
 
+WMError SceneSessionManager::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    if (onWatchGestureConsumeResultFunc_) {
+        onWatchGestureConsumeResultFunc_(keyCode, isConsumed);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "onWatchGestureConsumeResultFunc is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterWatchGestureConsumeResultCallback(NotifyWatchGestureConsumeResultFunc&& func)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    onWatchGestureConsumeResultFunc_ = std::move(func);
+}
+
+WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
+    if (onWatchFocusActiveChangeFunc_) {
+        onWatchFocusActiveChangeFunc_(isActive);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "onWatchFocusActiveChangeFunc is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    onWatchFocusActiveChangeFunc_ = std::move(func);  
+}
+
 void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)
 {
     for (auto iter = remoteObjectMap_.begin(); iter != remoteObjectMap_.end(); ++iter) {
