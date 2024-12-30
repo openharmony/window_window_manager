@@ -168,7 +168,6 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Lev
  * @tc.name: SetTransform01
  * @tc.desc: set transform
  * @tc.type: FUNC
- * @tc.require:issueI7IJVV
  */
 HWTEST_F(WindowSceneSessionImplTest2, SetTransform02, Function | SmallTest | Level3)
 {
