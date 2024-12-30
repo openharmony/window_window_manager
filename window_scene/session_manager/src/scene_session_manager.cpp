@@ -64,6 +64,7 @@
 #include "anomaly_detection.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
+#include "commom/include/fold_screen_state_internel.h"
 
 #include "hidump_controller.h"
 
@@ -10539,9 +10540,9 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session == nullptr) {
                 continue;
             }
-            bool IsOnVirtualDisplay = PcFoldScreenManager::GetInstance().IsSuperFoldDisplayDevice() &&
+            bool IsOnVirtualDisplay = FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
                 session->GetSessionRect().posY_ >= GetLowerScreenPosY();
-            bool IsVirtualDisplayShow = PcFoldScreenManager::GetInstance().IsSuperFoldDisplayDevice() &&
+            bool IsVirtualDisplayShow = FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
                 session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= GetLowerScreenPosY();
             bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow &&
                 session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
