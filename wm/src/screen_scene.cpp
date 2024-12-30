@@ -25,6 +25,7 @@
 
 #include "dm_common.h"
 #include "window_manager_hilog.h"
+#include "window_helper.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -212,6 +213,16 @@ Ace::UIContent* ScreenScene::GetUIContent() const
         TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
         return nullptr;
     }
+}
+
+bool WindowSessionImpl::IsSystemWindow() const
+{
+    return WindowHelper::IsSystemWindow(GetType());
+}
+
+bool WindowSessionImpl::IsAppWindow() const
+{
+    return WindowHelper::IsAppWindow(GetType());
 }
 } // namespace Rosen
 } // namespace OHOS
