@@ -85,8 +85,8 @@ WMError ExtensionWindowImpl::OccupyEvents(int32_t eventFlags)
     want.SetParam("type", std::string("OccupyEvents"));
     want.SetParam("eventFlags", static_cast<int32_t>(eventFlags));
     constexpr int32_t customId = 1001;
-    bool result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, customId, want);
-    if (!result)
+    auto ret = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, customId, want);
+    if (ret != DataHandlerErr::OK)
     {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
