@@ -64,7 +64,7 @@
 #include "anomaly_detection.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
-#include "commom/include/fold_screen_state_internel.h"
+#include "common/include/fold_screen_state_internel.h"
 
 #include "hidump_controller.h"
 
