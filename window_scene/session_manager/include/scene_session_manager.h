@@ -750,8 +750,8 @@ private:
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
         std::vector<sptr<SceneSession>>& filtedSessions);
-    bool IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session);
-    int32_t GetLowerScreenPosY();
+    bool IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
+    int32_t GetLowerScreenPosY() const;
 
     /*
      * Window Rotate Animation
