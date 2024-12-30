@@ -368,6 +368,91 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: IsDefaultDensityEnabled01
+ * @tc.desc: IsDefaultDensityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->SetDefaultDensityEnabled(true);
+    EXPECT_EQ(true, window->GetDefaultDensityEnabled());
+    window->SetDefaultDensityEnabled(false);
+    EXPECT_EQ(false, window->GetDefaultDensityEnabled());
+}
+
+/**
+ * @tc.name: IsDefaultDensityEnabled02
+ * @tc.desc: IsDefaultDensityEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(false, window->GetDefaultDensityEnabled());
+}
+
+
+/**
+ * @tc.name: GetCustomDensity01
+ * @tc.desc: GetCustomDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetCustomDensity01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetCustomDensity01");
+    window->state_ = WindowState::STATE_CREATED;
+    float density = 1.5f;
+    window->SetCustomDensity(density);
+    EXPECT_EQ(density, window->GetCustomDensity());
+}
+
+/**
+ * @tc.name: GetMainWindowCustomDensity02
+ * @tc.desc: GetMainWindowCustomDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetMainWindowCustomDensity01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetCustomDensity01");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    float density = 1.5f;
+    window->SetCustomDensity(density);
+    EXPECT_EQ(density, window->GetMainWindowCustomDensity());
+}
+
+/**
  * @tc.name: GetWindowDensityInfo01
  * @tc.desc: GetWindowDensityInfo
  * @tc.type: FUNC
@@ -389,6 +474,68 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo01, Function | SmallTe
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetWindowDensityInfo(densityInfo));
 }
-} // namespace
+
+/**
+ * @tc.name: GetWindowDensityInfo02
+ * @tc.desc: GetWindowDensityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetCustomDensity01");
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetDisplayId(1);
+    float density = 1.5f;
+    window->SetCustomDensity(density);
+    WindowDensityInfo densityInfo;
+    EXPECT_EQ(WMError::WM_OK, window->GetWindowDensityInfo(densityInfo));
+    EXPECT_EQ(density, densityInfo.customDensity);
+}
+
+/**
+ * @tc.name: SwitchFreeMultiWindow01
+ * @tc.desc: SwitchFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    auto ref = window->SwitchFreeMultiWindow(false);
+    ASSERT_NE(WSError::WS_ERROR_INVALID_WINDOW, ref);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetCustomDensity01");
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    ref = window->SwitchFreeMultiWindow(false);
+    ASSERT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, ref);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    ref = window->SwitchFreeMultiWindow(true);
+    ASSERT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, ref);
+    
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(true));
+    ASSERT_EQ(true, window->windowSystemConfig_.freeMultiWindowEnable_);
+    ASSERT_EQ(WSError::WS_OK, window->SwitchFreeMultiWindow(false));
+    ASSERT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
+    WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
+}
+}
 } // namespace Rosen
 } // namespace OHOS

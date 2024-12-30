@@ -165,10 +165,34 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetTransform01
+ * @tc.desc: set transform
+ * @tc.type: FUNC
+ * @tc.require:issueI7IJVV
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetTransform02, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+    
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+    Transform trans_;
+    ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
+    ASSERT_EQ(trans_, window->GetTransform());
+}
+
+/**
  * @tc.name: RegisterAnimationTransitionController01
  * @tc.desc: RegisterAnimationTransitionController
  * @tc.type: FUNC
- * @tc.require:issueI7IJVV
  */
 HWTEST_F(WindowSceneSessionImplTest2, RegisterAnimationTransitionController01, Function | SmallTest | Level3)
 {
@@ -180,6 +204,7 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterAnimationTransitionController01, F
     window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterAnimationTransitionController(nullptr));
 }
+
 
 /**
  * @tc.name: SetNeedDefaultAnimation01
@@ -249,6 +274,29 @@ HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetAlpha02
+ * @tc.desc: SetAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetAlpha02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetAlpha02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestMode", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->property_->SetPersistentId(1);
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
+}
+
+/**
  * @tc.name: DestroySubWindow01
  * @tc.desc: DestroySubWindow
  * @tc.type: FUNC
@@ -301,6 +349,22 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateAnimationFlagProperty01, Function | 
 }
 
 /**
+ * @tc.name: UpdateAnimationFlagProperty02
+ * @tc.desc: UpdateAnimationFlagProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, UpdateAnimationFlagProperty02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateAnimationFlagProperty01");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->UpdateAnimationFlagProperty(false));
+}
+
+/**
  * @tc.name: UpdateWindowModeImmediately01
  * @tc.desc: UpdateWindowModeImmediately
  * @tc.type: FUNC
@@ -343,6 +407,9 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateWindowMode01, Function | SmallTest |
     windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW,
               windowSceneSession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+    windowSceneSession->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE,
+              windowSceneSession->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
 /**
@@ -833,10 +900,29 @@ HWTEST_F(WindowSceneSessionImplTest2, Snapshot01, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("BindDialogTarget01");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSession);
+    sptr<IRemoteObject> targetToken;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->BindDialogTarget(targetToken));
+}
+
+/**
+ * @tc.name: BindDialogTarget02
+ * @tc.desc: BindDialogTarget
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("BindDialogTarget01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestMode", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
@@ -880,6 +966,29 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled02, Function | 
 
     WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetDialogBackGestureEnabled03
+ * @tc.desc: SetDialogBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("SetDialogBackGestureEnabled02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->property_->SetPersistentId(1);
+    WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -945,6 +1054,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionFullScreen, Function | SmallT
 HWTEST_F(WindowSceneSessionImplTest2, NotifyPrepareClosePiPWindow01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("NotifyPrepareClosePiPWindow01");
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -1764,24 +1874,47 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
  */
 HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest | Level2)
 {
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest2: IsWindowRectAutoSave start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
     option->SetWindowName("IsWindowRectAutoSave");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(windowSceneSessionImpl, nullptr);
+    bool enabled = false;
+    auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    enabled = true;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->context_ = abilityContext_;
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    bool enabled = false;
-    auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    enabled = false;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_OK, ret);
+    enabled = true;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->context_ = nullptr;
+    enabled = false;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    enabled = true;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest2: IsWindowRectAutoSave end";
 }
 } // namespace
 } // namespace Rosen
