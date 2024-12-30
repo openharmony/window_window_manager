@@ -10561,15 +10561,12 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
 
 bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session)
 {
-    bool isHideWindow = session->GetSessionRect().width_ == 0 &&
-                        session->GetSessionRect().height_ == 0;
     constexpr int32_t GROUP_ONE = 1;
     std::string name = session->GetWindowName();
     std::regex pattern("^(.*?)(\\d*)$");    //Remove last digit
     std::smatch matches;
     name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
-    return !session->GetSessionInfo().isSystem_ && !isHideWindow ||
-        layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
+    return !session->GetSessionInfo().isSystem_ || layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
 }
 
 bool SceneSessionManager::IsOnVirtualDisplay(const sptr<SceneSession>& session)
