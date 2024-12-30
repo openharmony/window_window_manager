@@ -10556,14 +10556,11 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             filtedSessions.emplace_back(session);
         }
     }
-    std::sort(
-        filtedSessions.begin(), filtedSessions.end(),
-            [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs) {
-                return lhs->GetZOrder() > rhs->GetZOrder();
-    });
+    std::sort(filtedSessions.begin(), filtedSessions.end(), [](const sptr<SceneSession>& lhs,
+        const sptr<SceneSession>& rhs) { return lhs->GetZOrder() > rhs->GetZOrder(); });
 }
 
-int32_t SceneSessionManager::GetLowerScreenPosY()
+int32_t SceneSessionManager::GetLowerScreenPosY() const
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
@@ -10572,7 +10569,7 @@ int32_t SceneSessionManager::GetLowerScreenPosY()
            defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
            defaultDisplayRect.height_;
 }
-bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session)
+bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const
 {
     constexpr int32_t GROUP_ONE = 1;
     std::string name = session->GetWindowName();
