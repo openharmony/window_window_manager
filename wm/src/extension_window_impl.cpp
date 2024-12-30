@@ -75,8 +75,7 @@ WMError ExtensionWindowImpl::OccupyEvents(int32_t eventFlags)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "events: %{public}d", eventFlags);
     auto dataHandler = windowExtensionSessionImpl_->GetExtensionDataHandler();
-    if (!dataHandler)
-    {
+    if (!dataHandler) {
         TLOGE(WmsLogTag::WMS_UIEXT, "null dataHandler");
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -86,8 +85,7 @@ WMError ExtensionWindowImpl::OccupyEvents(int32_t eventFlags)
     want.SetParam("eventFlags", static_cast<int32_t>(eventFlags));
     constexpr int32_t customId = 1001;
     auto ret = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, customId, want);
-    if (ret != DataHandlerErr::OK)
-    {
+    if (ret != DataHandlerErr::OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
