@@ -1797,18 +1797,6 @@ WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption)
     return WMError::WM_OK;
 }
 
-/** @note @window.immersive */
-bool WindowSessionImpl::IsSystemWindow() const
-{
-    return WindowHelper::IsSystemWindow(GetType());
-}
-
-/** @note @window.immersive */
-bool WindowSessionImpl::IsAppWindow() const
-{
-    return WindowHelper::IsAppWindow(GetType());
-}
-
 WMError WindowSessionImpl::HideNonSystemFloatingWindows(bool shouldHide)
 {
     WLOGFD("%{public}d", shouldHide);

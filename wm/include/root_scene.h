@@ -21,6 +21,7 @@
 #include "vsync_station.h"
 #include "window.h"
 #include "ws_common.h"
+#include "window_helper.h"
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -67,8 +68,8 @@ public:
     void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
-    bool IsSystemWindow() const override;
-    bool IsAppWindow() const override;
+    bool IsSystemWindow() const override { WindowHelper::IsSystemWindow(GetType()); };
+    bool IsAppWindow() const override { WindowHelper::IsAppWindow(GetType()); };
 
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
 
