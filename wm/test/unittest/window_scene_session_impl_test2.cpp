@@ -1475,7 +1475,7 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    auto ret = window->Maximize(presentation);
+    ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 
