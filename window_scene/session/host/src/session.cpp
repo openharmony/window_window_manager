@@ -1110,7 +1110,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetIsNeedUpdateWindowMode(true);
         property->SetWindowMode(GetSessionProperty()->GetWindowMode());
     }
-    if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != -1 && property) {
+    if (SessionHelper::IsMainWindow(GetWindowType()) && GetSessionInfo().screenId_ != SCREEN_ID_INVALID) {
         property->SetDisplayId(GetSessionInfo().screenId_);
     }
     InitSystemSessionDragEnable(property);
@@ -1141,17 +1141,16 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     if (GetSessionProperty()->GetCompatibleModeInPc()) {
         property->SetDragEnabled(GetSessionProperty()->GetIsSupportDragInPcCompatibleMode());
     }
-    property->SetIsAppSupportPhoneInPc(GetSessionProperty()->GetIsAppSupportPhoneInPc());
     property->SetCompatibleModeEnableInPad(GetSessionProperty()->GetCompatibleModeEnableInPad());
     property->SetCompatibleWindowSizeInPc(GetSessionProperty()->GetCompatibleInPcPortraitWidth(),
         GetSessionProperty()->GetCompatibleInPcPortraitHeight(),
         GetSessionProperty()->GetCompatibleInPcLandscapeWidth(),
         GetSessionProperty()->GetCompatibleInPcLandscapeHeight());
+    property->SetIsAppSupportPhoneInPc(GetSessionProperty()->GetIsAppSupportPhoneInPc());
     std::optional<bool> clientDragEnable = GetClientDragEnable();
     if (clientDragEnable.has_value()) {
         property->SetDragEnabled(clientDragEnable.value());
     }
-
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(GetSessionProperty()->GetIsPcAppInPad());
     }
