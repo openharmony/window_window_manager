@@ -81,17 +81,18 @@ static napi_value ExportEventFlag(napi_env env)
         return nullptr;
     }
 
-    (void)SetNamedProperty(env, result, "EVENT_NONE", static_cast<int32_t>(EventFlag::EVENT_NONE));
-    (void)SetNamedProperty(env, result, "EVENT_PAN_GESTURE_LEFT",
-        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_LEFT));
-    (void)SetNamedProperty(env, result, "EVENT_PAN_GESTURE_RIGHT",
-        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_RIGHT));
-    (void)SetNamedProperty(env, result, "EVENT_PAN_GESTURE_UP",
-        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_UP));
-    (void)SetNamedProperty(env, result, "EVENT_PAN_GESTURE_DOWN",
-        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_DOWN));
-    (void)SetNamedProperty(env, result, "EVENT_CLICK", static_cast<int32_t>(EventFlag::EVENT_CLICK));
-    (void)SetNamedProperty(env, result, "EVENT_LONG_PRESS", static_cast<int32_t>(EventFlag::EVENT_LONG_PRESS));
+    static_cast<void>(SetNamedProperty(env, result, "EVENT_NONE", static_cast<int32_t>(EventFlag::EVENT_NONE)));
+    static_cast<void>(SetNamedProperty(env, result, "EVENT_PAN_GESTURE_LEFT",
+        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_LEFT)));
+    static_cast<void>(SetNamedProperty(env, result, "EVENT_PAN_GESTURE_RIGHT",
+        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_RIGHT)));
+    static_cast<void>(SetNamedProperty(env, result, "EVENT_PAN_GESTURE_UP",
+        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_UP)));
+    static_cast<void>(SetNamedProperty(env, result, "EVENT_PAN_GESTURE_DOWN",
+        static_cast<int32_t>(EventFlag::EVENT_PAN_GESTURE_DOWN)));
+    static_cast<void>(SetNamedProperty(env, result, "EVENT_CLICK", static_cast<int32_t>(EventFlag::EVENT_CLICK)));
+    static_cast<void>(SetNamedProperty(env, result, "EVENT_LONG_PRESS",
+        static_cast<int32_t>(EventFlag::EVENT_LONG_PRESS)));
 
     napi_object_freeze(env, result);
     return result;
