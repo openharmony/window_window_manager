@@ -752,6 +752,9 @@ private:
         std::vector<sptr<SceneSession>>& filtedSessions);
     bool IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session);
     int32_t GetLowerScreenPosY();
+    bool IsOnVirtualDisplay(const sptr<SceneSession>& session);
+    bool IsVirtualDisplayShow(const sptr<SceneSession>& session);
+    void TransGlobalRectToVirtualDisplayRect(Rect& hostRect);
 
     /*
      * Window Rotate Animation
