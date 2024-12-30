@@ -10568,7 +10568,7 @@ bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& ses
     std::regex pattern("^(.*?)(\\d*)$");    //Remove last digit
     std::smatch matches;
     name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
-    return !session->GetSessionInfo().isSystem_ || !isHideWindow ||
+    return !session->GetSessionInfo().isSystem_ && !isHideWindow ||
         layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
 }
 
