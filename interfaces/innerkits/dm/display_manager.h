@@ -30,6 +30,16 @@
 #include "display_change_info.h"
 
 namespace OHOS::Rosen {
+/**
+ * @brief snapShot config
+ */
+struct SnapShotConfig {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    Media::Size imageSize_;
+    Media::Rect imageRect_;
+    int rotation_;
+};
+
 class DisplayManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
 friend class DMSDeathRecipient;
@@ -231,7 +241,8 @@ public:
      * @param errorCode error code.
      * @return PixelMap object of screenshot.
      */
-    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
+    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -254,6 +265,16 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
         const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get screenshot with option.
+     *
+     * @param snapShotConfig Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotwithConfig(const SnapShotConfig &snapShotConfig,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
      * @brief Begin to wake up screen.
