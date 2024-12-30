@@ -375,12 +375,10 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, Function | SmallTest |
 HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->SetDefaultDensityEnabled(true);
@@ -397,12 +395,10 @@ HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled01, Function | Smal
 HWTEST_F(WindowSceneSessionImplTest5, IsDefaultDensityEnabled02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(false, window->GetDefaultDensityEnabled());
@@ -421,7 +417,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetCustomDensity01, Function | SmallTest |
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetCustomDensity01");
     window->state_ = WindowState::STATE_CREATED;
@@ -442,7 +437,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetMainWindowCustomDensity01, Function | S
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetCustomDensity01");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -487,7 +481,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo02, Function | SmallTe
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetCustomDensity01");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -517,7 +510,6 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow01, Function | SmallT
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetCustomDensity01");
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
