@@ -1118,7 +1118,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         [weakThis = wptr(this)]() {
             auto session = weakThis.promote();
             if (session == nullptr) {
-                WLOGFE("session is nullptr");
+                TLOGNE("session is nullptr");
                 return;
             }
             session->NotifySessionInfoChange();
