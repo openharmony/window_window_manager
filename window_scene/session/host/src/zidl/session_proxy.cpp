@@ -2032,6 +2032,24 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
     }
 }
 
+WSError SessionProxy::SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    auto ret = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA), data,
+                                   reply, option);
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, ret code: %{public}u", ret);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    return WSError::WS_OK;
+}
+
 WSError SessionProxy::RequestFocus(bool isFocused)
 {
     MessageParcel data;
