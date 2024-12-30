@@ -10541,9 +10541,9 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
             if (session == nullptr) {
                 continue;
             }
-            const bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
+            bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
                 session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-            const bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
+            bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
                 IsOnVirtualDisplay(session) && session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
             if (isNotVirtualDisplayNeed || isNotDefaultDisplayNeed || !IsWindowLayoutInfoNeeded(session) ||
                 session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
