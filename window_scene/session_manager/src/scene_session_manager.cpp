@@ -10581,18 +10581,6 @@ bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& ses
     return !session->GetSessionInfo().isSystem_ || LAYOUT_INFO_WHITELIST.find(name) != LAYOUT_INFO_WHITELIST.end();
 }
 
-bool SceneSessionManager::IsOnVirtualDisplay(const sptr<SceneSession>& session)
-{
-    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-           session->GetSessionRect().posY_ >= GetLowerScreenPosY();
-}
-
-bool SceneSessionManager::IsVirtualDisplayShow(const sptr<SceneSession>& session)
-{
-    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-           session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= GetLowerScreenPosY();
-}
-
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     if (!SessionPermission::IsSystemCalling()) {
