@@ -229,6 +229,30 @@ HWTEST_F(ScreenSceneTest, SetDisplayDensity, Function | SmallTest | Level3)
     screenScene.SetDisplayDensity(density);
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
+
+/**
+ * @tc.name: IsSystemWindow
+ * @tc.desc: IsSystemWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, IsSystemWindow, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    bool res = screenScene.IsSystemWindow();
+    ASSERT_EQ(true, res);
+}
+
+/**
+ * @tc.name: IsAppWindow
+ * @tc.desc: IsAppWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, IsAppWindow, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    bool res = screenScene.IsAppWindow();
+    ASSERT_EQ(false, res);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

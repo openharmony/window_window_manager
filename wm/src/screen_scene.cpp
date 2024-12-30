@@ -215,12 +215,12 @@ Ace::UIContent* ScreenScene::GetUIContent() const
     }
 }
 
-bool WindowSessionImpl::IsSystemWindow() const
+bool ScreenScene::IsSystemWindow() const
 {
     return WindowHelper::IsSystemWindow(GetType());
 }
 
-bool WindowSessionImpl::IsAppWindow() const
+bool ScreenScene::IsAppWindow() const
 {
     return WindowHelper::IsAppWindow(GetType());
 }

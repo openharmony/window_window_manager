@@ -378,6 +378,30 @@ HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, Function | SmallTest | Le
     RootScene::staticRootScene_ = prevStaticRootScene;
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
+
+/**
+ * @tc.name: IsSystemWindow
+ * @tc.desc: IsSystemWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, IsSystemWindow, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    bool res = rootScene.IsSystemWindow();
+    ASSERT_EQ(true, res);
+}
+
+/**
+ * @tc.name: IsAppWindow
+ * @tc.desc: IsAppWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, IsAppWindow, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    bool res = rootScene.IsAppWindow();
+    ASSERT_EQ(false, res);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
