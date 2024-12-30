@@ -1428,6 +1428,9 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     option->SetDisplayId(0);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize(presentation));
+
     window->property_->SetWindowName("Maximize02");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->property_->SetPersistentId(2);
@@ -1436,8 +1439,6 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-
-    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     // not support subWinodw call
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(presentation));
 
@@ -1469,27 +1470,43 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
 
     // case1: only set maximize()
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 
     // case2: maximize(EXIT_IMMERSIVE) and the immersive value will be set ad false
     presentation = MaximizePresentation::EXIT_IMMERSIVE;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 
     // case3: maximize(FOLLOW_APP_IMMERSIVE_SETTING) and the immersive value will be set as client set
     presentation = MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 
-    // case4: maximize(ENTER_IMMERSIVE) and the immersive value will be set as true
-    presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    // case4: maximize(ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER) and the immersive value will be set as true
+    presentation = MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 }
 
 /**
