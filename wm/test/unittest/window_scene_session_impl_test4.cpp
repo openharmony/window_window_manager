@@ -814,7 +814,6 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifyDialogStateChange, Function | SmallT
     EXPECT_EQ(WSError::WS_ERROR_INVALID_WINDOW, ret);
 }
 
-
 /**
  * @tc.name: GetWindowStatus01
  * @tc.desc: GetWindowStatus
