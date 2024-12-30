@@ -522,10 +522,8 @@ HWTEST_F(WindowSceneSessionImplTest3, SetDefaultProperty, Function | SmallTest |
 HWTEST_F(WindowSceneSessionImplTest3, SetCallingWindow, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("SetCallingWindow");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     windowSceneSessionImpl->hostSession_ = nullptr;
     auto ret = windowSceneSessionImpl->SetCallingWindow(0);
@@ -533,12 +531,13 @@ HWTEST_F(WindowSceneSessionImplTest3, SetCallingWindow, Function | SmallTest | L
 
     SessionInfo sessionInfo = { "CreateTestBundle0", "CreateTestModule0", "CreateTestAbility0" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     windowSceneSessionImpl->hostSession_ = session;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    ret = windowSceneSessionImpl->NotifyPrepareClosePiPWindow();
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    ret = windowSceneSessionImpl->SetCallingWindow(0);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(0, windowSceneSessionImpl->property_->callingSessionId_);
 }
 
 /**
@@ -576,10 +575,8 @@ HWTEST_F(WindowSceneSessionImplTest3, RaiseToAppTop, Function | SmallTest | Leve
 HWTEST_F(WindowSceneSessionImplTest3, SetBlur, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("SetBlur");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     windowSceneSessionImpl->surfaceNode_ = nullptr;
     auto ret = windowSceneSessionImpl->SetBlur(1.0f);
@@ -627,6 +624,17 @@ HWTEST_F(WindowSceneSessionImplTest3, SetKeyboardTouchHotAreas, Function | Small
     hotAreas.portraitPanelHotAreas_.push_back(rect);
     auto ret = windowSceneSessionImpl->SetKeyboardTouchHotAreas(hotAreas);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    ret = windowSceneSessionImpl->SetKeyboardTouchHotAreas(hotAreas);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    ret = windowSceneSessionImpl->SetKeyboardTouchHotAreas(hotAreas);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -1344,17 +1352,15 @@ HWTEST_F(WindowSceneSessionImplTest3, StartMove, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: IsStartMoving
+ * @tc.name: IsStartMoving01
  * @tc.desc: get main window move flag, test IsStartMoving
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, IsStartMoving, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest3, IsStartMoving01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("IsStartMoving");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     bool isMoving = windowSceneSessionImpl->IsStartMoving();
     EXPECT_EQ(false, isMoving);
@@ -1948,22 +1954,31 @@ HWTEST_F(WindowSceneSessionImplTest3, InitSystemSessionDragEnable_IsDialogOrNot,
  */
 HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, Function | SmallTest | Level2)
 {
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest3: SetWindowRectAutoSave start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowRectAutoSave");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    auto ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
     EXPECT_EQ(WMError::WM_OK, ret);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(false);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = windowSceneSessionImpl->SetWindowRectAutoSave(true);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest3: SetWindowRectAutoSave end";
 }
 
 /**
