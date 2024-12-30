@@ -113,6 +113,16 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
+{
+    if (displayNode_) {
+        displayNode_->SetDisplayNodeMirrorConfig(config);
+        RSTransaction::FlushImplicitTransaction();
+    } else {
+        CreateDisplayNode(config);
+    }
+}
+
 ScreenSession::~ScreenSession()
 {
     WLOGI("~ScreenSession");
