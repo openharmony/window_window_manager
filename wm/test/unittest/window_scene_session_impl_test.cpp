@@ -91,6 +91,16 @@ RSSurfaceNode::SharedPtr WindowSceneSessionImplTest::CreateRSSurfaceNode()
     return surfaceNode;
 }
 
+static sptr<WindowSceneSessionImpl> CreateWindow(std::string windowName, WindowType type, int32_t id)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName(windowName);
+    option->SetWindowType(type);
+    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(id);
+    return window;
+}
+
 namespace {
 /**
  * @tc.name: CreateWindowAndDestroy01
@@ -1611,16 +1621,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen02, Function | SmallTest
     window->property_->SetCompatibleModeInPc(true);
     WMError res = window->SetLayoutFullScreen(false);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
-}
-
-static sptr<WindowSceneSessionImpl> CreateWindow(std::string windowName, WindowType type, int32_t id)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName(windowName);
-    option->SetWindowType(type);
-    auto window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(id);
-    return window;
 }
 
 /**
