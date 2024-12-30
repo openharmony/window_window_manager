@@ -1111,7 +1111,10 @@ int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, M
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to Write window layout info");
         return ERR_INVALID_DATA;
     }
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
