@@ -1801,16 +1801,18 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, Function | SmallT
     windowSceneSessionImpl->context_ = abilityContext_;
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     bool enabled = false;
-    windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     option->SetWindowName("IsWindowRectAutoSave002");
     windowSceneSessionImpl->state_ = WindowState::STATE_INITIAL;
     windowSceneSessionImpl->property_->SetPersistentId(1);
-    windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 }
 } // namespace
 } // namespace Rosen
