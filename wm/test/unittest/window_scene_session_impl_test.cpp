@@ -636,7 +636,7 @@ HWTEST_F(WindowSceneSessionImplTest, Minimize01, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest, Minimize02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Minimize01");
+    option->SetWindowName("Minimize02");
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->property_->SetPersistentId(0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->Minimize());
@@ -650,7 +650,7 @@ HWTEST_F(WindowSceneSessionImplTest, Minimize02, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest, Minimize03, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Minimize01");
+    option->SetWindowName("Minimize03");
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     windowSceneSession->property_->SetPersistentId(1);
@@ -669,7 +669,7 @@ HWTEST_F(WindowSceneSessionImplTest, Minimize03, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest, Minimize04, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Minimize01");
+    option->SetWindowName("Minimize04");
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     windowSceneSession->property_->SetPersistentId(1);
