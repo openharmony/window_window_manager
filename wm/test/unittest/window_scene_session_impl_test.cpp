@@ -517,7 +517,6 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor02, Function | SmallTe
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("DisableAppWindowDecor02");
     sptr<WindowSceneSessionImpl> windowSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSession);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -543,7 +542,6 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor03, Function | SmallTe
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("DisableAppWindowDecor03");
     sptr<WindowSceneSessionImpl> windowSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSession);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -620,7 +618,6 @@ HWTEST_F(WindowSceneSessionImplTest, Minimize01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, option);
     option->SetWindowName("Minimize01");
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSession);
 
     windowSceneSession->property_->SetPersistentId(1);
     windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
@@ -639,10 +636,8 @@ HWTEST_F(WindowSceneSessionImplTest, Minimize01, Function | SmallTest | Level2)
 HWTEST_F(WindowSceneSessionImplTest, Minimize02, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     option->SetWindowName("Minimize01");
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSession);
     windowSceneSession->property_->SetPersistentId(0);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->Minimize());
 }
