@@ -93,8 +93,10 @@ int main(int argc, char *argv[])
 static bool GetScreenshotByCmdArguments(CmdArguments& cmdArguments, sptr<Display> display,
     std::shared_ptr<OHOS::Media::PixelMap>& pixelMap)
 {
+    DmErrorCode errorCode;
     if (!cmdArguments.isWidthSet && !cmdArguments.isHeightSet) {
-        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArguments.displayId);  // default width & height
+        // default width & height
+        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArguments.displayId, &errorCode, false);
     } else {
         if (!cmdArguments.isWidthSet) {
             cmdArguments.width = display->GetWidth();
@@ -109,10 +111,12 @@ static bool GetScreenshotByCmdArguments(CmdArguments& cmdArguments, sptr<Display
             cmdArguments.height << " invalid!" << std::endl;
             return false;
         }
-        const Media::Rect rect = {0, 0, display->GetWidth(), display->GetHeight()};
-        const Media::Size size = {cmdArguments.width, cmdArguments.height};
-        constexpr int rotation = 0;
-        pixelMap = DisplayManager::GetInstance().GetScreenshot(cmdArguments.displayId, rect, size, rotation);
+        SnapShotConfig snapConfig;
+        snapConfig.displayId_ = cmdArguments.displayId;
+        snapConfig.imageRect_ = { 0, 0, display->GetWidth(), display->GetHeight() };
+        snapConfig.imageSize_ = { cmdArguments.width, cmdArguments.height };
+        snapConfig.rotation_ = 0;
+        pixelMap = DisplayManager::GetInstance().GetScreenshotwithConfig(snapConfig, &errorCode, false);
     }
     return true;
 }

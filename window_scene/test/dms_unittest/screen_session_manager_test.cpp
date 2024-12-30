@@ -977,7 +977,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplaySnapshot, Function | SmallTest | Le
 {
     DisplayId displayId(0);
     DmErrorCode* errorCode = nullptr;
-    ssm_->GetDisplaySnapshot(displayId, errorCode);
+    ssm_->GetDisplaySnapshot(displayId, errorCode, false);
     EXPECT_TRUE(1);
 }
 
@@ -3497,6 +3497,22 @@ HWTEST_F(ScreenSessionManagerTest, SetGotScreenOffAndWakeUpBlock, Function | Sma
     ssm_->needScreenOffNotify_ = true;
     ssm_->SetGotScreenOffAndWakeUpBlock();
     ASSERT_FALSE(ssm_->needScreenOffNotify_);
+}
+
+/**
+ * @tc.name: GetFoldStatus
+ * @tc.desc: GetFoldStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto status = ssm_->GetFoldStatus();
+    if (ssm_->IsFoldable()) {
+        EXPECT_NE(FoldStatus::UNKNOWN, status);
+    } else {
+        EXPECT_EQ(FoldStatus::UNKNOWN, status);
+    }
 }
 }
 } // namespace Rosen

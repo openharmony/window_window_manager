@@ -1209,7 +1209,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, Function | SmallTest
     DmErrorCode* errorCode = nullptr;
     std::function<void()> func = [&]()
     {
-        res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode);
+        res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode, false);
     };
     func();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
