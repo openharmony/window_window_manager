@@ -1116,6 +1116,26 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode02, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: SetWindowMode03
+ * @tc.desc: SetWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> subOption = sptr<WindowOption>::MakeSptr();
+    subOption->SetWindowName("SetWindowMode03");
+    subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
+    subWindow->property_->SetPersistentId(0);
+    SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
+    subWindow->hostSession_ = subSession;
+    subWindow->property_->SetWindowModeSupportType(1);
+    auto ret = subWindow->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+}
+
+/**
  * @tc.name: UpdateNewSize01
  * @tc.desc: UpdateNewSize
  * @tc.type: FUNC
