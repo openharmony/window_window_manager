@@ -751,9 +751,7 @@ private:
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
         std::vector<sptr<SceneSession>>& filtedSessions);
     bool IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session);
-    bool IsOnVirtualDisplay(const sptr<SceneSession>& session);
-    bool IsVirtualDisplayShow(const sptr<SceneSession>& session);
-    void TransGlobalRectToVirtualDisplayRect(Rect& hostRect);
+    int32_t GetLowerScreenPosY();
 
     /*
      * Window Rotate Animation
