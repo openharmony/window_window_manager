@@ -1060,6 +1060,21 @@ HWTEST_F(sceneSessionManagerProxyTest, GetDisplayIdByWindowId, Function | SmallT
 }
 
 /**
+ * @tc.name: IsPcWindow
+ * @tc.desc: IsPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, IsPcWindow, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    bool isPcWindow = false;
+    ASSERT_EQ(sceneSessionManagerProxy->IsPcWindow(isPcWindow),
+        WMError::WM_ERROR_IPC_FAILED);
+    ASSERT_EQ(isPcWindow, false);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC

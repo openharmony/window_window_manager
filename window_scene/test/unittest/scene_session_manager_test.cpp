@@ -1796,6 +1796,18 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
 }
 
 /**
+ * @tc.name: IsPcWindow
+ * @tc.desc: IsPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, IsPcWindow, Function | SmallTest | Level3)
+{
+    bool isPcWindow = false;
+    auto result = ssm_->IsPcWindow(isPcWindow);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
