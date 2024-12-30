@@ -10551,9 +10551,6 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             filtedSessions.emplace_back(session);
         }
     }
-    WindowLayoutInfoCmpFunc cmp = [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs) {
-        return lhs->GetZOrder() > rhs->GetZOrder();
-    };
     std::sort(filtedSessions.begin(), filtedSessions.end(),
         [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs)
             { return lhs->GetZOrder() > rhs->GetZOrder(); });
