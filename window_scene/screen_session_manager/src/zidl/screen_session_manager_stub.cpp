@@ -378,7 +378,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
             DmErrorCode errCode = DmErrorCode::DM_OK;
-            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode);
+            bool isUseDma = data.ReadBool();
+            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode, isUseDma);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
             break;
