@@ -90,7 +90,6 @@ ohos_shared_library("extensionwindow_napi") {
     ":extension_window_kit_config",
     "../../../../resources/config/build:coverage_flags",
   ]
-  public_configs = [ ":extension_window_kit_config" ]
 
   include_dirs = [ "extension_window" ]
   deps = [
@@ -99,6 +98,8 @@ ohos_shared_library("extensionwindow_napi") {
     "../../../../wm:libwm",
     "../window_runtime:window_native_kit",
   ]
+
+  public_configs = [ ":extension_window_kit_config" ]
 
   external_deps = [
     "ability_runtime:runtime",
