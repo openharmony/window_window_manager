@@ -957,6 +957,15 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureFloatingWindows, Function | Small
     ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
     ssm_->HideNonSecureFloatingWindows();
     EXPECT_TRUE(floatSession->GetSessionProperty()->GetForceHide());
+
+    ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = false;
+    ssm_->HideNonSecureFloatingWindows();
+    ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->HideNonSecureFloatingWindows();
+    EXPECT_FALSE(floatSession->GetSessionProperty()->GetForceHide());
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);
     ssm_->sceneSessionMap_.clear();
     ssm_->nonSystemFloatSceneSessionMap_.clear();
