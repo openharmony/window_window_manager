@@ -1127,7 +1127,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowMode03, Function | SmallTest | Le
     subOption->SetWindowName("SetWindowMode03");
     subOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(subOption);
-    ASSERT_NE(nullptr, subWindow->property_);
     subWindow->property_->SetPersistentId(0);
     SessionInfo subSessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
     sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(subSessionInfo);
