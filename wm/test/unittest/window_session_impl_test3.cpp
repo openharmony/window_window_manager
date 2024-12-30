@@ -187,7 +187,7 @@ HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, Function | SmallT
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window_->hostSession_ = session;
     window_->property_->SetPersistentId(1);
-    window_->state_->WindowState::STATE_CREATED;
+    window_->state_ = WindowState::STATE_CREATED;
     AppForceLandscapeConfig config = {};
     auto res = window_->GetAppForceLandscapeConfig(config);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -339,7 +339,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
     ret = window_->SetWindowModal(false);
     ASSERT_EQ(WMError::WM_OK, ret);
     
-    window_->property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = window_->SetWindowModal(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
     ret = window_->SetWindowModal(false);

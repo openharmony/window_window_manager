@@ -2030,14 +2030,11 @@ HWTEST_F(WindowSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level
 HWTEST_F(WindowSessionImplTest, GetWindowStatusInner, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("GetWindowStatusInner");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr();
-    ASSERT_NE(window, nullptr);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, Session);
     window->hostSession_ = session;
     EXPECT_EQ(WindowStatus::WINDOW_STATUS_UNDEFINED, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_PIP));
 
@@ -2069,7 +2066,6 @@ HWTEST_F(WindowSessionImplTest, GetBackgroundColor01, Function | SmallTest | Lev
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetBackgroundColor01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_EQ(0, window->GetBackgroundColor());
 }
@@ -2084,9 +2080,7 @@ HWTEST_F(WindowSessionImplTest, GetBackgroundColor02, Function | SmallTest | Lev
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetBackgroundColor02");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
     sptr<IAceAbilityHandler> handler = sptr<IAceAbilityHandler>();
-    ASSERT_EQ(handler, nullptr);
     window->SetAceAbilityHandler(handler);
     EXPECT_EQ(0xffffffff, window->GetBackgroundColor());
 }
@@ -2101,7 +2095,6 @@ HWTEST_F(WindowSessionImplTest, GetBackgroundColor03, Function | SmallTest | Lev
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetBackgroundColor03");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
     EXPECT_EQ(0xffffffff, window->GetBackgroundColor());
 }
 } // namespace
