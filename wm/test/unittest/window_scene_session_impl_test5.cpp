@@ -16,15 +16,15 @@
 #include <gtest/gtest.h>
 #include <parameters.h>
 #include "ability_context_impl.h"
-#include "display_info.h"
 #include "common_test_utils.h"
+#include "display_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window_adapter.h"
+#include "pointer_event.h"
 #include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
-#include "pointer_event.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -38,21 +38,13 @@ public:
     void TearDown() override;
 };
 
-void WindowSceneSessionImplTest5::SetUpTestCase()
-{
-}
+void WindowSceneSessionImplTest5::SetUpTestCase() {}
 
-void WindowSceneSessionImplTest5::TearDownTestCase()
-{
-}
+void WindowSceneSessionImplTest5::TearDownTestCase() {}
 
-void WindowSceneSessionImplTest5::SetUp()
-{
-}
+void WindowSceneSessionImplTest5::SetUp() {}
 
-void WindowSceneSessionImplTest5::TearDown()
-{
-}
+void WindowSceneSessionImplTest5::TearDown() {}
 
 namespace {
 /**
@@ -107,7 +99,7 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleUpForCompatibleMode, Function | Smal
 
     window->isDown_ = true;
     window->eventMapTriggerByDisplay_.clear();
-    window->eventMapTriggerByDisplay_.insert(std::pair<int32_t, std::vector<bool>>(-2, {true}));
+    window->eventMapTriggerByDisplay_.insert(std::pair<int32_t, std::vector<bool>>(-2, { true }));
     window->HandleUpForCompatibleMode(pointerEvent, pointerItem);
 }
 
@@ -131,7 +123,7 @@ HWTEST_F(WindowSceneSessionImplTest5, HandleMoveForCompatibleMode, Function | Sm
 
     window->isDown_ = true;
     window->eventMapTriggerByDisplay_.clear();
-    window->eventMapTriggerByDisplay_.insert(std::pair<int32_t, std::vector<bool>>(-2, {true}));
+    window->eventMapTriggerByDisplay_.insert(std::pair<int32_t, std::vector<bool>>(-2, { true }));
     window->HandleMoveForCompatibleMode(pointerEvent, pointerItem);
 }
 
@@ -182,7 +174,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyCompatibleModeEnableInPad, Function 
     auto ret = window->NotifyCompatibleModeEnableInPad(true);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
 
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
@@ -224,7 +216,7 @@ HWTEST_F(WindowSceneSessionImplTest5, Maximize01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
 
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
@@ -260,7 +252,7 @@ HWTEST_F(WindowSceneSessionImplTest5, Maximize02, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, window);
 
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
@@ -320,7 +312,7 @@ HWTEST_F(WindowSceneSessionImplTest5, MoveWindowToGlobal01, Function | SmallTest
     ASSERT_NE(nullptr, window);
 
     MoveConfiguration presentation;
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
@@ -356,7 +348,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetCustomDensity01, Function | SmallTest |
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetCustomDensity(density));
 
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
@@ -388,7 +380,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo01, Function | SmallTe
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetWindowDensityInfo(densityInfo));
 
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
@@ -397,6 +389,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowDensityInfo01, Function | SmallTe
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetWindowDensityInfo(densityInfo));
 }
-}  // namespace
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

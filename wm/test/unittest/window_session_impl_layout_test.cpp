@@ -21,12 +21,12 @@
 #include "accessibility_event_info.h"
 #include "color_parser.h"
 #include "mock_session.h"
-#include "window_helper.h"
-#include "window_session_impl.h"
-#include "wm_common.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
+#include "window_helper.h"
+#include "window_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,13 +46,9 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 50000;
 };
 
-void WindowSessionImplLayoutTest::SetUpTestCase()
-{
-}
+void WindowSessionImplLayoutTest::SetUpTestCase() {}
 
-void WindowSessionImplLayoutTest::TearDownTestCase()
-{
-}
+void WindowSessionImplLayoutTest::TearDownTestCase() {}
 
 void WindowSessionImplLayoutTest::SetUp()
 {
@@ -287,6 +283,6 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, Function | SmallTe
     window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
     ASSERT_NE(window, nullptr);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

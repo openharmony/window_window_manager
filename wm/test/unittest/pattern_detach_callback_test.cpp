@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <chrono>
 #include <future>
+#include <gtest/gtest.h>
 #include <limits>
 
 #include "pattern_detach_callback.h"
@@ -34,22 +34,16 @@ public:
     sptr<PatternDetachCallback> patternDetachCallback_;
 };
 
-void PatternDetachCallbackTest::SetUpTestCase()
-{
-}
+void PatternDetachCallbackTest::SetUpTestCase() {}
 
-void PatternDetachCallbackTest::TearDownTestCase()
-{
-}
+void PatternDetachCallbackTest::TearDownTestCase() {}
 
 void PatternDetachCallbackTest::SetUp()
 {
     patternDetachCallback_ = new (std::nothrow) PatternDetachCallback();
 }
 
-void PatternDetachCallbackTest::TearDown()
-{
-}
+void PatternDetachCallbackTest::TearDown() {}
 
 namespace {
 /**
@@ -60,11 +54,13 @@ namespace {
 HWTEST_F(PatternDetachCallbackTest, GetResult01, Function | SmallTest | Level2)
 {
     int32_t maxWaitTime = 300;
-    auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    auto startTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     patternDetachCallback_->GetResult(maxWaitTime);
-    auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    auto endTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     auto waitTime = endTime - startTime;
     GTEST_LOG_(INFO) << "GetResult waitTime:" << waitTime;
     ASSERT_TRUE(waitTime >= maxWaitTime);
@@ -83,11 +79,13 @@ HWTEST_F(PatternDetachCallbackTest, GetResult02, Function | SmallTest | Level2)
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
         patternDetachCallback_->OnPatternDetach(0);
     });
-    auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    auto startTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     patternDetachCallback_->GetResult(maxWaitTime);
-    auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    auto endTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     auto waitTime = endTime - startTime;
     GTEST_LOG_(INFO) << "GetResultAndOnPatternDetach waitTime:" << waitTime;
     ASSERT_TRUE(waitTime >= sleepTime && waitTime < maxWaitTime);
@@ -106,11 +104,13 @@ HWTEST_F(PatternDetachCallbackTest, GetResult03, Function | SmallTest | Level2)
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
         patternDetachCallback_->OnPatternDetach(0);
     });
-    auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    auto startTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     patternDetachCallback_->GetResult(maxWaitTime);
-    auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
+    auto endTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
     auto waitTime = endTime - startTime;
     GTEST_LOG_(INFO) << "GetResultAndOnPatternDetach waitTime:" << waitTime;
     ASSERT_TRUE(waitTime >= maxWaitTime && waitTime < sleepTime);
@@ -136,12 +136,12 @@ HWTEST_F(PatternDetachCallbackTest, OnRemoteRequest01, Function | SmallTest | Le
     MessageOption option;
     data.WriteInterfaceToken(u"error.GetDescriptor");
 
-    uint32_t code = static_cast<uint32_t>(
-        IPatternDetachCallback::PatternDetachCallbackMessage::TRANS_ID_PATTERN_ON_DETACH);
+    uint32_t code =
+        static_cast<uint32_t>(IPatternDetachCallback::PatternDetachCallbackMessage::TRANS_ID_PATTERN_ON_DETACH);
     int res = patternDetachCallback_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_TRANSACTION_FAILED);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

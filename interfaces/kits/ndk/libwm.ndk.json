@@ -6,5 +6,21 @@
     {
         "first_instroduced":"12",
         "name":"OH_NativeWindowManager_UnregisterKeyEventFilter"
+    },
+    {
+        "first_instroduced":"15",
+        "name":"OH_NativeWindowManager_RegisterMouseEventFilter"
+    },
+    {
+        "first_instroduced":"15",
+        "name":"OH_NativeWindowManager_UnregisterMouseEventFilter"
+    },
+    {
+        "first_instroduced":"15",
+        "name":"OH_NativeWindowManager_RegisterTouchEventFilter"
+    },
+    {
+        "first_instroduced":"15",
+        "name":"OH_NativeWindowManager_UnregisterTouchEventFilter"
     }
 ]

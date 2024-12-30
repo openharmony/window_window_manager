@@ -31,20 +31,15 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
-void WindowEffectTest::SetUpTestCase()
-{
-}
+void WindowEffectTest::SetUpTestCase() {}
 
-void WindowEffectTest::TearDownTestCase()
-{
-}
+void WindowEffectTest::TearDownTestCase() {}
 
-void WindowEffectTest::SetUp()
-{
-}
+void WindowEffectTest::SetUp() {}
 
 void WindowEffectTest::TearDown()
 {
@@ -241,6 +236,6 @@ HWTEST_F(WindowEffectTest, WindowEffect07, Function | SmallTest | Level2)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
