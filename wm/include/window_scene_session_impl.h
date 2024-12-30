@@ -38,6 +38,7 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WmErrorCode StartMoveWindow() override;
+    WmErrorCode StopMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
 

@@ -129,6 +129,8 @@ using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
+using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
+using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -197,6 +199,14 @@ public:
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+
+    /*
+     * Window Input Event
+     */
+    void RegisterWatchGestureConsumeResultCallback(NotifyWatchGestureConsumeResultFunc&& func);
+    WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override;
+    void RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func);
+    WMError NotifyWatchFocusActiveChange(bool isActive) override;
 
     /*
      * Window Rotate Animation
@@ -298,6 +308,7 @@ public:
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -809,6 +820,12 @@ private:
      */
     void UpdateGestureBackEnabled(int32_t persistentId);
     std::unordered_set<int32_t> gestureBackEnableWindowIdSet_; // ONLY Accessed on OS_sceneSession thread
+
+    /*
+     * Window Input Event
+     */
+    NotifyWatchGestureConsumeResultFunc onWatchGestureConsumeResultFunc_;
+    NotifyWatchFocusActiveChangeFunc onWatchFocusActiveChangeFunc_;
 
     sptr<RootSceneSession> rootSceneSession_;
     std::weak_ptr<AbilityRuntime::Context> rootSceneContextWeak_;

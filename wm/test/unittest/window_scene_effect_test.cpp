@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "mock_session.h"
-#include "window_scene_session_impl.h"
 #include "mock_uicontent.h"
+#include "window_scene_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,21 +32,13 @@ public:
     void TearDown() override;
 };
 
-void WindowSceneEffectTest::SetUpTestCase()
-{
-}
+void WindowSceneEffectTest::SetUpTestCase() {}
 
-void WindowSceneEffectTest::TearDownTestCase()
-{
-}
+void WindowSceneEffectTest::TearDownTestCase() {}
 
-void WindowSceneEffectTest::SetUp()
-{
-}
+void WindowSceneEffectTest::SetUp() {}
 
-void WindowSceneEffectTest::TearDown()
-{
-}
+void WindowSceneEffectTest::TearDown() {}
 
 class WindowEffectTestUtils {
 public:
@@ -208,6 +200,6 @@ HWTEST_F(WindowSceneEffectTest, WindowEffect07, Function | MediumTest | Level3)
     ASSERT_EQ(WMError::WM_OK, window->Destroy(true));
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

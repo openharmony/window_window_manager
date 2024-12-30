@@ -125,6 +125,9 @@ public:
         TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE,
         TRANS_ID_SET_APP_DRAG_RESIZE_TYPE,
         TRANS_ID_GET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
+        TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
+        TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -170,6 +173,29 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief notify watch gesture event consumption results
+     *
+     * This function provides the ability for notifying watch gesture event consumption results
+     *
+     * @param keycode keyEvent codes
+     * @param isConsumed consume result
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
+    WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override { return WMError::WM_OK; }
+
+    /**
+     * @brief notify watch focus active change
+     *
+     * This function provides the ability for notifying watch focus active change
+     *
+     * @param isActive focus status
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
+    WMError NotifyWatchFocusActiveChange(bool isActive) override { return WMError::WM_OK; }
 
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
@@ -327,6 +353,8 @@ public:
         DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
+        int32_t targetPersistentId) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

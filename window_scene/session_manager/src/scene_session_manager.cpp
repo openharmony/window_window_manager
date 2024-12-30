@@ -3574,6 +3574,42 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
     outsideDownEventFunc_ = func;
 }
 
+WMError SceneSessionManager::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    if (onWatchGestureConsumeResultFunc_) {
+        onWatchGestureConsumeResultFunc_(keyCode, isConsumed);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "onWatchGestureConsumeResultFunc is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterWatchGestureConsumeResultCallback(NotifyWatchGestureConsumeResultFunc&& func)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    onWatchGestureConsumeResultFunc_ = std::move(func);
+}
+
+WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
+    if (onWatchFocusActiveChangeFunc_) {
+        onWatchFocusActiveChangeFunc_(isActive);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "onWatchFocusActiveChangeFunc is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    onWatchFocusActiveChangeFunc_ = std::move(func);  
+}
+
 void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)
 {
     for (auto iter = remoteObjectMap_.begin(); iter != remoteObjectMap_.end(); ++iter) {
@@ -8278,8 +8314,13 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     if (windowVisibilityListenerSessionSet_.find(windowId) != windowVisibilityListenerSessionSet_.end()) {
         session->NotifyWindowVisibility();
     }
-    windowVisibilityInfos.emplace_back(sptr<WindowVisibilityInfo>::MakeSptr(
-        windowId, session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType()));
+    auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(
+        windowId, session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType());
+    windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
+    windowVisibilityInfo->SetBundleName(session->GetSessionInfo().bundleName_);
+    windowVisibilityInfo->SetAbilityName(session->GetSessionInfo().abilityName_);
+    windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+    windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 
     visibilityInfo +=
         "[" + session->GetWindowName() + ", " + std::to_string(windowId) + ", " + std::to_string(visibleState) + "], ";
@@ -8649,9 +8690,14 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
         sceneSession->SetRSVisible(false);
         sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
         sceneSession->ClearExtWindowFlags();
-        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(sceneSession->GetWindowId(),
+        auto windowVisibilityInfo = new WindowVisibilityInfo(sceneSession->GetWindowId(),
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
-            WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType()));
+            WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType());
+        windowVisibilityInfo->SetAppIndex(sceneSession->GetSessionInfo().appIndex_);
+        windowVisibilityInfo->SetBundleName(sceneSession->GetSessionInfo().bundleName_);
+        windowVisibilityInfo->SetAbilityName(sceneSession->GetSessionInfo().abilityName_);
+        windowVisibilityInfo->SetIsSystem(sceneSession->GetSessionInfo().isSystem_);
+        windowVisibilityInfos.emplace_back(windowVisibilityInfo);
 #ifdef MEMMGR_WINDOW_ENABLE
         memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(sceneSession->GetWindowId(),
             sceneSession->GetCallingPid(), sceneSession->GetCallingUid(), false));
@@ -10504,10 +10550,13 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                          static_cast<uint32_t>(hostRect.width_), static_cast<uint32_t>(hostRect.height_)};
             auto windowStatus = GetWindowStatus(session->GetWindowMode(), session->GetSessionState(),
                                                 session->GetSessionProperty());
-            infos.emplace_back(sptr<WindowVisibilityInfo>::MakeSptr(session->GetWindowId(), session->GetCallingPid(),
+            auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(session->GetWindowId(), session->GetCallingPid(),
                 session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType(), windowStatus, rect,
                 session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_,
-                session->IsFocused()));
+                session->IsFocused());
+            windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
+            windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
+            infos.emplace_back(windowVisibilityInfo);
         }
         return WMError::WM_OK;
     };
@@ -12296,5 +12345,50 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
         }
     }, __func__);
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d",
+        sourcePersistentId, targetPersistentId);
+    if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (sourcePersistentId == targetPersistentId) {
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
+    if (sourceSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (!WindowHelper::IsAppWindow(sourceSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is not app window", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    sptr<SceneSession> targetSession = GetSceneSession(targetPersistentId);
+    if (targetSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is nullptr", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (!WindowHelper::IsAppWindow(targetSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not app window", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
+        TLOGE(WmsLogTag::WMS_PC, "verify bundle failed, source name is %{public}s but target name is %{public}s)",
+            sourceSession->GetSessionInfo().bundleName_.c_str(), targetSession->GetSessionInfo().bundleName_.c_str());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!SessionPermission::IsSameBundleNameAsCalling(targetSession->GetSessionInfo().bundleName_)) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not same bundle as calling", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    return taskScheduler_->PostSyncTask([sourcePersistentId, targetPersistentId] {
+        int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId, true);
+        TLOGND(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
+            sourcePersistentId, targetPersistentId, ret);
+        return WMError::WM_OK;
+    }, __func__);
 }
 } // namespace OHOS::Rosen
