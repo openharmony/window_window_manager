@@ -10535,7 +10535,7 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
 {
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (auto&[_, session] : sceneSessionMap_) {
+        for (auto& [_, session] : sceneSessionMap_) {
             if (session == nullptr) {
                 continue;
             }
