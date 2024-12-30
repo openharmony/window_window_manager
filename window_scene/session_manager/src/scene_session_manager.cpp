@@ -2769,6 +2769,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
+    if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
+        shouldBlock = false;
+    }
     if (shouldBlock) {
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
@@ -10825,6 +10829,10 @@ void SceneSessionManager::UpdateSpecialExtWindowFlags(int32_t persistentId, Exte
 
 void SceneSessionManager::HideNonSecureFloatingWindows()
 {
+    if (systemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't hide");
+        return;
+    }
     bool shouldHide = false;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
