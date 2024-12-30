@@ -805,7 +805,8 @@ struct TitleButtonRect {
 struct WindowLayoutInfo : public Parcelable {
     static inline constexpr Rect EMPTY_RECT = { 0, 0, 0, 0 };
     Rect rect = EMPTY_RECT;
-    virtual bool Marshalling(Parcel& parcel) const override
+
+    bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
                parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
