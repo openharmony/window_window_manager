@@ -1048,7 +1048,7 @@ napi_value JsExtensionWindow::OnOccupyEvents(napi_env env, napi_callback_info in
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     
-    size_t argc = 4;
+    size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
