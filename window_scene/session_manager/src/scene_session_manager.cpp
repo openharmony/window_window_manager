@@ -2769,7 +2769,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
-    if (systemConfig_.IsPcWindow && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+    if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
         TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
         shouldBlock = false;
     }
