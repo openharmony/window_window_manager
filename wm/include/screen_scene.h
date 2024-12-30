@@ -56,6 +56,9 @@ public:
     DisplayId GetDisplayId() const override;
     void SetDisplayId(DisplayId displayId);
 
+    bool IsSystemWindow() const override;
+    bool IsAppWindow() const override;
+
     WindowState GetWindowState() const override
     {
         return WindowState::STATE_SHOWN;

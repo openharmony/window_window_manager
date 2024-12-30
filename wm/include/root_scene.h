@@ -67,6 +67,8 @@ public:
     void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
+    bool IsSystemWindow() const override;
+    bool IsAppWindow() const override;
 
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
 
