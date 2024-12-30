@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-#include "window_session_impl.h"
-
 #include <gtest/gtest.h>
-
 #include "ability_context_impl.h"
 #include "display_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
-#include "wm_common.h"
 #include "scene_board_judgement.h"
+#include "window_session_impl.h"
+#include "wm_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,17 +38,11 @@ public:
     sptr<WindowSessionImpl> window_;
 };
 
-void WindowSessionImplTest3::SetUpTestCase()
-{
-}
+void WindowSessionImplTest3::SetUpTestCase() {}
 
-void WindowSessionImplTest3::TearDownTestCase()
-{
-}
+void WindowSessionImplTest3::TearDownTestCase() {}
 
-void WindowSessionImplTest3::SetUp()
-{
-}
+void WindowSessionImplTest3::SetUp() {}
 
 void WindowSessionImplTest3::TearDown()
 {
@@ -71,7 +63,7 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
     if (window == nullptr) {
         return nullptr;
     }
-    SessionInfo sessionInfo = {name, name, name};
+    SessionInfo sessionInfo = { name, name, name };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     if (session == nullptr) {
         return nullptr;
@@ -563,7 +555,8 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, Function | SmallTes
     GTEST_LOG_(INFO) << "WindowSessionImplTest: CopyUniqueDensityParameter start";
     window_ = GetTestWindowImpl("CopyUniqueDensityParameter");
     ASSERT_NE(window_, nullptr);
-    sptr<WindowSessionImpl> parentWindow = GetTestWindowImpl("CopyUniqueDensityParameter01");;
+    sptr<WindowSessionImpl> parentWindow = GetTestWindowImpl("CopyUniqueDensityParameter01");
+    ;
     ASSERT_NE(parentWindow, nullptr);
     window_->useUniqueDensity_ = false;
     window_->virtualPixelRatio_ = 1.0f;
@@ -656,7 +649,7 @@ HWTEST_F(WindowSessionImplTest3, UpdateFrameLayoutCallbackIfNeeded, Function | S
     window_->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
     ASSERT_EQ(window_->enableFrameLayoutFinishCb_, true);
-    
+
     window_->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window_->UpdateFrameLayoutCallbackIfNeeded(wmReason);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFrameLayoutCallbackIfNeeded end";
@@ -885,7 +878,7 @@ HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption, Function | SmallTest | Leve
     option->SetWindowName("SetAvoidAreaOption");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
@@ -905,7 +898,7 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
     option->SetWindowName("GetAvoidAreaOption");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
 
     window->hostSession_ = session;
@@ -914,6 +907,164 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
     WMError res = window->GetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(res, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetWatchGestureConsumed
+ * @tc.desc: SetWatchGestureConsumed test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest | Level2)
+{
+    bool isWatchGestureConsumed = false;
+    ASSERT_NE(window_, nullptr);
+    window_->SetWatchGestureConsumed(isWatchGestureConsumed);
+    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
 }
+
+/**
+ * @tc.name: NotifyConsumeResultToFloatWindow
+ * @tc.desc: NotifyConsumeResultToFloatWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | SmallTest | Level2)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    ASSERT_NE(window_, nullptr);
+    window_->SetWatchGestureConsumed(false);
+    bool isConsumed = false;
+    window_->NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
+    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
+}
+
+/*
+ * @tc.name: IsSystemWindow
+ * @tc.desc: IsSystemWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsSystemWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
+    bool res = window->IsSystemWindow();
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: IsAppWindow
+ * @tc.desc: IsAppWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsAppWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    bool res = window->IsAppWindow();
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: SetMouseEventFilter
+ * @tc.desc: SetMouseEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetMouseEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetMouseEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    MouseEventFilterFunc filter = [](OHOS::MMI::PointerEvent& event) { return true; };
+    WMError res = window->SetMouseEventFilter(filter);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ClearMouseEventFilter
+ * @tc.desc: ClearMouseEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, ClearMouseEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ClearMouseEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    WMError res = window->ClearMouseEventFilter();
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetTouchEventFilter
+ * @tc.desc: SetTouchEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetTouchEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SetTouchEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    TouchEventFilterFunc filter = [](OHOS::MMI::PointerEvent& event) { return true; };
+    WMError res = window->SetTouchEventFilter(filter);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: ClearTouchEventFilter
+ * @tc.desc: ClearTouchEventFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("ClearTouchEventFilter");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    WMError res = window->ClearTouchEventFilter();
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

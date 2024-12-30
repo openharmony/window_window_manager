@@ -140,12 +140,16 @@ public:
     virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds);
     virtual WMError ReleaseForegroundSessionScreenLock();
+    virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
+    virtual WMError NotifyWatchFocusActiveChange(bool isActive);
+
     /*
      * PC Window
      */
     virtual WMError IsPcWindow(bool& isPcWindow);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t deviceId);
 
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);

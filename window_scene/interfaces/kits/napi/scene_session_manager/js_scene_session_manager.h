@@ -42,7 +42,9 @@ enum class ListenerFunctionType : uint32_t {
     CLOSE_TARGET_FLOAT_WINDOW_CB,
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
     START_PIP_FAILED_CB,
-    NOTIFY_APP_USE_CONTROL_LIST_CB
+    NOTIFY_APP_USE_CONTROL_LIST_CB,
+    WATCH_GESTURE_CONSUME_RESULT_CB,
+    WATCH_FOCUS_ACTIVE_CHANGE_CB
 };
 
 class JsSceneSessionManager final {
@@ -252,6 +254,14 @@ private:
      */
     void OnStartPiPFailed();
     void ProcessStartPiPFailedRegister();
+
+    /*
+     * Window Input Event
+     */
+    void RegisterWatchGestureConsumeResultCallback();
+    void OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
+    void RegisterWatchFocusActiveChangeCallback();
+    void OnWatchFocusActiveChange(bool isActive);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

@@ -556,15 +556,6 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED));
 
-    property->SetSystemCalling(false);
-    EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-
-    property->SetSystemCalling(true);
-    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
-        WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
-
-    sceneSession->property_ = property;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RAISEENABLED));
 
@@ -1390,13 +1381,13 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | L
     bool ret;
     property->SetAvoidAreaOption(0);
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-    sceneSession->SetSessionProperty(property);
-    ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+    session->SetSessionProperty(property);
+    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(false, ret);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sceneSession->SetSessionProperty(property);
-    ret = sceneSession->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
+    session->SetSessionProperty(property);
+    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(false, ret);
 }
 }

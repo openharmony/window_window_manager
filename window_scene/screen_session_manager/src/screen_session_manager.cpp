@@ -5521,6 +5521,16 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
     return foldScreenController_->GetFoldStatus();
 }
 
+SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
+{
+    DmsXcollie dmsXcollie("DMS:GetSuperFoldStatus", XCOLLIE_TIMEOUT_10S);
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return SuperFoldStatus::UNKNOWN;
+    }
+    SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+    return status;
+}
+
 bool ScreenSessionManager::GetTentMode()
 {
     if (!g_foldScreenFlag) {

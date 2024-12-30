@@ -197,6 +197,12 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetAppDragResizeType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_APP_DRAG_RESIZE_TYPE):
             return HandleGetAppDragResizeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_GESTURE_CONSUME_RESULT):
+            return HandleWatchGestureConsumeResult(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE):
+            return HandleWatchFocusActiveChange(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
+            return HandleShiftAppWindowPointerEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1065,6 +1071,41 @@ int SceneSessionManagerStub::HandleGetParentMainWindowId(MessageParcel& data, Me
     return ERR_NONE;
 }
 
+int SceneSessionManagerStub::HandleWatchGestureConsumeResult(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t keyCode = 0;
+    if (!data.ReadInt32(keyCode)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "read keyCode failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isConsumed = false;
+    if (!data.ReadBool(isConsumed)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "read isConsumed failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    WMError ret = NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleWatchFocusActiveChange(MessageParcel& data, MessageParcel& reply)
+{
+    bool isActive = false;
+    if (!data.ReadBool(isActive)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isActive failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
+    WMError ret = NotifyWatchFocusActiveChange(isActive);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SceneSessionManagerStub::HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Handled!");
@@ -1601,6 +1642,23 @@ int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t sourcePersistentId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(sourcePersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "read sourcePersistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t targetPersistentId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(targetPersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "read targetPersistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "root_scene.h"
 #include <event_handler.h>
+#include <gtest/gtest.h>
 #include <input_manager.h>
 #include <ui_content.h>
 #include <viewport_config.h>
+#include "root_scene.h"
 
 #include "app_mgr_client.h"
 #include "singleton.h"
@@ -41,21 +41,16 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void RootSceneTest::SetUpTestCase()
-{
-}
+void RootSceneTest::SetUpTestCase() {}
 
-void RootSceneTest::TearDownTestCase()
-{
-}
+void RootSceneTest::TearDownTestCase() {}
 
-void RootSceneTest::SetUp()
-{
-}
+void RootSceneTest::SetUp() {}
 
 void RootSceneTest::TearDown()
 {
@@ -189,7 +184,7 @@ HWTEST_F(RootSceneTest, FlushFrameRate, Function | SmallTest | Level3)
 HWTEST_F(RootSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Level3)
 {
     RootScene rootScene;
-    
+
     rootScene.SetFrameLayoutFinishCallback(nullptr);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
@@ -383,6 +378,6 @@ HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, Function | SmallTest | Le
     RootScene::staticRootScene_ = prevStaticRootScene;
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

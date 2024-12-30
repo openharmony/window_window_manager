@@ -1009,6 +1009,14 @@ WMError WindowAdapter::IsWindowRectAutoSave(const std::string& key, bool& enable
     return wmsProxy->IsWindowRectAutoSave(key, enabled);
 }
 
+WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+}
+
 WMError WindowAdapter::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
     std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap)
 {
@@ -1048,6 +1056,22 @@ WMError WindowAdapter::GetAppDragResizeType(const std::string& bundleName, DragR
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError WindowAdapter::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+}
+
+WMError WindowAdapter::NotifyWatchFocusActiveChange(bool isActive)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->NotifyWatchFocusActiveChange(isActive);
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -69,6 +69,8 @@ const std::string CLOSE_TARGET_FLOAT_WINDOW_CB = "closeTargetFloatWindow";
 const std::string ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB = "abilityManagerCollaboratorRegistered";
 const std::string START_PIP_FAILED_CB = "startPiPFailed";
 const std::string NOTIFY_APP_USE_CONTROL_LIST_CB = "updateAppUseControl";
+const std::string WATCH_GESTURE_CONSUME_RESULT_CB = "watchGestureConsumeResult";
+const std::string WATCH_FOCUS_ACTIVE_CHANGE_CB = "watchFocusActiveChange";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -85,6 +87,8 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB, ListenerFunctionType::ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB},
     {START_PIP_FAILED_CB,          ListenerFunctionType::START_PIP_FAILED_CB},
     {NOTIFY_APP_USE_CONTROL_LIST_CB, ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB},
+    {WATCH_GESTURE_CONSUME_RESULT_CB,          ListenerFunctionType::WATCH_GESTURE_CONSUME_RESULT_CB},
+    {WATCH_FOCUS_ACTIVE_CHANGE_CB,             ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB},
 };
 } // namespace
 
@@ -1316,6 +1320,12 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB:
             RegisterNotifyAppUseControlListCallback();
+            break;
+        case ListenerFunctionType::WATCH_GESTURE_CONSUME_RESULT_CB:
+            RegisterWatchGestureConsumeResultCallback();
+            break;
+        case ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB:
+            RegisterWatchFocusActiveChangeCallback();
             break;
         default:
             break;
@@ -3904,6 +3914,66 @@ void JsSceneSessionManager::OnNotifyAppUseControlList(
         napi_value userIdValue = CreateJsValue(env, userId);
         napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
         napi_value argv[] = { typeValue, userIdValue, controlListValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSessionManager::RegisterWatchGestureConsumeResultCallback()
+{
+    SceneSessionManager::GetInstance().RegisterWatchGestureConsumeResultCallback(
+        [this](int32_t keyCode, bool isConsumed) {
+            TLOGND(WmsLogTag::WMS_EVENT, "RegisterWatchGestureConsumeResultCallback called");
+            this->OnWatchGestureConsumeResult(keyCode, isConsumed);
+        });
+}
+
+void JsSceneSessionManager::OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    taskScheduler_->PostMainThreadTask([this, keyCode, isConsumed,
+        jsCallBack = GetJSCallback(WATCH_GESTURE_CONSUME_RESULT_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_set_named_property(env, objValue, "keyCode", CreateJsValue(env, keyCode));
+        napi_set_named_property(env, objValue, "isConsumed", CreateJsValue(env, isConsumed));
+        napi_value argv[] = { objValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSessionManager::RegisterWatchFocusActiveChangeCallback()
+{
+    SceneSessionManager::GetInstance().RegisterWatchFocusActiveChangeCallback([this](bool isActive) {
+        TLOGND(WmsLogTag::WMS_EVENT, "RegisterWatchFocusActiveChangeCallback called");
+        this->OnWatchFocusActiveChange(isActive);
+    });
+}
+
+void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    taskScheduler_->PostMainThreadTask([this, isActive,
+        jsCallBack = GetJSCallback(WATCH_FOCUS_ACTIVE_CHANGE_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_set_named_property(env, objValue, "isActive", CreateJsValue(env, isActive));
+        napi_value argv[] = { objValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }
