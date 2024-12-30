@@ -2044,8 +2044,10 @@ HWTEST_F(WindowSessionImplTest, GetWindowStatusInner, Function | SmallTest | Lev
     window->SetTargetAPIVersion(12);
     EXPECT_EQ(WindowStatus::WINDOW_STATUS_FULLSCREEN, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_FULLSCREEN));
 
-    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
-    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN,
+    window->GetWindowStatusInner(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN,
+    window->GetWindowStatusInner(WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
 
     window->property_->maximizeMode_ = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
     EXPECT_EQ(WindowStatus::WINDOW_STATUS_MAXIMIZE, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_FLOATING));

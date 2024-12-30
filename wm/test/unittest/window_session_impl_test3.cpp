@@ -959,6 +959,36 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetWatchGestureConsumed
+ * @tc.desc: SetWatchGestureConsumed test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest | Level2)
+{
+    bool isWatchGestureConsumed = false;
+    ASSERT_NE(window_, nullptr);
+    window_->SetWatchGestureConsumed(isWatchGestureConsumed);
+    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
+}
+
+/**
+ * @tc.name: NotifyConsumeResultToFloatWindow
+ * @tc.desc: NotifyConsumeResultToFloatWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | SmallTest | Level2)
+{
+    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
+    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
+    ASSERT_NE(window_, nullptr);
+    window_->SetWatchGestureConsumed(false);
+    bool isConsumed = false;
+    window_->NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
+    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
+}
+
+/**
  * @tc.name: IsSystemWindow
  * @tc.desc: IsSystemWindow
  * @tc.type: FUNC
