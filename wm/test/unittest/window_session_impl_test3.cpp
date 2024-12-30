@@ -180,7 +180,7 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, Function | SmallTest | Lev
 HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
-    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
+    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig01");
     ASSERT_NE(window_, nullptr);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
