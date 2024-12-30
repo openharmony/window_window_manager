@@ -10556,8 +10556,8 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             filtedSessions.emplace_back(session);
         }
     }
-    std::sort(filtedSessions.begin(), filtedSessions.end(), [](const sptr<SceneSession>& lhs,
-        const sptr<SceneSession>& rhs) { return lhs->GetZOrder() > rhs->GetZOrder(); });
+    std::sort(filtedSessions.begin(), filtedSessions.end(),
+        [](const sptr<SceneSession>& ls, const sptr<SceneSession>& rs) { return ls->GetZOrder() > rs->GetZOrder(); });
 }
 
 int32_t SceneSessionManager::GetLowerScreenPosY() const
