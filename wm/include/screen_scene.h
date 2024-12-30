@@ -58,8 +58,8 @@ public:
     DisplayId GetDisplayId() const override;
     void SetDisplayId(DisplayId displayId);
 
-    bool IsSystemWindow() const override { WindowHelper::IsSystemWindow(GetType()); };
-    bool IsAppWindow() const override { WindowHelper::IsAppWindow(GetType()); };
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); };
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); };
 
     WindowState GetWindowState() const override
     {
