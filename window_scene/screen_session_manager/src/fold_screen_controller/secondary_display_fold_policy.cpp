@@ -179,6 +179,7 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
             lastStatus_ = currentFoldStatus_;
             return;
         }
+        lastStatus_ = currentFoldStatus_;
     }
     SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND,
         displayMode);
