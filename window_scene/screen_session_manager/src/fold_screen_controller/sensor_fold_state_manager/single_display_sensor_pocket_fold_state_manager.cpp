@@ -66,6 +66,7 @@ SingleDisplaySensorPocketFoldStateManager::~SingleDisplaySensorPocketFoldStateMa
 void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    currentAngle = angle;
     SetCameraFoldStrategy(angle);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
@@ -83,6 +84,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    currentHall = hall;
     TLOGI(WmsLogTag::DMS, "isInCameraFoldStrategy_:%{public}d", isInCameraFoldStrategy_);
     SetCameraFoldStrategy(angle);
     if (isInCameraFoldStrategy_) {
@@ -259,9 +261,11 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
 
     if (isTent) {
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_ENTER_TENT_MODE);
-        foldScreenPolicy->SetFoldStatus(FoldStatus::FOLDED);
+        HandleSensorChange(FoldStatus::FOLDED, currentAngle, foldScreenPolicy);
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
     } else {
+        FoldStatus nextState = GetNextFoldState(currentAngle, currentHall);
+        HandleSensorChange(nextState, currentAngle, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();
     }
