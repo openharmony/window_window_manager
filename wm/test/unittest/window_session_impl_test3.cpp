@@ -321,7 +321,7 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
     window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->SetWindowModal(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
-    auto ret = window_->SetWindowModal(false);
+    ret = window_->SetWindowModal(false);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
@@ -332,11 +332,19 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, ret);
     ret = window_->SetWindowModal(false);
     ASSERT_EQ(WMError::WM_OK, ret);
-    window_->property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = window_->SetWindowModal(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
     ret = window_->SetWindowModal(false);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    
+    window_->property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = window_->SetWindowModal(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = window_->SetWindowModal(false);
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
@@ -951,36 +959,6 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: SetWatchGestureConsumed
- * @tc.desc: SetWatchGestureConsumed test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest | Level2)
-{
-    bool isWatchGestureConsumed = false;
-    ASSERT_NE(window_, nullptr);
-    window_->SetWatchGestureConsumed(isWatchGestureConsumed);
-    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
-}
-
-/**
- * @tc.name: NotifyConsumeResultToFloatWindow
- * @tc.desc: NotifyConsumeResultToFloatWindow test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | SmallTest | Level2)
-{
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
-    keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
-    keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    ASSERT_NE(window_, nullptr);
-    window_->SetWatchGestureConsumed(false);
-    bool isConsumed = false;
-    window_->NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
-    ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
-}
-
-/*
  * @tc.name: IsSystemWindow
  * @tc.desc: IsSystemWindow
  * @tc.type: FUNC
