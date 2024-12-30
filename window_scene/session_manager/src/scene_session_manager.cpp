@@ -10541,9 +10541,9 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
             if (session == nullptr) {
                 continue;
             }
-            bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
+            constexpr bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow(session) &&
                 session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-            bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
+            constexpr bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
                 IsOnVirtualDisplay(session) && session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
             if (isNotVirtualDisplayNeed || isNotDefaultDisplayNeed || !IsWindowLayoutInfoNeeded(session) ||
                 session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
@@ -10567,7 +10567,7 @@ bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& ses
     std::regex pattern("^(.*?)(\\d+)$");
     std::smatch matches;
     name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
-    return session->GetSessionInfo().isSystem_ || layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
+    return !session->GetSessionInfo().isSystem_ || layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
 }
 
 bool SceneSessionManager::IsOnVirtualDisplay(const sptr<SceneSession>& session)
