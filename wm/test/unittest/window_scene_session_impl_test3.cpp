@@ -514,7 +514,6 @@ HWTEST_F(WindowSceneSessionImplTest3, SetDefaultProperty, Function | SmallTest |
     EXPECT_EQ(WSError::WS_OK, ret);
 }
 
-
 /**
  * @tc.name: SetCallingWindow
  * @tc.desc: SetCallingWindow
@@ -1366,7 +1365,6 @@ HWTEST_F(WindowSceneSessionImplTest3, IsStartMoving01, Function | SmallTest | Le
     bool isMoving = windowSceneSessionImpl->IsStartMoving();
     EXPECT_EQ(false, isMoving);
 }
-
 
 /**
  * @tc.name: DisableAppWindowDecor
