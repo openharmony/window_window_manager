@@ -21,18 +21,18 @@
 namespace OHOS {
 namespace Rosen {
 class MockDataHandler : public IDataHandler {
-    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data,
+    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend,
         AAFwk::Want& reply) override
     {
         return DataHandlerErr::OK;
     }
    
-    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) override
+    DataHandlerErr SendDataSync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override
     {
         return DataHandlerErr::OK;
     }
 
-    DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, AAFwk::Want& data) override
+    DataHandlerErr SendDataAsync(SubSystemId subSystemId, uint32_t customId, const AAFwk::Want& toSend) override
     {
         return DataHandlerErr::OK;
     }
