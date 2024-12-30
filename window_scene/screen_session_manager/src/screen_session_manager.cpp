@@ -702,7 +702,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     NotifyScreenModeChange();
 }
 
-void ScreenSessionManager::NotifyScreenModeChange()
+void ScreenSessionManager::NotifyScreenModeChange(ScreenId disconnectedScreenId)
 {
     auto task = [=] {
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
@@ -712,6 +712,9 @@ void ScreenSessionManager::NotifyScreenModeChange()
         std::vector<sptr<ScreenInfo>> screenInfos;
         std::vector<ScreenId> screenIds = GetAllScreenIds();
         for (auto screenId : screenIds) {
+            if (disconnectedScreenId == screenId) {
+                continue;
+            }
             auto screenSession = GetScreenSession(screenId);
             screenInfos.emplace_back(screenSession->ConvertToScreenInfo());
         }
@@ -5050,7 +5053,7 @@ void ScreenSessionManager::OnScreenDisconnect(ScreenId screenId)
     for (auto& agent : agents) {
         agent->OnScreenDisconnect(screenId);
     }
-    NotifyScreenModeChange();
+    NotifyScreenModeChange(screenId);
 }
 
 void ScreenSessionManager::OnScreenshot(sptr<ScreenshotInfo> info)
