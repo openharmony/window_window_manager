@@ -10515,9 +10515,8 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
         std::vector<sptr<SceneSession>> filtedSessions;
         FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filtedSessions);
         for (auto& session : filtedSessions) {
-            Rect globalRect;
-            session->GetGlobalScaledRect(globalRect);
-            WSRect hostRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
+            Rect hostRect;
+            session->GetGlobalScaledRect(hostRect);
             if (isVirtualDisplay) {
                 TransGlobalRectToVirtualDisplayRect(hostRect);
             }
@@ -10531,13 +10530,12 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId inputDisplayId,
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
-WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
     std::vector<sptr<SceneSession>>& filtedSessions)
 {
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (auto& iter : sceneSessionMap_) {
-            auto session = iter.second;
+        for (auto&[_, session] : sceneSessionMap_) {
             if (session == nullptr) {
                 continue;
             }
@@ -10556,15 +10554,16 @@ WMError SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId
     WindowLayoutInfoCmpFunc cmp = [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs) {
         return lhs->GetZOrder() > rhs->GetZOrder();
     };
-    std::sort(filtedSessions.begin(), filtedSessions.end(), cmp);
-    return WMError::WM_OK;
+    std::sort(filtedSessions.begin(), filtedSessions.end(),
+        [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs)
+            { return lhs->GetZOrder() > rhs->GetZOrder(); });
 }
 
 bool SceneSessionManager::IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session)
 {
     constexpr int32_t GROUP_ONE = 1;
     std::string name = session->GetWindowName();
-    std::regex pattern("^(.*?)(\\d+)$");
+    std::regex pattern("^(.*?)(\\d*)$");    //Remove last digit
     std::smatch matches;
     name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
     return !session->GetSessionInfo().isSystem_ || layoutInfoWhitelist.find(name) != layoutInfoWhitelist.end();
@@ -10594,7 +10593,7 @@ bool SceneSessionManager::IsVirtualDisplayShow(const sptr<SceneSession>& session
            session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= lowerScreenPosY;
 }
 
-WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect& hostRect)
+void SceneSessionManager::TransGlobalRectToVirtualDisplayRect(Rect& hostRect)
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
@@ -10603,7 +10602,6 @@ WMError SceneSessionManager::TransGlobalRectToVirtualDisplayRect(WSRect& hostRec
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
         defaultDisplayRect.height_;
     hostRect.posY_ -= lowerScreenPosY;
-    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
