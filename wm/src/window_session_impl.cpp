@@ -1682,7 +1682,16 @@ bool WindowSessionImpl::IsTopmost() const
 WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
 {
     if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     property_->SetMainWindowTopmost(isTopmost);
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
@@ -1768,13 +1777,13 @@ WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption)
 }
 
 /** @note @window.immersive */
-bool WindowSessionImpl::IsSystemWindow()
+bool WindowSessionImpl::IsSystemWindow() const
 {
     return WindowHelper::IsSystemWindow(GetType());
 }
 
 /** @note @window.immersive */
-bool WindowSessionImpl::IsAppWindow()
+bool WindowSessionImpl::IsAppWindow() const
 {
     return WindowHelper::IsAppWindow(GetType());
 }
@@ -3703,7 +3712,9 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         return;
     }
-
+    if (FilterPointerEvent(pointerEvent)) {
+        return;
+    }
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
             TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
@@ -3734,6 +3745,34 @@ WMError WindowSessionImpl::ClearKeyEventFilter()
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::SetMouseEventFilter(MouseEventFilterFunc filter)
+{
+    std::unique_lock<std::shared_mutex> lock(mouseEventFilterMutex_);
+    mouseEventFilter_ = std::move(filter);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::ClearMouseEventFilter()
+{
+    std::unique_lock<std::shared_mutex> lock(mouseEventFilterMutex_);
+    mouseEventFilter_ = nullptr;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetTouchEventFilter(TouchEventFilterFunc filter)
+{
+    std::unique_lock<std::shared_mutex> lock(touchEventFilterMutex_);
+    touchEventFilter_ = std::move(filter);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::ClearTouchEventFilter()
+{
+    std::unique_lock<std::shared_mutex> lock(touchEventFilterMutex_);
+    touchEventFilter_ = nullptr;
+    return WMError::WM_OK;
+}
+
 bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     std::shared_lock<std::shared_mutex> lock(keyEventFilterMutex_);
@@ -3747,6 +3786,41 @@ bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         }
     }
     return false;
+}
+
+bool WindowSessionImpl::IsAxisEvent(int32_t action)
+{
+    if (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+        action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE &&
+        action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        return false;
+    }
+    return true;
+}
+
+bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto sourceType = pointerEvent->GetSourceType();
+    bool isFilter = false;
+    if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        std::shared_lock<std::shared_mutex> lock(touchEventFilterMutex_);
+        if (touchEventFilter_ == nullptr) {
+            return false;
+        }
+        isFilter = touchEventFilter_(*pointerEvent.get());
+    }
+    if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        !IsAxisEvent(pointerEvent->GetPointerAction())) {
+        std::shared_lock<std::shared_mutex> lock(mouseEventFilterMutex_);
+        if (mouseEventFilter_ == nullptr) {
+            return false;
+        }
+        isFilter = mouseEventFilter_(*pointerEvent.get());
+    }
+    if (isFilter) {
+        pointerEvent->MarkProcessed();
+    }
+    return isFilter;
 }
 
 void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)

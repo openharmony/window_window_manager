@@ -30,13 +30,9 @@ public:
     sptr<WindowImpl> window_;
 };
 
-void WindowImplListenerTest::SetUpTestCase()
-{
-}
+void WindowImplListenerTest::SetUpTestCase() {}
 
-void WindowImplListenerTest::TearDownTestCase()
-{
-}
+void WindowImplListenerTest::TearDownTestCase() {}
 
 void WindowImplListenerTest::SetUp()
 {
@@ -112,6 +108,6 @@ HWTEST_F(WindowImplListenerTest, InterfacesRegisterUnregister, Function | SmallT
     window_->UnregisterDialogTargetTouchListener(dialogTargetTouchListener);
     ASSERT_EQ(window_->dialogTargetTouchListeners_[window_->GetWindowId()].size(), 0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
