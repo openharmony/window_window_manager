@@ -202,7 +202,6 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterAnimationTransitionController01, F
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterAnimationTransitionController(nullptr));
 }
 
-
 /**
  * @tc.name: SetNeedDefaultAnimation01
  * @tc.desc: SetNeedDefaultAnimation
