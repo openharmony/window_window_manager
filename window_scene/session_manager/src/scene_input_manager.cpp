@@ -440,7 +440,8 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.width << "|" << displayInfo.height << "|"
                           << static_cast<int32_t>(displayInfo.direction) << "|"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|"
-                          << static_cast<int32_t>(displayInfo.displayMode) << ",";
+                          << static_cast<int32_t>(displayInfo.displayMode) << "|"
+                          << displayInfo.offsetX << "|" << displayInfo.offsetY << ",";
     }
 
     std::string displayList = displayListStream.str();
