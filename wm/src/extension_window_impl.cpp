@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+
+#include "want.h"
+
 #include "extension_window_impl.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
-#include "want.h"
 
 namespace OHOS {
 namespace Rosen {
