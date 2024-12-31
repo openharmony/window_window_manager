@@ -36,6 +36,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
 #include "window_option.h"
 #include "wm_common.h"
 
@@ -318,10 +319,10 @@ public:
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override;
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override;
-    bool IsSystemWindow() const override;
-    bool IsAppWindow() const override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
 
     /*
      * Window Property
