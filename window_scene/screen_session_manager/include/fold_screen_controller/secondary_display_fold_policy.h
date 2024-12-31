@@ -46,6 +46,7 @@ private:
     void SetStatusMainActiveRectAndTpFeature(ScreenProperty &screenProperty);
     void SetStatusGlobalFullActiveRectAndTpFeature(ScreenProperty &screenProperty);
     void InitScreenParams();
+    FoldStatus lastStatus_ = FoldStatus::UNKNOWN;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
     std::vector<uint32_t> screenParams_;
