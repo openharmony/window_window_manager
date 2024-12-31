@@ -195,8 +195,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
     auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     for (auto& [screenId, screenProperty] : screensProperties) {
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
-        auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
-        auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+        auto screenWidth = screenProperty.GetPhysicalTouchBounds().rect_.GetWidth();
+        auto screenHeight = screenProperty.GetPhysicalTouchBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
         Vector2f scale(screenProperty.GetScaleX(), screenProperty.GetScaleY());
         transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
@@ -215,7 +215,9 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            .ppi = screenProperty.GetXDpi()};
+            .ppi = screenProperty.GetXDpi(),
+            .offsetX = screenProperty.GetInputOffsetX(),
+            .offsetY = screenProperty.GetInputOffsetY()};
         displayInfos.emplace_back(displayInfo);
     }
 }
@@ -438,7 +440,8 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.width << "|" << displayInfo.height << "|"
                           << static_cast<int32_t>(displayInfo.direction) << "|"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|"
-                          << static_cast<int32_t>(displayInfo.displayMode) << ",";
+                          << static_cast<int32_t>(displayInfo.displayMode) << "|"
+                          << displayInfo.offsetX << "|" << displayInfo.offsetY << ",";
     }
 
     std::string displayList = displayListStream.str();
