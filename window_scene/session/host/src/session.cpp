@@ -2990,6 +2990,7 @@ RectAnimationConfig Session::GetRequestRectAnimationConfig() const
     return rectAnimationConfig;
 }
 
+
 WindowType Session::GetWindowType() const
 {
     return GetSessionProperty()->GetWindowType();
