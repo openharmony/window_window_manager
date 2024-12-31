@@ -1623,7 +1623,6 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect3, Function | SmallTest | Level2)
     WSError result = sceneSession->UpdateSessionRect(oldRect, reason, isGlobal);
     ASSERT_EQ(result, WSError::WS_OK);
 
-    sceneSession->SetSessionProperty(property);
     WSRect newRect = sceneSession->GetSessionRect();
     ASSERT_EQ(newRect.posX_, oldRect.posX_ - parentRect.posX_);
     ASSERT_EQ(newRect.posY_, oldRect.posY_ - parentRect.posY_);
