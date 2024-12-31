@@ -174,6 +174,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetWindowIdsByCoordinate(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
             return HandleReleaseForegroundSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
+            return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_DISPLAYID_BY_WINDOWID):
             return HandleGetDisplayIdByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
@@ -1140,6 +1142,21 @@ int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessagePar
 {
     WMError errCode = ReleaseForegroundSessionScreenLock();
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleIsPcWindow(MessageParcel& data, MessageParcel& reply)
+{
+    bool isPcWindow = false;
+    WMError errCode = IsPcWindow(isPcWindow);
+    if (!reply.WriteBool(isPcWindow)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isPcWindow fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

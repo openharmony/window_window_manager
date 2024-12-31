@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_extension_window_register_manager.h"
 #include "singleton_container.h"
 #include "window_manager.h"
@@ -21,6 +22,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
+const std::string WINDOW_RECT_CHANGE_CB = "rectChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
@@ -31,6 +33,7 @@ JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
     // white register list for window
     listenerCodeMap_[CaseType::CASE_WINDOW] = {
         {WINDOW_SIZE_CHANGE_CB, ListenerType::WINDOW_SIZE_CHANGE_CB},
+        {WINDOW_RECT_CHANGE_CB, ListenerType::WINDOW_RECT_CHANGE_CB},
         {AVOID_AREA_CHANGE_CB, ListenerType::AVOID_AREA_CHANGE_CB},
         {WINDOW_EVENT_CB, ListenerType::WINDOW_EVENT_CB},
     };
@@ -59,6 +62,18 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowChangeRegister(sptr<J
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowChangeListener(thisListener));
     }
     return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowRectChangeRegister(
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    return isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRectChangeListener(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(listener));
 }
 
 WmErrorCode JsExtensionWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsExtensionWindowListener> listener,
@@ -207,6 +222,9 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
         switch (listenerCodeMap_[caseType][type]) {
             case ListenerType::WINDOW_SIZE_CHANGE_CB:
                 ret = ProcessWindowChangeRegister(listener, window, isRegister);
+                break;
+            case ListenerType::WINDOW_RECT_CHANGE_CB:
+                ret = ProcessWindowRectChangeRegister(listener, window, isRegister);
                 break;
             case ListenerType::AVOID_AREA_CHANGE_CB:
                 ret = ProcessAvoidAreaChangeRegister(listener, window, isRegister);

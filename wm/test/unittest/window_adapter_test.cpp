@@ -614,6 +614,19 @@ HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | Small
 }
 
 /**
+ * @tc.name: IsPcWindow
+ * @tc.desc: WindowAdapter/IsPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, IsPcWindow, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    bool isPcWindow = false;
+    auto err = windowAdapter.IsPcWindow(isPcWindow);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
+
+/**
  * @tc.name: IsWindowRectAutoSave
  * @tc.desc: WindowAdapter/IsWindowRectAutoSave
  * @tc.type: FUNC

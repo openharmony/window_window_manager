@@ -33,6 +33,7 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     WMError HidePrivacyContentForHost(bool needHide) override;
+    bool IsPcWindow() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     
 private:
