@@ -15,10 +15,10 @@
 
 #include "ui_extension/provider_data_handler.h"
 
-#include <gtest/gtest.h>
+#include <memory>
+
 #include <message_parcel.h>
 #include <want.h>
-#include <memory>
 
 #include "iremote_object_mocker.h"
 #include "session/host/include/zidl/session_proxy.h"
@@ -44,10 +44,9 @@ TEST_F(ProviderDataHandlerTest, ProviderDataHandlerSendData01)
 {
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
-
     // Mock the SendRequest behavior
     EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
-        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
+        .WillOnce(Invoke([](uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) -> int {
             // Verify the message option is sync
             EXPECT_TRUE(option.GetFlags() & MessageOption::TF_SYNC);
 
@@ -64,14 +63,14 @@ TEST_F(ProviderDataHandlerTest, ProviderDataHandlerSendData01)
 
     // Create test data
     std::unique_ptr<ProviderDataHandler> handler = std::make_unique<ProviderDataHandler>();
-    handler->SetRemoteProxyObject(sessionProxy->AsRemoteObject());
+    handler->SetRemoteProxyObject(sessionProxy->AsObject());
 
     AAFwk::Want sendWant;
     sendWant.SetParam("send_key", std::string("send_value"));
     AAFwk::Want reply;
 
     // Test sync send with reply
-    auto result = handler->SendDataSync(SubSystemId::UI_EXTENSION, 1, sendWant, reply);
+    auto result = handler->SendDataSync(SubSystemId::WM_UIEXT, 1, sendWant, reply);
 
     // Verify results
     EXPECT_EQ(result, DataHandlerErr::OK);

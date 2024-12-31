@@ -69,6 +69,7 @@ ohos_static_library("libwm_static") {
     "src/root_scene.cpp",
     "src/screen_scene.cpp",
     "src/static_call.cpp",
+    "src/ui_extension/provider_data_handler.cpp",
     "src/window.cpp",
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
@@ -88,7 +89,6 @@ ohos_static_library("libwm_static") {
     "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
-    "src/ui_extension/provider_data_handler.cpp",
   ]
 
   configs = [
@@ -206,6 +206,7 @@ ohos_shared_library("libwm") {
     "src/root_scene.cpp",
     "src/screen_scene.cpp",
     "src/static_call.cpp",
+    "src/ui_extension/provider_data_handler.cpp",
     "src/window.cpp",
     "src/window_accessibility_controller.cpp",
     "src/window_adapter.cpp",
@@ -225,7 +226,6 @@ ohos_shared_library("libwm") {
     "src/zidl/pattern_detach_callback_stub.cpp",
     "src/zidl/window_manager_agent_stub.cpp",
     "src/zidl/window_stub.cpp",
-    "src/ui_extension/provider_data_handler.cpp",
   ]
 
   configs = [
