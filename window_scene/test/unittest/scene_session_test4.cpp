@@ -114,7 +114,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea01, Function |
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->GetSessionProperty()->SetWindowType(WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->property_->SetWindowType(WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
@@ -131,7 +131,7 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea02, Function |
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->GetSessionProperty()->SetWindowType(WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetWindowType(WINDOW_TYPE_APP_MAIN_WINDOW);
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
