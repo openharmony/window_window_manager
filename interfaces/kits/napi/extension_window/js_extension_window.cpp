@@ -85,6 +85,7 @@ napi_value JsExtensionWindow::CreateJsExtensionWindow(napi_env env, sptr<Rosen::
     BindNativeFunction(env, objValue, "setWaterMarkFlag", moduleName, JsExtensionWindow::SetWaterMarkFlag);
     BindNativeFunction(env, objValue, "hidePrivacyContentForHost", moduleName,
                        JsExtensionWindow::HidePrivacyContentForHost);
+    BindNativeFunction(env, objValue, "occupyEvents", moduleName, JsExtensionWindow::OccupyEvents);
 
     return objValue;
 }
@@ -298,6 +299,12 @@ napi_value JsExtensionWindow::SetWindowKeepScreenOn(napi_env env, napi_callback_
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowKeepScreenOn(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::OccupyEvents(napi_env env, napi_callback_info info)
+{
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnOccupyEvents(env, info) : nullptr;
 }
 
 napi_valuetype GetType(napi_env env, napi_value value)
@@ -1032,6 +1039,34 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
     return result;
+}
+
+napi_value JsExtensionWindow::OnOccupyEvents(napi_env env, napi_callback_info info)
+{
+    if (extensionWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "extensionWindow_ is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t eventFlags = 0;
+    if (!ConvertFromJsValue(env, argv[0], eventFlags)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert parameter to int32_t");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    auto ret = WM_JS_TO_ERROR_CODE_MAP.at(extensionWindow_->OccupyEvents(eventFlags));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    
+    return NapiGetUndefined(env);
 }
 
 }  // namespace Rosen
