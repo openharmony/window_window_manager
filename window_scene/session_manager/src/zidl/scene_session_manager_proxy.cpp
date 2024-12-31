@@ -1799,11 +1799,12 @@ WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read window layout info failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(ret);
+    return static_cast<WMError>(errCode);
 }
 
 WMError SceneSessionManagerProxy::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)

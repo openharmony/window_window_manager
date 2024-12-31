@@ -1112,7 +1112,7 @@ int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
