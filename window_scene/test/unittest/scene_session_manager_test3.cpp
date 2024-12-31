@@ -517,13 +517,9 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByType, Function | Small
     }
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession->SetSessionProperty(property);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
-    property->SetDisplayId(1);
+    sceneSession->property_->SetDisplayId(1);
     ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     ssm_->sceneSessionMap_.erase(1);
     ASSERT_EQ(ret, 0);
@@ -823,11 +819,8 @@ HWTEST_F(SceneSessionManagerTest3, IsPcSceneSessionLifecycle1, Function | SmallT
     info.bundleName_ = "IsPcSceneSessionLifecycle1";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession->SetSessionProperty(property);
-    property->SetIsAppSupportPhoneInPc(false);
-    sceneSession->SetIsPcAppInPad(false);
+    sceneSession->property_->SetIsAppSupportPhoneInPc(false);
+    sceneSession->property_->SetIsPcAppInPad(false);
 
     bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
     EXPECT_EQ(ret, true);
@@ -847,11 +840,8 @@ HWTEST_F(SceneSessionManagerTest3, IsPcSceneSessionLifecycle2, Function | SmallT
     info.bundleName_ = "IsPcSceneSessionLifecycle2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession->SetSessionProperty(property);
-    property->SetIsAppSupportPhoneInPc(false);
-    sceneSession->SetIsPcAppInPad(true);
+    sceneSession->property_->SetIsAppSupportPhoneInPc(false);
+    sceneSession->property_->SetIsPcAppInPad(true);
 
     bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
     EXPECT_EQ(ret, true);
@@ -871,11 +861,8 @@ HWTEST_F(SceneSessionManagerTest3, IsPcSceneSessionLifecycle3, Function | SmallT
     info.bundleName_ = "IsPcSceneSessionLifecycle3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession->SetSessionProperty(property);
-    property->SetIsAppSupportPhoneInPc(true);
-    sceneSession->SetIsPcAppInPad(false);
+    sceneSession->property_->SetIsAppSupportPhoneInPc(true);
+    sceneSession->property_->SetIsPcAppInPad(false);
 
     bool ret = ssm_->IsPcSceneSessionLifecycle(sceneSession);
     EXPECT_EQ(ret, false);
@@ -912,12 +899,9 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch1, Function 
     info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch1";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession->SetSessionProperty(property);
     sceneSession->SetCallingPid(45678);
-    property->SetIsAppSupportPhoneInPc(false);
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession->property_->SetIsAppSupportPhoneInPc(false);
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
 
     bool ret = ssm_->IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid);
@@ -939,12 +923,9 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch2, Function 
     info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch2";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession->SetSessionProperty(property);
     sceneSession->SetCallingPid(45678);
-    property->SetIsAppSupportPhoneInPc(false);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_->SetIsAppSupportPhoneInPc(false);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionState(SessionState::STATE_END);
 
     bool ret = ssm_->IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid);
@@ -966,12 +947,9 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch3, Function 
     info.bundleName_ = "IsNeedChangeLifeCycleOnUserSwitch3";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession->SetSessionProperty(property);
     sceneSession->SetCallingPid(45678);
-    property->SetIsAppSupportPhoneInPc(false);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_->SetIsAppSupportPhoneInPc(false);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
 
     bool ret = ssm_->IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid);
