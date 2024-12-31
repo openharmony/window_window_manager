@@ -3889,6 +3889,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
             FlushWindowInfoToMMI(true);
             NotifyAllAccessibilityInfo();
             rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+            UpdatePrivateStateAndNotifyForAllScreens();
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
             rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
@@ -6200,7 +6201,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     auto displayId = sessionProperty->GetDisplayId();
     std::unordered_set<std::string> privacyBundleList;
     GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    if (!JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
+    if (!JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList) || isUserBackground_) {
         return;
     }
 
