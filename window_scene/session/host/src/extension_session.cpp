@@ -198,7 +198,7 @@ WSError ExtensionSession::ConnectInner(
             }
         }
 
-        (session->dataHandler_)->SetRemoteProxyObject(sessionStage->AsObject());
+        session->dataHandler_->SetRemoteProxyObject(sessionStage->AsObject());
         return session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
     };

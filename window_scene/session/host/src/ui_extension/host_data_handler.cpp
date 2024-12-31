@@ -24,11 +24,7 @@ sptr<SessionStageProxy> HostDataHandler::GetRemoteProxy()
     if (remoteProxy_ == nullptr) {
         return nullptr;
     }
-    sptr<SessionStageProxy> proxy = iface_cast<SessionStageProxy>(remoteProxy_);
-    if (!proxy) {
-        return nullptr;
-    }
-    return proxy;
+    return iface_cast<SessionStageProxy>(remoteProxy_);
 }
 
 DataHandlerErr HostDataHandler::SendData(const AAFwk::Want& toSend, AAFwk::Want& reply,
