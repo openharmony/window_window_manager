@@ -2107,6 +2107,19 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetDisplayIdByWindowId, Function | S
 }
 
 /**
+ * @tc.name: HandleIsPcWindow
+ * @tc.desc: test HandleIsPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleIsPcWindow, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleIsPcWindow(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleIsPcOrPadFreeMultiWindowMode
  * @tc.desc: test HandleIsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC

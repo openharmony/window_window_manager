@@ -375,6 +375,29 @@ HWTEST_F(WindowSessionImplTest4, SetWindowModal, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsPcWindow
+ * @tc.desc: IsPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsPcWindow, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcWindow start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsPcWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    ASSERT_EQ(true, window->IsPcWindow());
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PHONE;
+    ASSERT_EQ(false, window->IsPcWindow());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: IsPcWindow end";
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
