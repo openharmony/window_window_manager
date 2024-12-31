@@ -69,6 +69,8 @@ const std::string CLOSE_TARGET_FLOAT_WINDOW_CB = "closeTargetFloatWindow";
 const std::string ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB = "abilityManagerCollaboratorRegistered";
 const std::string START_PIP_FAILED_CB = "startPiPFailed";
 const std::string NOTIFY_APP_USE_CONTROL_LIST_CB = "updateAppUseControl";
+const std::string WATCH_GESTURE_CONSUME_RESULT_CB = "watchGestureConsumeResult";
+const std::string WATCH_FOCUS_ACTIVE_CHANGE_CB = "watchFocusActiveChange";
 
 const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
@@ -85,6 +87,8 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB, ListenerFunctionType::ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB},
     {START_PIP_FAILED_CB,          ListenerFunctionType::START_PIP_FAILED_CB},
     {NOTIFY_APP_USE_CONTROL_LIST_CB, ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB},
+    {WATCH_GESTURE_CONSUME_RESULT_CB,          ListenerFunctionType::WATCH_GESTURE_CONSUME_RESULT_CB},
+    {WATCH_FOCUS_ACTIVE_CHANGE_CB,             ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB},
 };
 } // namespace
 
@@ -252,7 +256,7 @@ void JsSceneSessionManager::OnCreateSystemSession(const sptr<SceneSession>& scen
     wptr<SceneSession> weakSession(sceneSession);
     auto task = [this, weakSession, jsCallBack = GetJSCallback(CREATE_SYSTEM_SESSION_CB), env = env_]() {
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
         auto specificSession = weakSession.promote();
@@ -286,23 +290,23 @@ void JsSceneSessionManager::OnCreateKeyboardSession(const sptr<SceneSession>& ke
     auto task = [this, weakKeyboardSession, weakPanelSession,
         jsCallBack = GetJSCallback(CREATE_KEYBOARD_SESSION_CB), env = env_]() {
         if (!jsCallBack) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "jsCallBack is nullptr");
             return;
         }
         auto keyboardSession = weakKeyboardSession.promote();
         auto panelSession = weakPanelSession.promote();
         if (keyboardSession == nullptr || panelSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "Keyboard or panel session is nullptr");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "Keyboard or panel session is nullptr");
             return;
         }
         napi_value keyboardSessionObj = JsSceneSession::Create(env, keyboardSession);
         if (keyboardSessionObj == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSessionObj is nullptr");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboardSessionObj is nullptr");
             return;
         }
         napi_value panelSessionObj = JsSceneSession::Create(env, panelSession);
         if (panelSessionObj == nullptr) {
-            TLOGE(WmsLogTag::WMS_KEYBOARD, "panelSessionObj is nullptr");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "panelSessionObj is nullptr");
             return;
         }
         napi_value argv[] = { keyboardSessionObj, panelSessionObj };
@@ -323,27 +327,27 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, weakSession, sessionInfo, jsCallBack = GetJSCallback(RECOVER_SCENE_SESSION_CB), env = env_]() {
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_RECOVER, "jsCallBack is nullptr");
             return;
         }
         auto sceneSession = weakSession.promote();
         if (sceneSession == nullptr) {
-            WLOGFE("sceneSession is nullptr");
+            TLOGNE(WmsLogTag::WMS_RECOVER, "sceneSession is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = JsSceneSession::Create(env, sceneSession);
         if (jsSceneSessionObj == nullptr) {
-            WLOGFE("jsSceneSessionObj is nullptr");
+            TLOGNE(WmsLogTag::WMS_RECOVER, "jsSceneSessionObj is nullptr");
             return;
         }
         if (sessionInfo == nullptr) {
-            WLOGFE("sessionInfo is nullptr");
+            TLOGNE(WmsLogTag::WMS_RECOVER, "sessionInfo is nullptr");
             return;
         }
         napi_value jsSessionRecoverInfo =
             CreateJsSessionRecoverInfo(env, *sessionInfo, sceneSession->GetSessionProperty());
         if (jsSessionRecoverInfo == nullptr) {
-            WLOGFE("This target session info is nullptr");
+            TLOGNE(WmsLogTag::WMS_RECOVER, "This target session info is nullptr");
             return;
         }
         napi_value argv[] = { jsSceneSessionObj, jsSessionRecoverInfo };
@@ -371,7 +375,7 @@ void JsSceneSessionManager::OnStatusBarEnabledUpdate(bool enable, const std::str
     TLOGI(WmsLogTag::WMS_MAIN, "enable:%{public}d bundleName:%{public}s", enable, bundleName.c_str());
     auto task = [enable, bundleName, jsCallBack = GetJSCallback(STATUS_BAR_ENABLED_CHANGE_CB), env = env_] {
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, enable), CreateJsValue(env, bundleName)};
@@ -402,7 +406,7 @@ void JsSceneSessionManager::OnStartUIAbilityError(const uint32_t errorCode)
 
     auto task = [this, errorCode, jsCallBack = GetJSCallback(START_UI_ABILITY_ERROR), env = env_]() {
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, errorCode)};
@@ -417,13 +421,13 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
 
     auto task = [this, x, y, jsCallBack = GetJSCallback(OUTSIDE_DOWN_EVENT_CB), env = env_]() {
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
             return;
         }
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
-            WLOGFE("Object is null!");
+            TLOGNE(WmsLogTag::WMS_EVENT, "Object is null!");
             return;
         }
 
@@ -442,7 +446,7 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
 
     auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_]() {
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(env, persistentId)};
@@ -456,7 +460,7 @@ void JsSceneSessionManager::OnCallingSessionIdChange(uint32_t sessionId)
     TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]");
     auto task = [this, sessionId, jsCallBack = GetJSCallback(CALLING_WINDOW_ID_CHANGE_CB), env = env_]() {
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "jsCallBack is nullptr");
             return;
         }
         napi_value argv[] = { CreateJsValue(env, sessionId) };
@@ -512,8 +516,9 @@ void JsSceneSessionManager::ProcessCreateKeyboardSessionRegister()
 
 void JsSceneSessionManager::ProcessStartUIAbilityErrorRegister()
 {
-    ProcessStartUIAbilityErrorFunc func = [this](uint32_t startUIAbilityError) {
-        WLOGFD("ProcessStartUIAbilityErrorFunc called, startUIAbilityError: %{public}d", startUIAbilityError);
+    const char* const where = __func__;
+    ProcessStartUIAbilityErrorFunc func = [this, where](uint32_t startUIAbilityError) {
+        TLOGND(WmsLogTag::WMS_LIFE, "%{public}s called, startUIAbilityError: %{public}d", where, startUIAbilityError);
         this->OnStartUIAbilityError(startUIAbilityError);
     };
     SceneSessionManager::GetInstance().SetStartUIAbilityErrorListener(func);
@@ -531,7 +536,7 @@ void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
 void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
 {
     ProcessStatusBarEnabledChangeFunc func = [this](bool enable, const std::string& bundleName) {
-        WLOGFD("StatusBarEnabledUpdate");
+        TLOGND(WmsLogTag::WMS_EVENT, "StatusBarEnabledUpdate");
         this->OnStatusBarEnabledUpdate(enable, bundleName);
     };
     SceneSessionManager::GetInstance().SetStatusBarEnabledChangeListener(func);
@@ -548,7 +553,7 @@ void JsSceneSessionManager::ProcessGestureNavigationEnabledChangeListener()
 void JsSceneSessionManager::ProcessOutsideDownEvent()
 {
     ProcessOutsideDownEventFunc func = [this](int32_t x, int32_t y) {
-        WLOGFD("ProcessOutsideDownEvent called");
+        TLOGND(WmsLogTag::WMS_EVENT, "ProcessOutsideDownEvent called");
         this->OnOutsideDownEvent(x, y);
     };
     SceneSessionManager::GetInstance().SetOutsideDownEventListener(func);
@@ -564,7 +569,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
-            WLOGFE("[WMSComm]uiContent is nullptr");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
         }
         uiContent->Focus();
@@ -573,7 +578,7 @@ void JsSceneSessionManager::ProcessShiftFocus()
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent unfocus");
         const auto& uiContent = RootScene::staticRootScene_->GetUIContent();
         if (uiContent == nullptr) {
-            WLOGFE("[WMSComm]uiContent is nullptr");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "[WMSComm]uiContent is nullptr");
             return;
         }
         uiContent->UnFocus();
@@ -585,8 +590,9 @@ void JsSceneSessionManager::ProcessShiftFocus()
 
 void JsSceneSessionManager::ProcessCallingSessionIdChangeRegister()
 {
-    ProcessCallingSessionIdChangeFunc func = [this](uint32_t callingSessionId) {
-        WLOGFD("ProcessCallingSessionIdChangeRegister called, callingSessionId: %{public}d", callingSessionId);
+    const char* const where = __func__;
+    ProcessCallingSessionIdChangeFunc func = [this, where](uint32_t callingSessionId) {
+        TLOGND(WmsLogTag::WMS_KEYBOARD, "%{public}s called, callingSessionId: %{public}d", where, callingSessionId);
         this->OnCallingSessionIdChange(callingSessionId);
     };
     SceneSessionManager::GetInstance().SetCallingSessionIdSessionListenser(func);
@@ -1317,6 +1323,12 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::NOTIFY_APP_USE_CONTROL_LIST_CB:
             RegisterNotifyAppUseControlListCallback();
             break;
+        case ListenerFunctionType::WATCH_GESTURE_CONSUME_RESULT_CB:
+            RegisterWatchGestureConsumeResultCallback();
+            break;
+        case ListenerFunctionType::WATCH_FOCUS_ACTIVE_CHANGE_CB:
+            RegisterWatchFocusActiveChangeCallback();
+            break;
         default:
             break;
     }
@@ -1641,10 +1653,10 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
         std::vector<std::string>& infos) {
         if (params.size() == 1 && params[0] == ARG_DUMP_HELP) { // 1: params num
             Ace::UIContent::ShowDumpHelp(infos);
-            WLOGFD("Dump ArkUI help info");
+            TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI help info");
         } else if (const auto uiContent = RootScene::staticRootScene_->GetUIContent()) {
             uiContent->DumpInfo(params, infos);
-            WLOGFD("Dump ArkUI element info");
+            TLOGND(WmsLogTag::WMS_EVENT, "Dump ArkUI element info");
         }
     };
     SceneSessionManager::GetInstance().SetDumpRootSceneElementInfoListener(func);
@@ -3904,6 +3916,66 @@ void JsSceneSessionManager::OnNotifyAppUseControlList(
         napi_value userIdValue = CreateJsValue(env, userId);
         napi_value controlListValue = CreateAppUseControlInfos(env, controlList);
         napi_value argv[] = { typeValue, userIdValue, controlListValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSessionManager::RegisterWatchGestureConsumeResultCallback()
+{
+    SceneSessionManager::GetInstance().RegisterWatchGestureConsumeResultCallback(
+        [this](int32_t keyCode, bool isConsumed) {
+            TLOGND(WmsLogTag::WMS_EVENT, "RegisterWatchGestureConsumeResultCallback called");
+            this->OnWatchGestureConsumeResult(keyCode, isConsumed);
+        });
+}
+
+void JsSceneSessionManager::OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    taskScheduler_->PostMainThreadTask([this, keyCode, isConsumed,
+        jsCallBack = GetJSCallback(WATCH_GESTURE_CONSUME_RESULT_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_set_named_property(env, objValue, "keyCode", CreateJsValue(env, keyCode));
+        napi_set_named_property(env, objValue, "isConsumed", CreateJsValue(env, isConsumed));
+        napi_value argv[] = { objValue };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSessionManager::RegisterWatchFocusActiveChangeCallback()
+{
+    SceneSessionManager::GetInstance().RegisterWatchFocusActiveChangeCallback([this](bool isActive) {
+        TLOGND(WmsLogTag::WMS_EVENT, "RegisterWatchFocusActiveChangeCallback called");
+        this->OnWatchFocusActiveChange(isActive);
+    });
+}
+
+void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    taskScheduler_->PostMainThreadTask([this, isActive,
+        jsCallBack = GetJSCallback(WATCH_FOCUS_ACTIVE_CHANGE_CB), env = env_] {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_set_named_property(env, objValue, "isActive", CreateJsValue(env, isActive));
+        napi_value argv[] = { objValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }

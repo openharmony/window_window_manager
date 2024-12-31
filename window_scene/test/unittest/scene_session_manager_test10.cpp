@@ -87,8 +87,6 @@ void SceneSessionManagerTest10::TearDown()
 void SceneSessionManagerTest10::InitTestSceneSession(DisplayId displayId,
     int32_t windowId, int32_t zOrder, bool visible, WSRect rect)
 {
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetDisplayId(displayId);
     SessionInfo info;
     info.bundleName_ = "root";
     info.persistentId_ = windowId;
@@ -97,7 +95,7 @@ void SceneSessionManagerTest10::InitTestSceneSession(DisplayId displayId,
     sceneSession->SetZOrder(zOrder);
     sceneSession->SetRSVisible(visible);
     sceneSession->SetSessionRect(rect);
-    sceneSession->SetSessionProperty(property);
+    sceneSession->property_->SetDisplayId(displayId);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     EXPECT_EQ(windowId, sceneSession->GetPersistentId());
 }
@@ -777,10 +775,8 @@ HWTEST_F(SceneSessionManagerTest10, TestIsInDefaultScreen_01, Function | SmallTe
     info.abilityName_ = "test";
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    DisplayId displayId = displayId = 5;
-    property->SetDisplayId(displayId);
-    sceneSession->SetSessionProperty(property);
+    DisplayId displayId = 5;
+    sceneSession->property_->SetDisplayId(displayId);
     ASSERT_EQ(ssm_->IsInDefaultScreen(sceneSession), false);
 }
 
@@ -796,11 +792,8 @@ HWTEST_F(SceneSessionManagerTest10, TestIsInDefaultScreen_02, Function | SmallTe
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     DisplayId displayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
-    property->SetDisplayId(displayId);
-    sceneSession->SetSessionProperty(property);
+    sceneSession->property_->SetDisplayId(displayId);
     ASSERT_EQ(ssm_->IsInDefaultScreen(sceneSession), true);
 }
 

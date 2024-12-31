@@ -883,10 +883,6 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | Sm
     WSError ret = ssm_->RequestSessionFocusImmediately(0);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
     ssm_->RequestFocusBasicCheck(0);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-    session->SetSessionProperty(property);
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     ret = ssm_->RequestSessionFocusImmediately(1);
@@ -1247,7 +1243,17 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     property->SetWindowFlags(123);
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
-    ASSERT_EQ(WSError::WS_OK, res);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    property->SetFloatingWindowAppType(true);
+    ssm_->shouldHideNonSecureFloatingWindows_.store(true);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
+        systemConfig, token);
+    ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
+    ssm_->shouldHideNonSecureFloatingWindows_.store(false);
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
 }
 
 /**
@@ -1482,11 +1488,6 @@ HWTEST_F(SceneSessionManagerTest5, InitSceneSession02, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->SetSessionProperty(property);
 
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
     ASSERT_EQ(DISPLAY_ID_INVALID, sceneSession->GetSessionInfo().screenId_);

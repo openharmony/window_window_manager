@@ -230,6 +230,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyExtensionDetachToDisplay(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUPPORT_WINDOW_MODES):
             return HandleSetSupportWindowModes(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
+            return HandleExtensionProviderData(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -511,7 +513,7 @@ int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageP
 
 int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
 {
-    WSError errCode = OnRestoreMainWindow();
+    OnRestoreMainWindow();
     return ERR_NONE;
 }
 
@@ -1281,6 +1283,13 @@ int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    NotifyExtensionDataConsumer(data, reply);
+    return ERR_NONE;
+}
+
 int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "in");
@@ -1339,7 +1348,7 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
-    WSError errCode = OnSetWindowRectAutoSave(enabled);
+    OnSetWindowRectAutoSave(enabled);
     return ERR_NONE;
 }
 

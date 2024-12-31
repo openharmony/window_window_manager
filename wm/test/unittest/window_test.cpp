@@ -2604,6 +2604,19 @@ HWTEST_F(WindowTest, SetWindowTitle, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetSubWindowModal
+ * @tc.desc: SetSubWindowModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetSubWindowModal, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->SetSubWindowModal(true);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: GetWindowStatus
  * @tc.desc: GetWindowStatus
  * @tc.type: FUNC

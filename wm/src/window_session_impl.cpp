@@ -1407,7 +1407,28 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
+    RegisterWatchFocusActiveChangeCallback();
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::RegisterWatchFocusActiveChangeCallback()
+{
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->AddFocusActiveChangeCallback([this](bool isFocusActive) {
+            NotifyWatchFocusActiveChange(isFocusActive);
+        });
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
+    }
+}
+
+WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return SingletonContainer::Get<WindowAdapter>().NotifyWatchFocusActiveChange(isActive);
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
@@ -3649,6 +3670,27 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
     return WSError::WS_OK;
 }
 
+WMError WindowSessionImpl::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d, isConsumed:%{public}d", keyCode, isConsumed);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return SingletonContainer::Get<WindowAdapter>().NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+}
+
+bool WindowSessionImpl::GetWatchGestureConsumed() const
+{
+    return isWatchGestureConsumed_;
+}
+
+void WindowSessionImpl::SetWatchGestureConsumed(bool isWatchGestureConsumed)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, isWatchGestureConsumed:%{public}d",
+        GetPersistentId(), isWatchGestureConsumed);
+    isWatchGestureConsumed_ = isWatchGestureConsumed;
+}
+
 WSError WindowSessionImpl::NotifySystemDensityChange(float density)
 {
     std::lock_guard<std::mutex> lock(systemDensityChangeListenerMutex_);
@@ -3788,6 +3830,18 @@ bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
     return false;
 }
 
+void WindowSessionImpl::NotifyConsumeResultToFloatWindow
+    (const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed)
+{
+    if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
+         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && !GetWatchGestureConsumed() &&
+        keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
+        TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}d, keyCode:%{public}d, isConsumed:%{public}d",
+            GetWindowId(), keyEvent->GetKeyCode(), isConsumed);
+        NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
+    }
+}
+
 bool WindowSessionImpl::IsAxisEvent(int32_t action)
 {
     if (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
@@ -3867,6 +3921,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
             WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
             Recover();
         }
+        NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
         if (!isConsumed) {
             keyEvent->MarkProcessed();
         }

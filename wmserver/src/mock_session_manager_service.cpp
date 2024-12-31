@@ -132,15 +132,29 @@ MockSessionManagerService::MockSessionManagerService()
 
 bool MockSessionManagerService::RegisterMockSessionManagerService()
 {
-    bool res = SystemAbility::MakeAndRegisterAbility(this);
-    if (!res) {
-        WLOGFE("register failed");
+    static bool isRegistered = false;
+    static bool isPublished = false;
+    if (isRegistered && isPublished) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "WindowManagerService SA has already been registered and published");
+        return true;
     }
-    if (!Publish(this)) {
-        WLOGFE("Publish failed");
+    if (!isRegistered) {
+        isRegistered = SystemAbility::MakeAndRegisterAbility(this);
+        if (isRegistered) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER, "Successfully registered WindowManagerService SA");
+        } else {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to register WindowManagerService SA");
+        }
     }
-    WLOGFI("Publish mock session manager service success");
-    return true;
+    if (!isPublished) {
+        isPublished = Publish(this);
+        if (isPublished) {
+            TLOGI(WmsLogTag::WMS_MULTI_USER, "Successfully published WindowManagerService SA");
+        } else {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to publish WindowManagerService SA");
+        }
+    }
+    return isRegistered && isPublished;
 }
 
 void MockSessionManagerService::OnStart()
