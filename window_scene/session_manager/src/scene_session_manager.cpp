@@ -10540,7 +10540,7 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session == nullptr) {
                 continue;
             }
-            if (session->GetSessionRect().IsInvalid( )) {
+            if (session->GetSessionRect().IsInvalid()) {
                 continue;
             }
             if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
