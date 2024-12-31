@@ -6201,7 +6201,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     auto displayId = sessionProperty->GetDisplayId();
     std::unordered_set<std::string> privacyBundleList;
     GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    if (!JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList) || isUserBackground_) {
+    if (isUserBackground_ || !JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
         return;
     }
 
