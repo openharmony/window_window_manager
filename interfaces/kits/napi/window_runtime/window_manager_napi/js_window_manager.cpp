@@ -1191,7 +1191,6 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
 
 napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
 {
-    const char* const where = __func__;
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1211,7 +1210,7 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [displayId, where, env, task = napiAsyncTask] {
+    auto asyncTask = [env, task = napiAsyncTask, displayId, where = __func__] {
         std::vector<sptr<WindowLayoutInfo>> infos;
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
