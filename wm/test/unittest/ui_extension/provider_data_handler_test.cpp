@@ -45,10 +45,11 @@ TEST_F(ProviderDataHandlerTest, ProviderDataHandlerSendData01)
     auto remoteObj = sptr<RemoteObjectMocker>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(remoteObj);
     // Mock the SendRequest behavior
+    EXPECT_CALL(*remoteObj, IsProxyObject()).WillRepeatedly(Return(true));
     EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
         .WillOnce(Invoke([](uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) -> int {
             // Verify the message option is sync
-            EXPECT_TRUE(option.GetFlags() & MessageOption::TF_SYNC);
+            EXPECT_EQ(option.GetFlags(), MessageOption::TF_SYNC);
 
             // Write mock response
             reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::OK));  // Reply code
@@ -67,9 +68,9 @@ TEST_F(ProviderDataHandlerTest, ProviderDataHandlerSendData01)
 
     AAFwk::Want sendWant;
     sendWant.SetParam("send_key", std::string("send_value"));
-    AAFwk::Want reply;
 
     // Test sync send with reply
+    AAFwk::Want reply;
     auto result = handler->SendDataSync(SubSystemId::WM_UIEXT, 1, sendWant, reply);
 
     // Verify results
