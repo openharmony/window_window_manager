@@ -23,9 +23,9 @@ namespace OHOS::Rosen::Extension {
 class HostDataHandler : public DataHandler {
 public:
     DataHandlerErr SendData(const AAFwk::Want& toSend, AAFwk::Want& reply, const DataTransferConfig& config) override;
-    sptr<SessionStageProxy> GetRemoteProxy();
 
 private:
+    sptr<SessionStageProxy> GetRemoteProxy();
     bool WriteInterfaceToken(MessageParcel& data) override;
 };
 }  // namespace OHOS::Rosen::Extension

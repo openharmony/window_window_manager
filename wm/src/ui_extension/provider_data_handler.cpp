@@ -26,11 +26,7 @@ sptr<SessionProxy> ProviderDataHandler::GetRemoteProxy()
     if (remoteProxy_ == nullptr) {
         return nullptr;
     }
-    sptr<SessionProxy> proxy = iface_cast<SessionProxy>(remoteProxy_);
-    if (!proxy) {
-        return nullptr;
-    }
-    return proxy;
+    return iface_cast<SessionProxy>(remoteProxy_);
 }
 
 DataHandlerErr ProviderDataHandler::SendData(const AAFwk::Want& toSend, AAFwk::Want& reply,
