@@ -17,11 +17,13 @@
 #define MOCK_WINDOW_EXTENSION_SESSION_IMPL_H
 
 #include "window_extension_session_impl.h"
+#include "mock_data_handler.h"
 
 namespace OHOS {
 namespace Rosen {
 class MockWindowExtensionSessionImpl : public WindowExtensionSessionImpl {
 public:
+    std::shared_ptr<IDataHandler> mockHandler_;
     MockWindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowExtensionSessionImpl(option) {}
     ~MockWindowExtensionSessionImpl() {}
 
@@ -47,6 +49,11 @@ public:
     WMError HidePrivacyContentForHost(bool needHide)
     {
         return WMError::WM_OK;
+    }
+
+    std::shared_ptr<IDataHandler> GetExtensionDataHandler() const
+    {
+        return mockHandler_;
     }
 };
 } // Rosen
