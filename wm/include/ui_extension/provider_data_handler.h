@@ -17,11 +17,13 @@
 #define OHOS_ROSEN_EXTENSION_PROVIDER_DATA_HANDLER_H
 
 #include "extension_data_handler.h"
+#include "session/host/include/zidl/session_proxy.h"
 
 namespace OHOS::Rosen::Extension {
 class ProviderDataHandler : public DataHandler {
 public:
     DataHandlerErr SendData(const AAFwk::Want& toSend, AAFwk::Want& reply, const DataTransferConfig& config) override;
+    sptr<SessionProxy> GetRemoteProxy();
 
 private:
     bool WriteInterfaceToken(MessageParcel& data) override;

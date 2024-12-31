@@ -15,25 +15,29 @@
 
 #include "ui_extension/host_data_handler.h"
 
-#include "session_stage_proxy.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen::Extension {
+sptr<SessionStageProxy> HostDataHandler::GetRemoteProxy()
+{
+    std::lock_guard lock(mutex_);
+    if (remoteProxy_ == nullptr) {
+        return nullptr;
+    }
+    sptr<SessionStageProxy> proxy = iface_cast<SessionStageProxy>(remoteProxy_);
+    if (!proxy) {
+        return nullptr;
+    }
+    return proxy;
+}
+
 DataHandlerErr HostDataHandler::SendData(const AAFwk::Want& toSend, AAFwk::Want& reply,
                                          const DataTransferConfig& config)
 {
-    sptr<SessionStageProxy> proxy;
-    {
-        std::lock_guard lock(mutex_);
-        if (remoteProxy_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "nullptr, %{public}s", config.ToString().c_str());
-            return DataHandlerErr::NULL_PTR;
-        }
-        proxy = iface_cast<SessionStageProxy>(remoteProxy_);
-        if (!proxy) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "nullptr, %{public}s", config.ToString().c_str());
-            return DataHandlerErr::NULL_PTR;
-        }
+    auto proxy = GetRemoteProxy();
+    if (proxy == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "nullptr, %{public}s", config.ToString().c_str());
+        return DataHandlerErr::NULL_PTR;
     }
 
     MessageParcel sendParcel;
