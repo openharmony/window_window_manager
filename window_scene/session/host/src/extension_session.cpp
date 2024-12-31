@@ -162,9 +162,7 @@ void ExtensionSession::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHa
     const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
 {
     Session::SetEventHandler(handler, exportHandler);
-    if (dataHandler_) {
-        dataHandler_->SetEventHandler(handler);
-    }
+    dataHandler_->SetEventHandler(handler);
 }
 
 WSError ExtensionSession::ConnectInner(
@@ -200,11 +198,7 @@ WSError ExtensionSession::ConnectInner(
             }
         }
 
-        auto &dataHandler_ = session->dataHandler_;
-        if (dataHandler_) {
-            dataHandler_->SetRemoteProxyObject(sessionStage->AsObject());
-        }
-
+        (session->dataHandler_)->SetRemoteProxyObject(sessionStage->AsObject());
         return session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
     };
@@ -510,11 +504,6 @@ int32_t ExtensionSession::GetStatusBarHeight()
 
 void ExtensionSession::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
 {
-    if (dataHandler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "dataHandler_ is null");
-        reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::NULL_PTR));
-        return;
-    }
     dataHandler_->NotifyDataConsumer(data, reply);
 }
 } // namespace OHOS::Rosen

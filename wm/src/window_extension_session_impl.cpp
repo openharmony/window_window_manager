@@ -95,10 +95,8 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     // Since here is init of this window, no other threads will rw it.
     hostSession_ = iSession;
 
-    if (dataHandler_) {
-        dataHandler_->SetEventHandler(handler_);
-        dataHandler_->SetRemoteProxyObject(iSession->AsObject());
-    }
+    dataHandler_->SetEventHandler(handler_);
+    dataHandler_->SetRemoteProxyObject(iSession->AsObject());
 
     context_ = context;
     if (context_) {
@@ -1355,11 +1353,6 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 void WindowExtensionSessionImpl::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
-    if (dataHandler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "dataHandler_ is null");
-        reply.WriteUint32(static_cast<uint32_t>(DataHandlerErr::NULL_PTR));
-        return;
-    }
     dataHandler_->NotifyDataConsumer(data, reply);
 }
 } // namespace Rosen

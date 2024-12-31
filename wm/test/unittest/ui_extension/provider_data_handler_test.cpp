@@ -47,7 +47,7 @@ TEST_F(ProviderDataHandlerTest, ProviderDataHandlerSendData01)
     // Mock the SendRequest behavior
     EXPECT_CALL(*remoteObj, IsProxyObject()).WillRepeatedly(Return(true));
     EXPECT_CALL(*remoteObj, SendRequest(_, _, _, _))
-        .WillOnce(Invoke([](uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) -> int {
+        .WillOnce(Invoke([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) -> int {
             // Verify the message option is sync
             EXPECT_EQ(option.GetFlags(), MessageOption::TF_SYNC);
 
