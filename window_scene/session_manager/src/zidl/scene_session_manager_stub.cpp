@@ -1108,7 +1108,7 @@ int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, M
     std::vector<sptr<WindowLayoutInfo>> infos;
     WMError errCode = GetAllWindowLayoutInfo(displayId, infos);
     if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to Write window layout info");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write window layout info");
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {

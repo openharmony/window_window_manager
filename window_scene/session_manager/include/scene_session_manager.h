@@ -749,9 +749,9 @@ private:
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-        std::vector<sptr<SceneSession>>& filtedSessions);
-    bool IsWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
-    int32_t GetLowerScreenPosY() const;
+        std::vector<sptr<SceneSession>>& filteredSessions);
+    bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
+    int32_t GetFoldLowerScreenPosY() const;
 
     /*
      * Window Rotate Animation
@@ -1149,8 +1149,6 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-    static constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
-    static constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
     
     /*
      * Move Drag

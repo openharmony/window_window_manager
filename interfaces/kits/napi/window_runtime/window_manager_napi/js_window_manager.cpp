@@ -1191,6 +1191,7 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
 
 napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
 {
+    const char* const where = __func__;
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1216,10 +1217,10 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
             SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, CreateJsWindowLayoutInfoArrayObject(env, infos));
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "success");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
