@@ -165,21 +165,21 @@ WSError ExtensionSession::ConnectInner(
         &systemConfig, property, token, pid, uid]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "session is null");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
         if (eventChannel != nullptr) {
             sptr<IRemoteObject> remoteObject = eventChannel->AsObject();
             if (remoteObject == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "remoteObject is null");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "remoteObject is null");
                 return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
 
             session->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
             session->channelDeath_ = sptr<ChannelDeathRecipient>::MakeSptr(session->channelListener_);
             if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(session->channelDeath_)) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to add death recipient");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to add death recipient");
                 return WSError::WS_ERROR_INTERNAL_ERROR;
             }
         }

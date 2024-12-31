@@ -1372,7 +1372,7 @@ void ScreenSessionManager::NotifyScreenChanged(sptr<ScreenInfo> screenInfo, Scre
     }
     auto task = [=] {
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER);
-        TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", agent size: %{public}u",
+        TLOGNI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", agent size: %{public}u",
             screenInfo->GetScreenId(), static_cast<uint32_t>(agents.size()));
         if (agents.empty()) {
             return;
@@ -2520,7 +2520,7 @@ void ScreenSessionManager::SetScreenPowerForFold(ScreenId screenId, ScreenPowerS
 void ScreenSessionManager::TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode)
 {
     auto updateDisplayModeTask = [=] {
-        TLOGI(WmsLogTag::DMS, "start change displaymode to lastest mode");
+        TLOGNI(WmsLogTag::DMS, "start change displaymode to lastest mode");
         foldScreenController_->SetDisplayMode(targetDisplayMode);
     };
     taskScheduler_->PostAsyncTask(updateDisplayModeTask, "updateDisplayModeTask");
@@ -2538,7 +2538,7 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStat
 {
     auto rsSetScreenPowerStatusTask = [=] {
         if (foldScreenController_ == nullptr) {
-            TLOGW(WmsLogTag::DMS, "foldScreenController_ is null");
+            TLOGNW(WmsLogTag::DMS, "foldScreenController_ is null");
             return;
         }
         rsInterface_.SetScreenPowerStatus(foldScreenController_->GetCurrentScreenId(), status);
@@ -2964,10 +2964,10 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
     auto task = [=] {
         auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_EVENT_LISTENER);
         if (event == DisplayChangeEvent::UPDATE_REFRESHRATE) {
-            TLOGD(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+            TLOGND(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
                 event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
         } else {
-            TLOGI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
+            TLOGNI(WmsLogTag::DMS, "evevt:%{public}d, displayId:%{public}" PRIu64", agent size: %{public}u",
                 event, displayInfo->GetDisplayId(), static_cast<uint32_t>(agents.size()));
         }
         if (agents.empty()) {
@@ -3722,10 +3722,10 @@ void ScreenSessionManager::RegisterSettingRotationObserver()
         int32_t screenId = -1;
         if (ScreenSettingHelper::GetSettingRotation(rotation) &&
             ScreenSettingHelper::GetSettingRotationScreenID(screenId)) {
-            TLOGI(WmsLogTag::DMS, "current dms setting rotation:%{public}d, screenId:%{public}d",
+            TLOGNI(WmsLogTag::DMS, "current dms setting rotation:%{public}d, screenId:%{public}d",
                 rotation, screenId);
         } else {
-            TLOGI(WmsLogTag::DMS, "get current dms setting rotation and screenId failed");
+            TLOGNI(WmsLogTag::DMS, "get current dms setting rotation and screenId failed");
         }
     };
     ScreenSettingHelper::RegisterSettingRotationObserver(updateFunc);
@@ -4814,7 +4814,7 @@ void ScreenSessionManager::NotifyScreenConnected(sptr<ScreenInfo> screenInfo)
         return;
     }
     auto task = [=] {
-        TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
+        TLOGNI(WmsLogTag::DMS, "screenId:%{public}" PRIu64"", screenInfo->GetScreenId());
         OnScreenConnect(screenInfo);
     };
     taskScheduler_->PostAsyncTask(task, "NotifyScreenConnected");
@@ -4823,7 +4823,7 @@ void ScreenSessionManager::NotifyScreenConnected(sptr<ScreenInfo> screenInfo)
 void ScreenSessionManager::NotifyScreenDisconnected(ScreenId screenId)
 {
     auto task = [=] {
-        TLOGI(WmsLogTag::DMS, "notify screenId:%{public}" PRIu64"", screenId);
+        TLOGNI(WmsLogTag::DMS, "notify screenId:%{public}" PRIu64"", screenId);
         OnScreenDisconnect(screenId);
     };
     taskScheduler_->PostAsyncTask(task, "NotifyScreenDisconnected");
@@ -4871,7 +4871,7 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
     }
     std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", trigger:[%{public}s]",
+        TLOGNI(WmsLogTag::DMS, "screenId:%{public}" PRIu64", trigger:[%{public}s]",
             screenInfo->GetScreenId(), trigger.c_str());
         OnScreenGroupChange(trigger, screenInfo, event);
     };
@@ -4886,7 +4886,7 @@ void ScreenSessionManager::NotifyScreenGroupChanged(
     }
     std::string trigger = SysCapUtil::GetClientName();
     auto task = [=] {
-        TLOGI(WmsLogTag::DMS, "trigger:[%{public}s]", trigger.c_str());
+        TLOGNI(WmsLogTag::DMS, "trigger:[%{public}s]", trigger.c_str());
         OnScreenGroupChange(trigger, screenInfo, event);
     };
     taskScheduler_->PostAsyncTask(task, "NotifyScreenGroupChanged");
