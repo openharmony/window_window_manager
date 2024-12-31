@@ -126,8 +126,8 @@ void SCBSystemSession::PresentFocusIfPointDown()
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
-        NotifyClick();
     }
+    NotifyClick();
 }
 
 WSError SCBSystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -149,8 +149,8 @@ void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
         if (!isFocused_ && GetFocusable()) {
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
-            NotifyClick();
         }
+        NotifyClick();
     }
 }
 
