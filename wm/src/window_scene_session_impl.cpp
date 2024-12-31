@@ -2250,6 +2250,10 @@ WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
         TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     if (!IsDecorEnable()) {
         TLOGE(WmsLogTag::WMS_DECOR, "DecorEnable is false");
         return WMError::WM_ERROR_INVALID_WINDOW;
