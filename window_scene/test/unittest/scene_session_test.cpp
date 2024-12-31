@@ -1424,7 +1424,7 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     auto result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    property->isSystemCalling_ = false;
+    sceneSession->property_->isSystemCalling_ = false;
     result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
@@ -1443,8 +1443,6 @@ HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
-    sceneSession->SetSessionProperty(property);
     auto result = sceneSession->SetTopmost(false);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(sceneSession->IsTopmost());
