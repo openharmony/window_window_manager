@@ -1035,57 +1035,73 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "NotifyTouchOutside";
     info.bundleName_ = "NotifyTouchOutside";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
-    scensession->sessionStage_ = new SessionStageMocker();
-    EXPECT_NE(nullptr, scensession->sessionStage_);
-    scensession->NotifyTouchOutside();
+    sceneSession->sessionStage_ = new SessionStageMocker();
+    EXPECT_NE(nullptr, sceneSession->sessionStage_);
+    sceneSession->NotifyTouchOutside();
 
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
-    auto func = [scensession]() {
-        scensession->SaveUpdatedIcon(nullptr);
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
+    auto func = [sceneSession]() {
+        sceneSession->SaveUpdatedIcon(nullptr);
     };
-    scensession->sessionChangeCallback_->OnTouchOutside_ = func;
+    sceneSession->onTouchOutside_ = func;
     EXPECT_NE(nullptr, &func);
-    scensession->sessionStage_ = nullptr;
-    scensession->NotifyTouchOutside();
+    sceneSession->sessionStage_ = nullptr;
+    sceneSession->NotifyTouchOutside();
 
-    scensession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
-    scensession->sessionStage_ = nullptr;
-    scensession->NotifyTouchOutside();
+    sceneSession->onTouchOutside_ = nullptr;
+    sceneSession->sessionStage_ = nullptr;
+    sceneSession->NotifyTouchOutside();
 }
 
 /**
- * @tc.name: CheckOutTouchOutsideRegister
- * @tc.desc:  * @tc.name: CheckOutTouchOutsideRegister
+ * @tc.name: CheckTouchOutsideCallbackRegistered
+ * @tc.desc: CheckTouchOutsideCallbackRegistered
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, CheckOutTouchOutsideRegister, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "CheckOutTouchOutsideRegister";
-    info.bundleName_ = "CheckOutTouchOutsideRegister";
-    sptr<SceneSession> scensession;
-    scensession = new (std::nothrow) SceneSession(info, nullptr);
+    info.abilityName_ = "CheckTouchOutsideCallbackRegistered";
+    info.bundleName_ = "CheckTouchOutsideCallbackRegistered";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
-    scensession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(nullptr, scensession->sessionChangeCallback_);
-    auto func = [scensession]() {
-        scensession->NotifyWindowVisibility();
+    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
+    EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
+    auto func = [sceneSession]() {
+        sceneSession->NotifyWindowVisibility();
     };
-    scensession->sessionChangeCallback_->OnTouchOutside_ = func;
-    bool result = scensession->CheckOutTouchOutsideRegister();
+    sceneSession->onTouchOutside_ = func;
+    bool result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(true, result);
 
-    scensession->sessionChangeCallback_->OnTouchOutside_ = nullptr;
-    result = scensession->CheckOutTouchOutsideRegister();
+    sceneSession->OnTouchOutside_ = nullptr;
+    result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(false, result);
 
-    scensession->sessionChangeCallback_ = nullptr;
-    result = scensession->CheckOutTouchOutsideRegister();
+    sceneSession->sessionChangeCallback_ = nullptr;
+    result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(false, result);
+}
+
+/**
+ * @tc.name: RegisterTouchOutsideCallback
+ * @tc.desc: test RegisterTouchOutsideCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest2, RegisterTouchOutsideCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterTouchOutsideCallback";
+    info.bundleName_ = "RegisterTouchOutsideCallback";
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
+    sceneSession->onTouchOutside_ = nullptr;
+    NotifyTouchOutsideFunc func = []() {};
+    sceneSession->RegisterTouchOutsideCallback(std::move(func));
+
+    ASSERT_NE(sceneSession->onTouchOutside_, nullptr);
 }
 
 /**
