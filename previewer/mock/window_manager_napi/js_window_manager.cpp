@@ -106,7 +106,7 @@ napi_value JsWindowManager::ToggleShownStateForAllAppWindows(napi_env env, napi_
 
 napi_value JsWindowManager::GetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "mock: GetAllWindowLayoutInfo");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "mock");
     return nullptr;
 }
 

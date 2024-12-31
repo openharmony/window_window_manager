@@ -1123,7 +1123,7 @@ WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<s
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get window layout info failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }
