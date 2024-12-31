@@ -28,12 +28,12 @@ DataHandlerErr ProviderDataHandler::SendData(const AAFwk::Want& toSend, AAFwk::W
     {
         std::lock_guard lock(mutex_);
         if (remoteProxy_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+            TLOGE(WmsLogTag::WMS_UIEXT, "nullptr, %{public}s", config.ToString().c_str());
             return DataHandlerErr::NULL_PTR;
         }
         proxy = iface_cast<SessionProxy>(remoteProxy_);
         if (!proxy) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+            TLOGE(WmsLogTag::WMS_UIEXT, "nullptr, %{public}s", config.ToString().c_str());
             return DataHandlerErr::NULL_PTR;
         }
     }
@@ -48,7 +48,7 @@ DataHandlerErr ProviderDataHandler::SendData(const AAFwk::Want& toSend, AAFwk::W
     MessageParcel replyParcel;
     auto ret = proxy->SendExtensionData(sendParcel, replyParcel, option);
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed, %{public}s", config.ToString().c_str());
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendExtensionData failed, %{public}s", config.ToString().c_str());
         return DataHandlerErr::IPC_SEND_FAILED;
     }
 
