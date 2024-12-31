@@ -10540,20 +10540,24 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session == nullptr) {
                 continue;
             }
-            bool IsOnVirtualDisplay = FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-                session->GetSessionRect().posY_ >= GetFoldLowerScreenPosY();
-            bool IsVirtualDisplayShow = FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-                session->GetSessionRect().posY_ + session->GetSessionRect().height_ >= GetFoldLowerScreenPosY();
-            bool isNotVirtualDisplayNeed = isVirtualDisplay && !IsVirtualDisplayShow &&
-                session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-            bool isNotDefaultDisplayNeed = !isVirtualDisplay && displayId == DEFAULT_DISPLAY_ID &&
-                IsOnVirtualDisplay && session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-            if (isNotVirtualDisplayNeed || isNotDefaultDisplayNeed || !IsGetWindowLayoutInfoNeeded(session) ||
-                session->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
-                session->GetSessionProperty()->GetDisplayId() != displayId) {
+            if (session->GetSessionRect().IsInvalid( )) {
                 continue;
             }
-            filteredSessions.emplace_back(session);
+            if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+                session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID &&
+                displayId == DEFAULT_DISPLAY_ID) {
+                if (isVirtualDisplay &&
+                    session->GetSessionRect().posY_ + session->GetSessionRect().height_ < GetFoldLowerScreenPosY()) {
+                    continue;
+                }
+                if (!isVirtualDisplay && session->GetSessionRect().posY_ >= GetFoldLowerScreenPosY()) {
+                    continue;
+                }
+            }
+            if (IsGetWindowLayoutInfoNeeded(session) && session->GetSessionProperty()->GetDisplayId() == displayId &&
+                session->GetVisibilityState() != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+                filteredSessions.emplace_back(session);
+            }
         }
     }
     std::sort(filteredSessions.begin(), filteredSessions.end(),
