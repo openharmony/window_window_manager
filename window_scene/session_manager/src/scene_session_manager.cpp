@@ -209,6 +209,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.huawei.hmos.mediacontroller", "UIExtAbility", "phone_deviceswitch"),
         std::make_tuple("com.huawei.hmos.mediacontroller", "AnahsDialogAbility", "phone_deviceswitch"),
         std::make_tuple("com.huawei.hmos.security.privacycenter", "SuperPrivacyProtectedAbility", "superprivacy"),
+        std::make_tuple("com.huawei.hmos.security.privacycenter", "PermDisabledReminderAbility", "superprivacy"),
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
@@ -2769,6 +2770,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
+    if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
+        shouldBlock = false;
+    }
     if (shouldBlock) {
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
@@ -3088,8 +3093,8 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
 
 void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "PersistentIds need to be recovered=%{public}zu, CurrentUserId=%{public}d",
-          alivePersistentIds.size(), currentUserId_.load());
+    TLOGI(WmsLogTag::WMS_RECOVER, "Size of PersistentIds need to be recovered=%{public}zu, CurrentUserId=%{public}d",
+        alivePersistentIds.size(), currentUserId_.load());
     alivePersistentIds_ = alivePersistentIds;
 }
 
@@ -3574,6 +3579,42 @@ void SceneSessionManager::SetOutsideDownEventListener(const ProcessOutsideDownEv
     outsideDownEventFunc_ = func;
 }
 
+WMError SceneSessionManager::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d isConsumed:%{public}d", keyCode, isConsumed);
+    if (onWatchGestureConsumeResultFunc_) {
+        onWatchGestureConsumeResultFunc_(keyCode, isConsumed);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "onWatchGestureConsumeResultFunc is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterWatchGestureConsumeResultCallback(NotifyWatchGestureConsumeResultFunc&& func)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    onWatchGestureConsumeResultFunc_ = std::move(func);
+}
+
+WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "isActive:%{public}d", isActive);
+    if (onWatchFocusActiveChangeFunc_) {
+        onWatchFocusActiveChangeFunc_(isActive);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "onWatchFocusActiveChangeFunc is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    onWatchFocusActiveChangeFunc_ = std::move(func);  
+}
+
 void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)
 {
     for (auto iter = remoteObjectMap_.begin(); iter != remoteObjectMap_.end(); ++iter) {
@@ -3848,6 +3889,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
             FlushWindowInfoToMMI(true);
             NotifyAllAccessibilityInfo();
             rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+            UpdatePrivateStateAndNotifyForAllScreens();
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
             rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
@@ -6159,7 +6201,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     auto displayId = sessionProperty->GetDisplayId();
     std::unordered_set<std::string> privacyBundleList;
     GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    if (!JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
+    if (isUserBackground_ || !JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
         return;
     }
 
@@ -10789,6 +10831,10 @@ void SceneSessionManager::UpdateSpecialExtWindowFlags(int32_t persistentId, Exte
 
 void SceneSessionManager::HideNonSecureFloatingWindows()
 {
+    if (systemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't hide");
+        return;
+    }
     bool shouldHide = false;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -11763,11 +11809,11 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
+void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId)
 {
-    if (currentUserId_ != static_cast<int32_t>(userid)) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64,
-            currentUserId_.load(), userid);
+    if (currentUserId_ != static_cast<int32_t>(userId)) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userId:%{public}" PRIu64,
+            currentUserId_.load(), userId);
         return;
     }
     auto secSurfaceInfoMap = secExtensionData->GetSecData();

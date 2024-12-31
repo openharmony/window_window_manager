@@ -268,9 +268,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | Sma
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
     // the keyboard session is system keyboard
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(property));
+    keyboardSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
     keyboardSession->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, keyboardSession->IsSystemKeyboard());
@@ -666,6 +664,63 @@ HWTEST_F(SceneSessionManagerTest12, IsKeyboardForeground, Function | SmallTest |
     sceneSessionManager->IsKeyboardForeground();
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
     sceneSessionManager->IsKeyboardForeground();
+}
+
+/**
+ * @tc.name: RegisterWatchGestureConsumeResultCallback
+ * @tc.desc: RegisterWatchGestureConsumeResultCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterWatchGestureConsumeResultCallback, Function | SmallTest | Level3)
+{
+    NotifyWatchGestureConsumeResultFunc func = [](int32_t keyCode, bool isConsumed) {};
+    ssm_->RegisterWatchGestureConsumeResultCallback(std::move(func));
+    ASSERT_NE(ssm_->onWatchGestureConsumeResultFunc_, nullptr);
+}
+
+/**
+ * @tc.name: RegisterWatchFocusActiveChangeCallback
+ * @tc.desc: RegisterWatchFocusActiveChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterWatchFocusActiveChangeCallback, Function | SmallTest | Level3)
+{
+    NotifyWatchFocusActiveChangeFunc func = [](bool isActive) {};
+    ssm_->RegisterWatchFocusActiveChangeCallback(std::move(func));
+    ASSERT_NE(ssm_->onWatchFocusActiveChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyWatchGestureConsumeResult
+ * @tc.desc: NotifyWatchGestureConsumeResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyWatchGestureConsumeResult, Function | SmallTest | Level3)
+{
+    int32_t keyCode = 2049;
+    bool isConsumed = true;
+    ssm_->onWatchGestureConsumeResultFunc_ = [](int32_t keyCode, bool isConsumed) {};
+    auto ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ssm_->onWatchGestureConsumeResultFunc_ = nullptr;
+    ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyWatchFocusActiveChange
+ * @tc.desc: NotifyWatchFocusActiveChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyWatchFocusActiveChange, Function | SmallTest | Level3)
+{
+    bool isActive = true;
+    ssm_->onWatchFocusActiveChangeFunc_ = [](bool isActive) {};
+    auto ret = ssm_->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ssm_->onWatchFocusActiveChangeFunc_ = nullptr;
+    ret = ssm_->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**

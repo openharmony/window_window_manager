@@ -54,7 +54,7 @@ public:
     }
     virtual DMError SetOrientation(ScreenId screenId, Orientation orientation) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
-        DmErrorCode* errorCode = nullptr) = 0;
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false) = 0;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode = nullptr)
     {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
@@ -123,6 +123,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
+    virtual ScreenPowerState GetScreenPower() { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual bool TryToCancelScreenOff() = 0;

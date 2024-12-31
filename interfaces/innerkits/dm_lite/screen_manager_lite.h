@@ -114,6 +114,13 @@ public:
      * @return Power state of screen.
      */
     ScreenPowerState GetScreenPower(ScreenId screenId);
+
+    /**
+     * @brief Get screen power state.
+     *
+     * @return Power state of screen.
+     */
+    ScreenPowerState GetScreenPower();
 private:
     ScreenManagerLite();
     ~ScreenManagerLite();
