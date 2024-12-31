@@ -782,7 +782,7 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
     info.screenId_ = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     sceneSession->SetForegroundInteractiveStatus(false);
     sceneSession->NotifyServerToUpdateRect(uiParam, reason);
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));
