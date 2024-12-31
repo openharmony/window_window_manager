@@ -1004,7 +1004,7 @@ HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
 
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     bool res = window->IsSystemWindow();
     ASSERT_EQ(res, true);
 }
@@ -1025,7 +1025,7 @@ HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
 
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
     bool res = window->IsAppWindow();
     ASSERT_EQ(res, true);
 }
