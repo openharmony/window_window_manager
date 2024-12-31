@@ -1211,7 +1211,7 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [displayId, env, task = napiAsyncTask] {
+    auto asyncTask = [displayId, where, env, task = napiAsyncTask] {
         std::vector<sptr<WindowLayoutInfo>> infos;
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
