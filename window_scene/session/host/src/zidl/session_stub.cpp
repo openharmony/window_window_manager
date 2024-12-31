@@ -513,7 +513,7 @@ int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageP
 
 int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
 {
-    WSError errCode = OnRestoreMainWindow();
+    OnRestoreMainWindow();
     return ERR_NONE;
 }
 
@@ -1348,7 +1348,7 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
-    WSError errCode = OnSetWindowRectAutoSave(enabled);
+    OnSetWindowRectAutoSave(enabled);
     return ERR_NONE;
 }
 
