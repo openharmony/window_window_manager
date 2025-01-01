@@ -935,7 +935,9 @@ void ScreenSessionManager::RecoverMultiScreenInfoFromData(sptr<ScreenSession> sc
     }
     TLOGW(WmsLogTag::DMS, "read param success");
     SetMultiScreenMode(mainScreenOption.screenId_, secondaryScreenOption.screenId_, multiScreenMode);
-    SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+    if (multiScreenMode == MultiScreenMode::SCREEN_EXTEND) {
+        SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+    }
 }
 
 void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSession,
