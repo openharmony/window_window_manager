@@ -6057,6 +6057,11 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN_WATERFALL) {
+        sceneSession->UpdateFullScreenWaterfallMode(true);
+        return sceneSession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    }
+    sceneSession->UpdateFullScreenWaterfallMode(false);
     return sceneSession->UpdateWindowMode(mode);
 }
 
