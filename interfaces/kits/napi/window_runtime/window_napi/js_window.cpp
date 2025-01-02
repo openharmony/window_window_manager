@@ -7330,7 +7330,7 @@ napi_value JsWindow::OnSetAvoidAreaOption(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t avoidAreaOption = 0;
-    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &avoidAreaOption) != napi_ok) {
+    if (argv[INDEX_ZERO] == nullptr || napi_get_value_uint32(env, argv[INDEX_ZERO], &avoidAreaOption) != napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to avoidAreaOption");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -7344,7 +7344,7 @@ napi_value JsWindow::OnSetAvoidAreaOption(napi_env env, napi_callback_info info)
     }
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] avoidAreaOption %{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), avoidAreaOption);
-    return CreateJsValue(env, enable);
+    return CreateJsValue(env, avoidAreaOption);
 }
 
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
