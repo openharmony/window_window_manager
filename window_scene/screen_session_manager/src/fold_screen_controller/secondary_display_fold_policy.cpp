@@ -311,4 +311,9 @@ void SecondaryDisplayFoldPolicy::InitScreenParams()
           screenParams_[GLOBAL_FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT],
           screenParams_[FULL_STATUS_OFFSET_X]);
 }
+
+std::vector<uint32_t> SecondaryDisplayFoldPolicy::GetScreenParams()
+{
+    return screenParams_;
+}
 } // namespace OHOS::Rosen
