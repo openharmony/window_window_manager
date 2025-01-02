@@ -49,7 +49,7 @@ public:
     RSAnimationTimingCurve GetThrowSlipTimingCurve();
 
     void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
-    bool IsFullScreenWaterfallMode() { return isFullScreenWaterfallMode_; }
+    bool IsFullScreenWaterfallMode() const { return isFullScreenWaterfallMode_; }
     void UpdateRect();
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
     void UnregisterFullScreenWaterfallModeChangeCallback();
