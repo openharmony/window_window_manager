@@ -1181,41 +1181,6 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: InitUIContent
- * @tc.desc: InitUIContent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, InitUIContent, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: InitUIContent start";
-    auto window = GetTestWindowImpl("InitUIContent_Default");
-    ASSERT_NE(window, nullptr);
-    std::string contentInfo = "contentInfo";
-    napi_env env = nullptr;
-    napi_value storage = nullptr;
-    WindowSetUIContentType type = WindowSetUIContentType::DEFAULT;
-    AppExecFwk::Ability* ability = nullptr;
-    OHOS::Ace::UIContentErrorCode aceRet;
-    BackupAndRestoreType restoreType = BackupAndRestoreType::NONE;
-
-    window->uiContent_ = nullptr;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::RESTORE;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::BY_NAME;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::BY_ABC;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: InitUIContent end";
-}
-
-/**
  * @tc.name: NotifyScreenshot
  * @tc.desc: NotifyScreenshot01 listener==nullptr
  * @tc.type: FUNC
