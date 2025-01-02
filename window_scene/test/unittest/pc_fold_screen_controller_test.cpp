@@ -756,16 +756,16 @@ HWTEST_F(PcFoldScreenControllerTest, GetPersistentId, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: GetScreenId
- * @tc.desc: test function : GetScreenId
+ * @tc.name: GetDisplayId
+ * @tc.desc: test function : GetDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenControllerTest, GetScreenId, Function | SmallTest | Level3)
+HWTEST_F(PcFoldScreenControllerTest, GetDisplayId, Function | SmallTest | Level3)
 {
     mainSession_->sessionInfo_.screenId_ = 100;
-    EXPECT_EQ(100, controller_->GetScreenId());
+    EXPECT_EQ(100, controller_->GetDisplayId());
     mainSession_ = nullptr;
-    EXPECT_EQ(SCREEN_ID_INVALID, controller_->GetScreenId());
+    EXPECT_EQ(SCREEN_ID_INVALID, controller_->GetDisplayId());
 }
 
 /**
