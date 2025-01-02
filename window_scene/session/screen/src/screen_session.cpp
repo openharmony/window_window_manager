@@ -534,6 +534,10 @@ void ScreenSession::Connect()
         return;
     }
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnConnect(screenId_);
     }
 }
@@ -623,6 +627,10 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
     currentSensorRotation_ = sensorRotation;
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnSensorRotationChange(sensorRotation, screenId_);
     }
 }
@@ -635,6 +643,10 @@ void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus)
 void ScreenSession::HoverStatusChange(int32_t hoverStatus)
 {
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnHoverStatusChange(hoverStatus, screenId_);
     }
 }
@@ -642,6 +654,10 @@ void ScreenSession::HoverStatusChange(int32_t hoverStatus)
 void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnScreenExtendChange(mainScreenId, extendScreenId);
     }
 }
@@ -656,6 +672,10 @@ void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplay
 void ScreenSession::ScreenOrientationChange(float orientation)
 {
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnScreenOrientationChange(orientation, screenId_);
     }
 }
