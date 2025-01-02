@@ -3967,7 +3967,7 @@ WSError SceneSessionManager::SetBrightness(const sptr<SceneSession>& sceneSessio
 void SceneSessionManager::PostBrightnessTask(float brightness)
 {
     bool postTaskRet = true;
-    bool isPC = systemConfig_.IsPcWindow();
+    bool isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (!isPC) {
             auto task = [] {
@@ -4008,7 +4008,7 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     }
     auto brightness = sceneSession->GetBrightness();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
-    bool isPC = systemConfig_.IsPcWindow();
+    bool isPC = systemConfig_.uiType_ == UI_TYPE_PC;
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (GetDisplayBrightness() != brightness) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
