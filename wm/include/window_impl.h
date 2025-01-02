@@ -165,6 +165,7 @@ public:
         const Rect& rect = {0, 0, 0, 0}) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+    
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
