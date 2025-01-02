@@ -233,7 +233,7 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
-/**
+/*
  * Notify when updating highlight instead after hightlight functionality enabled
  */
 WSError MainSession::UpdateFocus(bool isFocused)
