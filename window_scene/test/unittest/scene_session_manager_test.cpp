@@ -572,14 +572,12 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, Function | SmallTes
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     persistentId = 1;
     WSError result02 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
     EXPECT_EQ(result02, WSError::WS_OK);
 
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     WSError result03 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
     EXPECT_EQ(result03, WSError::WS_OK);
 }
@@ -801,11 +799,10 @@ HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "UpdateTopmostProperty";
     info.bundleName_ = "UpdateTopmostProperty";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetTopmost(true);
     property->SetSystemCalling(true);
-    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionProperty(property);
     WMError result = ssm_->UpdateTopmostProperty(property, sceneSession);
     ASSERT_EQ(WMError::WM_OK, result);
 }
@@ -957,6 +954,15 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureFloatingWindows, Function | Small
     ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
     ssm_->HideNonSecureFloatingWindows();
     EXPECT_TRUE(floatSession->GetSessionProperty()->GetForceHide());
+
+    ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = false;
+    ssm_->HideNonSecureFloatingWindows();
+    ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->HideNonSecureFloatingWindows();
+    EXPECT_FALSE(floatSession->GetSessionProperty()->GetForceHide());
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);
     ssm_->sceneSessionMap_.clear();
     ssm_->nonSystemFloatSceneSessionMap_.clear();
@@ -2374,10 +2380,8 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     DisplayId displayId = 0;
-    property->SetDisplayId(displayId);
-    sceneSession1->SetSessionProperty(property);
+    sceneSession1->property_->SetDisplayId(displayId);
 
     const std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;

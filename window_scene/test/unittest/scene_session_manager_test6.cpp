@@ -971,8 +971,6 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->SetSessionProperty(property);
 
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
     ASSERT_EQ(100, sceneSession->GetSessionInfo().screenId_);

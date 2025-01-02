@@ -165,10 +165,31 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTransform01, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetTransform01
+ * @tc.desc: set transform
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetTransform02, Function | SmallTest | Level3)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetTransform01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    window->state_ = WindowState::STATE_CREATED;
+    Transform trans_;
+    ASSERT_EQ(WMError::WM_OK, window->SetTransform(trans_));
+    ASSERT_EQ(trans_, window->GetTransform());
+}
+
+/**
  * @tc.name: RegisterAnimationTransitionController01
  * @tc.desc: RegisterAnimationTransitionController
  * @tc.type: FUNC
- * @tc.require:issueI7IJVV
  */
 HWTEST_F(WindowSceneSessionImplTest2, RegisterAnimationTransitionController01, Function | SmallTest | Level3)
 {
@@ -249,6 +270,26 @@ HWTEST_F(WindowSceneSessionImplTest2, SetAlpha01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetAlpha02
+ * @tc.desc: SetAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetAlpha02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetAlpha02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestMode", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->property_->SetPersistentId(1);
+    windowSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->SetAlpha(1.0));
+}
+
+/**
  * @tc.name: DestroySubWindow01
  * @tc.desc: DestroySubWindow
  * @tc.type: FUNC
@@ -301,6 +342,21 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateAnimationFlagProperty01, Function | 
 }
 
 /**
+ * @tc.name: UpdateAnimationFlagProperty02
+ * @tc.desc: UpdateAnimationFlagProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, UpdateAnimationFlagProperty02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateAnimationFlagProperty01");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->UpdateAnimationFlagProperty(false));
+}
+
+/**
  * @tc.name: UpdateWindowModeImmediately01
  * @tc.desc: UpdateWindowModeImmediately
  * @tc.type: FUNC
@@ -343,6 +399,9 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateWindowMode01, Function | SmallTest |
     windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW,
               windowSceneSession->UpdateWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN));
+    windowSceneSession->property_->SetPersistentId(1);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE,
+              windowSceneSession->UpdateWindowMode(WindowMode::WINDOW_MODE_UNDEFINED));
 }
 
 /**
@@ -836,10 +895,24 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest |
     option->SetWindowName("BindDialogTarget01");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSession);
+    sptr<IRemoteObject> targetToken;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSceneSession->BindDialogTarget(targetToken));
+}
+
+/**
+ * @tc.name: BindDialogTarget02
+ * @tc.desc: BindDialogTarget
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("BindDialogTarget01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestMode", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     windowSceneSession->property_->SetPersistentId(1);
     windowSceneSession->hostSession_ = session;
     sptr<IRemoteObject> targetToken;
@@ -880,6 +953,26 @@ HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled02, Function | 
 
     WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SetDialogBackGestureEnabled03
+ * @tc.desc: SetDialogBackGestureEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetDialogBackGestureEnabled03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetDialogBackGestureEnabled02");
+    option->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSession->hostSession_ = session;
+    windowSceneSession->property_->SetPersistentId(1);
+    WMError ret = windowSceneSession->SetDialogBackGestureEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -948,10 +1041,8 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifyPrepareClosePiPWindow01, Function | 
     option->SetWindowName("NotifyPrepareClosePiPWindow01");
     option->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, windowSceneSession);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->NotifyPrepareClosePiPWindow());
 }
@@ -1428,6 +1519,9 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     option->SetDisplayId(0);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Maximize(presentation));
+
     window->property_->SetWindowName("Maximize02");
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     window->property_->SetPersistentId(2);
@@ -1436,8 +1530,6 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize02, Function | SmallTest | Level2)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-
-    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
     // not support subWinodw call
     ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Maximize(presentation));
 
@@ -1469,27 +1561,43 @@ HWTEST_F(WindowSceneSessionImplTest2, Maximize03, Function | SmallTest | Level2)
 
     // case1: only set maximize()
     MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     auto ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 
     // case2: maximize(EXIT_IMMERSIVE) and the immersive value will be set ad false
     presentation = MaximizePresentation::EXIT_IMMERSIVE;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 
     // case3: maximize(FOLLOW_APP_IMMERSIVE_SETTING) and the immersive value will be set as client set
     presentation = MaximizePresentation::FOLLOW_APP_IMMERSIVE_SETTING;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
 
-    // case4: maximize(ENTER_IMMERSIVE) and the immersive value will be set as true
-    presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    // case4: maximize(ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER) and the immersive value will be set as true
+    presentation = MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ret = window->Maximize(presentation);
     ASSERT_EQ(WMError::WM_OK, ret);
-    ASSERT_EQ(window->GetImmersiveModeEnabledState(), false);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->Maximize(presentation);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(window->GetImmersiveModeEnabledState(), true);
 }
 
 /**
@@ -1764,8 +1872,56 @@ HWTEST_F(WindowSceneSessionImplTest2, SetTitleButtonVisible03, Function | SmallT
  */
 HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest | Level2)
 {
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest2: IsWindowRectAutoSave start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsWindowRectAutoSave");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    bool enabled = false;
+    auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    enabled = true;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->property_->SetPersistentId(1);
+    windowSceneSessionImpl->hostSession_ = session;
+    windowSceneSessionImpl->context_ = abilityContext_;
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    enabled = false;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    enabled = true;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    windowSceneSessionImpl->context_ = nullptr;
+    enabled = false;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    enabled = true;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    GTEST_LOG_(INFO) << "WindowSceneSessionImplTest2: IsWindowRectAutoSave end";
+}
+
+/**
+ * @tc.name: IsWindowRectAutoSave
+ * @tc.desc: IsWindowRectAutoSave
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWindowRectAutoSave002");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
@@ -1775,13 +1931,17 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, Function | SmallTest
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     bool enabled = false;
     auto ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    option->SetWindowName("IsWindowRectAutoSave002");
+    windowSceneSessionImpl->state_ = WindowState::STATE_INITIAL;
+    windowSceneSessionImpl->property_->SetPersistentId(1);
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 }
 } // namespace
 } // namespace Rosen

@@ -270,6 +270,13 @@ ScreenPowerState ScreenManagerAdapterLite::GetScreenPower(ScreenId dmsScreenId)
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
 }
 
+ScreenPowerState ScreenManagerAdapterLite::GetScreenPower()
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+
+    return displayManagerServiceProxy_->GetScreenPower();
+}
+
 DMSDeathRecipientLite::DMSDeathRecipientLite(BaseAdapterLite& adapter) : adapter_(adapter)
 {
 }

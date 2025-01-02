@@ -243,10 +243,7 @@ HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, Function | SmallTe
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->UpdateOccupiedAreaIfNeed(persistentId);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSession->SetSessionProperty(property);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ssm_->UpdateOccupiedAreaIfNeed(persistentId);
 
     persistentId = 1;

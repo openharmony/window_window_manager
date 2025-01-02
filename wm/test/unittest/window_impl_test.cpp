@@ -931,6 +931,20 @@ HWTEST_F(WindowImplTest, Minimize02, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: Minimize03
+ * @tc.desc: Minimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest, Minimize03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Minimize03");
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    WMError res = window->Minimize();
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
+}
+
+/**
  * @tc.name: IsSupportWideGamut01
  * @tc.desc: IsSupportWideGamut
  * @tc.type: FUNC
@@ -1220,7 +1234,6 @@ HWTEST_F(WindowImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
         .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
-    ;
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(true));
     ASSERT_TRUE(window->IsKeepScreenOn());
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(false));

@@ -20,6 +20,8 @@
 
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
+
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::AppExecFwk {
@@ -55,6 +57,9 @@ public:
 
     DisplayId GetDisplayId() const override;
     void SetDisplayId(DisplayId displayId);
+
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
 
     WindowState GetWindowState() const override
     {

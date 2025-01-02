@@ -1424,7 +1424,7 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     auto result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    property->isSystemCalling_ = false;
+    sceneSession->property_->isSystemCalling_ = false;
     result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
@@ -1443,8 +1443,6 @@ HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
-    sceneSession->SetSessionProperty(property);
     auto result = sceneSession->SetTopmost(false);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(sceneSession->IsTopmost());
@@ -1524,7 +1522,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1553,7 +1551,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect1, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1582,7 +1580,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1831,7 +1829,7 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
@@ -1855,7 +1853,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetDefaultDisplayIdIfNeed();
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetDisplayId(-1);
     sceneSession->SetSessionProperty(property);

@@ -244,7 +244,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent, Function | SmallTest | Level2)
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     info.isSystem_ = false;
     pointerEvent->SetPointerAction(9);
@@ -277,7 +277,7 @@ HWTEST_F(SceneSessionTest5, TransferPointerEvent01, Function | SmallTest | Level
     info.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     session->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     session->property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
     session->ClearDialogVector();
@@ -578,16 +578,14 @@ HWTEST_F(SceneSessionTest5, AdjustRectByAspectRatio, Function | SmallTest | Leve
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSRect rect;
     EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-    session->SetSessionProperty(property);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
+    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    session->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     EXPECT_EQ(false, session->AdjustRectByAspectRatio(rect));
 }
 
@@ -652,10 +650,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, Function | SmallTest | Level2)
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, session->GetWindowType());
     EXPECT_NE(session->moveDragController_, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    session->SetSessionProperty(property);
-    property->compatibleModeInPc_ = true;
+    session->property_->compatibleModeInPc_ = true;
     session->OnMoveDragCallback(reason);
     EXPECT_EQ(WSError::WS_OK, session->UpdateSizeChangeReason(reason));
 }

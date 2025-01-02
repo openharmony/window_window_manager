@@ -1418,6 +1418,7 @@ HWTEST_F(SceneSessionTest2, TransferPointerEvent03, Function | SmallTest | Level
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     property->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
+    sceneSession->SetSessionProperty(property);
     sceneSession->AdjustRectByLimits(limits, ratio, false, vpr, rect);
     ASSERT_EQ(WSError::WS_OK, sceneSession->SetPipActionEvent("pointerEvent", 0));
 }
