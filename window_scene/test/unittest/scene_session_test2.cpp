@@ -1035,6 +1035,7 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "NotifyTouchOutside";
     info.bundleName_ = "NotifyTouchOutside";
+
     sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
     sceneSession->sessionStage_ = new SessionStageMocker();
@@ -1077,7 +1078,7 @@ HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | Smal
     bool result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(true, result);
 
-    sceneSession->OnTouchOutside_ = nullptr;
+    sceneSession->onTouchOutside_ = nullptr;
     result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(false, result);
 
