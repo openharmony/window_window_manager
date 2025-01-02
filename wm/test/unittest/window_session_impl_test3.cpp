@@ -103,6 +103,8 @@ HWTEST_F(WindowSessionImplTest3, SetContinueState, Function | SmallTest | Level2
     ASSERT_EQ(ret, WMError::WM_OK);
     ret = window_->SetContinueState(-100);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+        ret = window_->SetContinueState(3);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetContinueState end";
 }
 
@@ -171,11 +173,37 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: GetAppForceLandscapeConfig
+ * @tc.name: GetAppForceLandscapeConfig01
  * @tc.desc: GetAppForceLandscapeConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig, Function | SmallTest | Level2)
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
+    window_ = GetTestWindowImpl("GetAppForceLandscapeConfig01");
+    ASSERT_NE(window_, nullptr);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    AppForceLandscapeConfig config = {};
+    auto res = window_->GetAppForceLandscapeConfig(config);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(res, WMError::WM_OK);
+        ASSERT_EQ(config.mode_, 0);
+        ASSERT_EQ(config.homePage_, "");
+    }
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig end";
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfig02
+ * @tc.desc: GetAppForceLandscapeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetAppForceLandscapeConfig02, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest: GetAppForceLandscapeConfig start";
     window_ = GetTestWindowImpl("GetAppForceLandscapeConfig");
@@ -293,13 +321,35 @@ HWTEST_F(WindowSessionImplTest3, SetWindowModal, Function | SmallTest | Level2)
     window_->property_->SetPersistentId(INVALID_SESSION_ID);
     auto ret = window_->SetWindowModal(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
-    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window_->SetWindowModal(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(WMError::WM_OK, ret);
+
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = window_->SetWindowModal(true);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ret = window_->SetWindowModal(true);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+    
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->SetWindowModal(false);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ret = window_->SetWindowModal(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: SetWindowModal end";
 }
 
@@ -556,7 +606,6 @@ HWTEST_F(WindowSessionImplTest3, CopyUniqueDensityParameter, Function | SmallTes
     window_ = GetTestWindowImpl("CopyUniqueDensityParameter");
     ASSERT_NE(window_, nullptr);
     sptr<WindowSessionImpl> parentWindow = GetTestWindowImpl("CopyUniqueDensityParameter01");
-    ;
     ASSERT_NE(parentWindow, nullptr);
     window_->useUniqueDensity_ = false;
     window_->virtualPixelRatio_ = 1.0f;
@@ -938,7 +987,7 @@ HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | Sm
     ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
 }
 
-/*
+/**
  * @tc.name: IsSystemWindow
  * @tc.desc: IsSystemWindow
  * @tc.type: FUNC
@@ -954,7 +1003,7 @@ HWTEST_F(WindowSessionImplTest3, IsSystemWindow, Function | SmallTest | Level2)
 
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     bool res = window->IsSystemWindow();
     ASSERT_EQ(res, true);
 }
@@ -975,7 +1024,7 @@ HWTEST_F(WindowSessionImplTest3, IsAppWindow, Function | SmallTest | Level2)
 
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+    window->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
     bool res = window->IsAppWindow();
     ASSERT_EQ(res, true);
 }

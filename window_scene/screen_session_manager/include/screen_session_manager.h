@@ -95,6 +95,8 @@ public:
     uint32_t GetScreenBrightness(uint64_t screenId) override;
     bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     void ForceSkipScreenOffAnimation();
+    ScreenPowerState GetScreenPower() override;
+
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
     void NotifyScreenshot(DisplayId displayId);

@@ -109,7 +109,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         uid, identityToken]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (SessionHelper::IsMainWindow(session->GetWindowType())) {
@@ -945,10 +945,10 @@ WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
     auto task = [weakThis = wptr(this), mode]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            TLOGNE(WmsLogTag::WMS_PC, "[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFD("[WMSCom] mode: %{public}u", static_cast<uint32_t>(mode));
+        TLOGND(WmsLogTag::WMS_PC, "[WMSCom] mode: %{public}u", static_cast<uint32_t>(mode));
         session->maximizeMode_ = mode;
         ScenePersistentStorage::Insert("maximize_state", static_cast<int32_t>(session->maximizeMode_),
             ScenePersistentStorageType::MAXIMIZE_STATE);
@@ -962,11 +962,11 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
     auto task = [weakThis = wptr(this), &mode]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            TLOGNE(WmsLogTag::WMS_PC, "[WMSCom] session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         mode = maximizeMode_;
-        WLOGFD("[WMSCom] mode: %{public}u", static_cast<uint32_t>(mode));
+        TLOGND(WmsLogTag::WMS_PC, "[WMSCom] mode: %{public}u", static_cast<uint32_t>(mode));
         return WSError::WS_OK;
     };
     return PostSyncTask(task, "GetGlobalMaximizeMode");
@@ -1017,18 +1017,18 @@ WSError SceneSession::SetAspectRatio(float ratio)
     auto task = [weakThis = wptr(this), ratio] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->GetSessionProperty()) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Set ratio failed, property is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "Set ratio failed, property is null");
             return WSError::WS_ERROR_NULLPTR;
         }
         float vpr = 1.5f; // 1.5f: default virtual pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display) {
             vpr = display->GetVirtualPixelRatio();
-            WLOGD("vpr=%{public}f", vpr);
+            TLOGND(WmsLogTag::WMS_LAYOUT, "vpr=%{public}f", vpr);
         }
         WSError ret = CheckAspectRatioValid(session, ratio, vpr);
         if (ret != WSError::WS_OK) {
@@ -1594,7 +1594,7 @@ WSError SceneSession::RaiseToAppTop()
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->onRaiseToTop_) {
@@ -1626,7 +1626,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
     auto task = [weakThis = wptr(this), subWindowId]() {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->onRaiseAboveTarget_) {
@@ -2167,7 +2167,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
     auto task = [weakThis = wptr(this), &avoidAreas] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
             return WSError::WS_ERROR_NULLPTR;
         }
 

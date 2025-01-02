@@ -310,6 +310,11 @@ ScreenPowerState ScreenManagerLite::GetScreenPower(ScreenId dmsScreenId)
     return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower(dmsScreenId);
 }
 
+ScreenPowerState ScreenManagerLite::GetScreenPower()
+{
+    return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower();
+}
+
 void ScreenManagerLite::Impl::OnRemoteDied()
 {
     WLOGFD("dms is died");

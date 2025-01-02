@@ -112,9 +112,7 @@ void SecondaryDisplayFoldPolicy::RecoverWhenBootAnimationExit()
 {
     TLOGW(WmsLogTag::DMS, "CurrentScreen(%{public}" PRIu64 ")", screenId_);
     FoldDisplayMode displayMode = GetModeMatchStatus();
-    if (currentDisplayMode_ != displayMode) {
-        ChangeScreenDisplayMode(displayMode);
-    }
+    ChangeScreenDisplayMode(displayMode);
 }
 
 FoldDisplayMode SecondaryDisplayFoldPolicy::GetModeMatchStatus()
@@ -172,11 +170,16 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
         return;
     }
     {
+        if (lastStatus_ == FoldStatus::UNKNOWN) {
+            lastStatus_ = currentFoldStatus_;
+        }
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-        if (currentDisplayMode_ == displayMode) {
+        if (currentDisplayMode_ == displayMode && lastStatus_ != currentFoldStatus_) {
             TLOGW(WmsLogTag::DMS, "already in displayMode %{public}d", displayMode);
+            lastStatus_ = currentFoldStatus_;
             return;
         }
+        lastStatus_ = currentFoldStatus_;
     }
     SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND,
         displayMode);

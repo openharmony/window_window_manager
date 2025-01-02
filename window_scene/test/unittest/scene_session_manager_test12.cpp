@@ -268,9 +268,7 @@ HWTEST_F(SceneSessionManagerTest12, CreateKeyboardPanelSession03, Function | Sma
     ASSERT_EQ(nullptr, keyboardSession->GetKeyboardPanelSession());
 
     // the keyboard session is system keyboard
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ASSERT_EQ(WSError::WS_OK, keyboardSession->SetSessionProperty(property));
+    keyboardSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ASSERT_NE(nullptr, keyboardSession->GetSessionProperty());
     keyboardSession->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, keyboardSession->IsSystemKeyboard());

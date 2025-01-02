@@ -64,6 +64,7 @@
 #include "anomaly_detection.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
+#include "common/include/fold_screen_state_internel.h"
 
 #include "hidump_controller.h"
 
@@ -123,6 +124,8 @@ const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
+constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -140,6 +143,11 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
     {"locked",                              OHOS::AppExecFwk::DisplayOrientation::LOCKED},
     {"auto_rotation_unspecified",           OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_UNSPECIFIED},
     {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
+};
+
+const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = { 
+    "SCBSmartDock",
+    "SCBExtScreenDock"
 };
 
 const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
@@ -209,6 +217,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.huawei.hmos.mediacontroller", "UIExtAbility", "phone_deviceswitch"),
         std::make_tuple("com.huawei.hmos.mediacontroller", "AnahsDialogAbility", "phone_deviceswitch"),
         std::make_tuple("com.huawei.hmos.security.privacycenter", "SuperPrivacyProtectedAbility", "superprivacy"),
+        std::make_tuple("com.huawei.hmos.security.privacycenter", "PermDisabledReminderAbility", "superprivacy"),
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
@@ -2769,6 +2778,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
+    if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
+        shouldBlock = false;
+    }
     if (shouldBlock) {
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
@@ -3088,8 +3101,8 @@ SessionInfo SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProp
 
 void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)
 {
-    TLOGI(WmsLogTag::WMS_RECOVER, "PersistentIds need to be recovered=%{public}zu, CurrentUserId=%{public}d",
-          alivePersistentIds.size(), currentUserId_.load());
+    TLOGI(WmsLogTag::WMS_RECOVER, "Size of PersistentIds need to be recovered=%{public}zu, CurrentUserId=%{public}d",
+        alivePersistentIds.size(), currentUserId_.load());
     alivePersistentIds_ = alivePersistentIds;
 }
 
@@ -3884,6 +3897,7 @@ void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
             FlushWindowInfoToMMI(true);
             NotifyAllAccessibilityInfo();
             rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+            UpdatePrivateStateAndNotifyForAllScreens();
         } else { // switch to another user
             SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
             rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
@@ -6195,7 +6209,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     auto displayId = sessionProperty->GetDisplayId();
     std::unordered_set<std::string> privacyBundleList;
     GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    if (!JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
+    if (isUserBackground_ || !JudgeNeedNotifyPrivacyInfo(displayId, privacyBundleList)) {
         return;
     }
 
@@ -10533,6 +10547,87 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
+WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
+    std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    auto task = [this, displayId, &infos]() mutable {
+        bool isVirtualDisplay = false;
+        if (displayId == VIRTUAL_DISPLAY_ID) {
+            displayId = DEFAULT_DISPLAY_ID;
+            isVirtualDisplay = true;
+        }
+        std::vector<sptr<SceneSession>> filteredSessions;
+        FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
+        for (const auto& session : filteredSessions) {
+            Rect globalScaledRect;
+            session->GetGlobalScaledRect(globalScaledRect);
+            if (isVirtualDisplay) {
+                globalScaledRect.posY_ -= GetFoldLowerScreenPosY();
+            }
+            auto windowLayoutInfo = sptr<WindowLayoutInfo>::MakeSptr();
+            windowLayoutInfo->rect = globalScaledRect;
+            infos.emplace_back(windowLayoutInfo);
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+    std::vector<sptr<SceneSession>>& filteredSessions)
+{
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session == nullptr) {
+                continue;
+            }
+            if (session->GetSessionRect().IsInvalid()) {
+                continue;
+            }
+            if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+                session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID &&
+                displayId == DEFAULT_DISPLAY_ID) {
+                if (isVirtualDisplay &&
+                    session->GetSessionRect().posY_ + session->GetSessionRect().height_ < GetFoldLowerScreenPosY()) {
+                    continue;
+                }
+                if (!isVirtualDisplay && session->GetSessionRect().posY_ >= GetFoldLowerScreenPosY()) {
+                    continue;
+                }
+            }
+            if (IsGetWindowLayoutInfoNeeded(session) && session->GetSessionProperty()->GetDisplayId() == displayId &&
+                session->GetVisibilityState() != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+                filteredSessions.emplace_back(session);
+            }
+        }
+    }
+    std::sort(filteredSessions.begin(), filteredSessions.end(),
+              [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs) {
+                  return lhs->GetZOrder() > rhs->GetZOrder();
+              });
+}
+
+int32_t SceneSessionManager::GetFoldLowerScreenPosY() const
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+        PcFoldScreenManager::GetInstance().GetDisplayRects();
+    constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
+    return foldCreaseRect.height_ != 0 ?
+           defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_ :
+           defaultDisplayRect.height_;
+}
+
+bool SceneSessionManager::IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const
+{
+    constexpr int32_t GROUP_ONE = 1;
+    std::string name = session->GetWindowName();
+    std::regex pattern("^(.*?)(\\d*)$"); // Remove last digit
+    std::smatch matches;
+    name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
+    return !session->GetSessionInfo().isSystem_ || LAYOUT_INFO_WHITELIST.find(name) != LAYOUT_INFO_WHITELIST.end();
+}
+
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -10825,6 +10920,10 @@ void SceneSessionManager::UpdateSpecialExtWindowFlags(int32_t persistentId, Exte
 
 void SceneSessionManager::HideNonSecureFloatingWindows()
 {
+    if (systemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't hide");
+        return;
+    }
     bool shouldHide = false;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -11799,11 +11898,11 @@ WMError SceneSessionManager::ReportScreenFoldStatus(const ScreenFoldData& data)
     return WMError::WM_OK;
 }
 
-void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid)
+void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId)
 {
-    if (currentUserId_ != static_cast<int32_t>(userid)) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userid:%{public}" PRIu64,
-            currentUserId_.load(), userid);
+    if (currentUserId_ != static_cast<int32_t>(userId)) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userId:%{public}" PRIu64,
+            currentUserId_.load(), userId);
         return;
     }
     auto secSurfaceInfoMap = secExtensionData->GetSecData();
