@@ -84,6 +84,8 @@ public:
     bool IsTopmost() const;
     void SetMainWindowTopmost(bool isTopmost);
     bool IsMainWindowTopmost() const;
+    void SetWindowDelayRaiseEnabled(bool isEnabled);
+    bool IsWindowDelayRaiseEnabled() const;
     void AddWindowFlag(WindowFlag flag);
     void SetWindowModeSupportType(uint32_t windowModeSupportType);
     void SetFloatingWindowAppType(bool isAppType);
@@ -237,6 +239,7 @@ public:
      */
     void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
     void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
+    bool isWindowDelayRaiseEnabled_ = false;
 
     /*
      * system keyboard

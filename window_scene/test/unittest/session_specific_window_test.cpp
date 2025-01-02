@@ -652,6 +652,27 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick03, Function | SmallTest
     result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE);
     EXPECT_EQ(result, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: HandleSubWindowClick03
+ * @tc.desc: isExecuteDelayRaise is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick04, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(dialogSession, nullptr);
+    session_->SetParentSession(dialogSession);
+
+    bool isExecuteDelayRaise = false;
+    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, isExecuteDelayRaise);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

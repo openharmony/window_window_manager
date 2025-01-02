@@ -1696,7 +1696,8 @@ WSError SessionProxy::ProcessPointDownSession(int32_t posX, int32_t posY)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool isExecuteDelayRaise)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1707,6 +1708,10 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     }
     if (!pointerEvent->WriteToParcel(data)) {
         WLOGFE("width pointerEvent failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isExecuteDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write isExecuteDelayRaise failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

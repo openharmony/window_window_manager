@@ -2090,7 +2090,7 @@ void Session::HandlePointDownDialog()
     }
 }
 
-WSError Session::HandleSubWindowClick(int32_t action)
+WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
@@ -2099,16 +2099,19 @@ WSError Session::HandleSubWindowClick(int32_t action)
     }
     bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (raiseEnabled) {
-        RaiseToAppTopForPointDown();
-    } else if (parentSession) {
-        // sub window is forbidden to raise to top after click, but its parent should raise
-        parentSession->NotifyClick(!IsScbCoreEnabled());
+    if (!isExecuteDelayRaise) {
+        if (raiseEnabled) {
+            RaiseToAppTopForPointDown();
+        } else if (parentSession) {
+            // sub window is forbidden to raise to top after click, but its parent should raise
+            parentSession->NotifyClick(!IsScbCoreEnabled());
+        }
     }
     return WSError::WS_OK;
 }
 
-WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, bool needNotifyClient)
+WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool needNotifyClient, bool isExecuteDelayRaise)
 {
     WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
     if (!IsSystemSession() && !IsSessionValid()) {
@@ -2127,7 +2130,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        WSError ret = HandleSubWindowClick(pointerAction);
+        WSError ret = HandleSubWindowClick(pointerAction, isExecuteDelayRaise);
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -2142,7 +2145,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
-    PresentFoucusIfNeed(pointerAction);
+    if (!isExecuteDelayRaise) {
+        PresentFoucusIfNeed(pointerAction);
+    }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
             WLOGFE("windowEventChannel_ is null");
