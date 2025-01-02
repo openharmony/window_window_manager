@@ -2914,6 +2914,20 @@ public:
      * @return The string corresponding to the window.
      */
     virtual std::string GetClassType() const { return "Window"; }
+
+    /**
+     * @brief Enable or disable window delay raise
+     *
+     * @param isEnabled Enable or disable window delay raise
+     */
+    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether window delay raise is enabled
+     *
+     * @return True means window delay raise is enabled
+     */
+    virtual bool IsWindowDelayRaiseEnabled() const { return false; }
 };
 }
 }

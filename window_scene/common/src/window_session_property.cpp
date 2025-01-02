@@ -428,6 +428,16 @@ bool WindowSessionProperty::IsMainWindowTopmost() const
     return mainWindowTopmost_;
 }
 
+void WindowSessionProperty::SetWindowDelayRaiseEnabled(bool isEnabled)
+{
+    isWindowDelayRaiseEnabled_ = isEnabled;
+}
+
+bool WindowSessionProperty::IsWindowDelayRaiseEnabled() const
+{
+    return isWindowDelayRaiseEnabled_;
+}
+
 void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -1156,7 +1166,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
-        parcel.WriteUint32(avoidAreaOption_);
+        parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1238,6 +1248,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAppInstanceKey(parcel.ReadString());
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
+    property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
     return property;
 }
 
@@ -1321,6 +1332,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     appInstanceKey_ = property->appInstanceKey_;
     isSystemKeyboard_ = property->isSystemKeyboard_;
     avoidAreaOption_ = property->avoidAreaOption_;
+    isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
