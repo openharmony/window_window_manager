@@ -2685,11 +2685,19 @@ void ScreenSessionManager::SetDpiFromSettingData()
 
 void ScreenSessionManager::SetExtendPixelRatio(const float& dpi)
 {
-    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-    for (const auto& sessionIt : screenSessionMap_) {
-        const auto& screenSession = sessionIt.second;
+    auto screenIds = GetAllScreenIds();
+    if (screenIds.empty()) {
+        TLOGE(WmsLogTag::DMS, "no screenId");
+        return;
+    }
+    for (auto screenId : screenIds) {
+        auto screenSession = GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screensession is nullptr, screenId: %{public}" PRIu64"", screenId);
+            continue;
+        }
         if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && !screenSession->isInternal_) {
-            SetVirtualPixelRatio(sessionIt.first, dpi);
+            SetVirtualPixelRatio(screenId, dpi);
         }
     }
 }
