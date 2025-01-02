@@ -44,6 +44,8 @@ public:
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     SuperFoldStatus GetScreenFoldStatus();
     bool IsHalfFolded(DisplayId displayId);
+    void UpdateVirtualKeyboardStatus(bool hasVirtualKeyboard);
+    bool HasVirtualKeyboard();
 
     std::tuple<WSRect, WSRect, WSRect> GetDisplayRects();
 
@@ -61,7 +63,12 @@ public:
 
     void ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
 
-    bool NeedDoThrowSlip(ScreenSide startSide, const WSRectF& velocity);
+    bool NeedDoThrowSlip(const WSRect& rect, const WSRectF& velocity, ScreenSide& throwSide);
+    bool NeedDoEasyThrowSlip(const WSRect& rect, const WSRect& startRect,
+        const WSRectF& velocity, ScreenSide& throwSide);
+    bool CheckVelocityOrientation(const WSRect& rect, const WSRectF& velocity);
+    WSRect CalculateThrowBacktracingRect(const WSRect& rect, const WSRectF& velocity);
+    WSRect CalculateThrowEnd(const WSRect& rect, const WSRectF& velocity);
     bool ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& rect,
         int32_t topAvoidHeight, int32_t botAvoidHeight, int32_t titleHeight);
     void MappingRectInScreenSide(ScreenSide side, WSRect& rect,
@@ -93,6 +100,7 @@ private:
     float vpr_ { 1.5f }; // display vp ratio
     SuperFoldStatus prevScreenFoldStatus_ { SuperFoldStatus::UNKNOWN };
     SuperFoldStatus screenFoldStatus_ { SuperFoldStatus::UNKNOWN };
+    bool hasVirtualKeyboard_ { false }; // bottom virtual keyboard
     // Above guarded by displayInfoMutex_
 
     std::shared_mutex rectsMutex_; // protect rects

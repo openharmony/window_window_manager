@@ -645,6 +645,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             }
             WSRect rect = session->winRect_;
             if (session->IsFullScreenMovable()) {
+                session->UpdateFullScreenWaterfallMode(false);
                 rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->GetSessionRequestRect());
                 session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, "OnSessionEvent", nullptr);
@@ -2462,8 +2463,7 @@ bool SceneSession::IsFullScreenMovable()
         return false;
     }
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING) &&
-        !IsFullScreenWaterfallMode();
+        WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
 bool SceneSession::IsMovable()
@@ -2768,7 +2768,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
     isThrowSlipToFullScreen_.store(false);
-    if (pcFoldScreenController_ && pcFoldScreenController_->IsHalfFolded(GetScreenId())) {
+    if (pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId())) {
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
                 pcFoldScreenController_->GetMovingTimingCurve());
@@ -2776,7 +2776,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
         } else {
             SetSurfaceBounds(globalRect, isGlobal, needFlush);
         }
-        if (reason == SizeChangeReason::DRAG_MOVE) {
+        if (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END) {
             pcFoldScreenController_->RecordMoveRects(rect);
         }
     } else {
@@ -3082,12 +3082,12 @@ void SceneSession::SetSurfaceBoundsWithAnimation(
             TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
             return;
         }
-        session->SetSurfaceBounds(rect, isGlobal, needFlush);
+        session->SetSurfaceBounds(rect, isGlobal, needFlush, true);
     };
     RSNode::Animate(animationParam.first, animationParam.second, interiaFunc, finishCallback);
 }
 
-void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
+void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush, bool needFlushAll)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         rect.ToString().c_str(), isGlobal, needFlush);
@@ -3128,6 +3128,9 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     }
     if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Commit();
+    }
+    if (needFlushAll) {
+        RSTransaction::FlushImplicitTransaction();
     }
 }
 
