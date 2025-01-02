@@ -4035,39 +4035,6 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
-{
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        WLOGFE("session is invalid");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    if (!(sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-            sceneSession->GetSessionInfo().isSystem_)) {
-        WLOGW("only app main window can set brightness");
-        return WSError::WS_DO_NOTHING;
-    }
-    auto brightness = sceneSession->GetBrightness();
-    WLOGFI("Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
-    if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (GetDisplayBrightness() != brightness) {
-            WLOGI("adjust brightness with default value");
-            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
-            SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
-        }
-        brightnessSessionId_ = INVALID_WINDOW_ID;
-    } else {
-        if (GetDisplayBrightness() != brightness) {
-            WLOGI("adjust brightness with value");
-            DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().OverrideBrightness(
-                static_cast<uint32_t>(brightness * MAX_BRIGHTNESS));
-            SetDisplayBrightness(brightness);
-        }
-        brightnessSessionId_ = sceneSession->GetPersistentId();
-    }
-    return WSError::WS_OK;
-}
-
 int32_t SceneSessionManager::GetCurrentUserId() const
 {
     return currentUserId_;
