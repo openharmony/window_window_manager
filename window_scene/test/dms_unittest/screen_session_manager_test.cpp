@@ -2670,6 +2670,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | Smal
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTest | Level3)
 {
+#ifdef FOLD_ABILITY_ENABLE
     std::string statusParam;
     auto ret = ssm_->NotifyFoldStatusChanged(statusParam);
     ASSERT_EQ(ret, -1);
@@ -2694,6 +2695,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTe
     ssm_->HandleFoldScreenPowerInit();
     ret = ssm_->NotifyFoldStatusChanged(statusParam);
     ASSERT_EQ(ret, 0);
+#endif
 }
 
 /**
@@ -2771,6 +2773,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | SmallTest | Level3)
 {
+#ifdef FOLD_ABILITY_ENABLE
     float phyWidth = 0.0f;
     float phyHeight = 0.0f;
     bool isReset = true;
@@ -2785,6 +2788,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | Small
     ASSERT_NE(ssm_->foldScreenController_, nullptr);
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     ASSERT_FALSE(isReset);
+#endif
 }
 
 /**
