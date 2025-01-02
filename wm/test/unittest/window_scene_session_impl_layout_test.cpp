@@ -17,7 +17,6 @@
 #include <parameters.h>
 
 #include "ability_context_impl.h"
-#include "common_test_utils.h"
 #include "display_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
@@ -28,7 +27,6 @@
 #include "window_adapter.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
-#include "window_test_utils.h"
 #include "wm_common.h"
 
 using namespace testing;
