@@ -95,6 +95,45 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityEvent03 end");
 }
+
+/**
+ * @tc.name: UpdateSessionPropertyByAction
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<IRemoteObject> iRemoteObjectMocker = new iRemoteObjectMocker();
+    SessionProxy* sessionproxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sessionproxy, nullptr);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionproxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionPreperty();
+    ASSERT_NE(property, nullptr);
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionproxy->UpdateSessionPropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    ASSERT_EQ(WSError::WS_OK, sessionproxy->UpdateSessionPropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionproxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    ASSERT_EQ(WSError::WS_OK, sessionproxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
