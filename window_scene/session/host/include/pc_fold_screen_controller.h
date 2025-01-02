@@ -57,7 +57,7 @@ public:
 
 private:
     int32_t GetPersistentId() const;
-    DisplayId GetScreenId();
+    DisplayId GetDisplayId();
     int32_t GetTitleHeight() const;
     WSRectF CalculateMovingVelocity();
 

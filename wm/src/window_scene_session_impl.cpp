@@ -4703,8 +4703,7 @@ WSError WindowSceneSessionImpl::SetSupportEnterWaterfallMode(bool isSupportEnter
             TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent unavailable", where);
             return;
         }
-        uiContent->OnContainerModalEvent("scb_waterfall_visibility",
-            isSupportEnter ? "true" : "false");
+        uiContent->OnContainerModalEvent("scb_waterfall_visibility", isSupportEnter ? "true" : "false");
     }, __func__);
     return WSError::WS_OK;
 }

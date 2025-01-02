@@ -71,7 +71,7 @@ void PcFoldScreenController::OnConnect()
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(GetPersistentId(),
         std::weak_ptr<FoldScreenStatusChangeCallback>(onFoldScreenStatusChangeCallback_));
 
-    supportEnterWaterfallMode_ = PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId());
+    supportEnterWaterfallMode_ = PcFoldScreenManager::GetInstance().IsHalfFolded(GetDisplayId());
     UpdateSupportEnterWaterfallMode();
 }
 
@@ -224,7 +224,7 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
         controller->isFullScreenWaterfallMode_ = isWaterfallMode;
         controller->ExecuteFullScreenWaterfallModeChangeCallback();
         controller->supportEnterWaterfallMode_ =
-            !controller->isFullScreenWaterfallMode_ && controller->IsHalfFolded(controller->GetScreenId());
+            !controller->isFullScreenWaterfallMode_ && controller->IsHalfFolded(controller->GetDisplayId());
         controller->UpdateSupportEnterWaterfallMode();
     }, __func__);
 }
@@ -281,7 +281,7 @@ int32_t PcFoldScreenController::GetPersistentId() const
     return persistentId_;
 }
 
-DisplayId PcFoldScreenController::GetScreenId()
+DisplayId PcFoldScreenController::GetDisplayId()
 {
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
