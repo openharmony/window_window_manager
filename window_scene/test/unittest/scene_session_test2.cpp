@@ -1042,8 +1042,6 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, sceneSession->sessionStage_);
     sceneSession->NotifyTouchOutside();
 
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
     auto func = [sceneSession]() {
         sceneSession->SaveUpdatedIcon(nullptr);
     };
@@ -1069,8 +1067,6 @@ HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | Smal
     info.bundleName_ = "CheckTouchOutsideCallbackRegistered";
     sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
-    sceneSession->sessionChangeCallback_ = new SceneSession::SessionChangeCallback();
-    EXPECT_NE(nullptr, sceneSession->sessionChangeCallback_);
     auto func = [sceneSession]() {
         sceneSession->NotifyWindowVisibility();
     };
@@ -1079,10 +1075,6 @@ HWTEST_F(SceneSessionTest2, CheckTouchOutsideCallbackRegistered, Function | Smal
     EXPECT_EQ(true, result);
 
     sceneSession->onTouchOutside_ = nullptr;
-    result = sceneSession->CheckTouchOutsideCallbackRegistered();
-    EXPECT_EQ(false, result);
-
-    sceneSession->sessionChangeCallback_ = nullptr;
     result = sceneSession->CheckTouchOutsideCallbackRegistered();
     EXPECT_EQ(false, result);
 }
