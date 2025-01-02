@@ -3968,14 +3968,8 @@ void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
             TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
             return;
         }
-        napi_value objValue = nullptr;
-        napi_create_object(env, &objValue);
-        if (objValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is nullptr");
-            return;
-        }
-        napi_set_named_property(env, objValue, "isActive", CreateJsValue(env, isActive));
-        napi_value argv[] = { objValue };
+        napi_value isActiveValue = CreateJsValue(env, isActive);
+        napi_value argv[] = { isActiveValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }
