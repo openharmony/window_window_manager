@@ -399,8 +399,7 @@ HWTEST_F(ScreenSessionTest, SetPhysicalRotation, Function | SmallTest | Level2)
     sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
     EXPECT_NE(nullptr, screenSession);
     int rotation = 0;
-    FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN;
-    screenSession->SetPhysicalRotation(rotation, foldDisplayMode);
+    screenSession->SetPhysicalRotation(rotation);
     GTEST_LOG_(INFO) << "SetPhysicalRotation end";
 }
 

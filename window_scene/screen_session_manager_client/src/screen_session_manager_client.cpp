@@ -310,7 +310,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_,
-        screenPropertyChangeType);
+        directionInfo.phyRotation_, screenPropertyChangeType);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, directionInfo.notifyRotation_,
         screenPropertyChangeType);
 
@@ -325,7 +325,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
-    screenSession->SetPhysicalRotation(directionInfo.rotation_, foldDisplayMode);
+    screenSession->SetPhysicalRotation(directionInfo.phyRotation_);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);

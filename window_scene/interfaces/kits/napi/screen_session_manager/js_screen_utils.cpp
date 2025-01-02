@@ -244,10 +244,11 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 
 bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenDirectionInfo& directionInfo)
 {
-    napi_value jsNotifyRotation = nullptr, jsScreenRotation = nullptr, jsRotation = nullptr;
+    napi_value jsNotifyRotation = nullptr, jsScreenRotation = nullptr, jsRotation = nullptr, jsPhyRotation = nullptr;
     napi_get_named_property(env, jsObject, "notifyRotation", &jsNotifyRotation);
     napi_get_named_property(env, jsObject, "screenRotation", &jsScreenRotation);
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);
+    napi_get_named_property(env, jsObject, "phyRotation", &jsPhyRotation);
 
     if (GetType(env, jsNotifyRotation) != napi_undefined) {
         int32_t notifyRotation;
@@ -272,6 +273,14 @@ bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenD
             return false;
         }
         directionInfo.rotation_ = rotation;
+    }
+    if (GetType(env, jsPhyRotation) != napi_undefined) {
+        int32_t phyRotation;
+        if (!ConvertFromJsValue(env, jsPhyRotation, phyRotation)) {
+            WLOGFE("[NAPI]Failed to convert parameter to phyRotation");
+            return false;
+        }
+        directionInfo.phyRotation_ = phyRotation;
     }
     return true;
 }
