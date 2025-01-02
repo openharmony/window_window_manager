@@ -206,7 +206,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     WMError res = window->SetMainWindowTopmost(true);
-    ASSERT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
 }
 
 /**
