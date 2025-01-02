@@ -297,6 +297,8 @@ private:
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
     void EnableMirrorScreenRegion();
     int32_t GetApiVersion();
+    void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
+    bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
 };
 
 class ScreenSessionGroup : public ScreenSession {

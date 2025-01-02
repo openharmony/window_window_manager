@@ -4577,38 +4577,47 @@ const std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetRSDisplayNodeByScr
     return screen->GetDisplayNode();
 }
 
-std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId, bool isUseDma)
+std::shared_ptr<RSDisplayNode> ScreenSessionManager::GetDisplayNodeByDisplayId(DisplayId displayId)
 {
-    ScreenId screenId = SCREEN_ID_INVALID;
     std::shared_ptr<RSDisplayNode> displayNode = nullptr;
-    {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        for (auto sessionIt : screenSessionMap_) {
-            auto screenSession = sessionIt.second;
-            if (screenSession == nullptr) {
-                TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+            continue;
+        }
+        sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayInfo is nullptr!");
+            continue;
+        }
+        if (displayId == displayInfo->GetDisplayId()) {
+            if (sessionIt.first == SCREEN_ID_INVALID) {
+                TLOGE(WmsLogTag::DMS, "screenId is invalid!");
                 continue;
             }
-            sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
-            if (displayInfo == nullptr) {
-                TLOGE(WmsLogTag::DMS, "displayInfo is nullptr!");
-                continue;
-            }
-            if (displayId == displayInfo->GetDisplayId()) {
-                displayNode = screenSession->GetDisplayNode();
-                screenId = sessionIt.first;
-                break;
-            }
+            displayNode = screenSession->GetDisplayNode();
+            break;
         }
     }
-    if (screenId == SCREEN_ID_INVALID || displayNode == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenId is invalid or displayNode is null!");
+    return displayNode;
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId, bool isUseDma)
+{
+    std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(displayId);
+    if (displayNode == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayNode is null!");
         return nullptr;
     }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSSurfaceCaptureConfig config;
     config.useDma = isUseDma;
     TLOGW(WmsLogTag::DMS, "take surface capture with dma=%{public}d", isUseDma);
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        config.mainScreenRect = foldScreenController_->GetScreenSnapshotRect();
+    }
     bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
