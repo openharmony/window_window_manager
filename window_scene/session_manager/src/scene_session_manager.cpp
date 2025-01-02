@@ -2338,9 +2338,6 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSession)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-    if (abilitySessionInfo == nullptr) {
-        return ERR_NULL_OBJECT;
-    }
     return StartUIAbilityBySCB(abilitySessionInfo);
 }
 
@@ -2354,9 +2351,6 @@ int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(const sptr<SceneSess
     bool visibility, bool isFromClient)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-    if (abilitySessionInfo == nullptr) {
-        return ERR_NULL_OBJECT;
-    }
     if (!isFromClient) {
         sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
     }

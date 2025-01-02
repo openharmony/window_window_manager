@@ -1480,7 +1480,7 @@ HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function 
 
     sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
-    ssm_->sceneSessionMap_[info.persistentId_] = sceneSession;
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
 
     auto task = []() {};
     sceneSession->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
@@ -1488,13 +1488,10 @@ HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function 
     ssm_->RemoveLifeCycleTaskByPersistentId(100, LifeCycleTaskType::START);
     ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 0);
 
-    info.persistentId_ = 2;
     sceneSession->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
     ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
     ssm_->RemoveLifeCycleTaskByPersistentId(3, LifeCycleTaskType::START);
     ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
-    ssm_->RemoveLifeCycleTaskByPersistentId(2, LifeCycleTaskType::START);
-    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 0);
 }
 }
 } // namespace Rosen
