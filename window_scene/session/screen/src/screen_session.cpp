@@ -734,22 +734,10 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     }
 }
 
-void ScreenSession::SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::SetPhysicalRotation(int rotation)
 {
-    int32_t realRotation = static_cast<int32_t>(rotation);
-    std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
-    bool isOuterScreen = FoldScreenStateInternel::IsOuterScreen(foldDisplayMode);
-    int32_t offsetRotation = 0;
-    if (phyOffsets.size() == 1 || isOuterScreen) {
-        offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[0]));
-    }
-    if (!isOuterScreen && phyOffsets.size() == 2) { // 2 is arg number
-        offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[1]));
-    }
-    realRotation = (rotation + offsetRotation) % 360; // 360 is 360 degree
-    property_.SetPhysicalRotation(static_cast<float>(realRotation));
-    WLOGFI("physicalrotation :%{public}f , rotation: %{public}d , phyOffset: %{public}d",
-        property_.GetPhysicalRotation(), rotation, offsetRotation);
+    property_.SetPhysicalRotation(static_cast<float>(rotation));
+    WLOGFI("physicalrotation :%{public}f", property_.GetPhysicalRotation());
 }
 
 void ScreenSession::SetScreenComponentRotation(int rotation)
