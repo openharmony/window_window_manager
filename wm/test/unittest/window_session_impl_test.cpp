@@ -214,26 +214,32 @@ HWTEST_F(WindowSessionImplTest, Hide01, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled01, Function | SmallTest | Level2)
 {
-    sptr<WindowOption> option = new WindowOption();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled01");
-    sptr<WindowSessionImpl> window = new(std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(nullptr, window);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     WMError retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetResizeByDragEnabled02
+ * @tc.desc: SetResizeByDragEnabled and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetResizeByDragEnabled02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new(std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     ASSERT_FALSE(window->IsWindowSessionInvalid());
-    retCode = window->SetResizeByDragEnabled(true);
+    WMError retCode = window->SetResizeByDragEnabled(true);
     ASSERT_EQ(retCode, WMError::WM_OK);
-
-    window->property_->type_ = WindowType::APP_SUB_WINDOW_BASE;
-    ASSERT_FALSE(WindowHelper::IsMainWindow(window->GetType()));
-    retCode = window->SetResizeByDragEnabled(true);
-    ASSERT_EQ(retCode, WMError::WM_OK);
+    ASSERT_EQ(true, window->property_->GetDragEnabled());
 }
 
 /**
@@ -245,13 +251,12 @@ HWTEST_F(WindowSessionImplTest, SetResizeByDragEnabled03, Function | SmallTest |
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetResizeByDragEnabled03");
+    option->SetSubWindowDecorEnable(true);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
 
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
