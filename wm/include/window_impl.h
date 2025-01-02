@@ -31,6 +31,7 @@
 #include "input_transfer_station.h"
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
 #include "window_property.h"
 #include "window_transition_info.h"
 #include "wm_common_inner.h"
@@ -162,7 +163,8 @@ public:
     }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
         const Rect& rect = {0, 0, 0, 0}) override;
-
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
