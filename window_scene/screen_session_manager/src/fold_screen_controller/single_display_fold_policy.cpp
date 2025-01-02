@@ -106,6 +106,10 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
         }
     }
     SetdisplayModeChangeStatus(true);
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        lastDisplayMode_ = displayMode;
+    }
     ReportFoldDisplayModeChange(displayMode);
     switch (displayMode) {
         case FoldDisplayMode::MAIN: {
@@ -128,7 +132,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
-        lastDisplayMode_ = displayMode;
     }
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
