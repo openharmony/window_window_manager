@@ -241,11 +241,11 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             TLOGNE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
             return;
         }
-        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
-            sessionInfo->persistentId_, LifeCycleTaskType::START);
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         napi_value argv[] = {jsSessionInfo};
@@ -253,6 +253,8 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+            sessionInfo->persistentId_, LifeCycleTaskType::START);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
