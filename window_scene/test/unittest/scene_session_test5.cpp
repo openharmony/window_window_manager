@@ -1625,8 +1625,14 @@ HWTEST_F(SceneSessionTest5, CheckAndMoveDisplayIdRecursively, Function | SmallTe
     sptr<SceneSessionMocker> subSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     sceneSession->subSession_.push_back(subSession);
     EXPECT_CALL(*sceneSession, CheckAndMoveDisplayIdRecursively(displayId))
-        .WillRepeatedly([sceneSession](uint64_t displayId) {
-        return sceneSession->SceneSession::CheckAndMoveDisplayIdRecursively(displayId);
+        .WillRepeatedly([weakThis = wptr(sceneSession)](uint64_t displayId) {
+            auto session = weakThis.promote();
+            if (session) {
+                return weakThis->SceneSession::CheckAndMoveDisplayIdRecursively(displayId);
+            } else {
+                GTEST_LOG_(INFO) << "SceneSessionMocker:NULL";
+                return;
+            }
     });
     sceneSession->property_->SetDisplayId(displayId);
     sceneSession->shouldFollowParentWhenShow_ = true;
