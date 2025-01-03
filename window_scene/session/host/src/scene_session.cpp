@@ -2772,7 +2772,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
                 pcFoldScreenController_->GetMovingTimingCurve());
-            SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal, needFlush);
+            SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal);
         } else {
             SetSurfaceBounds(globalRect, isGlobal, needFlush);
         }
@@ -3074,20 +3074,21 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 
 void SceneSession::SetSurfaceBoundsWithAnimation(
     const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
-    const WSRect& rect, const std::function<void()>& finishCallback, bool isGlobal, bool needFlush)
+    const WSRect& rect, const std::function<void()>& finishCallback, bool isGlobal)
 {
-    auto interiaFunc = [weakThis = wptr(this), rect, isGlobal, needFlush]() {
+    auto interiaFunc = [weakThis = wptr(this), rect, isGlobal]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
             return;
         }
-        session->SetSurfaceBounds(rect, isGlobal, needFlush, true);
+        session->SetSurfaceBounds(rect, isGlobal, false);
+        RSTransaction::FlushImplicitTransaction();
     };
     RSNode::Animate(animationParam.first, animationParam.second, interiaFunc, finishCallback);
 }
 
-void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush, bool needFlushAll)
+void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "rect: %{public}s isGlobal: %{public}d needFlush: %{public}d",
         rect.ToString().c_str(), isGlobal, needFlush);
@@ -3128,9 +3129,6 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     }
     if (rsTransaction != nullptr && needFlush) {
         rsTransaction->Commit();
-    }
-    if (needFlushAll) {
-        RSTransaction::FlushImplicitTransaction();
     }
 }
 

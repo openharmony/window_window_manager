@@ -154,7 +154,7 @@ void PcFoldScreenControllerTest::SetUp()
     controller_ = mainSession_->pcFoldScreenController_;
 
     SetExpanded();
-    manager_.UpdateVirtualKeyboardStatus(false);
+    manager_.UpdateSystemKeyboardStatus(false);
 }
 
 void PcFoldScreenControllerTest::TearDown()
@@ -228,16 +228,16 @@ HWTEST_F(PcFoldScreenManagerTest, SetDisplayRects, Function | SmallTest | Level1
 }
 
 /**
- * @tc.name: UpdateVirtualKeyboardStatus
- * @tc.desc: test function : UpdateVirtualKeyboardStatus, HasVirtualKeyboard
+ * @tc.name: UpdateSystemKeyboardStatus
+ * @tc.desc: test function : UpdateSystemKeyboardStatus, HasSystemKeyboard
  * @tc.type: FUNC
  */
-HWTEST_F(PcFoldScreenManagerTest, UpdateVirtualKeyboardStatus, Function | SmallTest | Level1)
+HWTEST_F(PcFoldScreenManagerTest, UpdateSystemKeyboardStatus, Function | SmallTest | Level1)
 {
-    manager_.UpdateVirtualKeyboardStatus(true);
-    EXPECT_TRUE(manager_.HasVirtualKeyboard());
-    manager_.UpdateVirtualKeyboardStatus(false);
-    EXPECT_FALSE(manager_.HasVirtualKeyboard());
+    manager_.UpdateSystemKeyboardStatus(true);
+    EXPECT_TRUE(manager_.HasSystemKeyboard());
+    manager_.UpdateSystemKeyboardStatus(false);
+    EXPECT_FALSE(manager_.HasSystemKeyboard());
 }
 
 /**
@@ -666,9 +666,9 @@ HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Le
     SetExpanded();
     EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
     SetHalfFolded();
-    manager_.UpdateVirtualKeyboardStatus(false);
+    manager_.UpdateSystemKeyboardStatus(false);
     EXPECT_TRUE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
-    manager_.UpdateVirtualKeyboardStatus(true);
+    manager_.UpdateSystemKeyboardStatus(true);
     EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
 }
 
