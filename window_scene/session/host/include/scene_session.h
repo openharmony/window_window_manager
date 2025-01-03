@@ -153,10 +153,6 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
-    virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
-        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError ReconnectInner(sptr<WindowSessionProperty> property);
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
@@ -184,6 +180,16 @@ public:
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
+
+    /*
+     * Window Recover
+     */
+    virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
+    WSError ReconnectInner(sptr<WindowSessionProperty> property);
+    bool IsRecovered() const { return isRecovered_; }
+    void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
     /*
      * Window Layout
@@ -365,10 +371,6 @@ public:
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
 
     sptr<MoveDragController> moveDragController_ = nullptr;
-
-    // Session recover
-    bool IsRecovered() const { return isRecovered_; }
-    void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
     bool IsDecorEnable() const;
     bool IsAppSession() const;

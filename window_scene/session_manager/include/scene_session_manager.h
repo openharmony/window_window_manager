@@ -175,13 +175,6 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         SystemSessionConfig& systemConfig, sptr<IRemoteObject> token = nullptr) override;
-    WSError RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr) override;
-    WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<ISession>& session, sptr<WindowSessionProperty> property = nullptr,
-        sptr<IRemoteObject> token = nullptr) override;
     WSError DestroyAndDisconnectSpecificSession(const int32_t persistentId) override;
     WSError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
         const sptr<IRemoteObject>& callback) override;
@@ -189,7 +182,6 @@ public:
     void SetCreateKeyboardSessionListener(const NotifyCreateKeyboardSessionFunc& func);
     void SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func);
     void SetStartUIAbilityErrorListener(const ProcessStartUIAbilityErrorFunc& func);
-    void SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func);
     void SetGestureNavigationEnabledChangeListener(const ProcessGestureNavigationEnabledChangeFunc& func);
     void SetDumpRootSceneElementInfoListener(const DumpRootSceneElementInfoFunc& func);
     void SetOutsideDownEventListener(const ProcessOutsideDownEventFunc& func);
@@ -199,6 +191,25 @@ public:
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
+
+    /*
+     * Window Recover
+     */
+    WSError RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr) override;
+    WSError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<ISession>& session, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr) override;
+    WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
+        std::vector<SCBAbilityInfo>& scbAbilityInfos);
+    void SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func);
+    void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
+    void NotifyRecoveringFinished();
+    bool IsInputEventEnabled();
+    void SetEnableInputEvent(bool enabled);
+    void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
 
     /*
      * Window Input Event
@@ -281,8 +292,6 @@ public:
         SessionInfoBean& sessionInfo) override;
     WSError GetAllAbilityInfos(const AAFwk::Want& want, int32_t userId,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
-    WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
-        std::vector<SCBAbilityInfo>& scbAbilityInfos);
     WSError GetAbilityInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, int32_t userId, SCBAbilityInfo& scbAbilityInfo);
     WSError PrepareTerminate(int32_t persistentId, bool& isPrepareTerminate);
@@ -341,12 +350,6 @@ public:
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) override;
     WSError UnregisterIAbilityManagerCollaborator(int32_t type) override;
     void ClearAllCollaboratorSessions();
-
-    bool IsInputEventEnabled();
-    void SetEnableInputEvent(bool enabled);
-    void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
-    void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
-    void NotifyRecoveringFinished();
 
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
@@ -786,7 +789,6 @@ private:
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     void ReportWindowProfileInfos();
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
-    void RemoveFailRecoveredSession();
     void GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
     void FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
@@ -819,6 +821,11 @@ private:
         const sptr<WindowSessionProperty>& property);
     void RecoverCachedSubSession(int32_t persistentId);
     void RecoverCachedDialogSession(int32_t persistentId);
+    void RemoveFailRecoveredSession();
+    void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
+    SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
+    bool IsNeedRecover(const int32_t persistentId);
+    WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
 
     /*
      * Gesture Back
@@ -859,12 +866,9 @@ private:
 
     std::set<int32_t> touchOutsideListenerSessionSet_;
     std::set<int32_t> windowVisibilityListenerSessionSet_;
-    std::set<int32_t> failRecoveredPersistentIdSet_;
 
     NotifyCreateSystemSessionFunc createSystemSessionFunc_;
     NotifyCreateKeyboardSessionFunc createKeyboardSessionFunc_;
-    bool recoveringFinished_ = false;
-    NotifyRecoverSceneSessionFunc recoverSceneSessionFunc_;
     ProcessStatusBarEnabledChangeFunc statusBarEnabledChangeFunc_;
     ProcessGestureNavigationEnabledChangeFunc gestureNavigationEnabledChangeFunc_;
     ProcessOutsideDownEventFunc outsideDownEventFunc_;
@@ -879,6 +883,13 @@ private:
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
 
     AppWindowSceneConfig appWindowSceneConfig_;
+
+    /*
+     * Window Recover
+     */
+    bool recoveringFinished_ = false;
+    NotifyRecoverSceneSessionFunc recoverSceneSessionFunc_;
+    std::set<int32_t> failRecoveredPersistentIdSet_;
 
     /*
      * Window Rotate Animation
@@ -944,9 +955,6 @@ private:
     bool isReportTaskStart_ = false;
     std::vector<std::pair<uint64_t, WindowVisibilityState> > lastVisibleData_;
     RSInterfaces& rsInterface_;
-    void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
-    SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
-    bool IsNeedRecover(const int32_t persistentId);
     void RegisterSessionStateChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneSession>& sceneSession);
     void OnSessionStateChange(int32_t persistentId, const SessionState& state) REQUIRES(SCENE_GUARD);
@@ -1058,7 +1066,6 @@ private:
         const sptr<WindowSessionProperty>& property);
     void DeleteStateDetectTask();
     bool JudgeNeedNotifyPrivacyInfo(DisplayId displayId, const std::unordered_set<std::string>& privacyBundles);
-    WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
 
     /*
      * Window Visibility
