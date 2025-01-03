@@ -61,7 +61,7 @@ void RootSceneSession::GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();
-        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT || !inputMethod->IsKeyboardAvoidAreaActive()) {
             continue;
         }
         if (isKeyboardPanelEnabled_) {
