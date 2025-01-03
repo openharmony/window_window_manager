@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 
 namespace OHOS::Rosen::Extension {
 
-constexpr const char *const WINDOW_MODE_FIELD = "windowMode";
+constexpr const char* const WINDOW_MODE_FIELD = "windowMode";
 
 enum class Businesscode : uint8_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode

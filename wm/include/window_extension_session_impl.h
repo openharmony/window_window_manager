@@ -161,7 +161,7 @@ private:
     void RegisterDataConsumer();
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
-    std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;
+    std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
