@@ -6619,12 +6619,12 @@ void ScreenSessionManager::MultiScreenModeChange(ScreenId mainScreenId, ScreenId
 void ScreenSessionManager::SwitchScrollParam(FoldDisplayMode displayMode)
 {
     std::map<FoldDisplayMode, ScrollableParam> scrollableParams = ScreenSceneConfig::GetAllScrollableParam();
-    std::string scrollVelocityScale = scrollableParams.count(displayMode) != 0 ?
+    std::string srollVelocityScale = scrollableParams.count(displayMode) != 0 ?
         scrollableParams[displayMode].velocityScale_ : "0";
-    std::string scrollFriction = scrollableParams.count(displayMode) != 0 ?
+    std::string srollFriction = scrollableParams.count(displayMode) != 0 ?
         scrollableParams[displayMode].friction_ : "0";
-    system::SetParameter("persist.scrollable.velocityScale", scrollVelocityScale);
-    system::SetParameter("persist.scrollable.friction", scrollFriction);
+    system::SetParameter("persist.scrollable.velocityScale", srollVelocityScale);
+    system::SetParameter("persist.scrollable.friction", srollFriction);
 }
 
 void ScreenSessionManager::MultiScreenModeChange(const std::string& firstScreenIdStr,
