@@ -359,7 +359,10 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
         return;
     }
     if (focusedSceneSession->HasModalUIExtension()) {
-        focusedSessionId_ =  focusedSceneSession->GetLastModalUIExtensionEventInfo().persistentId;
+        auto modalUIExtensionEventInfo = focusedSceneSession->GetLastModalUIExtensionEventInfo();
+        if (modalUIExtensionEventInfo.has_value()) {
+            focusedSessionId_ =  modalUIExtensionEventInfo.value().persistentId;
+        }
     }
 }
 

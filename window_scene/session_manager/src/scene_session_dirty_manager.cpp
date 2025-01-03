@@ -431,7 +431,11 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
         return;
     }
 
-    auto extensionInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    if (!modalUIExtensionEventInfo.has_value()) {
+        return;
+    }
+    auto extensionInfo = uiExtensionEventInfo.value();
     windowInfo.id = extensionInfo.persistentId;
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
         MMI::Rect windowRect = {
