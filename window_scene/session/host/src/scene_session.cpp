@@ -2013,19 +2013,23 @@ bool SceneSession::HasModalUIExtension()
     return !modalUIExtensionInfoList_.empty();
 }
 
-ExtensionWindowEventInfo SceneSession::GetLastModalUIExtensionEventInfo()
+std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEventInfo()
 {
     std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
-    return modalUIExtensionInfoList_.back();
+    return modalUIExtensionInfoList_.empty() ? std::nullopt :
+        std::make_optional<ExtensionWindowEventInfo>(modalUIExtensionInfoList_.back());
 }
 
 Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
     WSRect windowRect = GetSessionGlobalRect();
     if (useUIExtension && HasModalUIExtension()) {
-        auto rect = GetLastModalUIExtensionEventInfo().windowRect;
-        windowRect.posX_ = rect.posX_;
-        windowRect.posY_ = rect.posY_;
+        auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo();
+        if (modalUIExtensionEventInfo.has_value()) {
+            auto rect = modalUIExtensionEventInfo.value().windowRect;
+            windowRect.posX_ = rect.posX_;
+            windowRect.posY_ = rect.posY_;
+        }
     }
     Vector2f position(windowRect.posX_, windowRect.posY_);
     return position;

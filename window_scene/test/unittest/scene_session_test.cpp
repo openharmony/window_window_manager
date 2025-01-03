@@ -837,15 +837,15 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     EXPECT_TRUE(sceneSession->HasModalUIExtension());
 
     auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    EXPECT_EQ(getInfo.persistentId, extensionInfo.persistentId);
-    EXPECT_EQ(getInfo.pid, extensionInfo.pid);
-    EXPECT_EQ(getInfo.windowRect, extensionInfo.windowRect);
+    EXPECT_EQ(getInfo.value().persistentId, extensionInfo.persistentId);
+    EXPECT_EQ(getInfo.value().pid, extensionInfo.pid);
+    EXPECT_EQ(getInfo.value().windowRect, extensionInfo.windowRect);
 
     Rect windowRect = { 5, 6, 7, 8 };
     extensionInfo.windowRect = windowRect;
     sceneSession->UpdateModalUIExtension(extensionInfo);
     getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    EXPECT_EQ(getInfo.windowRect, windowRect);
+    EXPECT_EQ(getInfo.value().windowRect, windowRect);
 
     sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
     EXPECT_FALSE(sceneSession->HasModalUIExtension());
