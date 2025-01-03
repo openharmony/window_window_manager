@@ -1031,11 +1031,18 @@ napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnGetWindowDensityInfo(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetAvoidAreaOption(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetAvoidAreaOption(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetSystemAvoidAreaEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsSystemAvoidAreaEnabled(env, info) : nullptr;
 }
 
 static WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
@@ -7320,21 +7327,55 @@ napi_value JsWindow::OnGetWindowDensityInfo(napi_env env, napi_callback_info inf
     }
 }
 
-napi_value JsWindow::OnSetAvoidAreaOption(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < INDEX_ONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    uint32_t avoidAreaOption = 0;
-    if (argv[INDEX_ZERO] == nullptr || napi_get_value_uint32(env, argv[INDEX_ZERO], &avoidAreaOption) != napi_ok) {
+    bool avoidAreaOption = false;
+    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &avoidAreaOption) != napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to avoidAreaOption");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetAvoidAreaOption(avoidAreaOption));
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    const char* const where = __func__;
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, avoidAreaOption, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(static_cast<uint32_t>(avoidAreaOption)));
+    };
+    auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            task.Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s set failed, ret %{public}d", where, *errCodePtr);
+            task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "set failed."));
+        }
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetSystemAvoidAreaEnabled",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    unint32_t avoidAreaOption = 0;
+    bool enable = false;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaOption(avoidAreaOption));
+    enable = avoidAreaOption & 1;
     if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
         TLOGE(WmsLogTag::WMS_IMMS, "device is not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
@@ -7342,9 +7383,9 @@ napi_value JsWindow::OnSetAvoidAreaOption(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] avoidAreaOption %{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), avoidAreaOption);
-    return CreateJsValue(env, avoidAreaOption);
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] enable %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
+    return CreateJsValue(env, enable);
 }
 
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
@@ -7485,7 +7526,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
-    BindNativeFunction(env, object, "setAvoidAreaOption", moduleName, JsWindow::SetAvoidAreaOption);
+    BindNativeFunction(env, object, "setSystemAvoidAreaEnabled", moduleName, JsWindow::SetSystemAvoidAreaEnabled);
+    BindNativeFunction(env, object, "isSystemAvoidAreaEnabled", moduleName, JsWindow::IsSystemAvoidAreaEnabled);
 }
 }  // namespace Rosen
 }  // namespace OHOS
