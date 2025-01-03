@@ -109,7 +109,7 @@ bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
 bool PcFoldScreenController::IsAllowThrowSlip(DisplayId displayId)
 {
     return PcFoldScreenManager::GetInstance().IsHalfFolded(displayId) &&
-           !PcFoldScreenManager::GetInstance().HasVirtualKeyboard();
+           !PcFoldScreenManager::GetInstance().HasSystemKeyboard();
 }
 
 bool PcFoldScreenController::NeedFollowHandAnimation()

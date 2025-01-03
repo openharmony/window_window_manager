@@ -232,8 +232,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetWindowPid);
     BindNativeFunction(env, exportObj, "updatePcFoldScreenStatus", moduleName,
         JsSceneSessionManager::UpdatePcFoldScreenStatus);
-    BindNativeFunction(env, exportObj, "updateVirtualKeyboardStatus", moduleName,
-        JsSceneSessionManager::UpdateVirtualKeyboardStatus);
+    BindNativeFunction(env, exportObj, "updateSystemKeyboardStatus", moduleName,
+        JsSceneSessionManager::UpdateSystemKeyboardStatus);
     BindNativeFunction(env, exportObj, "resetPcFoldScreenArrangeRule", moduleName,
         JsSceneSessionManager::ResetPcFoldScreenArrangeRule);
     BindNativeFunction(env, exportObj, "setIsWindowRectAutoSave", moduleName,
@@ -1184,10 +1184,10 @@ napi_value JsSceneSessionManager::UpdatePcFoldScreenStatus(napi_env env, napi_ca
     return (me != nullptr) ? me->OnUpdatePcFoldScreenStatus(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::UpdateVirtualKeyboardStatus(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::UpdateSystemKeyboardStatus(napi_env env, napi_callback_info info)
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnUpdateVirtualKeyboardStatus(env, info) : nullptr;
+    return (me != nullptr) ? me->OnUpdateSystemKeyboardStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info)
@@ -3798,7 +3798,7 @@ napi_value JsSceneSessionManager::OnUpdatePcFoldScreenStatus(napi_env env, napi_
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::OnUpdateVirtualKeyboardStatus(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnUpdateSystemKeyboardStatus(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = {nullptr};
@@ -3811,15 +3811,15 @@ napi_value JsSceneSessionManager::OnUpdateVirtualKeyboardStatus(napi_env env, na
         return NapiGetUndefined(env);
     }
 
-    bool hasVirtualKeyboard = false;
-    if (argv[0] == nullptr || !ConvertFromJsValue(env, argv[0], hasVirtualKeyboard)) {
+    bool hasSystemKeyboard = false;
+    if (argv[0] == nullptr || !ConvertFromJsValue(env, argv[0], hasSystemKeyboard)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
-    PcFoldScreenManager::GetInstance().UpdateVirtualKeyboardStatus(hasVirtualKeyboard);
+    PcFoldScreenManager::GetInstance().UpdateSystemKeyboardStatus(hasSystemKeyboard);
     return NapiGetUndefined(env);
 }
 

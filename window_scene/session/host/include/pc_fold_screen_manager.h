@@ -44,8 +44,8 @@ public:
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     SuperFoldStatus GetScreenFoldStatus();
     bool IsHalfFolded(DisplayId displayId);
-    void UpdateVirtualKeyboardStatus(bool hasVirtualKeyboard);
-    bool HasVirtualKeyboard();
+    void UpdateSystemKeyboardStatus(bool hasSystemKeyboard);
+    bool HasSystemKeyboard();
 
     std::tuple<WSRect, WSRect, WSRect> GetDisplayRects();
 
@@ -100,7 +100,7 @@ private:
     float vpr_ { 1.5f }; // display vp ratio
     SuperFoldStatus prevScreenFoldStatus_ { SuperFoldStatus::UNKNOWN };
     SuperFoldStatus screenFoldStatus_ { SuperFoldStatus::UNKNOWN };
-    bool hasVirtualKeyboard_ { false }; // bottom virtual keyboard
+    bool hasSystemKeyboard_ { false }; // bottom system keyboard
     // Above guarded by displayInfoMutex_
 
     std::shared_mutex rectsMutex_; // protect rects

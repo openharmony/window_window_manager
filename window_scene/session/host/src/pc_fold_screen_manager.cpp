@@ -98,17 +98,17 @@ bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId)
     return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED && displayId_ == displayId;
 }
 
-void PcFoldScreenManager::UpdateVirtualKeyboardStatus(bool hasVirtualKeyboard)
+void PcFoldScreenManager::UpdateSystemKeyboardStatus(bool hasSystemKeyboard)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "status: %{public}d", hasVirtualKeyboard);
+    TLOGI(WmsLogTag::WMS_MAIN, "status: %{public}d", hasSystemKeyboard);
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
-    hasVirtualKeyboard_ = hasVirtualKeyboard;
+    hasSystemKeyboard_ = hasSystemKeyboard;
 }
 
-bool PcFoldScreenManager::HasVirtualKeyboard()
+bool PcFoldScreenManager::HasSystemKeyboard()
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
-    return hasVirtualKeyboard_;
+    return hasSystemKeyboard_;
 }
 
 float PcFoldScreenManager::GetVpr()

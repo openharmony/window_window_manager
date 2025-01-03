@@ -960,9 +960,8 @@ private:
      */
     void SetSurfaceBoundsWithAnimation(
         const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
-        const WSRect& rect, const std::function<void()>& finishCallback = nullptr,
-        bool isGlobal = false, bool needFlush = true);
-    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true, bool needFlushAll = false);
+        const WSRect& rect, const std::function<void()>& finishCallback = nullptr, bool isGlobal = false);
+    void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
