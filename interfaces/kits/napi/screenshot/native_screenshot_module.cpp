@@ -41,6 +41,7 @@ struct Option {
     Media::Size size;
     int rotation = 0;
     DisplayId displayId = 0;
+    bool isNeedNotify = true;
 };
 
 struct Param {
@@ -163,6 +164,19 @@ static void GetImageSize(napi_env env, std::unique_ptr<Param> &param, napi_value
     }
 }
 
+static void IsNeedNotify(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
+{
+    GNAPI_LOG("Get Screenshot Option: IsNeedNotify");
+    napi_value isNeedNotify;
+    NAPI_CALL_RETURN_VOID(env, napi_get_named_property(env, argv, "isNotificationNeeded", &isNeedNotify));
+    if (isNeedNotify != nullptr && GetType(env, isNeedNotify) == napi_boolean) {
+        NAPI_CALL_RETURN_VOID(env, napi_get_value_bool(env, isNeedNotify, &param->option.isNeedNotify));
+        GNAPI_LOG("IsNeedNotify: %{public}d", param->option.isNeedNotify);
+    } else {
+        GNAPI_LOG("IsNeedNotify failed, invalid param, use default true.");
+    }
+}
+
 static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi_value &argv)
 {
     if (param == nullptr) {
@@ -173,6 +187,7 @@ static void GetScreenshotParam(napi_env env, std::unique_ptr<Param> &param, napi
     GetRotation(env, param, argv);
     GetScreenRect(env, param, argv);
     GetImageSize(env, param, argv);
+    IsNeedNotify(env, param, argv);
 }
 
 static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
@@ -184,16 +199,26 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
         param->errMessage = "Get Screenshot Failed: Invalid input param";
         return;
     }
-    if (param->useInputOption) {
-        GNAPI_LOG("Get Screenshot by input option");
-        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
-            param->option.rect, param->option.size, param->option.rotation, &param->wret);
-    } else if (param->isPick) {
-        GNAPI_LOG("Get Screenshot by picker");
-        param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
+    CaptureOption option = { param->option.displayId, param->option.isNeedNotify};
+    if (!param->isPick && !option.isNeedNotify_) {
+        if (param->useInputOption) {
+            param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option,
+                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+        } else {
+            param->image = DisplayManager::GetInstance().GetScreenshotWithOption(option, &param->wret);
+        }
     } else {
-        GNAPI_LOG("Get Screenshot by default option");
-        param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
+        if (param->useInputOption) {
+            GNAPI_LOG("Get Screenshot by input option");
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
+                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+        } else if (param->isPick) {
+            GNAPI_LOG("Get Screenshot by picker");
+            param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
+        } else {
+            GNAPI_LOG("Get Screenshot by default option");
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
+        }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
         GNAPI_LOG("Get Screenshot failed!");
@@ -242,13 +267,35 @@ napi_value Resolve(napi_env env, std::unique_ptr<Param> &param)
     napi_value result;
     napi_value error;
     napi_value code;
-    if (param->wret == DmErrorCode::DM_ERROR_INVALID_PARAM) {
+    bool isThrowError = true;
+    if (param->wret != DmErrorCode::DM_OK) {
         napi_create_error(env, nullptr, nullptr, &error);
-        napi_create_int32(env, (int32_t)DmErrorCode::DM_ERROR_INVALID_PARAM, &code);
-        napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+        napi_create_int32(env, (int32_t)param->wret, &code);
+    }
+    switch (param->wret) {
+        case DmErrorCode::DM_ERROR_NO_PERMISSION:
+            napi_set_named_property(env, error, "DM_ERROR_NO_PERMISSION", code);
+            break;
+        case DmErrorCode::DM_ERROR_INVALID_PARAM:
+            napi_set_named_property(env, error, "DM_ERROR_INVALID_PARAM", code);
+            break;
+        case DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT:
+            napi_set_named_property(env, error, "DM_ERROR_DEVICE_NOT_SUPPORT", code);
+            break;
+        case DmErrorCode::DM_ERROR_SYSTEM_INNORMAL:
+            napi_set_named_property(env, error, "DM_ERROR_SYSTEM_INNORMAL", code);
+            break;
+        default:
+            isThrowError = false;
+            WLOGFI("screen shot default.");
+            break;
+    }
+    WLOGFI("screen shot ret=%{public}d.", param->wret);
+    if (isThrowError) {
         napi_throw(env, error);
         return error;
-    } else if (param->wret != DmErrorCode::DM_OK) {
+    }
+    if (param->wret != DmErrorCode::DM_OK) {
         NAPI_CALL(env, napi_get_undefined(env, &result));
         return result;
     }
@@ -288,6 +335,44 @@ napi_value PickFunc(napi_env env, napi_callback_info info)
     }
     param->isPick = true;
     return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenshot, Resolve, ref, param);
+}
+
+static void AsyncGetScreenCapture(napi_env env, std::unique_ptr<Param> &param)
+{
+    CaptureOption captureOption;
+    captureOption.displayId_ = param->option.displayId;
+    captureOption.isNeedNotify_ = param->option.isNeedNotify;
+    GNAPI_LOG("capture option isNeedNotify=%{public}d", captureOption.isNeedNotify_);
+    param->image = DisplayManager::GetInstance().GetScreenCapture(captureOption, &param->wret);
+    if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {
+        GNAPI_LOG("screen capture failed!");
+        param->wret = DmErrorCode::DM_ERROR_SYSTEM_INNORMAL;
+        param->errMessage = "ScreenCapture failed: image is null.";
+        return;
+    }
+}
+
+napi_value CaptureFunc(napi_env env, napi_callback_info info)
+{
+    GNAPI_LOG("%{public}s called", __PRETTY_FUNCTION__);
+    napi_value argv[1] = { nullptr };
+    size_t argc = 1;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+
+    auto param = std::make_unique<Param>();
+    if (param == nullptr) {
+        WLOGFE("Create param failed.");
+        return nullptr;
+    }
+    param->option.displayId = DisplayManager::GetInstance().GetDefaultDisplayId();
+    napi_ref ref = nullptr;
+    if (argc > 0 && GetType(env, argv[0]) == napi_object) {
+        GNAPI_LOG("argv[0]'s type is napi_object");
+        GetScreenshotParam(env, param, argv[0]);
+    } else {
+        GNAPI_LOG("use default.");
+    }
+    return AsyncProcess<Param>(env, __PRETTY_FUNCTION__, AsyncGetScreenCapture, Resolve, ref, param);
 }
 
 napi_value MainFunc(napi_env env, napi_callback_info info)
@@ -399,6 +484,7 @@ napi_value ScreenshotModuleInit(napi_env env, napi_value exports)
     napi_property_descriptor properties[] = {
         DECLARE_NAPI_FUNCTION("save", save::MainFunc),
         DECLARE_NAPI_FUNCTION("pick", save::PickFunc),
+        DECLARE_NAPI_FUNCTION("capture", save::CaptureFunc),
         DECLARE_NAPI_PROPERTY("DMError", errorCode),
         DECLARE_NAPI_PROPERTY("DmErrorCode", dmErrorCode),
     };

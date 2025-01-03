@@ -33,7 +33,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Displa
 const static uint32_t MAX_RETRY_NUM = 6;
 const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
-const static uint32_t MAX_INTERVAL_US = 25000;
+const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
+const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 }
@@ -90,6 +91,7 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     DMError ResetAllFreezeStatus();
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid, std::vector<uint64_t>& windowIdList);
+    sptr<Display> GetPrimaryDisplaySync();
     void OnRemoteDied();
 private:
     void ClearDisplayStateCallback();
@@ -117,6 +119,7 @@ private:
     std::string GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo);
 
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
+    DisplayId primaryDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
     std::map<DisplayId, std::chrono::steady_clock::time_point> displayUptateTimeMap_;
     DisplayStateCallback displayStateCallback_;
@@ -576,7 +579,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
-    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < APP_GET_DISPLAY_INTERVAL_US) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(defaultDisplayId_);
         if (iter != displayMap_.end()) {
@@ -618,10 +621,12 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto lastRequestIter = displayUptateTimeMap_.find(displayId);
+        static uint32_t getDisplayIntervalUs_ = (std::string(program_invocation_name) != "com.ohos.sceneboard")
+             ? APP_GET_DISPLAY_INTERVAL_US : SCB_GET_DISPLAY_INTERVAL_US;
         if (displayId != DISPLAY_ID_INVALID && lastRequestIter != displayUptateTimeMap_.end()) {
             auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestIter->second)
                 .count();
-            if (interval < MAX_INTERVAL_US) {
+            if (interval < getDisplayIntervalUs_) {
                 auto iter = displayMap_.find(displayId);
                 if (iter != displayMap_.end()) {
                     WLOGFW("update display from cache, Id: %{public}" PRIu64" ", displayId);
@@ -630,6 +635,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
             }
         }
     }
+    WLOGFI("update displayId: %{public}" PRIu64" ", displayId);
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
     if (displayInfo == nullptr) {
         WLOGFW("display null id : %{public}" PRIu64" ", displayId);
@@ -801,7 +807,7 @@ void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemote
     } else {
         displayIdList_.push_back(std::make_pair(abilityToken, displayId));
     }
-    ShowDisplayIdList(false);
+    ShowDisplayIdList(true);
 }
 
 void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken)
@@ -822,7 +828,7 @@ void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityTo
     if (iter != displayIdList_.end()) {
         displayIdList_.erase(iter);
     }
-    ShowDisplayIdList(false);
+    ShowDisplayIdList(true);
 }
 
 DisplayId DisplayManager::GetCallingAbilityDisplayId()
@@ -855,9 +861,9 @@ void DisplayManager::ShowDisplayIdList(bool isShowLog)
         oss << iter.second << ",";
     }
     if (isShowLog) {
-        WLOGFI("%{public}s]", oss.str().c_str());
-    } else {
         WLOGFD("%{public}s]", oss.str().c_str());
+    } else {
+        WLOGFI("%{public}s]", oss.str().c_str());
     }
 }
 
@@ -867,7 +873,7 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
         sptr<Display> display = nullptr;
         DisplayId displayId = GetCallingAbilityDisplayId();
         if (displayId != DISPLAY_ID_INVALID) {
-            WLOGFD("displayId:%{public}" PRIu64, displayId);
+            WLOGFI("displayId:%{public}" PRIu64, displayId);
             display = pImpl_->GetDisplayById(displayId);
         }
         if (display != nullptr) {
@@ -2068,5 +2074,113 @@ DMError DisplayManager::Impl::SetVirtualScreenSecurityExemption(ScreenId screenI
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenSecurityExemption(
         screenId, pid, windowIdList);
+}
+
+sptr<Display> DisplayManager::Impl::GetPrimaryDisplaySync()
+{
+    static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
+    if (primaryDisplayId_ != DISPLAY_ID_INVALID && interval < APP_GET_DISPLAY_INTERVAL_US) {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        auto iter = displayMap_.find(primaryDisplayId_);
+        if (iter != displayMap_.end()) {
+            return displayMap_[primaryDisplayId_];
+        }
+    }
+
+    uint32_t retryTimes = 0;
+    sptr<DisplayInfo> displayInfo = nullptr;
+    while (retryTimes < MAX_RETRY_NUM) {
+        displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
+        if (displayInfo != nullptr) {
+            break;
+        }
+        retryTimes++;
+        WLOGFW("get display info null, retry %{public}u times", retryTimes);
+        std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
+    }
+    if (retryTimes >= MAX_RETRY_NUM || displayInfo == nullptr) {
+        WLOGFE("get display info failed");
+        return nullptr;
+    }
+
+    auto displayId = displayInfo->GetDisplayId();
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (!UpdateDisplayInfoLocked(displayInfo)) {
+        displayMap_.erase(displayId);
+        return nullptr;
+    }
+    lastRequestTime = currentTime;
+    primaryDisplayId_ = displayId;
+    return displayMap_[displayId];
+}
+
+sptr<Display> DisplayManager::GetPrimaryDisplaySync()
+{
+    return pImpl_->GetPrimaryDisplaySync();
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    std::shared_ptr<Media::PixelMap> screenCapture =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetScreenCapture(captureOption, errorCode);
+    if (screenCapture == nullptr) {
+        WLOGFE("screen capture failed!");
+        return nullptr;
+    }
+    return screenCapture;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId invalid!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("get snapshot with option failed!");
+        return nullptr;
+    }
+    return screenShot;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode)
+{
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("set snapshot with option failed!");
+        return nullptr;
+    }
+    // check parameters
+    int32_t oriHeight = screenShot->GetHeight();
+    int32_t oriWidth = screenShot->GetWidth();
+    if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
+        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+            rect.left, rect.top, rect.width, rect.height);
+        return nullptr;
+    }
+    if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
+        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        return nullptr;
+    }
+    // create crop dest pixelmap
+    Media::InitializationOptions opt;
+    opt.size.width = size.width;
+    opt.size.height = size.height;
+    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    opt.editable = false;
+    auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
+    if (pixelMap == nullptr) {
+        WLOGFE("Media::PixelMap::Create failed!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
+    return dstScreenshot;
 }
 } // namespace OHOS::Rosen

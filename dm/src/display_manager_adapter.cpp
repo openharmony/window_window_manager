@@ -816,4 +816,28 @@ DMError ScreenManagerAdapter::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
     return displayManagerServiceProxy_->SetVirtualScreenMaxRefreshRate(id, refreshRate, actualRefreshRate);
 }
+
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetScreenCapture(captureOption, errorCode);
+}
+
+sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+    } else {
+        return displayManagerServiceProxy_->GetDefaultDisplayInfo();
+    }
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetDisplaySnapshotWithOption(captureOption, errorCode);
+}
 } // namespace OHOS::Rosen

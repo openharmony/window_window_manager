@@ -1154,6 +1154,34 @@ HWTEST_F(DisplayManagerTest, SetDisplayScale, Function | SmallTest | Level1)
     ScreenId screenId = display->GetScreenId();
     displayManager.SetDisplayScale(screenId, scaleX, scaleY, pivotX, pivotY);
 }
+
+/**
+ * @tc.name: GetScreenCapture
+ * @tc.desc: GetScreenCapture test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenCapture, Function | SmallTest | Level1)
+{
+    CaptureOption captureOption;
+    sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplay();
+    ASSERT_NE(display, nullptr);
+    captureOption.displayId_ = display->GetId();
+    DmErrorCode errCode;
+    std::shared_ptr<Media::PixelMap> pixelMap = DisplayManager::GetInstance().GetScreenCapture(captureOption,
+        &errCode);
+    ASSERT_NE(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPrimaryDisplaySync
+ * @tc.desc: GetPrimaryDisplaySync test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetPrimaryDisplaySync, Function | SmallTest | Level1)
+{
+    sptr<Display> display = DisplayManager::GetInstance().GetPrimaryDisplaySync();
+    ASSERT_NE(display, nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

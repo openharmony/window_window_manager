@@ -3059,4 +3059,107 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenMaxRefreshRate(ScreenId id, u
     actualRefreshRate = reply.ReadUint32();
     return static_cast<DMError>(reply.ReadInt32());
 }
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetScreenCapture(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(captureOption.displayId_) ||
+        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_)) {
+        WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPTURE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
+    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    if (errorCode) {
+        *errorCode = replyErrorCode;
+    }
+    if (pixelMap == nullptr) {
+        WLOGFE("Send pixelMap nullptr.");
+        return nullptr;
+    }
+    return pixelMap;
+}
+
+sptr<DisplayInfo> ScreenSessionManagerProxy::GetPrimaryDisplayInfo()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetPrimaryDisplayInfo: remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_PRIMARY_DISPLAY_INFO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return nullptr;
+    }
+
+    sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
+    if (info == nullptr) {
+        WLOGFE("get display info.");
+    }
+    return info;
+}
+
+std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWithOption(
+    const CaptureOption& captureOption, DmErrorCode* errorCode)
+{
+    WLOGFD("enter");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(captureOption.displayId_) ||
+        !data.WriteBool(captureOption.isNeedNotify_) || !data.WriteBool(captureOption.isNeedPointer_)) {
+        WLOGFE("Write displayId or isNeedNotify or isNeedPointer failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return nullptr;
+    }
+
+    std::shared_ptr<Media::PixelMap> pixelMap(reply.ReadParcelable<Media::PixelMap>());
+    DmErrorCode replyErrorCode = static_cast<DmErrorCode>(reply.ReadInt32());
+    if (errorCode) {
+        *errorCode = replyErrorCode;
+    }
+    if (pixelMap == nullptr) {
+        WLOGFW("SendRequest nullptr.");
+        return nullptr;
+    }
+    return pixelMap;
+}
 } // namespace OHOS::Rosen
