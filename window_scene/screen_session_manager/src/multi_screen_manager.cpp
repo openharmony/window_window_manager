@@ -114,6 +114,15 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const std::vector<ScreenI
         }
         TLOGW(WmsLogTag::DMS, "switch to mirror physical ScreenId: %{public}" PRIu64, physicalScreenId);
         std::shared_ptr<RSDisplayNode> displayNode = screenSession->GetDisplayNode();
+        if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            if (mirrorRegion != screenSession->GetMirrorScreenRegion().second) {
+                screenSession->SetMirrorScreenRegion(defaultSession->GetRSScreenId(), mirrorRegion);
+                screenSession->SetIsPhysicalMirrorSwitch(true);
+                screenSession->EnableMirrorScreenRegion();
+            }
+            TLOGW(WmsLogTag::DMS, "already mirror and get a same region.");
+            return DMError::DM_OK;
+        }
         if (displayNode != nullptr) {
             displayNode->RemoveFromTree();
         }
@@ -122,6 +131,7 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const std::vector<ScreenI
         screenSession->SetIsPhysicalMirrorSwitch(true);
         RSDisplayNodeConfig config = { screenSession->screenId_, true, nodeId, true };
         screenSession->CreateDisplayNode(config);
+        screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     }
     TLOGW(WmsLogTag::DMS, "physical screen switch to mirror end");
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:PhysicalScreenMirrorSwitch end");

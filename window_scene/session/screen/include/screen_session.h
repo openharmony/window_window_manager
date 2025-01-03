@@ -269,6 +269,7 @@ public:
     std::pair<ScreenId, DMRect> GetMirrorScreenRegion();
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
+    void EnableMirrorScreenRegion();
 
 private:
     ScreenProperty property_;
@@ -296,7 +297,6 @@ private:
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
-    void EnableMirrorScreenRegion();
     int32_t GetApiVersion();
 };
 
