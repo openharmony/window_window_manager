@@ -52,6 +52,8 @@ public:
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) override;
+    WindowMode GetMode() const override;
+    WMError SetWindowMode(WindowMode mode) override;
 
     /*
      * Window Privacy
@@ -156,8 +158,10 @@ private:
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
+    void RegisterDataConsumer();
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
+    std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
