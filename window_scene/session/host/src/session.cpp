@@ -1118,7 +1118,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         [weakThis = wptr(this)]() {
             auto session = weakThis.promote();
             if (session == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+                TLOGNE(WmsLogTag::DEFAULT, "session is null");
                 return;
             }
             session->NotifySessionInfoChange();
