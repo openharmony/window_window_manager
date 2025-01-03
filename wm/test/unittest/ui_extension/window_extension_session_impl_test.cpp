@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 
-#include <transaction/rs_transaction.h>
-#include <context_impl.h>
 #include <ability_context_impl.h>
+#include <context_impl.h>
+#include <transaction/rs_transaction.h>
 
 #include "accessibility_event_info.h"
 #include "display_info.h"
