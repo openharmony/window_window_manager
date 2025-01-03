@@ -15,21 +15,24 @@
 
 #include "window_extension_session_impl.h"
 
+#include <hitrace_meter.h>
+#include <parameters.h>
 #include <transaction/rs_interfaces.h>
 #include <transaction/rs_transaction.h>
+
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif
-#include "window_manager_hilog.h"
+
 #include "display_info.h"
-#include "parameters.h"
-#include "hitrace_meter.h"
+#include "extension/extension_business_info.h"
+#include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_permission.h"
 #include "singleton_container.h"
-#include "window_adapter.h"
-#include "input_transfer_station.h"
 #include "ui_extension/provider_data_handler.h"
+#include "window_adapter.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -67,6 +70,7 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
     dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
+    RegisterDataConsumer();
 }
 
 WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
@@ -1354,6 +1358,56 @@ void WindowExtensionSessionImpl::NotifyExtensionDataConsumer(MessageParcel& data
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
+}
+
+WindowMode WindowExtensionSessionImpl::GetMode() const
+{
+    return property_->GetWindowMode();
+}
+
+WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
+{
+    property_->SetWindowMode(static_cast<WindowMode>(mode));
+    TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetMode());
+    return WMError::WM_OK;
+}
+
+void WindowExtensionSessionImpl::RegisterDataConsumer()
+{
+    auto windowModeConsumer = [this](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+                                     std::optional<AAFwk::Want>& reply) -> int32_t {
+        auto windowMode = data.GetIntParam(Extension::WINDOW_MODE_FIELD, 0);
+        if (windowMode < static_cast<int32_t>(WindowMode::WINDOW_MODE_UNDEFINED) ||
+            windowMode > static_cast<int32_t>(WindowMode::END)) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "invalid window mode, windowMode:%{public}d", windowMode);
+            return static_cast<int32_t>(DataHandlerErr::INVALID_PARAMETER);
+        }
+
+        static_cast<void>(SetWindowMode(static_cast<WindowMode>(windowMode)));
+        return static_cast<int32_t>(DataHandlerErr::OK);
+    };
+    dataConsumers_.emplace(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_MODE),
+                           std::move(windowModeConsumer));
+
+    auto consumersEntry = [this](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+                                 std::optional<AAFwk::Want>& reply) -> int32_t {
+        auto itr = dataConsumers_.find(customId);
+        if (itr == dataConsumers_.end()) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "no consumer for %{public}u", customId);
+            return static_cast<int32_t>(DataHandlerErr::NO_CONSUME_CALLBACK);
+        }
+
+        const auto& func = itr->second;
+        if (!func) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "not callable for %{public}u", customId);
+            return static_cast<int32_t>(DataHandlerErr::INVALID_CALLBACK);
+        }
+
+        auto ret = func(id, customId, std::move(data), reply);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "customId:%{public}u, ret:%{public}d", customId, ret);
+        return static_cast<int32_t>(DataHandlerErr::OK);
+    };
+    dataHandler_->RegisterDataConsumer(SubSystemId::WM_UIEXT, std::move(consumersEntry));
 }
 } // namespace Rosen
 } // namespace OHOS
