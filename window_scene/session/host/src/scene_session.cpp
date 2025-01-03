@@ -2438,7 +2438,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         pointerItem.SetWindowY(windowY);
         pointerEvent->AddPointerItem(pointerItem);
     }
-    return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
+    return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
 }
 
 bool SceneSession::IsMovableWindowType()

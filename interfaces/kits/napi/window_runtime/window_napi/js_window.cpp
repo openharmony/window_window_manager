@@ -524,7 +524,7 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowDelayRaise(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetWindowDelayRaise");
+    TLOGD(WmsLogTag::WMS_EVENT, "SetWindowDelayRaise");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowDelayRaise(env, info) : nullptr;
 }
@@ -3947,7 +3947,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
@@ -3955,7 +3955,7 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1 || argv[0] == nullptr) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY,
+        TLOGE(WmsLogTag::WMS_EVENT,
             "Argc is invalid: %{public}zu. Failed to convert parameter to delay raise", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -3974,7 +3974,7 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowDelayRaiseEnabled(isDelayRaise));
-        TLOGND(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s] set success",
+        TLOGND(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] set success",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =

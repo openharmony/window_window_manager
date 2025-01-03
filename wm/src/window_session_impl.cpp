@@ -1729,15 +1729,15 @@ bool WindowSessionImpl::IsMainWindowTopmost() const
 WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
+        TLOGE(WmsLogTag::WMS_EVENT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
+        TLOGE(WmsLogTag::WMS_EVENT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     property_->SetWindowDelayRaiseEnabled(isEnabled);
-    TLOGI(WmsLogTag::DEFAULT, "SetWindowDelayRaiseEnabled: %{public}d", isEnabled);
+    TLOGI(WmsLogTag::WMS_EVENT, "SetWindowDelayRaiseEnabled: %{public}d", isEnabled);
     return WMError::WM_OK;
 }
 

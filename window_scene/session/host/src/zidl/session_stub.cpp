@@ -1152,7 +1152,7 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
     }
     bool isExecuteDelayRaise = false;
     if (!data.ReadBool(isExecuteDelayRaise)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Read isExecuteDelayRaise failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "Read isExecuteDelayRaise failed");
         return ERR_INVALID_DATA;
     }
     WSError errCode = SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
