@@ -173,7 +173,7 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     }
     WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, GetTitleHeight() };
     ScreenSide throwSide = manager.CalculateScreenSide(titleRect);
-    WSRectF velocity = CalculateMovingVelocity();
+    const WSRectF& velocity = CalculateMovingVelocity();
     if ((!startFullScreen && !manager.NeedDoThrowSlip(titleRect, velocity, throwSide)) ||
         (startFullScreen && !manager.NeedDoEasyThrowSlip(titleRect, startRect, velocity, throwSide))) {
         manager.ResetArrangeRule(throwSide);
@@ -334,7 +334,7 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
         auto rect1 = movingRectRecords_[recordsSize - 1].second;
         float duration = MathHelper::NonZero(TimeHelper::GetDuration(movingRectRecords_[0].first,
             movingRectRecords_[recordsSize - 1].first));
-        if (duration < 0.0f) {
+        if (!MathHelper::GreatNotEqual(duration, 0.0f)) {
             return velocity;
         }
         velocity.posX_ = static_cast<float>((rect1.posX_ - rect0.posX_) / static_cast<float>(duration));

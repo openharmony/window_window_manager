@@ -42,12 +42,12 @@ WM_DECLARE_SINGLE_INSTANCE(PcFoldScreenManager);
 public:
     void UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
-    SuperFoldStatus GetScreenFoldStatus();
-    bool IsHalfFolded(DisplayId displayId);
+    SuperFoldStatus GetScreenFoldStatus() const;
+    bool IsHalfFolded(DisplayId displayId) const;
     void UpdateSystemKeyboardStatus(bool hasSystemKeyboard);
-    bool HasSystemKeyboard();
+    bool HasSystemKeyboard() const;
 
-    std::tuple<WSRect, WSRect, WSRect> GetDisplayRects();
+    std::tuple<WSRect, WSRect, WSRect> GetDisplayRects() const;
 
     // animation parameters
     RSAnimationTimingProtocol GetMovingTimingProtocol();
@@ -89,13 +89,13 @@ private:
     void SetDisplayInfo(DisplayId displayId, SuperFoldStatus status);
     void SetDisplayRects(
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
-    float GetVpr();
+    float GetVpr() const;
 
     /*
      * fold screen property
      * if need, use map for multi fold screen
      */
-    std::shared_mutex displayInfoMutex_; // protect display infos
+    mutable std::shared_mutex displayInfoMutex_; // protect display infos
     DisplayId displayId_ { SCREEN_ID_INVALID };
     float vpr_ { 1.5f }; // display vp ratio
     SuperFoldStatus prevScreenFoldStatus_ { SuperFoldStatus::UNKNOWN };
@@ -103,7 +103,7 @@ private:
     bool hasSystemKeyboard_ { false }; // bottom system keyboard
     // Above guarded by displayInfoMutex_
 
-    std::shared_mutex rectsMutex_; // protect rects
+    mutable std::shared_mutex rectsMutex_; // protect rects
     WSRect defaultDisplayRect_;
     WSRect virtualDisplayRect_;
     WSRect foldCreaseRect_;
