@@ -2294,7 +2294,9 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     res = uiContent->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
         TLOGE(WmsLogTag::WMS_DECOR, "GetContainerModalButtonsRect failed");
-        titleButtonRect.IsUninitializedRect();
+        if (GetTargetAPIVersion() >= 15) { // 15: isolated version
+            titleButtonRect.ResetRect();
+        }
         return WMError::WM_OK;
     }
     float vpr = 0.f;
@@ -2352,12 +2354,17 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
                 TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window is null", where);
                 return;
             }
+            TitleButtonRect titleButtonRect;
+            if (window->GetTargetAPIVersion() >= 15 && // 15: isolated version
+                titleButtonLeftRect.IsUninitializedRect()) {
+                window->NotifyWindowTitleButtonRectChange(titleButtonRect);
+                return;
+            }
             float vpr = 0.f;
             auto err = window->GetVirtualPixelRatio(vpr);
             if (err != WMError::WM_OK) {
                 return;
             }
-            TitleButtonRect titleButtonRect;
             titleButtonRect.posX_ = static_cast<int32_t>(decorRect.width_) -
                 static_cast<int32_t>(titleButtonLeftRect.width_) - titleButtonLeftRect.posX_;
             titleButtonRect.posX_ = static_cast<int32_t>(titleButtonRect.posX_ / vpr);
