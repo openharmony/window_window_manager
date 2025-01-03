@@ -7372,7 +7372,7 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    unint32_t avoidAreaOption = 0;
+    uint32_t avoidAreaOption = 0;
     bool enable = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaOption(avoidAreaOption));
     enable = avoidAreaOption & 1;
