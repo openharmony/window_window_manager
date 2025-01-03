@@ -295,6 +295,12 @@ public:
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
+    std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr) override;
+    void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode) override;
 
 protected:
     ScreenSessionManager();
@@ -344,6 +350,7 @@ private:
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
+    void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE

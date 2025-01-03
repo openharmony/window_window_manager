@@ -285,6 +285,16 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
     return DMError::DM_OK;
 }
 
+void ScreenSession::SetIsExtend(bool isExtend)
+{
+    isExtended_ = isExtend;
+}
+
+bool ScreenSession::GetIsExtend() const
+{
+    return isExtended_;
+}
+
 std::string ScreenSession::GetName()
 {
     return name_;
@@ -1465,5 +1475,15 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         WLOGFE("failed to get pixelMap, return nullptr");
     }
     return pixelMap;
+}
+
+void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            continue;
+        }
+        listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
+    }
 }
 } // namespace OHOS::Rosen
