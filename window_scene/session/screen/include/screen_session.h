@@ -97,6 +97,7 @@ public:
     virtual ~ScreenSession();
 
     void CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config);
+    void ReuseDisplayNode(const RSDisplayNodeConfig& config);
     void SetDisplayNodeScreenId(ScreenId screenId);
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
