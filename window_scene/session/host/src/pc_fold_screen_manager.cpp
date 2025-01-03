@@ -86,13 +86,13 @@ void PcFoldScreenManager::SetDisplayRects(
     foldCreaseRect_ = foldCreaseRect;
 }
 
-SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus()
+SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus() const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return screenFoldStatus_;
 }
 
-bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId)
+bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId) const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED && displayId_ == displayId;
@@ -100,24 +100,24 @@ bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId)
 
 void PcFoldScreenManager::UpdateSystemKeyboardStatus(bool hasSystemKeyboard)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "status: %{public}d", hasSystemKeyboard);
-    std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "status: %{public}d", hasSystemKeyboard);
+    std::unique_lock<std::shared_mutex> lock(displayInfoMutex_);
     hasSystemKeyboard_ = hasSystemKeyboard;
 }
 
-bool PcFoldScreenManager::HasSystemKeyboard()
+bool PcFoldScreenManager::HasSystemKeyboard() const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return hasSystemKeyboard_;
 }
 
-float PcFoldScreenManager::GetVpr()
+float PcFoldScreenManager::GetVpr() const
 {
-    std::unique_lock<std::shared_mutex> lock(displayInfoMutex_);
+    std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return vpr_;
 }
 
-std::tuple<WSRect, WSRect, WSRect> PcFoldScreenManager::GetDisplayRects()
+std::tuple<WSRect, WSRect, WSRect> PcFoldScreenManager::GetDisplayRects() const
 {
     std::shared_lock<std::shared_mutex> lock(rectsMutex_);
     return { defaultDisplayRect_, virtualDisplayRect_, foldCreaseRect_ };
@@ -212,13 +212,13 @@ bool PcFoldScreenManager::NeedDoThrowSlip(const WSRect& rect, const WSRectF& vel
         rect.ToString().c_str(), velocity.ToString().c_str(), static_cast<int32_t>(throwSide));
 
     // velocity check
-    WSRect backtracingRect = CalculateThrowBacktracingRect(rect, velocity);
+    const WSRect& backtracingRect = CalculateThrowBacktracingRect(rect, velocity);
     if (!CheckVelocityOrientation(backtracingRect, velocity)) {
         return false;
     }
 
     const ScreenSide startSide = CalculateScreenSide(backtracingRect);
-    WSRect endRect = CalculateThrowEnd(backtracingRect, velocity);
+    const WSRect& endRect = CalculateThrowEnd(backtracingRect, velocity);
     const ScreenSide endSide = CalculateScreenSide(endRect);
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "backtracingRect: %{public}s, endRect: %{public}s",
         backtracingRect.ToString().c_str(), endRect.ToString().c_str());
@@ -234,7 +234,7 @@ bool PcFoldScreenManager::NeedDoThrowSlip(const WSRect& rect, const WSRectF& vel
 }
 
 /*
- * only for fullscreen cross-axis throw slip 
+ * only for fullscreen cross-axis throw slip
  */
 bool PcFoldScreenManager::NeedDoEasyThrowSlip(const WSRect& rect, const WSRect& startRect,
     const WSRectF& velocity, ScreenSide& throwSide)
@@ -274,26 +274,28 @@ bool PcFoldScreenManager::CheckVelocityOrientation(const WSRect& rect, const WSR
     int32_t aimX = 0;
     int32_t aimY = 0;
     if (startSide == ScreenSide::FOLD_B) {
-        if (velocity.posX_ < 0.0f) {
+        if (MathHelper::LessNotEqual(velocity.posX_, 0.0f)) {
             aimX = defaultDisplayRect.posX_;
             aimY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
         } else {
             aimX = defaultDisplayRect.posX_ + defaultDisplayRect.width_;
             aimY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
         }
-        return velocity.posY_ > std::abs(float(aimY - centerY) / MathHelper::NonZero(float(aimX - centerX)) * 
-                                velocity.posX_);
+        return MathHelper::GreatNotEqual(velocity.posY_,
+            std::abs(static_cast<float>(aimY - centerY) /
+                     MathHelper::NonZero(static_cast<float>(aimX - centerX)) * velocity.posX_));
     }
     if (startSide == ScreenSide::FOLD_C) {
-        if (velocity.posX_ < 0.0f) {
+        if (MathHelper::LessNotEqual(velocity.posX_, 0.0f)) {
             aimX = virtualDisplayRect.posX_;
             aimY = virtualDisplayRect.posY_;
         } else {
             aimX = virtualDisplayRect.posX_ + virtualDisplayRect.height_;
             aimY = virtualDisplayRect.posY_;
         }
-        return velocity.posY_ < -std::abs(float(aimY - centerY) / MathHelper::NonZero(float(aimX - centerX)) *
-                                velocity.posX_);
+        return MathHelper::LessNotEqual(velocity.posY_,
+            -std::abs(static_cast<float>(aimY - centerY) /
+                      MathHelper::NonZero(static_cast<float>(aimX - centerX)) * velocity.posX_));
     }
 
     return false;
@@ -304,19 +306,19 @@ WSRect PcFoldScreenManager::CalculateThrowBacktracingRect(const WSRect& rect, co
     int32_t midPosY = rect.height_ / 2 + rect.posY_; // 2: center
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     const int32_t midScreenY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
-    if ((midPosY < midScreenY - THROW_BACKTRACING_THRESHOLD && velocity.posY_ < 0.0f) ||
-        (midPosY > midScreenY + THROW_BACKTRACING_THRESHOLD && velocity.posY_ > 0.0f)) {
+    if ((midPosY < midScreenY - THROW_BACKTRACING_THRESHOLD && MathHelper::LessNotEqual(velocity.posY_, 0.0f)) ||
+        (midPosY > midScreenY + THROW_BACKTRACING_THRESHOLD && MathHelper::GreatNotEqual(velocity.posY_, 0.0f))) {
         return rect;
     }
-    return WSRect{int32_t(rect.posX_ - velocity.posX_ * THROW_BACKTRACING_DURATION),
-                  int32_t(rect.posY_ - velocity.posY_ * THROW_BACKTRACING_DURATION),
+    return WSRect{static_cast<int32_t>(rect.posX_ - velocity.posX_ * THROW_BACKTRACING_DURATION),
+                  static_cast<int32_t>(rect.posY_ - velocity.posY_ * THROW_BACKTRACING_DURATION),
                   rect.width_, rect.height_};
 }
 
 WSRect PcFoldScreenManager::CalculateThrowEnd(const WSRect& rect, const WSRectF& velocity)
 {
-    return WSRect{ rect.posX_ + std::round(velocity.posX_ / THROW_SLIP_DECELERATION_RATE),
-                   rect.posY_ + std::round(velocity.posY_ / THROW_SLIP_DECELERATION_RATE),
+    return WSRect{ static_cast<int32_t>(rect.posX_ + velocity.posX_ / THROW_SLIP_DECELERATION_RATE),
+                   static_cast<int32_t>(rect.posY_ + velocity.posY_ / THROW_SLIP_DECELERATION_RATE),
                    rect.width_, rect.height_ };
 }
 

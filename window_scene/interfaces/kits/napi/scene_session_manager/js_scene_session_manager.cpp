@@ -3805,7 +3805,7 @@ napi_value JsSceneSessionManager::OnUpdateSystemKeyboardStatus(napi_env env, nap
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     if (argc < ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -3813,7 +3813,7 @@ napi_value JsSceneSessionManager::OnUpdateSystemKeyboardStatus(napi_env env, nap
 
     bool hasSystemKeyboard = false;
     if (argv[0] == nullptr || !ConvertFromJsValue(env, argv[0], hasSystemKeyboard)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to bool");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
