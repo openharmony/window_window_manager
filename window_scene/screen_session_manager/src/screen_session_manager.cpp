@@ -2451,7 +2451,8 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         TLOGI(WmsLogTag::DMS, "[UL_POWER] screenIds empty");
         return false;
     }
-    bool isOffScreen = ((status == ScreenPowerStatus::POWER_STATUS_OFF) || (status == ScreenPowerStatus::POWER_STATUS_SUSPEND) ||
+    bool isOffScreen = ((status == ScreenPowerStatus::POWER_STATUS_OFF) ||
+        (status == ScreenPowerStatus::POWER_STATUS_SUSPEND) ||
         (status == ScreenPowerStatus::POWER_STATUS_DOZE) || (status == ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND));
 
     if (isOffScreen) {
