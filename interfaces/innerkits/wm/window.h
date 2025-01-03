@@ -65,9 +65,9 @@ namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
-using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
-using MouseEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
-using TouchEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
+using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
+using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
+using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;

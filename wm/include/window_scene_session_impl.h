@@ -38,7 +38,6 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WmErrorCode StartMoveWindow() override;
-    WmErrorCode StopMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
 
@@ -167,6 +166,7 @@ public:
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
+    WmErrorCode StopMoveWindow() override;
 
     /*
      * Compatible Mode
