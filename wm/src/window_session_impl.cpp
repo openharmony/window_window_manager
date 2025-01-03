@@ -3830,16 +3830,6 @@ void WindowSessionImpl::NotifyConsumeResultToFloatWindow
     }
 }
 
-bool WindowSessionImpl::IsAxisEvent(int32_t action)
-{
-    if (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-        action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE &&
-        action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
-        return false;
-    }
-    return true;
-}
-
 bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     bool isFiltered = false;
@@ -3851,10 +3841,10 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
             return false;
         }
         isFiltered = touchEventFilter_(*pointerEvent.get());
-    }else if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-              (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-               action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE &&
-               action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
+    } else if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+               (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+                action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE &&
+                action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
         std::shared_lock<std::shared_mutex> lock(mouseEventFilterMutex_);
         if (mouseEventFilter_ == nullptr) {
             return false;
