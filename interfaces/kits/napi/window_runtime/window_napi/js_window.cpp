@@ -7336,21 +7336,22 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
         TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    bool avoidAreaOption = false;
-    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &avoidAreaOption) != napi_ok) {
-        TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to avoidAreaOption");
+    bool enable = false;
+    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enable) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enable");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const where = __func__;
-    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, avoidAreaOption, where] {
+    auto execute = [weakToken = wptr<Window>(windowToken_), errCodePtr, enable, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(static_cast<uint32_t>(avoidAreaOption)));
+        uint32_t avoidAreaOption = enable ? 1 : 0;
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(avoidAreaOption));
     };
     auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
@@ -7373,9 +7374,8 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     uint32_t avoidAreaOption = 0;
-    bool enable = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaOption(avoidAreaOption));
-    enable = avoidAreaOption & 1;
+    bool enable = avoidAreaOption & 1;
     if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
         TLOGE(WmsLogTag::WMS_IMMS, "device is not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
