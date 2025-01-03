@@ -1134,7 +1134,7 @@ HWTEST_F(WindowSessionImplTest4, Filter, Function | SmallTest | Level2)
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->FilterKeyEvent(keyEvent);
     ASSERT_EQ(window->keyEventFilter_, nullptr);
-    window->SetKeyEventFilter([](MMI::KeyEvent& keyEvent) {
+    window->SetKeyEventFilter([](const MMI::KeyEvent& keyEvent) {
         GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetKeyEventFilter";
         return true;
     });
