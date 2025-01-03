@@ -3950,7 +3950,11 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_EVENT, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
