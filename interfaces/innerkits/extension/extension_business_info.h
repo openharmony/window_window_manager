@@ -19,7 +19,6 @@
 #include <cstdint>
 
 namespace OHOS::Rosen::Extension {
-
 constexpr const char* const WINDOW_MODE_FIELD = "windowMode";
 
 enum class Businesscode : uint8_t {
