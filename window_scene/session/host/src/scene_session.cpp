@@ -752,6 +752,18 @@ void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarProper
     }, __func__);
 }
 
+void SceneSession::RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            return;
+        }
+        session->onTouchOutside_ = std::move(callback);
+    }, __func__);
+}
+
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     auto task = [weakThis = wptr(this), mode]() {
@@ -3138,9 +3150,9 @@ void SceneSession::NotifyTouchOutside()
         WLOGFD("Notify sessionStage TouchOutside");
         sessionStage_->NotifyTouchOutside();
     }
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
+    if (onTouchOutside_) {
         WLOGFD("Notify sessionChangeCallback TouchOutside");
-        sessionChangeCallback_->OnTouchOutside_();
+        onTouchOutside_();
     }
 }
 
@@ -3153,12 +3165,9 @@ void SceneSession::NotifyWindowVisibility()
     }
 }
 
-bool SceneSession::CheckOutTouchOutsideRegister()
+bool SceneSession::CheckTouchOutsideCallbackRegistered()
 {
-    if (sessionChangeCallback_ && sessionChangeCallback_->OnTouchOutside_) {
-        return true;
-    }
-    return false;
+    return onTouchOutside_ != nullptr;
 }
 
 void SceneSession::SetRequestedOrientation(Orientation orientation)
@@ -4977,7 +4986,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->onRaiseToTop_ = nullptr;
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
-            session->sessionChangeCallback_->OnTouchOutside_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
             session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
         }
