@@ -885,13 +885,10 @@ HWTEST_F(SceneSessionManagerTest12, UpdateKeyboardAvoidAreaActive, Function | Sm
     ASSERT_EQ(true, systemKeyboardSession->IsSystemKeyboard());
     ssm->sceneSessionMap_.insert({ systemKeyboardSession->GetPersistentId(), systemKeyboardSession });
 
-    ssm->UpdateKeyboardAvoidAreaActive(DISPLAY_ID_INVALID, true);
-    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
-    ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
-    ssm->UpdateKeyboardAvoidAreaActive(systemKeyboardSession->GetScreenId(), false);
+    ssm->UpdateKeyboardAvoidAreaActive(false);
     ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
-    ssm->UpdateKeyboardAvoidAreaActive(systemKeyboardSession->GetScreenId(), true);
+    ssm->UpdateKeyboardAvoidAreaActive(true);
     ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
 }
