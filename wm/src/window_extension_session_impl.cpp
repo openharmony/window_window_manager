@@ -1367,7 +1367,7 @@ WindowMode WindowExtensionSessionImpl::GetMode() const
 
 WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
 {
-    property_->SetWindowMode(static_cast<WindowMode>(mode));
+    property_->SetWindowMode(mode);
     TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetMode());
     return WMError::WM_OK;
 }
