@@ -346,7 +346,6 @@ public:
     WSRect GetLastSafeRect() const;
     WSRect GetSessionTargetRect() const;
     std::string GetUpdatedIconPath() const;
-    std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     int32_t GetMainSessionId();
     virtual int32_t GetMissionId() const { return persistentId_; };
