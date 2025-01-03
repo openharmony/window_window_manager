@@ -905,7 +905,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
         auto isPhone = windowSystemConfig_.uiType_ == UI_TYPE_PHONE;
         auto isPad = windowSystemConfig_.uiType_ == UI_TYPE_PAD;
-        bool onlySupportFullScreen = (windowModeSupportType == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
+        bool isWindowModeSupportFullscreen = GetTargetAPIVersion() < 15 ? // 15: isolated version
+            (windowModeSupportType == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) :
+            (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
+            !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
+        bool onlySupportFullScreen = isWindowModeSupportFullscreen &&
             ((!isPhone && !isPad) || IsFreeMultiWindowMode());
         if (onlySupportFullScreen || property_->GetFullScreenStart()) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
