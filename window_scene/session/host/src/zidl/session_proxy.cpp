@@ -1711,7 +1711,7 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isExecuteDelayRaise)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "write isExecuteDelayRaise failed");
+        WLOGFE("write isExecuteDelayRaise failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

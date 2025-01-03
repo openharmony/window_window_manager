@@ -2099,13 +2099,14 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
     }
     bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (!isExecuteDelayRaise) {
-        if (raiseEnabled) {
-            RaiseToAppTopForPointDown();
-        } else if (parentSession) {
-            // sub window is forbidden to raise to top after click, but its parent should raise
-            parentSession->NotifyClick(!IsScbCoreEnabled());
-        }
+    if (isExecuteDelayRaise) {
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled) {
+        RaiseToAppTopForPointDown();
+    } else if (parentSession) {
+        // sub window is forbidden to raise to top after click, but its parent should raise
+        parentSession->NotifyClick(!IsScbCoreEnabled());
     }
     return WSError::WS_OK;
 }

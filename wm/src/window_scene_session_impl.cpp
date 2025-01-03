@@ -849,7 +849,7 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
         auto callbackFunc = [weakThis, pointerEvent, &pointerItem](bool isPointerTargetDraggable) {
             auto promoteThis = weakThis.promote();
             if (promoteThis == nullptr) {
-                TLOGD(WmsLogTag::WMS_HIERARCHY, "promoteThis is null");
+                TLOGNE(WmsLogTag::WMS_EVENT, "promoteThis is null");
                 return;
             }
             promoteThis->ConsumePointerEventInner(pointerEvent, pointerItem, isPointerTargetDraggable);

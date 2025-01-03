@@ -459,7 +459,7 @@ public:
      *
      * @param isEnabled Enable or disable window delay raise
      */
-    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_OK; }
+    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Get whether window delay raise is enabled
