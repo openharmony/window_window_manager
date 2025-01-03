@@ -174,7 +174,6 @@ private:
      */
     void ReregisterWindowManagerAgent();
     void WindowManagerAndSessionRecover();
-    bool recoverInitialized_ = false;
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 
@@ -189,6 +188,7 @@ private:
      * Window Recover
      */
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
+    bool recoverInitialized_ = false;
     // above guarded by mutex_
 };
 } // namespace Rosen
