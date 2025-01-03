@@ -7351,7 +7351,7 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
             return;
         }
         uint32_t avoidAreaOption = enable ? 1 : 0;
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(avoidAreaOption));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(windowToken->SetAvoidAreaOption(avoidAreaOption));
     };
     auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
