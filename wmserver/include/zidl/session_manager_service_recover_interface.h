@@ -28,7 +28,14 @@ public:
         TRANS_ID_ON_WMS_CONNECTION_CHANGED,
     };
 
+    /*
+     * Window Recover
+     */
     virtual void OnSessionManagerServiceRecover(const sptr<IRemoteObject>& sessionManagerService) = 0;
+
+    /*
+     * Multi User
+     */
     virtual void OnWMSConnectionChanged(
         int32_t userId, int32_t screenId, bool isConnected, const sptr<IRemoteObject>& sessionManagerService) = 0;
 };

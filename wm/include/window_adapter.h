@@ -165,9 +165,13 @@ public:
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
-    void OnUserSwitch();
     bool InitWMSProxy();
     bool InitSSMProxy();
+
+    /*
+     * Multi User
+     */
+    void OnUserSwitch();
 
     /*
      * Window Recover
