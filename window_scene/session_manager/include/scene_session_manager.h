@@ -271,9 +271,13 @@ public:
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
 
+    /*
+     * Multi User
+     */
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
     void NotifySwitchingUser(const bool isUserActive);
     int32_t GetCurrentUserId() const;
+
     void StartWindowInfoReportLoop();
 
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
@@ -962,7 +966,9 @@ private:
 
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
-    // Multi User
+    /*
+     * Multi User
+     */
     static constexpr int32_t DEFAULT_USERID = -1;
     std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
     bool isUserBackground_ = false; // Only accessed on SSM thread
