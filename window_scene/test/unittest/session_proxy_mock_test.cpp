@@ -104,33 +104,33 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
 HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
 {
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new iRemoteObjectMocker();
-    SessionProxy* sessionproxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    ASSERT_NE(sessionproxy, nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
+    ASSERT_NE(sessionProxy, nullptr);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionproxy->UpdateSessionPropertyByAction(nullptr,
-        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+    WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionPreperty();
+    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(property, nullptr);
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionproxy->UpdateSessionPropertyByAction(property,
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WSError::WS_OK, sessionproxy->UpdateSessionPropertyByAction(property,
+    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionproxy->UpdateSessionPropertyByAction(nullptr,
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
     MockMessageParcel::SetWriteBoolErrorFlag(false);
-    ASSERT_EQ(WSError::WS_OK, sessionproxy->UpdateSessionPropertyByAction(nullptr,
+    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(nullptr,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 }
