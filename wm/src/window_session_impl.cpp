@@ -3845,7 +3845,7 @@ bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEve
                (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
                 action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE &&
                 action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
-        std::shared_lock<std::shared_mutex> lock(mouseEventFilterMutex_);
+        std::lock_guard<std::mutex> lock(mouseEventFilterMutex_);
         if (mouseEventFilter_ == nullptr) {
             return false;
         }
