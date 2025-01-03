@@ -964,8 +964,9 @@ HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest | Level2)
 {
-    bool isWatchGestureConsumed = false;
+    window_ = GetTestWindowImpl("SetWatchGestureConsumed");
     ASSERT_NE(window_, nullptr);
+    bool isWatchGestureConsumed = false;
     window_->SetWatchGestureConsumed(isWatchGestureConsumed);
     ASSERT_EQ(window_->GetWatchGestureConsumed(), false);
 }
@@ -977,10 +978,11 @@ HWTEST_F(WindowSessionImplTest3, SetWatchGestureConsumed, Function | SmallTest |
  */
 HWTEST_F(WindowSessionImplTest3, NotifyConsumeResultToFloatWindow, Function | SmallTest | Level2)
 {
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    window_ = GetTestWindowImpl("NotifyConsumeResultToFloatWindow");
+    ASSERT_NE(window_, nullptr);
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     keyEvent->SetKeyCode(MMI::KeyEvent::KEYCODE_TAB);
     keyEvent->SetKeyAction(MMI::KeyEvent::KEY_ACTION_DOWN);
-    ASSERT_NE(window_, nullptr);
     window_->SetWatchGestureConsumed(false);
     bool isConsumed = false;
     window_->NotifyConsumeResultToFloatWindow(keyEvent, isConsumed);
