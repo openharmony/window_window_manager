@@ -834,7 +834,7 @@ HWTEST_F(WindowSceneSessionImplTest4, GetWindowStatus02, Function | SmallTest | 
 
     WindowStatus windowStatus;
     ASSERT_EQ(WMError::WM_OK, window->GetWindowStatus(windowStatus));
-    ASSERT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN, windowStatus);
+    ASSERT_EQ(WindowStatus::WINDOW_STATUS_FULLSCREEN, windowStatus);
 }
 
 /**
