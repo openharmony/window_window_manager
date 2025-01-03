@@ -205,12 +205,6 @@ private:
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
 
     /*
-     * Window Recover
-     */
-    napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
-    napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
-
-    /*
      * Multi Instance
      */
     napi_value OnGetMaxInstanceCount(napi_env env, napi_callback_info info);
@@ -254,6 +248,8 @@ private:
     /*
      * Window Recover
      */
+    napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
+    napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
     void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
     void ProcessRecoverSceneSessionRegister();
 
