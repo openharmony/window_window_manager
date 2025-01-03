@@ -2521,6 +2521,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
+    if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
+        shouldBlock = false;
+    }
     if (shouldBlock) {
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         return WSError::WS_ERROR_INVALID_OPERATION;
@@ -3802,6 +3806,10 @@ WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionPrope
 void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
+    if (systemConfig_.IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't hide");
+        return;
+    }
     auto propertyOld = sceneSession->GetSessionProperty();
     if (propertyOld == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "session property null");
