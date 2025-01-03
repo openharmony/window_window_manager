@@ -1196,6 +1196,8 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
         const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
             PcFoldScreenManager::GetInstance().GetDisplayRects();
         screenHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, virtual display posY: %{public}d, height: %{public}d",
+            GetPersistentId(), virtualDisplayRect.posY_, virtualDisplayRect.height_);
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
     return true;
@@ -1223,6 +1225,8 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
         const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
             PcFoldScreenManager::GetInstance().GetDisplayRects();
         screenHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, virtual display posY: %{public}d, height: %{public}d",
+            GetPersistentId(), virtualDisplayRect.posY_, virtualDisplayRect.height_);
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
     return true;
@@ -1870,7 +1874,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
@@ -1889,7 +1893,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();
-        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT || !inputMethod->IsKeyboardAvoidAreaActive()) {
             continue;
         }
         if (isKeyboardPanelEnabled_) {
@@ -6080,6 +6084,11 @@ void SceneSession::ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid)
     if (recalculateAvoid && active) {
         EnableCallingSessionAvoidArea();
     }
+}
+
+bool SceneSession::IsKeyboardAvoidAreaActive() const
+{
+    return keyboardAvoidAreaActive_;
 }
 
 void SceneSession::MarkAvoidAreaAsDirty()

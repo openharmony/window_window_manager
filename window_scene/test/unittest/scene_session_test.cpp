@@ -928,9 +928,13 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     WSRect overlapRect = {0, 0, 0, 0};
     AvoidArea avoidArea;
-    int ret = 1;
     sceneSession->GetKeyboardAvoidArea(overlapRect, avoidArea);
-    ASSERT_EQ(ret, 1);
+    ASSERT_EQ(true, overlapRect.IsEmpty());
+    ASSERT_EQ(true, sceneSession->keyboardAvoidAreaActive_);
+    sceneSession->keyboardAvoidAreaActive_ = false;
+    sceneSession->GetKeyboardAvoidArea(overlapRect, avoidArea);
+    ASSERT_EQ(false, sceneSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(true, overlapRect.IsEmpty());
 }
 
 /**
