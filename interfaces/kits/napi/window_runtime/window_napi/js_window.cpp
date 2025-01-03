@@ -524,7 +524,7 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowDelayRaise(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "SetWindowDelayRaise");
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowDelayRaise(env, info) : nullptr;
 }
@@ -3954,7 +3954,7 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
-    
+
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3964,22 +3964,24 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isDelayRaise = false;
-    napi_get_value_bool(env, argv[0], &isDelayRaise);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter from jsValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
 
-    wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, isDelayRaise, errCodePtr] {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken = wptr<Window>(windowToken_), isDelayRaise, errCodePtr] {
         if (errCodePtr == nullptr) {
             return;
         }
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetWindowDelayRaiseEnabled(isDelayRaise));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowDelayRaiseEnabled(isDelayRaise));
         TLOGND(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] set success",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+            window->GetWindowId(), window->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
