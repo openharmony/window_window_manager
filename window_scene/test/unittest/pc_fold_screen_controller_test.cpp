@@ -65,11 +65,11 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112; // dp
 constexpr int32_t MOVING_RECORDS_SIZE_LIMIT = 5;
 constexpr int32_t MOVING_RECORDS_TIME_LIMIT_IN_NS = 100000;
 const WSRectF B_VELOCITY = { 0.0f, 5.0f, 0.0f, 0.0f };
-const WSRectF B_VELOCITY_SLOW = { 0.0f, 0.1f, 0.0f, 0.0f };
-const WSRectF B_VELOCITY_SKEW = { 0.5f, 0.5f, 0.0f, 0.0f };
+const WSRectF B_VELOCITY_SLOW = { 0.0f, 0.01f, 0.0f, 0.0f };
+const WSRectF B_VELOCITY_SKEW = { 50.0f, 5.0f, 0.0f, 0.0f };
 const WSRectF C_VELOCITY = { 0.0f, -5.0f, 0.0f, 0.0f };
-const WSRectF C_VELOCITY_SLOW = { 0.0f, -0.1f, 0.0f, 0.0f };
-const WSRectF C_VELOCITY_SKEW = { 0.5f, -0.5f, 0.0f, 0.0f };
+const WSRectF C_VELOCITY_SLOW = { 0.0f, -0.01f, 0.0f, 0.0f };
+const WSRectF C_VELOCITY_SKEW = { 50.0f, -5.0f, 0.0f, 0.0f };
 } // namespace
 
 class PcFoldScreenManagerTest : public testing::Test {
@@ -154,6 +154,7 @@ void PcFoldScreenControllerTest::SetUp()
     controller_ = mainSession_->pcFoldScreenController_;
 
     SetExpanded();
+    manager_.UpdateSystemKeyboardStatus(false);
 }
 
 void PcFoldScreenControllerTest::TearDown()
@@ -224,6 +225,19 @@ HWTEST_F(PcFoldScreenManagerTest, SetDisplayRects, Function | SmallTest | Level1
     EXPECT_EQ(DEFAULT_DISPLAY_RECT, rect4);
     EXPECT_EQ(VIRTUAL_DISPLAY_RECT, rect5);
     EXPECT_EQ(FOLD_CREASE_RECT, rect6);
+}
+
+/**
+ * @tc.name: UpdateSystemKeyboardStatus
+ * @tc.desc: test function : UpdateSystemKeyboardStatus, HasSystemKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, UpdateSystemKeyboardStatus, Function | SmallTest | Level1)
+{
+    manager_.UpdateSystemKeyboardStatus(true);
+    EXPECT_TRUE(manager_.HasSystemKeyboard());
+    manager_.UpdateSystemKeyboardStatus(false);
+    EXPECT_FALSE(manager_.HasSystemKeyboard());
 }
 
 /**
@@ -306,14 +320,105 @@ HWTEST_F(PcFoldScreenManagerTest, ResizeToFullScreen, Function | SmallTest | Lev
  */
 HWTEST_F(PcFoldScreenManagerTest, NeedDoThrowSlip, Function | SmallTest | Level1)
 {
+    SetHalfFolded();
     // side B
-    EXPECT_TRUE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_B, B_VELOCITY));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_B, B_VELOCITY_SLOW));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_B, B_VELOCITY_SKEW));
+    ScreenSide throwSide = ScreenSide::FOLD_B;
+    EXPECT_TRUE(manager_.NeedDoThrowSlip(B_RECT, B_VELOCITY, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(B_RECT, B_VELOCITY_SLOW, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(B_RECT, B_VELOCITY_SKEW, throwSide));
     // side C
-    EXPECT_TRUE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_C, C_VELOCITY));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_C, C_VELOCITY_SLOW));
-    EXPECT_FALSE(manager_.NeedDoThrowSlip(ScreenSide::FOLD_C, C_VELOCITY_SKEW));
+    throwSide = ScreenSide::FOLD_C;
+    EXPECT_TRUE(manager_.NeedDoThrowSlip(C_RECT, C_VELOCITY, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(C_RECT, C_VELOCITY_SLOW, throwSide));
+    EXPECT_FALSE(manager_.NeedDoThrowSlip(C_RECT, C_VELOCITY_SKEW, throwSide));
+}
+
+/**
+ * @tc.name: NeedDoEasyThrowSlip
+ * @tc.desc: test function : NeedDoEasyThrowSlip
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, NeedDoEasyThrowSlip, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    // side B cross axis
+    WSRect startRectB = { 100, 100, 100, 20 };
+    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20};
+    ScreenSide throwSide = ScreenSide::FOLD_C;
+    EXPECT_TRUE(manager_.NeedDoEasyThrowSlip(rectB, startRectB, B_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_B, throwSide);
+    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20};
+    throwSide = ScreenSide::FOLD_C;
+    EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectB, startRectB, B_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_C, throwSide);
+    // side C cross axis
+    WSRect startRectC = { 100, SCREEN_HEIGHT - 100, 100, 20 };
+    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20};
+    throwSide = ScreenSide::FOLD_B;
+    EXPECT_TRUE(manager_.NeedDoEasyThrowSlip(rectC, startRectC, C_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_C, throwSide);
+    rectC = { 100, 90, 100, 20};
+    throwSide = ScreenSide::FOLD_B;
+    EXPECT_FALSE(manager_.NeedDoEasyThrowSlip(rectC, startRectC, C_VELOCITY, throwSide));
+    EXPECT_EQ(ScreenSide::FOLD_B, throwSide);
+}
+
+/**
+ * @tc.name: CheckVelocityOrientation
+ * @tc.desc: test function : CheckVelocityOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, CheckVelocityOrientation, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    EXPECT_TRUE(manager_.CheckVelocityOrientation(B_RECT, B_VELOCITY));
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(B_RECT, B_VELOCITY_SKEW));
+    WSRectF velocity1 = B_VELOCITY_SKEW;
+    velocity1.posX_ = -velocity1.posX_;
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(B_RECT, velocity1));
+    EXPECT_TRUE(manager_.CheckVelocityOrientation(C_RECT, C_VELOCITY));
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(C_RECT, C_VELOCITY_SKEW));
+    velocity1 = C_VELOCITY_SKEW;
+    velocity1.posX_ = -velocity1.posX_;
+    EXPECT_FALSE(manager_.CheckVelocityOrientation(C_RECT, velocity1));
+}
+
+/**
+ * @tc.name: CalculateThrowBacktracingRect
+ * @tc.desc: test function : CalculateThrowBacktracingRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, CalculateThrowBacktracingRect, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    // side B
+    WSRect rectB = { 100, SCREEN_HEIGHT_HALF + 90, 100, 20};
+    EXPECT_EQ(ScreenSide::FOLD_B,
+        manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectB, B_VELOCITY)));
+    rectB = { 100, SCREEN_HEIGHT - 110, 100, 20};
+    EXPECT_EQ(rectB, manager_.CalculateThrowBacktracingRect(rectB, B_VELOCITY));
+    // side C
+    WSRect rectC = { 100, SCREEN_HEIGHT_HALF - 110, 100, 20};
+    EXPECT_EQ(ScreenSide::FOLD_C,
+        manager_.CalculateScreenSide(manager_.CalculateThrowBacktracingRect(rectC, C_VELOCITY)));
+    rectC = { 100, 90, 100, 20};
+    EXPECT_EQ(rectC, manager_.CalculateThrowBacktracingRect(rectC, C_VELOCITY));
+}
+
+/**
+ * @tc.name: CalculateThrowEnd
+ * @tc.desc: test function : CalculateThrowEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, CalculateThrowEnd, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    // side B
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(B_RECT, B_VELOCITY)));
+    EXPECT_EQ(ScreenSide::FOLD_B, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(B_RECT, B_VELOCITY_SLOW)));
+    // side C
+    EXPECT_EQ(ScreenSide::FOLD_B, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(C_RECT, C_VELOCITY)));
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(manager_.CalculateThrowEnd(C_RECT, C_VELOCITY_SLOW)));
 }
 
 /**
@@ -549,6 +654,22 @@ HWTEST_F(PcFoldScreenManagerTest, GetVpr, Function | SmallTest | Level2)
 {
     manager_.vpr_ = 1.0;
     EXPECT_TRUE(MathHelper::NearZero(manager_.GetVpr() - 1.0));
+}
+
+/**
+ * @tc.name: IsAllowThrowSlip
+ * @tc.desc: test function : IsAllowThrowSlip, IsStartFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Level1)
+{
+    SetExpanded();
+    EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+    SetHalfFolded();
+    manager_.UpdateSystemKeyboardStatus(false);
+    EXPECT_TRUE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+    manager_.UpdateSystemKeyboardStatus(true);
+    EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
 }
 
 /**

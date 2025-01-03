@@ -35,6 +35,7 @@ public:
     void FoldStatusChangeForSupportEnterWaterfallMode(
         DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     bool IsHalfFolded(DisplayId displayId);
+    bool IsAllowThrowSlip(DisplayId displayId);
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
     void RecordMoveRects(const WSRect& rect);
