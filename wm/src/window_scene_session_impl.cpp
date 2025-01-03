@@ -2705,7 +2705,7 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_END_MOVE);
-    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d , errorCode: %{public}d",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
           GetPersistentId(), static_cast<int>(errorCode));
     return errorCode == WSError::WS_ERROR_NULLPTR ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
 }

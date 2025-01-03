@@ -12482,6 +12482,11 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not same bundle as calling", targetPersistentId);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != targetSession->GetCallingPid()) {
+        TLOGE(WmsLogTag::WMS_PC, "permission denied, not call by the same process");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     return taskScheduler_->PostSyncTask([sourcePersistentId, targetPersistentId] {
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId, true);
         TLOGND(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
