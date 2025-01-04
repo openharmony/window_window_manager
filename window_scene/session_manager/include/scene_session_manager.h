@@ -381,8 +381,8 @@ public:
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
     bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
-    void SetStatusBarDefaultHeightPerDisplay(uint32_t height);
-    void GetStatusBarDefaultHeightByDisplayId(WSRect& barArea);
+    void SetStatusBarAvoidHeight(uint32_t height);
+    void GetStatusBarAvoidHeight(WSRect& barArea);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -1132,7 +1132,7 @@ private:
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
-    uint32_t statusBarDefaultHeightPerDisplay_;
+    uint32_t statusBarAvoidHeight_;
 
     struct SessionInfoList {
         int32_t uid_;
