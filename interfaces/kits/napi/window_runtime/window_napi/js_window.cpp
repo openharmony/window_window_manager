@@ -3950,7 +3950,6 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_FOCUS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3964,37 +3963,12 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter from jsValue");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
-    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken = wptr<Window>(windowToken_), isDelayRaise, errCodePtr] {
-        if (errCodePtr == nullptr) {
-            return;
-        }
-        auto window = weakToken.promote();
-        if (window == nullptr) {
-            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            return;
-        }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowDelayRaiseEnabled(isDelayRaise));
-        TLOGND(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] set success",
-            window->GetWindowId(), window->GetWindowName().c_str());
-    };
-    NapiAsyncTask::CompleteCallback complete =
-        [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (errCodePtr == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                return;
-            }
-            if (*errCodePtr == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "Set window delay raise failed"));
-            }
-        };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnSetWindowDelayRaise", env,
-        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
-    return result;
+    auto result = windowToken_->SetWindowDelayRaiseEnabled(isDelayRaise);
+    if (result != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "set window delay raise failed");
+        return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(result));
+    }
+    return NapiGetUndefined(env);
 }
 
 napi_value JsWindow::OnSetKeepScreenOn(napi_env env, napi_callback_info info)
