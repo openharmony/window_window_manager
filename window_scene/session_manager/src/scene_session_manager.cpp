@@ -12413,10 +12413,13 @@ void SceneSessionManager::SetStatusBarDefaultHeightPerDisplay(DisplayId displayI
     }, __func__);
 }
 
-uint32_t SceneSessionManager::GetStatusBarDefaultHeightByDisplayId(DisplayId displayId)
+void SceneSessionManager::GetStatusBarDefaultHeightByDisplayId(DisplayId displayId, WSRect& barArea)
 {
-    return statusBarDefaultHeightPerDisplay_.count(displayId) != 0 ?
-        statusBarDefaultHeightPerDisplay_[displayId] : 0;
+    if (!statusBarDefaultHeightPerDisplay_.count(displayId)) {
+        TLOGD(WmsLogTag::WMS_IMMS, "display %{public}llu failed", displayId);
+    }
+    barArea.height_ = statusBarDefaultHeightPerDisplay_.count(displayId) != 0 ?
+        statusBarDefaultHeightPerDisplay_[displayId] : barArea.height_;
 }
 
 } // namespace OHOS::Rosen
