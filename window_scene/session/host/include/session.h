@@ -380,6 +380,7 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
+    WSError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Multi Window

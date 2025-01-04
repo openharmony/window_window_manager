@@ -2332,6 +2332,27 @@ HWTEST_F(WindowSessionImplTest4, NotifySystemDensityChange01, Function | SmallTe
     ASSERT_EQ(WSError::WS_OK, ret);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetIsMidScene, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetIsMidScene");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessioninfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    bool isMidScene = false;
+    window->GetIsMidScene(isMidScene);
+    ASSERT_EQ(false, isMidScene);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
