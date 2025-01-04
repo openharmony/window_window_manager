@@ -2891,13 +2891,32 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
                 TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
                 return;
             }
+            session->OnThrowSlipAnimationStateChange(false);
             session->NotifyFullScreenAfterThrowSlip(rect);
+        };
+    } else {
+        finishCallback = [weakThis = wptr(this), rect] {
+            auto session = weakThis.promote();
+            if (session == nullptr) {
+                TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+                return;
+            }
+            session->OnThrowSlipAnimationStateChange(false);
         };
     }
     auto throwSlipPair = std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
         pcFoldScreenController_->GetThrowSlipTimingCurve());
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
+    OnThrowSlipAnimationStateChange(true);
     return needSetFullScreen;
+}
+
+void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "status: %{public}d", isAnimating);
+    if (onThrowSlipAnimationStateChangeFunc_) {
+        onThrowSlipAnimationStateChangeFunc_(isAnimating);
+    }
 }
 
 void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
@@ -4251,6 +4270,18 @@ void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<v
             return;
         }
         session->pcFoldScreenController_->RegisterFullScreenWaterfallModeChangeCallback(std::move(func));
+    }, __func__);
+}
+
+void SceneSession::RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func)
+{
+    PostTask([weakThis = wptr(this), func = std::move(func)]() mutable {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr");
+            return;
+        }
+        session->onThrowSlipAnimationStateChangeFunc_ = std::move(func);
     }, __func__);
 }
 
