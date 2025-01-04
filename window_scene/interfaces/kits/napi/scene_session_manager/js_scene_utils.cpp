@@ -326,6 +326,19 @@ bool IsJsInstanceKeyUndefined(napi_env env, napi_value jsInstanceKey, SessionInf
     return true;
 }
 
+bool IsJsIsAppUseControlUndefined(napi_env env, napi_value jsIsAppUseControl, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsAppUseControl) != napi_undefined) {
+        bool isAppUseControl = false;
+        if (!ConvertFromJsValue(env, jsIsAppUseControl, isAppUseControl)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isAppUseControl");
+            return false;
+        }
+        sessionInfo.isAppUseControl_ = isAppUseControl;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -420,6 +433,8 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
     napi_value jsProcessOption = nullptr;
     napi_get_named_property(env, jsObject, "processOptions", &jsProcessOption);
+    napi_value jsIsAppUseControl = nullptr;
+    napi_get_named_property(env, jsObject, "isAppUseControl", &jsIsAppUseControl);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
@@ -443,6 +458,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsProcessOptionUndefined(env, jsProcessOption, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsAppUseControlUndefined(env, jsProcessOption, sessionInfo)) {
         return false;
     }
     return true;
