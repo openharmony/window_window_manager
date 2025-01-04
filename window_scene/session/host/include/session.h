@@ -169,6 +169,8 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
+    bool GetIsAppUseControl();
+    void SetIsAppUseControl(bool isAppUseControl);
 
     /*
      * Window Recover
@@ -861,6 +863,7 @@ private:
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
+    bool isAppUseControl_ = false; // Indicates whether the window is a control window.
 
     /*
      * Starting Window
