@@ -589,6 +589,8 @@ public:
      */
     void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
+    void OnThrowSlipAnimationStateChange(bool isAnimating);
+    void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
     bool IsMissionHighlighted();
 
     /*
@@ -705,6 +707,7 @@ protected:
     void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic_bool isThrowSlipToFullScreen_ = false;
+    std::function<void(bool isAnimating)> onThrowSlipAnimationStateChangeFunc_;
 
     /*
      * Multi Window
