@@ -980,8 +980,8 @@ HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, Function | SmallTe
     constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
     std::vector<sptr<WindowLayoutInfo>> info;
     ssm_->GetAllWindowLayoutInfo(VIRTUAL_DISPLAY_ID, info);
-    ASSERT_EQ(-2472, info[0]->rect.posY_);
     ssm_->sceneSessionMap_.clear();
+    ASSERT_EQ(-2472, info[0]->rect.posY_);
 }
 
 /**
@@ -1012,8 +1012,8 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function 
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<WindowLayoutInfo>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
-    ASSERT_EQ(130, filteredSessions[0]->rect.posY_);
     ssm_->sceneSessionMap_.clear();
+    ASSERT_EQ(130, filteredSessions[0]->rect.posY_);
 }
 
 /**
@@ -1055,8 +1055,8 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, Function 
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<WindowLayoutInfo>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
-    ASSERT_EQ(2, filteredSessions.size());
     ssm_->sceneSessionMap_.clear();
+    ASSERT_EQ(2, filteredSessions.size());
 }
 
 /**
@@ -1095,8 +1095,8 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, Function 
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<WindowLayoutInfo>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
-    ASSERT_EQ(2, filteredSessions.size());
     ssm_->sceneSessionMap_.clear();
+    ASSERT_EQ(2, filteredSessions.size());
 }
 
 /**
@@ -1136,14 +1136,14 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function 
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
 
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
-    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+
     std::vector<sptr<WindowLayoutInfo>> filteredSessions1;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions1);
-    ASSERT_EQ(2, filteredSessions1.size());
+    EXPECT_EQ(2, filteredSessions1.size());
     std::vector<sptr<WindowLayoutInfo>> filteredSessions2;
-    ssm_->FilterForGetAllWindowLayoutInfo(VIRTUAL_DISPLAY_ID, true, filteredSessions2);
-    ASSERT_EQ(2, filteredSessions2.size());
+    ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, true, filteredSessions2);
     ssm_->sceneSessionMap_.clear();
+    ASSERT_EQ(2, filteredSessions2.size());
 }
 
 /**
@@ -1160,8 +1160,8 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo05, Function 
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
-    ASSERT_EQ(0, filteredSessions.size());
     ssm_->sceneSessionMap_.clear();
+    ASSERT_EQ(0, filteredSessions.size());
 }
 }
 } // namespace Rosen
