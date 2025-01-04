@@ -1011,6 +1011,38 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetDecorHeight03
+ * @tc.desc: GetDecorHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetDecorHeight03");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9f;
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(72));
+    window->uiContent_ = std::move(uiContent);
+    int32_t decorHeight = 38;
+    window->SetDecorHeight(decorHeight);
+    EXPECT_EQ(window->decorHeight_, decorHeight);
+
+    
+    window->SetTargetAPIVersion(14);
+    int32_t height = -1;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, 37);
+    window->SetTargetAPIVersion(15);
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, decorHeight);
+    window->Destroy();
+}
+
+/**
  * @tc.name: GetTitleButtonArea01
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
