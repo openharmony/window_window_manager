@@ -102,6 +102,7 @@ using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isN
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
+using GetStatusBarDefaultHeightByDisplayIdFunc = std::function<uint32_t(DisplayId displayId)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -135,6 +136,7 @@ public:
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
+        GetStatusBarDefaultHeightByDisplayIdFunc onGetStatusBarDefaultHeightByDisplayId_;
     };
 
     // func for change window scene pattern property

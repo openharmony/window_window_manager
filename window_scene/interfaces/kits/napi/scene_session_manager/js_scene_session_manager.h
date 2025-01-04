@@ -125,6 +125,7 @@ public:
     static napi_value ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
+    static napi_value SetStatusBarDefaultHeightPerDisplay(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -205,6 +206,7 @@ private:
     napi_value OnResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetStatusBarDefaultHeightPerDisplay(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
