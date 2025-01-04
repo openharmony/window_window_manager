@@ -3965,7 +3965,7 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
     }
     auto result = windowToken_->SetWindowDelayRaiseEnabled(isDelayRaise);
     if (result != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "set window delay raise failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed");
         return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(result));
     }
     return NapiGetUndefined(env);
