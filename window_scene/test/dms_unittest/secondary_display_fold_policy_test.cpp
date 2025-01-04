@@ -17,6 +17,7 @@
 
 #include "screen_session_manager.h"
 #include "screen_session_manager/include/fold_screen_controller/secondary_display_fold_policy.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -204,6 +205,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, GetModeMatchStatus, Function | SmallTes
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeSuperScreenDisplayMode01, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::make_shared<TaskScheduler>("test");
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -244,6 +248,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeSuperScreenDisplayMode01, Functio
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult01, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::make_shared<TaskScheduler>("test");
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
