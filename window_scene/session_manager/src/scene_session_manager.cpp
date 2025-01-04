@@ -12413,7 +12413,7 @@ void SceneSessionManager::SetStatusBarDefaultHeightPerDisplay(DisplayId displayI
     }, __func__);
 }
 
-uint32_t SceneSessionManager::GetStatusBarDefaultHeightByDisplay(DisplayId displayId)
+uint32_t SceneSessionManager::GetStatusBarDefaultHeightByDisplayId(DisplayId displayId)
 {
     return statusBarDefaultHeightPerDisplay_.count(displayId) != 0 ?
         statusBarDefaultHeightPerDisplay_[displayId] : 0;
