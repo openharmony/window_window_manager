@@ -178,10 +178,17 @@ void SceneInputManager::Init()
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     eventLoop_ = AppExecFwk::EventRunner::Create(FLUSH_DISPLAY_INFO_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    auto callback = [this]() {
-        FlushDisplayInfoToMMI();
-    };
-    sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
+}
+
+void SceneInputManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback)
+{
+    sceneSessionDirty_->RegisterFlushWindowInfoCallback(std::move(callback));
+}
+
+auto SceneInputManager::GetFullWindowInfoList() ->
+    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
+{
+    return sceneSessionDirty_->GetFullWindowInfoList();
 }
 
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
@@ -361,7 +368,10 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
         return;
     }
     if (focusedSceneSession->HasModalUIExtension()) {
-        focusedSessionId_ =  focusedSceneSession->GetLastModalUIExtensionEventInfo().persistentId;
+        auto modalUIExtensionEventInfo = focusedSceneSession->GetLastModalUIExtensionEventInfo();
+        if (modalUIExtensionEventInfo.has_value()) {
+            focusedSessionId_ =  modalUIExtensionEventInfo.value().persistentId;
+        }
     }
 }
 
@@ -502,9 +512,12 @@ void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::Displa
     }
 }
 
-void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
+void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& windowInfoList,
+                                              std::vector<std::shared_ptr<Media::PixelMap>>&& pixelMapList,
+                                              const bool forceFlush)
 {
-    auto task = [this, forceFlush]() {
+    eventHandler_->PostTask([this, windowInfoList = std::move(windowInfoList),
+                            pixelMapList = std::move(pixelMapList), forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
         if (isUserBackground_.load()) {
             TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
@@ -517,7 +530,6 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
@@ -528,10 +540,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
             return;
         }
         UpdateDisplayAndWindowInfo(displayInfos, std::move(windowInfoList));
-    };
-    if (eventHandler_) {
-        eventHandler_->PostTask(task);
-    }
+    });
 }
 
 void SceneInputManager::UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)
