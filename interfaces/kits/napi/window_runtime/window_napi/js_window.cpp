@@ -524,7 +524,7 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowDelayRaise(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowDelayRaise(env, info) : nullptr;
 }
