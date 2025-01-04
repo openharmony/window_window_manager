@@ -856,7 +856,6 @@ private:
     mutable std::mutex leashWinSurfaceNodeMutex_;
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
-    bool isAppUseControl_ = false; // Indicates whether the window is a control window.
 
     /*
      * Starting Window
@@ -874,6 +873,11 @@ private:
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };
+
+    /*
+     * App Use Control
+     */
+    bool isAppUseControl_ = false; // Indicates whether the window is a control window.
 };
 } // namespace OHOS::Rosen
 
