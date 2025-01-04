@@ -746,15 +746,15 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
         isFixedSystemWin, isFixedSubWin, isDecorDialog);
     if ((isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
-        hostSession->SendPointEventForMoveDrag(pointerEvent);
+        hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
     } else {
         if (dragType != AreaType::UNDEFINED) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent);
+            hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
             needNotifyEvent = false;
         } else if (WindowHelper::IsMainWindow(windowType) ||
                    WindowHelper::IsSubWindow(windowType) ||
                    WindowHelper::IsSystemWindow(windowType)) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent);
+            hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
@@ -763,7 +763,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
 }
 
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    MMI::PointerEvent::PointerItem& pointerItem)
+    MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable)
 {
     const int32_t& action = pointerEvent->GetPointerAction();
     const auto& sourceType = pointerEvent->GetSourceType();
@@ -787,6 +787,9 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             pointerEvent->MarkProcessed();
             return;
         }
+        if (IsWindowDelayRaiseEnabled() && isHitTargetDraggable) {
+            isExecuteDelayRaise_ = true;
+        }
         needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
         RefreshNoInteractionTimeoutMonitor();
     }
@@ -795,10 +798,14 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
     if (isPointUp) {
         if (auto hostSession = GetHostSession()) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent);
+            hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
         }
     }
 
+    bool isPointPullUp = action == MMI::PointerEvent::POINTER_ACTION_PULL_UP;
+    if (isExecuteDelayRaise_ && (isPointUp || isPointPullUp)) {
+        isExecuteDelayRaise_ = false;
+    }
     if (needNotifyEvent) {
         NotifyPointerEvent(pointerEvent);
     } else {
@@ -833,7 +840,21 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
         return;
     }
 
-    ConsumePointerEventInner(pointerEvent, pointerItem);
+    if (!IsWindowDelayRaiseEnabled()) {
+        ConsumePointerEventInner(pointerEvent, pointerItem, false);
+        return;
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->ProcessPointerEvent(pointerEvent,
+            [weakThis = wptr(this), pointerEvent, pointerItem](bool isHitTargetDraggable) mutable {
+                auto window = weakThis.promote();
+                if (window == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_FOCUS, "window is null");
+                    return;
+                }
+                window->ConsumePointerEventInner(pointerEvent, pointerItem, isHitTargetDraggable);
+            });
+    }
 }
 
 bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
