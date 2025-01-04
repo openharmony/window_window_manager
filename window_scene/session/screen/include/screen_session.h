@@ -49,6 +49,7 @@ public:
     virtual void OnSensorRotationChange(float sensorRotation, ScreenId screenId) = 0;
     virtual void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) = 0;
     virtual void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) = 0;
+    virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -191,6 +192,7 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
+    bool isExtended_ { false };
 
     NodeId nodeId_ {};
 
@@ -221,6 +223,9 @@ public:
     Rotation ConvertIntToRotation(int rotation);
     void SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode);
     void SetScreenComponentRotation(int rotation);
+    void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
+    void SetIsExtend(bool isExtend);
+    bool GetIsExtend() const;
 
 private:
     ScreenProperty property_;

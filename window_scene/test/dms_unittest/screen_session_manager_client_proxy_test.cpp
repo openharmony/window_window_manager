@@ -256,5 +256,20 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, SetVirtualPixelRatioSystem, Functi
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
     screenSessionManagerClientProxy_->SetVirtualPixelRatioSystem(screenId, virtualPixelRatio);
 }
+
+/**
+ * @tc.name: ScreenCaptureNotify
+ * @tc.desc: ScreenCaptureNotify test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenCaptureNotify, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    int32_t uid = 0;
+    std::string clientName = "test";
+
+    ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
+    screenSessionManagerClientProxy_->ScreenCaptureNotify(screenId, uid, clientName);
+}
 } // namespace Rosen
 } // namespace OHOS
