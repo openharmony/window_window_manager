@@ -66,8 +66,8 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read callingTokenId failed.");
         return ERR_INVALID_DATA;
     }
-    if (!data.ReadInt32(abilitySessionInfo->tmpSpecifiedId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read tmpSpecifiedId failed.");
+    if (!data.ReadInt32(abilitySessionInfo->requestId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read requestId failed.");
         return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(abilitySessionInfo->reuse)) {
