@@ -145,7 +145,7 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
     {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
-const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = { 
+const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "SCBSmartDock",
     "SCBExtScreenDock"
 };
@@ -1616,7 +1616,7 @@ sptr<SceneSession> SceneSessionManager::GetKeyboardSession(DisplayId displayId, 
         }
     }
     return keyboardSession;
-}     
+}
 
 void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSession, DisplayId displayId,
     SystemKeyboardAvoidChangeReason reason)
@@ -1652,7 +1652,7 @@ void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSess
          * when the system keyboard is hiden, disconnect or it's gravity is float
          * check for whether other keyboard can be avoided: if yes, avoids the other keyboard
          *                                                  if no, restores the system keyboard
-         */                                                
+         */
         case SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT: {
@@ -2148,7 +2148,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->userId = currentUserId_;
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
-    abilitySessionInfo->tmpSpecifiedId = sessionInfo.specifiedId;
+    abilitySessionInfo->requestId = sessionInfo.specifiedId;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -2344,13 +2344,13 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSessionInfo->collaboratorType = sceneSession->GetCollaboratorType();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "id %{public}d want-ability: %{public}s, bundle: %{public}s, "
-        "module: %{public}s, uri: %{public}s, appIndex: %{public}d, tmpSpecifiedId:%{public}d", persistentId,
+        "module: %{public}s, uri: %{public}s, appIndex: %{public}d, requestId:%{public}d", persistentId,
         sceneSessionInfo->want.GetElement().GetAbilityName().c_str(),
         sceneSessionInfo->want.GetElement().GetBundleName().c_str(),
         sceneSessionInfo->want.GetElement().GetModuleName().c_str(),
         sceneSessionInfo->want.GetElement().GetURI().c_str(),
         sceneSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0),
-        sceneSessionInfo->tmpSpecifiedId);
+        sceneSessionInfo->requestId);
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
     bool isAppSupportPhoneInPc = false;
@@ -3620,7 +3620,7 @@ WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
 void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "in");
-    onWatchFocusActiveChangeFunc_ = std::move(func);  
+    onWatchFocusActiveChangeFunc_ = std::move(func);
 }
 
 void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)
@@ -10044,7 +10044,7 @@ bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
             if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
                 continue;
             }
-            if (sceneSession->GetSessionProperty()->GetDisplayId() != screenId) { 
+            if (sceneSession->GetSessionProperty()->GetDisplayId() != screenId) {
                 continue;
             }
             if (isPcOrPadFreeMultiWindowMode) {
