@@ -3496,6 +3496,12 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
+WSError Session::GetIsMidScene(bool& isMidScene)
+{
+    isMidScene = GetIsMidScene();
+    return WSError::WS_OK;
+}
+
 WSError Session::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
 {
     if (!IsSessionValid()) {

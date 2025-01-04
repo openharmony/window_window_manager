@@ -838,6 +838,24 @@ HWTEST_F(SessionProxyTest, NotifySupportWindowModesChange, Function | SmallTest 
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportWindowModesChange end";
 }
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    bool isMidScene = false;
+    sProxy->GetIsMidScene(isMidScene);
+    ASSERT_EQ(isMidScene, false);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

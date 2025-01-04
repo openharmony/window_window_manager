@@ -295,6 +295,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+    WMError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Window Layout

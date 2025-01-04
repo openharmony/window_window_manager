@@ -791,6 +791,23 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent2, Function | SmallTest | Level2
     result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: sessionStub GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    bool isMidScene = false;
+    data.WriteBool(isMidScene);
+    auto result = session_->HandleGetIsMidScene(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    ASSERT_EQ(isMidScene, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

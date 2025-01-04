@@ -2914,6 +2914,13 @@ public:
      * @return The string corresponding to the window.
      */
     virtual std::string GetClassType() const { return "Window"; }
+
+    /**
+     * @brief Get whether is mid scene.
+     *
+     * @return True - is mid scene, false - is not mid scene.
+     */
+    virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
 };
 }
 }
