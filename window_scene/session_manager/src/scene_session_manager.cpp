@@ -12405,17 +12405,15 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }, __func__);
 }
 
-void SceneSessionManager::SetStatusBarDefaultHeightPerDisplay(uint32_t height)
+void SceneSessionManager::SetStatusBarAvoidHeight(uint32_t height)
 {
-    taskScheduler_->PostAsyncTask([this, height] {
-        statusBarDefaultHeightPerDisplay_ = height;
-        TLOGNI(WmsLogTag::WMS_IMMS, "set status bar default height: %{public}u", height);
-    }, __func__);
+    statusBarAvoidHeight_ = height;
+    TLOGI(WmsLogTag::WMS_IMMS, "height: %{public}u", height);
 }
 
-void SceneSessionManager::GetStatusBarDefaultHeightByDisplayId(WSRect& barArea)
+void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
 {
-    barArea.height_ = statusBarDefaultHeightPerDisplay_;
+    barArea.height_ = statusBarAvoidHeight_;
 }
 
 } // namespace OHOS::Rosen

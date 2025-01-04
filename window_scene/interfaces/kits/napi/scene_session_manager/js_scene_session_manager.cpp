@@ -238,8 +238,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetIsWindowRectAutoSave);
     BindNativeFunction(env, exportObj, "notifyAboveLockScreen", moduleName,
         JsSceneSessionManager::NotifyAboveLockScreen);
-    BindNativeFunction(env, exportObj, "setStatusBarDefaultHeightPerDisplay", moduleName,
-        JsSceneSessionManager::SetStatusBarDefaultHeightPerDisplay);
+    BindNativeFunction(env, exportObj, "SetStatusBarAvoidHeight", moduleName,
+        JsSceneSessionManager::SetStatusBarAvoidHeight);
     return NapiGetUndefined(env);
 }
 
@@ -1214,10 +1214,10 @@ napi_value JsSceneSessionManager::NotifyAboveLockScreen(napi_env env, napi_callb
     return me->OnNotifyAboveLockScreen(env, info);
 }
 
-napi_value JsSceneSessionManager::SetStatusBarDefaultHeightPerDisplay(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::SetStatusBarAvoidHeight(napi_env env, napi_callback_info info)
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnSetStatusBarDefaultHeightPerDisplay(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetStatusBarAvoidHeight(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3988,7 +3988,7 @@ void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
     }, __func__);
 }
 
-napi_value JsSceneSessionManager::OnSetStatusBarDefaultHeightPerDisplay(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
@@ -4006,7 +4006,7 @@ napi_value JsSceneSessionManager::OnSetStatusBarDefaultHeightPerDisplay(napi_env
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().SetStatusBarDefaultHeightPerDisplay(height);
+    SceneSessionManager::GetInstance().SetStatusBarAvoidHeight(height);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
