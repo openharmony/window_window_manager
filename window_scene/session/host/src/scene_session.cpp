@@ -2411,6 +2411,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 pointerEvent->MarkProcessed();
+                ProcessWindowMoving(pointerEvent);
                 return WSError::WS_OK;
             }
         }
@@ -2443,6 +2444,27 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         pointerEvent->AddPointerItem(pointerItem);
     }
     return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
+}
+
+void SceneSession::ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        return;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        return;
+    }
+    if (notifyWindowMovingFunc_) {
+        notifyWindowMovingFunc_(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()),
+            pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
+    }
+}
+
+void SceneSession::SetWindowMovingCallback(const NotifyWindowMovingFunc& func)
+{
+    notifyWindowMovingFunc_ = func;
 }
 
 bool SceneSession::IsMovableWindowType()

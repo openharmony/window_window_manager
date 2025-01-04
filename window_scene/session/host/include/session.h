@@ -91,6 +91,7 @@ using VisibilityChangedDetectFunc = std::function<void(const int32_t pid, const 
     const bool newIsVisible)>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
+using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 
 class ILifecycleListener {
 public:
