@@ -296,18 +296,15 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent06, Function | SmallTest | Leve
 HWTEST_F(WindowSessionTest2, TransferPointerEvent07, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-
     session_->sessionInfo_.isSystem_ = true;
-
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    ASSERT_NE(pointerEvent, nullptr);
-
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     session_->windowEventChannel_ = mockEventChannel_;
 
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     bool needNotifyClient = true;
     bool isExecuteDelayRaise = true;
-    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
     ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise));
 }
 

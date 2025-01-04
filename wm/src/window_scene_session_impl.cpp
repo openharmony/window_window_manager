@@ -746,15 +746,15 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
         isFixedSystemWin, isFixedSubWin, isDecorDialog);
     if ((isFixedSystemWin || isFixedSubWin) && !isDecorDialog) {
-        hostSession->SendPointEventForMoveDrag(pointerEvent, isPointDownPending_);
+        hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
     } else {
         if (dragType != AreaType::UNDEFINED) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent, isPointDownPending_);
+            hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
             needNotifyEvent = false;
         } else if (WindowHelper::IsMainWindow(windowType) ||
                    WindowHelper::IsSubWindow(windowType) ||
                    WindowHelper::IsSystemWindow(windowType)) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent, isPointDownPending_);
+            hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
         }
@@ -763,7 +763,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
 }
 
 void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    MMI::PointerEvent::PointerItem& pointerItem, bool isPointerTargetDraggable)
+    MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable)
 {
     const int32_t& action = pointerEvent->GetPointerAction();
     const auto& sourceType = pointerEvent->GetSourceType();
@@ -787,8 +787,8 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             pointerEvent->MarkProcessed();
             return;
         }
-        if (IsWindowDelayRaiseEnabled() && isPointerTargetDraggable) {
-            isPointDownPending_ = true;
+        if (IsWindowDelayRaiseEnabled() && isHitTargetDraggable) {
+            isExecuteDelayRaise_ = true;
         }
         needNotifyEvent = HandlePointDownEvent(pointerEvent, pointerItem, sourceType, vpr, rect);
         RefreshNoInteractionTimeoutMonitor();
@@ -796,15 +796,15 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
-    bool isPointPullUp = action == MMI::PointerEvent::POINTER_ACTION_PULL_UP;
     if (isPointUp) {
         if (auto hostSession = GetHostSession()) {
-            hostSession->SendPointEventForMoveDrag(pointerEvent, isPointDownPending_);
+            hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
         }
     }
 
-    if (isPointDownPending_ && (isPointUp || isPointPullUp)) {
-        isPointDownPending_ = false;
+    bool isPointPullUp = action == MMI::PointerEvent::POINTER_ACTION_PULL_UP;
+    if (isExecuteDelayRaise_ && (isPointUp || isPointPullUp)) {
+        isExecuteDelayRaise_ = false;
     }
     if (needNotifyEvent) {
         NotifyPointerEvent(pointerEvent);
@@ -845,16 +845,15 @@ void WindowSceneSessionImpl::ConsumePointerEvent(const std::shared_ptr<MMI::Poin
         return;
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
-        wptr<WindowSceneSessionImpl> weakThis = this;
-        auto callbackFunc = [weakThis, pointerEvent, &pointerItem](bool isPointerTargetDraggable) {
-            auto promoteThis = weakThis.promote();
-            if (promoteThis == nullptr) {
-                TLOGNE(WmsLogTag::WMS_EVENT, "promoteThis is null");
-                return;
-            }
-            promoteThis->ConsumePointerEventInner(pointerEvent, pointerItem, isPointerTargetDraggable);
-        };
-        uiContent->ProcessPointerEvent(pointerEvent, callbackFunc);
+        uiContent->ProcessPointerEvent(pointerEvent,
+            [weakThis = wptr(this), pointerEvent, pointerItem](bool isHitTargetDraggable) mutable {
+                auto window = weakThis.promote();
+                if (window == nullptr) {
+                    TLOGNE(WmsLogTag::WMS_FOCUS, "window is null");
+                    return;
+                }
+                window->ConsumePointerEventInner(pointerEvent, pointerItem, isHitTargetDraggable);
+            });
     }
 }
 

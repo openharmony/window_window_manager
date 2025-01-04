@@ -1950,13 +1950,10 @@ HWTEST_F(WindowSceneSessionImplTest, SetPropertySessionInfo01, Function | SmallT
 HWTEST_F(WindowSceneSessionImplTest, SetWindowDelayRaiseEnabled, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(nullptr, window);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
     window->property_->SetWindowName("SetWindowDelayRaiseEnabled");
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
