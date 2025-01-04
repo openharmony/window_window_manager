@@ -975,6 +975,7 @@ napi_value CreateJsSessionRecoverInfo(
     Rect rect = property->GetWindowRect();
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     napi_set_named_property(env, objValue, "recoverRect", CreateJsSessionRect(env, wsRect));
+    napi_set_named_property(env, objValue, "mainWindowTopmost", CreateJsValue(env, property->IsMainWindowTopmost()));
     return objValue;
 }
 
