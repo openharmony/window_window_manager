@@ -381,7 +381,7 @@ public:
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
     bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
-    void SetStatusBarDefaultHeightPerDisplay(DisplayId displayId, bool visible);
+    void SetStatusBarDefaultHeightPerDisplay(DisplayId displayId, uint32_t height);
     uint32_t GetStatusBarDefaultHeightByDisplayId(DisplayId displayId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
