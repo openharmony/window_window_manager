@@ -1185,7 +1185,7 @@ HWTEST_F(SceneSessionTest, ProcessWindowMoving, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession;
     sceneSession = new (std::nothrow) SceneSession(info, specificCallback_);
     EXPECT_NE(sceneSession, nullptr);
-    std::shared_ptr<MMI::PointerEvent> pointerEvent_ = MMI::PointerEvent::Create();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     sceneSession->ProcessWindowMoving(pointerEvent);
 }
 
