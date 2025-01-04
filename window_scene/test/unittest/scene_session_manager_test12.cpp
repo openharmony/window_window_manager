@@ -1019,7 +1019,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function 
 
 /**
  * @tc.name: FilterForGetAllWindowLayoutInfo02
- * @tc.desc: test isSystem_
+ * @tc.desc: test system window
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, Function | SmallTest | Level3)
