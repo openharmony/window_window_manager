@@ -173,6 +173,11 @@ public:
         std::vector<uint64_t>& windowIdList) override;
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
+    std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr) override;
+    std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode) override;
+    sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
 };

@@ -33,6 +33,7 @@ public:
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override {}
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
+    void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -2071,6 +2072,21 @@ HWTEST_F(ScreenSessionTest, SetScreenScale, Function | SmallTest | Level2)
     EXPECT_EQ(session.property_.GetPivotY(), pivotY);
     EXPECT_EQ(session.property_.GetTranslateX(), translateX);
     EXPECT_EQ(session.property_.GetTranslateY(), translateY);
+}
+
+/**
+ * @tc.name: ScreenCaptureNotify
+ * @tc.desc: ScreenCaptureNotify test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, Function | SmallTest | Level2)
+{
+    sptr<ScreenSession> session = new ScreenSession();
+    ASSERT_NE(session, nullptr);
+    ScreenId screenId = 0;
+    int32_t uid = 0;
+    std::string clientName = "test";
+    session->ScreenCaptureNotify(screenId, uid, clientName);
 }
 } // namespace
 } // namespace Rosen

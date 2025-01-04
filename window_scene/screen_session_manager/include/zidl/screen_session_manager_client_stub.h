@@ -25,12 +25,15 @@
 namespace OHOS::Rosen {
 class ScreenSessionManagerClientStub : public IRemoteStub<IScreenSessionManagerClient> {
 public:
-    ScreenSessionManagerClientStub() = default;
+    ScreenSessionManagerClientStub();
     virtual ~ScreenSessionManagerClientStub() = default;
 
     int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
+    using HandleScreenChange = std::function<int(MessageParcel &, MessageParcel &)>;
+    using HandleScreenChangeMap = std::map<ScreenSessionManagerClientMessage, HandleScreenChange>;
+    void InitScreenChangeMap();
     int HandleOnScreenConnectionChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnPropertyChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnPowerStatusChanged(MessageParcel& data, MessageParcel& reply);
@@ -46,6 +49,8 @@ private:
     int HandleSetVirtualPixelRatioSystem(MessageParcel& data, MessageParcel& reply);
     int HandleSwitchUserCallback(MessageParcel& data, MessageParcel& reply);
     int HandleOnFoldStatusChangedReportUE(MessageParcel& data, MessageParcel& reply);
+    int HandleScreenCaptureNotify(MessageParcel& data, MessageParcel& reply);
+    HandleScreenChangeMap HandleScreenChangeMap_ {};
 };
 } // namespace OHOS::Rosen
 
