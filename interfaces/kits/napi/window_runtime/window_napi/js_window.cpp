@@ -7350,8 +7350,7 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        uint32_t avoidAreaOption = enable ? 1 : 0;
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(windowToken->SetAvoidAreaOption(avoidAreaOption));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(static_cast<uint32_t>(enable)));
     };
     auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
@@ -7375,17 +7374,20 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
     }
     uint32_t avoidAreaOption = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaOption(avoidAreaOption));
-    bool enable = avoidAreaOption & 1;
-    if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device is not support");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-    } else if (ret != WmErrorCode::WM_OK) {
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] enable %{public}u",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
-    return CreateJsValue(env, enable);
+    bool enabled = avoidAreaOption & 1;
+    auto objValue = CreateJsValue(env, enabled);
+    if (objValue != nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] enabled %{public}u",
+            windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enabled);
+        return objValue;
+    } else {
+        TLOGE(WmsLogTag::WMS_IMMS, "create js object failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
 }
 
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
