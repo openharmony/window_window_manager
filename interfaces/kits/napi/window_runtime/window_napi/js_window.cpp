@@ -7350,7 +7350,10 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(static_cast<uint32_t>(enable)));
+        uint32_t option;
+        window->GetAvoidAreaOption(option);
+        option = option | static_cast<uint32_t>(enable);
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(option));
     };
     auto complete = [errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*errCodePtr == WmErrorCode::WM_OK) {
@@ -7378,10 +7381,10 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
         TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
         return NapiThrowError(env, ret);
     }
-    bool enabled = avoidAreaOption & 1;
+    bool enabled = avoidAreaOption & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW);
     auto objValue = CreateJsValue(env, enabled);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] enabled %{public}u",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enabled %{public}u",
             windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enabled);
         return objValue;
     } else {
