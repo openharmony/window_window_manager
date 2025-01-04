@@ -151,7 +151,6 @@ public:
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
-    bool isPointDownPending_ = false;
 
     /*
      * PC Window Layout
@@ -263,7 +262,7 @@ private:
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        MMI::PointerEvent::PointerItem& pointerItem, bool isPointerTargetDraggable = false);
+        MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
     void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem);
     void HandleDownForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -342,6 +341,11 @@ private:
      */
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
+
+    /*
+     * PC Window
+     */
+    bool isExecuteDelayRaise_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

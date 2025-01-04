@@ -666,7 +666,6 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick04, Function | SmallTest
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
     sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession, nullptr);
     session_->SetParentSession(dialogSession);
 
     bool isExecuteDelayRaise = false;

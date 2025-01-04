@@ -2092,6 +2092,9 @@ void Session::HandlePointDownDialog()
 
 WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
+    if (isExecuteDelayRaise) {
+        return WSError::WS_OK;
+    }
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
@@ -2099,9 +2102,6 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
     }
     bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
         (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (isExecuteDelayRaise) {
-        return WSError::WS_OK;
-    }
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {

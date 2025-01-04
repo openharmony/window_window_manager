@@ -239,7 +239,6 @@ public:
      */
     void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
     void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
-    bool isWindowDelayRaiseEnabled_ = false;
 
     /*
      * system keyboard
@@ -415,6 +414,7 @@ private:
      */
     mutable std::mutex supportWindowModesMutex_;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+    bool isWindowDelayRaiseEnabled_ = false;
 
     // system keyboard
     bool isSystemKeyboard_ = false;

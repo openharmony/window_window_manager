@@ -3947,25 +3947,21 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_FOCUS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "not system app, permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
 
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1 || argv[0] == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT,
+        TLOGE(WmsLogTag::WMS_FOCUS,
             "Argc is invalid: %{public}zu. Failed to convert parameter to delay raise", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isDelayRaise = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isDelayRaise)) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter from jsValue");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter from jsValue");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
@@ -3980,7 +3976,7 @@ napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowDelayRaiseEnabled(isDelayRaise));
-        TLOGND(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] set success",
+        TLOGND(WmsLogTag::WMS_FOCUS, "Window [%{public}u, %{public}s] set success",
             window->GetWindowId(), window->GetWindowName().c_str());
     };
     NapiAsyncTask::CompleteCallback complete =
