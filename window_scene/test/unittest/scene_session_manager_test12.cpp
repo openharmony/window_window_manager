@@ -975,7 +975,7 @@ HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, Function | SmallTe
     sceneSession1->SetSessionRect(rect);
     int32_t zOrder = 100;
     sceneSession1->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
 
     constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
     std::vector<sptr<WindowLayoutInfo>> info;
@@ -1000,15 +1000,15 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function 
     sceneSession1->SetSessionRect(rect);
     int32_t zOrder = 100;
     sceneSession1->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
-    
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession2->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     rect = { 0, 130, 120, 120 };
     sceneSession2->SetSessionRect(rect);
     zOrder = 101;
     sceneSession2->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
     
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
@@ -1042,7 +1042,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, Function 
     sceneSession2->SetSessionRect(rect);
     zOrder = 101;
     sceneSession2->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
 
     sessionInfo.abilityName_ = "TestAbility";
     sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
@@ -1051,7 +1051,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, Function 
     sceneSession3->SetSessionRect(rect);
     zOrder = 102;
     sceneSession3->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
+    ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
     
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
@@ -1075,7 +1075,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, Function 
     sceneSession1->SetSessionRect(rect);
     int32_t zOrder = 101;
     sceneSession1->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
 
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession2->SetVisibilityState(WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
@@ -1083,7 +1083,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, Function 
     sceneSession2->SetSessionRect(rect);
     zOrder = 100;
     sceneSession2->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
 
     sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession3->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
@@ -1091,7 +1091,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, Function 
     sceneSession3->SetSessionRect(rect);
     zOrder = 99;
     sceneSession3->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
+    ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
     
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
@@ -1118,7 +1118,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function 
     sceneSession1->SetSessionRect(rect);
     int32_t zOrder = 100;
     sceneSession1->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
 
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession2->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
@@ -1126,7 +1126,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function 
     sceneSession2->SetSessionRect(rect);
     zOrder = 101;
     sceneSession2->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
 
     sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession3->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
@@ -1134,7 +1134,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function 
     sceneSession3->SetSessionRect(rect);
     zOrder = 102;
     sceneSession3->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
+    ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
 
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 
