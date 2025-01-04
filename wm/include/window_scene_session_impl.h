@@ -147,8 +147,6 @@ public:
     /*
      * PC Window
      */
-    bool IsPcOrPadCapabilityEnabled() const override;
-    bool IsPcOrPadFreeMultiWindowMode() const override;
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
 
     /*
