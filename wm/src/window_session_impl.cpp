@@ -759,7 +759,7 @@ void WindowSessionImpl::UpdateVirtualPixelRatio(const sptr<Display>& display)
 void WindowSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
     WindowSizeChangeReason wmReason, const SceneAnimationConfig& config)
 {
-    handler_->PostTask([weak = wptr(this), wmReason, wmRect, preRect, config]() mutable {
+    handler_->PostImmediateTask([weak = wptr(this), wmReason, wmRect, preRect, config]() mutable {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
@@ -857,10 +857,10 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
     if (wmReason == WindowSizeChangeReason::DRAG) {
         bool isDragTaskPostDone = true;
         if (isDragTaskPostDone_.compare_exchange_strong(isDragTaskPostDone, false)) {
-            handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+            handler_->PostImmediateTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
         }
     } else {
-        handler_->PostTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
+        handler_->PostImmediateTask(task, "WMS_WindowSessionImpl_UpdateRectForOtherReason");
     }
 }
 
