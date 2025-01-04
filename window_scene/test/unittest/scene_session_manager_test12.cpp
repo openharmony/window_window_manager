@@ -970,17 +970,60 @@ HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, Function | SmallTe
     sessionInfo.isSystem_ = false;
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
-    WSRect rect = { 0, 0, 120, 120 };
+    WSRect rect = { 0, 1500, 120, 1000 };
     sceneSession1->SetSessionRect(rect);
     int32_t zOrder = 100;
     sceneSession1->SetZOrder(zOrder);
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
 
-    constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
-    std::vector<sptr<WindowLayoutInfo>> infos;
-    GetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, infos);
+    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+    std::vector<sptr<WindowLayoutInfo>> info;
+    ssm_->GetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, info);
+    ASSERT_EQ(2, info[0].rect.posY_);
+}
 
-    ASSERT_EQ(1, infos.size());
+/**
+ * @tc.name: GetAllWindowLayoutInfo02
+ * @tc.desc: HALF_FOLDED
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo02, Function | SmallTest | Level3)
+{
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    WSRect rect = { 0, 0, 120, 120 };
+    sceneSession1->SetSessionRect(rect);
+    int32_t zOrder = 100;
+    sceneSession1->SetZOrder(zOrder);
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession2->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    rect = { 0, 3000, 120, 120 };
+    sceneSession2->SetSessionRect(rect);
+    zOrder = 101;
+    sceneSession2->SetZOrder(zOrder);
+    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession3->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    rect = { 0, 1500, 120, 1000 };
+    sceneSession3->SetSessionRect(rect);
+    zOrder = 102;
+    sceneSession3->SetZOrder(zOrder);
+    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
+
+    constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
+    constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
+    std::vector<sptr<WindowLayoutInfo>> info1;
+    ssm_->GetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, info1);
+    ASSERT_EQ(2, info1.size());
+    std::vector<sptr<WindowLayoutInfo>> info2;
+    ssm_->GetAllWindowLayoutInfo(VIRTUAL_DISPLAY_ID, info2);
+    ASSERT_EQ(2, info2.size());
 }
 }
 } // namespace Rosen
