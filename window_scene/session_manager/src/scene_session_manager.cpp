@@ -1458,6 +1458,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
+    specificCb->onGetStatusBarDefaultHeightByDisplayId_ = [this](DisplayId displayId) {
+        return this->GetStatusBarDefaultHeightByDisplayId(displayId);
+    };
     return specificCb;
 }
 
@@ -12401,4 +12404,19 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         return WMError::WM_OK;
     }, __func__);
 }
+
+void SceneSessionManager::SetStatusBarDefaultHeightPerDisplay(DisplayId displayId, uint32_t height)
+{
+    taskScheduler_->PostAsyncTask([this, displayId, height] {
+        statusBarDefaultHeightPerDisplay_[displayId] = height;
+        TLOGNI(WmsLogTag::WMS_IMMS, "set status bar default height: %{public}u", height);
+    }, __func__);
+}
+
+uint32_t SceneSessionManager::GetStatusBarDefaultHeightByDisplay(DisplayId displayId)
+{
+    return statusBarDefaultHeightPerDisplay_.count(displayId) != 0 ?
+        statusBarDefaultHeightPerDisplay_[displayId] : 0;
+}
+
 } // namespace OHOS::Rosen
