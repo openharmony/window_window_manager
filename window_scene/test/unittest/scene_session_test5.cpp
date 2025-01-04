@@ -1625,8 +1625,14 @@ HWTEST_F(SceneSessionTest5, CheckAndMoveDisplayIdRecursively, Function | SmallTe
     sptr<SceneSessionMocker> subSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     sceneSession->subSession_.push_back(subSession);
     EXPECT_CALL(*sceneSession, CheckAndMoveDisplayIdRecursively(displayId))
-        .WillRepeatedly([sceneSession](uint64_t displayId) {
-        return sceneSession->SceneSession::CheckAndMoveDisplayIdRecursively(displayId);
+        .WillRepeatedly([weakThis = wptr(sceneSession)](uint64_t displayId) {
+            auto session = weakThis.promote();
+            if (session) {
+                return weakThis->SceneSession::CheckAndMoveDisplayIdRecursively(displayId);
+            } else {
+                GTEST_LOG_(INFO) << "SceneSessionMocker:NULL";
+                return;
+            }
     });
     sceneSession->property_->SetDisplayId(displayId);
     sceneSession->shouldFollowParentWhenShow_ = true;
@@ -1672,6 +1678,28 @@ HWTEST_F(SceneSessionTest5, CheckSubSessionShouldFollowParent, Function | SmallT
     EXPECT_EQ(subSession->shouldFollowParentWhenShow_, true);
     sceneSession->CheckSubSessionShouldFollowParent(displayIdDiff);
     EXPECT_EQ(subSession->shouldFollowParentWhenShow_, false);
+}
+
+/**
+ * @tc.name: ActivateKeyboardAvoidArea01
+ * @tc.desc: test ActivateKeyboardAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ActivateKeyboardAvoidArea01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "ActivateKeyboardAvoidArea01";
+    info.abilityName_ = "ActivateKeyboardAvoidArea01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(false, true);
+    ASSERT_EQ(false, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(false, false);
+    ASSERT_EQ(false, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(true, true);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(true, false);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
 }
 }
 }

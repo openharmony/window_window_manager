@@ -239,7 +239,7 @@ public:
     void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
 
     /*
-     * system keyboard
+     * Keyboard
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
@@ -413,7 +413,9 @@ private:
     mutable std::mutex supportWindowModesMutex_;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
 
-    // system keyboard
+    /*
+     * Keyboard
+     */
     bool isSystemKeyboard_ = false;
 
     /*
