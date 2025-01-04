@@ -1154,8 +1154,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function 
 HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo05, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession = nullptr;
+    sptr<SceneSession> sceneSession = nullptr;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     std::vector<sptr<SceneSession>> filteredSessions;
