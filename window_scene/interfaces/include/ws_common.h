@@ -370,6 +370,8 @@ struct SessionInfo {
     bool isFoundationCall_ = false;
     int32_t specifiedId = 0;
 
+    bool isAppUseControl_ = false; // Indicates whether the window is a control window.
+
     /*
      * UIExtension
      */
