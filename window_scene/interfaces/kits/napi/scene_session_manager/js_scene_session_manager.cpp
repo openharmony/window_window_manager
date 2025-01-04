@@ -3993,31 +3993,20 @@ napi_value JsSceneSessionManager::OnSetStatusBarDefaultHeightPerDisplay(napi_env
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    int64_t displayId = -1;
-    if (!ConvertFromJsValue(env, argv[0], displayId)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to displayId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    if (displayId < 0) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to displayId");
-        return NapiGetUndefined(env);
-    }
     uint32_t height = 0;
-    if (!ConvertFromJsValue(env, argv[1], height)) {
+    if (!ConvertFromJsValue(env, argv[0], height)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to height");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().SetStatusBarDefaultHeightPerDisplay(static_cast<DisplayId>(displayId), height);
+    SceneSessionManager::GetInstance().SetStatusBarDefaultHeightPerDisplay(height);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

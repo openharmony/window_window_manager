@@ -1861,10 +1861,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         if (specificCallback_ != nullptr && specificCallback_->onGetStatusBarDefaultHeightByDisplayId_) {
-            specificCallback_->onGetStatusBarDefaultHeightByDisplayId_(
-                GetSessionProperty()->GetDisplayId(), statusBarRect);
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d display %{public}llu status bar height %{public}u",
-                GetPersistentId(), GetSessionProperty()->GetDisplayId(), statusBarRect.height_);
+            specificCallback_->onGetStatusBarDefaultHeightByDisplayId_(statusBarRect);
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}u",
+                GetPersistentId(), statusBarRect.height_);
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s status bar %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str());
