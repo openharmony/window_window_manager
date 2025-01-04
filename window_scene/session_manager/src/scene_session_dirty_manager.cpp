@@ -427,15 +427,11 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession,
     const std::optional<ExtensionWindowEventInfo>& modalUIExtensionEventInfo)
 {
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+    if (sceneSession == nullptr || !modalUIExtensionEventInfo) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr or modalUIExtensionEventInfo is null");
         return;
     }
 
-    auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    if (!modalUIExtensionEventInfo.has_value()) {
-        return;
-    }
     const auto& extensionInfo = modalUIExtensionEventInfo.value();
     windowInfo.id = extensionInfo.persistentId;
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {

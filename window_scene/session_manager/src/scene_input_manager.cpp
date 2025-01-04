@@ -358,7 +358,6 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
         TLOGE(WmsLogTag::WMS_EVENT, "focusedSceneSession is null");
         return;
     }
-
     if (auto modalUIExtensionEventInfo = focusedSceneSession->GetLastModalUIExtensionEventInfo()) {
         focusedSessionId_ =  modalUIExtensionEventInfo.value().persistentId;
     }
