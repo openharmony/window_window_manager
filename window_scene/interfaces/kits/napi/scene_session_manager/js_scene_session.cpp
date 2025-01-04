@@ -33,6 +33,7 @@ const std::string SESSION_STATE_CHANGE_CB = "sessionStateChange";
 const std::string BUFFER_AVAILABLE_CHANGE_CB = "bufferAvailableChange";
 const std::string SESSION_EVENT_CB = "sessionEvent";
 const std::string SESSION_RECT_CHANGE_CB = "sessionRectChange";
+const std::string WINDOW_MOVING_CB = "windowMoving";
 const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatusChange";
 const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
 const std::string CREATE_SUB_SESSION_CB = "createSpecificSession";
@@ -98,6 +99,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {BUFFER_AVAILABLE_CHANGE_CB,            ListenerFuncType::BUFFER_AVAILABLE_CHANGE_CB},
     {SESSION_EVENT_CB,                      ListenerFuncType::SESSION_EVENT_CB},
     {SESSION_RECT_CHANGE_CB,                ListenerFuncType::SESSION_RECT_CHANGE_CB},
+    {WINDOW_MOVING_CB,                      ListenerFuncType::WINDOW_MOVING_CB},
     {SESSION_PIP_CONTROL_STATUS_CHANGE_CB,  ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB},
     {SESSION_AUTO_START_PIP_CB,             ListenerFuncType::SESSION_AUTO_START_PIP_CB},
     {CREATE_SUB_SESSION_CB,                 ListenerFuncType::CREATE_SUB_SESSION_CB},
@@ -1048,6 +1050,25 @@ void JsSceneSession::ProcessSessionDisplayIdChangeRegister()
         }
         jsSceneSession->OnSessionDisplayIdChange(displayId);
     });
+}
+
+void JsSceneSession::ProcessWindowMovingRegister()
+{
+    NotifyWindowMovingFunc func = [weakThis = wptr(this)](DisplayId displayId, int32_t pointerX, int32_t pointerY) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnWindowMoving(displayId, pointerX, pointerY);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetWindowMovingCallback(func);
+    TLOGI(WmsLogTag::WMS_DECOR, "success");
 }
 
 void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
@@ -2264,6 +2285,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SESSION_RECT_CHANGE_CB):
             ProcessSessionRectChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::WINDOW_MOVING_CB):
+            ProcessWindowMovingRegister();
+            break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB):
             ProcessSessionDisplayIdChangeRegister();
             break;
@@ -2961,6 +2985,29 @@ void JsSceneSession::OnSessionRectChange(const WSRect& rect, SizeChangeReason re
     std::string rectInfo = "OnSessionRectChange [" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_)
         + "], [" + std::to_string(rect.width_) + ", " + std::to_string(rect.height_);
     taskScheduler_->PostMainThreadTask(task, rectInfo);
+}
+
+void JsSceneSession::OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY)
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, displayId, pointerX, pointerY, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(WINDOW_MOVING_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsDisplayId = CreateJsValue(env, static_cast<int64_t>(displayId));
+        napi_value jsPointerX = CreateJsValue(env, static_cast<int32_t>(pointerX));
+        napi_value jsPointerY = CreateJsValue(env, static_cast<int32_t>(pointerY));
+        napi_value argv[] = {jsDisplayId, jsPointerX, jsPointerY};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnWindowMoving");
 }
 
 void JsSceneSession::OnSessionDisplayIdChange(uint64_t displayId)
