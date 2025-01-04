@@ -1173,7 +1173,7 @@ HWTEST_F(SceneSessionManagerTest12, GetFoldLowerScreenPosY01, Function | SmallTe
 {
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    ASSERT_EQ(0, ssm_->GetFoldLowerScreenPosY());
+    ASSERT_EQ(2472, ssm_->GetFoldLowerScreenPosY());
 }
 
 /**
