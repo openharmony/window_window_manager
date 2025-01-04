@@ -1010,10 +1010,10 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function 
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
-    std::vector<sptr<WindowLayoutInfo>> filteredSessions;
+    std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
     ssm_->sceneSessionMap_.clear();
-    ASSERT_EQ(130, filteredSessions[0]->rect.posY_);
+    ASSERT_EQ(130, filteredSessions[0]->GetSessionRect().posY_);
 }
 
 /**
@@ -1053,7 +1053,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, Function 
     ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
     
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
-    std::vector<sptr<WindowLayoutInfo>> filteredSessions;
+    std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
     ssm_->sceneSessionMap_.clear();
     ASSERT_EQ(2, filteredSessions.size());
@@ -1084,16 +1084,16 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, Function 
     sceneSession2->SetZOrder(zOrder);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
-    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession2->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession3->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
     rect = { 0, 0, 100, 100 };
-    sceneSession2->SetSessionRect(rect);
+    sceneSession3->SetSessionRect(rect);
     zOrder = 99;
-    sceneSession2->SetZOrder(zOrder);
-    ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
+    sceneSession3->SetZOrder(zOrder);
+    ssm_->sceneSessionMap_.insert({sceneSession3->GetPersistentId(), sceneSession3});
     
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
-    std::vector<sptr<WindowLayoutInfo>> filteredSessions;
+    std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
     ssm_->sceneSessionMap_.clear();
     ASSERT_EQ(2, filteredSessions.size());
@@ -1137,10 +1137,10 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function 
 
     constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 
-    std::vector<sptr<WindowLayoutInfo>> filteredSessions1;
+    std::vector<sptr<SceneSession>> filteredSessions1;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions1);
     EXPECT_EQ(2, filteredSessions1.size());
-    std::vector<sptr<WindowLayoutInfo>> filteredSessions2;
+    std::vector<sptr<SceneSession>> filteredSessions2;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, true, filteredSessions2);
     ssm_->sceneSessionMap_.clear();
     ASSERT_EQ(2, filteredSessions2.size());
@@ -1162,6 +1162,59 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo05, Function 
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
     ssm_->sceneSessionMap_.clear();
     ASSERT_EQ(0, filteredSessions.size());
+}
+
+/**
+ * @tc.name: GetFoldLowerScreenPosY01
+ * @tc.desc: test get fold lower screen posY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetFoldLowerScreenPosY01, Function | SmallTest | Level3)
+{
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    ASSERT_EQ(0, ssm_->GetFoldLowerScreenPosY());
+}
+
+/**
+ * @tc.name: IsGetWindowLayoutInfoNeeded01
+ * @tc.desc: not System
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded01, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_EQ(true, ssm_->IsGetWindowLayoutInfoNeeded(sceneSession));
+}
+
+/**
+ * @tc.name: IsGetWindowLayoutInfoNeeded02
+ * @tc.desc: is System, not in whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = true;
+    sessionInfo.abilityName_ = "TestAbility";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_EQ(false, ssm_->IsGetWindowLayoutInfoNeeded(sceneSession));
+}
+
+/**
+ * @tc.name: IsGetWindowLayoutInfoNeeded03
+ * @tc.desc: is System, in whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded03, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = true;
+    sessionInfo.abilityName_ = "SCBSmartDock";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_EQ(true, ssm_->IsGetWindowLayoutInfoNeeded(sceneSession));
 }
 }
 } // namespace Rosen
