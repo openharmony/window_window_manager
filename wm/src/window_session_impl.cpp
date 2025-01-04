@@ -2236,9 +2236,11 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     }
     height = static_cast<int32_t>(height / vpr);
     if (GetTargetAPIVersion() >= 15) { // 15: isolated version
+        // SetDecorHeight and GetDecorHeight round down twice, resulting in a 1vp precision loss.
         if (decorHeight_ - height == 1) {
             height = decorHeight_;
         } else if (decorHeight_ == 0) {
+            // There is also a loss of precision when the display size changes.
             decorHeight_ = height;
         }
     }
