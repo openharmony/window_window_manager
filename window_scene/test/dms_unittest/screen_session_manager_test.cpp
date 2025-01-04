@@ -22,6 +22,7 @@
 #include "screen_scene_config.h"
 #include <surface.h>
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2670,6 +2671,9 @@ HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | Smal
  */
 HWTEST_F(ScreenSessionManagerTest, TriggerFoldStatusChange01, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     ASSERT_NE(ssm_, nullptr);
     FoldStatus foldStatus = FoldStatus::EXPAND;
     ssm_->TriggerFoldStatusChange(foldStatus);
