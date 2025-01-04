@@ -214,9 +214,9 @@ public:
         bool isFromClient = false, bool startFail = false);
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        bool needNotifyClient = true) override;
+        bool needNotifyClient = true, bool isExecuteDelayRaise = false) override;
     WSError TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        bool needNotifyClient = true);
+        bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -247,7 +247,8 @@ public:
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
-    WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isExecuteDelayRaise = false) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;

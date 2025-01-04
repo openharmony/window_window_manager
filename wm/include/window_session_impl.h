@@ -116,6 +116,8 @@ public:
     bool IsPcWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError SetWindowDelayRaiseEnabled(bool isEnabled) override;
+    bool IsWindowDelayRaiseEnabled() const override;
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
         bool isCloseVisible) override;
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;

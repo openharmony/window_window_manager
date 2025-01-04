@@ -522,6 +522,13 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowDelayRaise(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowDelayRaise(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
 {
     WLOGI("SetKeepScreenOn");
@@ -3935,6 +3942,33 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
     return result;
+}
+
+napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS,
+            "Argc is invalid: %{public}zu. Failed to convert parameter to delay raise", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isDelayRaise = false;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter from jsValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    auto result = windowToken_->SetWindowDelayRaiseEnabled(isDelayRaise);
+    if (result != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed");
+        return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(result));
+    }
+    return NapiGetUndefined(env);
 }
 
 napi_value JsWindow::OnSetKeepScreenOn(napi_env env, napi_callback_info info)
@@ -7376,6 +7410,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setWindowBrightness", moduleName, JsWindow::SetWindowBrightness);
     BindNativeFunction(env, object, "setTopmost", moduleName, JsWindow::SetTopmost);
     BindNativeFunction(env, object, "setWindowTopmost", moduleName, JsWindow::SetWindowTopmost);
+    BindNativeFunction(env, object, "setWindowDelayRaise", moduleName, JsWindow::SetWindowDelayRaise);
     BindNativeFunction(env, object, "setDimBehind", moduleName, JsWindow::SetDimBehind);
     BindNativeFunction(env, object, "setFocusable", moduleName, JsWindow::SetFocusable);
     BindNativeFunction(env, object, "setWindowFocusable", moduleName, JsWindow::SetWindowFocusable);

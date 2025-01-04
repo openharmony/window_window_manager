@@ -1150,7 +1150,12 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_EVENT, "Read pointer event failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = SendPointEventForMoveDrag(pointerEvent);
+    bool isExecuteDelayRaise = false;
+    if (!data.ReadBool(isExecuteDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read isExecuteDelayRaise failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
