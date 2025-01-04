@@ -382,7 +382,7 @@ public:
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
     bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
     void SetStatusBarDefaultHeightPerDisplay(DisplayId displayId, bool visible);
-    bool GetStatusBarDefaultHeightByDisplayId(DisplayId displayId);
+    uint32_t GetStatusBarDefaultHeightByDisplayId(DisplayId displayId);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
