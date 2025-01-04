@@ -161,11 +161,11 @@ HWTEST_F(DisplayPowerUnitTest, unregister_display_power_event_listener_002, Func
 HWTEST_F(DisplayPowerUnitTest, wake_up_begin_001, Function | SmallTest | Level2)
 {
     Mocker m;
-    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));;
+    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
     bool ret  = DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
 
-    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));;
+    EXPECT_CALL(m.Mock(), WakeUpBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));
     ret  = DisplayManager::GetInstance().WakeUpBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(false, ret);
 }
@@ -195,11 +195,11 @@ HWTEST_F(DisplayPowerUnitTest, wake_up_end_001, Function | SmallTest | Level2)
 HWTEST_F(DisplayPowerUnitTest, suspend_begin_001, Function | SmallTest | Level2)
 {
     Mocker m;
-    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));;
+    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(true));
     bool ret  = DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(true, ret);
 
-    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));;
+    EXPECT_CALL(m.Mock(), SuspendBegin(PowerStateChangeReason::POWER_BUTTON)).Times(1).WillOnce(Return(false));
     ret  = DisplayManager::GetInstance().SuspendBegin(PowerStateChangeReason::POWER_BUTTON);
     ASSERT_EQ(false, ret);
 }

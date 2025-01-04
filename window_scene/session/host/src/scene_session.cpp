@@ -645,6 +645,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             }
             WSRect rect = session->winRect_;
             if (session->IsFullScreenMovable()) {
+                session->UpdateFullScreenWaterfallMode(false);
                 rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->GetSessionRequestRect());
                 session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, "OnSessionEvent", nullptr);
@@ -1196,6 +1197,8 @@ bool SceneSession::GetScreenWidthAndHeightFromServer(const sptr<WindowSessionPro
         const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
             PcFoldScreenManager::GetInstance().GetDisplayRects();
         screenHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, virtual display posY: %{public}d, height: %{public}d",
+            GetPersistentId(), virtualDisplayRect.posY_, virtualDisplayRect.height_);
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
     return true;
@@ -1223,6 +1226,8 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
         const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
             PcFoldScreenManager::GetInstance().GetDisplayRects();
         screenHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, virtual display posY: %{public}d, height: %{public}d",
+            GetPersistentId(), virtualDisplayRect.posY_, virtualDisplayRect.height_);
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "screenWidth: %{public}d, screenHeight: %{public}d", screenWidth, screenHeight);
     return true;
@@ -1870,7 +1875,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
 {
     if (!keyboardAvoidAreaActive_) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemkeyboard: %{public}d, state: %{public}d, "
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isSystemKeyboard: %{public}d, state: %{public}d, "
             "gravity: %{public}d", GetPersistentId(), IsSystemKeyboard(), GetSessionState(), GetKeyboardGravity());
         return;
     }
@@ -1889,7 +1894,7 @@ void SceneSession::GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             continue;
         }
         SessionGravity gravity = inputMethod->GetKeyboardGravity();
-        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT) {
+        if (gravity == SessionGravity::SESSION_GRAVITY_FLOAT || !inputMethod->IsKeyboardAvoidAreaActive()) {
             continue;
         }
         if (isKeyboardPanelEnabled_) {
@@ -2462,8 +2467,7 @@ bool SceneSession::IsFullScreenMovable()
         return false;
     }
     return property->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
-        WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING) &&
-        !IsFullScreenWaterfallMode();
+        WindowHelper::IsWindowModeSupported(property->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING);
 }
 
 bool SceneSession::IsMovable()
@@ -2768,15 +2772,15 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
     isThrowSlipToFullScreen_.store(false);
-    if (pcFoldScreenController_ && pcFoldScreenController_->IsHalfFolded(GetScreenId())) {
+    if (pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId())) {
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
                 pcFoldScreenController_->GetMovingTimingCurve());
-            SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal, needFlush);
+            SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal);
         } else {
             SetSurfaceBounds(globalRect, isGlobal, needFlush);
         }
-        if (reason == SizeChangeReason::DRAG_MOVE) {
+        if (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END) {
             pcFoldScreenController_->RecordMoveRects(rect);
         }
     } else {
@@ -3074,15 +3078,16 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 
 void SceneSession::SetSurfaceBoundsWithAnimation(
     const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
-    const WSRect& rect, const std::function<void()>& finishCallback, bool isGlobal, bool needFlush)
+    const WSRect& rect, const std::function<void()>& finishCallback, bool isGlobal)
 {
-    auto interiaFunc = [weakThis = wptr(this), rect, isGlobal, needFlush]() {
+    auto interiaFunc = [weakThis = wptr(this), rect, isGlobal]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
             return;
         }
-        session->SetSurfaceBounds(rect, isGlobal, needFlush);
+        session->SetSurfaceBounds(rect, isGlobal, false);
+        RSTransaction::FlushImplicitTransaction();
     };
     RSNode::Animate(animationParam.first, animationParam.second, interiaFunc, finishCallback);
 }
@@ -6080,6 +6085,11 @@ void SceneSession::ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid)
     if (recalculateAvoid && active) {
         EnableCallingSessionAvoidArea();
     }
+}
+
+bool SceneSession::IsKeyboardAvoidAreaActive() const
+{
+    return keyboardAvoidAreaActive_;
 }
 
 void SceneSession::MarkAvoidAreaAsDirty()

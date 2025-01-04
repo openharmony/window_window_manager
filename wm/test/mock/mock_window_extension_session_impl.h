@@ -16,14 +16,13 @@
 #ifndef MOCK_WINDOW_EXTENSION_SESSION_IMPL_H
 #define MOCK_WINDOW_EXTENSION_SESSION_IMPL_H
 
-#include "window_extension_session_impl.h"
 #include "mock_data_handler.h"
+#include "window_extension_session_impl.h"
 
 namespace OHOS {
 namespace Rosen {
 class MockWindowExtensionSessionImpl : public WindowExtensionSessionImpl {
 public:
-    std::shared_ptr<IDataHandler> mockHandler_;
     MockWindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowExtensionSessionImpl(option) {}
     ~MockWindowExtensionSessionImpl() {}
 
@@ -55,6 +54,9 @@ public:
     {
         return mockHandler_;
     }
+
+private:
+    std::shared_ptr<IDataHandler> mockHandler_;
 };
 } // Rosen
 } // OHOS

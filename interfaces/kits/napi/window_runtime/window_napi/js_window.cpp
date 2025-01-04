@@ -7124,7 +7124,7 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     const char* const where = __func__;
-    auto asyncTask = [this, windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, where] {
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
@@ -7142,7 +7142,7 @@ napi_value JsWindow::OnStopMoving(napi_env env, napi_callback_info info)
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Stop move window failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Stop moving window failed"));
         }
     };
     if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {

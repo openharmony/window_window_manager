@@ -1234,7 +1234,6 @@ HWTEST_F(WindowImplTest, SetKeepScreenOn02, Function | SmallTest | Level3)
         .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_OK));
-    ;
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(true));
     ASSERT_TRUE(window->IsKeepScreenOn());
     ASSERT_EQ(WMError::WM_OK, window->SetKeepScreenOn(false));

@@ -153,6 +153,12 @@ napi_value JsWindowManager::ShiftAppWindowFocus(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnShiftAppWindowFocus(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::GetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnGetAllWindowLayoutInfo(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::GetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -1189,6 +1195,46 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
     return result;
 }
 
+napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (displayId < 0 ||
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [env, task = napiAsyncTask, displayId, where = __func__] {
+        std::vector<sptr<WindowLayoutInfo>> infos;
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, CreateJsWindowLayoutInfoArrayObject(env, infos));
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "failed"));
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -1275,26 +1321,26 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     if (argc != ARGC_TWO) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    int32_t sourcePersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
-    int32_t targetPersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourcePersistentId)) {
-        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourcePersistentId");
+    int32_t sourceWindowId;
+    int32_t targetWindowId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourceWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (!ConvertFromJsValue(env, argv[ARGC_ONE], targetPersistentId)) {
-        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetPersistentId");
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], targetWindowId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (sourcePersistentId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
-        targetPersistentId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
-        TLOGE(WmsLogTag::WMS_PC, "invalid sourcePersistentId or targetPersistentId");
+    if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
+        TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [sourcePersistentId, targetPersistentId, env, task = napiAsyncTask] {
+    auto asyncTask = [sourceWindowId, targetWindowId, env, task = napiAsyncTask] {
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
-            ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId));
+            ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -1353,6 +1399,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetGestureNavigationEnabled);
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
+    BindNativeFunction(env, exportObj, "getAllWindowLayoutInfo", moduleName, JsWindowManager::GetAllWindowLayoutInfo);
     BindNativeFunction(env, exportObj, "getVisibleWindowInfo", moduleName, JsWindowManager::GetVisibleWindowInfo);
     BindNativeFunction(env, exportObj, "getWindowsByCoordinate", moduleName, JsWindowManager::GetWindowsByCoordinate);
     BindNativeFunction(env, exportObj, "shiftAppWindowPointerEvent", moduleName,

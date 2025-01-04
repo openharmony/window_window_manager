@@ -167,6 +167,13 @@ HWTEST_F(KeyboardSessionTest2, AdjustKeyboardLayout02, Function | SmallTest | Le
     EXPECT_NE(keyboardSession, nullptr);
 
     KeyboardLayoutParams params;
+    // params gravity is WINDOW_GRAVITY_BOTTOM
+    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+    keyboardSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
+
+    // params gravity is WINDOW_GRAVITY_FLOAT
+    params.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     ASSERT_EQ(keyboardSession->AdjustKeyboardLayout(params), WSError::WS_OK);
 }
 
@@ -425,6 +432,12 @@ HWTEST_F(KeyboardSessionTest2, Hide01, Function | SmallTest | Level1)
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     EXPECT_EQ(WSError::WS_OK, keyboardSession->Hide());
+
+    // Hide system keyboard
+    ASSERT_EQ(false, keyboardSession->IsSystemKeyboard());
+    keyboardSession->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, keyboardSession->IsSystemKeyboard());
+    ASSERT_EQ(WSError::WS_OK, keyboardSession->Hide());
 }
 
 /**
@@ -461,7 +474,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession01, Function | SmallTest | Lev
     ASSERT_EQ(resultRect, emptyRect);
 
     // for cover GetSceneSession
-    keyboardSession->keyboardCallback_->onGetSceneSession_ =
+    keyboardSession->keyboardCallback_->onGetSceneSession =
         [callingSession](int32_t persistentId)->sptr<SceneSession> {
         return callingSession;
     };
@@ -497,7 +510,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession02, Function | SmallTest | Lev
     ASSERT_NE(callingSession->property_, nullptr);
     callingSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     callingSession->winRect_ = { 1, 1, 1, 1 };
-    keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
+    keyboardSession->keyboardCallback_->onGetSceneSession = [callingSession](int32_t persistentId) {
         return callingSession;
     };
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
@@ -534,7 +547,7 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, Function | SmallTest | Lev
     callingSession->winRect_ = { 1, 1, 1, 1 };
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
     callingSession->updateRectCallback_ = [](const WSRect& rect, SizeChangeReason reason) {};
-    keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
+    keyboardSession->keyboardCallback_->onGetSceneSession = [callingSession](int32_t persistentId) {
         return callingSession;
     };
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;
@@ -559,6 +572,12 @@ HWTEST_F(KeyboardSessionTest2, RaiseCallingSession03, Function | SmallTest | Lev
     keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
     callingOriPosY = callingSession->oriPosYBeforeRaisedByKeyboard_;
     ASSERT_EQ(callingOriPosY, 10);
+
+    keyboardSession->ActivateKeyboardAvoidArea(false, false);
+    ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
+    keyboardSession->EnableCallingSessionAvoidArea();
+    keyboardSession->RaiseCallingSession(keyboardPanelRect, true, nullptr);
+    ASSERT_EQ(callingSession->oriPosYBeforeRaisedByKeyboard_, 10); // 10 is calling session position
 }
 
 /**
@@ -577,7 +596,7 @@ HWTEST_F(KeyboardSessionTest2, IsCallingSessionSplitMode01, Function | SmallTest
     callingSession->oriPosYBeforeRaisedByKeyboard_ = 0;
     callingSession->winRect_ = { 0, 0, 0, 0 };
     callingSession->updateRectCallback_ = [](const WSRect& rect, SizeChangeReason reason) {};
-    keyboardSession->keyboardCallback_->onGetSceneSession_ = [callingSession](int32_t persistentId) {
+    keyboardSession->keyboardCallback_->onGetSceneSession = [callingSession](int32_t persistentId) {
         return callingSession;
     };
     keyboardSession->state_ = SessionState::STATE_FOREGROUND;

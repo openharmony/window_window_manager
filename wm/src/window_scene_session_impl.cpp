@@ -890,9 +890,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         property_->SetWindowModeSupportType(windowModeSupportType);
         // update windowModeSupportType to server
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
-        bool onlySupportFullScreen =
-            WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
-            !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING) &&
+        bool isWindowModeSupportFullscreen = GetTargetAPIVersion() < 15 ? // 15: isolated version
+            (windowModeSupportType == WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) :
+            (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
+            !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
+        bool onlySupportFullScreen = isWindowModeSupportFullscreen &&
             ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
         if (onlySupportFullScreen || property_->GetFullScreenStart()) {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
@@ -2295,6 +2297,10 @@ WMError WindowSceneSessionImpl::Maximize()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (GetTargetAPIVersion() >= 15 && state_ != WindowState::STATE_SHOWN) { // 15: isolated version
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", GetPersistentId());
+        return WMError::WM_OK;
+    }
     if (WindowHelper::IsMainWindow(GetType())) {
         SetLayoutFullScreen(enableImmersiveMode_);
     }
@@ -2317,6 +2323,10 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     // The device is not supported
     if (!windowSystemConfig_.IsPcWindow() && !IsFreeMultiWindowMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WMError::WM_OK;
+    }
+    if (GetTargetAPIVersion() >= 15 && state_ != WindowState::STATE_SHOWN) { // 15: isolated version
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
     titleHoverShowEnabled_ = true;
@@ -2695,7 +2705,7 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_END_MOVE);
-    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d , errorCode: %{public}d",
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
           GetPersistentId(), static_cast<int>(errorCode));
     return errorCode == WSError::WS_ERROR_NULLPTR ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
 }
@@ -4695,8 +4705,7 @@ WSError WindowSceneSessionImpl::SetSupportEnterWaterfallMode(bool isSupportEnter
             TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent unavailable", where);
             return;
         }
-        uiContent->OnContainerModalEvent("scb_waterfall_visibility",
-            isSupportEnter ? "true" : "false");
+        uiContent->OnContainerModalEvent("scb_waterfall_visibility", isSupportEnter ? "true" : "false");
     }, __func__);
     return WSError::WS_OK;
 }
@@ -4757,22 +4766,21 @@ float WindowSceneSessionImpl::GetCustomDensity() const
 
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId=%{public}u, density=%{public}f", GetWindowId(), density);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, density=%{public}f", GetWindowId(), density);
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if ((density < MINIMUM_CUSTOM_DENSITY && !MathHelper::NearZero(density - UNDEFINED_DENSITY)) ||
         density > MAXIMUM_CUSTOM_DENSITY) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid custom density=%{public}f", density);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set invalid density=%{public}f", GetWindowId(), density);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "must be app main window");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, must be app main window", GetWindowId());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (MathHelper::NearZero(customDensity_ - density)) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "custom density not change");
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
         return WMError::WM_OK;
     }
     isDefaultDensityEnabled_ = false;
@@ -4785,17 +4793,16 @@ WMError WindowSceneSessionImpl::SetCustomDensity(float density)
 WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityInfo)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "display is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "display is null, winId=%{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is null, winId=%{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
     densityInfo.systemDensity = displayInfo->GetVirtualPixelRatio();
