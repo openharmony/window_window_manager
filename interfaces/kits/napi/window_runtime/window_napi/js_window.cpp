@@ -7384,8 +7384,7 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
     bool enabled = avoidAreaOption & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW);
     auto objValue = CreateJsValue(env, enabled);
     if (objValue != nullptr) {
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enabled %{public}u",
-            windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enabled);
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enabled %{public}u", windowToken_->GetWindowId(), enabled);
         return objValue;
     } else {
         TLOGE(WmsLogTag::WMS_IMMS, "create js object failed");
