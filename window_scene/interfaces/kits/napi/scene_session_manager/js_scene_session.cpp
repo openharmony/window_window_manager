@@ -1054,19 +1054,19 @@ void JsSceneSession::ProcessSessionDisplayIdChangeRegister()
 
 void JsSceneSession::ProcessWindowMovingRegister()
 {
-    NotifyWindowMovingFunc func = [weakThis = wptr(this)](DisplayId displayId, int32_t pointerX, int32_t pointerY) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_DECOR, "jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnWindowMoving(displayId, pointerX, pointerY);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
+    NotifyWindowMovingFunc func = [weakThis = wptr(this)](DisplayId displayId, int32_t pointerX, int32_t pointerY) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "ProcessWindowMovingRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnWindowMoving(displayId, pointerX, pointerY);
+    };
     session->SetWindowMovingCallback(func);
     TLOGI(WmsLogTag::WMS_DECOR, "success");
 }
