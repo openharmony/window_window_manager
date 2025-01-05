@@ -925,6 +925,28 @@ HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, Function | SmallTest | Level1
     EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
     extensionSession_->GetStatusBarHeight();
 }
+
+/**
+ * @tc.name: TryUpdateExtensionPersistentId
+ * @tc.desc: test function : TryUpdateExtensionPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ExtensionSessionTest";
+    info.bundleName_ = "ExtensionSessionTest";
+    info.persistentId_ = INVALID_SESSION_ID;
+    sptr<ExtensionSession> extensionSessionA = sptr<ExtensionSession>::MakeSptr(info);
+
+    info.persistentId_ = extensionSessionA->GetPersistentId();
+    sptr<ExtensionSession> extensionSessionB = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_NE(info.persistentId_ + 1, extensionSessionB->GetPersistentId());
+
+    extensionSessionA = nullptr;
+    sptr<ExtensionSession> extensionSessionC = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_NE(info.persistentId_, extensionSessionC->GetPersistentId());
+}
 }
 }
 }

@@ -123,6 +123,8 @@ public:
     void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) override;
 
 private:
+    void TryUpdateExtensionPersistentId();
+    void RemoveExtensionPersistentId();
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
     bool isFirstTriggerBindModal_ = true;
     sptr<ChannelDeathRecipient> channelDeath_ = nullptr;
