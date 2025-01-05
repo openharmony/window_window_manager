@@ -23,6 +23,13 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
+std::set<int32_t> g_extensionPersistentIdSet;
+std::mutex g_extensionPersistentIdMutex;
+constexpr uint32_t EXTENSION_ID_FALG = 0x40000000;
+constexpr uint32_t PID_LENGTH = 18;
+constexpr uint32_t PID_MASK = (1 << PID_LENGTH) - 1;
+constexpr uint32_t PERSISTENTID_LENGTH = 12;
+constexpr uint32_t PERSISTENTID_MASK = (1 << PERSISTENTID_LENGTH) - 1;
 } // namespace
 
 void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(int32_t keyEventId, bool isPreImeEvent,
@@ -128,17 +135,59 @@ void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     listener_->ResetTransferKeyEventForConsumedParams(false, WSError::WS_ERROR_IPC_FAILED);
 }
 
+void ExtensionSession::TryUpdateExtensionPersistentId()
+{
+    std::lock_guard lock(g_extensionPersistentIdMutex);
+    auto persistentId = persistentId_;
+    if (!g_extensionPersistentIdSet.count(persistentId)) {
+        g_extensionPersistentIdSet.insert(persistentId);
+        return;
+    }
+    uint32_t assembledPersistentId = ((static_cast<uint32_t>(getpid()) & PID_MASK) << PERSISTENTID_LENGTH);
+    int32_t min = assembledPersistentId | EXTENSION_ID_FALG;
+    int32_t max = assembledPersistentId | EXTENSION_ID_FALG | PERSISTENTID_MASK;
+    if (persistentId < min || persistentId > max) {
+        persistentId_ = INVALID_SESSION_ID;
+        TLOGE(WmsLogTag::WMS_UIEXT, "Id < min || Id > max, persistenId: %{public}d", persistentId);
+        return;
+    }
+    uint32_t count = 0;
+    while (g_extensionPersistentIdSet.count(persistentId)) {
+        persistentId++;
+        if (persistentId > max) {
+            persistentId = min;
+        }
+        count++;
+        if (count > PERSISTENTID_MASK) {
+            persistentId_ = INVALID_SESSION_ID;
+            TLOGE(WmsLogTag::WMS_UIEXT, "can't generate Id");
+            return;
+        }
+    }
+    g_extensionPersistentIdSet.insert(persistentId);
+    persistentId_ = persistentId;
+}
+
+void ExtensionSession::RemoveExtensionPersistentId()
+{
+    std::lock_guard lock(g_extensionPersistentIdMutex);
+    g_extensionPersistentIdSet.erase(persistentId_);
+}
+
+
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
     WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info.persistentId_);
+    TryUpdateExtensionPersistentId();
     dataHandler_ = std::make_shared<Extension::HostDataHandler>();
 }
 
 ExtensionSession::~ExtensionSession()
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "realease extension session");
+    RemoveExtensionPersistentId();
     if (windowEventChannel_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "window event channel is null");
         return;
