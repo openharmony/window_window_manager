@@ -977,6 +977,7 @@ private:
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
+    static constexpr uint32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
 
     /*
      * PC Window Layout

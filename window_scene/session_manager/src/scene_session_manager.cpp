@@ -12408,7 +12408,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 void SceneSessionManager::SetStatusBarAvoidHeight(uint32_t height)
 {
     statusBarAvoidHeight_ = height;
-    TLOGI(WmsLogTag::WMS_IMMS, "height: %{public}u", height);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}u", property->GetPersistentId(), height);
 }
 
 uint32_t SceneSessionManager::GetStatusBarAvoidHeight()
