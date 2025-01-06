@@ -33,7 +33,8 @@ class SceneInputManager : public std::enable_shared_from_this<SceneInputManager>
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
 public:
     void Init();
-    void FlushDisplayInfoToMMI(const bool forceFlush = false);
+    void FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& windowInfoList,
+        std::vector<std::shared_ptr<Media::PixelMap>>&& pixelMapList, const bool forceFlush = false);
     void FlushEmptyInfoToMMI();
     void NotifyWindowInfoChange(const sptr<SceneSession>& scenenSession, const WindowUpdateType& type);
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
@@ -41,6 +42,10 @@ public:
     void SetUserBackground(bool userBackground);
     void SetCurrentUserId(int32_t userId);
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
+    using FlushWindowInfoCallback = std::function<void()>;
+    void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
+    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
+        GetFullWindowInfoList();
 
 protected:
     SceneInputManager() = default;
