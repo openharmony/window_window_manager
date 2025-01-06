@@ -225,8 +225,6 @@ public:
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
-    WMError RecoverAndConnectSpecificSession();
-    WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
@@ -242,6 +240,12 @@ protected:
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
+    
+    /*
+     * Window Recover
+     */
+    WMError RecoverAndConnectSpecificSession();
+    WMError RecoverAndReconnectSceneSession();
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -252,7 +256,6 @@ private:
     static uint32_t maxFloatingWindowSize_;
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
-    void RegisterSessionRecoverListener(bool isSpecificSession);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
@@ -282,6 +285,11 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * Window Recover
+     */
+    void RegisterSessionRecoverListener(bool isSpecificSession);
 
     /*
      * Window Layout
