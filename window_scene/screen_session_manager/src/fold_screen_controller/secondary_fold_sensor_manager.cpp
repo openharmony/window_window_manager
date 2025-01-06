@@ -151,14 +151,15 @@ void SecondaryFoldSensorManager::NotifyFoldAngleChanged(const std::vector<float>
     if (angles.size() < SECONDARY_HALL_SIZE) {
         return;
     }
-    bool bcFlag = fabs(angles[0] - oldFoldAngle[0]) > MINI_NOTIFY_FOLD_ANGLE;
-    bool abFlag = fabs(angles[1] - oldFoldAngle[1]) > MINI_NOTIFY_FOLD_ANGLE;
-    if (bcFlag || abFlag) {
-        oldFoldAngle[0] = angles[0];
-        oldFoldAngle[1] = angles[1];
-        std::vector<float> notifyAngles = {angles[0], angles[1]};
-        ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(notifyAngles);
+    bool bcFlag = fabs(angles[0] - oldFoldAngle[0]) < MINI_NOTIFY_FOLD_ANGLE;
+    bool abFlag = fabs(angles[1] - oldFoldAngle[1]) < MINI_NOTIFY_FOLD_ANGLE;
+    if (bcFlag && abFlag) {
+        return;
     }
+    oldFoldAngle[0] = angles[0];
+    oldFoldAngle[1] = angles[1];
+    std::vector<float> notifyAngles = {angles[0], angles[1]};
+    ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(notifyAngles);
 }
 
 void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const event)

@@ -1726,6 +1726,25 @@ bool WindowSessionImpl::IsMainWindowTopmost() const
     return property_->IsMainWindowTopmost();
 }
 
+WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "The device is not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    property_->SetWindowDelayRaiseEnabled(isEnabled);
+    TLOGI(WmsLogTag::WMS_FOCUS, "isEnabled: %{public}d", isEnabled);
+    return WMError::WM_OK;
+}
+
+bool WindowSessionImpl::IsWindowDelayRaiseEnabled() const
+{
+    return property_->IsWindowDelayRaiseEnabled();
+}
+
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}d", dragEnabled);
@@ -3759,6 +3778,10 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
             TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d", pointerEvent->GetId());
+        }
+        if (IsWindowDelayRaiseEnabled()) {
+            pointerEvent->MarkProcessed();
+            return;
         }
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
             TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");

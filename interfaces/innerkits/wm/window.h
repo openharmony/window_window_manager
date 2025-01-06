@@ -2916,6 +2916,20 @@ public:
     virtual std::string GetClassType() const { return "Window"; }
 
     /**
+     * @brief Enable or disable window delay raise
+     *
+     * @param isEnabled Enable or disable window delay raise
+     */
+    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window delay raise is enabled
+     *
+     * @return True means window delay raise is enabled
+     */
+    virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
      * @brief Get whether is mid scene.
      *
      * @return True - is mid scene, false - is not mid scene.
