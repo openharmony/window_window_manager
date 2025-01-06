@@ -3454,6 +3454,31 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
 }
 
+void SceneSession::ResetOcclusionAlpha()
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::ResetAbilityBGAlpha");
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
+        return;
+    }
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
+        return;
+    }
+    uint8_t alpha8bit = sessionProperty->GetBackgroundAlpha();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u.", alpha8bit);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
+    surfaceNode->SetAbilityBGAlpha(alpha8bit);
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
+}
+
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
@@ -4646,6 +4671,18 @@ WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSession
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     sessionProperty->SetAvoidAreaOption(property->GetAvoidAreaOption());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sessionProperty->SetBackgroundAlpha(property->GetBackgroundAlpha());
     return WMError::WM_OK;
 }
 
