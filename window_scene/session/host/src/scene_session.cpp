@@ -5618,9 +5618,11 @@ int32_t SceneSession::GetStatusBarHeight()
     std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
+        WSRect statusBarRect = statusBar->GetSessionRect();
         if (specificCallback_ != nullptr && specificCallback_->onGetStatusBarAvoidHeight_) {
             specificCallback_->onGetStatusBarAvoidHeight_(statusBarRect);
         }
+        height = statusBarRect.height_;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "height %{public}d", height);
     return height;
