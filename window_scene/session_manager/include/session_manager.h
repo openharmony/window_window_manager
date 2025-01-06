@@ -42,8 +42,6 @@ public:
     using WindowManagerRecoverCallbackFunc = std::function<void()>;
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     using UserSwitchCallbackFunc = std::function<void()>;
-    void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
-    void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
     void OnWMSConnectionChanged(
         int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
     void ClearSessionManagerProxy();
@@ -53,6 +51,12 @@ public:
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
     void OnFoundationDied();
+
+    /*
+     * Window Recover
+     */
+    void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
+    void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
 
 protected:
     SessionManager() = default;
