@@ -102,7 +102,7 @@ using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isN
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
-using GetStatusBarAvoidHeightFunc = std::function<uint32_t()>;
+using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -977,7 +977,6 @@ private:
     std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     bool isStatusBarVisible_ = true;
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
-    static constexpr uint32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
 
     /*
      * PC Window Layout
