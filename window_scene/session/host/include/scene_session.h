@@ -558,6 +558,7 @@ public:
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
+    void SetWindowMovingCallback(const NotifyWindowMovingFunc& func);
 
     /*
      * Window Layout
@@ -753,6 +754,7 @@ private:
     void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason);
     void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode);
     NotifySessionEventFunc onSessionEvent_;
+    void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /*
      * Gesture Back
@@ -926,6 +928,7 @@ private:
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
     DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    NotifyWindowMovingFunc notifyWindowMovingFunc_;
 
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
