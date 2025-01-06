@@ -189,7 +189,7 @@ public:
     virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
         sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError ReconnectInner(sptr<WindowSessionProperty> property);
+    WSError ReconnectInner(sptr<WindowSessionProperty> property) REQUIRES(SCENE_GUARD);
     bool IsRecovered() const { return isRecovered_; }
     void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
@@ -454,6 +454,7 @@ public:
     virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -522,8 +523,10 @@ public:
     // WMSPipeline-related: only accessed on SSM thread
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     void SetNeedSyncSessionRect(bool needSync);
-    uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
-    uint32_t UpdateUIParam();   // update invisible session, return dirty flags
+    // update visible session, return dirty flags
+    uint32_t UpdateUIParam(const SessionUIParam& uiParam) REQUIRES(SCENE_GUARD);
+    // update invisible session, return dirty flags
+    uint32_t UpdateUIParam() REQUIRES(SCENE_GUARD);
     void SetPostProcessFocusState(PostProcessFocusState state);
     PostProcessFocusState GetPostProcessFocusState() const;
     void ResetPostProcessFocusState();
@@ -539,7 +542,6 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
-    void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
 
     /*
      * Window ZOrder: PC
@@ -614,7 +616,7 @@ protected:
     /*
      * Window Pipeline
      */
-    bool UpdateVisibilityInner(bool visibility);
+    bool UpdateVisibilityInner(bool visibility) REQUIRES(SCENE_GUARD);
     bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
     bool PipelineNeedNotifyClientToUpdateRect() const;

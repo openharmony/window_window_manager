@@ -1527,7 +1527,6 @@ HWTEST_F(WindowSessionTest2, NeedCheckContextTransparent, Function | SmallTest |
     session_->SetContextTransparentFunc(func);
     ASSERT_EQ(session_->NeedCheckContextTransparent(), true);
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS
