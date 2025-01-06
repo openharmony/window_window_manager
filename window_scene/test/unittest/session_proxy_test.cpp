@@ -847,12 +847,11 @@ HWTEST_F(SessionProxyTest, NotifySupportWindowModesChange, Function | SmallTest 
 HWTEST_F(SessionProxyTest, GetIsMidScene, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene start";
-    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
-    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
 
     bool isMidScene = false;
-    sProxy->GetIsMidScene(isMidScene);
+    WSError res = sProxy->GetIsMidScene(isMidScene);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     ASSERT_EQ(isMidScene, false);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene end";
 }

@@ -2729,8 +2729,10 @@ HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     bool isMidScene = false;
-    window->GetIsMidScene(isMidScene);
+    WMError res = window->GetIsMidScene(isMidScene);
+    EXPECT_EQ(WMError::WM_OK, res);
     ASSERT_EQ(isMidScene, false);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
 } // namespace
 } // namespace Rosen

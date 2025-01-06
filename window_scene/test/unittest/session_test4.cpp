@@ -934,7 +934,8 @@ HWTEST_F(WindowSessionTest4, GetIsMidScene, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     bool isMidScene = false;
-    session_->GetIsMidScene(isMidScene);
+    auto result = session_->GetIsMidScene(isMidScene);
+    ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(isMidScene, false);
 }
 }

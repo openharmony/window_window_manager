@@ -2344,12 +2344,13 @@ HWTEST_F(WindowSessionImplTest4, GetIsMidScene, Function | SmallTest | Level2)
     option->SetWindowName("GetIsMidScene");
 
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    SessionInfo sessioninfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessioninfo);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
 
     bool isMidScene = false;
-    window->GetIsMidScene(isMidScene);
+    auto ret = window->GetIsMidScene(isMidScene);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     ASSERT_EQ(false, isMidScene);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
