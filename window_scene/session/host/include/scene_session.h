@@ -102,7 +102,7 @@ using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isN
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
-using GetStatusBarAvoidHeightFunc = std::function<uint32_t(WSRect& barArea)>;
+using GetStatusBarAvoidHeightFunc = std::function<uint32_t()>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
