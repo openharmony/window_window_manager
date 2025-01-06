@@ -187,9 +187,6 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
-    if (leashWindowSurfaceNodeChangedFunc_) {
-        leashWindowSurfaceNodeChangedFunc_();
-    }
 }
 
 void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
@@ -1865,11 +1862,6 @@ WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
         pendingSessionToBackgroundForDelegatorFunc_(info, shouldBackToCaller);
     }
     return WSError::WS_OK;
-}
-
-void Session::SetLeashWindowSurfaceNodeChangedListener(const NotifyLeashWindowSurfaceNodeChangedFunc& func)
-{
-    leashWindowSurfaceNodeChangedFunc_ = func;
 }
 
 void Session::SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func)
