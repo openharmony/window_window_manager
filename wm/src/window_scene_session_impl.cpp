@@ -2256,7 +2256,7 @@ WMError WindowSceneSessionImpl::Maximize()
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", GetPersistentId());
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
@@ -2284,7 +2284,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         return WMError::WM_OK;
     }
     if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", GetPersistentId());
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
     titleHoverShowEnabled_ = true;
