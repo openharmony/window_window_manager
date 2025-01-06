@@ -1459,7 +1459,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         this->UpdateGestureBackEnabled(persistentId);
     };
     specificCb->onGetStatusBarAvoidHeight_ = [this](WSRect& barArea) {
-        return this->GetStatusBarAvoidHeight(barArea);
+        this->GetStatusBarAvoidHeight(barArea);
     };
     return specificCb;
 }
