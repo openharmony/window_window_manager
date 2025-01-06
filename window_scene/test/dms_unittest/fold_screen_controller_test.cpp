@@ -75,6 +75,10 @@ namespace {
         ret = fsc_.GetFoldScreenPolicy(productType);
         ASSERT_NE(ret, nullptr);
 
+        productType = DisplayDeviceType::SINGLE_DISPLAY_POCKET_DEVICE;
+        ret = fsc_.GetFoldScreenPolicy(productType);
+        ASSERT_NE(ret, nullptr);
+
         productType = DisplayDeviceType::DISPLAY_DEVICE_UNKNOWN;
         ret = fsc_.GetFoldScreenPolicy(productType);
         ASSERT_EQ(ret, nullptr);
@@ -360,6 +364,34 @@ namespace {
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         fsc_.UpdateForPhyScreenPropertyChange();
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+    }
+
+    /**
+     * @tc.name: GetTentMode
+     * @tc.desc: test function :GetTentMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetTentMode, Function | SmallTest | Level1)
+    {
+        if (ssm_.IsFoldable()) {
+            ASSERT_NE(ssm_.foldScreenController_, nullptr);
+            auto tentMode = ssm_.foldScreenController_->GetTentMode();
+            ASSERT_EQ(tentMode, false);
+        }
+    }
+
+    /**
+     * @tc.name: OnTentModeChanged
+     * @tc.desc: test function :OnTentModeChanged
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, OnTentModeChanged, Function | SmallTest | Level1)
+    {
+        if (ssm_.IsFoldable()) {
+            bool isTentMode = false;
+            ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
+            ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), false);
+        }
     }
 }
 } // namespace Rosen

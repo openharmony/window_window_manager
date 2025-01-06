@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_DEVICE_POLICY_H
-#define OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_DEVICE_POLICY_H
+
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_POCKET_FOLD_POLICY_H
+#define OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_POCKET_FOLD_POLICY_H
 
 #include <refbase.h>
 
@@ -23,11 +24,11 @@
 #include "session/screen/include/screen_session.h"
 
 namespace OHOS::Rosen {
-class SingleDisplayFoldPolicy : public FoldScreenPolicy {
+class SingleDisplayPocketFoldPolicy : public FoldScreenPolicy {
 public:
-    SingleDisplayFoldPolicy(std::recursive_mutex& displayInfoMutex,
+    SingleDisplayPocketFoldPolicy(std::recursive_mutex& displayInfoMutex,
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
-    ~SingleDisplayFoldPolicy() = default;
+    ~SingleDisplayPocketFoldPolicy() = default;
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT) override;
     void SendSensorResult(FoldStatus foldStatus) override;
@@ -35,9 +36,10 @@ public:
     void LockDisplayStatus(bool locked) override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     void UpdateForPhyScreenPropertyChange() override;
-    void ExitCoordination() override {};
-    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override {};
+    void ExitCoordination() override;
+    void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override;
     FoldDisplayMode GetModeMatchStatus() override;
+    void BootAnimationFinishPowerInit() override;
 private:
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
@@ -47,18 +49,25 @@ private:
     void ChangeScreenDisplayModeToMainWhenFoldScreenOff(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullWhenFoldScreenOn(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullWhenFoldScreenOff(sptr<ScreenSession> screenSession,
-        DisplayModeChangeReason reason);
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
+    void ChangeScreenDisplayModeToCoordination();
+    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModePower(ScreenId screenId, ScreenPowerStatus screenPowerStatus);
+    void ChangeScreenDisplayModePower(ScreenPowerStatus screenPowerStatus);
     void RecoverWhenBootAnimationExit();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
     void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false) override;
+    void ChangeOnTentMode(FoldStatus currentState) override;
+    void ChangeOffTentMode() override;
+    void CloseCoordinationScreen();
+    void NotifyRefreshRateEvent(bool isEventStatus);
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
 };
 } // namespace OHOS::Rosen
-#endif //OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_DEVICE_POLICY_H
+#endif //OHOS_ROSEN_WINDOW_SCENE_SINGLE_DISPLAY_FOLD_POLICY_H
