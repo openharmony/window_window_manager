@@ -2065,19 +2065,23 @@ bool SceneSession::HasModalUIExtension()
     return !modalUIExtensionInfoList_.empty();
 }
 
-ExtensionWindowEventInfo SceneSession::GetLastModalUIExtensionEventInfo()
+std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEventInfo()
 {
     std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
-    return modalUIExtensionInfoList_.back();
+    return modalUIExtensionInfoList_.empty() ? std::nullopt :
+        std::make_optional<ExtensionWindowEventInfo>(modalUIExtensionInfoList_.back());
 }
 
 Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
     WSRect windowRect = GetSessionGlobalRect();
     if (useUIExtension && HasModalUIExtension()) {
-        auto rect = GetLastModalUIExtensionEventInfo().windowRect;
-        windowRect.posX_ = rect.posX_;
-        windowRect.posY_ = rect.posY_;
+        auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo();
+        if (modalUIExtensionEventInfo.has_value()) {
+            auto rect = modalUIExtensionEventInfo.value().windowRect;
+            windowRect.posX_ = rect.posX_;
+            windowRect.posY_ = rect.posY_;
+        }
     }
     Vector2f position(windowRect.posX_, windowRect.posY_);
     return position;
@@ -2308,10 +2312,11 @@ WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WSError SceneSession::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool isExecuteDelayRaise)
 {
     NotifyOutsideDownEvent(pointerEvent);
-    TransferPointerEvent(pointerEvent, false);
+    TransferPointerEvent(pointerEvent, false, isExecuteDelayRaise);
     return WSError::WS_OK;
 }
 
@@ -2342,21 +2347,21 @@ void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEven
 }
 
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    bool needNotifyClient)
+    bool needNotifyClient, bool isExecuteDelayRaise)
 {
-    auto task = [weakThis = wptr(this), pointerEvent, needNotifyClient] {
+    auto task = [weakThis = wptr(this), pointerEvent, needNotifyClient, isExecuteDelayRaise] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::DEFAULT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        return session->TransferPointerEventInner(pointerEvent, needNotifyClient);
+        return session->TransferPointerEventInner(pointerEvent, needNotifyClient, isExecuteDelayRaise);
     };
     return PostSyncTask(std::move(task), __func__);
 }
 
 WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    bool needNotifyClient)
+    bool needNotifyClient, bool isExecuteDelayRaise)
 {
     WLOGFD("[WMSCom] TransferPointEvent, id: %{public}d, type: %{public}d, needNotifyClient: %{public}d",
         GetPersistentId(), GetWindowType(), needNotifyClient);
@@ -2377,7 +2382,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
+        return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
     }
     auto windowType = property->GetWindowType();
     bool isMovableWindowType = IsMovableWindowType();
@@ -2400,7 +2405,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         }
         if (!moveDragController_) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
-            return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
+            return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
         if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) ||
             isDragEnabledSystemWindow) {
@@ -2420,7 +2425,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
-            Session::TransferPointerEvent(pointerEvent, needNotifyClient);
+            Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
             return WSError::WS_OK;
         }
     }
@@ -2442,7 +2447,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         pointerItem.SetWindowY(windowY);
         pointerEvent->AddPointerItem(pointerItem);
     }
-    return Session::TransferPointerEvent(pointerEvent, needNotifyClient);
+    return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
 }
 
 bool SceneSession::IsMovableWindowType()
@@ -3906,7 +3911,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
         info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
         info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-        info.specifiedId = abilitySessionInfo->tmpSpecifiedId;
+        info.specifiedId = abilitySessionInfo->requestId;
         info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
         info.requestCode = abilitySessionInfo->requestCode;
         info.callerToken_ = abilitySessionInfo->callerToken;
@@ -3939,7 +3944,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-    info.specifiedId = abilitySessionInfo->tmpSpecifiedId;
+    info.specifiedId = abilitySessionInfo->requestId;
     info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     info.requestCode = abilitySessionInfo->requestCode;
     info.callerToken_ = abilitySessionInfo->callerToken;

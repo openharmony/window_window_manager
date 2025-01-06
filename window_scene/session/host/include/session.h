@@ -193,7 +193,7 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        bool needNotifyClient = true);
+        bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     virtual WSError NotifyClientToUpdateRect(const std::string& updateReason,
@@ -762,7 +762,7 @@ protected:
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
-    WSError HandleSubWindowClick(int32_t action);
+    WSError HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise = false);
 
     template<typename T>
     bool RegisterListenerLocked(std::vector<std::shared_ptr<T>>& holder, const std::shared_ptr<T>& listener);
