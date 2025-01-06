@@ -699,7 +699,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | S
     };
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, nullptr, extensionInfo);
     EXPECT_EQ(windowInfoList.size(), 1);
-
     
     sceneSession->AddModalUIExtension(extensionInfo);
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
