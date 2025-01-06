@@ -1012,7 +1012,7 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2
 
 /**
  * @tc.name: GetDecorHeight03
- * @tc.desc: GetDecorHeight
+ * @tc.desc: GetDecorHeight version isolation test cases
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2)
@@ -1031,7 +1031,6 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2
     window->SetDecorHeight(decorHeight);
     EXPECT_EQ(window->decorHeight_, decorHeight);
 
-    
     window->SetTargetAPIVersion(14);
     int32_t height = -1;
     EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
