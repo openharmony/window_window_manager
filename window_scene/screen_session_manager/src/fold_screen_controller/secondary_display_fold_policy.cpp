@@ -177,8 +177,8 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
         displayMode);
     if (currentDisplayMode_ != displayMode) {
         if((currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::FULL)
-            ||(currentDisplayMode_ == FoldDisplayMode::FULL && displayMode == FoldDisplayMode::MAIN)
-            ||(currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::MAIN)) {
+            || (currentDisplayMode_ == FoldDisplayMode::FULL && displayMode == FoldDisplayMode::MAIN)
+            || (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::MAIN)) {
                 return;
         }
     }
