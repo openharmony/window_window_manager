@@ -159,7 +159,7 @@ const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "status_bar_assistant_translate",
     "status_bar_quick_note",
     "status_bar_bluetooth_panel",
-    "status_bat_battery_panel",
+    "status_bar_battery_panel",
     "status_bar_focus_mode_paddle",
     "SCBStatusBar"
 };
