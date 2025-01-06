@@ -496,13 +496,13 @@ inline bool NearZero(const double left)
 
 template<typename T>
 struct WSRectT {
-    inline static const WSRect<T> EMPTY_RECT { static_cast<T>(0), static_cast<T>(0),
-        static_cast<T>(0), static_cast<T>(0)};
     T posX_ = 0;
     T posY_ = 0;
     T width_ = 0;
     T height_ = 0;
-
+    inline static const WSRect<T> EMPTY_RECT { static_cast<T>(0), static_cast<T>(0),
+        static_cast<T>(0), static_cast<T>(0)};
+        
     bool operator==(const WSRectT<T>& a) const
     {
         return (NearEqual(posX_, a.posX_) && NearEqual(posY_, a.posY_) &&
