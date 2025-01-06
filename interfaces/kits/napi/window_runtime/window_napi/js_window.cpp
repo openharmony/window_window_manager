@@ -7350,7 +7350,7 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        uint32_t option;
+        uint32_t option = 0;
         window->GetAvoidAreaOption(option);
         option = option | static_cast<uint32_t>(enable);
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(option));
