@@ -1092,6 +1092,32 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: GetTitleButtonArea03
+ * @tc.desc: GetTitleButtonArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea03, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetTitleButtonArea03");
+    ASSERT_NE(window, nullptr);
+    TitleButtonRect titleButtonRect = { 1400, 0, 0, 0 };
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
+    window->uiContent_ = std::move(uiContent);
+    window->SetTargetAPIVersion(14);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), false);
+
+    window->SetTargetAPIVersion(15);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), true);
+    window->Destroy();
+}
+
+/**
  * @tc.name: RegisterWindowTitleButtonRectChangeListener
  * @tc.desc: RegisterWindowTitleButtonRectChangeListener
  * @tc.type: FUNC
