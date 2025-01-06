@@ -533,7 +533,7 @@ struct Rect {
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
-    static Rect EMPTY_RECT;
+    static const Rect EMPTY_RECT;
 
     bool operator==(const Rect& a) const
     {

@@ -500,7 +500,7 @@ struct WSRectT {
     T posY_ = 0;
     T width_ = 0;
     T height_ = 0;
-    static WSRect<T> EMPTY_RECT;
+    const static WSRect<T> EMPTY_RECT;
 
     bool operator==(const WSRectT<T>& a) const
     {
@@ -553,8 +553,7 @@ struct WSRectT {
     }
 };
 
-const WSRectT WSRectT::EMPTY_RECT = { static_cast<T>(0), static_cast<T>(0),
-        static_cast<T>(0), static_cast<T>(0) };
+const WSRectT WSRectT::EMPTY_RECT = { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
