@@ -658,6 +658,7 @@ private:
      * Window Decor
      */
     DecorButtonStyle decorButtonStyle_;
+    int32_t decorHeight_ = 0;
 
     /*
      * Multi Window
