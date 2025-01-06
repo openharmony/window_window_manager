@@ -1585,6 +1585,7 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             }
             TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d", decorVisible);
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
+            uiContent->NotifyWindowMode(mode);
         }
         NotifyModeChange(mode, IsDecorEnable());
     }
