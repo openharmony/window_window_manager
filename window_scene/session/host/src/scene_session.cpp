@@ -3468,7 +3468,7 @@ void SceneSession::ResetOcclusionAlpha()
         return;
     }
     uint8_t alpha8bit = sessionProperty->GetBackgroundAlpha();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u.", alpha8bit);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u", alpha8bit);
     auto rsTransaction = RSTransactionProxy::GetInstance();
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
