@@ -22,6 +22,7 @@
 #include "screen_scene_config.h"
 #include <surface.h>
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2661,6 +2662,63 @@ HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | Smal
     DisplayId displayId = 0;
     ASSERT_NE(ssm_, nullptr);
     ssm_->NotifyAvailableAreaChanged(area, displayId);
+}
+
+/**
+ * @tc.name: TriggerFoldStatusChange01
+ * @tc.desc: test interface TriggerFoldStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TriggerFoldStatusChange01, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    ASSERT_NE(ssm_, nullptr);
+    FoldStatus foldStatus = FoldStatus::EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    FoldStatus res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::HALF_FOLD;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
 }
 
 /**

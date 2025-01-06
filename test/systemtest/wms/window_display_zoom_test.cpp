@@ -198,7 +198,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
     expect.scaleX_ = expect.scaleY_ = 2; // scale value
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
-    ASSERT_EQ(WMError::WM_OK, window->Hide());;
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
 

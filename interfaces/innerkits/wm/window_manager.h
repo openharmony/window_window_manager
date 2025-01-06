@@ -731,6 +731,14 @@ public:
         std::vector<sptr<UnreliableWindowInfo>>& infos) const;
 
     /**
+     * @brief Get window layout info.
+     *
+     * @param infos window layout infos
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
+
+    /**
      * @brief Get visibility window info.
      *
      * @param infos Visible window infos
@@ -948,11 +956,11 @@ public:
     /**
      * @brief Shift window pointer event within the same application. Only main window and subwindow.
      *
-     * @param sourcePersistentId Window id which the pointer event shift from
-     * @param targetPersistentId Window id which the pointer event shift to
+     * @param sourceWindowId Window id which the pointer event shift from
+     * @param targetWindowId Window id which the pointer event shift to
      * @return WM_OK means shift window pointer event success, others means failed.
      */
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId);
+    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
 private:
     WindowManager();
