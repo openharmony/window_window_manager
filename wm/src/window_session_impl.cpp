@@ -56,6 +56,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
+constexpr int32_t API_VERSION_15 = 15;
 
 /**
  * DFX
@@ -2294,7 +2295,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     res = uiContent->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
         TLOGE(WmsLogTag::WMS_DECOR, "GetContainerModalButtonsRect failed");
-        if (GetTargetAPIVersion() >= 15) { // 15: isolated version
+        if (GetTargetAPIVersion() >= API_VERSION_15) { // 15: isolated version
             titleButtonRect.ResetRect();
         }
         return WMError::WM_OK;
@@ -2355,7 +2356,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
                 return;
             }
             TitleButtonRect titleButtonRect;
-            if (window->GetTargetAPIVersion() >= 15 && // 15: isolated version
+            if (window->GetTargetAPIVersion() >= API_VERSION_15 && // 15: isolated version
                 titleButtonLeftRect.IsUninitializedRect()) {
                 window->NotifyWindowTitleButtonRectChange(titleButtonRect);
                 return;
