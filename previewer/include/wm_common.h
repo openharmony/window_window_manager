@@ -529,11 +529,11 @@ struct SystemBarPropertyFlag {
  * @brief Window Rect.
  */
 struct Rect {
-    inline static const Rect EMPTY_RECT { 0, 0, 0, 0 };
     int32_t posX_;
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
+    inline static const Rect EMPTY_RECT { 0, 0, 0, 0 };
 
     bool operator==(const Rect& a) const
     {
