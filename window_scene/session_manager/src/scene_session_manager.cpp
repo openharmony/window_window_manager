@@ -12408,11 +12408,6 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
 {
     statusBarAvoidHeight_ = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
-    if (statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT) {
-        TLOGI(WmsLogTag::WMS_IMMS, "cancelled, win %{public}d", session->GetPersistentId());
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}d", session->GetPersistentId(), height);
 }
 
 void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
