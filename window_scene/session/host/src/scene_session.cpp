@@ -2059,12 +2059,6 @@ void SceneSession::RemoveModalUIExtension(int32_t persistentId)
     NotifySessionInfoChange();
 }
 
-bool SceneSession::HasModalUIExtension()
-{
-    std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
-    return !modalUIExtensionInfoList_.empty();
-}
-
 std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEventInfo()
 {
     std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
@@ -2075,10 +2069,9 @@ std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEve
 Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
 {
     WSRect windowRect = GetSessionGlobalRect();
-    if (useUIExtension && HasModalUIExtension()) {
-        auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo();
-        if (modalUIExtensionEventInfo.has_value()) {
-            auto rect = modalUIExtensionEventInfo.value().windowRect;
+    if (useUIExtension) {
+        if (auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo()) {
+            const auto& rect = modalUIExtensionEventInfo.value().windowRect;
             windowRect.posX_ = rect.posX_;
             windowRect.posY_ = rect.posY_;
         }
