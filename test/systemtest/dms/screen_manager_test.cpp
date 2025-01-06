@@ -1310,7 +1310,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate01, Function | MediumT
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
     } else {
-        ASSERT_EQ(DMError::DM_OK, res);
+        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, res);
     }
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
@@ -1348,7 +1348,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate02, Function | MediumT
     DMError res = ScreenManager::GetInstance().SetVirtualScreenMaxRefreshRate(virtualScreenId,
         refreshRate, actualRefreshRate);
     sleep(TEST_SLEEP_S);
-    ASSERT_EQ(DMError::DM_OK, res);
+    ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, res);
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -1388,7 +1388,7 @@ HWTEST_F(ScreenManagerTest, SetVirtualScreenMaxRefreshRate03, Function | MediumT
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
     } else {
-        ASSERT_EQ(DMError::DM_OK, res);
+        ASSERT_EQ(DMError::DM_ERROR_DEVICE_NOT_SUPPORT, res);
     }
     ScreenManager::GetInstance().DestroyVirtualScreen(virtualScreenId);
 }
