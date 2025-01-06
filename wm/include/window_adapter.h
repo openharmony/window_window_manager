@@ -183,10 +183,6 @@ private:
     bool isProxyValid_ = false;
     bool isRegisteredUserSwitchListener_ = false;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
-    
-    /*
-     * Window Recover
-     */
     std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
     bool recoverInitialized_ = false;
     // above guarded by mutex_
