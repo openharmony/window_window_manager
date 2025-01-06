@@ -2411,7 +2411,6 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
                 moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
                 PresentFoucusIfNeed(pointerEvent->GetPointerAction());
                 pointerEvent->MarkProcessed();
-                ProcessWindowMoving(pointerEvent);
                 return WSError::WS_OK;
             }
         }
@@ -2422,6 +2421,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
             Session::TransferPointerEvent(pointerEvent, needNotifyClient);
+            ProcessWindowMoving(pointerEvent);
             return WSError::WS_OK;
         }
     }
