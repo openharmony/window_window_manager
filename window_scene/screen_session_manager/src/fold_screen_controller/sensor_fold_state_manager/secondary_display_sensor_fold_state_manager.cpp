@@ -179,13 +179,13 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetFoldStateUnpower(const std
     FoldStatus state = FoldStatus::UNKNOWN;
     int hall1 = halls[0];
     int hall2 = halls[1];
-    if (hall2 == HALL_FOLDED_THRESHOLD && hall1 == HALL_THRESHOLD) {
+    if (hall2 == HALL_THRESHOLD && hall1 == HALL_THRESHOLD) {
         state = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
-    } else if (hall2 = HALL_FOLDED_THRESHOLD && hall1 = HALL_THRESHOLD) {
+    } else if (hall2 == HALL_FOLDED_THRESHOLD && hall1 == HALL_THRESHOLD) {
         state = FoldStatus::EXPAND;
-    } else if (hall2 = HALL_FOLDED_THRESHOLD && hall1 = HALL_FOLDED_THRESHOLD) {
+    } else if (hall2 == HALL_FOLDED_THRESHOLD && hall1 == HALL_FOLDED_THRESHOLD) {
         state = FoldStatus::FOLDED;
-    } else if (hall2 == HALL_THRESHOLD && hall1 = HALL_FOLDED_THRESHOLD) {
+    } else if (hall2 == HALL_THRESHOLD && hall1 == HALL_FOLDED_THRESHOLD) {
         state = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
     }
     return state;
