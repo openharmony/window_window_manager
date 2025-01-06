@@ -759,7 +759,7 @@ void Session::SetCallingPid(int32_t id)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", persistentId_, id);
     callingPid_ = id;
-    if (isVisible_) {
+    if (visibilityChangedDetectFunc_ && isVisible_) {
         visibilityChangedDetectFunc_(callingPid_, false, isVisible_);
     }
 }

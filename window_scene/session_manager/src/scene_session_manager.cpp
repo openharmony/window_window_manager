@@ -847,7 +847,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
     TLOGI(WmsLogTag::WMS_RECOVER, "persistentIds recovered=%{public}zu. CurrentUserId=%{public}d",
         recoveredPersistentIds.size(), currentUserId_.load());
 
-    auto task = [this, recoveredPersistentIds]() {
+    taskScheduler_->PostAsyncTask([this, recoveredPersistentIds]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         ClearUnrecoveredSessions(recoveredPersistentIds);
         std::list<AAFwk::SessionInfo> abilitySessionInfos;
         for (const auto& persistentId : recoveredPersistentIds) {
@@ -889,8 +889,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             sceneSession->NotifySessionExceptionInner(sceneSessionInfo, false);
         }
         RemoveFailRecoveredSession();
-    };
-    taskScheduler_->PostAsyncTask(task, __func__);
+    }, __func__);
 }
 
 bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
@@ -2004,7 +2003,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
-        InitSceneSession(sceneSession, sessionInfo, property);
+        LOCK_GUARD_EXPR(SCENE_GUARD, InitSceneSession(sceneSession, sessionInfo, property));
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
@@ -2233,7 +2232,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
 WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, isNewActive]() {
+    auto task = [this, weakSceneSession, isNewActive]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         sptr<SceneSession> sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
@@ -2641,7 +2640,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     bool needRemoveSession, bool isSaveSnapshot, bool isForceClean)
 {
     auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession),
-        needRemoveSession, isSaveSnapshot, isForceClean]() {
+        needRemoveSession, isSaveSnapshot, isForceClean]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
@@ -4695,11 +4694,12 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible, const bool newIsVisible) {
+    sceneSession->SetVisibilityChangedDetectFunc(
+        [this](int32_t pid, bool isVisible, bool newIsVisible) THREAD_SAFETY_GUARD(SCENE_GUARD) {
         if (isVisible == newIsVisible || pid == -1) {
             return;
         }
-        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
+        auto windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
         windowPidVisibilityInfo->pid_ = pid;
         int32_t currentCount = 0;
         int32_t beforeCount = 0;
@@ -4723,8 +4723,7 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
             TLOGNE(WmsLogTag::WMS_LIFE, "The count of visible windows in same pid:%{public}d is less than 0.", pid);
             RecoveryVisibilityPidCount(pid);
         }
-    };
-    sceneSession->SetVisibilityChangedDetectFunc(func);
+    });
 }
 
 void SceneSessionManager::RecoveryVisibilityPidCount(int32_t pid)
@@ -7684,7 +7683,7 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
 {
     const char* const where = __func__;
-    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where] {
+    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session is nullptr", where);
@@ -10141,7 +10140,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     if (onFlushUIParamsFunc_ != nullptr) {
         onFlushUIParamsFunc_();
     }
-    auto task = [this, screenId, uiParams = std::move(uiParams)]() {
+    taskScheduler_->PostAsyncTask([this, screenId, uiParams = std::move(uiParams)]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushUIParams");
         TLOGND(WmsLogTag::WMS_PIPELINE, "FlushUIParams");
         {
@@ -10211,8 +10210,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
             }
         }
-    };
-    taskScheduler_->PostAsyncTask(task, "FlushUIParams");
+    }, __func__);
 }
 
 void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList)

@@ -176,7 +176,7 @@ WSError ExtensionSession::ConnectInner(
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode,
-        &systemConfig, property, token, pid, uid]() {
+        &systemConfig, property, token, pid, uid]() NO_THREAD_SAFETY_ANALYSIS {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
