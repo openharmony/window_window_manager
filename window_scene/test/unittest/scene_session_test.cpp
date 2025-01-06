@@ -850,15 +850,15 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
     ExtensionWindowEventInfo extensionInfo;
     extensionInfo.persistentId = 12345;
     extensionInfo.pid = 1234;
     extensionInfo.windowRect = { 1, 2, 3, 4 };
     sceneSession->AddModalUIExtension(extensionInfo);
-    EXPECT_TRUE(sceneSession->HasModalUIExtension());
 
     auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    EXPECT_TRUE(getInfo);
     EXPECT_EQ(getInfo.value().persistentId, extensionInfo.persistentId);
     EXPECT_EQ(getInfo.value().pid, extensionInfo.pid);
     EXPECT_EQ(getInfo.value().windowRect, extensionInfo.windowRect);
@@ -867,10 +867,11 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     extensionInfo.windowRect = windowRect;
     sceneSession->UpdateModalUIExtension(extensionInfo);
     getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    EXPECT_TRUE(getInfo);
     EXPECT_EQ(getInfo.value().windowRect, windowRect);
 
     sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
 /**

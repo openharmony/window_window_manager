@@ -505,7 +505,6 @@ public:
     void OnNotifyAboveLockScreen();
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
-    bool HasModalUIExtension();
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     std::optional<ExtensionWindowEventInfo> GetLastModalUIExtensionEventInfo();
     Vector2f GetSessionGlobalPosition(bool useUIExtension);
