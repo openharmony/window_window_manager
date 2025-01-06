@@ -166,23 +166,22 @@ FoldDisplayMode SecondaryDisplayFoldPolicy::GetModeMatchStatus()
 void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
     FoldDisplayMode displayMode)
 {
-    if (onBootAnimation_) {
-        return;
-    }
     {
-        if (lastStatus_ == FoldStatus::UNKNOWN) {
-            lastStatus_ = currentFoldStatus_;
-        }
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-        if (currentDisplayMode_ == displayMode && lastStatus_ != currentFoldStatus_) {
+        if (currentDisplayMode_ == displayMode) {
             TLOGW(WmsLogTag::DMS, "already in displayMode %{public}d", displayMode);
-            lastStatus_ = currentFoldStatus_;
             return;
         }
-        lastStatus_ = currentFoldStatus_;
     }
     SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND,
         displayMode);
+    if (currentDisplayMode_ != displayMode) {
+        if((currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::FULL)
+            ||(currentDisplayMode_ == FoldDisplayMode::FULL && displayMode == FoldDisplayMode::MAIN)
+            ||(currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::MAIN)) {
+                return;
+        }
+    }
     auto taskScreenOnFullOn = [=] {
         screenId_ = SCREEN_ID_FULL;
         PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
