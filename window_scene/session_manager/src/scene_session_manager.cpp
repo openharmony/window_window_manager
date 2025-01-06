@@ -1458,8 +1458,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
-    specificCb->onGetStatusBarAvoidHeight_ = [this](WSRect& barArea) {
-        this->GetStatusBarAvoidHeight(barArea);
+    specificCb->onGetStatusBarAvoidHeight_ = [this] {
+        return this->GetStatusBarAvoidHeight();
     };
     return specificCb;
 }
@@ -12411,9 +12411,9 @@ void SceneSessionManager::SetStatusBarAvoidHeight(uint32_t height)
     TLOGI(WmsLogTag::WMS_IMMS, "height: %{public}u", height);
 }
 
-void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
+uint32_t SceneSessionManager::GetStatusBarAvoidHeight()
 {
-    barArea.height_ = statusBarAvoidHeight_;
+    return statusBarAvoidHeight_;
 }
 
 } // namespace OHOS::Rosen
