@@ -1132,7 +1132,7 @@ private:
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
-    uint32_t statusBarAvoidHeight_;
+    uint32_t statusBarAvoidHeight_ = INVALID_STATUS_BAR_AVOID_HEIGHT;
 
     struct SessionInfoList {
         int32_t uid_;
