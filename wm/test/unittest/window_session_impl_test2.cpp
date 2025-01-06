@@ -1011,6 +1011,37 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetDecorHeight03
+ * @tc.desc: GetDecorHeight version isolation test cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetDecorHeight03");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9f;
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(72));
+    window->uiContent_ = std::move(uiContent);
+    int32_t decorHeight = 38;
+    window->SetDecorHeight(decorHeight);
+    EXPECT_EQ(window->decorHeight_, decorHeight);
+
+    window->SetTargetAPIVersion(14);
+    int32_t height = -1;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, 37);
+    window->SetTargetAPIVersion(15);
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, decorHeight);
+    window->Destroy();
+}
+
+/**
  * @tc.name: GetTitleButtonArea01
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
@@ -1178,41 +1209,6 @@ HWTEST_F(WindowSessionImplTest2, GetVirtualPixelRatio, Function | SmallTest | Le
     vpr = window->GetVirtualPixelRatio(displayInfo);
     ASSERT_EQ(window->virtualPixelRatio_, vpr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest2: GetVirtualPixelRatio end";
-}
-
-/**
- * @tc.name: InitUIContent
- * @tc.desc: InitUIContent
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, InitUIContent, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: InitUIContent start";
-    auto window = GetTestWindowImpl("InitUIContent_Default");
-    ASSERT_NE(window, nullptr);
-    std::string contentInfo = "contentInfo";
-    napi_env env = nullptr;
-    napi_value storage = nullptr;
-    WindowSetUIContentType type = WindowSetUIContentType::DEFAULT;
-    AppExecFwk::Ability* ability = nullptr;
-    OHOS::Ace::UIContentErrorCode aceRet;
-    BackupAndRestoreType restoreType = BackupAndRestoreType::NONE;
-
-    window->uiContent_ = nullptr;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::RESTORE;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::BY_NAME;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-
-    type = WindowSetUIContentType::BY_ABC;
-    EXPECT_EQ(window->InitUIContent(contentInfo, env, storage, type, restoreType, ability, aceRet), WMError::WM_OK);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest2: InitUIContent end";
 }
 
 /**

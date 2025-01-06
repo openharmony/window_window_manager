@@ -759,7 +759,7 @@ void Session::SetCallingPid(int32_t id)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", persistentId_, id);
     callingPid_ = id;
-    if (isVisible_) {
+    if (visibilityChangedDetectFunc_ && isVisible_) {
         visibilityChangedDetectFunc_(callingPid_, false, isVisible_);
     }
 }
@@ -1118,7 +1118,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         [weakThis = wptr(this)]() {
             auto session = weakThis.promote();
             if (session == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+                TLOGNE(WmsLogTag::DEFAULT, "session is null");
                 return;
             }
             session->NotifySessionInfoChange();
@@ -2090,8 +2090,11 @@ void Session::HandlePointDownDialog()
     }
 }
 
-WSError Session::HandleSubWindowClick(int32_t action)
+WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
+    if (isExecuteDelayRaise) {
+        return WSError::WS_OK;
+    }
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
@@ -2108,7 +2111,8 @@ WSError Session::HandleSubWindowClick(int32_t action)
     return WSError::WS_OK;
 }
 
-WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, bool needNotifyClient)
+WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool needNotifyClient, bool isExecuteDelayRaise)
 {
     WLOGFD("Session TransferPointEvent, id: %{public}d", GetPersistentId());
     if (!IsSystemSession() && !IsSessionValid()) {
@@ -2127,7 +2131,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
-        WSError ret = HandleSubWindowClick(pointerAction);
+        WSError ret = HandleSubWindowClick(pointerAction, isExecuteDelayRaise);
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -2142,7 +2146,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
-    PresentFoucusIfNeed(pointerAction);
+    if (!isExecuteDelayRaise) {
+        PresentFoucusIfNeed(pointerAction);
+    }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
             WLOGFE("windowEventChannel_ is null");
@@ -3493,6 +3499,12 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
         return sessionStage_->SwitchFreeMultiWindow(enable);
     }
+    return WSError::WS_OK;
+}
+
+WSError Session::GetIsMidScene(bool& isMidScene)
+{
+    isMidScene = GetIsMidScene();
     return WSError::WS_OK;
 }
 

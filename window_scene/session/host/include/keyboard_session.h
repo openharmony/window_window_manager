@@ -20,7 +20,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 
 namespace OHOS::Rosen {
-enum class SystemKeyboardAvoidChangeReason {
+enum class SystemKeyboardAvoidChangeReason : uint32_t {
     KEYBOARD_BEGIN,
     KEYBOARD_CREATED,
     KEYBOARD_SHOW,
@@ -41,10 +41,10 @@ class KeyboardSession : public SystemSession {
 public:
     // callback for notify SceneSessionManager
     struct KeyboardSessionCallback : public RefBase {
-        OnGetSceneSessionCallback onGetSceneSession_;
-        OnGetFocusedSessionIdCallback onGetFocusedSessionId_;
-        OnCallingSessionIdChangeCallback onCallingSessionIdChange_;
-        OnSystemKeyboardAvoidChangeCallback onSystemKeyboardAvoidChange_;
+        OnGetSceneSessionCallback onGetSceneSession;
+        OnGetFocusedSessionIdCallback onGetFocusedSessionId;
+        OnCallingSessionIdChangeCallback onCallingSessionIdChange;
+        OnSystemKeyboardAvoidChangeCallback onSystemKeyboardAvoidChange;
     };
     KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
         const sptr<KeyboardSessionCallback>& keyboardCallback);

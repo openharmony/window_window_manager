@@ -167,29 +167,31 @@ napi_value OnGetDefaultDisplay(napi_env env, napi_callback_info info)
         errCode = DMError::DM_ERROR_INVALID_PARAM;
     }
 
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (errCode != DMError::DM_OK) {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(errCode), "JsDisplayManager::OnGetDefaultDisplay failed."));
-            }
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Async:GetDefaultDisplay");
-            sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
-            if (display != nullptr) {
-                task.Resolve(env, CreateJsDisplayObject(env, display));
-                WLOGI("OnGetDefaultDisplay success");
-            } else {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetDefaultDisplay failed."));
-            }
-        };
     napi_value lastParam = nullptr;
     if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_function) {
         lastParam = argv[0];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplayManager::OnGetDefaultDisplay",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, errCode, task = napiAsyncTask.get()] {
+        if (errCode != DMError::DM_OK) {
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(errCode), "JsDisplayManager::OnGetDefaultDisplay failed."));
+            delete task;
+            return;
+        }
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Async:GetDefaultDisplay");
+        sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+        if (display != nullptr) {
+            task->Resolve(env, CreateJsDisplayObject(env, display));
+            WLOGI("OnGetDefaultDisplay success");
+        } else {
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetDefaultDisplay failed."));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnGetDefaultDisplay");
     return result;
 }
 
@@ -353,55 +355,37 @@ napi_value OnGetAllDisplayPhysicalResolution(napi_env env, napi_callback_info in
         errCode = DMError::DM_ERROR_INVALID_PARAM;
     }
 
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (errCode != DMError::DM_OK) {
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(errCode), "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
-            }
-            std::vector<DisplayPhysicalResolution> displayPhysicalArray =
-                SingletonContainer::Get<DisplayManager>().GetAllDisplayPhysicalResolution();
-            if (!displayPhysicalArray.empty()) {
-                task.Resolve(env, CreateJsDisplayPhysicalArrayObject(env, displayPhysicalArray));
-                WLOGI("OnGetAllDisplayPhysicalResolution success");
-            } else {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
-                    "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
-            }
-        };
-
     napi_value lastParam = nullptr;
     if (argc == ARGC_ONE && GetType(env, argv[0]) == napi_function) {
         lastParam = argv[0];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplayManager::OnGetAllDisplayPhysicalResolution",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, errCode, task = napiAsyncTask.get()] {
+        if (errCode != DMError::DM_OK) {
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(errCode), "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
+            delete task;
+            return;
+        }
+        std::vector<DisplayPhysicalResolution> displayPhysicalArray =
+            SingletonContainer::Get<DisplayManager>().GetAllDisplayPhysicalResolution();
+        if (!displayPhysicalArray.empty()) {
+            task->Resolve(env, CreateJsDisplayPhysicalArrayObject(env, displayPhysicalArray));
+            WLOGI("OnGetAllDisplayPhysicalResolution success");
+        } else {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_SYSTEM_INNORMAL),
+                "JsDisplayManager::OnGetAllDisplayPhysicalResolution failed."));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnGetAllDisplayPhysicalResolution");
     return result;
 }
 
 napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
 {
     WLOGD("OnGetAllDisplays is called");
-
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
-            if (!displays.empty()) {
-                task.Resolve(env, CreateJsDisplayArrayObject(env, displays));
-                WLOGD("GetAllDisplays success");
-            } else {
-                auto errorPending = false;
-                napi_is_exception_pending(env, &errorPending);
-                if (errorPending) {
-                    napi_value exception = nullptr;
-                    napi_get_and_clear_last_exception(env, &exception);
-                }
-                task.Reject(env, CreateJsError(env,
-                    static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
-                    "JsDisplayManager::OnGetAllDisplays failed."));
-            }
-        };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -411,8 +395,26 @@ napi_value OnGetAllDisplays(napi_env env, napi_callback_info info)
         lastParam = argv[0];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsDisplayManager::OnGetAllDisplays",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask.get()] {
+        std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
+        if (!displays.empty()) {
+            task->Resolve(env, CreateJsDisplayArrayObject(env, displays));
+            WLOGD("GetAllDisplays success");
+        } else {
+            auto errorPending = false;
+            napi_is_exception_pending(env, &errorPending);
+            if (errorPending) {
+                napi_value exception = nullptr;
+                napi_get_and_clear_last_exception(env, &exception);
+            }
+            task->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN),
+                "JsDisplayManager::OnGetAllDisplays failed."));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask, "OnGetDefaultDisplay");
     return result;
 }
 

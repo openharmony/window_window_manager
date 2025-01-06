@@ -67,7 +67,8 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        WSError ret = LOCK_GUARD_EXPR(SCENE_GUARD,
+            session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid));
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -233,7 +234,7 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
-/**
+/*
  * Notify when updating highlight instead after hightlight functionality enabled
  */
 WSError MainSession::UpdateFocus(bool isFocused)

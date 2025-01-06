@@ -83,6 +83,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_APP_USE_CONTROL_CB,
     SESSION_DISPLAY_ID_CHANGE_CB,
     SET_SUPPORT_WINDOW_MODES_CB,
+    WINDOW_MOVING_CB,
 };
 
 class SceneSession;
@@ -296,6 +297,7 @@ private:
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
+    void ProcessWindowMovingRegister();
 
     /*
      * PC Window Layout
@@ -351,6 +353,7 @@ private:
     void NotifyPrivacyModeChange(bool isPrivacyMode);
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
 
     /*
      * PC Window Layout
