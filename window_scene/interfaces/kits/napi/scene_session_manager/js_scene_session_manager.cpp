@@ -238,7 +238,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetIsWindowRectAutoSave);
     BindNativeFunction(env, exportObj, "notifyAboveLockScreen", moduleName,
         JsSceneSessionManager::NotifyAboveLockScreen);
-    BindNativeFunction(env, exportObj, "SetStatusBarAvoidHeight", moduleName,
+    BindNativeFunction(env, exportObj, "setStatusBarAvoidHeight", moduleName,
         JsSceneSessionManager::SetStatusBarAvoidHeight);
     return NapiGetUndefined(env);
 }
