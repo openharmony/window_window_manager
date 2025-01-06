@@ -10524,8 +10524,8 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
         auto parentSession = GetSceneSession(parentId);
         if (parentSession) {
             auto modalUIExtensionEventInfo = parentSession->GetLastModalUIExtensionEventInfo();
-            if (modalUIExtensionEventInfo && (modalUIExtensionEventInfo.value().pid == pid) &&
-                (modalUIExtensionEventInfo.value().persistentId == persistentId)) {
+            if (modalUIExtensionEventInfo && modalUIExtensionEventInfo.value().pid == pid &&
+                modalUIExtensionEventInfo.value().persistentId == persistentId) {
                 parentSession->ProcessPointDownSession(posX, posY);
             }
         }
