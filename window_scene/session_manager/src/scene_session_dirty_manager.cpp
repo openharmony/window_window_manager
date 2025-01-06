@@ -425,14 +425,13 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
 
 void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
     MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession,
-    const std::optional<ExtensionWindowEventInfo>& modalUIExtensionEventInfo)
+    const ExtensionWindowEventInfo& extensionInfo)
 {
-    if (sceneSession == nullptr || !modalUIExtensionEventInfo) {
-        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr or modalUIExtensionEventInfo is null");
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
 
-    const auto& extensionInfo = modalUIExtensionEventInfo.value();
     windowInfo.id = extensionInfo.persistentId;
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
         MMI::Rect windowRect = {
@@ -495,7 +494,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
         } else if (auto modalUIExtensionEventInfo = sceneSessionValue->GetLastModalUIExtensionEventInfo()) {
-            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue, modalUIExtensionEventInfo);
+            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue, *modalUIExtensionEventInfo);
         }
         TLOGD(WmsLogTag::WMS_EVENT, "windowId = %{public}d, agentWindowId = %{public}d, zOrder = %{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
