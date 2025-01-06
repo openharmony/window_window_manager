@@ -2928,6 +2928,13 @@ public:
      * @return True means window delay raise is enabled
      */
     virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
+     * @brief Get whether is mid scene.
+     *
+     * @return True - is mid scene, false - is not mid scene.
+     */
+    virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
 };
 }
 }
