@@ -45,7 +45,7 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
         !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
         !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
-        !data.WriteInt32(abilitySessionInfo->tmpSpecifiedId) ||
+        !data.WriteInt32(abilitySessionInfo->requestId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
@@ -1696,7 +1696,8 @@ WSError SessionProxy::ProcessPointDownSession(int32_t posX, int32_t posY)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool isExecuteDelayRaise)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1707,6 +1708,10 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     }
     if (!pointerEvent->WriteToParcel(data)) {
         WLOGFE("width pointerEvent failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isExecuteDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write isExecuteDelayRaise failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

@@ -113,6 +113,16 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
     RSTransaction::FlushImplicitTransaction();
 }
 
+void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
+{
+    if (displayNode_) {
+        displayNode_->SetDisplayNodeMirrorConfig(config);
+        RSTransaction::FlushImplicitTransaction();
+    } else {
+        CreateDisplayNode(config);
+    }
+}
+
 ScreenSession::~ScreenSession()
 {
     WLOGI("~ScreenSession");
@@ -534,6 +544,10 @@ void ScreenSession::Connect()
         return;
     }
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnConnect(screenId_);
     }
 }
@@ -623,6 +637,10 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
     currentSensorRotation_ = sensorRotation;
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnSensorRotationChange(sensorRotation, screenId_);
     }
 }
@@ -635,6 +653,10 @@ void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus)
 void ScreenSession::HoverStatusChange(int32_t hoverStatus)
 {
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnHoverStatusChange(hoverStatus, screenId_);
     }
 }
@@ -642,6 +664,10 @@ void ScreenSession::HoverStatusChange(int32_t hoverStatus)
 void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnScreenExtendChange(mainScreenId, extendScreenId);
     }
 }
@@ -656,6 +682,10 @@ void ScreenSession::ScreenOrientationChange(Orientation orientation, FoldDisplay
 void ScreenSession::ScreenOrientationChange(float orientation)
 {
     for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
         listener->OnScreenOrientationChange(orientation, screenId_);
     }
 }
@@ -734,22 +764,10 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     }
 }
 
-void ScreenSession::SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::SetPhysicalRotation(int rotation)
 {
-    int32_t realRotation = static_cast<int32_t>(rotation);
-    std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
-    bool isOuterScreen = FoldScreenStateInternel::IsOuterScreen(foldDisplayMode);
-    int32_t offsetRotation = 0;
-    if (phyOffsets.size() == 1 || isOuterScreen) {
-        offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[0]));
-    }
-    if (!isOuterScreen && phyOffsets.size() == 2) { // 2 is arg number
-        offsetRotation = static_cast<int32_t>(std::stoi(phyOffsets[1]));
-    }
-    realRotation = (rotation + offsetRotation) % 360; // 360 is 360 degree
-    property_.SetPhysicalRotation(static_cast<float>(realRotation));
-    WLOGFI("physicalrotation :%{public}f , rotation: %{public}d , phyOffset: %{public}d",
-        property_.GetPhysicalRotation(), rotation, offsetRotation);
+    property_.SetPhysicalRotation(static_cast<float>(rotation));
+    WLOGFI("physicalrotation :%{public}f", property_.GetPhysicalRotation());
 }
 
 void ScreenSession::SetScreenComponentRotation(int rotation)

@@ -116,6 +116,8 @@ public:
     bool IsPcWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError SetWindowDelayRaiseEnabled(bool isEnabled) override;
+    bool IsWindowDelayRaiseEnabled() const override;
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
         bool isCloseVisible) override;
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
@@ -393,7 +395,6 @@ protected:
      */
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    bool IsAxisEvent(int32_t action);
     WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     WMError ClearKeyEventFilter() override;
     WMError SetMouseEventFilter(MouseEventFilterFunc filter) override;
@@ -675,11 +676,11 @@ private:
     /*
      * PC Event Filter
      */
-    std::shared_mutex keyEventFilterMutex_;
+    std::mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
-    std::shared_mutex mouseEventFilterMutex_;
+    std::mutex mouseEventFilterMutex_;
     MouseEventFilterFunc mouseEventFilter_;
-    std::shared_mutex touchEventFilterMutex_;
+    std::mutex touchEventFilterMutex_;
     TouchEventFilterFunc touchEventFilter_;
 };
 } // namespace Rosen

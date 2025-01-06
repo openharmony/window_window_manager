@@ -96,7 +96,7 @@ HWTEST_F(SessionSpecificWindowTest, UpdateInputMethodSessionRect, Function | Sma
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -650,6 +650,26 @@ HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick03, Function | SmallTest
     EXPECT_EQ(result, WSError::WS_OK);
 
     result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: HandleSubWindowClick03
+ * @tc.desc: isExecuteDelayRaise is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionSpecificWindowTest, HandleSubWindowClick04, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "testSession1";
+    info.moduleName_ = "testSession2";
+    info.bundleName_ = "testSession3";
+    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
+    session_->SetParentSession(dialogSession);
+
+    bool isExecuteDelayRaise = false;
+    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, isExecuteDelayRaise);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 }

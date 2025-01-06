@@ -26,7 +26,10 @@ ohos_unittest("wm_extension_window_impl_test") {
 
 ohos_unittest("wm_window_extension_session_impl_test") {
   module_out_path = module_out_path
-  sources = [ "window_extension_session_impl_test.cpp" ]
+  sources = [
+    "provider_data_handler_test.cpp",
+    "window_extension_session_impl_test.cpp",
+  ]
   deps = [ wm_unittest_common ]
   external_deps = [
     "ability_runtime:app_context",

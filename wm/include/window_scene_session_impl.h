@@ -38,7 +38,6 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WmErrorCode StartMoveWindow() override;
-    WmErrorCode StopMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
 
@@ -167,6 +166,7 @@ public:
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
+    WmErrorCode StopMoveWindow() override;
 
     /*
      * Compatible Mode
@@ -262,7 +262,7 @@ private:
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        MMI::PointerEvent::PointerItem& pointerItem);
+        MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
     void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem);
     void HandleDownForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -341,6 +341,11 @@ private:
      */
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
+
+    /*
+     * PC Window
+     */
+    bool isExecuteDelayRaise_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

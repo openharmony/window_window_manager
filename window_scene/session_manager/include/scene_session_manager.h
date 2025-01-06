@@ -207,6 +207,8 @@ public:
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override;
     void RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func);
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
+    void RegisterFlushWindowInfoCallback();
+    void FlushWindowInfoToMMI(const bool forceFlush = false);
 
     /*
      * Window Rotate Animation
@@ -396,7 +398,6 @@ public:
     const std::map<int32_t, sptr<SceneSession>> GetSceneSessionMap();
     void GetAllSceneSession(std::vector<sptr<SceneSession>>& sceneSessions);
     void GetAllWindowVisibilityInfos(std::vector<std::pair<int32_t, uint32_t>>& windowVisibilityInfos);
-    void FlushWindowInfoToMMI(const bool forceFlush = false);
 
     /*
      * UIExtension
@@ -459,6 +460,7 @@ public:
      */
     WMError ReleaseForegroundSessionScreenLock() override;
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
 
     /*
      * Multi Window
@@ -758,6 +760,10 @@ private:
     void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
+    void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+        std::vector<sptr<SceneSession>>& filteredSessions);
+    bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
+    int32_t GetFoldLowerScreenPosY() const;
 
     /*
      * Window Rotate Animation
@@ -1009,14 +1015,14 @@ private:
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
 
     /*
-     * keyboard Window
+     * Keyboard
      */
     void CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession);
     sptr<SceneSession> RequestKeyboardPanelSession(const std::string& panelName, uint64_t displayId);
     sptr<SceneSession> GetKeyboardSession(DisplayId displayId, bool isSystemKeyboard);
-    void HandleKeyboardAvoidChange(sptr<SceneSession> sceneSession, DisplayId displayId,
+    void HandleKeyboardAvoidChange(const sptr<SceneSession>& sceneSession, DisplayId displayId,
         SystemKeyboardAvoidChangeReason reason);
-    void UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool sysKeyAvoidAreaActive);
+    void UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool systemKeyboardAvoidAreaActive);
 
     /*
      * Specific Window

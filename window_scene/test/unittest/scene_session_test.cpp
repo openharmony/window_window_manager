@@ -859,15 +859,15 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     EXPECT_TRUE(sceneSession->HasModalUIExtension());
 
     auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    EXPECT_EQ(getInfo.persistentId, extensionInfo.persistentId);
-    EXPECT_EQ(getInfo.pid, extensionInfo.pid);
-    EXPECT_EQ(getInfo.windowRect, extensionInfo.windowRect);
+    EXPECT_EQ(getInfo.value().persistentId, extensionInfo.persistentId);
+    EXPECT_EQ(getInfo.value().pid, extensionInfo.pid);
+    EXPECT_EQ(getInfo.value().windowRect, extensionInfo.windowRect);
 
     Rect windowRect = { 5, 6, 7, 8 };
     extensionInfo.windowRect = windowRect;
     sceneSession->UpdateModalUIExtension(extensionInfo);
     getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    EXPECT_EQ(getInfo.windowRect, windowRect);
+    EXPECT_EQ(getInfo.value().windowRect, windowRect);
 
     sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
     EXPECT_FALSE(sceneSession->HasModalUIExtension());
@@ -928,9 +928,13 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     WSRect overlapRect = {0, 0, 0, 0};
     AvoidArea avoidArea;
-    int ret = 1;
     sceneSession->GetKeyboardAvoidArea(overlapRect, avoidArea);
-    ASSERT_EQ(ret, 1);
+    ASSERT_EQ(true, overlapRect.IsEmpty());
+    ASSERT_EQ(true, sceneSession->keyboardAvoidAreaActive_);
+    sceneSession->keyboardAvoidAreaActive_ = false;
+    sceneSession->GetKeyboardAvoidArea(overlapRect, avoidArea);
+    ASSERT_EQ(false, sceneSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(true, overlapRect.IsEmpty());
 }
 
 /**
@@ -1522,7 +1526,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1551,7 +1555,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect1, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1580,7 +1584,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1829,7 +1833,7 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
@@ -1853,7 +1857,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetDefaultDisplayIdIfNeed();
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetDisplayId(-1);
     sceneSession->SetSessionProperty(property);
