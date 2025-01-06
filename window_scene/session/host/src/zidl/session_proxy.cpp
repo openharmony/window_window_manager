@@ -1320,10 +1320,6 @@ WSError SessionProxy::GetIsMidScene(bool& isMidScene)
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(isMidScene)) {
-        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write isMidScene failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is null");

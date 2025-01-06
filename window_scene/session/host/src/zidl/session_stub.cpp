@@ -944,14 +944,14 @@ int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParce
 
 int SessionStub::HandleGetIsMidScene(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "HandleGetIsMidScene!");
-    bool isMidScene = data.ReadBool();
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
+    bool isMidScene = false;
     const WSError errCode = GetIsMidScene(isMidScene);
     if (!reply.WriteBool(isMidScene)) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write isMidScene failed");
         return ERR_INVALID_DATA;
     }
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

@@ -802,11 +802,8 @@ HWTEST_F(SessionStubTest, GetIsMidScene, Function | SmallTest | Level2)
     MessageParcel data;
     MessageParcel reply;
 
-    bool isMidScene = false;
-    data.WriteBool(isMidScene);
     auto result = session_->HandleGetIsMidScene(data, reply);
     ASSERT_EQ(result, ERR_NONE);
-    ASSERT_EQ(isMidScene, false);
 }
 }
 } // namespace Rosen

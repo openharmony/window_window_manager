@@ -380,13 +380,13 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
-    WSError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Multi Window
      */
     void SetIsMidScene(bool isMidScene);
     bool GetIsMidScene() const;
+    WSError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Keyboard Window
