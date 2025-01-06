@@ -209,7 +209,7 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
-        const Rect& rect = {0, 0, 0, 0}) override { return {}; }
+        const Rect& rect = Rect::EMPTY_RECT) override { return {}; }
 
     /**
      * @brief get top window information by id of main window.

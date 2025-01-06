@@ -99,7 +99,8 @@ public:
     virtual WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) = 0;
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
-    virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, const Rect& rect = {0, 0, 0, 0}) = 0;
+    virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
+        const Rect& rect = Rect::EMPTY_RECT) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) = 0;

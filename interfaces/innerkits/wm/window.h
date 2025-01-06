@@ -915,7 +915,7 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area

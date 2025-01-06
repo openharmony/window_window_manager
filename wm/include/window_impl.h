@@ -161,7 +161,7 @@ public:
         state_ = state;
     }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) override;
+        const Rect& rect = Rect::EMPTY_RECT) override;
 
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
