@@ -460,7 +460,7 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!IsJsProcessOptionUndefined(env, jsProcessOption, sessionInfo)) {
         return false;
     }
-    if (!IsJsIsAppUseControlUndefined(env, jsProcessOption, sessionInfo)) {
+    if (!IsJsIsAppUseControlUndefined(env, jsIsAppUseControl, sessionInfo)) {
         return false;
     }
     return true;
