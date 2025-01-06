@@ -533,7 +533,7 @@ struct Rect {
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
-    inline static const Rect EMPTY_RECT { 0, 0, 0, 0 };
+    static Rect EMPTY_RECT;
 
     bool operator==(const Rect& a) const
     {
@@ -568,6 +568,8 @@ struct Rect {
         return oss.str();
     }
 };
+
+const Rect Rect::EMPTY_RECT{ 0, 0, 0, 0 };
 
 /**
  * @struct SystemBarProperty
