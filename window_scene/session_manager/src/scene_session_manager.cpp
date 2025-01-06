@@ -1458,8 +1458,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
-    specificCb->onGetStatusBarDefaultHeightByDisplayId_ = [this](DisplayId displayId) {
-        return this->GetStatusBarDefaultHeightByDisplayId(displayId);
+    specificCb->onGetStatusBarAvoidHeight_ = [this](WSRect& barArea) {
+        return this->GetStatusBarAvoidHeight(barArea);
     };
     return specificCb;
 }
