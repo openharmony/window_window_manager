@@ -917,8 +917,7 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
-        uint64_t displayId) -> std::vector<sptr<SceneSession>> {
+    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> backgroundSession;
         return backgroundSession;
     };
@@ -1080,7 +1079,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
+        specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [](WindowType type,
             uint64_t displayId)-> std::vector<sptr<SceneSession>>
     {
         SessionInfo info_;
@@ -1659,7 +1658,7 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     ASSERT_EQ(height, 0);
     WSRect rect({0, 0, 0, 1});
     sceneSession->winRect_ = rect;
-    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
         uint64_t displayId)->std::vector<sptr<SceneSession>>
     {
         std::vector<sptr<SceneSession>> vec;
@@ -1696,7 +1695,7 @@ HWTEST_F(SceneSessionTest, GetDockHeight, Function | SmallTest | Level1)
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
     WSRect rect({0, 0, 0, 112});
     sceneSession->winRect_ = rect;
-    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
         uint64_t displayId)->std::vector<sptr<SceneSession>>
     {
         std::vector<sptr<SceneSession>> vec;

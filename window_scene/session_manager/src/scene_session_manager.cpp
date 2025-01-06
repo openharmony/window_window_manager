@@ -1248,8 +1248,11 @@ void SceneSessionManager::CreateRootSceneSession()
 {
     system::SetParameter("bootevent.wms.fullscreen.ready", "true");
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-        return this->GetSceneSessionVectorByType(type, displayId);
+    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
+    };
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type) {
+        return this->GetSceneSessionVectorByType(type);
     };
     specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
         return this->GetAINavigationBarArea(displayId);
@@ -1365,7 +1368,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByBundleName(const std::s
     return nullptr;
 }
 
-std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByTypeAndDisplayId(
     WindowType type, uint64_t displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
@@ -1382,6 +1385,18 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType
         }
     }
 
+    return sceneSessionVector;
+}
+
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(WindowType type)
+{
+    std::vector<sptr<SceneSession>> sceneSessionVector;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession->GetWindowType() == type) {
+            sceneSessionVector.emplace_back(sceneSession);
+        }
+    }
     return sceneSessionVector;
 }
 
@@ -1428,8 +1443,11 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
         this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     };
-    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-        return this->GetSceneSessionVectorByType(type, displayId);
+    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
+    };
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type) {
+        return this->GetSceneSessionVectorByType(type);
     };
     specificCb->onUpdateAvoidArea_ = [this](int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
@@ -1651,7 +1669,7 @@ void SceneSessionManager::HandleKeyboardAvoidChange(const sptr<SceneSession>& sc
          */
         case SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM: {
-            UpdateKeyboardAvoidAreaActive(displayId, true);
+            UpdateKeyboardAvoidAreaActive(true);
             break;
         }
 
@@ -1681,9 +1699,9 @@ void SceneSessionManager::HandleKeyboardAvoidChange(const sptr<SceneSession>& sc
     }
 }
 
-void SceneSessionManager::UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool systemKeyboardAvoidAreaActive)
+void SceneSessionManager::UpdateKeyboardAvoidAreaActive(bool systemKeyboardAvoidAreaActive)
 {
-    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayId);
+    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     if (keyboardSessionVec.empty()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "there is no keyboard window in the map");
         return;
@@ -1738,7 +1756,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         return;
     }
     DisplayId displayId = sessionProperty->GetDisplayId();
-    const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, displayId);
+    const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sptr<SceneSession> panelSession;
     for (const auto& session : panelVec) {
         if (session && session->IsSystemKeyboard() == keyboardSession->IsSystemKeyboard()) {
