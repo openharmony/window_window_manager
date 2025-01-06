@@ -2045,8 +2045,7 @@ WMError WindowSessionImpl::UnregisterDisplayMoveListener(sptr<IDisplayMoveListen
  */
 WMError WindowSessionImpl::EnableDrag(bool enableDrag)
 {
-    bool isPC = windowSystemConfig_.IsPcWindow();
-    if (!isPC && !IsFreeMultiWindowMode()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2537,7 +2536,7 @@ WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWind
         TLOGE(WmsLogTag::WMS_PC, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode())) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_PC, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2555,7 +2554,7 @@ WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWi
         TLOGE(WmsLogTag::WMS_PC, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode())) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_PC, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
