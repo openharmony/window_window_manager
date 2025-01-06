@@ -496,7 +496,7 @@ inline bool NearZero(const double left)
 
 template<typename T>
 struct WSRectT {
-    inline static constexpr WSRect<T> EMPTY_RECT { static_cast<T>(0), static_cast<T>(0),
+    inline static const WSRect<T> EMPTY_RECT { static_cast<T>(0), static_cast<T>(0),
         static_cast<T>(0), static_cast<T>(0)};
     T posX_ = 0;
     T posY_ = 0;
