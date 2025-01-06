@@ -1862,11 +1862,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         }
         if (specificCallback_ != nullptr && specificCallback_->onGetStatusBarAvoidHeight_) {
             specificCallback_->onGetStatusBarAvoidHeight_(statusBarRect);
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar height %{public}u",
-                GetPersistentId(), statusBarRect.height_);
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s status bar %{public}s",
-              rect.ToString().c_str(), statusBarRect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d window rect %{public}s status bar %{public}s",
+            GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
     return;
@@ -5620,11 +5618,11 @@ int32_t SceneSession::GetStatusBarHeight()
     std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
-        if (statusBar != nullptr && statusBar->GetSessionRect().height_ > height) {
-            height = statusBar->GetSessionRect().height_;
+        if (specificCallback_ != nullptr && specificCallback_->onGetStatusBarAvoidHeight_) {
+            specificCallback_->onGetStatusBarAvoidHeight_(statusBarRect);
         }
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "height %{public}d", height);
+    TLOGI(WmsLogTag::WMS_IMMS, "height %{public}d", height);
     return height;
 }
 
