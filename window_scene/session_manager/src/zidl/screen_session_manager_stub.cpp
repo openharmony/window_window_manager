@@ -655,7 +655,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenComponentRotation = data.ReadFloat();
             auto rotation = data.ReadFloat();
-            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation);
+            auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
+            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, screenPropertyChangeType);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
@@ -833,7 +834,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcGetDisplaySnapshotWithOption(data, reply);
             break;
         }
-
+        case DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS: {
+            int32_t cameraStatus = data.ReadInt32();
+            int32_t cameraPosition = data.ReadInt32();
+            SetCameraStatus(cameraStatus, cameraPosition);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

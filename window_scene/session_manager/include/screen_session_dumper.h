@@ -27,6 +27,7 @@
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "screen_session_manager.h"
+#include "screen_rotation_property.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -36,6 +37,7 @@ public:
     ScreenSessionDumper(int fd, const std::vector<std::u16string>& args);
     ~ScreenSessionDumper() = default;
 
+    bool IsNumber(std::string str);
     void ExcuteDumpCmd();
     void DumpEventTracker(EventTracker& tracker);
     void DumpFreezedPidList(std::set<int32_t> pidList);
@@ -45,6 +47,7 @@ private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
     void DumpFoldStatus();
+    void DumpTentMode();
     void OutputDumpInfo();
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);
@@ -53,19 +56,33 @@ private:
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
     void ExcuteInjectCmd();
+    void ExcuteInjectCmd2();
 /*
     hidumper 命令注入隔离
 */
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
+    void SetMotionSensorvalue(std::string input);
+    void SetRotationLockedvalue(std::string input);
+    void SetEnterOrExitTentMode(std::string input);
+    void SetHoverStatusChange(std::string input);
     bool IsValidDisplayModeCommand(std::string command);
     int SetFoldDisplayMode();
     int SetFoldStatusLocked();
-
+    void SetHallAndPostureValue(std::string input);
+    void SetHallAndPostureStatus(std::string input);
 private:
     int fd_;
     std::vector<std::string> params_;
     std::string dumpInfo_;
+/*
+    依赖的外部定义
+*/
+private:
+    typedef struct EXTHALLData {
+        float flag = 0.0;
+        float hall = 0.0;
+    } ExtHallData;
 };
 } // Rosen
 } // OHOS

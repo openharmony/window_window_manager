@@ -24,6 +24,7 @@
 #include "motion_callback_stub.h"
 #endif
 #include "screen_rotation_property.h"
+#include "screen_tent_property.h"
 #ifdef SENSOR_ENABLE
 #include "sensor_agent.h"
 #endif
@@ -38,6 +39,8 @@ public:
 
     static void SubscribeRotationSensor();
     static void UnsubscribeRotationSensor();
+    static void SubscribeTentSensor();
+    static void UnsubscribeTentSensor();
 };
 
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
@@ -45,6 +48,11 @@ using OHOS::Msdp::MotionCallbackStub;
 using OHOS::Msdp::MotionEvent;
 
 class RotationMotionEventCallback : public MotionCallbackStub {
+public:
+    void OnMotionChanged(const MotionEvent& motionData) override;
+};
+
+class TentMotionEventCallback : public MotionCallbackStub {
 public:
     void OnMotionChanged(const MotionEvent& motionData) override;
 };
@@ -59,6 +67,19 @@ private:
     static void UnsubscribeMotionSensor();
 
     static sptr<RotationMotionEventCallback> motionEventCallback_;
+    static bool isMotionSensorSubscribed_;
+};
+
+class MotionTentSubscriber {
+friend ScreenSensorConnector;
+public:
+    MotionTentSubscriber() = delete;
+    ~MotionTentSubscriber() = default;
+private:
+    static void SubscribeMotionSensor();
+    static void UnsubscribeMotionSensor();
+
+    static sptr<TentMotionEventCallback> motionEventCallback_;
     static bool isMotionSensorSubscribed_;
 };
 #endif

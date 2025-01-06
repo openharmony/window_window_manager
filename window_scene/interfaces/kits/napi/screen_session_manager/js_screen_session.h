@@ -57,6 +57,7 @@ private:
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
     void OnScreenDensityChange();
+    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
 
     napi_env env_;

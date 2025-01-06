@@ -411,6 +411,30 @@ HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest16, Function | Small
 }
 
 /**
+ * @tc.name: OnRemoteRequest18
+ * @tc.desc: TRANS_ID_ON_HOVER_STATUS_CHANGED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest18, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    int32_t hoverStatus = 1;
+    data.WriteInt32(hoverStatus);
+
+    uint32_t code = static_cast<uint32_t>(
+        IScreenSessionManagerClient::ScreenSessionManagerClientMessage::TRANS_ID_ON_HOVER_STATUS_CHANGED);
+    int res = screenSessionManagerClientStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: HandleOnScreenConnectionChanged
  * @tc.desc: HandleOnScreenConnectionChanged test
  * @tc.type: FUNC
@@ -453,6 +477,26 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnPropertyChanged, Function |
     data.WriteUint32(static_cast<uint32_t>(reason));
 
     int ret = screenSessionManagerClientStub_->HandleOnPropertyChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnHoverStatusChanged
+ * @tc.desc: HandleOnHoverStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnHoverStatusChanged, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    int32_t hoverStatus = 0;
+    data.WriteInt32(hoverStatus);
+
+    int ret = screenSessionManagerClientStub_->HandleOnHoverStatusChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }
 

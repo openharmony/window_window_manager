@@ -2330,7 +2330,7 @@ std::shared_ptr<RSDisplayNode> ScreenSessionManagerProxy::GetDisplayNode(ScreenI
 }
 
 void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation,
-    float rotation)
+    float rotation, ScreenPropertyChangeType screenPropertyChangeType)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2355,6 +2355,10 @@ void ScreenSessionManagerProxy::UpdateScreenDirectionInfo(ScreenId screenId, flo
     }
     if (!data.WriteFloat(rotation)) {
         WLOGFE("Write rotation failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(screenPropertyChangeType))) {
+        WLOGFE("Write screenPropertyChangeType failed");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_DIRECTION_INFO),
@@ -2627,6 +2631,36 @@ int32_t ScreenSessionManagerProxy::SetScreenOffDelayTime(int32_t delay)
         return 0;
     }
     return reply.ReadInt32();
+}
+
+void ScreenSessionManagerProxy::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("SetCameraStatus: remote is null");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_SYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(cameraStatus)) {
+        WLOGFE("Write cameraStatus failed");
+        return;
+    }
+    if (!data.WriteInt32(cameraPosition)) {
+        WLOGFE("Write cameraPosition failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_CAMERA_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
 }
 
 DMError ScreenSessionManagerProxy::GetAvailableArea(DisplayId displayId, DMRect& area)

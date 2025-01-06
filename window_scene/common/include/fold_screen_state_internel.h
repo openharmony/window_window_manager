@@ -61,7 +61,7 @@ public:
     static bool IsSingleDisplayFoldDevice()
     {
         // ALTB ccm property conflict with the chip, waiting for chip conflict resolution
-        return !IsDualDisplayFoldDevice();
+        return !IsDualDisplayFoldDevice() && !IsSingleDisplayPocketFoldDevice();
     }
 
     static bool IsSingleDisplayPocketFoldDevice()

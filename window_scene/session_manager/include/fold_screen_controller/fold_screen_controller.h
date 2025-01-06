@@ -28,6 +28,7 @@ enum class DisplayDeviceType :uint32_t {
     DISPLAY_DEVICE_UNKNOWN = 0,
     SINGLE_DISPLAY_DEVICE,
     DOUBLE_DISPLAY_DEVICE,
+    SINGLE_DISPLAY_POCKET_DEVICE,
 };
 
 class FoldScreenController : public RefBase {
@@ -36,12 +37,15 @@ public:
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
     virtual ~FoldScreenController();
 
+    void BootAnimationFinishPowerInit();
     void SetDisplayMode(const FoldDisplayMode displayMode);
     void RecoverDisplayMode();
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();
     FoldStatus GetFoldStatus();
+    bool GetTentMode();
     void SetFoldStatus(FoldStatus foldStatus);
+    void OnTentModeChanged(bool isTentMode);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
