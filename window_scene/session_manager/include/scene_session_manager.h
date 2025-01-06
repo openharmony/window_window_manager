@@ -636,7 +636,7 @@ private:
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
     void CreateRootSceneSession();
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
-        const sptr<WindowSessionProperty>& property);
+        const sptr<WindowSessionProperty>& property) REQUIRES(SCENE_GUARD);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
@@ -688,7 +688,7 @@ private:
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
 
-    WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& sceneSession);
+    WSError DestroyDialogWithMainWindow(const sptr<SceneSession>& sceneSession) REQUIRES(SCENE_GUARD);
     sptr<SceneSession> FindMainWindowWithToken(sptr<IRemoteObject> targetToken);
     WSError UpdateParentSessionForDialog(const sptr<SceneSession>& sceneSession, sptr<WindowSessionProperty> property);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
@@ -730,7 +730,8 @@ private:
     WSError GetTotalUITreeInfo(std::string& dumpInfo);
 
     void PerformRegisterInRequestSceneSession(sptr<SceneSession>& sceneSession);
-    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive);
+    WSError RequestSceneSessionActivationInner(sptr<SceneSession>& sceneSession, bool isNewActive)
+        REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
     WSError UpdateBrightness(int32_t persistentId);
@@ -824,7 +825,7 @@ private:
     void RecoverCachedSubSession(int32_t persistentId);
     void RecoverCachedDialogSession(int32_t persistentId);
     void RemoveFailRecoveredSession();
-    void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds);
+    void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds) REQUIRES(SCENE_GUARD);
     SessionInfo RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
@@ -847,7 +848,6 @@ private:
     std::map<int32_t, sptr<SceneSession>> sceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> systemTopSceneSessionMap_;
     std::map<int32_t, sptr<SceneSession>> nonSystemFloatSceneSessionMap_;
-    std::map<int32_t, int32_t> visibleWindowCountMap_;
     sptr<ScbSessionHandler> scbSessionHandler_;
     std::shared_ptr<SessionListenerController> listenerController_;
     std::unordered_map<sptr<IRemoteObject>, int32_t, SptrHash<IRemoteObject>> remoteObjectMap_;
@@ -1080,7 +1080,7 @@ private:
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
     WMError CheckAndReportScreenFoldStatus(ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
-    void RecoveryVisibilityPidCount(int32_t pid);
+    void RecoveryVisibilityPidCount(int32_t pid) REQUIRES(SCENE_GUARD);
 
     /*
      * Window Watermark
@@ -1203,6 +1203,7 @@ private:
      * Window Lifecycle
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
+    std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
 };
 } // namespace OHOS::Rosen
 
