@@ -111,7 +111,9 @@ void RootScene::SetDisplayOrientation(int32_t orientation)
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
-    if (updateRootSceneRectCallback_ != nullptr) {
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion >= 16 &&
+        updateRootSceneRectCallback_ != nullptr) {
         updateRootSceneRectCallback_(rect);
     }
 
@@ -251,6 +253,10 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
 
 WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion < 16) {
+        return WMError::WM_OK;
+    }
     if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
@@ -277,6 +283,10 @@ void RootScene::RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAre
 
 WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion < 16) {
+        return WMError::WM_OK;
+    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -298,6 +308,10 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
 
 WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion < 16) {
+        return WMError::WM_OK;
+    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
