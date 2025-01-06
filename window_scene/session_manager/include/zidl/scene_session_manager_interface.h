@@ -116,7 +116,7 @@ public:
         TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES,
         TRANS_ID_SET_PROCESS_WATERMARK,
         TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
-        TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
+        TRANS_ID_UPDATE_SESSION_SCREEN_LOCK,
         TRANS_ID_IS_PC_WINDOW,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
         TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
@@ -338,7 +338,8 @@ public:
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber, int32_t x, int32_t y,
         std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 
-    WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName,
+        bool isRelease) override { return WMError::WM_OK; }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
