@@ -851,6 +851,29 @@ HWTEST_F(SceneSessionTest5, SetSystemSceneOcclusionAlpha, Function | SmallTest |
 }
 
 /**
+ * @tc.name: ResetOcclusionAlpha
+ * @tc.desc: ResetOcclusionAlpha function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ResetOcclusionAlpha, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ResetOcclusionAlpha";
+    info.bundleName_ = "ResetOcclusionAlpha";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+    session->leashWinSurfaceNode_ = nullptr;
+    session->ResetOcclusionAlpha();
+    session->leashWinSurfaceNode_ = surfaceNode;
+    session->ResetOcclusionAlpha();
+    EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
+}
+
+/**
  * @tc.name: SetSystemSceneForceUIFirst
  * @tc.desc: SetSystemSceneForceUIFirst function01
  * @tc.type: FUNC

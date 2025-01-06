@@ -87,6 +87,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::WriteActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::WriteBackgroundAlpha),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -150,6 +152,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::ReadActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::ReadBackgroundAlpha),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -1166,7 +1170,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
-        parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_);
+        parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
+        parcel.WriteUint8(backgroundAlpha_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1249,6 +1254,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
+    property->SetBackgroundAlpha(parcel.ReadUint8());
     return property;
 }
 
@@ -1333,6 +1339,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isSystemKeyboard_ = property->isSystemKeyboard_;
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
+    backgroundAlpha_ = property->backgroundAlpha_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1476,6 +1483,11 @@ bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parce
 bool WindowSessionProperty::WriteActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     return parcel.WriteUint32(avoidAreaOption_);
+}
+
+bool WindowSessionProperty::WriteBackgroundAlpha(Parcel& parcel)
+{
+    return parcel.WriteUint8(backgroundAlpha_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
@@ -1622,6 +1634,11 @@ void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel
 void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     SetAvoidAreaOption(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadBackgroundAlpha(Parcel& parcel)
+{
+    SetBackgroundAlpha(parcel.ReadUint8());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -1817,6 +1834,16 @@ void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
 bool WindowSessionProperty::IsSystemKeyboard() const
 {
     return isSystemKeyboard_;
+}
+
+uint8_t WindowSessionProperty::GetBackgroundAlpha() const
+{
+    return backgroundAlpha_;
+}
+
+void WindowSessionProperty::SetBackgroundAlpha(uint8_t alpha)
+{
+    backgroundAlpha_ = alpha;
 }
 } // namespace Rosen
 } // namespace OHOS

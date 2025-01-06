@@ -330,6 +330,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setPrivacyMode", moduleName, JsSceneSession::SetPrivacyMode);
     BindNativeFunction(env, objValue, "setSystemSceneOcclusionAlpha",
         moduleName, JsSceneSession::SetSystemSceneOcclusionAlpha);
+    BindNativeFunction(env, objValue, "resetOcclusionAlpha", moduleName, JsSceneSession::ResetOcclusionAlpha);
     BindNativeFunction(env, objValue, "setSystemSceneForceUIFirst",
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
     BindNativeFunction(env, objValue, "markSystemSceneUIFirst",
@@ -1812,6 +1813,13 @@ napi_value JsSceneSession::SetSystemSceneOcclusionAlpha(napi_env env, napi_callb
     return (me != nullptr) ? me->OnSetSystemSceneOcclusionAlpha(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::ResetOcclusionAlpha(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnResetOcclusionAlpha(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetSystemSceneForceUIFirst(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
@@ -2491,6 +2499,18 @@ napi_value JsSceneSession::OnSetSystemSceneOcclusionAlpha(napi_env env, napi_cal
     }
     session->SetSystemSceneOcclusionAlpha(alpha);
     WLOGFI("end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnResetOcclusionAlpha(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->ResetOcclusionAlpha();
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "end");
     return NapiGetUndefined(env);
 }
 
