@@ -2255,7 +2255,7 @@ WMError WindowSceneSessionImpl::Maximize()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (GetTargetAPIVersion() >= 15 && state_ != WindowState::STATE_SHOWN) { // 15: isolated version
+    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
@@ -2283,7 +2283,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
     }
-    if (GetTargetAPIVersion() >= 15 && state_ != WindowState::STATE_SHOWN) { // 15: isolated version
+    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is not shown, id:%{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
