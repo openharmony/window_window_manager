@@ -1458,8 +1458,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
-    specificCb->onGetStatusBarAvoidHeight_ = [this] {
-        return this->GetStatusBarAvoidHeight();
+    specificCb->onGetStatusBarAvoidHeight_ = [this](WSRect& barArea) {
+        return this->GetStatusBarAvoidHeight(barArea);
     };
     return specificCb;
 }
@@ -12405,15 +12405,19 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }, __func__);
 }
 
-void SceneSessionManager::SetStatusBarAvoidHeight(uint32_t height)
+void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
 {
-    statusBarAvoidHeight_ = height;
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}u", property->GetPersistentId(), height);
+    statusBarAvoidHeight_ = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
+    if (statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT) {
+        TLOGI(WmsLogTag::WMS_IMMS, "cancelled, win %{public}d", property->GetPersistentId());
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}d", property->GetPersistentId(), height);
 }
 
-uint32_t SceneSessionManager::GetStatusBarAvoidHeight()
+void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
 {
-    return statusBarAvoidHeight_;
+    barArea.height_ = statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT ?
+        barArea.height_ : statusBarAvoidHeight_;
 }
 
 } // namespace OHOS::Rosen
