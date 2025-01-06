@@ -1287,6 +1287,11 @@ void SceneSessionManager::RegisterNotifyRootSceneAvoidAreaChangeFunc(NotifyRootS
     onNotifyAvoidAreaChangeForRootFunc_ = std::move(func);
 }
 
+void SceneSessionManager::RegisterNotifyRootSceneOccupiedAreaChangeFunc(NotifyRootSceneOccupiedAreaChangeFunc&& func)
+{
+    onNotifyOccupiedAreaChangeForRootFunc_ = std::move(func);
+}
+
 AvoidArea SceneSessionManager::GetRootSessionAvoidAreaByType(AvoidAreaType type)
 {
     if (auto rootSession = GetRootSceneSession()) {
@@ -1527,6 +1532,9 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
     keyboardCb->onCallingSessionIdChange = callingSessionIdChangeFunc_;
     keyboardCb->onSystemKeyboardAvoidChange = [this](DisplayId displayId, SystemKeyboardAvoidChangeReason reason) {
         this->HandleKeyboardAvoidChange(nullptr, displayId, reason);
+    };
+    keyboardCb->onNotifyOccupiedAreaChange = [this](const sptr<OccupiedAreaChangeInfo>& info) {
+        this->onNotifyOccupiedAreaChangeForRootFunc_(info);
     };
     return keyboardCb;
 }
