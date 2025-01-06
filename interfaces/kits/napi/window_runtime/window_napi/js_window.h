@@ -257,8 +257,6 @@ private:
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     
-    napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
-    napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
@@ -382,6 +380,8 @@ private:
     napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
 };
