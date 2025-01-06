@@ -1437,11 +1437,11 @@ WMError WindowManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t win
     return ret;
 }
 
-WMError WindowManager::ReleaseForegroundSessionScreenLock()
+WMError WindowManager::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().UpdateScreenLockStatusForApp(bundleName, isRelease);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "release screen lock failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "update screen lock status failed");
     }
     return ret;
 }

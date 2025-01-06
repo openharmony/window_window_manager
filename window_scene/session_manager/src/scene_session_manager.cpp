@@ -1608,7 +1608,7 @@ sptr<SceneSession> SceneSessionManager::GetKeyboardSession(DisplayId displayId, 
         }
     }
     return keyboardSession;
-}     
+}
 
 void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSession, DisplayId displayId,
     SystemKeyboardAvoidChangeReason reason)
@@ -1644,7 +1644,7 @@ void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSess
          * when the system keyboard is hiden, disconnect or it's gravity is float
          * check for whether other keyboard can be avoided: if yes, avoids the other keyboard
          *                                                  if no, restores the system keyboard
-         */                                                
+         */
         case SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT: {
@@ -3612,7 +3612,7 @@ WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
 void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "in");
-    onWatchFocusActiveChangeFunc_ = std::move(func);  
+    onWatchFocusActiveChangeFunc_ = std::move(func);
 }
 
 void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)
@@ -10035,7 +10035,7 @@ bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
             if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
                 continue;
             }
-            if (sceneSession->GetSessionProperty()->GetDisplayId() != screenId) { 
+            if (sceneSession->GetSessionProperty()->GetDisplayId() != screenId) {
                 continue;
             }
             if (isPcOrPadFreeMultiWindowMode) {
@@ -12219,36 +12219,91 @@ void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
     AbilityInfoManager::GetInstance().RemoveAppInfo(bundleName);
 }
 
-WMError SceneSessionManager::ReleaseForegroundSessionScreenLock()
+WMError SceneSessionManager::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
     if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 #ifdef POWER_MANAGER_ENABLE
-    auto task = [this] {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
-            if (!IsSessionVisibleForeground(sceneSession) || sceneSession->keepScreenLock_ == nullptr) {
+    if (isRelease) {
+        return ReleaseScreenLockForApp(bundleName);
+    } else {
+        return RelockScreenLockForApp(bundleName);
+    }
+#else
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Can not find the sub system of PowerMgr");
+    return WMError::WM_OK;
+#endif
+}
+
+WMError SceneSessionManager::ReleaseScreenLockForApp(const std::string& bundleName)
+{
+    std::vector<sptr<SceneSession>> sessionsToReleaseScreenLock;
+    GetAllSessionsToReleaseScreenLock(sessionsToReleaseScreenLock, bundleName);
+    auto task = [this, bundleName, sessionsToReleaseScreenLock] {
+        for (const auto& sceneSession : sessionsToReleaseScreenLock) {
+            if (sceneSession->keepScreenLock_ == nullptr || !sceneSession->keepScreenLock_->IsUsed()) {
                 continue;
             }
             auto res = sceneSession->keepScreenLock_->UnLock();
             if (res != ERR_OK) {
-                TLOGNE(WmsLogTag::DEFAULT,
-                    "release screen lock failed: window: [%{public}d, %{public}s], err: %{public}d",
-                    persistentId, sceneSession->GetWindowName().c_str(), res);
-                return WMError::WM_ERROR_INVALID_OPERATION;
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE,
+                    "release screenlock failed, window:[%{public}d, %{public}s], err:%{public}d",
+                    sceneSession->GetPersistentId(), sceneSession->GetWindowName().c_str(), res);
+                continue;
             }
-            TLOGNI(WmsLogTag::DEFAULT, "release screen lock success: window: [%{public}d, %{public}s]",
-                persistentId, sceneSession->GetWindowName().c_str());
+            auto [iter, emplaced] = releasedScreenLockMap_.try_emplace(bundleName, std::unordered_set<int32_t>{});
+            iter->second.insert(sceneSession->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "release screenlock success, window:[%{public}d, %{public}s]",
+                sceneSession->GetPersistentId(), sceneSession->GetWindowName().c_str());
         }
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, __func__);
-#else
-    TLOGD(WmsLogTag::DEFAULT, "Can not find the sub system of PowerMgr");
-    return WMError::WM_OK;
-#endif
+}
+
+void SceneSessionManager::GetAllSessionsToReleaseScreenLock(
+    std::vector<sptr<SceneSession>>& sessionsToReleaseScreenLock, const std::string& bundleName) {
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
+        if (sceneSession->GetSessionInfo().bundleName_ == bundleName && sceneSession->keepScreenLock_ != nullptr) {
+            sessionsToReleaseScreenLock.push_back(sceneSession);
+        }
+    }
+}
+
+WMError SceneSessionManager::RelockScreenLockForApp(const std::string& bundleName)
+{
+    auto task = [this, bundleName] {
+        auto iter = releasedScreenLockMap_.find(bundleName);
+        if (iter == releasedScreenLockMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: not found in map", bundleName.c_str());
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+        const auto& persistentIds = iter->second;
+        for (const int32_t persistentId : persistentIds) {
+            sptr<SceneSession> sceneSession = GetSceneSession(static_cast<int32_t>(persistentId));
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            auto sourceMode = ScreenSourceMode::SCREEN_ALONE;
+            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(
+                sceneSession->GetScreenId());
+            if (screenSession) {
+                sourceMode = screenSession->GetSourceMode();
+            }
+            if (sceneSession->IsKeepScreenOn() && IsSessionVisibleForeground(sceneSession) &&
+                sourceMode != ScreenSourceMode::SCREEN_UNIQUE && sceneSession->keepScreenLock_ != nullptr) {
+                auto res = sceneSession->keepScreenLock_->Lock();
+                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "relock screenlock, window: [%{public}d, %{public}s], res:%{public}d",
+                    persistentId, sceneSession->GetWindowName().c_str(), res);
+            }
+        }
+        releasedScreenLockMap_.erase(bundleName);
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
