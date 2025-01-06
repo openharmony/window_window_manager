@@ -123,8 +123,8 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetAppInstanceKey(session->GetAppInstanceKey());
         }
         session->RetrieveStatusBarDefaultVisibility();
-        auto ret = session->Session::ConnectInner(
-            sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
+        auto ret = LOCK_GUARD_EXPR(SCENE_GUARD, session->Session::ConnectInner(
+            sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid));
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -159,11 +159,12 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        WSError ret = LOCK_GUARD_EXPR(SCENE_GUARD,
+            session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid));
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        return session->ReconnectInner(property);
+        return LOCK_GUARD_EXPR(SCENE_GUARD, session->ReconnectInner(property));
     });
 }
 
@@ -556,7 +557,7 @@ WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityT
 
 WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
 {
-    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot]() {
+    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -3288,7 +3289,7 @@ std::string SceneSession::GetUpdatedIconPath() const
 
 void SceneSession::UpdateNativeVisibility(bool visible)
 {
-    PostTask([weakThis = wptr(this), visible]() {
+    PostTask([weakThis = wptr(this), visible]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -3306,7 +3307,6 @@ void SceneSession::UpdateNativeVisibility(bool visible)
             TLOGNW(WmsLogTag::WMS_SCB, "specific callback is null.");
             return;
         }
-
         if (visible) {
             session->specificCallback_->onWindowInfoUpdate_(persistentId, WindowUpdateType::WINDOW_UPDATE_ADDED);
         } else {
@@ -3316,7 +3316,7 @@ void SceneSession::UpdateNativeVisibility(bool visible)
         session->specificCallback_->onUpdateAvoidArea_(persistentId);
         // update private state
         if (!session->GetSessionProperty()) {
-            WLOGFE("UpdateNativeVisibility property is null");
+            TLOGNE(WmsLogTag::WMS_SCB, "property is null");
             return;
         }
         if (session->updatePrivateStateAndNotifyFunc_ != nullptr) {
@@ -5960,9 +5960,9 @@ void SceneSession::UnregisterSessionChangeListeners()
     }, "UnregisterSessionChangeListeners");
 }
 
-void SceneSession::SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func)
+void SceneSession::SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func)
 {
-    visibilityChangedDetectFunc_ = func;
+    LOCK_GUARD_EXPR(SCENE_GUARD, visibilityChangedDetectFunc_ = std::move(func));
 }
 
 void SceneSession::SetDefaultDisplayIdIfNeed()

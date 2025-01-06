@@ -178,7 +178,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
     const std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession, callback = std::move(resultCallback)]() {
+    auto task = [this, weakExtSession, callback = std::move(resultCallback)]() NO_THREAD_SAFETY_ANALYSIS {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
