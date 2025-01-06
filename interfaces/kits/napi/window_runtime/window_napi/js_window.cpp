@@ -7337,9 +7337,10 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool enable = false;
-    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enable) != napi_ok) {
-        TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enable");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enable)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enable");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
     }
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const where = __func__;
@@ -7382,8 +7383,7 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
         return NapiThrowError(env, ret);
     }
     bool enabled = avoidAreaOption & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW);
-    auto objValue = CreateJsValue(env, enabled);
-    if (objValue != nullptr) {
+    if (auto objValue = CreateJsValue(env, enabled)) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enabled %{public}u", windowToken_->GetWindowId(), enabled);
         return objValue;
     } else {
