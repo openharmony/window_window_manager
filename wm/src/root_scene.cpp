@@ -38,6 +38,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
+constexpr int32 API_VERSION = 16;
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
@@ -112,7 +113,7 @@ void RootScene::SetDisplayOrientation(int32_t orientation)
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
-        GetContext()->GetApplicationInfo()->apiCompatibleVersion >= 16 &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion >= API_VERSION &&
         updateRootSceneRectCallback_ != nullptr) {
         updateRootSceneRectCallback_(rect);
     }
@@ -253,13 +254,13 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
 
 WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
-    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
-        GetContext()->GetApplicationInfo()->apiCompatibleVersion < 16) {
-        return WMError::WM_OK;
-    }
     if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION) {
+        return WMError::WM_OK;
     }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
     TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
@@ -283,13 +284,13 @@ void RootScene::RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAre
 
 WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
-        GetContext()->GetApplicationInfo()->apiCompatibleVersion < 16) {
-        return WMError::WM_OK;
-    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION) {
+        return WMError::WM_OK;
     }
     bool firstInserted = false;
     {
@@ -308,13 +309,13 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
 
 WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
-    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
-        GetContext()->GetApplicationInfo()->apiCompatibleVersion < 16) {
-        return WMError::WM_OK;
-    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
+    }
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION) {
+        return WMError::WM_OK;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success");
     std::lock_guard<std::mutex> lock(mutex_);
