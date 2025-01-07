@@ -553,7 +553,7 @@ struct WSRectT {
     }
 };
 
-const WSRectT WSRectT::EMPTY_RECT = { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
+WSRectT::EMPTY_RECT = { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
