@@ -39,6 +39,11 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t NO_EXIST_UID_VERSION = -1;
+const float FULL_STATUS_WIDTH = 2048;
+const float GLOBAL_FULL_STATUS_WIDTH = 3184;
+const float MAIN_STATUS_WIDTH = 1008;
+const float FULL_STATUS_OFFSET_X = 1136;
+const float SCREEN_HEIGHT = 2232;
 ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -1682,6 +1687,39 @@ void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
     colorSpaces_ = std::move(colorSpaces);
 }
 
+bool ScreenSession::IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
+{
+    return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
+}
+
+void ScreenSession::SetScreenSnapshotRect(RSSurfaceCaptureConfig& config)
+{
+    bool isChanged = false;
+    auto width = property_.GetBounds().rect_.width_;
+    auto height = property_.GetBounds().rect_.height_;
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    if (IsWidthHeightMatch(width, height, MAIN_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        snapshotRect = {0, 0, SCREEN_HEIGHT, MAIN_STATUS_WIDTH};
+        config.mainScreenRect = snapshotRect;
+        isChanged = true;
+    } else if (IsWidthHeightMatch(width, height, FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        snapshotRect = {0, FULL_STATUS_OFFSET_X, SCREEN_HEIGHT, GLOBAL_FULL_STATUS_WIDTH};
+        config.mainScreenRect = snapshotRect;
+        isChanged = true;
+    } else if (IsWidthHeightMatch(width, height, GLOBAL_FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        snapshotRect = {0, 0, SCREEN_HEIGHT, GLOBAL_FULL_STATUS_WIDTH};
+        config.mainScreenRect = snapshotRect;
+        isChanged = true;
+    }
+    if (isChanged) {
+        TLOGI(WmsLogTag::DMS,
+            "GetScreenSnapshotRect left: %{public}f, top: %{public}f, right: %{public}f, bottom: %{public}f",
+            snapshotRect.left_, snapshotRect.top_, snapshotRect.right_, snapshotRect.bottom_);
+    } else {
+        TLOGI(WmsLogTag::DMS, "no need to set screen snapshot rect, use default rect");
+    }
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, float scaleY)
 {
     {
@@ -1698,6 +1736,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         .scaleX = scaleX,
         .scaleY = scaleY,
     };
+    SetScreenSnapshotRect(config);
     {
         DmsXcollie dmsXcollie("DMS:GetScreenSnapshot:TakeSurfaceCapture", XCOLLIE_TIMEOUT_5S);
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);

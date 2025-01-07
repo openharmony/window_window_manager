@@ -759,7 +759,7 @@ void Session::SetCallingPid(int32_t id)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", persistentId_, id);
     callingPid_ = id;
-    if (isVisible_) {
+    if (visibilityChangedDetectFunc_ && isVisible_) {
         visibilityChangedDetectFunc_(callingPid_, false, isVisible_);
     }
 }
@@ -3499,6 +3499,12 @@ WSError Session::SwitchFreeMultiWindow(bool enable)
     if (WindowHelper::IsMainWindow(GetWindowType()) || isUiExtSubWindow) {
         return sessionStage_->SwitchFreeMultiWindow(enable);
     }
+    return WSError::WS_OK;
+}
+
+WSError Session::GetIsMidScene(bool& isMidScene)
+{
+    isMidScene = GetIsMidScene();
     return WSError::WS_OK;
 }
 
