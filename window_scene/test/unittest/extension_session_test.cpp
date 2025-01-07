@@ -937,7 +937,7 @@ HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallT
     info.abilityName_ = "ExtensionSessionTest";
     info.bundleName_ = "ExtensionSessionTest";
     info.persistentId_ = INVALID_SESSION_ID;
-    ExtensionSession extensionSessionA = new ExtensionSession(info);
+    ExtensionSession* extensionSessionA = new ExtensionSession(info);
     info.persistentId_ = extensionSessionA->GetPersistentId();
     sptr<ExtensionSession> extensionSessionB = sptr<ExtensionSession>::MakeSptr(info);
     ASSERT_EQ(info.persistentId_ + 1, extensionSessionB->GetPersistentId());
