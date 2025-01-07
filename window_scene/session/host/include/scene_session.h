@@ -42,8 +42,9 @@ using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
-using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
+using GetSceneSessionVectorByTypeAndDisplayIdCallback = std::function<std::vector<sptr<SceneSession>>(
     WindowType type, DisplayId displayId)>;
+using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
 using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
 using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
 using UpdateOccupiedAreaIfNeedCallback = std::function<void(int32_t persistentId)>;
@@ -119,6 +120,7 @@ public:
         SpecificSessionDestroyCallback onDestroy_;
         ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags_;
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
+        GetSceneSessionVectorByTypeAndDisplayIdCallback onGetSceneSessionVectorByTypeAndDisplayId_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
         UpdateAvoidAreaByTypeCallback onUpdateAvoidAreaByType_;
@@ -153,10 +155,6 @@ public:
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property = nullptr, sptr<IRemoteObject> token = nullptr,
         int32_t pid = -1, int32_t uid = -1, const std::string& identityToken = "") override;
-    virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
-        const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
-        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
-    WSError ReconnectInner(sptr<WindowSessionProperty> property);
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
         const std::string& identityToken = "") override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
@@ -184,6 +182,16 @@ public:
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
     WSError RaiseToAppTop() override;
+
+    /*
+     * Window Recover
+     */
+    virtual WSError Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property = nullptr,
+        sptr<IRemoteObject> token = nullptr, int32_t pid = -1, int32_t uid = -1);
+    WSError ReconnectInner(sptr<WindowSessionProperty> property) REQUIRES(SCENE_GUARD);
+    bool IsRecovered() const { return isRecovered_; }
+    void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
 
     /*
      * Window Layout
@@ -214,9 +222,9 @@ public:
         bool isFromClient = false, bool startFail = false);
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        bool needNotifyClient = true) override;
+        bool needNotifyClient = true, bool isExecuteDelayRaise = false) override;
     WSError TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        bool needNotifyClient = true);
+        bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError SetAspectRatio(float ratio) override;
     WSError SetGlobalMaximizeMode(MaximizeMode mode) override;
@@ -247,7 +255,8 @@ public:
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
-    WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isExecuteDelayRaise = false) override;
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     void SetForegroundInteractiveStatus(bool interactive) override;
@@ -366,10 +375,6 @@ public:
 
     sptr<MoveDragController> moveDragController_ = nullptr;
 
-    // Session recover
-    bool IsRecovered() const { return isRecovered_; }
-    void SetRecovered(bool isRecovered) { isRecovered_ = isRecovered; }
-
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsAppOrLowerSystemSession() const;
@@ -449,6 +454,7 @@ public:
     virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -500,9 +506,8 @@ public:
     void OnNotifyAboveLockScreen();
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
-    bool HasModalUIExtension();
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
-    ExtensionWindowEventInfo GetLastModalUIExtensionEventInfo();
+    std::optional<ExtensionWindowEventInfo> GetLastModalUIExtensionEventInfo();
     Vector2f GetSessionGlobalPosition(bool useUIExtension);
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
@@ -518,8 +523,10 @@ public:
     // WMSPipeline-related: only accessed on SSM thread
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
     void SetNeedSyncSessionRect(bool needSync);
-    uint32_t UpdateUIParam(const SessionUIParam& uiParam);   // update visible session, return dirty flags
-    uint32_t UpdateUIParam();   // update invisible session, return dirty flags
+    // update visible session, return dirty flags
+    uint32_t UpdateUIParam(const SessionUIParam& uiParam) REQUIRES(SCENE_GUARD);
+    // update invisible session, return dirty flags
+    uint32_t UpdateUIParam() REQUIRES(SCENE_GUARD);
     void SetPostProcessFocusState(PostProcessFocusState state);
     PostProcessFocusState GetPostProcessFocusState() const;
     void ResetPostProcessFocusState();
@@ -535,7 +542,6 @@ public:
     void SetMinimizedFlagByUserSwitch(bool isMinimized);
     bool IsMinimizedByUserSwitch() const;
     void UnregisterSessionChangeListeners() override;
-    void SetVisibilityChangedDetectFunc(const VisibilityChangedDetectFunc& func);
 
     /*
      * Window ZOrder: PC
@@ -557,6 +563,7 @@ public:
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
+    void SetWindowMovingCallback(const NotifyWindowMovingFunc& func);
 
     /*
      * Window Layout
@@ -609,7 +616,7 @@ protected:
     /*
      * Window Pipeline
      */
-    bool UpdateVisibilityInner(bool visibility);
+    bool UpdateVisibilityInner(bool visibility) REQUIRES(SCENE_GUARD);
     bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
     bool PipelineNeedNotifyClientToUpdateRect() const;
@@ -752,6 +759,7 @@ private:
     void HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason reason);
     void HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reason, bool isSupportDragInPcCompatibleMode);
     NotifySessionEventFunc onSessionEvent_;
+    void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /*
      * Gesture Back
@@ -925,6 +933,7 @@ private:
     static std::map<uint64_t, std::map<uint32_t, WSRect>> windowDragHotAreaMap_;
     DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    NotifyWindowMovingFunc notifyWindowMovingFunc_;
 
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };

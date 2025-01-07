@@ -36,6 +36,7 @@ public:
     void SetOnBootAnimation(bool onBootAnimation) override;
     FoldDisplayMode GetModeMatchStatus() override;
     std::vector<uint32_t> GetScreenParams();
+    Drawing::Rect GetScreenSnapshotRect() override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);

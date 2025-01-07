@@ -105,18 +105,10 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         SystemSessionConfig& systemConfig, sptr<IRemoteObject> token = nullptr);
-    virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
     virtual WMError DestroyAndDisconnectSpecificSession(const int32_t persistentId);
     virtual WMError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
         const sptr<IRemoteObject>& callback);
-    virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
     WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
-    void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
-    void UnregisterSessionRecoverCallbackFunc(int32_t persistentId);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
@@ -145,6 +137,18 @@ public:
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
 
     /*
+     * Window Recover
+     */
+    void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
+    void UnregisterSessionRecoverCallbackFunc(int32_t persistentId);
+    virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
+    virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
+
+    /*
      * PC Window
      */
     virtual WMError IsPcWindow(bool& isPcWindow);
@@ -161,11 +165,14 @@ public:
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
-    void ReregisterWindowManagerAgent();
     void OnUserSwitch();
     bool InitWMSProxy();
     bool InitSSMProxy();
 
+    /*
+     * Window Recover
+     */
+    void ReregisterWindowManagerAgent();
     void WindowManagerAndSessionRecover();
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
@@ -174,10 +181,10 @@ private:
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ = false;
-    bool recoverInitialized_ = false;
     bool isRegisteredUserSwitchListener_ = false;
-    std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
+    std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
+    bool recoverInitialized_ = false;
     // above guarded by mutex_
 };
 } // namespace Rosen
