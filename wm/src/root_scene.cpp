@@ -39,6 +39,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
 constexpr int32_t API_VERSION_16 = 16;
+constexpr int32_t API_DEFAULT_VERSION = 1000;
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
@@ -287,7 +288,7 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
         return WMError::WM_ERROR_NULLPTR;
     }
     if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
-        GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion % API_DEFAULT_VERSION < API_VERSION_16) {
         return WMError::WM_DO_NOTHING;
     }
     bool firstInserted = false;
@@ -312,7 +313,7 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
         return WMError::WM_ERROR_NULLPTR;
     }
     if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
-        GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion % API_DEFAULT_VERSION < API_VERSION_16) {
         return WMError::WM_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success");
