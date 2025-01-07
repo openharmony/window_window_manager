@@ -57,7 +57,7 @@ static const std::unordered_map<int32_t, Input_MouseEventButton> mouseEventButto
 KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
 {
     return [filter](const OHOS::MMI::KeyEvent& keyEvent) {
-        Input_KeyEvent *input = OH_Input_CreateKeyEvent();
+        Input_KeyEvent* input = OH_Input_CreateKeyEvent();
         OH_Input_SetKeyEventKeyCode(input, keyEvent.GetKeyCode());
         auto iter = keyEventActionMap.find(keyEvent.GetKeyAction());
         if (iter == keyEventActionMap.end()) {

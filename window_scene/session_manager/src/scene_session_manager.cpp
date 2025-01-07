@@ -847,7 +847,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
     TLOGI(WmsLogTag::WMS_RECOVER, "persistentIds recovered=%{public}zu. CurrentUserId=%{public}d",
         recoveredPersistentIds.size(), currentUserId_.load());
 
-    auto task = [this, recoveredPersistentIds]() {
+    taskScheduler_->PostAsyncTask([this, recoveredPersistentIds]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         ClearUnrecoveredSessions(recoveredPersistentIds);
         std::list<AAFwk::SessionInfo> abilitySessionInfos;
         for (const auto& persistentId : recoveredPersistentIds) {
@@ -889,8 +889,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             sceneSession->NotifySessionExceptionInner(sceneSessionInfo, false);
         }
         RemoveFailRecoveredSession();
-    };
-    taskScheduler_->PostAsyncTask(task, __func__);
+    }, __func__);
 }
 
 bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
@@ -1248,8 +1247,11 @@ void SceneSessionManager::CreateRootSceneSession()
 {
     system::SetParameter("bootevent.wms.fullscreen.ready", "true");
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-        return this->GetSceneSessionVectorByType(type, displayId);
+    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
+    };
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type) {
+        return this->GetSceneSessionVectorByType(type);
     };
     specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
         return this->GetAINavigationBarArea(displayId);
@@ -1365,7 +1367,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByBundleName(const std::s
     return nullptr;
 }
 
-std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByTypeAndDisplayId(
     WindowType type, uint64_t displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
@@ -1382,6 +1384,18 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType
         }
     }
 
+    return sceneSessionVector;
+}
+
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(WindowType type)
+{
+    std::vector<sptr<SceneSession>> sceneSessionVector;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession->GetWindowType() == type) {
+            sceneSessionVector.emplace_back(sceneSession);
+        }
+    }
     return sceneSessionVector;
 }
 
@@ -1428,8 +1442,11 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
         this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     };
-    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-        return this->GetSceneSessionVectorByType(type, displayId);
+    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
+    };
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type) {
+        return this->GetSceneSessionVectorByType(type);
     };
     specificCb->onUpdateAvoidArea_ = [this](int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
@@ -1651,7 +1668,7 @@ void SceneSessionManager::HandleKeyboardAvoidChange(const sptr<SceneSession>& sc
          */
         case SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM: {
-            UpdateKeyboardAvoidAreaActive(displayId, true);
+            UpdateKeyboardAvoidAreaActive(true);
             break;
         }
 
@@ -1681,9 +1698,9 @@ void SceneSessionManager::HandleKeyboardAvoidChange(const sptr<SceneSession>& sc
     }
 }
 
-void SceneSessionManager::UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool systemKeyboardAvoidAreaActive)
+void SceneSessionManager::UpdateKeyboardAvoidAreaActive(bool systemKeyboardAvoidAreaActive)
 {
-    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayId);
+    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     if (keyboardSessionVec.empty()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "there is no keyboard window in the map");
         return;
@@ -1738,7 +1755,7 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         return;
     }
     DisplayId displayId = sessionProperty->GetDisplayId();
-    const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, displayId);
+    const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sptr<SceneSession> panelSession;
     for (const auto& session : panelVec) {
         if (session && session->IsSystemKeyboard() == keyboardSession->IsSystemKeyboard()) {
@@ -1986,7 +2003,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
-        InitSceneSession(sceneSession, sessionInfo, property);
+        LOCK_GUARD_EXPR(SCENE_GUARD, InitSceneSession(sceneSession, sessionInfo, property));
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
@@ -2215,7 +2232,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
 WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, isNewActive]() {
+    auto task = [this, weakSceneSession, isNewActive]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         sptr<SceneSession> sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
@@ -2623,7 +2640,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     bool needRemoveSession, bool isSaveSnapshot, bool isForceClean)
 {
     auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession),
-        needRemoveSession, isSaveSnapshot, isForceClean]() {
+        needRemoveSession, isSaveSnapshot, isForceClean]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
@@ -4677,11 +4694,12 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible, const bool newIsVisible) {
+    sceneSession->SetVisibilityChangedDetectFunc(
+        [this](int32_t pid, bool isVisible, bool newIsVisible) THREAD_SAFETY_GUARD(SCENE_GUARD) {
         if (isVisible == newIsVisible || pid == -1) {
             return;
         }
-        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
+        auto windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
         windowPidVisibilityInfo->pid_ = pid;
         int32_t currentCount = 0;
         int32_t beforeCount = 0;
@@ -4705,8 +4723,7 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
             TLOGNE(WmsLogTag::WMS_LIFE, "The count of visible windows in same pid:%{public}d is less than 0.", pid);
             RecoveryVisibilityPidCount(pid);
         }
-    };
-    sceneSession->SetVisibilityChangedDetectFunc(func);
+    });
 }
 
 void SceneSessionManager::RecoveryVisibilityPidCount(int32_t pid)
@@ -7666,7 +7683,7 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
 {
     const char* const where = __func__;
-    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where] {
+    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session is nullptr", where);
@@ -10123,7 +10140,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     if (onFlushUIParamsFunc_ != nullptr) {
         onFlushUIParamsFunc_();
     }
-    auto task = [this, screenId, uiParams = std::move(uiParams)]() {
+    taskScheduler_->PostAsyncTask([this, screenId, uiParams = std::move(uiParams)]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushUIParams");
         TLOGND(WmsLogTag::WMS_PIPELINE, "FlushUIParams");
         {
@@ -10193,8 +10210,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
             }
         }
-    };
-    taskScheduler_->PostAsyncTask(task, "FlushUIParams");
+    }, __func__);
 }
 
 void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList)
@@ -10800,10 +10816,10 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
         TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid=%{public}d, persistentId=%{public}d, "
             "parentId=%{public}d", where, pid, persistentId, parentId);
         auto parentSession = GetSceneSession(parentId);
-        if (parentSession && parentSession->HasModalUIExtension()) {
+        if (parentSession) {
             auto modalUIExtensionEventInfo = parentSession->GetLastModalUIExtensionEventInfo();
-            if (modalUIExtensionEventInfo.has_value() && (modalUIExtensionEventInfo.value().pid == pid) &&
-                (modalUIExtensionEventInfo.value().persistentId == persistentId)) {
+            if (modalUIExtensionEventInfo && modalUIExtensionEventInfo.value().pid == pid &&
+                modalUIExtensionEventInfo.value().persistentId == persistentId) {
                 parentSession->ProcessPointDownSession(posX, posY);
             }
         }

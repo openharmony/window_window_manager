@@ -297,6 +297,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+    WMError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Window Layout
@@ -657,6 +658,7 @@ private:
      * Window Decor
      */
     DecorButtonStyle decorButtonStyle_;
+    int32_t decorHeight_ = 0;
 
     /*
      * Multi Window
