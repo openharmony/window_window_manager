@@ -2447,8 +2447,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
 void SceneSession::ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    int32_t action = pointerEvent->GetPointerAction();
-    if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         return;
     }
     MMI::PointerEvent::PointerItem pointerItem;
@@ -2456,14 +2455,24 @@ void SceneSession::ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>&
         return;
     }
     if (notifyWindowMovingFunc_) {
-        notifyWindowMovingFunc_(static_cast<uint64_t>(pointerEvent->GetTargetDisplayId()),
+        notifyWindowMovingFunc_(static_cast<DisplayId>(pointerEvent->GetTargetDisplayId()),
             pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
     }
 }
 
-void SceneSession::SetWindowMovingCallback(const NotifyWindowMovingFunc& func)
+void SceneSession::SetWindowMovingCallback(NotifyWindowMovingFunc&& func)
 {
-    notifyWindowMovingFunc_ = func;
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), funcName, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session or func is null", funcName);
+            return;
+        }
+        session->notifyWindowMovingFunc_ = std::move(func);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", funcName,
+            session->GetPersistentId());
+    }, __func__);
 }
 
 bool SceneSession::IsMovableWindowType()

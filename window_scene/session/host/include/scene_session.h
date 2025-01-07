@@ -563,7 +563,7 @@ public:
     void SetAppDragResizeType(DragResizeType dragResizeType) { appDragResizeType_ = dragResizeType; }
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
-    void SetWindowMovingCallback(const NotifyWindowMovingFunc& func);
+    void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
 
     /*
      * Window Layout
