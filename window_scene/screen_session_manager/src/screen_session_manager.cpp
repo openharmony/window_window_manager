@@ -2572,6 +2572,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
         if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
             if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
                 SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+                SecondaryFoldSensorManager::GetInstance().PowerKeySetScreenActiveRect();
             } else {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
             }
@@ -2592,6 +2593,7 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
         if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
             if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
                 SecondaryFoldSensorManager::GetInstance().UnRegisterPostureCallback();
+                SecondaryFoldSensorManager::GetInstance().isPowerRectExe_ = false;
             } else {
                 FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
             }

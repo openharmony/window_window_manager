@@ -45,6 +45,12 @@ constexpr size_t SECONDARY_HALL_SIZE = 2;
 constexpr uint16_t FIRST_DATA = 0;
 constexpr uint16_t SECOND_DATA = 1;
 constexpr uint16_t THIRD_DATA = 2;
+const int32_t MAIN_STATUS_WIDTH = 0;
+const int32_t FULL_STATUS_WIDTH = 1;
+const int32_t GLOBAL_FULL_STATUS_WIDTH = 2;
+const int32_t SCREEN_HEIGHT = 3;
+const int32_t FULL_STATUS_OFFSET_X = 4;
+const int32_t PARAMS_VECTOR_SIZE = 5;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(SecondaryFoldSensorManager);
 
@@ -264,6 +270,41 @@ bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, u
     valueAb = static_cast<uint16_t>((*extHallData).hallAb);
     TLOGI(WmsLogTag::DMS, "hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
     return true;
+}
+
+void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
+{
+    if (foldScreenPolicy_->GetScreenParams().size() != PARAMS_VECTOR_SIZE) {
+        return;
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::FULL) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X],
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = 0,
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = 0,
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    isPowerRectExe_ = true;
 }
 
 bool SecondaryFoldSensorManager::IsPostureUserCallbackInvalid() const
