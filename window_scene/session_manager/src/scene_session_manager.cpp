@@ -1590,7 +1590,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
 // windowIds are all main window
 void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds)
 {
-   taskScheduler_->PostSyncTask([this, &windowIds] {
+    taskScheduler_->PostSyncTask([this, &windowIds] {
         // check every window
         for (auto windowId : windowIds) {
             auto sceneSession = GetSceneSession(windowId);
@@ -4504,7 +4504,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return;
     }
-    auto task = [this, &focusInfo] {
+    taskScheduler_->PostSyncTask([this, &focusInfo] {
         if (auto sceneSession = GetSceneSession(focusedSessionId_)) {
             TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             focusInfo.windowId_ = sceneSession->GetWindowId();
@@ -4516,8 +4516,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_DESTROYED_OBJECT;
-    };
-    taskScheduler_->PostSyncTask(task, __func__);
+    }, __func__);
 }
 
 static bool IsValidDigitString(const std::string& windowIdStr)
@@ -4526,7 +4525,7 @@ static bool IsValidDigitString(const std::string& windowIdStr)
         return false;
     }
     for (char ch : windowIdStr) {
-        if ((ch >= '0' && ch <= '9')) {
+        if (ch >= '0' && ch <= '9') {
             continue;
         }
         WLOGFE("invalid window id");
@@ -4541,8 +4540,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    const char* const where = __func__;
-    sceneSession->SetSessionExceptionListener([this, where](
+    sceneSession->SetSessionExceptionListener([this, where = __func__](
         const SessionInfo& info, bool needRemoveSession, bool startFail) {
         auto task = [this, info, where] {
             auto session = GetSceneSession(info.persistentId_);
@@ -8677,14 +8675,14 @@ WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token)
 
 WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& element)
 {
-    AppExecFwk::RunningProcessInfo info;
     auto pid = IPCSkeleton::GetCallingRealPid();
+    AppExecFwk::RunningProcessInfo info;
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
     if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
         WLOGFE("permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, &element, where = __func__]() {
+    return taskScheduler_->PostSyncTask([this, &element, where = __func__]() {
         WLOGD("%{public}s with focusedSessionId: %{public}d", where, focusedSessionId_);
         if (auto sceneSession = GetSceneSession(focusedSessionId_)) {
             const auto& sessionInfo = sceneSession->GetSessionInfo();
@@ -8693,8 +8691,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_INVALID_SESSION;
-    };
-    return taskScheduler_->PostSyncTask(task, "GetFocusSessionElement");
+    }, __func__);
 }
 
 WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
@@ -8736,9 +8733,9 @@ bool SceneSessionManager::UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
     }
 
     bool needUpdate = true;
-    if (auto iter = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
-        iter != lastUpdatedAvoidArea_[persistentId].end()) {
-        needUpdate = iter->second != avoidArea;
+    if (auto it = lastUpdatedAvoidArea_[persistentId].find(avoidAreaType);
+        it != lastUpdatedAvoidArea_[persistentId].end()) {
+        needUpdate = it->second != avoidArea;
     } else {
         if (avoidArea.isEmptyAvoidArea()) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}d empty avoid area",
@@ -8916,8 +8913,7 @@ void SceneSessionManager::UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaT
 
 void SceneSessionManager::UpdateGestureBackEnabled(int32_t persistentId)
 {
-    const char* const where = __func__;
-    auto task = [this, persistentId, where] {
+    auto task = [this, persistentId, where = __func__] {
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !sceneSession->GetEnableGestureBackHadSet()) {
             TLOGNI(WmsLogTag::WMS_IMMS, "sceneSession is nullptr or not set Gesture Back enable");
