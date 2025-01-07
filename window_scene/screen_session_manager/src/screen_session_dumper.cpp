@@ -872,6 +872,10 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
 void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        TLOGD(WmsLogTag::DMS, "not secondary device");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "secondary input: %{public}s", input.c_str());
     size_t commaPos = input.find(',');
     if (!((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SECONDARY_FOLD_STATUS))) {
