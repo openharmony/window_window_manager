@@ -40,6 +40,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "updatePiPControlStatus", moduleName, JsPipController::UpdatePiPControlStatus);
     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
     BindNativeFunction(env, object, "setPiPControlEnabled", moduleName, JsPipController::SetPiPControlEnabled);
+    BindNativeFunction(env, object, "getPiPWindowInfo", moduleName, JsPipController::GetPiPWindowInfo);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsPipController::UnregisterCallback);
 }
@@ -299,6 +300,49 @@ napi_value JsPipController::OnSetPiPControlEnabled(napi_env env, napi_callback_i
     pipController_->UpdatePiPControlStatus(controlType, enabled ?
         PiPControlStatus::ENABLED : PiPControlStatus::DISABLED);
     return NapiGetUndefined(env);
+}
+
+napi_value JsPipController::GetPiPWindowInfo(napi_env env, napi_callback_info info)
+{
+    JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnGetPiPWindowInfo(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value callback = nullptr;
+    if (argc > 0) {
+        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
+    }
+    NapiAsyncTask::CompleteCallback complete =
+        [weak = wptr<PictureInPictureController>(this->pipController_)]
+            (napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (!PictureInPictureManager::IsSupportPiP()) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+                    "Capability not supported.Failed to call the API due to limited device capabilities."));
+                return;
+            }
+            if (weak == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                    "PiP internal error."));
+                return;
+            }
+            sptr<Window> pipWindow = weak->GetPipWindow();
+            if (pipWindow == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                    "PiP internal error."));
+                return;
+            }
+            task.Resolve(env, CreateJsPiPWindowInfoObject(env, pipWindow));
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsPipController::OnGetPiPWindowInfo", env,
+        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    return result;
 }
 
 napi_value JsPipController::RegisterCallback(napi_env env, napi_callback_info info)

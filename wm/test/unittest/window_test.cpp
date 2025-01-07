@@ -2734,6 +2734,19 @@ HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
     ASSERT_EQ(isMidScene, false);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: GetLayoutTransform
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    Transform trans;
+    ASSERT_EQ(trans, window->GetLayoutTransform());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
