@@ -256,9 +256,9 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+    if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
         GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
-        return WMError::WM_OK;
+        return WMError::WM_DO_NOTHING;
     }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
     TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
@@ -286,9 +286,9 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+    if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
         GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
-        return WMError::WM_OK;
+        return WMError::WM_DO_NOTHING;
     }
     bool firstInserted = false;
     {
@@ -311,9 +311,9 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
+    if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
         GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
-        return WMError::WM_OK;
+        return WMError::WM_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success");
     std::lock_guard<std::mutex> lock(mutex_);
