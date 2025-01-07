@@ -1547,9 +1547,16 @@ void Session::RegisterDetachCallback(const sptr<IPatternDetachCallback>& callbac
 }
 
 void Session::SetChangeSessionVisibilityWithStatusBarEventListener(
-    const NotifyChangeSessionVisibilityWithStatusBarFunc& func)
+    NotifyChangeSessionVisibilityWithStatusBarFunc&& func)
 {
-    changeSessionVisibilityWithStatusBarFunc_ = func;
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->changeSessionVisibilityWithStatusBarFunc_ = std::move(func);
+    }, __func__);
 }
 
 void Session::SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func)
@@ -1838,7 +1845,8 @@ WSError Session::PendingSessionToForeground()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     if (pendingSessionActivationFunc_) {
-        pendingSessionActivationFunc_(GetSessionInfo());
+        SessionInfo info = GetSessionInfo();
+        pendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
 }
