@@ -757,7 +757,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     property_.SetDisplayOrientation(displayOrientation);
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation, foldDisplayMode);
     property_.UpdateDeviceRotation(targetDeviceRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
@@ -834,10 +834,10 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         rotation, displayOrientation);
 }
 
-void ScreenSession::UpdateRotationOrientation(int rotation)
+void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation, foldDisplayMode);
     property_.UpdateDeviceRotation(targetRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     WLOGFI("rotation:%{public}d, orientation:%{public}u", rotation, deviceOrientation);
@@ -1084,8 +1084,12 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
     }
 }
 
-DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation) const
+DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        rotation = static_cast<Rotation>(temp);
+    }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
     switch (rotation) {
         case Rotation::ROTATION_0: {
