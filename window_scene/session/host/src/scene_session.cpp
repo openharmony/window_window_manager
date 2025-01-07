@@ -3819,8 +3819,7 @@ void SceneSession::DumpSessionInfo(std::vector<std::string>& info) const
 
 std::shared_ptr<AppExecFwk::AbilityInfo> SceneSession::GetAbilityInfo() const
 {
-    const SessionInfo& sessionInfo = GetSessionInfo();
-    return sessionInfo.abilityInfo;
+    return GetSessionInfo().abilityInfo;
 }
 
 void SceneSession::SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)

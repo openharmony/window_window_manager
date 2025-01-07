@@ -339,6 +339,11 @@ const SessionInfo& Session::GetSessionInfo() const
     return sessionInfo_;
 }
 
+SessionInfo& Session::EditSessionInfo()
+{
+    return sessionInfo_;
+}
+
 bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
 {
     return RegisterListenerLocked(lifecycleListeners_, listener);
@@ -1784,9 +1789,8 @@ WSError Session::Clear(bool needStartCaller)
             return;
         }
         session->isTerminating_ = true;
-        SessionInfo info = session->GetSessionInfo();
         if (session->terminateSessionFuncNew_) {
-            session->terminateSessionFuncNew_(info, needStartCaller, false);
+            session->terminateSessionFuncNew_(session->GetSessionInfo(), needStartCaller, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -1795,8 +1799,7 @@ WSError Session::Clear(bool needStartCaller)
 
 void Session::SetSessionExceptionListener(NotifySessionExceptionFunc&& func, bool fromJsScene)
 {
-    const char* const where = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), where, fromJsScene] {
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func), fromJsScene] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
@@ -1807,7 +1810,7 @@ void Session::SetSessionExceptionListener(NotifySessionExceptionFunc&& func, boo
         } else {
             session->sessionExceptionFunc_ = std::move(func);
         }
-    }, where);
+    }, __func__);
 }
 
 void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
@@ -1821,23 +1824,21 @@ void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
 
 void Session::SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func)
 {
-    const char* const where = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->pendingSessionToForegroundFunc_ = std::move(func);
-    }, where);
+    }, __func__);
 }
 
 WSError Session::PendingSessionToForeground()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
-    SessionInfo info = GetSessionInfo();
     if (pendingSessionActivationFunc_) {
-        pendingSessionActivationFunc_(info);
+        pendingSessionActivationFunc_(GetSessionInfo());
     }
     return WSError::WS_OK;
 }
@@ -1845,24 +1846,22 @@ WSError Session::PendingSessionToForeground()
 void Session::SetPendingSessionToBackgroundForDelegatorListener(
     NotifyPendingSessionToBackgroundForDelegatorFunc&& func)
 {
-    const char* const where = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->pendingSessionToBackgroundForDelegatorFunc_ = std::move(func);
-    }, where);
+    }, __func__);
 }
 
 WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
         GetPersistentId(), shouldBackToCaller);
-    SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
-        pendingSessionToBackgroundForDelegatorFunc_(info, shouldBackToCaller);
+        pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller);
     }
     return WSError::WS_OK;
 }
