@@ -223,7 +223,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, Function | SmallTe
     window->hostSession_ = session;
 
     WindowLimits windowLimits = { 2000, 2000, 2000, 2000, 0.0f, 0.0f };
-    ASSERT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits));
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, false));
     WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
     ASSERT_EQ(windowSizeLimits.maxWidth_, 2000);
     ASSERT_EQ(windowSizeLimits.maxHeight_, 2000);
@@ -244,7 +244,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits02, Function | SmallTe
     WindowLimits windowLimits = { 1000, 1000, 1000, 1000, 0.0f, 0.0f };
 
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits, false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
 }
 
@@ -266,7 +266,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits03, Function | SmallTe
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits, false);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 
@@ -281,7 +281,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits04, Function | SmallTe
     subWindow->SetWindowName("SetWindowLimits04");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(subWindow);
     WindowLimits windowLimits = { 1000, 1000, 1000, 1000, 0.0f, 0.0f };
-    windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    windowSceneSessionImpl->SetWindowLimits(windowLimits, false);
     windowSceneSessionImpl->property_->SetPersistentId(1004);
     windowSceneSessionImpl->property_->SetDisplayId(0);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -289,7 +289,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits04, Function | SmallTe
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_LAUNCHING);
-    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits, false);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 
@@ -304,13 +304,13 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits05, Function | SmallTe
     subWindow->SetWindowName("SetWindowLimits05");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(subWindow);
     WindowLimits windowLimits = { 1000, 1000, 1000, 1000, 0.0f, 0.0f };
-    windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    windowSceneSessionImpl->SetWindowLimits(windowLimits, false);
     windowSceneSessionImpl->property_->SetPersistentId(1005);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = subSession;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, false));
 }
 
 /**
