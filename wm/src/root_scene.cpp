@@ -258,7 +258,7 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
         return WMError::WM_ERROR_NULLPTR;
     }
     if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
-        GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
+        GetContext()->GetApplicationInfo()->apiCompatibleVersion % API_DEFAULT_VERSION < API_VERSION_16) {
         return WMError::WM_DO_NOTHING;
     }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
