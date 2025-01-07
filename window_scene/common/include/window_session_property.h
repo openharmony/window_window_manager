@@ -552,6 +552,11 @@ struct SystemSessionConfig : public Parcelable {
     {
         return freeMultiWindowEnable_ && freeMultiWindowSupport_;
     }
+
+    bool IsPcWindow() const
+    {
+        return windowUIType_ == WindowUIType::PC_WINDOW;
+    }
 };
 } // namespace Rosen
 } // namespace OHOS
