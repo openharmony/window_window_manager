@@ -6073,10 +6073,20 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "Width or height should be greater than or equal to 0");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    size_t lastParamIndex = INDEX_ONE;
+    bool isForce = false;
+    if (argc >= 2 && argv[INDEX_ONE] != nullptr && GetType(env, argv[INDEX_ONE]) == napi_boolean) { // 2:params num
+        lastParamIndex = INDEX_TWO;
+        if (!ConvertFromJsValue(env, argv[INDEX_ONE], isForce)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isForce");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        }
+    }
+    napi_value lastParam = (argc <= lastParamIndex) ? nullptr :
+                            (GetType(env, argv[lastParamIndex]) == napi_function ? argv[lastParamIndex] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), windowLimits,
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), windowLimits, isForce,
                       env, task = napiAsyncTask, where = __func__]() mutable {
         auto window = windowToken.promote();
         if (window == nullptr) {
@@ -6084,7 +6094,7 @@ napi_value JsWindow::OnSetWindowLimits(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowLimits(windowLimits));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowLimits(windowLimits, isForce));
         if (ret == WmErrorCode::WM_OK) {
             auto objValue = GetWindowLimitsAndConvertToJsValue(env, windowLimits);
             if (objValue == nullptr) {
