@@ -2521,7 +2521,9 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             shouldBlock = (shouldBlock || parentSession->GetCombinedExtWindowFlags().hideNonSecureWindowsFlag);
         }
     }
-    if (systemConfig_.IsPcWindow() && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+    bool isPcWindow = false;
+    IsPcWindow(isPcWindow);
+    if (isPcWindow && property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
         TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't block");
         shouldBlock = false;
     }
@@ -3806,7 +3808,9 @@ WMError SceneSessionManager::UpdateTopmostProperty(const sptr<WindowSessionPrope
 void SceneSessionManager::HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession)
 {
-    if (systemConfig_.IsPcWindow()) {
+    bool isPcWindow = false;
+    IsPcWindow(isPcWindow);
+    if (isPcWindow) {
         TLOGI(WmsLogTag::WMS_UIEXT, "PC window don't hide");
         return;
     }

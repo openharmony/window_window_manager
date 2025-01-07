@@ -983,12 +983,12 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetFloatingWindowAppType(true);
     ssm_->shouldHideNonSecureFloatingWindows_.store(true);
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.uiType_ == UI_TYPE_PC;
     res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     ASSERT_NE(WSError::WS_ERROR_INVALID_OPERATION, res);
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);
-    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    ssm_->systemConfig_.uiType_ == UI_TYPE_PHONE;
 }
 
 /**
