@@ -35,7 +35,7 @@ public:
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     FoldDisplayMode GetModeMatchStatus() override;
-    std::vector<uint32_t> GetScreenParams();
+    std::vector<uint32_t> GetScreenParams() override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);
