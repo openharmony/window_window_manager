@@ -3332,9 +3332,9 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
     }
 
     // If point event type is up, should reset start move flag
-    if (WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode()) || GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE ||
-        (action == MMI::PointerEvent::POINTER_ACTION_UP || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-        action == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
+    if (WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode()) ||
+        GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE || (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
         ConsumeMoveOrDragEvent(pointerEvent);
     }
 
