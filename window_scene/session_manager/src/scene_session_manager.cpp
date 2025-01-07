@@ -1458,9 +1458,6 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
-    specificCb->onGetStatusBarAvoidHeight_ = [this](WSRect& barArea) {
-        return this->GetStatusBarAvoidHeight(barArea);
-    };
     return specificCb;
 }
 
@@ -1807,6 +1804,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         }
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
+        });
+        sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
+            return this->GetStatusBarAvoidHeight(barArea);
         });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
