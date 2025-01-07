@@ -48,7 +48,7 @@ public:
     bool IsHallUserCallbackInvalid() const;
     std::vector<float> GetGlobalAngle() const;
     std::vector<uint16_t> GetGlobalHall() const;
-    bool isPowerRectExe = false;
+    bool isPowerRectExe_ = false;
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
     sptr<SensorFoldStateManager> sensorFoldStateManager_;
