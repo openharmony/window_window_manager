@@ -3693,7 +3693,7 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
     return nullptr;
 }
 
-bool Session::GetIsAppUseControl()
+bool Session::GetIsAppUseControl() const
 {
     return isAppUseControl_;
 }
