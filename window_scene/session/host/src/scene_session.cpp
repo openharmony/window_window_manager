@@ -2472,7 +2472,7 @@ void SceneSession::SetWindowMovingCallback(NotifyWindowMovingFunc&& func)
         session->notifyWindowMovingFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", funcName,
             session->GetPersistentId());
-    }, __func__);
+    }, funcName);
 }
 
 bool SceneSession::IsMovableWindowType()
