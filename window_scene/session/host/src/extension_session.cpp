@@ -151,17 +151,15 @@ void ExtensionSession::TryUpdateExtensionPersistentId()
         TLOGE(WmsLogTag::WMS_UIEXT, "Id < min || Id > max, persistenId: %{public}d", persistentId);
         return;
     }
-    uint32_t count = 0;
+    if (g_extensionPersistentIdSet.size() >= PERSISTENTID_MASK) {
+        persistentId_ = INVALID_SESSION_ID;
+        TLOGE(WmsLogTag::WMS_UIEXT, "can't generate Id");
+        return;
+    }
     while (g_extensionPersistentIdSet.count(persistentId)) {
         persistentId++;
         if (persistentId > max) {
             persistentId = min;
-        }
-        count++;
-        if (count > PERSISTENTID_MASK) {
-            persistentId_ = INVALID_SESSION_ID;
-            TLOGE(WmsLogTag::WMS_UIEXT, "can't generate Id");
-            return;
         }
     }
     g_extensionPersistentIdSet.insert(persistentId);
