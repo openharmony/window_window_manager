@@ -99,7 +99,6 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {BUFFER_AVAILABLE_CHANGE_CB,            ListenerFuncType::BUFFER_AVAILABLE_CHANGE_CB},
     {SESSION_EVENT_CB,                      ListenerFuncType::SESSION_EVENT_CB},
     {SESSION_RECT_CHANGE_CB,                ListenerFuncType::SESSION_RECT_CHANGE_CB},
-    {WINDOW_MOVING_CB,                      ListenerFuncType::WINDOW_MOVING_CB},
     {SESSION_PIP_CONTROL_STATUS_CHANGE_CB,  ListenerFuncType::SESSION_PIP_CONTROL_STATUS_CHANGE_CB},
     {SESSION_AUTO_START_PIP_CB,             ListenerFuncType::SESSION_AUTO_START_PIP_CB},
     {CREATE_SUB_SESSION_CB,                 ListenerFuncType::CREATE_SUB_SESSION_CB},
@@ -151,6 +150,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
     {SESSION_DISPLAY_ID_CHANGE_CB,          ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB},
     {SET_SUPPORT_WINDOW_MODES_CB,           ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB},
+    {WINDOW_MOVING_CB,                      ListenerFuncType::WINDOW_MOVING_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -1059,15 +1059,14 @@ void JsSceneSession::ProcessWindowMovingRegister()
         TLOGE(WmsLogTag::WMS_DECOR, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    NotifyWindowMovingFunc func = [weakThis = wptr(this)](DisplayId displayId, int32_t pointerX, int32_t pointerY) {
+    session->SetWindowMovingCallback([weakThis = wptr(this)](DisplayId displayId, int32_t pointerX, int32_t pointerY) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_DECOR, "ProcessWindowMovingRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnWindowMoving(displayId, pointerX, pointerY);
-    };
-    session->SetWindowMovingCallback(func);
+    });
     TLOGI(WmsLogTag::WMS_DECOR, "success");
 }
 
@@ -3002,8 +3001,8 @@ void JsSceneSession::OnWindowMoving(DisplayId displayId, int32_t pointerX, int32
             return;
         }
         napi_value jsDisplayId = CreateJsValue(env, static_cast<int64_t>(displayId));
-        napi_value jsPointerX = CreateJsValue(env, static_cast<int32_t>(pointerX));
-        napi_value jsPointerY = CreateJsValue(env, static_cast<int32_t>(pointerY));
+        napi_value jsPointerX = CreateJsValue(env, pointerX);
+        napi_value jsPointerY = CreateJsValue(env, pointerY);
         napi_value argv[] = {jsDisplayId, jsPointerX, jsPointerY};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
