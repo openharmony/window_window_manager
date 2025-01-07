@@ -5585,14 +5585,7 @@ void SceneSession::RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreen
 
 void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
-            return;
-        }
-        session->onGetStatusBarAvoidHeight_ = std::move(callback);
-    }, __func__);
+    session->onGetStatusBarAvoidHeight_ = std::move(callback);
 }
 
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
