@@ -36,7 +36,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
-        SetIsUseControlSession(info.isUseControlSession_);
+        SetIsUseControlSession(info.isUseControlSession);
     }
     WLOGFD("Create SCBSystemSession");
 }
@@ -230,7 +230,6 @@ void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)
         isNeedSyncGlobalPos_, needSync);
     isNeedSyncGlobalPos_ = needSync;
 }
-
 
 bool SCBSystemSession::GetIsUseControlSession() const
 {
