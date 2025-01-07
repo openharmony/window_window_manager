@@ -97,6 +97,7 @@ public:
     virtual ~ScreenSession();
 
     void CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config);
+    void ReuseDisplayNode(const RSDisplayNodeConfig& config);
     void SetDisplayNodeScreenId(ScreenId screenId);
     void RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
@@ -261,13 +262,14 @@ public:
     void SetMirrorScreenType(MirrorScreenType mirrorType);
     MirrorScreenType GetMirrorScreenType();
     Rotation ConvertIntToRotation(int rotation);
-    void SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode);
+    void SetPhysicalRotation(int rotation);
     void SetScreenComponentRotation(int rotation);
     void SetStartPosition(uint32_t startX, uint32_t startY);
     void SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion);
     std::pair<ScreenId, DMRect> GetMirrorScreenRegion();
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
+    void EnableMirrorScreenRegion();
 
 private:
     ScreenProperty property_;
@@ -295,8 +297,9 @@ private:
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
-    void EnableMirrorScreenRegion();
     int32_t GetApiVersion();
+    void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
+    bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
 };
 
 class ScreenSessionGroup : public ScreenSession {

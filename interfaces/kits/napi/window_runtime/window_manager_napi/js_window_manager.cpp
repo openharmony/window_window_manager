@@ -40,6 +40,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowManager"};
 const std::string PIP_WINDOW = "pip_window";
 constexpr size_t INDEX_ZERO = 0;
+constexpr size_t INDEX_ONE = 1;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
@@ -1321,26 +1322,26 @@ napi_value JsWindowManager::OnShiftAppWindowPointerEvent(napi_env env, napi_call
     if (argc != ARGC_TWO) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    int32_t sourcePersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
-    int32_t targetPersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
-    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourcePersistentId)) {
-        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourcePersistentId");
+    int32_t sourceWindowId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], sourceWindowId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to sourceWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (!ConvertFromJsValue(env, argv[ARGC_ONE], targetPersistentId)) {
-        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetPersistentId");
+    int32_t targetWindowId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], targetWindowId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter to targetWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (sourcePersistentId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
-        targetPersistentId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
-        TLOGE(WmsLogTag::WMS_PC, "invalid sourcePersistentId or targetPersistentId");
+    if (sourceWindowId == static_cast<int32_t>(INVALID_WINDOW_ID) ||
+        targetWindowId == static_cast<int32_t>(INVALID_WINDOW_ID)) {
+        TLOGE(WmsLogTag::WMS_PC, "invalid sourceWindowId or targetWindowId");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [sourcePersistentId, targetPersistentId, env, task = napiAsyncTask] {
+    auto asyncTask = [sourceWindowId, targetWindowId, env, task = napiAsyncTask] {
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
-            ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId));
+            ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {

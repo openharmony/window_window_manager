@@ -55,6 +55,7 @@ public:
     void SetOnBootAnimation(bool onBootAnimation);
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
+    Drawing::Rect GetScreenSnapshotRect();
     /*
      *    Avoid fold to expand process queues public interface
      */

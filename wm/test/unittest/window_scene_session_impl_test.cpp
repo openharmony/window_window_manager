@@ -1941,6 +1941,36 @@ HWTEST_F(WindowSceneSessionImplTest, SetPropertySessionInfo01, Function | SmallT
     windowSceneSession->CreateAndConnectSpecificSession();
     ASSERT_EQ(windowSceneSession->property_->sessionInfo_.bundleName_, abilityContext_->GetBundleName());
 }
+
+/**
+ * @tc.name: SetWindowDelayRaiseEnabled
+ * @tc.desc: SetWindowDelayRaiseEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, SetWindowDelayRaiseEnabled, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowName("SetWindowDelayRaiseEnabled");
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowDelayRaiseEnabled(false));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowDelayRaiseEnabled(false));
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowDelayRaiseEnabled(false));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowDelayRaiseEnabled(false));
+    ASSERT_EQ(false, window->IsWindowDelayRaiseEnabled());
+    ASSERT_EQ(WMError::WM_OK, window->SetWindowDelayRaiseEnabled(true));
+    ASSERT_EQ(true, window->IsWindowDelayRaiseEnabled());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

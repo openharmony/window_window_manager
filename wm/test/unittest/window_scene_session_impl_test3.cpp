@@ -1838,7 +1838,7 @@ HWTEST_F(WindowSceneSessionImplTest3, PreNotifyKeyEvent, Function | SmallTest | 
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     windowSceneSessionImpl->uiContent_ = nullptr;
     auto ret = windowSceneSessionImpl->PreNotifyKeyEvent(keyEvent);
     EXPECT_EQ(false, ret);

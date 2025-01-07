@@ -145,7 +145,7 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
     {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
-const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = { 
+const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = {
     "SCBSmartDock",
     "SCBExtScreenDock"
 };
@@ -334,6 +334,7 @@ void SceneSessionManager::Init()
     openDebugTrace_ = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
     SceneInputManager::GetInstance().Init();
+    RegisterFlushWindowInfoCallback();
 
     // MMI window state error check
     int32_t retCode = MMI::InputManager::GetInstance()->
@@ -352,6 +353,12 @@ void SceneSessionManager::Init()
     InitVsyncStation();
     UpdateDarkColorModeToRS();
     CreateRootSceneSession();
+}
+
+void SceneSessionManager::RegisterFlushWindowInfoCallback()
+{
+    SceneInputManager::GetInstance().
+        RegisterFlushWindowInfoCallback([this]() { FlushWindowInfoToMMI(); });
 }
 
 void SceneSessionManager::InitVsyncStation()
@@ -840,7 +847,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
     TLOGI(WmsLogTag::WMS_RECOVER, "persistentIds recovered=%{public}zu. CurrentUserId=%{public}d",
         recoveredPersistentIds.size(), currentUserId_.load());
 
-    auto task = [this, recoveredPersistentIds]() {
+    taskScheduler_->PostAsyncTask([this, recoveredPersistentIds]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         ClearUnrecoveredSessions(recoveredPersistentIds);
         std::list<AAFwk::SessionInfo> abilitySessionInfos;
         for (const auto& persistentId : recoveredPersistentIds) {
@@ -882,8 +889,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             sceneSession->NotifySessionExceptionInner(sceneSessionInfo, false);
         }
         RemoveFailRecoveredSession();
-    };
-    taskScheduler_->PostAsyncTask(task, __func__);
+    }, __func__);
 }
 
 bool SceneSessionManager::ConfigAppWindowShadow(const WindowSceneConfig::ConfigItem& shadowConfig,
@@ -1241,8 +1247,11 @@ void SceneSessionManager::CreateRootSceneSession()
 {
     system::SetParameter("bootevent.wms.fullscreen.ready", "true");
     auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-        return this->GetSceneSessionVectorByType(type, displayId);
+    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
+    };
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type) {
+        return this->GetSceneSessionVectorByType(type);
     };
     specificCb->onGetAINavigationBarArea_ = [this](uint64_t displayId) {
         return this->GetAINavigationBarArea(displayId);
@@ -1358,7 +1367,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByBundleName(const std::s
     return nullptr;
 }
 
-std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByTypeAndDisplayId(
     WindowType type, uint64_t displayId)
 {
     if (displayId == DISPLAY_ID_INVALID) {
@@ -1375,6 +1384,18 @@ std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType
         }
     }
 
+    return sceneSessionVector;
+}
+
+std::vector<sptr<SceneSession>> SceneSessionManager::GetSceneSessionVectorByType(WindowType type)
+{
+    std::vector<sptr<SceneSession>> sceneSessionVector;
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession->GetWindowType() == type) {
+            sceneSessionVector.emplace_back(sceneSession);
+        }
+    }
     return sceneSessionVector;
 }
 
@@ -1421,8 +1442,11 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
         this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     };
-    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type, uint64_t displayId) {
-        return this->GetSceneSessionVectorByType(type, displayId);
+    specificCb->onGetSceneSessionVectorByTypeAndDisplayId_ = [this](WindowType type, uint64_t displayId) {
+        return this->GetSceneSessionVectorByTypeAndDisplayId(type, displayId);
+    };
+    specificCb->onGetSceneSessionVectorByType_ = [this](WindowType type) {
+        return this->GetSceneSessionVectorByType(type);
     };
     specificCb->onUpdateAvoidArea_ = [this](int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
@@ -1493,14 +1517,14 @@ sptr<KeyboardSession::KeyboardSessionCallback> SceneSessionManager::CreateKeyboa
 {
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
-    keyboardCb->onGetSceneSession_ = [this](int32_t persistentId) {
+    keyboardCb->onGetSceneSession = [this](int32_t persistentId) {
         return this->GetSceneSession(persistentId);
     };
-    keyboardCb->onGetFocusedSessionId_ = [this] {
+    keyboardCb->onGetFocusedSessionId = [this] {
         return this->GetFocusedSessionId();
     };
-    keyboardCb->onCallingSessionIdChange_ = callingSessionIdChangeFunc_;
-    keyboardCb->onSystemKeyboardAvoidChange_ = [this](DisplayId displayId, SystemKeyboardAvoidChangeReason reason) {
+    keyboardCb->onCallingSessionIdChange = callingSessionIdChangeFunc_;
+    keyboardCb->onSystemKeyboardAvoidChange = [this](DisplayId displayId, SystemKeyboardAvoidChangeReason reason) {
         this->HandleKeyboardAvoidChange(nullptr, displayId, reason);
     };
     return keyboardCb;
@@ -1602,7 +1626,7 @@ void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& wi
 sptr<SceneSession> SceneSessionManager::GetKeyboardSession(DisplayId displayId, bool isSystemKeyboard)
 {
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "displayId: %{public}" PRIu64 " is invalid.", displayId);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "displayId is invalid.");
         return nullptr;
     }
     sptr<SceneSession> keyboardSession = nullptr;
@@ -1616,12 +1640,12 @@ sptr<SceneSession> SceneSessionManager::GetKeyboardSession(DisplayId displayId, 
         }
     }
     return keyboardSession;
-}     
+}
 
-void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSession, DisplayId displayId,
+void SceneSessionManager::HandleKeyboardAvoidChange(const sptr<SceneSession>& sceneSession, DisplayId displayId,
     SystemKeyboardAvoidChangeReason reason)
 {
-    if (!(systemConfig_.IsPcWindow())) {
+    if (!systemConfig_.IsPcWindow()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "this device is not pc.");
         return;
     }
@@ -1638,35 +1662,33 @@ void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSess
             }
             break;
         }
-        /**
+        /*
          * activate the system keyboard's avoid area, while it is showing or it's gravity is bottom
          * and deactivate other keyboard's avoid area
          */
         case SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM: {
-            UpdateKeyboardAvoidAreaActive(displayId, true);
+            UpdateKeyboardAvoidAreaActive(true);
             break;
         }
 
-        /**
+        /*
          * when the system keyboard is hiden, disconnect or it's gravity is float
          * check for whether other keyboard can be avoided: if yes, avoids the other keyboard
          *                                                  if no, restores the system keyboard
-         */                                                
+         */
         case SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT:
         case SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT: {
-            sptr<SceneSession> keyboardSession = GetKeyboardSession(displayId, false);
             bool keyboardRecalculate = false;
-            if (keyboardSession) {
+            if (auto keyboardSession = GetKeyboardSession(displayId, false)) {
                 if (keyboardSession->IsSessionForeground() &&
                     keyboardSession->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
                     keyboardRecalculate = true;
                 }
                 keyboardSession->ActivateKeyboardAvoidArea(true, keyboardRecalculate);
             }
-            sptr<SceneSession> sysKeyboardSession = GetKeyboardSession(displayId, true);
-            if (sysKeyboardSession) {
+            if (auto sysKeyboardSession = GetKeyboardSession(displayId, true)) {
                 sysKeyboardSession->ActivateKeyboardAvoidArea(false, !keyboardRecalculate);
             }
             break;
@@ -1676,22 +1698,22 @@ void SceneSessionManager::HandleKeyboardAvoidChange(sptr<SceneSession> sceneSess
     }
 }
 
-void SceneSessionManager::UpdateKeyboardAvoidAreaActive(DisplayId displayId, bool sysKeyAvoidAreaActive)
+void SceneSessionManager::UpdateKeyboardAvoidAreaActive(bool systemKeyboardAvoidAreaActive)
 {
-    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayId);
+    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     if (keyboardSessionVec.empty()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "there is no keyboard window in the map");
         return;
     }
 
-    for (const auto& tempKeyboardSession : keyboardSessionVec) {
-        if (!tempKeyboardSession) {
+    for (const auto& keyboardSession : keyboardSessionVec) {
+        if (!keyboardSession) {
             continue;
         }
-        if (tempKeyboardSession->IsSystemKeyboard()) {
-            tempKeyboardSession->ActivateKeyboardAvoidArea(sysKeyAvoidAreaActive, false);
+        if (keyboardSession->IsSystemKeyboard()) {
+            keyboardSession->ActivateKeyboardAvoidArea(systemKeyboardAvoidAreaActive, false);
         } else {
-            tempKeyboardSession->ActivateKeyboardAvoidArea(!sysKeyAvoidAreaActive, false);
+            keyboardSession->ActivateKeyboardAvoidArea(!systemKeyboardAvoidAreaActive, false);
         }
     }
 }
@@ -1733,18 +1755,19 @@ void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboard
         return;
     }
     DisplayId displayId = sessionProperty->GetDisplayId();
-    const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL, displayId);
+    const auto& panelVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     sptr<SceneSession> panelSession;
-    for (const auto& tempPanelSession : panelVec) {
-        if (tempPanelSession && tempPanelSession->IsSystemKeyboard() == keyboardSession->IsSystemKeyboard()) {
-            panelSession = tempPanelSession;
+    for (const auto& session : panelVec) {
+        if (session && session->IsSystemKeyboard() == keyboardSession->IsSystemKeyboard()) {
+            panelSession = session;
             break;
         }
     }
-
-    // only 2 scenarios of panelSession is nullptr:
-    // 1: neither keyboard panel session or systemkeyboard keyboard panel session is created.
-    // 2: a panel session has been created already, but it's isSystemKeyboard is not match with keyboardSesion's
+    /*
+     * Only 2 scenarios of panelSession is nullptr:
+     * 1: neither keyboard panel session nor system keyboard panel session is created.
+     * 2: a panel session has been created already, but it's isSystemKeyboard is not match with the keyboardSesion's
+     */
     if (panelSession == nullptr) {
         if (panelVec.size() >= 2) { // 2 is max number of keyboard panel, one input method and one system keyboard
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Error size of keyboardPanel, size: %{public}zu", panelVec.size());
@@ -1980,7 +2003,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
-        InitSceneSession(sceneSession, sessionInfo, property);
+        LOCK_GUARD_EXPR(SCENE_GUARD, InitSceneSession(sceneSession, sessionInfo, property));
         if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
@@ -2148,7 +2171,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->userId = currentUserId_;
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
-    abilitySessionInfo->tmpSpecifiedId = sessionInfo.specifiedId;
+    abilitySessionInfo->requestId = sessionInfo.specifiedId;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -2209,7 +2232,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
 WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSession>& sceneSession, bool isNewActive)
 {
     wptr<SceneSession> weakSceneSession(sceneSession);
-    auto task = [this, weakSceneSession, isNewActive]() {
+    auto task = [this, weakSceneSession, isNewActive]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         sptr<SceneSession> sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
@@ -2344,13 +2367,13 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         sceneSessionInfo->collaboratorType = sceneSession->GetCollaboratorType();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "id %{public}d want-ability: %{public}s, bundle: %{public}s, "
-        "module: %{public}s, uri: %{public}s, appIndex: %{public}d, tmpSpecifiedId:%{public}d", persistentId,
+        "module: %{public}s, uri: %{public}s, appIndex: %{public}d, requestId:%{public}d", persistentId,
         sceneSessionInfo->want.GetElement().GetAbilityName().c_str(),
         sceneSessionInfo->want.GetElement().GetBundleName().c_str(),
         sceneSessionInfo->want.GetElement().GetModuleName().c_str(),
         sceneSessionInfo->want.GetElement().GetURI().c_str(),
         sceneSessionInfo->want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0),
-        sceneSessionInfo->tmpSpecifiedId);
+        sceneSessionInfo->requestId);
     int32_t errCode = ERR_OK;
     bool isColdStart = false;
     bool isAppSupportPhoneInPc = false;
@@ -2617,7 +2640,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     bool needRemoveSession, bool isSaveSnapshot, bool isForceClean)
 {
     auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession),
-        needRemoveSession, isSaveSnapshot, isForceClean]() {
+        needRemoveSession, isSaveSnapshot, isForceClean]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
@@ -3024,9 +3047,9 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
 
-    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) && property->IsSystemKeyboard()) {
-        // system keyboard window can be create by virtual keyboard service only
-        if (SessionPermission::IsStartedBySystemKeyboard()) {
+    if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && property->IsSystemKeyboard()) {
+        // system keyboard window can only be created by virtual keyboard service
+        if (SessionPermission::IsSystemCalling()) {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission check sucess.");
             return true;
         }
@@ -3034,8 +3057,8 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return false;
     }
 
-    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR)
-        && SessionPermission::IsStartedByInputMethod()) {
+    if ((type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+         type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) && SessionPermission::IsStartedByInputMethod()) {
         // WINDOW_TYPE_INPUT_METHOD_FLOAT could be created by input method app
         TLOGD(WmsLogTag::WMS_KEYBOARD, "check create permission success, input method app create input method window.");
         return true;
@@ -3620,7 +3643,7 @@ WMError SceneSessionManager::NotifyWatchFocusActiveChange(bool isActive)
 void SceneSessionManager::RegisterWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeFunc&& func)
 {
     TLOGD(WmsLogTag::WMS_EVENT, "in");
-    onWatchFocusActiveChangeFunc_ = std::move(func);  
+    onWatchFocusActiveChangeFunc_ = std::move(func);
 }
 
 void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistentId)
@@ -4671,11 +4694,12 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
         return;
     }
-    VisibilityChangedDetectFunc func = [this](const int32_t pid, const bool isVisible, const bool newIsVisible) {
+    sceneSession->SetVisibilityChangedDetectFunc(
+        [this](int32_t pid, bool isVisible, bool newIsVisible) THREAD_SAFETY_GUARD(SCENE_GUARD) {
         if (isVisible == newIsVisible || pid == -1) {
             return;
         }
-        sptr<WindowPidVisibilityInfo> windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
+        auto windowPidVisibilityInfo = sptr<WindowPidVisibilityInfo>::MakeSptr();
         windowPidVisibilityInfo->pid_ = pid;
         int32_t currentCount = 0;
         int32_t beforeCount = 0;
@@ -4699,8 +4723,7 @@ void SceneSessionManager::RegisterVisibilityChangedDetectFunc(const sptr<SceneSe
             TLOGNE(WmsLogTag::WMS_LIFE, "The count of visible windows in same pid:%{public}d is less than 0.", pid);
             RecoveryVisibilityPidCount(pid);
         }
-    };
-    sceneSession->SetVisibilityChangedDetectFunc(func);
+    });
 }
 
 void SceneSessionManager::RecoveryVisibilityPidCount(int32_t pid)
@@ -7660,7 +7683,7 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession)
 {
     const char* const where = __func__;
-    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where] {
+    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession), where]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session is nullptr", where);
@@ -9398,7 +9421,7 @@ void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
         return;
     }
 
-    auto task = [displayInfo] {
+    auto task = [this, displayInfo] {
         ScreenSessionManagerClient::GetInstance().UpdateDisplayScale(displayInfo->GetScreenId(),
             displayInfo->GetScaleX(),
             displayInfo->GetScaleY(),
@@ -9407,7 +9430,7 @@ void SceneSessionManager::ProcessDisplayScale(sptr<DisplayInfo>& displayInfo)
             displayInfo->GetTranslateX(),
             displayInfo->GetTranslateY());
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
-        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(true);
+        FlushWindowInfoToMMI(true);
     };
     taskScheduler_->PostAsyncTask(task, __func__);
 }
@@ -10044,7 +10067,7 @@ bool SceneSessionManager::GetImmersiveState(ScreenId screenId)
             if (sceneSession->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
                 continue;
             }
-            if (sceneSession->GetSessionProperty()->GetDisplayId() != screenId) { 
+            if (sceneSession->GetSessionProperty()->GetDisplayId() != screenId) {
                 continue;
             }
             if (isPcOrPadFreeMultiWindowMode) {
@@ -10117,7 +10140,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
     if (onFlushUIParamsFunc_ != nullptr) {
         onFlushUIParamsFunc_();
     }
-    auto task = [this, screenId, uiParams = std::move(uiParams)]() {
+    taskScheduler_->PostAsyncTask([this, screenId, uiParams = std::move(uiParams)]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushUIParams");
         TLOGND(WmsLogTag::WMS_PIPELINE, "FlushUIParams");
         {
@@ -10187,8 +10210,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
                 }
             }
         }
-    };
-    taskScheduler_->PostAsyncTask(task, "FlushUIParams");
+    }, __func__);
 }
 
 void SceneSessionManager::ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList)
@@ -10678,7 +10700,9 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
-        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(forceFlush);
+        auto [windowInfoList, pixelMapList] = SceneInputManager::GetInstance().GetFullWindowInfoList();
+        SceneInputManager::GetInstance().
+            FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList), forceFlush);
     };
     taskScheduler_->PostAsyncTask(task, __func__);
 }
@@ -10792,9 +10816,10 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
         TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid=%{public}d, persistentId=%{public}d, "
             "parentId=%{public}d", where, pid, persistentId, parentId);
         auto parentSession = GetSceneSession(parentId);
-        if (parentSession && parentSession->HasModalUIExtension()) {
-            auto modalUIExtension = parentSession->GetLastModalUIExtensionEventInfo();
-            if ((modalUIExtension.pid == pid) && (modalUIExtension.persistentId == persistentId)) {
+        if (parentSession) {
+            auto modalUIExtensionEventInfo = parentSession->GetLastModalUIExtensionEventInfo();
+            if (modalUIExtensionEventInfo && modalUIExtensionEventInfo.value().pid == pid &&
+                modalUIExtensionEventInfo.value().persistentId == persistentId) {
                 parentSession->ProcessPointDownSession(posX, posY);
             }
         }
@@ -12481,6 +12506,11 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }
     if (!SessionPermission::IsSameBundleNameAsCalling(targetSession->GetSessionInfo().bundleName_)) {
         TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not same bundle as calling", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != targetSession->GetCallingPid()) {
+        TLOGE(WmsLogTag::WMS_PC, "permission denied, not call by the same process");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     return taskScheduler_->PostSyncTask([sourcePersistentId, targetPersistentId] {

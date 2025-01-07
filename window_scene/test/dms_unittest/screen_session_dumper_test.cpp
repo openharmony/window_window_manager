@@ -17,6 +17,7 @@
 
 #include "screen_session_dumper.h"
 #include "screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1146,11 +1147,30 @@ HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall02, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, Function | SmallTest | Level1)
 {
-    int fd = 1;
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::vector<std::u16string> args = {u"-h"};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(1, args);
+    dumper->TriggerSecondarySensor("posture:178,180,0/hall:1,1");
+    FoldStatus status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
+
     dumper->TriggerSecondarySensor("posture:93,180,0/hall:1,1");
-    ASSERT_EQ(dumper->fd_, 1);
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondarySensor("posture:150,88,0/hall:1,1");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondarySensor("posture:3,88,0/hall:1,1");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondarySensor("posture:88,3,0/hall:1,0");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::HALF_FOLD);
 }
 
 /**
@@ -1160,11 +1180,46 @@ HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, Function | SmallTest
  */
 HWTEST_F(ScreenSessionDumperTest, TriggerSecondaryFoldStatus01, Function | SmallTest | Level1)
 {
-    int fd = 1;
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::vector<std::u16string> args = {u"-h"};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(1, args);
+    dumper->TriggerSecondaryFoldStatus("z=1");
+    FoldStatus status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=2");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=3");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::HALF_FOLD);
+
+    dumper->TriggerSecondaryFoldStatus("z=11");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=21");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=12");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=22");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=13");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND);
+
     dumper->TriggerSecondaryFoldStatus("z=23");
-    ASSERT_EQ(dumper->fd_, 1);
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED);
 }
 
 /**
