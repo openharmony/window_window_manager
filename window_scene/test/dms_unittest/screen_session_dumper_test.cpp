@@ -395,6 +395,53 @@ HWTEST_F(ScreenSessionDumperTest, ShowIllegalArgsInfo, Function | SmallTest | Le
     dumper->ShowIllegalArgsInfo();
     ASSERT_EQ(dumper->fd_, 1);
 }
+
+/**
+ * @tc.name: SetHoverStatusChange
+ * @tc.desc: test function : SetHoverStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetHoverStatusChange, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper ->SetHoverStatusChange("-hoverStatus,-1");
+    dumper ->SetHoverStatusChange("-hoverStatus,-0");
+    dumper ->SetHoverStatusChange("-hoverStatus,1");
+    dumper ->SetHoverStatusChange("-hoverStatus,4");
+    ASSERT_EQ(true, true);
+}
+
+/**
+ * @tc.name: DumpTentMode
+ * @tc.desc: test function : DumpTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpTentMode, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->DumpTentMode();
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: SetEnterOrExitTentMode
+ * @tc.desc: test function : SetEnterOrExitTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    
+    dumper->SetEnterOrExitTentMode("-offtent");
+    bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
+    ASSERT_EQ(tentMode, false);
+}
 }
 }
 }

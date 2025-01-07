@@ -197,6 +197,16 @@ void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, floa
     screenSession->SensorRotationChange(sensorRotation);
 }
 
+void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->HandleHoverStatusChange(hoverStatus);
+}
+
 void ScreenSessionManagerClient::OnScreenOrientationChanged(ScreenId screenId, float screenOrientation)
 {
     auto screenSession = GetScreenSession(screenId);
@@ -287,7 +297,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_);
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_,
+        screenPropertyChangeType);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, directionInfo.notifyRotation_,
         screenPropertyChangeType);
 
@@ -395,6 +406,15 @@ int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
         return 0;
     }
     return screenSessionManager_->SetScreenOffDelayTime(delay);
+}
+
+void ScreenSessionManagerClient::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    return screenSessionManager_->SetCameraStatus(cameraStatus, cameraPosition);
 }
 
 void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)

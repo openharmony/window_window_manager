@@ -61,7 +61,7 @@ DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMu
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdMain, rect);
 }
 
-void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
+void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation)
 {
     if (status) {
         pengdingTask_ = CHANGE_MODE_TASK_NUM;

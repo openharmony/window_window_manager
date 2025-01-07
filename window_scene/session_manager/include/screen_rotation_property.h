@@ -36,14 +36,22 @@ enum class DeviceRotation: int32_t {
     ROTATION_LANDSCAPE_INVERTED,
 };
 
+enum class DeviceHoverStatus: int32_t {
+    INVALID = -1,
+    TENT_STATUS = 0,
+    TENT_STATUS_CANCEL,
+    CAMERA_STATUS,
+    CAMERA_STATUS_CANCEL,
+};
+
 class ScreenRotationProperty : public RefBase {
 public:
     ScreenRotationProperty() = delete;
     ~ScreenRotationProperty() = default;
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
+    static void HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus);
 private:
     static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
-    static DeviceRotation ConvertSinglePocketOuterRotation(DeviceRotation deviceRotation);
 };
 } // Rosen
 } // OHOS

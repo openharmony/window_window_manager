@@ -38,10 +38,16 @@ void SensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldS
 
 void SensorFoldStateManager::HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
+void SensorFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) {}
+
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angle,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (foldScreenPolicy == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenPolicy is nullptr");
+        return;
+    }
     if (nextState == FoldStatus::UNKNOWN) {
         WLOGFW("fold state is UNKNOWN");
         return;
@@ -55,7 +61,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
 
     NotifyReportFoldStatusToScb(mState_, nextState, angle);
-    
+
     mState_ = nextState;
     if (foldScreenPolicy != nullptr) {
         foldScreenPolicy->SetFoldStatus(mState_);
@@ -108,5 +114,21 @@ void SensorFoldStateManager::NotifyReportFoldStatusToScb(FoldStatus currentStatu
     std::vector<std::string> screenFoldInfo {std::to_string(static_cast<int32_t>(currentStatus)),
         std::to_string(static_cast<int32_t>(nextStatus)), std::to_string(duration), std::to_string(postureAngle)};
     ScreenSessionManager::GetInstance().ReportFoldStatusToScb(screenFoldInfo);
+}
+
+bool SensorFoldStateManager::IsTentMode()
+{
+    return isTentMode_;
+}
+
+void SensorFoldStateManager::SetTentMode(bool status)
+{
+    TLOGI(WmsLogTag::DMS, "tent mode changing: %{public}d -> %{public}d", isTentMode_, status);
+    isTentMode_ = status;
+    if (status) {
+        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
+    } else {
+        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
+    }
 }
 } // namespace OHOS::Rosen
