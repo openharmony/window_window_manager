@@ -17,6 +17,7 @@
 #define OHOS_JS_PIP_UTILS_H
 
 #include "js_runtime_utils.h"
+#include "window.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -25,6 +26,8 @@ napi_value NapiThrowInvalidParam(napi_env env, std::string msg = "");
 bool NapiIsCallable(napi_env env, napi_value value);
 napi_status InitEnums(napi_env env, napi_value exports);
 napi_valuetype GetType(napi_env env, napi_value value);
+napi_value GetPiPWindowSizeAndConvertToJsValue(napi_env env, const Rect& rect, float scale);
+napi_value CreateJsPiPWindowInfoObject(napi_env env, sptr<Window> window);
 }
 }
 #endif //OHOS_JS_PIP_UTILS_H
