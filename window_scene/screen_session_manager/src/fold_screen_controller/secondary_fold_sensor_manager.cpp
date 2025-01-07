@@ -304,7 +304,7 @@ void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
         };
         RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     }
-    isPowerRectExe = true;
+    isPowerRectExe_ = true;
 }
 
 bool SecondaryFoldSensorManager::IsPostureUserCallbackInvalid() const
