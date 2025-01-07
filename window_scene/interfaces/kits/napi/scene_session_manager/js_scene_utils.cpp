@@ -326,7 +326,7 @@ bool IsJsInstanceKeyUndefined(napi_env env, napi_value jsInstanceKey, SessionInf
     return true;
 }
 
-bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseControlSession, SessionInfo& sessionInfo)
+static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseControlSession, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsIsUseControlSession) != napi_undefined) {
         bool isUseControlSession = false;
@@ -334,7 +334,7 @@ bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseControlSes
             TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isUseControlSession");
             return false;
         }
-        sessionInfo.isUseControlSession_ = isUseControlSession;
+        sessionInfo.isUseControlSession = isUseControlSession;
     }
     return true;
 }

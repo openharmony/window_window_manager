@@ -1071,9 +1071,9 @@ HWTEST_F(SceneSessionManagerTest10, MinimizeMainSession, Function | SmallTest | 
     sessionInfo.appIndex_ = 0;
     sessionInfo.windowType_ = 1;
     sessionInfo.sessionState_ = SessionState::STATE_ACTIVE;
-    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
 
-    ssm_->sceneSessionMap_.emplace(1, sceneSession1);
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
     int userId = ssm_->currentUserId_.load();
     auto result = ssm_->MinimizeMainSession(sessionInfo.bundleName_, sessionInfo.appIndex_, userId);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
