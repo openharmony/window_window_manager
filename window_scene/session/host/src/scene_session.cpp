@@ -5583,12 +5583,12 @@ void SceneSession::RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreen
     }, __func__);
 }
 
-void SceneSession::RegisterGetStatusBarAvoidHeightFunc(NotifyLayoutFullScreenChangeFunc&& callback)
+void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
             return;
         }
         session->onGetStatusBarAvoidHeight_ = std::move(callback);
