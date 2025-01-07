@@ -50,12 +50,12 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SecondaryFoldSensorManager);
 
 static void SecondarySensorPostureDataCallback(SensorEvent *event)
 {
-    OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandlePostureData(event);
+    SecondaryFoldSensorManager::GetInstance().HandlePostureData(event);
 }
 
 static void SecondarySensorHallDataCallbackExt(SensorEvent *event)
 {
-    OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(event);
+    SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(event);
 }
 
 void SecondaryFoldSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy)
@@ -255,13 +255,13 @@ bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, u
     }
     FoldScreenSensorManager::ExtHallData *extHallData =
         reinterpret_cast<FoldScreenSensorManager::ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    uint16_t flag = (uint16_t)(*extHallData).flag;
+    uint16_t flag = static_cast<uint16_t>((*extHallData).flag);
     if (!(flag & (1 << HALL_B_C_COLUMN_ORDER)) || !(flag & (1 << HALL_A_B_COLUMN_ORDER))) {
         TLOGW(WmsLogTag::DMS, "not support Extend Hall.");
         return false;
     }
-    valueBc = (uint16_t)(*extHallData).hall; // axis of bc screen. 0: hall closed, 1: hall expaned
-    valueAb = (uint16_t)(*extHallData).hallAb;
+    valueBc = static_cast<uint16_t>((*extHallData).hall); // axis of bc screen. 0: hall closed, 1: hall expaned
+    valueAb = static_cast<uint16_t>((*extHallData).hallAb);
     TLOGI(WmsLogTag::DMS, "hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
     return true;
 }
