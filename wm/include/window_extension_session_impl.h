@@ -52,7 +52,7 @@ public:
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) override;
-    WindowMode GetMode() const override;
+    WindowMode GetWindowMode() const override;
     WMError SetWindowMode(WindowMode mode) override;
 
     /*

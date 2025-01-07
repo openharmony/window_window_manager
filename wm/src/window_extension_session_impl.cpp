@@ -1360,7 +1360,7 @@ void WindowExtensionSessionImpl::NotifyExtensionDataConsumer(MessageParcel& data
     dataHandler_->NotifyDataConsumer(data, reply);
 }
 
-WindowMode WindowExtensionSessionImpl::GetMode() const
+WindowMode WindowExtensionSessionImpl::GetWindowMode() const
 {
     return property_->GetWindowMode();
 }
@@ -1372,7 +1372,7 @@ WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
     if (uiContet) {
         uiContet->NotifyWindowMode(mode);
     }
-    TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetMode());
+    TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetWindowMode());
     return WMError::WM_OK;
 }
 

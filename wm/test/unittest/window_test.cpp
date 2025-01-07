@@ -284,19 +284,19 @@ HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetMode
+ * @tc.name: GetWindowMode
  * @tc.desc: get mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetWindowMode, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetWindowMode());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<Window> window2 = sptr<Window>::MakeSptr();
     ASSERT_NE(nullptr, window2);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window2->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window2->GetWindowMode());
 }
 
 /**
