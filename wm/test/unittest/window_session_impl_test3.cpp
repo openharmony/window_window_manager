@@ -1046,8 +1046,9 @@ HWTEST_F(WindowSessionImplTest3, SetMouseEventFilter, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
-    MouseEventFilterFunc filter = [](const OHOS::MMI::PointerEvent& event) { return true; };
-    WMError res = window->SetMouseEventFilter(filter);
+    WMError res = window->SetMouseEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
     ASSERT_EQ(res, WMError::WM_OK);
 }
 
@@ -1085,8 +1086,9 @@ HWTEST_F(WindowSessionImplTest3, SetTouchEventFilter, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
     window->property_->SetPersistentId(1);
-    TouchEventFilterFunc filter = [](const OHOS::MMI::PointerEvent& event) { return true; };
-    WMError res = window->SetTouchEventFilter(filter);
+    WMError res = window->SetTouchEventFilter([](const OHOS::MMI::PointerEvent& event) {
+        return true;
+    });
     ASSERT_EQ(res, WMError::WM_OK);
 }
 

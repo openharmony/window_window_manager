@@ -93,6 +93,7 @@ private:
     void HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
+    void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
 };
 } // Rosen
 } // OHOS

@@ -1011,6 +1011,37 @@ HWTEST_F(WindowSessionImplTest2, GetDecorHeight02, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetDecorHeight03
+ * @tc.desc: GetDecorHeight version isolation test cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetDecorHeight03, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetDecorHeight03");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9f;
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleHeight()).WillRepeatedly(Return(72));
+    window->uiContent_ = std::move(uiContent);
+    int32_t decorHeight = 38;
+    window->SetDecorHeight(decorHeight);
+    EXPECT_EQ(window->decorHeight_, decorHeight);
+
+    window->SetTargetAPIVersion(14);
+    int32_t height = -1;
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, 37);
+    window->SetTargetAPIVersion(15);
+    EXPECT_EQ(window->GetDecorHeight(height), WMError::WM_OK);
+    EXPECT_EQ(height, decorHeight);
+    window->Destroy();
+}
+
+/**
  * @tc.name: GetTitleButtonArea01
  * @tc.desc: GetTitleButtonArea
  * @tc.type: FUNC
@@ -1057,6 +1088,32 @@ HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea02, Function | SmallTest | Le
     EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_ERROR_NULLPTR);
     window->property_->SetDisplayId(0);
     EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: GetTitleButtonArea03
+ * @tc.desc: GetTitleButtonArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, GetTitleButtonArea03, Function | SmallTest | Level2)
+{
+    auto window = GetTestWindowImpl("GetTitleButtonArea03");
+    ASSERT_NE(window, nullptr);
+    TitleButtonRect titleButtonRect = { 1400, 0, 0, 0 };
+    window->property_->SetPersistentId(1);
+    window->property_->SetDisplayId(0);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalButtonsRect(testing::_, testing::_)).WillRepeatedly(Return(false));
+    window->uiContent_ = std::move(uiContent);
+    window->SetTargetAPIVersion(14);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), false);
+
+    window->SetTargetAPIVersion(15);
+    EXPECT_EQ(window->GetTitleButtonArea(titleButtonRect), WMError::WM_OK);
+    EXPECT_EQ(titleButtonRect.IsUninitializedRect(), true);
     window->Destroy();
 }
 

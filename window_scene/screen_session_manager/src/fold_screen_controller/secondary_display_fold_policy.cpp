@@ -316,4 +316,26 @@ std::vector<uint32_t> SecondaryDisplayFoldPolicy::GetScreenParams()
 {
     return screenParams_;
 }
+
+Drawing::Rect SecondaryDisplayFoldPolicy::GetScreenSnapshotRect()
+{
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    if (currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        snapshotRect.left_ = 0;
+        snapshotRect.top_ = 0;
+        snapshotRect.right_ = screenParams_[SCREEN_HEIGHT];
+        snapshotRect.bottom_ = screenParams_[MAIN_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::FULL) {
+        snapshotRect.left_ = 0;
+        snapshotRect.top_ = screenParams_[FULL_STATUS_OFFSET_X];
+        snapshotRect.right_ = screenParams_[SCREEN_HEIGHT];
+        snapshotRect.bottom_ = screenParams_[GLOBAL_FULL_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        snapshotRect.left_ = 0;
+        snapshotRect.top_ = 0;
+        snapshotRect.right_ = screenParams_[SCREEN_HEIGHT];
+        snapshotRect.bottom_ = screenParams_[GLOBAL_FULL_STATUS_WIDTH];
+    }
+    return snapshotRect;
+}
 } // namespace OHOS::Rosen

@@ -112,4 +112,10 @@ int64_t FoldScreenPolicy::getFoldingElapsedMs()
 }
 
 void FoldScreenPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) {};
+
+Drawing::Rect FoldScreenPolicy::GetScreenSnapshotRect()
+{
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    return snapshotRect;
+}
 } // namespace OHOS::Rosen
