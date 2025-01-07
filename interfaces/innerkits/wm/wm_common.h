@@ -787,7 +787,7 @@ struct Rect {
     }
 };
 
-const Rect Rect::EMPTY_RECT{ 0, 0, 0, 0 };
+Rect::EMPTY_RECT = { 0, 0, 0, 0 };
 
 /**
  * @struct RectAnimationConfig
