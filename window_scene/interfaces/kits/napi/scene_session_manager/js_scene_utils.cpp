@@ -326,15 +326,15 @@ bool IsJsInstanceKeyUndefined(napi_env env, napi_value jsInstanceKey, SessionInf
     return true;
 }
 
-bool IsJsIsAppUseControlUndefined(napi_env env, napi_value jsIsAppUseControl, SessionInfo& sessionInfo)
+bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseControlSession, SessionInfo& sessionInfo)
 {
-    if (GetType(env, jsIsAppUseControl) != napi_undefined) {
-        bool isAppUseControl = false;
-        if (!ConvertFromJsValue(env, jsIsAppUseControl, isAppUseControl)) {
-            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isAppUseControl");
+    if (GetType(env, jsIsUseControlSession) != napi_undefined) {
+        bool isUseControlSession = false;
+        if (!ConvertFromJsValue(env, jsIsUseControlSession, isUseControlSession)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isUseControlSession");
             return false;
         }
-        sessionInfo.isAppUseControl_ = isAppUseControl;
+        sessionInfo.isUseControlSession_ = isUseControlSession;
     }
     return true;
 }
@@ -433,8 +433,8 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
     napi_value jsProcessOption = nullptr;
     napi_get_named_property(env, jsObject, "processOptions", &jsProcessOption);
-    napi_value jsIsAppUseControl = nullptr;
-    napi_get_named_property(env, jsObject, "isAppUseControl", &jsIsAppUseControl);
+    napi_value jsIsUseControlSession = nullptr;
+    napi_get_named_property(env, jsObject, "isAppUseControl", &jsIsUseControlSession);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
@@ -460,7 +460,7 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!IsJsProcessOptionUndefined(env, jsProcessOption, sessionInfo)) {
         return false;
     }
-    if (!IsJsIsAppUseControlUndefined(env, jsIsAppUseControl, sessionInfo)) {
+    if (!IsJsIsUseControlSessionUndefined(env, jsIsUseControlSession, sessionInfo)) {
         return false;
     }
     return true;
