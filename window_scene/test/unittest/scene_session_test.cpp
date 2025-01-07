@@ -1179,10 +1179,7 @@ HWTEST_F(SceneSessionTest, ProcessWindowMoving, Function | SmallTest | Level2)
     info.bundleName_ = "ProcessWindowMovingBundle";
     info.windowType_ = 1;
     auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession;
-    sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
-    EXPECT_NE(sceneSession, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     sceneSession->ProcessWindowMoving(pointerEvent);
 }
