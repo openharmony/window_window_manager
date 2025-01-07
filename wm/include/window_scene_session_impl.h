@@ -38,7 +38,7 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WMError Close() override;
-    WindowMode GetMode() const override;
+    WindowMode GetWindowMode() const override;
 
     /*
      * Window Layout
