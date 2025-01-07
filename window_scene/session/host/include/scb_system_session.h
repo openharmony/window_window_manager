@@ -41,6 +41,10 @@ public:
     void SyncScenePanelGlobalPosition(bool needSync) override;
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     bool IsVisibleForeground() const override;
+
+    /*
+     * App Use Control
+     */
     bool GetIsUseControlSession() const override;
     void SetIsUseControlSession(bool isUseControlSession) override;
 
