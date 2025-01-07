@@ -44,6 +44,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnSensorRotationChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_HOVER_STATUS_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnHoverStatusChanged(data, reply);
+    };
     HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_ORIENTATION_CHANGED] =
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnScreenOrientationChanged(data, reply);
@@ -275,6 +279,15 @@ int ScreenSessionManagerClientStub::HandleOnFoldStatusChangedReportUE(MessagePar
     std::vector<std::string> screenFoldInfo;
     data.ReadStringVector(&screenFoldInfo);
     OnFoldStatusChangedReportUE(screenFoldInfo);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnHoverStatusChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnHoverStatusChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto hoverStatus = data.ReadInt32();
+    OnHoverStatusChanged(screenId, hoverStatus);
     return ERR_NONE;
 }
 

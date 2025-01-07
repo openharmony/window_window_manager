@@ -74,6 +74,10 @@ void FoldScreenPolicy::ExitCoordination() {};
 
 void FoldScreenPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) {};
 
+void FoldScreenPolicy::ChangeOnTentMode(FoldStatus currentState) {}
+
+void FoldScreenPolicy::ChangeOffTentMode() {}
+
 bool FoldScreenPolicy::GetModeChangeRunningStatus()
 {
     auto currentTime = std::chrono::steady_clock::now();

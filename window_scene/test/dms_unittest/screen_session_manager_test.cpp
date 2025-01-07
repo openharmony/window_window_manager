@@ -2142,6 +2142,43 @@ HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | Smal
 }
 
 /**
+ * @tc.name: SetCoordinationFlag
+ * @tc.desc: SetCoordinationFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    ASSERT_EQ(ssm->isCoordinationFlag_, false);
+    ssm->SetCoordinationFlag(true);
+    ASSERT_EQ(ssm->isCoordinationFlag_, true);
+}
+
+/**
+ * @tc.name: GetTentMode
+ * @tc.desc: Test get tent mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetTentMode, Function | SmallTest | Level1)
+{
+    auto tentMode = ssm_->GetTentMode();
+    ASSERT_EQ(tentMode, false);
+}
+
+/**
+ * @tc.name: OnTentModeChanged
+ * @tc.desc: Test change tent mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Level1)
+{
+    bool isTentMode = false;
+    ssm_->OnTentModeChanged(isTentMode);
+    ASSERT_EQ(ssm_->GetTentMode(), false);
+}
+
+/**
  * @tc.name: GetScreenCapture
  * @tc.desc: GetScreenCapture
  * @tc.type: FUNC
