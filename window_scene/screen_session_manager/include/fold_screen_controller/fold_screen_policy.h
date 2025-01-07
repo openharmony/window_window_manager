@@ -67,6 +67,7 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
+    std::vector<uint32_t> screenParams_ = {};
     /*
      *    Avoid fold to expand process queues public interface
      */
@@ -74,7 +75,8 @@ public:
     virtual void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false){};
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
-    
+    virtual std::vector<uint32_t> GetScreenParams() { return screenParams_; };
+
 protected:
     /*
      *    Avoid fold to expand process queues private variable

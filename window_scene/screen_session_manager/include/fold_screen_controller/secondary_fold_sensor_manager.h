@@ -43,10 +43,12 @@ public:
     void UnRegisterHallCallback();
     void HandlePostureData(const SensorEvent * const event);
     void HandleHallDataExt(const SensorEvent * const event);
+    void PowerKeySetScreenActiveRect();
     bool IsPostureUserCallbackInvalid() const;
     bool IsHallUserCallbackInvalid() const;
     std::vector<float> GetGlobalAngle() const;
     std::vector<uint16_t> GetGlobalHall() const;
+    bool isPowerRectExe = false;
 private:
     sptr<FoldScreenPolicy> foldScreenPolicy_;
     sptr<SensorFoldStateManager> sensorFoldStateManager_;
