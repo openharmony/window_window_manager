@@ -323,7 +323,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplaySnapshot, Function | SmallTest | Le
 {
     DisplayId displayId(0);
     DmErrorCode* errorCode = nullptr;
-    ssm_->GetDisplaySnapshot(displayId, errorCode);
+    ssm_->GetDisplaySnapshot(displayId, errorCode, false);
     EXPECT_TRUE(1);
 }
 
