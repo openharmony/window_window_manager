@@ -2719,6 +2719,21 @@ HWTEST_F(WindowTest, GetDecorButtonStyle, Function | SmallTest | Level2)
     WMError res = window->GetDecorButtonStyle(style);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
 }
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    bool isMidScene = false;
+    WMError res = window->GetIsMidScene(isMidScene);
+    EXPECT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(isMidScene, false);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

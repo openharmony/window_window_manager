@@ -280,4 +280,14 @@ void FoldScreenController::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32
     }
     foldScreenPolicy_->AddOrRemoveDisplayNodeToTree(screenId, command);
 }
+
+Drawing::Rect FoldScreenController::GetScreenSnapshotRect()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        Drawing::Rect snapshotRect = {0, 0, 0, 0};
+        return snapshotRect;
+    }
+    return foldScreenPolicy_->GetScreenSnapshotRect();
+}
 } // namespace OHOS::Rosen
