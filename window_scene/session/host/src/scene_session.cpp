@@ -1860,8 +1860,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
         }
-        if (specificCallback_ != nullptr && specificCallback_->onGetStatusBarAvoidHeight_) {
-            specificCallback_->onGetStatusBarAvoidHeight_(statusBarRect);
+        if (onGetStatusBarAvoidHeight_) {
+            onGetStatusBarAvoidHeight_(statusBarRect);
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d window rect %{public}s status bar %{public}s",
             GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
@@ -5619,8 +5619,8 @@ int32_t SceneSession::GetStatusBarHeight()
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
         WSRect statusBarRect = statusBar->GetSessionRect();
-        if (specificCallback_ != nullptr && specificCallback_->onGetStatusBarAvoidHeight_) {
-            specificCallback_->onGetStatusBarAvoidHeight_(statusBarRect);
+        if (onGetStatusBarAvoidHeight_) {
+            onGetStatusBarAvoidHeight_(statusBarRect);
         }
         height = statusBarRect.height_;
     }
