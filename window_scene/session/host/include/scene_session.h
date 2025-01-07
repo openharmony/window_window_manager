@@ -136,7 +136,6 @@ public:
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
-        GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeight_;
     };
 
     // func for change window scene pattern property
@@ -628,6 +627,7 @@ protected:
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+    GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeight_;
 
     /*
      * Gesture Back
