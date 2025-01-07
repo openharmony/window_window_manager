@@ -37,19 +37,14 @@ ExtensionSessionManager::ExtensionSessionManager()
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
 
-sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sptr<ExtensionSession>& extSession)
+sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession)
 {
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    if (!abilitySessionInfo) {
-        WLOGFE("abilitySessionInfo is nullptr");
-        return nullptr;
-    }
-    auto sessionInfo = extSession->GetSessionInfo();
-    sptr<ISession> iSession(extSession);
-    abilitySessionInfo->sessionToken = iSession->AsObject();
+    const auto& sessionInfo = extensionSession->GetSessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilitySessionInfo->sessionToken = sptr<ISession>(extensionSession)->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->parentToken = sessionInfo.rootToken_;
-    abilitySessionInfo->persistentId = extSession->GetPersistentId();
+    abilitySessionInfo->persistentId = extensionSession->GetPersistentId();
     abilitySessionInfo->realHostWindowId = sessionInfo.realParentId_;
     abilitySessionInfo->isAsyncModalBinding = sessionInfo.isAsyncModalBinding_;
     abilitySessionInfo->uiExtensionUsage = static_cast<AAFwk::UIExtensionUsage>(sessionInfo.uiExtensionUsage_);
@@ -122,9 +117,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (extSessionInfo == nullptr) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
         extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
@@ -159,9 +151,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (!extSessionInfo) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED;
@@ -193,9 +182,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (!extSessionInfo) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         extensionSessionMap_.erase(persistentId);
         if (callback) {
@@ -227,9 +213,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sp
             return;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (!extSessionInfo) {
-            return;
-        }
         AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         extensionSessionMap_.erase(persistentId);
     };
