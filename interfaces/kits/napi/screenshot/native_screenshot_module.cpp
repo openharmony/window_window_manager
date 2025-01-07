@@ -210,14 +210,18 @@ static void AsyncGetScreenshot(napi_env env, std::unique_ptr<Param> &param)
     } else {
         if (param->useInputOption) {
             GNAPI_LOG("Get Screenshot by input option");
-            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId,
-                param->option.rect, param->option.size, param->option.rotation, &param->wret);
+            SnapShotConfig snapConfig;
+            snapConfig.displayId_ = param->option.displayId;
+            snapConfig.imageRect_ = param->option.rect;
+            snapConfig.imageSize_ = param->option.size;
+            snapConfig.rotation_ = param->option.rotation;
+            param->image = DisplayManager::GetInstance().GetScreenshotwithConfig(snapConfig, &param->wret, true);
         } else if (param->isPick) {
             GNAPI_LOG("Get Screenshot by picker");
             param->image = DisplayManager::GetInstance().GetSnapshotByPicker(param->imageRect, &param->wret);
         } else {
             GNAPI_LOG("Get Screenshot by default option");
-            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret);
+            param->image = DisplayManager::GetInstance().GetScreenshot(param->option.displayId, &param->wret, true);
         }
     }
     if (param->image == nullptr && param->wret == DmErrorCode::DM_OK) {

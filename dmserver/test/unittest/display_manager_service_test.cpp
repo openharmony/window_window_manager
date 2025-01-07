@@ -557,6 +557,19 @@ HWTEST_F(DisplayManagerServiceTest, RemoveSurfaceNodeFromDisplay, Function | Sma
     DMError ret = dms_->RemoveSurfaceNodeFromDisplay(displayId, surfaceNode);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: GetDisplaySnapshot
+ * @tc.desc: DMS GetDisplaySnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | Level3)
+{
+    DisplayId displayId = -1;
+    DmErrorCode* errorCode = nullptr;
+    auto ret = dms_->GetDisplaySnapshot(displayId, errorCode, false);
+    ASSERT_EQ(nullptr, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
