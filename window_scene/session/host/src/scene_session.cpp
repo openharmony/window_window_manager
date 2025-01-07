@@ -2851,14 +2851,15 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is moved and reset oriPosYBeforeRaisedByKeyboard");
         SetOriPosYBeforeRaisedByKeyboard(0);
     }
-    if (!MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
-        if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-            WindowHelper::IsSystemWindow(GetWindowType())) {
-            NotifySessionRectChange(rect, reason);
-        } else {
-            NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
-            CheckSubSessionShouldFollowParent(moveDragController_->GetMoveDragEndDisplayId());
-        }
+    if (MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
+    }
+    if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+        WindowHelper::IsSystemWindow(GetWindowType())) {
+        NotifySessionRectChange(rect, reason);
+    } else {
+        NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
+        CheckSubSessionShouldFollowParent(moveDragController_->GetMoveDragEndDisplayId());
     }
     moveDragController_->ResetCrossMoveDragProperty();
     OnSessionEvent(SessionEvent::EVENT_END_MOVE);
@@ -2888,7 +2889,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         finishCallback = [weakThis = wptr(this), rect] {
             auto session = weakThis.promote();
             if (session == nullptr) {
-                TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr");
                 return;
             }
             session->OnThrowSlipAnimationStateChange(false);
@@ -2898,7 +2899,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         finishCallback = [weakThis = wptr(this), rect] {
             auto session = weakThis.promote();
             if (session == nullptr) {
-                TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr");
                 return;
             }
             session->OnThrowSlipAnimationStateChange(false);
@@ -2908,6 +2909,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         pcFoldScreenController_->GetThrowSlipTimingCurve());
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
     OnThrowSlipAnimationStateChange(true);
+    rect = endRect;
     return needSetFullScreen;
 }
 
@@ -2936,6 +2938,7 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
             TLOGNW(WmsLogTag::WMS_LAYOUT, "session moved when throw");
             return;
         }
+        session->isThrowSlipToFullScreen_.store(false);
         if (!session->onSessionEvent_) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s invalid callback", where);
             return;

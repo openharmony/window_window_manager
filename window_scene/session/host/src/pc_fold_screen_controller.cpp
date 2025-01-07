@@ -116,7 +116,8 @@ bool PcFoldScreenController::NeedFollowHandAnimation()
 {
     static bool needFollowHandAnimation =
         system::GetParameter("persist.window.throw_slip_follow_animation.enabled", "1") == "1";
-    return needFollowHandAnimation;
+    std::unique_lock<std::mutex> lock(moveMutex_);
+    return needFollowHandAnimation && (!isStartFullScreen_ || movingRectRecords_.size() > 0);
 }
 
 void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen)
@@ -126,6 +127,7 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
     std::unique_lock<std::mutex> lock(moveMutex_);
     startMoveRect_ = rect;
     isStartFullScreen_ = isStartFullScreen;
+    movingRectRecords_.clear();
 }
 
 bool PcFoldScreenController::IsStartFullScreen()
