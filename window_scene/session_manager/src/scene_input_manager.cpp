@@ -202,6 +202,11 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
     auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     for (auto& [screenId, screenProperty] : screensProperties) {
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_EVENT, "screenSession get failed, screenId: %{public}" PRIu64"", screenId);
+            continue;
+        }
+        auto screenCombination = screenSession->GetScreenCombination();
         auto screenWidth = screenProperty.GetPhysicalTouchBounds().rect_.GetWidth();
         auto screenHeight = screenProperty.GetPhysicalTouchBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
@@ -224,7 +229,12 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .transform = transformData,
             .ppi = screenProperty.GetXDpi(),
             .offsetX = screenProperty.GetInputOffsetX(),
-            .offsetY = screenProperty.GetInputOffsetY()};
+            .offsetY = screenProperty.GetInputOffsetY(),
+            .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),
+            .screenRealWidth = screenProperty.GetScreenRealWidth(),
+            .screenRealHeight = screenProperty.GetScreenRealHeight(),
+            .screenRealPPI = screenProperty.GetScreenRealPPI(),
+            .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination)};
         displayInfos.emplace_back(displayInfo);
     }
 }
@@ -448,7 +458,11 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << static_cast<int32_t>(displayInfo.direction) << "|"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|"
                           << static_cast<int32_t>(displayInfo.displayMode) << "|"
-                          << displayInfo.offsetX << "|" << displayInfo.offsetY << ",";
+                          << displayInfo.offsetX << "|" << displayInfo.offsetY << "|"
+                          << displayInfo.isCurrentOffScreenRendering << "|"
+                          << displayInfo.screenRealWidth << "|" << displayInfo.screenRealHeight << "|"
+                          << displayInfo.screenRealPPI << "|"
+                          << static_cast<int32_t>(displayInfo.screenCombination) << ",";
     }
 
     std::string displayList = displayListStream.str();

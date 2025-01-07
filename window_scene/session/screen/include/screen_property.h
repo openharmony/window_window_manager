@@ -175,6 +175,18 @@ public:
     int32_t GetInputOffsetY();
 
     void SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode);
+
+    float CalculatePPI();
+
+    // OffScreenRender
+    void SetCurrentOffScreenRendering(bool enable) { isCurrentOffScreenRendering_ = enable; }
+    bool GetCurrentOffScreenRendering() { return isCurrentOffScreenRendering_; }
+    void SetScreenRealWidth(uint32_t width) { screenRealWidth_ = width; }
+    uint32_t GetScreenRealWidth() { return screenRealWidth_; }
+    void SetScreenRealHeight(uint32_t height) { screenRealHeight_ = height; }
+    uint32_t GetScreenRealHeight() { return screenRealHeight_; }
+    void SetScreenRealPPI() { screenRealPPI_ = CalculatePPI(); }
+    float GetScreenRealPPI() { return screenRealPPI_; }
 private:
     static inline bool IsVertical(Rotation rotation)
     {
@@ -239,6 +251,12 @@ private:
     RRect physicalTouchBounds_;
     int32_t inputOffsetX_;
     int32_t inputOffsetY_;
+
+    // OffScreenRender
+    bool isCurrentOffScreenRendering_ { false };
+    uint32_t screenRealWidth_ { UINT32_MAX };
+    uint32_t screenRealHeight_ { UINT32_MAX };
+    float screenRealPPI_ { 0.0f };
 };
 } // namespace OHOS::Rosen
 
