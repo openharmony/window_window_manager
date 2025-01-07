@@ -170,8 +170,8 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
-    bool GetIsAppUseControl() const;
-    void SetIsAppUseControl(bool isAppUseControl);
+    virtual bool GetIsUseControlSession() const { return false; }
+    virtual void SetIsUseControlSession(bool isUseControlSession) {}
 
     /*
      * Callbacks for ILifecycleListener
@@ -873,11 +873,6 @@ private:
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };
-
-    /*
-     * App Use Control
-     */
-    bool isAppUseControl_ = false; // Indicates whether the window is a control window.
 };
 } // namespace OHOS::Rosen
 
