@@ -286,7 +286,7 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
         GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
         return WMError::WM_OK;
     }
@@ -311,7 +311,7 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (GetContext() == nullptr || GetContext()->GetApplicationInfo() == nullptr ||
+    if (GetContext() != nullptr && GetContext()->GetApplicationInfo() != nullptr &&
         GetContext()->GetApplicationInfo()->apiCompatibleVersion < API_VERSION_16) {
         return WMError::WM_OK;
     }
