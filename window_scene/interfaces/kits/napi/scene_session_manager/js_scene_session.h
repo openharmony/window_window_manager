@@ -75,6 +75,7 @@ enum class ListenerFuncType : uint32_t {
     DEFAULT_DENSITY_ENABLED_CB,
     NEXT_FRAME_LAYOUT_FINISH_CB,
     UPDATE_APP_USE_CONTROL_CB,
+    PRIVACY_MODE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -292,6 +293,8 @@ private:
     void OnDefaultDensityEnabled(bool isDefaultDensityEnabled);
     void NotifyFrameLayoutFinish();
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void ProcessPrivacyModeChangeRegister();
+    void NotifyPrivacyModeChange(bool isPrivacyMode);
     
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 
