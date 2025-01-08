@@ -57,7 +57,7 @@ public:
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) = 0;
     virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) = 0;
-    virtual void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus) = 0;
+    virtual void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) = 0;
     virtual void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) = 0;
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;
     virtual void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) = 0;

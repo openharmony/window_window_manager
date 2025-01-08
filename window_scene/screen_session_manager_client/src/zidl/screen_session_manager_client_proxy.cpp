@@ -229,7 +229,7 @@ void ScreenSessionManagerClientProxy::OnSensorRotationChanged(ScreenId screenId,
     }
 }
 
-void ScreenSessionManagerClientProxy::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus)
+void ScreenSessionManagerClientProxy::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -250,6 +250,10 @@ void ScreenSessionManagerClientProxy::OnHoverStatusChanged(ScreenId screenId, in
     }
     if (!data.WriteInt32(hoverStatus)) {
         WLOGFE("Write hoverStatus failed");
+        return;
+    }
+    if (!data.WriteBool(needRotate)) {
+        WLOGFE("Write needRotate failed");
         return;
     }
     if (remote->SendRequest(
