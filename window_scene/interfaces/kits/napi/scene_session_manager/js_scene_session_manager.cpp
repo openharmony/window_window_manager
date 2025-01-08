@@ -626,6 +626,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         [](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
         RootScene::staticRootScene_->NotifyAvoidAreaChangeForRoot(avoidArea, type);
     });
+    SceneSessionManager::GetInstance().RegisterNotifyRootSceneOccupiedAreaChangeFunc(
+        [](const sptr<OccupiedAreaChangeInfo>& info) {
+        RootScene::staticRootScene_->NotifyOccupiedAreaChangeForRoot(info);
+    });
 }
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
