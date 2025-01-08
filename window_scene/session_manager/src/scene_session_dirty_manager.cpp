@@ -476,17 +476,17 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
         };
         touchHotAreas.emplace_back(touchRect);
         windowInfo.defaultHotAreas = touchHotAreas;
-        windowInfo.pointerHotAreas = touchHotAreas;
+        windowInfo.pointerHotAreas = std::move(touchHotAreas);
         Matrix3f transform;
         CalTransform(sceneSession, transform, true);
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
-        windowInfo.transform = transformData;
+        windowInfo.transform = std::move(transformData);
     }
 
     windowInfo.agentWindowId = extensionInfo.persistentId;
     windowInfo.pid = extensionInfo.pid;
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
-    windowInfo.pointerChangeAreas = pointerChangeAreas;
+    windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
     windowInfo.zOrder = windowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
 
     windowInfoList.emplace_back(windowInfo);
