@@ -4139,6 +4139,9 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetBackgroundColor(color);
+        uint8_t alpha = static_cast<int8_t>((color >> 24) & 0xff);
+        property_->SetBackgroundAlpha(alpha);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA);
         return WMError::WM_OK;
     }
 

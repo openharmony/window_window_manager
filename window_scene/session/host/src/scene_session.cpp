@@ -4359,6 +4359,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateWindowModeSupportType(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
             return HandleActionUpdateAvoidAreaOption(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA):
+            return HandleBackgroundAlpha(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4674,7 +4676,7 @@ WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSession
     return WMError::WM_OK;
 }
 
-WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
+WMError SceneSession::HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
     auto sessionProperty = GetSessionProperty();
