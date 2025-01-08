@@ -940,10 +940,12 @@ HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallT
     ExtensionSession* extensionSessionA = new ExtensionSession(info);
     info.persistentId_ = extensionSessionA->GetPersistentId();
     sptr<ExtensionSession> extensionSessionB = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_NE(extensionSessionB, nullptr);
     ASSERT_EQ(info.persistentId_ + 1, extensionSessionB->GetPersistentId());
     delete extensionSessionA;
     info.persistentId_ += 4096;
     sptr<ExtensionSession> extensionSessionC = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_NE(extensionSessionC, nullptr);
     ASSERT_EQ(info.persistentId_, extensionSessionC->GetPersistentId());
 }
 }
