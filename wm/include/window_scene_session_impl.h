@@ -96,6 +96,7 @@ public:
     virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
     virtual WMError SetGrayScale(float grayScale) override;
+    virtual WMError SetWindowShadowRadius(float radius) override;
 
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;

@@ -3196,6 +3196,33 @@ WMError WindowSceneSessionImpl::SetShadowRadius(float radius)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetWindowShadowRadius(float radius)
+{
+    if (!windowSystemConfig_.IsPcWindow()&&!windowSystemConfig_.IsPadWindow()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window, not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RSSurface node is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set window %{public}s shadow radius %{public}f", GetWindowName().c_str(), radius);
+    if (MathHelper::LessNotEqual(radius, 0.0)) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    surfaceNode_->SetShadowRadius(radius);
+    RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetShadowColor(std::string color)
 {
     WMError ret = CheckParmAndPermission();

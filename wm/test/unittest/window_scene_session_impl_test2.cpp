@@ -1943,6 +1943,36 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave002, Function | SmallT
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 }
+
+/**
+ * @tc.name: SetWindowShadowRadius
+ * @tc.desc: SetWindowShadowRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetWindowShadowRadius, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowShadowRadius");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    windowSceneSessionImpl->surfaceNode_ = nullptr;
+    auto ret = windowSceneSessionImpl->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = windowSceneSessionImpl->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = windowSceneSessionImpl->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
