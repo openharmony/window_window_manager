@@ -650,19 +650,19 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
-void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus)
+void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
-    HoverStatusChange(hoverStatus);
+    HoverStatusChange(hoverStatus, needRotate);
 }
 
-void ScreenSession::HoverStatusChange(int32_t hoverStatus)
+void ScreenSession::HoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             WLOGFE("screenChangeListener is null.");
             continue;
         }
-        listener->OnHoverStatusChange(hoverStatus, screenId_);
+        listener->OnHoverStatusChange(hoverStatus, needRotate, screenId_);
     }
 }
 

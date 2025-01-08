@@ -77,6 +77,7 @@ void FoldScreenPolicy::ChangeOffTentMode() {}
 
 bool FoldScreenPolicy::GetModeChangeRunningStatus()
 {
+    TLOGE(WmsLogTag::DMS, "GetdisplayModeRunningStatus: %{public}d", GetdisplayModeRunningStatus());
     auto currentTime = std::chrono::steady_clock::now();
     auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTimePoint_).count();
     if (intervalMs > MODE_CHANGE_TIMEOUT_MS) {
