@@ -47,6 +47,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_TOP_MOST_CHANGE_CB,
     SUB_MODAL_TYPE_CHANGE_CB,
     MAIN_MODAL_TYPE_CHANGE_CB,
+    THROW_SLIP_ANIMATION_STATE_CHANGE_CB,
     FULLSCREEN_WATERFALL_MODE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
@@ -270,6 +271,7 @@ private:
     void ProcessMainWindowTopmostChangeRegister();
     void ProcessSubModalTypeChangeRegister();
     void ProcessMainModalTypeChangeRegister();
+    void RegisterThrowSlipAnimationStateChangeCallback();
     void RegisterFullScreenWaterfallModeChangeCallback();
     void ProcessClickRegister();
     void ProcessUpdateSessionLabelRegister();
@@ -326,6 +328,7 @@ private:
     void OnMainWindowTopmostChange(bool isTopmost);
     void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainModalTypeChange(bool isModal);
+    void OnThrowSlipAnimationStateChange(bool isAnimating);
     void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
     void UpdateSessionLabel(const std::string& label);

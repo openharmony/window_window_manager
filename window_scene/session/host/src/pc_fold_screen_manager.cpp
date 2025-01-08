@@ -80,6 +80,9 @@ void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, SuperFoldStatus st
 void PcFoldScreenManager::SetDisplayRects(
     const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s, %{public}s, %{public}s",
+        defaultDisplayRect.ToString().c_str(), virtualDisplayRect.ToString().c_str(),
+        foldCreaseRect.ToString().c_str());
     std::unique_lock<std::shared_mutex> lock(rectsMutex_);
     defaultDisplayRect_ = defaultDisplayRect;
     virtualDisplayRect_ = virtualDisplayRect;
