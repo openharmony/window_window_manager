@@ -2816,7 +2816,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
     std::string name;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], name) ||
         (name.compare("status") != 0 && name.compare("navigation") != 0 && name.compare("navigationIndicator") != 0)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "invalid systemBar name");
+        TLOGE(WmsLogTag::WMS_IMMS, "invalid systemBar name.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     auto systemBarType = name.compare("status") == 0 ? WindowType::WINDOW_TYPE_STATUS_BAR :
@@ -2829,13 +2829,12 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
-    const char* const where = __func__;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask,
-        systemBarType, systemBarEnable, systemBarEnableAnimation, where] {
+        systemBarType, systemBarEnable, systemBarEnableAnimation] {
         auto window = weakToken.promote();
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -2847,7 +2846,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, errCode);
+            TLOGNE(WmsLogTag::WMS_IMMS, "failed, ret %{public}d", errCode);
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
                 "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
