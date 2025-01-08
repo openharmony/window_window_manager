@@ -1056,6 +1056,31 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, Function | SmallTes
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
         ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
 }
+
+/**
+ * @tc.name: MinimizeMainSession
+ * @tc.desc: test MinimizeMainSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, MinimizeMainSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "MinimizeMainSessionBundle";
+    sessionInfo.abilityName_ = "MinimizeMainSessionAbility";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1;
+    sessionInfo.sessionState_ = SessionState::STATE_ACTIVE;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    int userId = ssm_->currentUserId_.load();
+    auto result = ssm_->MinimizeMainSession(sessionInfo.bundleName_, sessionInfo.appIndex_, userId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+
+    result = ssm_->MinimizeMainSession(sessionInfo.bundleName_, sessionInfo.appIndex_, 1);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
 }  // namespace
 }
 }
