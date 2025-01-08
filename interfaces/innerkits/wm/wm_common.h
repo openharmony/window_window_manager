@@ -751,7 +751,6 @@ struct Rect {
     int32_t posY_;
     uint32_t width_;
     uint32_t height_;
-    const static Rect EMPTY_RECT;
 
     bool operator==(const Rect& a) const
     {
@@ -785,9 +784,11 @@ struct Rect {
         oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
         return oss.str();
     }
+    
+    static const Rect EMPTY_RECT;
 };
 
-Rect::EMPTY_RECT = { 0, 0, 0, 0 };
+inline constepr Rect Rect::EMPTY_RECT = { 0, 0, 0, 0 };
 
 /**
  * @struct RectAnimationConfig
