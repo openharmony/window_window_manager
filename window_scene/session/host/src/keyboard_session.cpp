@@ -293,6 +293,10 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             }
             session->SetWindowAnimationFlag(true);
         }
+        // avoidHeight is set, notify avoidArea in case ui params don't flush
+        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0) {
+            session->NotifyClientToUpdateAvoidArea();
+        }
         // notify keyboard layout param
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
@@ -663,11 +667,13 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     // need to get screen property if the landscape width is same to the portrait
     if (params.LandscapePanelRect_.width_ != params.PortraitPanelRect_.width_) {
         if (static_cast<uint32_t>(panelRect.width_) == params.LandscapePanelRect_.width_) {
+            panelRect.posY_ += panelRect.height_ - params.landscapeAvoidHeight_;
             panelRect.height_ = params.landscapeAvoidHeight_;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "landscapeAvoidHeight %{public}d", panelRect.height_);
             return;
         }
         if (static_cast<uint32_t>(panelRect.width_) == params.PortraitPanelRect_.width_) {
+            panelRect.posY_ += panelRect.height_ - params.portraitAvoidHeight_;
             panelRect.height_ = params.portraitAvoidHeight_;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "portraitAvoidHeight %{public}d", panelRect.height_);
             return;
@@ -681,7 +687,9 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
         return;
     }
     bool isLandscape = screenHeight < screenWidth;
-    panelRect.height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
+    int32_t height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
+    panelRect.posY_ += height_ - params.portraitAvoidHeight_;
+    panelRect.height_ = height_;
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
 }
 } // namespace OHOS::Rosen
