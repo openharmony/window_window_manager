@@ -318,5 +318,47 @@ void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, A
         }
     }
 }
+
+WMError RootScene::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (occupiedAreaChangeListeners_.find(listener) == occupiedAreaChangeListeners_.end()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "register success");
+        occupiedAreaChangeListeners_.insert(listener);
+    }
+    return WMError::WM_OK;
+}
+
+WMError RootScene::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "unregister success");
+    std::lock_guard<std::mutex> lock(mutex_);
+    occupiedAreaChangeListeners_.erase(listener);
+    return WMError::WM_OK;
+}
+
+void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info)
+{
+    if (info == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "occupied area info is null");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "occupiedRect: %{public}s, textField PositionY_: %{public}f, Height_: %{public}f",
+        info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_);
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto& listener : occupiedAreaChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(info);
+        }
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

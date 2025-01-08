@@ -271,15 +271,45 @@ HWTEST_F(KeyboardSessionTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     EXPECT_NE(keyboardSession, nullptr);
     sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSRect rect = { 0, 0, 0, 0 };
-    WSRect occupiedArea = { 0, 0, 0, 0 };
-    keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
-
-    WSRect lastSR = {1, 1, 1, 1};
-    callingSession->lastSafeRect = lastSR;
+    WSRect rect = { 0, 0, 1260, 2720 };
+    WSRect occupiedArea = { 0, 1700, 1260, 1020 };
     keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
 
     keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
+
+    callingSession->lastSafeRect = { 0, 0, 0, 0 };
+    callingSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
+    keyboardSession->NotifyOccupiedAreaChangeInfo(callingSession, rect, occupiedArea);
+}
+
+/**
+ * @tc.name: NotifyRootSceneOccupiedAreaChange
+ * @tc.desc: NotifyRootSceneOccupiedAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, NotifyRootSceneOccupiedAreaChange, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyRootSceneOccupiedAreaChange";
+    info.bundleName_ = "NotifyRootSceneOccupiedAreaChange";
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specificCb, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    EXPECT_NE(keyboardCb, nullptr);
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
+    EXPECT_NE(keyboardSession, nullptr);
+    auto occupiedInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
+    ASSERT_NE(nullptr, occupiedInfo);
+    keyboardSession->NotifyRootSceneOccupiedAreaChange(occupiedInfo);
+    keyboardSession->GetSessionProperty()->SetDisplayId(2025);
+    keyboardSession->NotifyRootSceneOccupiedAreaChange(occupiedInfo);
+    keyboardSession->GetSessionProperty()->SetDisplayId(0);
+    keyboardSession->keyboardCallback_->onNotifyOccupiedAreaChange = nullptr;
+    keyboardSession->NotifyRootSceneOccupiedAreaChange(occupiedInfo);
+    keyboardSession->keyboardCallback_ = nullptr;
+    keyboardSession->NotifyRootSceneOccupiedAreaChange(occupiedInfo);
 }
 
 /**
