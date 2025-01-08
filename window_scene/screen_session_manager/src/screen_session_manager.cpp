@@ -795,26 +795,18 @@ bool ScreenSessionManager::IsScreenRestored(sptr<ScreenSession> screenSession)
 {
     const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
     ScreenId currentScreenId = screenSession->GetScreenId();
-    uint32_t currentWidth = screenProperty.GetBounds().rect_.GetWidth();
-    uint32_t currentHeight = screenProperty.GetBounds().rect_.GetHeight();
-    TLOGI(WmsLogTag::DMS, "currentScreenId: %{public}" PRIu64
-        ", currentWidth: %{public}d, currentHeight: %{public}d", currentScreenId, currentWidth, currentHeight);
-    std::map<ScreenId, std::pair<uint32_t, uint32_t>> resolution;
-    bool getResolution = ScreenSettingHelper::GetSettingRecoveryResolutionMap(resolution);
-    if (!getResolution) {
-        TLOGE(WmsLogTag::DMS, "get restored resolution failed");
+    TLOGI(WmsLogTag::DMS, "currentScreenId: %{public}" PRIu64, currentScreenId);
+    std::set<ScreenId> restoredScreenId;
+    bool getRestoredScreenId = ScreenSettingHelper::GetSettingRecoveryResolutionSet(restoredScreenId);
+    if (!getRestoredScreenId) {
+        TLOGE(WmsLogTag::DMS, "get restored screenId failed");
         return false;
     }
-    if (resolution.find(currentScreenId) == resolution.end()) {
-        TLOGE(WmsLogTag::DMS, "screen id not exist");
+    if (restoredScreenId.find(currentScreenId) == restoredScreenId.end()) {
+        TLOGE(WmsLogTag::DMS, "screenId not exist");
         return false;
     }
-    auto screenInfo = resolution[currentScreenId];
-    if (screenInfo.first == currentWidth && screenInfo.second == currentHeight) {
-        TLOGI(WmsLogTag::DMS, "found screen, id: %{public}" PRIu64, currentScreenId);
-        return true;
-    }
-    return false;
+    return true;
 }
 
 bool ScreenSessionManager::GetIsCurrentInUseById(ScreenId screenId)
@@ -910,7 +902,10 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
         int32_t mainWidth = mainProperty.GetBounds().rect_.GetWidth();
         mainOptions = { mainSession->GetScreenId(), 0, 0 };
         extendOptions = { extendSession->GetScreenId(), mainWidth, 0 };
-        SetMultiScreenRelativePosition(mainOptions, extendOptions);
+        auto ret = SetMultiScreenRelativePosition(mainOptions, extendOptions);
+        if (ret != DMError::DM_OK) {
+            TLOGE(WmsLogTag::DMS, "set Relative Position failed, DMError:%{public}d", static_cast<int32_t>(ret));
+        }
     }
 }
 
@@ -944,7 +939,10 @@ void ScreenSessionManager::RecoverMultiScreenInfoFromData(sptr<ScreenSession> sc
     TLOGW(WmsLogTag::DMS, "read param success");
     SetMultiScreenMode(mainScreenOption.screenId_, secondaryScreenOption.screenId_, multiScreenMode);
     if (multiScreenMode == MultiScreenMode::SCREEN_EXTEND) {
-        SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+        auto ret = SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+        if (ret != DMError::DM_OK) {
+            SetMultiScreenDefaultRelativePosition();
+        }
     }
 }
 
