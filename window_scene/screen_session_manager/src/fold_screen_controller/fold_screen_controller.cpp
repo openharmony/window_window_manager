@@ -121,8 +121,9 @@ void FoldScreenController::RecoverDisplayMode()
         TLOGI(WmsLogTag::DMS, "current displayMode is correct, skip");
         return;
     }
-    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
-        TLOGI(WmsLogTag::DMS, "not single display fold device, skip");
+    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);

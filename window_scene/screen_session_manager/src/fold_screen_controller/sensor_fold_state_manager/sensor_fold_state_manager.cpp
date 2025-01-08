@@ -184,6 +184,7 @@ bool SensorFoldStateManager::IsTentMode()
 
 void SensorFoldStateManager::SetTentMode(bool status)
 {
+    TLOGI(WmsLogTag::DMS, "tent mode changing: %{public}d -> %{public}d", isTentMode_, status);
     isTentMode_ = status;
 }
 } // namespace OHOS::Rosen

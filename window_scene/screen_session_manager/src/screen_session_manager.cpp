@@ -267,7 +267,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
 void ScreenSessionManager::FixPowerStatus()
 {
     if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
         TLOGI(WmsLogTag::DMS, "Fix Screen Power State");
     }
 }
@@ -5334,6 +5334,11 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     }
     TLOGI(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d, setmode: %{public}d",
         SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), displayMode);
+    if (foldScreenController_->GetTentMode() &&
+        (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION)) {
+            TLOGW(WmsLogTag::DMS, "in TentMode, SetFoldDisplayMode to %{public}d failed", displayMode);
+            return;
+    }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 #endif
@@ -5853,14 +5858,14 @@ void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId
     clientProxy_->OnSensorRotationChanged(screenId, sensorRotation);
 }
 
-void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId)
+void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " hoverStatus: %{public}d", screenId, hoverStatus);
     if (!clientProxy_) {
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy_->OnHoverStatusChanged(screenId, hoverStatus);
+    clientProxy_->OnHoverStatusChanged(screenId, hoverStatus, needRotate);
 }
 
 void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
@@ -6832,11 +6837,6 @@ void ScreenSessionManager::OnTentModeChanged(bool isTentMode)
         return;
     }
     foldScreenController_->OnTentModeChanged(isTentMode);
-    if (isTentMode) {
-        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
-    } else {
-        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
-    }
 #endif
 }
 
