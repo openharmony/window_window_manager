@@ -606,7 +606,7 @@ HWTEST_F(WindowLayoutTest, SetWindowLimitsDataRoute, Function | MediumTest | Lev
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
     WindowLimits windowLimits1 = {4000, 4000, 2000, 2000, 0.0f, 0.0f};
-    WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1);
+    WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1, false);
     EXPECT_EQ(WMError::WM_OK, ret);
     auto windowProperty = windowSceneSessionImpl->GetProperty();
     ASSERT_NE(nullptr, windowProperty);
@@ -643,7 +643,7 @@ HWTEST_F(WindowLayoutTest, SetAspectRatioDataRoute, Function | MediumTest | Leve
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
     WindowLimits windowLimits1 = {4000, 4000, 2000, 2000, 0.0f, 0.0f};
-    WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1);
+    WMError ret = windowSceneSessionImpl->SetWindowLimits(windowLimits1, false);
     EXPECT_EQ(WMError::WM_OK, ret);
     const float ratio = 1.5;
 
@@ -753,7 +753,7 @@ HWTEST_F(WindowLayoutTest, AdjustRectByAspectRatio, Function | MediumTest | Leve
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
 
     WindowLimits windowLimits1 = {3000, 3000, 1200, 1200, 0.0f, 0.0f};
-    WMError wmRet1 = windowSceneSessionImpl->SetWindowLimits(windowLimits1);
+    WMError wmRet1 = windowSceneSessionImpl->SetWindowLimits(windowLimits1, false);
     EXPECT_EQ(WMError::WM_OK, wmRet1);
 
     WMError wmRet2 = windowSceneSessionImpl->Resize(1600, 1600);
