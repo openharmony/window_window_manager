@@ -25,7 +25,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
 std::set<int32_t> g_extensionPersistentIdSet;
 std::mutex g_extensionPersistentIdMutex;
-constexpr uint32_t EXTENSION_ID_FALG = 0x40000000;
+constexpr uint32_t EXTENSION_ID_FLAG = 0x40000000;
 constexpr uint32_t PID_LENGTH = 18;
 constexpr uint32_t PID_MASK = (1 << PID_LENGTH) - 1;
 constexpr uint32_t PERSISTENTID_LENGTH = 12;
@@ -144,8 +144,8 @@ void ExtensionSession::TryUpdateExtensionPersistentId()
         return;
     }
     uint32_t assembledPersistentId = ((static_cast<uint32_t>(getpid()) & PID_MASK) << PERSISTENTID_LENGTH);
-    int32_t min = assembledPersistentId | EXTENSION_ID_FALG;
-    int32_t max = assembledPersistentId | EXTENSION_ID_FALG | PERSISTENTID_MASK;
+    int32_t min = static_cast<int32_t>(assembledPersistentId | EXTENSION_ID_FLAG);
+    int32_t max = static_cast<int32_t>(assembledPersistentId | EXTENSION_ID_FLAG | PERSISTENTID_MASK);
     if (persistentId < min || persistentId > max) {
         persistentId_ = INVALID_SESSION_ID;
         TLOGE(WmsLogTag::WMS_UIEXT, "Id < min || Id > max, persistenId: %{public}d", persistentId);
