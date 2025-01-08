@@ -5585,7 +5585,7 @@ void SceneSession::RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreen
 
 void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& callback)
 {
-    session->onGetStatusBarAvoidHeight_ = std::move(callback);
+    onGetStatusBarAvoidHeight_ = std::move(callback);
 }
 
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
