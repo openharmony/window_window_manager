@@ -715,7 +715,7 @@ void JsScreenSession::OnScreenExtendChange(ScreenId mainScreenId, ScreenId exten
     }
 }
 
-void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId)
+void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId)
 {
     const std::string callbackType = ON_HOVER_STATUS_CHANGE_CALLBACK;
     WLOGI("Call js callback: %{public}s.", callbackType.c_str());
@@ -726,7 +726,7 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId
 
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, env = env_]() {
+    auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, needRotate, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnHoverStatusChange");
         if (jsCallbackRef == nullptr) {
             TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
@@ -742,7 +742,7 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId
             TLOGNE(WmsLogTag::DMS, "Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
-        napi_value argv[] = { CreateJsValue(env, hoverStatus) };
+        napi_value argv[] = { CreateJsValue(env, hoverStatus), CreateJsValue(env, needRotate) };
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
