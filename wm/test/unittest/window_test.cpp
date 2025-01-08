@@ -2192,6 +2192,8 @@ HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
     WindowLimits windowLimits;
     auto ret = window->SetWindowLimits(windowLimits, false);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ret = window->SetWindowLimits(windowLimits, true);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
