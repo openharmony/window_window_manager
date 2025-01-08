@@ -4781,7 +4781,7 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
     } else {
         sName = session->GetWindowName();
     }
-    uint32_t flag = GetWindowFlags();
+    uint32_t flag = session->GetSessionProperty()->GetWindowFlags();
     uint64_t displayId = session->GetSessionProperty()->GetDisplayId();
     uint32_t orientation = 0;
     const std::string& windowName = sName.size() <= WINDOW_NAME_MAX_LENGTH ?
