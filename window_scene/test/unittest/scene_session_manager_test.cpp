@@ -809,7 +809,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateModalExtensionRect, Function | SmallTest
     ASSERT_NE(sceneSession, nullptr);
     Rect rect { 1, 2, 3, 4 };
     ssm_->UpdateModalExtensionRect(nullptr, rect);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
 /**
@@ -826,7 +826,7 @@ HWTEST_F(SceneSessionManagerTest, ProcessModalExtensionPointDown, Function | Sma
     ASSERT_NE(sceneSession, nullptr);
 
     ssm_->ProcessModalExtensionPointDown(nullptr, 0, 0);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
 /**
