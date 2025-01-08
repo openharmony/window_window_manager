@@ -1368,8 +1368,7 @@ WindowMode WindowExtensionSessionImpl::GetMode() const
 WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
 {
     property_->SetWindowMode(mode);
-    auto uiContet = GetUIContentSharedPtr();
-    if (uiContet) {
+    if (auto uiContet = GetUIContentSharedPtr()) {
         uiContet->NotifyWindowMode(mode);
     }
     TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetMode());
