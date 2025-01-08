@@ -507,7 +507,6 @@ napi_value JsExtensionWindow::OnDestroyWindow(napi_env env, napi_callback_info i
                 "Window destroy failed"));
             return;
         }
-        windowImpl = nullptr; // ensure window dtor when finalizer invalid
         task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -554,8 +553,6 @@ napi_value JsExtensionWindow::OnShowWindow(napi_env env, napi_callback_info info
             return;
         }
         WMError ret = windowImpl->Show(0, false);
-        TLOGNI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] show with ret = %{public}d",
-            windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), ret);
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
