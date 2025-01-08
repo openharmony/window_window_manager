@@ -474,6 +474,9 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
+    /*
+     * Window PrivacyMode
+     */
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
 protected:
