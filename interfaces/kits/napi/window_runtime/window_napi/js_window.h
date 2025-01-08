@@ -163,9 +163,9 @@ public:
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetTitleButtonRect(napi_env env, napi_callback_info info);
+    static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetTitleButtonVisible(napi_env env, napi_callback_info info);
-    static napi_value SetWindowTitleButtonVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
