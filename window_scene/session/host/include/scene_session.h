@@ -91,6 +91,7 @@ using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 
 class SceneSession : public Session {
 public:
@@ -473,6 +474,8 @@ public:
      */
     void ResetSizeChangeReasonIfDirty();
 
+    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
+
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -656,6 +659,7 @@ private:
         const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+    void NotifyPrivacyModeChange();
 
     /*
      * PiP Window
@@ -666,6 +670,7 @@ private:
 
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
+    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
@@ -737,6 +742,9 @@ private:
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
+
+    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
+    bool isPrivacyMode_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
