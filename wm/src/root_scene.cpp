@@ -33,6 +33,7 @@
 #include "intention_event_manager.h"
 #include "window_manager_hilog.h"
 #include "sys_cap_util.h"
+
 namespace OHOS {
 namespace Rosen {
 namespace {
