@@ -117,6 +117,8 @@ public:
 
     static sptr<RootScene> staticRootScene_;
 
+    std::string GetClassType() const override { return "RootScene"; }
+
 private:
     void RegisterInputEventListener();
 
