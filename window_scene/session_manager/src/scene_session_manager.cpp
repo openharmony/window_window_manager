@@ -12407,7 +12407,13 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 
 void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
 {
-    statusBarAvoidHeight_ = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
+    const char* const where = __func__;
+    auto task = [this, where] {
+        statusBarAvoidHeight_ = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
+        TLOGNI(WMS_IMMS, "%{public}s, height %{public}d", where, statusBarAvoidHeight_);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "SetStatusBarAvoidHeight");
 }
 
 void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
