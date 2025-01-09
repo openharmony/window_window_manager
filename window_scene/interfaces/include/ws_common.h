@@ -551,7 +551,7 @@ struct WSRectT {
         return ss.str();
     }
 
-    static const WSRect<T> WSRect<T>::EMPTY_RECT { 0, 0, 0, 0 };
+    static const WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 };
 
 inline constexpr WSRectT::EMPTY_RECT { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
