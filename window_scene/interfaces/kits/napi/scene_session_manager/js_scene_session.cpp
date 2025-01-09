@@ -2465,7 +2465,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             ProcessSetSupportedWindowModesRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::LOCK_STATE_CHANGE_CB):
-            ProcessLockStateChangeRigster();
+            ProcessLockStateChangeRegister();
             break;
         default:
             break;
