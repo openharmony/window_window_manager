@@ -452,7 +452,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, Function | SmallTe
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
-    option->SetWindowName("ConsumePointerEventInner");
+    option->SetWindowName("ResetSuperFoldDisplayY");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
@@ -462,13 +462,13 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, Function | SmallTe
     pointerItem.SetDisplayY(150);
     pointerEvent->AddPointerItem(pointerItem);
     int originalDisplayY = pointerItem.GetDisplayY();
-    WindowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     int updatedDisplayY = pointerItem.GetDisplayY();
     ASSERT_EQ(updatedDisplayY, originalDisplayY);
 
-    WindowSceneSessionImpl->superFoldOffsetY_ = 150;
-    WindowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    windowSceneSessionImpl->superFoldOffsetY_ = 150;
+    windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     updatedDisplayY = pointerItem.GetDisplayY();
     ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
