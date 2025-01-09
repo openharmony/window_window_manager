@@ -1931,7 +1931,7 @@ public:
      * @param windowLimits.
      * @return WMError.
      */
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForce)
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForcible = false)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
