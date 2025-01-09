@@ -2249,6 +2249,10 @@ WMError WindowSceneSessionImpl::Maximize()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
+        return WMError::WM_OK;
+    }
     if (WindowHelper::IsMainWindow(GetType())) {
         SetLayoutFullScreen(enableImmersiveMode_);
     }
@@ -2277,6 +2281,10 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     if (property_ == nullptr || property_->GetCompatibleModeInPc()) {
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
         return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
+        return WMError::WM_OK;
     }
     titleHoverShowEnabled_ = true;
     dockHoverShowEnabled_ = true;
