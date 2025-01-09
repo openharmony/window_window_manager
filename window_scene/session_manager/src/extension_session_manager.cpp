@@ -91,7 +91,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
         if (persistentId == INVALID_SESSION_ID) {
-            return std::nullptr_t;
+            return std::nullptr;
         }
         TLOGNI(WmsLogTag::WMS_UIEXT,
             "persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, "
