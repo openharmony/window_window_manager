@@ -764,7 +764,7 @@ napi_value JsWindow::SetShadow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowShadowRadius(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SetWindowShadowRadius");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowShadowRadius(env, info) : nullptr;
 }
@@ -5675,38 +5675,43 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info info)
 {
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    double result = 0.0;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) { // 1: min param num
+    if (argc != ARG_COUNT_ONE) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowToken_ is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window, not supported.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
-    if (argv[0] == nullptr) {
+    if (argv[INDEX_ZERO] == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Parameter is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    napi_status statusCode = napi_get_value_double(env, argv[0], &result);
-    if (statusCode != napi_ok) {
+    double result = 0.0f;
+    if (napi_get_value_double(env, argv[INDEX_ZERO], &result) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Napi get radius value failed.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (MathHelper::LessNotEqual(result, 0.0)) {
+    float radius = static_cast<float>(result);
+    if (MathHelper::LessNotEqual(radius, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The shadow radius is less than zero.");
         return NapiThrowError(env,  WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(result));
+    const char* const where = __func__;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SetShadowRadius failed:%{public}d", ret);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "{public%s} set window shadow radius failed.", where);
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] SetWindowShawdow end, radius=%{public}f",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), result);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set window shawdow end, radius=%{public}f.",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return NapiGetUndefined(env);
 }
 
