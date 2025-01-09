@@ -139,6 +139,7 @@ public:
     // window effect
     static napi_value SetCornerRadius(napi_env env, napi_callback_info info);
     static napi_value SetShadow(napi_env env, napi_callback_info info);
+    static napi_value SetWindowShadowRadius(napi_env env, napi_callback_info info);
     static napi_value SetBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
@@ -148,7 +149,6 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
-    static napi_value SetWindowShadowRadius(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
@@ -313,6 +313,7 @@ private:
     // window effect
     napi_value OnSetCornerRadius(napi_env env, napi_callback_info info);
     napi_value OnSetShadow(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowShadowRadius(napi_env env, napi_callback_info info);
     napi_value OnSetBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlurStyle(napi_env env, napi_callback_info info);
@@ -322,7 +323,6 @@ private:
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
     napi_value OnStopMoving(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowShadowRadius(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
