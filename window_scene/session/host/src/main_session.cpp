@@ -294,17 +294,17 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
 }
 
 WSError MainSession::NotifySupportWindowModesChange(
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     const char* const where = __func__;
-    PostTask([weakThis = wptr(this), supportWindowModes = supportWindowModes, where]() mutable {
+    PostTask([weakThis = wptr(this), supportedWindowModes = supportedWindowModes, where]() mutable {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", where);
             return;
         }
-        if (session->onSetSupportWindowModesFunc_) {
-            session->onSetSupportWindowModesFunc_(std::move(supportWindowModes));
+        if (session->onSetSupportedWindowModesFunc_) {
+            session->onSetSupportedWindowModesFunc_(std::move(supportedWindowModes));
         }
     }, __func__);
     return WSError::WS_OK;
