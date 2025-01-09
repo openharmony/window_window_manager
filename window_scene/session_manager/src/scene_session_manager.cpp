@@ -606,7 +606,7 @@ void SceneSessionManager::ConfigFreeMultiWindow()
         item = freeMultiWindowConfig["defaultWindowMode"];
         if (GetSingleIntItem(item, param) &&
             (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
-            param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+             param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.freeMultiWindowConfig_.defaultWindowMode_ =
                 static_cast<WindowMode>(static_cast<uint32_t>(param));
         }
@@ -634,7 +634,7 @@ void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
         item = config["defaultWindowMode"];
         if (GetSingleIntItem(item, param) &&
             (param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN) ||
-            param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
+             param == static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING))) {
             systemConfig_.defaultWindowMode_ = static_cast<WindowMode>(static_cast<uint32_t>(param));
         }
     }
@@ -6154,7 +6154,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             if (!sceneSession->GetSessionInfo().bundleName_.empty()) {
                 privacyBundles.insert(sceneSession->GetSessionInfo().bundleName_);
             } else {
-                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "bundle name is empty, wid=%{public}d.", item.first);
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "bundle name is empty, wid=%{public}d.", persistentId);
                 privacyBundles.insert(sceneSession->GetWindowName());
             }
         }
@@ -8459,8 +8459,7 @@ void SceneSessionManager::UpdateWindowDrawingData(uint64_t surfaceId, int32_t pi
 bool SceneSessionManager::GetProcessDrawingState(uint64_t surfaceId, int32_t pid)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& item : sceneSessionMap_) {
-        auto sceneSession = item.second;
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr) {
             continue;
         }
@@ -9321,8 +9320,7 @@ void SceneSessionManager::GetAllClearableSessions(std::vector<sptr<SceneSession>
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto &item : sceneSessionMap_) {
-        auto sceneSession = item.second;
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (IsSessionClearable(sceneSession)) {
             sessionVector.push_back(sceneSession);
         }
@@ -9906,16 +9904,14 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         processingFlushUIParams_.store(true);
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            for (const auto& item : sceneSessionMap_) {
-                auto sceneSession = item.second;
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
                 if (sceneSession == nullptr) {
                     continue;
                 }
                 if (sceneSession->GetSessionInfo().screenId_ != screenId) {
                     continue;
                 }
-                auto iter = uiParams.find(sceneSession->GetPersistentId());
-                if (iter != uiParams.end()) {
+                if (auto iter = uiParams.find(sceneSession->GetPersistentId()); iter != uiParams.end()) {
                     if ((systemConfig_.IsPhoneWindow() ||
                          (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode())) &&
                         sceneSession->GetStartingBeforeVisible() && sceneSession->IsAppSession()) {
@@ -9953,8 +9949,7 @@ void SceneSessionManager::FlushUIParams(ScreenId screenId, std::unordered_map<in
         sessionMapDirty_ = 0;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            for (const auto& item : sceneSessionMap_) {
-                auto sceneSession = item.second;
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
                 if (sceneSession == nullptr) {
                     continue;
                 }
@@ -11112,8 +11107,7 @@ void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayIn
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& item : sceneSessionMap_) {
-        auto sceneSession = item.second;
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr) {
             continue;
         }
