@@ -373,8 +373,6 @@ public:
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
 
-    sptr<MoveDragController> moveDragController_ = nullptr;
-
     bool IsDecorEnable() const;
     bool IsAppSession() const;
     bool IsAppOrLowerSystemSession() const;
@@ -649,6 +647,7 @@ protected:
      */
     NotifyBindDialogSessionFunc onBindDialogTarget_;
 
+    sptr<MoveDragController> moveDragController_ = nullptr;
     sptr<SceneSession> keyboardPanelSession_ = nullptr;
     sptr<SceneSession> keyboardSession_ = nullptr;
     NotifyKeyboardLayoutAdjustFunc adjustKeyboardLayoutFunc_;
