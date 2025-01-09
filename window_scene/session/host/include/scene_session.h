@@ -555,6 +555,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
+    WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue);
     void RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& func);
 
     /*
