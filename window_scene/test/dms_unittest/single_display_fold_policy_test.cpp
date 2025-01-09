@@ -443,6 +443,36 @@ HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayMode02, Function | Smal
     policy.ChangeScreenDisplayMode(displayMode);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
+
+/**
+ * @tc.name: ChangeScreenDisplayModeInner
+ * @tc.desc: test function : ChangeScreenDisplayModeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayModeInner, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+    
+    FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+    DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
+    sptr<ScreenSession> screenSession = new ScreenSession;
+    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::MAIN;
+    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::FULL;
+    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    EXPECT_FALSE(policy.onBootAnimation_);
+
+    displayMode = FoldDisplayMode::SUB;
+    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    EXPECT_FALSE(policy.onBootAnimation_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
