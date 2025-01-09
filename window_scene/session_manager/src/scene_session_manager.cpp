@@ -12334,7 +12334,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }, __func__);
 }
 
-WMError LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+WMError SceneSessionManager::LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
@@ -12358,7 +12358,7 @@ WMError LockSessionByAbility(const std::string& bundleName, const std::string& m
     }, __func__);
     return WMError::WM_OK;
 }
-WMError UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+WMError SceneSessionManager::UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
