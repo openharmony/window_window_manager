@@ -50,7 +50,7 @@ void TryUpdateExtensionPersistentId(int32_t& persistentId)
         }
         count ++;
         if (count > PERSISTENTID_MASK) {
-            persistentId_ = INVALID_SESSION_ID;
+            persistentId = INVALID_SESSION_ID;
             TLOGE(WmsLogTag::WMS_UIEXT, "can't generate Id");
             return;
         }
