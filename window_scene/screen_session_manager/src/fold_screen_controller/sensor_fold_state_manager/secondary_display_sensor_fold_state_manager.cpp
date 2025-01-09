@@ -62,12 +62,16 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::v
         FoldScreenStateInternel::TransVec2Str(halls, "hall").c_str());
 
     FoldStatus state = FoldStatus::UNKNOWN;
+    bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     if (angles.size() != ANGLES_AXIS_SIZE || halls.size() != HALLS_AXIS_SIZE) {
         TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}zu, halls size %{public}zu",
             angles.size(), halls.size());
         return state;
     }
-
+    if (!isPowerOn) {
+        state = GetFoldStateUnpower(halls);
+        return state;
+    }
     float angleAB = angles[1];
     uint16_t hallAB = halls[1];
     float angleBC = angles[0];
@@ -168,5 +172,22 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState (FoldStatu
     int32_t globalFoldStatus = mPrimaryFoldStatus + mSecondaryFoldStatus * 10;
     FoldStatus globalFoldState = static_cast<FoldStatus>(globalFoldStatus);
     return globalFoldState;
+}
+
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetFoldStateUnpower(const std::vector<uint16_t> &halls)
+{
+    FoldStatus state = FoldStatus::UNKNOWN;
+    int hall1 = halls[0];
+    int hall2 = halls[1];
+    if (hall2 == HALL_THRESHOLD && hall1 == HALL_THRESHOLD) {
+        state = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    } else if (hall2 == HALL_FOLDED_THRESHOLD && hall1 == HALL_THRESHOLD) {
+        state = FoldStatus::EXPAND;
+    } else if (hall2 == HALL_FOLDED_THRESHOLD && hall1 == HALL_FOLDED_THRESHOLD) {
+        state = FoldStatus::FOLDED;
+    } else if (hall2 == HALL_THRESHOLD && hall1 == HALL_FOLDED_THRESHOLD) {
+        state = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
+    }
+    return state;
 }
 } // namespace OHOS::Rosen

@@ -32,12 +32,14 @@
 
 #include "intention_event_manager.h"
 #include "window_manager_hilog.h"
+#include "sys_cap_util.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
+constexpr int32_t API_VERSION_16 = 16;
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
@@ -255,6 +257,10 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
+        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
+        return WMError::WM_DO_NOTHING;
+    }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
     TLOGI(WmsLogTag::WMS_IMMS, "root scene type %{public}u area %{public}s", type, avoidArea.ToString().c_str());
     return WMError::WM_OK;
@@ -281,6 +287,10 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
+        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
+        return WMError::WM_DO_NOTHING;
+    }
     bool firstInserted = false;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -302,6 +312,10 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
+    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
+        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
+        return WMError::WM_DO_NOTHING;
+    }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success");
     std::lock_guard<std::mutex> lock(mutex_);
     avoidAreaChangeListeners_.erase(listener);
@@ -315,6 +329,48 @@ void RootScene::NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, A
     for (auto& listener : avoidAreaChangeListeners_) {
         if (listener != nullptr) {
             listener->OnAvoidAreaChanged(*avoidArea, type);
+        }
+    }
+}
+
+WMError RootScene::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (occupiedAreaChangeListeners_.find(listener) == occupiedAreaChangeListeners_.end()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "register success");
+        occupiedAreaChangeListeners_.insert(listener);
+    }
+    return WMError::WM_OK;
+}
+
+WMError RootScene::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "unregister success");
+    std::lock_guard<std::mutex> lock(mutex_);
+    occupiedAreaChangeListeners_.erase(listener);
+    return WMError::WM_OK;
+}
+
+void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info)
+{
+    if (info == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "occupied area info is null");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "occupiedRect: %{public}s, textField PositionY_: %{public}f, Height_: %{public}f",
+        info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_);
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto& listener : occupiedAreaChangeListeners_) {
+        if (listener != nullptr) {
+            listener->OnSizeChange(info);
         }
     }
 }

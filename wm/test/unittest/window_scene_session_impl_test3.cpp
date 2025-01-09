@@ -656,7 +656,7 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowLimits01, Function | SmallTest | 
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
-    auto ret = windowSceneSessionImpl->SetWindowLimits(oldWindowLimits);
+    auto ret = windowSceneSessionImpl->SetWindowLimits(oldWindowLimits, false);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     WindowLimits newWindowLimits;
@@ -1838,7 +1838,7 @@ HWTEST_F(WindowSceneSessionImplTest3, PreNotifyKeyEvent, Function | SmallTest | 
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent = nullptr;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     windowSceneSessionImpl->uiContent_ = nullptr;
     auto ret = windowSceneSessionImpl->PreNotifyKeyEvent(keyEvent);
     EXPECT_EQ(false, ret);

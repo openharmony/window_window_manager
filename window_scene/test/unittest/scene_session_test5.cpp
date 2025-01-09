@@ -114,11 +114,11 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     session->specificCallback_ = specificCallback;
-    session->specificCallback_->onGetSceneSessionVectorByType_ = nullptr;
+    session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = nullptr;
     session->GetSystemAvoidArea(rect, avoidArea);
 
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
         return vSession;
@@ -127,7 +127,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(2024, screenSession));
-    session->specificCallback_->onGetSceneSessionVectorByType_ = func;
+    session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
     session->GetSystemAvoidArea(rect, avoidArea);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
@@ -160,7 +160,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
     session->specificCallback_ = specificCallback;
 
     systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
         return vSession;
@@ -169,7 +169,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(2024, screenSession));
-    session->specificCallback_->onGetSceneSessionVectorByType_ = func;
+    session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 
     session->property_->SetDisplayId(1024);
@@ -670,18 +670,18 @@ HWTEST_F(SceneSessionTest5, UpdateWinRectForSystemBar, Function | SmallTest | Le
     EXPECT_NE(session, nullptr);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCallback->onGetSceneSessionVectorByType_ = nullptr;
+    specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = nullptr;
     session->specificCallback_ = specificCallback;
     WSRect rect = { 1, 10, 3, 4 };
     session->UpdateWinRectForSystemBar(rect);
-    GetSceneSessionVectorByTypeCallback func = [session](WindowType type, uint64_t displayId)->
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func = [session](WindowType type, uint64_t displayId)->
         std::vector<sptr<SceneSession>>
     {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
         return vSession;
     };
-    specificCallback->onGetSceneSessionVectorByType_ = func;
+    specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
     session->UpdateWinRectForSystemBar(rect);
 
     session->isVisible_ = true;
@@ -1625,8 +1625,14 @@ HWTEST_F(SceneSessionTest5, CheckAndMoveDisplayIdRecursively, Function | SmallTe
     sptr<SceneSessionMocker> subSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     sceneSession->subSession_.push_back(subSession);
     EXPECT_CALL(*sceneSession, CheckAndMoveDisplayIdRecursively(displayId))
-        .WillRepeatedly([sceneSession](uint64_t displayId) {
-        return sceneSession->SceneSession::CheckAndMoveDisplayIdRecursively(displayId);
+        .WillRepeatedly([weakThis = wptr(sceneSession)](uint64_t displayId) {
+            auto session = weakThis.promote();
+            if (session) {
+                return weakThis->SceneSession::CheckAndMoveDisplayIdRecursively(displayId);
+            } else {
+                GTEST_LOG_(INFO) << "SceneSessionMocker:NULL";
+                return;
+            }
     });
     sceneSession->property_->SetDisplayId(displayId);
     sceneSession->shouldFollowParentWhenShow_ = true;
@@ -1672,6 +1678,28 @@ HWTEST_F(SceneSessionTest5, CheckSubSessionShouldFollowParent, Function | SmallT
     EXPECT_EQ(subSession->shouldFollowParentWhenShow_, true);
     sceneSession->CheckSubSessionShouldFollowParent(displayIdDiff);
     EXPECT_EQ(subSession->shouldFollowParentWhenShow_, false);
+}
+
+/**
+ * @tc.name: ActivateKeyboardAvoidArea01
+ * @tc.desc: test ActivateKeyboardAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ActivateKeyboardAvoidArea01, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "ActivateKeyboardAvoidArea01";
+    info.abilityName_ = "ActivateKeyboardAvoidArea01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(false, true);
+    ASSERT_EQ(false, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(false, false);
+    ASSERT_EQ(false, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(true, true);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
+    sceneSession->ActivateKeyboardAvoidArea(true, false);
+    ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
 }
 }
 }

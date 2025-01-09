@@ -35,7 +35,7 @@ public:
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override {}
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override {}
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
-    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override {}
+    void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override {}
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
 };
@@ -2536,7 +2536,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation01, Function | SmallTest | Leve
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_0, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::PORTRAIT);
 }
 
@@ -2549,7 +2549,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation02, Function | SmallTest | Leve
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_90);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_90, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::LANDSCAPE);
 }
 
@@ -2562,7 +2562,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation03, Function | SmallTest | Leve
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_180);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_180, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
 }
 
@@ -2575,7 +2575,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation04, Function | SmallTest | Leve
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_270);
+    DisplayOrientation result = session->CalcDeviceOrientation(Rotation::ROTATION_270, FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::LANDSCAPE_INVERTED);
 }
 
@@ -2588,7 +2588,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientation05, Function | SmallTest | Leve
 {
     sptr<ScreenSession> session = new ScreenSession();
     ASSERT_NE(session, nullptr);
-    DisplayOrientation result = session->CalcDeviceOrientation(static_cast<Rotation>(100));
+    DisplayOrientation result = session->CalcDeviceOrientation(static_cast<Rotation>(100), FoldDisplayMode::FULL);
     ASSERT_EQ(result, DisplayOrientation::UNKNOWN);
 }
 
