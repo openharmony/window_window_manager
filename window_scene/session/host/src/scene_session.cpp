@@ -3102,10 +3102,6 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         return;
     }
     auto sessionProperty = GetSessionProperty();
-    if (!sessionProperty) {
-        WLOGFE("get session property is null!");
-        return;
-    }
     float tmpPosY = 0.0;
     std::vector<sptr<SceneSession>> statusBarVector;
     if (specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_) {
@@ -5041,12 +5037,11 @@ std::vector<sptr<SceneSession>> SceneSession::GetToastSession() const
     return toastSession_;
 }
 
-WSRect SceneSession::GetSessionTargetRect() const
+WSRect SceneSession::GetSessionTargetRectByDisplayId(DisplayId displayId) const
 {
     WSRect rect;
     if (moveDragController_) {
-        rect = moveDragController_->GetTargetRect(
-            MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+        rect = moveDragController_->GetTargetRectByDisplayId(displayId);
     } else {
         WLOGFI("moveDragController_ is null");
     }
