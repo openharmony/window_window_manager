@@ -91,7 +91,7 @@ using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
-using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
+using NotifyPrivacyModeChangeFunc = std::function<void(bool isPrivacyMode)>;
 
 class SceneSession : public Session {
 public:
@@ -360,6 +360,7 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
     /*
      * Window Rotation
@@ -473,11 +474,6 @@ public:
      * Window Layout
      */
     void ResetSizeChangeReasonIfDirty();
-
-    /*
-     * Window PrivacyMode
-     */
-    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
 protected:
     void NotifySessionRectChange(const WSRect& rect, const SizeChangeReason& reason = SizeChangeReason::UNDEFINED);
@@ -663,6 +659,8 @@ private:
     void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void NotifyPrivacyModeChange();
+    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
+    bool isPrivacyMode_ { false };
 
     /*
      * PiP Window
@@ -745,9 +743,6 @@ private:
      */
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
-
-    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
-    bool isPrivacyMode_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

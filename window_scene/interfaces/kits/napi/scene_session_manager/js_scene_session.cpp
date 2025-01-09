@@ -1493,8 +1493,13 @@ void JsSceneSession::NotifyFrameLayoutFinish()
 
 void JsSceneSession::ProcessPrivacyModeChangeRegister()
 {
-    NotifyPrivacyModeChangeFunc func = [this](bool isPrivacyMode) {
-        this->NotifyPrivacyModeChange(isPrivacyMode);
+    NotifyPrivacyModeChangeFunc func = [weakThis = wptr(this)](bool isPrivacyMode) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->NotifyPrivacyModeChange(isPrivacyMode);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -1507,17 +1512,22 @@ void JsSceneSession::ProcessPrivacyModeChangeRegister()
 void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "isPrivacyMode:%{public}d, id:%{public}d", isPrivacyMode, persistentId_);
-    auto task = [this, isPrivacyMode, env = env_]() {
-        auto jsCallback = this->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
-        if (!jsCallback) {
-            TLOGE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
+    auto task = [weakThis = wptr(this), isPrivacyMode, env = env_]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
             return;
         }
-        napi_value jsSessionPrivacyMode = CreateJsValue(env, isPrivacyMode);
+        auto jsCallback = jsSceneSession->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
+        if (!jsCallback) {
+            TLOGNE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
+            return;
+        }
+        napi_value jsIsPrivacyModeValue = CreateJsValue(env, isPrivacyMode);
         napi_value argv[] = { jsSessionPrivacyMode };
         napi_call_function(env, NapiGetUndefined(env), jsCallback->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "NotifyPrivacyModeChange");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
