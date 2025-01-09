@@ -2222,7 +2222,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->userId = currentUserId_;
     abilitySessionInfo->isClearSession = sessionInfo.isClearSession;
     abilitySessionInfo->processOptions = sessionInfo.processOptions;
-    abilitySessionInfo->requestId = sessionInfo.specifiedId;
+    abilitySessionInfo->requestId = sessionInfo.requestId;
     if (sessionInfo.want != nullptr) {
         abilitySessionInfo->want = *sessionInfo.want;
     } else {
@@ -2286,9 +2286,9 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         auto persistentId = sceneSession->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionActivation(%d )", persistentId);
         TLOGNI(WmsLogTag::WMS_MAIN,
-            "Request active id:%{public}d, system:%{public}d, isNewActive:%{public}d, specifiedId:%{public}d",
+            "Request active id:%{public}d, system:%{public}d, isNewActive:%{public}d, requestId:%{public}d",
             persistentId, sceneSession->GetSessionInfo().isSystem_,
-            isNewActive, sceneSession->GetSessionInfo().specifiedId);
+            isNewActive, sceneSession->GetSessionInfo().requestId);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Request active session invalid by %{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
