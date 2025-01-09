@@ -133,6 +133,10 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleMinimizeMainSession(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_HAS_FLOAT_FOREGROUND):
             return HandleHasFloatingWindowForeground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY):
+            return HandleLockSession(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION_BY_ABILITY):
+            return HandleUnlockSession(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -909,6 +913,62 @@ int SceneSessionManagerLiteStub::HandleMinimizeMainSession(MessageParcel& data, 
         return ERR_INVALID_DATA;
     }
     WMError ret = MinimizeMainSession(bundleName, appIndex, userId);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleLockSessionByAbility(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string moduleName;
+    if (!data.ReadString(moduleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read moduleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string abilityName;
+    if (!data.ReadString(abilityName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read abilityName");
+        return ERR_INVALID_DATA;
+    }
+    int32_t appIndex = 0;
+    if (!data.ReadInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = LockSessionByAbility(bundleName, moduleName, abilityName, appIndex);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnlockSessionByAbility(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string moduleName;
+    if (!data.ReadString(moduleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read moduleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string abilityName;
+    if (!data.ReadString(abilityName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read abilityName");
+        return ERR_INVALID_DATA;
+    }
+    int32_t appIndex = 0;
+    if (!data.ReadInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UnlockSessionByAbility(bundleName, moduleName, abilityName, appIndex);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

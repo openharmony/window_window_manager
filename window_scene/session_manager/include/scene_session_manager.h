@@ -575,6 +575,12 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
+    void GetMainSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+    WMError LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex);
+    WMError UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex);
 
 protected:
     SceneSessionManager();
@@ -1218,6 +1224,7 @@ private:
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
+    std::unordered_set<std::string> lockStateCacheSet_;
 };
 } // namespace OHOS::Rosen
 

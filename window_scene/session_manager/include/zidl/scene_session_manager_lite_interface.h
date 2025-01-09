@@ -84,6 +84,8 @@ public:
         TRANS_ID_UI_EXTENSION_CREATION_CHECK,
         TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST,
         TRANS_ID_MINIMIZE_MAIN_SESSION,
+        TRANS_ID_LOCK_SESSION_BY_ABILITY,
+        TRANS_ID_UNLOCK_SESSION_BY_ABILITY,
         TRANS_ID_HAS_FLOAT_FOREGROUND,
     };
 
@@ -163,6 +165,38 @@ public:
      * @permission application requires SA permission or SystemApp permission
      */
     virtual WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) = 0;
+
+    /**
+     * @brief Lock a call session in recent tasks.
+     *
+     * This function locks the session in recent tasks when the app makes a call through the CallKit.
+     * The invoker must be an SA or SystemApp and have the related permission.
+     *
+     * @param bundleName bundle name of the session that needed to be locked.
+     * @param moduleName moduel name of the session that needed to be locked.
+     * @param abilityName ability name of the session that needed to be locked.
+     * @param appIndex appIndex of the session that needed to be locked.
+     * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
+     * @permission application requires SA permission or SystemApp permission
+     */
+    virtual WMError LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex) = 0;
+
+    /**
+     * @brief Unlock the session in recent tasks when the call ends.
+     *
+     * This function unlocks the session in recent tasks when the call ends.
+     * The invoker must be an SA or SystemApp and have the related permission.
+     *
+     * @param bundleName bundle name of the session that needed to be unlocked.
+     * @param moduleName moduel name of the session that needed to be unlocked.
+     * @param abilityName ability name of the session that needed to be unlocked.
+     * @param appIndex appIndex of the session that needed to be unlocked.
+     * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
+     * @permission application requires SA permission or SystemApp permission
+     */
+    virtual WMError UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex) = 0;
 
     /**
      * @brief Query if there is float type window foreground of an abilityToken
