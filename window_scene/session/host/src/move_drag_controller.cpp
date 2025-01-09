@@ -175,8 +175,13 @@ WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
         default:
             return moveDragProperty_.targetRect_;
     }
+    return GetTargetRectByDisplayId(relatedDisplayId);
+}
+
+WSRect MoveDragController::GetTargetRectByDisplayId(DisplayId displayId) const
+{
     sptr<ScreenSession> screenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(relatedDisplayId);
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
     if (!screenSession) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return relative coordinates.");
         return moveDragProperty_.targetRect_;
@@ -1074,17 +1079,9 @@ void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaF
 
 void MoveDragController::OnLostFocus()
 {
-    if (isStartMove_ || isStartDrag_) {
-        WLOGFI("window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d, isDrag: %{public}d",
-            persistentId_, isStartMove_, isStartDrag_);
-        isStartMove_ = false;
-        isStartDrag_ = false;
-        NotifyWindowInputPidChange(isStartDrag_);
-        if (windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED) {
-            ProcessWindowDragHotAreaFunc(true, SizeChangeReason::DRAG_END);
-        }
-        ProcessSessionRectChange(SizeChangeReason::DRAG_END);
-    }
+    TLOGW(WmsLogTag::WMS_LAYOUT, "window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d,"
+        "isDrag: %{public}d", persistentId_, isStartMove_, isStartDrag_);
+    moveDragIsInterrupted_ = true;
 }
 
 void MoveDragController::SetIsPcWindow(bool isPcWindow)

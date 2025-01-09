@@ -1446,7 +1446,7 @@ HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect01, Function | SmallTest | L
     info.bundleName_ = "NotifyServerToUpdateRect01";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    
+
     session->foregroundInteractiveStatus_.store(true);
     EXPECT_EQ(session->GetForegroundInteractiveStatus(), true);
 
@@ -1490,7 +1490,7 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | Smal
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     PcFoldScreenManager::GetInstance().vpr_ = 1.7f;
-    
+
     WSRect rect0 = { 100, 100, 400, 400 };
     WSRect rect1 = { 100, 500, 400, 400 };
 
@@ -1542,7 +1542,7 @@ HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     session->MarkSystemSceneUIFirst(true, true);
- 
+
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;

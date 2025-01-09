@@ -65,6 +65,7 @@ public:
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect(TargetRectCoordinate coordinate) const;
+    WSRect GetTargetRectByDisplayId(DisplayId displayId) const;
     void SetTargetRect(const WSRect& rect);
     WSRect GetOriginalRect() const;
     void InitMoveDragProperty();
