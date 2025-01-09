@@ -87,7 +87,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
         if (!newSessionInfo.config_.isDensityFollowHost_) {
             newSessionInfo.config_.density_ = GetSystemDensity(newSessionInfo.config_.displayId_);
         }
-        sptr<ExtensionSession> extensionSession = new ExtensionSession(newSessionInfo);
+        sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(newSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
         if (persistentId == INVALID_SESSION_ID) {
