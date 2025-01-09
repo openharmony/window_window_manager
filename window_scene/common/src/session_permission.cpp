@@ -29,9 +29,6 @@
 #include <pwd.h>
 #include "common/include/session_permission.h"
 #include "parameters.h"
-#ifdef OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
-#include "virtual_keyboard_client.h"
-#endif // OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -196,17 +193,6 @@ bool SessionPermission::IsStartedByInputMethod()
     }
     int pid = IPCSkeleton::GetCallingPid();
     return imc->IsCurrentImeByPid(pid);
-}
-
-bool SessionPermission::IsStartedBySystemKeyboard()
-{
-#ifdef OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD
-    int pid = IPCSkeleton::GetCallingPid();
-    return VirtualKeyboard::VirtualKeyboardClient::GetInstance().IsCurrentProcess(pid);
-#else
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "This device dose not support system keyboard.");
-    return false;
-#endif
 }
 
 bool SessionPermission::IsSameBundleNameAsCalling(const std::string& bundleName)

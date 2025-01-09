@@ -63,7 +63,8 @@ public:
     DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
     void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event);
-    void NotifyScreenModeChange();
+    // inner interface of multimodal-input
+    void NotifyScreenModeChange(ScreenId disconnectedScreenId = INVALID_SCREEN_ID);
 
     DMError GetScreenColorGamut(ScreenId screenId, ScreenColorGamut& colorGamut) override;
     DMError SetScreenColorGamut(ScreenId screenId, int32_t colorGamutIdx) override;
@@ -278,7 +279,7 @@ public:
     void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
-    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override;
+    void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
 
@@ -423,6 +424,7 @@ private:
         std::vector<uint64_t>& windowIdList) override;
     void GetInternalAndExternalSession(sptr<ScreenSession>& internalSession, sptr<ScreenSession>& externalSession);
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
+    std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE

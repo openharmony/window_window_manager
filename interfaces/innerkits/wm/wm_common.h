@@ -139,7 +139,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_PRIMARY = 100,
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
+    WINDOW_MODE_PIP,
+    END = WINDOW_MODE_PIP,
 };
 
 /**
@@ -1162,10 +1163,10 @@ struct WindowLimits {
  * @brief An area of title buttons relative to the upper right corner of the window.
  */
 struct TitleButtonRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const TitleButtonRect& a) const
     {
@@ -1175,6 +1176,14 @@ struct TitleButtonRect {
     bool operator!=(const TitleButtonRect& a) const
     {
         return !this->operator==(a);
+    }
+
+    void ResetRect()
+    {
+        posX_ = 0;
+        posY_ = 0;
+        width_ = 0;
+        height_ = 0;
     }
 
     bool IsUninitializedRect() const

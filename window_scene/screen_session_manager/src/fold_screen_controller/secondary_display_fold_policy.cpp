@@ -166,23 +166,22 @@ FoldDisplayMode SecondaryDisplayFoldPolicy::GetModeMatchStatus()
 void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
     FoldDisplayMode displayMode)
 {
-    if (onBootAnimation_) {
-        return;
-    }
     {
-        if (lastStatus_ == FoldStatus::UNKNOWN) {
-            lastStatus_ = currentFoldStatus_;
-        }
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-        if (currentDisplayMode_ == displayMode && lastStatus_ != currentFoldStatus_) {
+        if (currentDisplayMode_ == displayMode) {
             TLOGW(WmsLogTag::DMS, "already in displayMode %{public}d", displayMode);
-            lastStatus_ = currentFoldStatus_;
             return;
         }
-        lastStatus_ = currentFoldStatus_;
     }
     SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND,
         displayMode);
+    if (currentDisplayMode_ != displayMode) {
+        if ((currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::FULL)
+            || (currentDisplayMode_ == FoldDisplayMode::FULL && displayMode == FoldDisplayMode::MAIN)
+            || (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::MAIN)) {
+                return;
+        }
+    }
     auto taskScreenOnFullOn = [=] {
         screenId_ = SCREEN_ID_FULL;
         PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
@@ -310,5 +309,32 @@ void SecondaryDisplayFoldPolicy::InitScreenParams()
           screenParams_[MAIN_STATUS_WIDTH], screenParams_[FULL_STATUS_WIDTH],
           screenParams_[GLOBAL_FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT],
           screenParams_[FULL_STATUS_OFFSET_X]);
+}
+
+std::vector<uint32_t> SecondaryDisplayFoldPolicy::GetScreenParams()
+{
+    return screenParams_;
+}
+
+Drawing::Rect SecondaryDisplayFoldPolicy::GetScreenSnapshotRect()
+{
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    if (currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        snapshotRect.left_ = 0;
+        snapshotRect.top_ = 0;
+        snapshotRect.right_ = screenParams_[SCREEN_HEIGHT];
+        snapshotRect.bottom_ = screenParams_[MAIN_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::FULL) {
+        snapshotRect.left_ = 0;
+        snapshotRect.top_ = screenParams_[FULL_STATUS_OFFSET_X];
+        snapshotRect.right_ = screenParams_[SCREEN_HEIGHT];
+        snapshotRect.bottom_ = screenParams_[GLOBAL_FULL_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        snapshotRect.left_ = 0;
+        snapshotRect.top_ = 0;
+        snapshotRect.right_ = screenParams_[SCREEN_HEIGHT];
+        snapshotRect.bottom_ = screenParams_[GLOBAL_FULL_STATUS_WIDTH];
+    }
+    return snapshotRect;
 }
 } // namespace OHOS::Rosen
