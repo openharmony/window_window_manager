@@ -784,11 +784,11 @@ struct Rect {
         oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
         return oss.str();
     }
-    
+
     static const Rect EMPTY_RECT;
 };
 
-inline constepr Rect Rect::EMPTY_RECT = { 0, 0, 0, 0 };
+inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
  * @struct RectAnimationConfig
