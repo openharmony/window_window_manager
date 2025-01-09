@@ -467,7 +467,7 @@ public:
     /*
      * Window Property
      */
-    WMError ReleaseForegroundSessionScreenLock() override;
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
 
@@ -764,6 +764,7 @@ private:
     /*
      * Window Property
      */
+    std::unordered_map<std::string, std::unordered_set<int32_t>> releasedScreenLockMap_;
     std::vector<std::pair<uint64_t, bool>> GetWindowDrawingContentChangeInfo(
         const std::vector<std::pair<uint64_t, bool>>& currDrawingContentData);
     bool GetPreWindowDrawingState(uint64_t surfaceId, bool currentWindowDrawing, int32_t& pid);
@@ -771,6 +772,10 @@ private:
     void UpdateWindowDrawingData(uint64_t surfaceId, int32_t pid, int32_t uid);
     bool GetSpecifiedDrawingData(uint64_t surfaceId, int32_t& pid, int32_t& uid);
     void RemoveSpecifiedDrawingData(uint64_t surfaceId);
+    WMError ReleaseScreenLockForApp(const std::string& bundleName);
+    WMError RelockScreenLockForApp(const std::string& bundleName);
+    void GetAllSessionsToReleaseScreenLock(
+        std::vector<sptr<SceneSession>>& sessionsToReleaseScreenLock, const std::string& bundleName);
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
@@ -1182,7 +1187,7 @@ private:
         int32_t uid_ = 0;
     };
     std::unordered_map<uint64_t, DrawingSessionInfo> lastDrawingSessionInfoMap_;
-    
+
     /*
      * Move Drag
      */
