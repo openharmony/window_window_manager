@@ -142,6 +142,16 @@ public:
      * @brief Notify caller that window is destroyed.
      */
     virtual void AfterDestroyed() {}
+
+    /**
+     * @brief Notify caller that window is paused.
+     */
+    virtual void AfterDidForeground() {}
+
+    /**
+     * @brief Notify caller that window is destroyed.
+     */
+    virtual void AfterDidBackground() {}
 };
 
 /**
