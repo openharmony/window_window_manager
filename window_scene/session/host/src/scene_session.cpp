@@ -105,16 +105,17 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
     const std::string& identityToken)
 {
+    const char* const where = __func__;
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid,
-        uid, identityToken]() {
+        uid, identityToken, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (SessionHelper::IsMainWindow(session->GetWindowType())) {
             if (!session->CheckIdentityTokenIfMatched(identityToken)) {
-                TLOGNW(WmsLogTag::WMS_LIFE, "check failed");
+                TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s check failed", where);
                 return WSError::WS_OK;
             }
         }
@@ -134,7 +135,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         }
         return ret;
     };
-    return PostSyncTask(task, __func__);
+    return PostSyncTask(task, where);
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -153,10 +154,12 @@ WSError SceneSession::Reconnect(const sptr<ISessionStage>& sessionStage, const s
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
     int32_t pid, int32_t uid)
 {
-    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, property, token, pid, uid]() {
+    const char* const where = __func__;
+    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel,
+        surfaceNode, property, token, pid, uid, where] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WSError ret = LOCK_GUARD_EXPR(SCENE_GUARD,
@@ -238,11 +241,14 @@ void SceneSession::AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo)
 
 void SceneSession::RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityToken)
 {
+    const char* const where = __func__;
     auto persistentId = GetPersistentId();
     auto itr = std::remove_if(
-        extensionTokenInfos_.begin(), extensionTokenInfos_.end(), [&abilityToken, persistentId](const auto& tokenInfo) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
-                tokenInfo.callingTokenId, persistentId);
+        extensionTokenInfos_.begin(), extensionTokenInfos_.end(), [&abilityToken, persistentId, where]
+            (const auto& tokenInfo) {
+            TLOGNI(WmsLogTag::WMS_UIEXT,
+                "%{public}s UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
+                where, tokenInfo.callingTokenId, persistentId);
             return tokenInfo.abilityToken == abilityToken;
         });
 
@@ -352,10 +358,11 @@ void SceneSession::SetRequestNextVsyncFunc(RequestVsyncFunc&& func)
 
 WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property)
 {
-    PostTask([weakThis = wptr(this), property]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), property, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto sessionProperty = session->GetSessionProperty();
@@ -367,8 +374,8 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         int32_t persistentId = session->GetPersistentId();
         auto ret = session->Session::Foreground(property);
         if (ret != WSError::WS_OK) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session foreground failed, ret=%{public}d persistentId=%{public}d",
-                ret, persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session foreground failed, ret=%{public}d persistentId=%{public}d",
+                where, ret, persistentId);
             return ret;
         }
         auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
@@ -387,10 +394,11 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
             session->UpdateGestureBackEnabled();
         } else {
-            TLOGNI(WmsLogTag::WMS_LIFE, "foreground specific callback does not take effect, callback function null");
+            TLOGNI(WmsLogTag::WMS_LIFE,
+                "%{public}s foreground specific callback does not take effect, callback function null", where);
         }
         return WSError::WS_OK;
-    }, __func__);
+    }, where);
     return WSError::WS_OK;
 }
 
@@ -429,29 +437,31 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
 WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}s", notifyListener, rect.ToString().c_str());
-    PostTask([weakThis = wptr(this), notifyListener, rect]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), notifyListener, rect, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
+            TLOGNE(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->layoutRect_ = rect;
         session->NotifyLayoutFinished();
         if (notifyListener && session->frameLayoutFinishFunc_) {
-            TLOGND(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d", session->GetPersistentId());
+            TLOGND(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s id: %{public}d", where, session->GetPersistentId());
             session->frameLayoutFinishFunc_();
         }
         return WSError::WS_OK;
-    }, "NotifyFrameLayoutFinishFromApp");
+    }, where);
     return WSError::WS_OK;
 }
 
 WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
 {
-    PostTask([weakThis = wptr(this), isSaveSnapshot]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), isSaveSnapshot, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         auto state = session->GetSessionState();
@@ -477,7 +487,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
             session->UpdateGestureBackEnabled();
         }
         return WSError::WS_OK;
-    }, __func__);
+    }, where);
     return WSError::WS_OK;
 }
 
@@ -491,7 +501,7 @@ void SceneSession::ClearSpecificSessionCbMap()
             return;
         }
         session->ClearJsSceneSessionCbMap(true);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::ClearJsSceneSessionCbMap(bool needRemove)
@@ -557,15 +567,16 @@ WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityT
 
 WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
 {
-    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot, where]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (isFromClient) {
-            TLOGNI(WmsLogTag::WMS_LIFE, "Client need notify destroy session, id: %{public}d",
-                session->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Client need notify destroy session, id: %{public}d",
+                where, session->GetPersistentId());
             session->SetSessionState(SessionState::STATE_DISCONNECT);
             return WSError::WS_OK;
         }
@@ -583,25 +594,27 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             session->isEnableGestureBackHadSet_ = false;
         }
         return WSError::WS_OK;
-    }, __func__);
+    }, where);
     return WSError::WS_OK;
 }
 
 WSError SceneSession::UpdateActiveStatus(bool isActive)
 {
-    PostTask([weakThis = wptr(this), isActive]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), isActive, where] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->IsSessionValid()) {
-            TLOGNW(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-                session->GetPersistentId(), session->GetSessionState());
+            TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s Session is invalid, id: %{public}d state: %{public}u",
+                where, session->GetPersistentId(), session->GetSessionState());
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         if (isActive == session->isActive_) {
-            WLOGFD("[WMSCom] Session active do not change: %{public}d", isActive);
+            TLOGND(WmsLogTag::WMS_LIFE, "%{public}s Session active do not change: %{public}d",
+                where, isActive);
             return WSError::WS_DO_NOTHING;
         }
 
@@ -616,22 +629,23 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
             session->isActive_ = isActive;
             ret = WSError::WS_OK;
         }
-        WLOGFI("[WMSCom] isActive: %{public}d, state: %{public}u",
-            session->isActive_, session->GetSessionState());
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s isActive: %{public}d, state: %{public}u",
+            where, session->isActive_, session->GetSessionState());
         return ret;
-    }, "UpdateActiveStatus:" + std::to_string(isActive));
+    }, std::string(where) + ":" + std::to_string(isActive));
     return WSError::WS_OK;
 }
 
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
-    PostTask([weakThis = wptr(this), event]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), event, where] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("[WMSCom] session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
@@ -649,7 +663,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 session->UpdateFullScreenWaterfallMode(false);
                 rect = session->moveDragController_->GetFullScreenToFloatingRect(session->winRect_,
                     session->GetSessionRequestRect());
-                session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, "OnSessionEvent", nullptr);
+                session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, where, nullptr);
                 session->moveDragController_->SetStartMoveFlag(true);
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
             } else {
@@ -664,7 +678,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
             session->onSessionEvent_(static_cast<uint32_t>(event), session->sessionEventParam_);
         }
         return WSError::WS_OK;
-    }, "OnSessionEvent:" + std::to_string(static_cast<uint32_t>(event)));
+    }, std::string(where) + ":" + std::to_string(static_cast<uint32_t>(event)));
     return WSError::WS_OK;
 }
 
@@ -711,28 +725,28 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
             "eventId=%{public}u windowId=%{public}d", event, GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
-    const char* const funcName = __func__;
-    return PostSyncTask([weakThis = wptr(this), event, funcName] {
+    const char* const where = __func__;
+    return PostSyncTask([weakThis = wptr(this), event, where] {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: session or moveDragController is null", funcName);
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: session or moveDragController is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (event == SessionEvent::EVENT_END_MOVE) {
             if (!session->moveDragController_->GetStartMoveFlag()) {
-                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "Repeat operation, window is not moving");
+                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s Repeat operation, window is not moving", where);
                 return WSError::WS_OK;
             }
             session->moveDragController_->MoveDragInterrupted();
             return WSError::WS_OK;
         }
         if (session->moveDragController_->GetStartMoveFlag()) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: Repeat operation, system window is moving", funcName);
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: Repeat operation, system window is moving", where);
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         session->OnSessionEvent(event);
         return WSError::WS_OK;
-    }, funcName);
+        }, where);
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY)
@@ -770,7 +784,7 @@ WSError SceneSession::NotifySubModalTypeChange(SubWindowModalType subWindowModal
         if (session->onSubModalTypeChange_) {
             session->onSubModalTypeChange_(subWindowModalType);
         }
-    }, __func__);
+    }, where);
     return WSError::WS_OK;
 }
 
@@ -786,7 +800,7 @@ void SceneSession::RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFu
         session->onSubModalTypeChange_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s id: %{public}d",
             where, session->GetPersistentId());
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func)
@@ -800,7 +814,7 @@ void SceneSession::RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChange
         }
         session->onMainModalTypeChange_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where, session->GetPersistentId());
-    }, __func__);
+    }, where);
 }
 
 bool SceneSession::IsDialogWindow() const
@@ -841,137 +855,147 @@ void SceneSession::SetSessionEventParam(SessionEventParam param)
 
 void SceneSession::RegisterSessionEventCallback(NotifySessionEventFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return;
         }
         session->onSessionEvent_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onUpdateAppUseControlFunc_ = std::move(callback);
         for (const auto& [type, isNeedControl] : session->appUseControlMap_) {
             session->onUpdateAppUseControlFunc_(type, isNeedControl);
         }
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl)
 {
-    PostTask([weakThis = wptr(this), type, isNeedControl] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), type, isNeedControl, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->appUseControlMap_[type] = isNeedControl;
         if (session->onUpdateAppUseControlFunc_) {
             session->onUpdateAppUseControlFunc_(type, isNeedControl);
         }
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onWindowAnimationFlagChange_ = std::move(callback);
         session->onWindowAnimationFlagChange_(session->IsNeedDefaultAnimation());
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterDefaultDensityEnabledCallback(NotifyDefaultDensityEnabledFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onDefaultDensityEnabledFunc_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterNeedAvoidCallback(NotifyNeedAvoidFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return;
         }
         session->onNeedAvoid_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onSystemBarPropertyChange_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onTouchOutside_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
-    auto task = [weakThis = wptr(this), mode]() {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), mode, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_PC, "[WMSCom] session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGND(WmsLogTag::WMS_PC, "[WMSCom] mode: %{public}u", static_cast<uint32_t>(mode));
+        TLOGND(WmsLogTag::WMS_PC, "%{public}s mode: %{public}u", where, static_cast<uint32_t>(mode));
         session->maximizeMode_ = mode;
         ScenePersistentStorage::Insert("maximize_state", static_cast<int32_t>(session->maximizeMode_),
             ScenePersistentStorageType::MAXIMIZE_STATE);
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "SetGlobalMaximizeMode");
+    return PostSyncTask(task, where);
 }
 
 WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
-    auto task = [weakThis = wptr(this), &mode]() {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), &mode, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_PC, "[WMSCom] session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         mode = maximizeMode_;
-        TLOGND(WmsLogTag::WMS_PC, "[WMSCom] mode: %{public}u", static_cast<uint32_t>(mode));
+        TLOGND(WmsLogTag::WMS_PC, "%{public}s mode: %{public}u", where, static_cast<uint32_t>(mode));
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "GetGlobalMaximizeMode");
+    return PostSyncTask(task, where);
 }
 
 static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ratio, float vpr)
@@ -1016,21 +1040,22 @@ static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ra
 /** @note @window.layout */
 WSError SceneSession::SetAspectRatio(float ratio)
 {
-    auto task = [weakThis = wptr(this), ratio] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), ratio, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->GetSessionProperty()) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "Set ratio failed, property is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s Set ratio failed, property is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
         float vpr = 1.5f; // 1.5f: default virtual pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display) {
             vpr = display->GetVirtualPixelRatio();
-            TLOGND(WmsLogTag::WMS_LAYOUT, "vpr=%{public}f", vpr);
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s vpr=%{public}f", where, vpr);
         }
         WSError ret = CheckAspectRatioValid(session, ratio, vpr);
         if (ret != WSError::WS_OK) {
@@ -1042,32 +1067,32 @@ WSError SceneSession::SetAspectRatio(float ratio)
         }
         session->SaveAspectRatio(session->aspectRatio_);
         WSRect adjustedRect = session->winRect_;
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Before adjusting, the id:%{public}d, the current rect:%{public}s, "
-            "ratio:%{public}f", session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s Before adjusting, the id:%{public}d, the current rect:%{public}s, "
+            "ratio:%{public}f", where, session->GetPersistentId(), adjustedRect.ToString().c_str(), ratio);
         if (session->AdjustRectByAspectRatio(adjustedRect)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
-                session->GetPersistentId(), adjustedRect.ToString().c_str());
+            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s After adjusting, the id:%{public}d, the adjusted rect:%{public}s",
+                where, session->GetPersistentId(), adjustedRect.ToString().c_str());
             session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
         }
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "SetAspectRatio");
+    return PostSyncTask(task, where);
 }
 
 /** @note @window.layout */
 WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    const char* const funcName = __func__;
-    PostTask([weakThis = wptr(this), rect, reason, rsTransaction, updateReason, funcName] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), rect, reason, rsTransaction, updateReason, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
             return;
         }
         if (session->reason_ == SizeChangeReason::DRAG) {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: skip drag reason update id:%{public}d rect:%{public}s",
-                funcName, session->GetPersistentId(), rect.ToString().c_str());
+                where, session->GetPersistentId(), rect.ToString().c_str());
             return;
         }
         if (session->winRect_ == rect && session->reason_ != SizeChangeReason::DRAG_END &&
@@ -1075,18 +1100,18 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
              session->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
             if (!session->sessionStage_) {
                 TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: skip same rect update id:%{public}d rect:%{public}s",
-                    funcName, session->GetPersistentId(), rect.ToString().c_str());
+                    where, session->GetPersistentId(), rect.ToString().c_str());
                 return;
             } else if (session->GetClientRect() == rect) {
                 TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: skip same rect update id:%{public}d rect:%{public}s "
-                    "clientRect:%{public}s", funcName, session->GetPersistentId(), rect.ToString().c_str(),
+                    "clientRect:%{public}s", where, session->GetPersistentId(), rect.ToString().c_str(),
                     session->GetClientRect().ToString().c_str());
                 return;
             }
         }
         if (rect.IsInvalid()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d rect:%{public}s is invalid",
-                funcName, session->GetPersistentId(), rect.ToString().c_str());
+                where, session->GetPersistentId(), rect.ToString().c_str());
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdateRect %d [%d, %d, %u, %u]",
@@ -1095,7 +1120,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         if (NearEqual(rect.width_, session->winRect_.width_) && NearEqual(rect.height_, session->winRect_.height_) &&
             (session->reason_ != SizeChangeReason::DRAG_MOVE || !session->rectChangeListenerRegistered_)) {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, "
-                "rect:%{public}s, preRect:%{public}s", funcName,
+                "rect:%{public}s, preRect:%{public}s", where,
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
             session->winRect_ = rect;
         } else {
@@ -1105,9 +1130,9 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, reason:%{public}d %{public}s, "
             "rect:%{public}s, clientRect:%{public}s",
-            funcName, session->GetPersistentId(), session->reason_, updateReason.c_str(),
+            where, session->GetPersistentId(), session->reason_, updateReason.c_str(),
             rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
-    }, funcName + GetRectInfo(rect));
+    }, where + GetRectInfo(rect));
     return WSError::WS_OK;
 }
 
@@ -1147,10 +1172,11 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
 WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
-    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), rsTransaction, updateReason, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
@@ -1164,7 +1190,7 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
             }
         }
         return ret;
-    }, "NotifyClientToUpdateRect");
+    }, where);
     return WSError::WS_OK;
 }
 
@@ -1237,19 +1263,21 @@ bool SceneSession::GetScreenWidthAndHeightFromClient(const sptr<WindowSessionPro
 void SceneSession::NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
     uint32_t screenHeight)
 {
-    PostTask([weakThis = wptr(this), isScreenAngleMismatch, screenWidth, screenHeight]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), isScreenAngleMismatch, screenWidth, screenHeight, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "keyboard session is null");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s keyboard session is null", where);
             return;
         }
         session->isScreenAngleMismatch_ = isScreenAngleMismatch;
         session->targetScreenWidth_ = screenWidth;
         session->targetScreenHeight_ = screenHeight;
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, "target isMismatch: %{public}d, width_: %{public}d, height_: %{public}d",
-            isScreenAngleMismatch, screenWidth, screenHeight);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD,
+            "%{public}s target isMismatch: %{public}d, width_: %{public}d, height_: %{public}d",
+            where, isScreenAngleMismatch, screenWidth, screenHeight);
         return;
-    }, "NotifyTargetScreenWidthAndHeight");
+    }, where);
 }
 
 bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newWinRect, WSRect& newRequestRect)
@@ -1286,10 +1314,11 @@ bool SceneSession::UpdateInputMethodSessionRect(const WSRect& rect, WSRect& newW
 
 void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFunc& func)
 {
-    PostTask([weakThis = wptr(this), func]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func, where] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->sessionRectChangeFunc_ = func;
@@ -1303,19 +1332,20 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
             session->sessionRectChangeFunc_(rect, reason, DISPLAY_ID_INVALID, rectAnimationConfig);
         }
         return WSError::WS_OK;
-    }, "SetSessionRectChangeCallback");
+    }, where);
 }
 
 void SceneSession::SetSessionDisplayIdChangeCallback(NotifySessionDisplayIdChangeFunc&& func)
 {
-    PostTask([weakThis = wptr(this), func = std::move(func)]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "session or display id is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session or display id is null", where);
             return;
         }
         session->sessionDisplayIdChangeFunc_ = std::move(func);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func)
@@ -1328,89 +1358,93 @@ void SceneSession::SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostCha
             return;
         }
         session->mainWindowTopmostChangeFunc_ = std::move(func);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHoverShowChangeFunc&& func)
 {
-    const char* const funcName = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), funcName] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session or TitleAndDockHoverShowChangeFunc is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or TitleAndDockHoverShowChangeFunc is null", where);
             return;
         }
         session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d",
-            funcName, session->GetPersistentId());
-    }, funcName);
+            where, session->GetPersistentId());
+    }, where);
 }
 
 void SceneSession::SetRestoreMainWindowCallback(NotifyRestoreMainWindowFunc&& func)
 {
-    const char* const funcName = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), funcName] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session or RestoreMainWindowFunc is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or RestoreMainWindowFunc is null", where);
             return;
         }
         session->onRestoreMainWindowFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d",
-            funcName, session->GetPersistentId());
-    }, funcName);
+            where, session->GetPersistentId());
+    }, where);
 }
 
 void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdjustFunc& func)
 {
-    PostTask([weakThis = wptr(this), func]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func, where] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "session or keyboardLayoutFunc is null");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or keyboardLayoutFunc is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->adjustKeyboardLayoutFunc_ = func;
         auto property = session->GetSessionProperty();
         if (property == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "property is null");
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s property is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         KeyboardLayoutParams params = property->GetKeyboardLayoutParams();
         session->adjustKeyboardLayoutFunc_(params);
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Notify adjust keyboard layout when register, keyboardId: %{public}d, "
+        TLOGNI(WmsLogTag::WMS_KEYBOARD,
+            "%{public}s Notify adjust keyboard layout when register, keyboardId: %{public}d, "
             "gravity: %{public}u, landscapeAvoidHeight: %{public}d, PortraitAvoidHeight: %{public}d, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
-            "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s", session->GetPersistentId(),
+            "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s", where, session->GetPersistentId(),
             static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
             params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
             params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
         return WSError::WS_OK;
-    }, "SetAdjustKeyboardLayoutCallback");
+    }, where);
 }
 
 void SceneSession::SetSessionPiPControlStatusChangeCallback(const NotifySessionPiPControlStatusChangeFunc& func)
 {
-    PostTask([weakThis = wptr(this), func]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_PIP, "session is null");
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->sessionPiPControlStatusChangeFunc_ = func;
         return WSError::WS_OK;
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func)
 {
-    PostTask([weakThis = wptr(this), func] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_PIP, "session is null");
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
             return;
         }
         session->autoStartPiPStatusChangeFunc_ = func;
-    }, __func__);
+    }, where);
 }
 
 /** @note @window.layout */
@@ -1520,15 +1554,16 @@ WSError SceneSession::UpdateSessionRect(
         }
     }
     Session::RectCheckProcess();
-    PostTask([weakThis = wptr(this), newRect, reason, moveConfiguration, rectAnimationConfig] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), newRect, reason, moveConfiguration, rectAnimationConfig, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->UpdateSessionRectInner(newRect, reason, moveConfiguration, rectAnimationConfig);
         return WSError::WS_OK;
-    }, "UpdateSessionRect" + GetRectInfo(rect));
+    }, where + GetRectInfo(rect));
     return WSError::WS_OK;
 }
 
@@ -1559,34 +1594,37 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
 
 void SceneSession::RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onRaiseToTop_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onRaiseAboveTarget_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return;
         }
         session->onSessionTopmostChange_ = std::move(callback);
@@ -1597,20 +1635,21 @@ void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChan
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
-    auto task = [weakThis = wptr(this)]() {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->onRaiseToTop_) {
-            TLOGNI(WmsLogTag::WMS_HIERARCHY, "id: %{public}d", session->GetPersistentId());
+            TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s id: %{public}d", where, session->GetPersistentId());
             session->onRaiseToTop_();
             session->SetMainSessionUIStateDirty(true);
         }
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "RaiseToAppTop");
+    return PostSyncTask(task, where);
 }
 
 /** @note @window.hierarchy */
@@ -1629,10 +1668,11 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied! id: %{public}d", subWindowId);
         return WSError::WS_ERROR_INVALID_CALLING;
     }
-    auto task = [weakThis = wptr(this), subWindowId]() {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), subWindowId, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "session is null");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->onRaiseAboveTarget_) {
@@ -1640,7 +1680,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         }
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "RaiseAboveTarget");
+    return PostSyncTask(task, where);
 }
 
 WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSession)
@@ -1676,14 +1716,15 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
 
 void SceneSession::SetIsStatusBarVisible(bool isVisible)
 {
-    PostTask([weakThis = wptr(this), isVisible] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), isVisible, where] {
         sptr<SceneSession> sceneSession = weakThis.promote();
         if (sceneSession == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return;
         }
         sceneSession->SetIsStatusBarVisibleInner(isVisible);
-    }, __func__);
+    }, where);
 }
 
 WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
@@ -1731,10 +1772,11 @@ void SceneSession::NotifyPropertyWhenConnect()
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseAppMainWindowToTop()
 {
-    PostTask([weakThis = wptr(this)]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->IsFocusedOnShow()) {
@@ -1745,25 +1787,26 @@ WSError SceneSession::RaiseAppMainWindowToTop()
             session->SetFocusedOnShow(true);
         }
         return WSError::WS_OK;
-    }, "RaiseAppMainWindowToTop");
+    }, where);
     return WSError::WS_OK;
 }
 
 WSError SceneSession::OnNeedAvoid(bool status)
 {
-    PostTask([weakThis = wptr(this), status]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), status, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGNI(WmsLogTag::WMS_IMMS, "win %{public}d status %{public}d ",
-            session->GetPersistentId(), static_cast<int32_t>(status));
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d status %{public}d ",
+            where, session->GetPersistentId(), static_cast<int32_t>(status));
         if (session->onNeedAvoid_) {
             session->onNeedAvoid_(status);
         }
         return WSError::WS_OK;
-    }, "OnNeedAvoid");
+    }, where);
     return WSError::WS_OK;
 }
 
@@ -2154,23 +2197,25 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
 
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
-    auto task = [weakThis = wptr(this), type, rect]() -> AvoidArea {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), type, rect, where]() -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
         return session->GetAvoidAreaByTypeInner(type, rect);
     };
-    return PostSyncTask(task, "GetAvoidAreaByType");
+    return PostSyncTask(task, where);
 }
 
 WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    auto task = [weakThis = wptr(this), &avoidAreas] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), &avoidAreas, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "session is null");
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
 
@@ -2182,7 +2227,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         }
         return WSError::WS_OK;
     };
-    return PostSyncTask(task, "GetAllAvoidAreas");
+    return PostSyncTask(task, where);
 }
 
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
@@ -2216,14 +2261,15 @@ WSError SceneSession::SetPiPControlEvent(WsPiPControlType controlType, WsPiPCont
 
 void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback)
 {
-    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), callback = std::move(callback), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_PIP, "session is null");
+            TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null", where);
             return;
         }
         session->onPrepareClosePiPSession_ = std::move(callback);
-    }, __func__);
+    }, where);
 }
 
 void SceneSession::HandleStyleEvent(MMI::WindowArea area)
@@ -2343,15 +2389,16 @@ void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEven
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool needNotifyClient, bool isExecuteDelayRaise)
 {
-    auto task = [weakThis = wptr(this), pointerEvent, needNotifyClient, isExecuteDelayRaise] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), pointerEvent, needNotifyClient, isExecuteDelayRaise, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::DEFAULT, "session is null");
+            TLOGNE(WmsLogTag::DEFAULT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         return session->TransferPointerEventInner(pointerEvent, needNotifyClient, isExecuteDelayRaise);
     };
-    return PostSyncTask(std::move(task), __func__);
+    return PostSyncTask(std::move(task), where);
 }
 
 WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -2519,14 +2566,15 @@ bool SceneSession::IsMovable()
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
 {
-    PostTask([weakThis = wptr(this), needMoveToBackground]() {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), needMoveToBackground, where] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (!session->backPressedFunc_) {
-            WLOGFW("Session didn't register back event consumer!");
+            TLOGNW(WmsLogTag::WMS_EVENT, "%{public}s Session didn't register back event consumer!", where);
             return WSError::WS_DO_NOTHING;
         }
         if (g_enableForceUIFirst) {
@@ -2537,9 +2585,11 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
             auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
             if (leashWinSurfaceNode) {
                 leashWinSurfaceNode->SetForceUIFirst(true);
-                WLOGFI("leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!", session->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s leashWinSurfaceNode_ SetForceUIFirst id:%{public}u!",
+                    where, session->GetPersistentId());
             } else {
-                WLOGFI("failed, leashWinSurfaceNode_ null id:%{public}u", session->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s failed, leashWinSurfaceNode_ null id:%{public}u",
+                    where, session->GetPersistentId());
             }
             if (rsTransaction) {
                 rsTransaction->Commit();
@@ -2547,7 +2597,7 @@ WSError SceneSession::RequestSessionBack(bool needMoveToBackground)
         }
         session->backPressedFunc_(needMoveToBackground);
         return WSError::WS_OK;
-    }, "RequestSessionBack:" + std::to_string(needMoveToBackground));
+    }, std::string(where) + ":" + std::to_string(needMoveToBackground));
     return WSError::WS_OK;
 }
 
@@ -2566,17 +2616,18 @@ void SceneSession::RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction
 void SceneSession::NotifySessionRectChange(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)
 {
-    PostTask([weakThis = wptr(this), rect, reason, displayId, rectAnimationConfig] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), rect, reason, displayId, rectAnimationConfig, where] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return;
         }
         if (session->sessionRectChangeFunc_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::NotifySessionRectChange");
             session->sessionRectChangeFunc_(rect, reason, displayId, rectAnimationConfig);
         }
-    }, "NotifySessionRectChange" + GetRectInfo(rect));
+    }, where + GetRectInfo(rect));
 }
 
 /** @note @window.layout */
@@ -2820,10 +2871,10 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     if (reason != SizeChangeReason::DRAG_MOVE) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
-        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), funcName = __func__](int64_t, int64_t) {
+        nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
             auto session = weakThis.promote();
             if (!session) {
-                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", funcName);
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
                 return;
             }
             session->OnNextVsyncReceivedWhenDrag();
