@@ -16,6 +16,7 @@
 #include "session/screen/include/screen_session.h"
 #include <hisysevent.h>
 
+#include "screen_cache.h"
 #include <hitrace_meter.h>
 #include <surface_capture_future.h>
 #include <transaction/rs_interfaces.h>
@@ -26,6 +27,7 @@
 #include "fold_screen_state_internel.h"
 #include <parameters.h>
 #include "sys_cap_util.h"
+#include <ipc_skeleton.h>
 
 namespace OHOS::Rosen {
 namespace {
@@ -34,8 +36,11 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
+const static int32_t MAX_INTERVAL_US = 1800000000; //30分钟
+const int32_t MAP_SIZE = 300;
+const int32_t NO_EXIT_UID_VERSION = -1;
+ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIT_UID_VERSION);
 }
-
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
     : name_(config.name), screenId_(config.screenId), rsId_(config.rsId), defaultScreenId_(config.defaultScreenId),
     property_(config.property), displayNode_(config.displayNode)
@@ -232,7 +237,6 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
         return displayInfo;
     }
     displayInfo->name_ = name_;
-    uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
     displayInfo->SetWidth(property_.GetBounds().rect_.GetWidth());
     displayInfo->SetHeight(property_.GetBounds().rect_.GetHeight());
     displayInfo->SetPhysicalWidth(property_.GetPhyBounds().rect_.GetWidth());
@@ -246,6 +250,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetXDpi(property_.GetXDpi());
     displayInfo->SetYDpi(property_.GetYDpi());
     displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);
+    int32_t apiVersion = GetApiVersion();
     if (apiVersion >= 14 || apiVersion == 0) { // 14 is API version
         displayInfo->SetRotation(property_.GetDeviceRotation());
         displayInfo->SetDisplayOrientation(property_.GetDeviceOrientation());
@@ -1504,5 +1509,24 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
         }
         listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
     }
+}
+
+int32_t ScreenSession::GetApiVersion()
+{
+    static std::chrono::steady_clock::time_point lastReauestTime = std::chrono::steady_clock::now();
+    auto currentTime = std::chrono::steady_clock::now();
+    auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastReauestTime).count();
+    int32_t apiVersion = NO_EXIT_UID_VERSION;
+    int32_t currentPid = IPCSkeleton::GetCallingPid();
+    if (interval < MAX_INTERVAL_US) {
+        apiVersion = g_uidVersionMap.Get(currentPid);
+    }
+    if (apiVersion == NO_EXIT_UID_VERSION) {
+        apiVersion = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
+        WLOGFI("Get version from IPC");
+        g_uidVersionMap.Set(currentPid, apiVersion);
+    }
+    lastReauestTime = currentTime;
+    return apiVersion;
 }
 } // namespace OHOS::Rosen

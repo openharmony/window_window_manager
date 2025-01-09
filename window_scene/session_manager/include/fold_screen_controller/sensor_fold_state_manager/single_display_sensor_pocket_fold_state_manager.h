@@ -74,6 +74,8 @@ private:
     bool TriggerTentExit(float angle, int hall);
     void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     void ReportTentStatusChange(ReportTentModeStatus tentStatus);
+    float currentAngle_ = -1.0F;
+    int32_t currentHall_ = -1;
 };
 } // namespace Rosen
 } // namespace OHOS

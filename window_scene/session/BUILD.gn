@@ -179,6 +179,7 @@ ohos_shared_library("screen_session") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
+    "ipc:ipc_single",
   ]
   public_external_deps = [
     "accessibility:accessibility_common",

@@ -66,6 +66,7 @@ SingleDisplaySensorPocketFoldStateManager::~SingleDisplaySensorPocketFoldStateMa
 void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    currentAngle_ = angle;
     SetCameraFoldStrategy(angle);
     if (isInCameraFoldStrategy_) {
         HandleSensorChange(FoldStatus::FOLDED, angle, foldScreenPolicy);
@@ -83,6 +84,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleAngleChange(float angle, i
 void SingleDisplaySensorPocketFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
+    currentHall_ = hall;
     TLOGI(WmsLogTag::DMS, "isInCameraFoldStrategy_:%{public}d", isInCameraFoldStrategy_);
     SetCameraFoldStrategy(angle);
     if (isInCameraFoldStrategy_) {
@@ -259,9 +261,11 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
 
     if (isTent) {
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_ENTER_TENT_MODE);
-        FoldStatus currentState = GetCurrentState();
-        foldScreenPolicy->ChangeOnTentMode(currentState);
+        HandleSensorChange(FoldStatus::FOLDED, currentAngle_, foldScreenPolicy);
+        foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
     } else {
+        FoldStatus nextState = GetNextFoldState(currentAngle_, currentHall_);
+        HandleSensorChange(nextState, currentAngle_, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();
     }
@@ -274,7 +278,7 @@ bool SingleDisplaySensorPocketFoldStateManager::TriggerTentExit(float angle, int
         WLOGI("Exit tent mode due to hall sensor report folded");
         return true;
     }
-
+    
     if (std::isless(angle, TENT_MODE_EXIT_MIN_THRESHOLD) || std::isgreater(angle, TENT_MODE_EXIT_MAX_THRESHOLD)) {
         ReportTentStatusChange(ReportTentModeStatus::ABNORMAL_EXIT_TENT_MODE_DUE_TO_ANGLE);
         WLOGI("Exit tent mode due to angle sensor report angle:%{public}f", angle);
