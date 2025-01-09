@@ -459,7 +459,7 @@ public:
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
-    void RegisterLockStateChangeCallBack(NotifyLockStateChangeCallback&& callback);
+    void RegisterLockStateChangeCallback(NotifyLockStateChangeCallback&& callback);
     void NotifyLockStateChange(bool lockState);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);

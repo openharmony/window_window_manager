@@ -881,7 +881,7 @@ void SceneSession::NotifyUpdateAppUseControl(ControlAppType type, bool isNeedCon
     }, __func__);
 }
 
-void SceneSession::RegisterLockStateChangeCallBack(NotifyLockStateChangeCallback&& callback)
+void SceneSession::RegisterLockStateChangeCallback(NotifyLockStateChangeCallback&& callback)
 {
     PostTask([this, weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
