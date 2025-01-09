@@ -1125,6 +1125,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
         NotifyAfterForeground(true, false);
+        NotifyAfterDidForeground(reason);
         return WMError::WM_OK;
     }
     const auto type = GetType();
@@ -1144,12 +1145,13 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     property_->SetDecorEnable(isDecorEnable);
 
     if (state_ == WindowState::STATE_SHOWN) {
-        TLOGD(WmsLogTag::WMS_LIFE, "window is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
+        TLOGI(WmsLogTag::WMS_LIFE, "window is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
         if (WindowHelper::IsMainWindow(type)) {
             hostSession->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
+        NotifyAfterDidForeground(reason);
         RefreshNoInteractionTimeoutMonitor();
         return WMError::WM_OK;
     }
@@ -1203,6 +1205,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, true);
+        NotifyAfterDidForeground(reason);
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
@@ -1233,6 +1236,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to another user, NotifyAfterBackground");
         NotifyAfterBackground(true, false);
+        NotifyAfterDidBackground(reason);
         return WMError::WM_OK;
     }
 
@@ -1283,6 +1287,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
         UpdateSubWindowState(type);
+        NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
         if (!interactive_) {

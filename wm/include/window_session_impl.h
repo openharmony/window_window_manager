@@ -221,6 +221,8 @@ public:
     int32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterDidForeground(uint32_t reason = 0);
+    void NotifyAfterDidBackground(uint32_t reason = 0);
     void NotifyForegroundFailed(WMError ret);
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;

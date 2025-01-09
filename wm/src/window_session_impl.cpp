@@ -3235,6 +3235,30 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     }
 }
 
+void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH) ||
+        reason == static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        if (handler_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+            return;
+        }
+        const char* const where = __func__;
+        handler_->PostTask([weak = wptr(this), where] {
+            auto window = weak.promote();
+            if (window == nullptr) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "{public}s window is nullptr", where);
+                return;
+            }
+            TLOGNI(WmsLogTag::WMS_LIFE, "{public}s execute", where);
+            auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterDidForeground, lifecycleListeners);
+            }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    }
+    return;
+}
+
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
@@ -3257,6 +3281,30 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
+}
+
+void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH) ||
+        reason == static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        if (handler_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+            return;
+        }
+        const char* const where = __func__;
+        handler_->PostTask([weak = wptr(this), where] {
+            auto window = weak.promote();
+            if (window == nullptr) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "{public}s window is nullptr", where);
+                return;
+            }
+            TLOGNI(WmsLogTag::WMS_LIFE, "{public}s execute", where);
+            auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+            CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners);
+            }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    }
+    return;
 }
 
 static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)
