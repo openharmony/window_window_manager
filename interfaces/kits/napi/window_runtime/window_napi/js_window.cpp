@@ -2846,7 +2846,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
-            TLOGNE(WmsLogTag::WMS_IMMS, "set system bar enable failed, errCode: %{public}d", errCode);
+            TLOGNE(WmsLogTag::WMS_IMMS, "set system bar enable failed, errcode: %{public}d", errCode);
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
                 "JsWindow::OnSetSpecificSystemBarEnabled failed"));
         }
