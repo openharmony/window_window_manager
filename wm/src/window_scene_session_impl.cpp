@@ -1001,8 +1001,8 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     uint32_t limitMinWidth = systemLimits.minWidth_;
     uint32_t limitMinHeight = systemLimits.minHeight_;
     if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
-        limitMinWidth = FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio;
-        limitMinHeight = FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio;
+        limitMinWidth = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
+        limitMinHeight = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
         newLimits.minWidth_ = limitMinWidth;
         newLimits.minHeight_ = limitMinHeight;
     }
