@@ -1820,9 +1820,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetNotifyVisibleChangeFunc([this](int32_t persistentId) {
             this->NotifyVisibleChange(persistentId);
         });
-        if (sceneSession->moveDragController_) {
-            sceneSession->moveDragController_->SetIsPcWindow(systemConfig_.IsPcWindow());
-        }
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });

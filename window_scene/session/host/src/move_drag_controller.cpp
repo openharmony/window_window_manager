@@ -32,7 +32,6 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
-#include "ws_common.h"
 
 #ifdef RES_SCHED_ENABLE
 #include "res_sched_client.h"
@@ -392,17 +391,10 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     }
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        bool isNeedFlush = false;
-        if (isStartDrag_ && isPcWindow_) {
-            surfaceNode->MarkUifirstNode(false);
-            isNeedFlush = true;
-        }
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
             WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
-            RSTransaction::FlushImplicitTransaction();
-        } else if (isNeedFlush) {
             RSTransaction::FlushImplicitTransaction();
         }
         return;
@@ -410,9 +402,6 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-        if (!isStartDrag_ && isPcWindow_) {
-            surfaceNode->MarkUifirstNode(true);
-        }
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
         RSTransaction::FlushImplicitTransaction();
         WLOGFI("recover gravity to TOP_LEFT");
@@ -1082,11 +1071,6 @@ void MoveDragController::OnLostFocus()
     TLOGW(WmsLogTag::WMS_LAYOUT, "window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d,"
         "isDrag: %{public}d", persistentId_, isStartMove_, isStartDrag_);
     moveDragIsInterrupted_ = true;
-}
-
-void MoveDragController::SetIsPcWindow(bool isPcWindow)
-{
-    isPcWindow_ = isPcWindow;
 }
 
 std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
