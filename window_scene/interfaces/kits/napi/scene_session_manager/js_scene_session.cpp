@@ -517,7 +517,7 @@ void JsSceneSession::OnWindowDragHotArea(DisplayId displayId, uint32_t type, Siz
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    WSRect rect = session->GetSessionTargetRect();
+    WSRect rect = session->GetSessionTargetRectByDisplayId(displayId);
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_,
                  displayId, type, reason, rect, where] {
