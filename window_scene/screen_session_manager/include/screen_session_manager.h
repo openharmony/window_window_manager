@@ -279,7 +279,7 @@ public:
     void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId) override;
-    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override;
+    void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
 
@@ -425,6 +425,7 @@ private:
     void GetInternalAndExternalSession(sptr<ScreenSession>& internalSession, sptr<ScreenSession>& externalSession);
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
+    void RefreshMirrorScreenRegion(ScreenId screenId);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE

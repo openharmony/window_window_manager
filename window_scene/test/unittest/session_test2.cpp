@@ -1144,21 +1144,20 @@ HWTEST_F(WindowSessionTest2, SetSessionState02, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListener, Function | SmallTest | Level2)
 {
     int resultValue = 0;
-    NotifyChangeSessionVisibilityWithStatusBarFunc func1 = [&resultValue](SessionInfo& info, const bool visible) {
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener([&resultValue](
+        const SessionInfo& info, const bool visible) {
         resultValue = 1;
-    };
-    NotifyChangeSessionVisibilityWithStatusBarFunc func2 = [&resultValue](SessionInfo& info, const bool visible) {
-        resultValue = 2;
-    };
-
-    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func1);
+    });
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
 
     SessionInfo info;
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 1);
 
-    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func2);
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener([&resultValue](
+        const SessionInfo& info, const bool visible) {
+        resultValue = 2;
+    });
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 2);

@@ -306,7 +306,8 @@ int ScreenSessionManagerClientStub::HandleOnHoverStatusChanged(MessageParcel& da
     WLOGD("HandleOnHoverStatusChanged");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto hoverStatus = data.ReadInt32();
-    OnHoverStatusChanged(screenId, hoverStatus);
+    auto needRotate = data.ReadBool();
+    OnHoverStatusChanged(screenId, hoverStatus, needRotate);
     return ERR_NONE;
 }
 

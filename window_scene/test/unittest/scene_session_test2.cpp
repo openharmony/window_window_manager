@@ -1100,15 +1100,15 @@ HWTEST_F(SceneSessionTest2, SetLastSafeRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetSessionTargetRect
- * @tc.desc: GetSessionTargetRect
+ * @tc.name: GetSessionTargetRectByDisplayId
+ * @tc.desc: GetSessionTargetRectByDisplayId
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest2, GetSessionTargetRectByDisplayId, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "GetSubSession";
-    info.bundleName_ = "GetSessionTargetRect";
+    info.bundleName_ = "GetSessionTargetRectByDisplayId";
     sptr<SceneSession> sceneSession;
     sptr<SceneSession::SpecificSessionCallback> specificSession =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -1117,7 +1117,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     EXPECT_EQ(true, res);
     EXPECT_EQ(sceneSession, (sceneSession->GetSubSession())[0]);
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(1024, WindowType::WINDOW_TYPE_FLOAT);
-    WSRect rectResult = sceneSession->GetSessionTargetRect();
+    WSRect rectResult = sceneSession->GetSessionTargetRectByDisplayId(0);
     EXPECT_EQ(0, rectResult.posX_);
     EXPECT_EQ(0, rectResult.width_);
     auto dragHotAreaFunc = [sceneSession](DisplayId displayId, int32_t type, SizeChangeReason reason) {
@@ -1129,7 +1129,7 @@ HWTEST_F(SceneSessionTest2, GetSessionTargetRect, Function | SmallTest | Level2)
     sceneSession->SetWindowDragHotAreaListener(dragHotAreaFunc);
     EXPECT_NE(nullptr,  sceneSession->moveDragController_);
     sceneSession->moveDragController_ = nullptr;
-    rectResult = sceneSession->GetSessionTargetRect();
+    rectResult = sceneSession->GetSessionTargetRectByDisplayId(0);
     sceneSession->SetWindowDragHotAreaListener(dragHotAreaFunc);
     ASSERT_EQ(0, rectResult.width_);
 }
@@ -1542,7 +1542,7 @@ HWTEST_F(SceneSessionTest2, IsStartMoving, Function | SmallTest | Level2)
     sceneSession->ClearExtWindowFlags();
     bool isRegister = true;
     sceneSession->UpdateRectChangeListenerRegistered(isRegister);
-    
+
     sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, sceneSession->sessionStage_);
     sceneSession->NotifyDisplayMove(from, to);

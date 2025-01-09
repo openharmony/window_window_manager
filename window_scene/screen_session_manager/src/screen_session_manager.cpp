@@ -267,7 +267,7 @@ void ScreenSessionManager::FoldScreenPowerInit()
 void ScreenSessionManager::FixPowerStatus()
 {
     if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
         TLOGI(WmsLogTag::DMS, "Fix Screen Power State");
     }
 }
@@ -795,26 +795,18 @@ bool ScreenSessionManager::IsScreenRestored(sptr<ScreenSession> screenSession)
 {
     const ScreenProperty& screenProperty = screenSession->GetScreenProperty();
     ScreenId currentScreenId = screenSession->GetScreenId();
-    uint32_t currentWidth = screenProperty.GetBounds().rect_.GetWidth();
-    uint32_t currentHeight = screenProperty.GetBounds().rect_.GetHeight();
-    TLOGI(WmsLogTag::DMS, "currentScreenId: %{public}" PRIu64
-        ", currentWidth: %{public}d, currentHeight: %{public}d", currentScreenId, currentWidth, currentHeight);
-    std::map<ScreenId, std::pair<uint32_t, uint32_t>> resolution;
-    bool getResolution = ScreenSettingHelper::GetSettingRecoveryResolutionMap(resolution);
-    if (!getResolution) {
-        TLOGE(WmsLogTag::DMS, "get restored resolution failed");
+    TLOGI(WmsLogTag::DMS, "currentScreenId: %{public}" PRIu64, currentScreenId);
+    std::set<ScreenId> restoredScreenId;
+    bool getRestoredScreenId = ScreenSettingHelper::GetSettingRecoveryResolutionSet(restoredScreenId);
+    if (!getRestoredScreenId) {
+        TLOGE(WmsLogTag::DMS, "get restored screenId failed");
         return false;
     }
-    if (resolution.find(currentScreenId) == resolution.end()) {
-        TLOGE(WmsLogTag::DMS, "screen id not exist");
+    if (restoredScreenId.find(currentScreenId) == restoredScreenId.end()) {
+        TLOGE(WmsLogTag::DMS, "screenId not exist");
         return false;
     }
-    auto screenInfo = resolution[currentScreenId];
-    if (screenInfo.first == currentWidth && screenInfo.second == currentHeight) {
-        TLOGI(WmsLogTag::DMS, "found screen, id: %{public}" PRIu64, currentScreenId);
-        return true;
-    }
-    return false;
+    return true;
 }
 
 bool ScreenSessionManager::GetIsCurrentInUseById(ScreenId screenId)
@@ -910,7 +902,10 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
         int32_t mainWidth = mainProperty.GetBounds().rect_.GetWidth();
         mainOptions = { mainSession->GetScreenId(), 0, 0 };
         extendOptions = { extendSession->GetScreenId(), mainWidth, 0 };
-        SetMultiScreenRelativePosition(mainOptions, extendOptions);
+        auto ret = SetMultiScreenRelativePosition(mainOptions, extendOptions);
+        if (ret != DMError::DM_OK) {
+            TLOGE(WmsLogTag::DMS, "set Relative Position failed, DMError:%{public}d", static_cast<int32_t>(ret));
+        }
     }
 }
 
@@ -944,7 +939,10 @@ void ScreenSessionManager::RecoverMultiScreenInfoFromData(sptr<ScreenSession> sc
     TLOGW(WmsLogTag::DMS, "read param success");
     SetMultiScreenMode(mainScreenOption.screenId_, secondaryScreenOption.screenId_, multiScreenMode);
     if (multiScreenMode == MultiScreenMode::SCREEN_EXTEND) {
-        SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+        auto ret = SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
+        if (ret != DMError::DM_OK) {
+            SetMultiScreenDefaultRelativePosition();
+        }
     }
 }
 
@@ -1633,6 +1631,13 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
             .property = property,
         };
         screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+        screenSession->SetIsPhysicalMirrorSwitch(true);
+        if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            DMRect mainScreenRegion = {0, 0, 0, 0};
+            foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+            screenSession->SetMirrorScreenRegion(screenId, mainScreenRegion);
+            screenSession->EnableMirrorScreenRegion();
+        }
     }
     return screenSession;
 }
@@ -3710,6 +3715,9 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
     for (ScreenId screenId : allMirrorScreenIds) {
         OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     }
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+    }
     DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
         allMirrorScreenIds, mainScreenRegion, screenGroupId);
     for (ScreenId screenId : allMirrorScreenIds) {
@@ -5334,6 +5342,11 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
     }
     TLOGI(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d, setmode: %{public}d",
         SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), displayMode);
+    if (foldScreenController_->GetTentMode() &&
+        (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION)) {
+            TLOGW(WmsLogTag::DMS, "in TentMode, SetFoldDisplayMode to %{public}d failed", displayMode);
+            return;
+    }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 #endif
@@ -5759,6 +5772,22 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
     }
 }
 
+void ScreenSessionManager::RefreshMirrorScreenRegion(ScreenId screenId)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession->GetName() == "CastEngine" || screenSession->GetName() == "Cooperation") {
+        DMRect mainScreenRegion = {0, 0, 0, 0};
+        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+        ScreenId rsScreenId = SCREEN_ID_INVALID;
+        if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+            TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", screenId);
+        } else {
+            screenSession->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
+            screenSession->EnableMirrorScreenRegion();
+        }
+    }
+}
+
 void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
@@ -5773,6 +5802,12 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
         if (!IsFreezed(agentPid,
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER)) {
             agent->NotifyDisplayModeChanged(displayMode);
+        }
+    }
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        auto screenIds = GetAllScreenIds();
+        for (auto screenId : screenIds) {
+            RefreshMirrorScreenRegion(screenId);
         }
     }
 }
@@ -5853,14 +5888,14 @@ void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId
     clientProxy_->OnSensorRotationChanged(screenId, sensorRotation);
 }
 
-void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId)
+void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " hoverStatus: %{public}d", screenId, hoverStatus);
     if (!clientProxy_) {
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy_->OnHoverStatusChanged(screenId, hoverStatus);
+    clientProxy_->OnHoverStatusChanged(screenId, hoverStatus, needRotate);
 }
 
 void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
@@ -6832,11 +6867,6 @@ void ScreenSessionManager::OnTentModeChanged(bool isTentMode)
         return;
     }
     foldScreenController_->OnTentModeChanged(isTentMode);
-    if (isTentMode) {
-        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
-    } else {
-        ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS_CANCEL);
-    }
 #endif
 }
 

@@ -36,6 +36,7 @@ using OnGetFocusedSessionIdCallback = std::function<int32_t()>;
 using OnCallingSessionIdChangeCallback = std::function<void(uint32_t callingSessionId)>;
 using OnSystemKeyboardAvoidChangeCallback = std::function<void(DisplayId displayId,
     SystemKeyboardAvoidChangeReason reason)>;
+using NotifyOccupiedAreaChangeCallback = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 
 class KeyboardSession : public SystemSession {
 public:
@@ -45,6 +46,7 @@ public:
         OnGetFocusedSessionIdCallback onGetFocusedSessionId;
         OnCallingSessionIdChangeCallback onCallingSessionIdChange;
         OnSystemKeyboardAvoidChangeCallback onSystemKeyboardAvoidChange;
+        NotifyOccupiedAreaChangeCallback onNotifyOccupiedAreaChange;
     };
     KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
         const sptr<KeyboardSessionCallback>& keyboardCallback);
@@ -92,6 +94,7 @@ private:
     void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty,
         bool isShow);
     void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
+    void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;

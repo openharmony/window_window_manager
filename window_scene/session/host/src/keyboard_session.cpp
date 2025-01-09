@@ -293,6 +293,10 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             }
             session->SetWindowAnimationFlag(true);
         }
+        // avoidHeight is set, notify avoidArea in case ui params don't flush
+        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0) {
+            session->NotifyClientToUpdateAvoidArea();
+        }
         // notify keyboard layout param
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
@@ -348,10 +352,14 @@ void KeyboardSession::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& cal
     }
     sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr(OccupiedAreaType::TYPE_INPUT,
         SessionHelper::TransferToRect(safeRect), safeRect.height_, textFieldPositionY, textFieldHeight);
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "lastSafeRect: %{public}s, safeRect: %{public}s, keyboardRect: %{public}s, "
-        "textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f", lastSafeRect.ToString().c_str(),
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling id: %{public}d, safeRect: %{public}s, keyboardRect: %{public}s"
+        ", textFieldPositionY_: %{public}f, textFieldHeight_: %{public}f", callingSession->GetPersistentId(),
         safeRect.ToString().c_str(), occupiedArea.ToString().c_str(), textFieldPositionY, textFieldHeight);
-    callingSession->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
+    if (callingSession->IsSystemSession()) {
+        NotifyRootSceneOccupiedAreaChange(info);
+    } else {
+        callingSession->NotifyOccupiedAreaChangeInfo(info, rsTransaction);
+    }
 }
 
 void KeyboardSession::NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow)
@@ -663,11 +671,13 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     // need to get screen property if the landscape width is same to the portrait
     if (params.LandscapePanelRect_.width_ != params.PortraitPanelRect_.width_) {
         if (static_cast<uint32_t>(panelRect.width_) == params.LandscapePanelRect_.width_) {
+            panelRect.posY_ += panelRect.height_ - params.landscapeAvoidHeight_;
             panelRect.height_ = params.landscapeAvoidHeight_;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "landscapeAvoidHeight %{public}d", panelRect.height_);
             return;
         }
         if (static_cast<uint32_t>(panelRect.width_) == params.PortraitPanelRect_.width_) {
+            panelRect.posY_ += panelRect.height_ - params.portraitAvoidHeight_;
             panelRect.height_ = params.portraitAvoidHeight_;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "portraitAvoidHeight %{public}d", panelRect.height_);
             return;
@@ -681,7 +691,25 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
         return;
     }
     bool isLandscape = screenHeight < screenWidth;
-    panelRect.height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
+    int32_t height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
+    panelRect.posY_ += height_ - params.portraitAvoidHeight_;
+    panelRect.height_ = height_;
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
+}
+
+void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info)
+{
+    ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+    auto displayId = GetSessionProperty()->GetDisplayId();
+    if (displayId != defaultScreenId) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "displayId: %{public}" PRIu64", defaultScreenId: %{public}" PRIu64"",
+            displayId, defaultScreenId);
+        return;
+    }
+    if (keyboardCallback_ == nullptr || keyboardCallback_->onNotifyOccupiedAreaChange == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "callback is nullptr");
+        return;
+    }
+    keyboardCallback_->onNotifyOccupiedAreaChange(info);
 }
 } // namespace OHOS::Rosen

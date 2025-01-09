@@ -656,7 +656,7 @@ HWTEST_F(WindowSceneSessionImplTest3, GetWindowLimits01, Function | SmallTest | 
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
-    auto ret = windowSceneSessionImpl->SetWindowLimits(oldWindowLimits);
+    auto ret = windowSceneSessionImpl->SetWindowLimits(oldWindowLimits, false);
     EXPECT_EQ(WMError::WM_OK, ret);
 
     WindowLimits newWindowLimits;
