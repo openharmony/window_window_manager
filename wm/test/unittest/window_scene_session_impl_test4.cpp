@@ -444,6 +444,37 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowFlags, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: ResetSuperFoldDisplayY
+ * @tc.desc: ResetSuperFoldDisplayY
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("ConsumePointerEventInner");
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetDisplayY(150);
+    pointerEvent->AddPointerItem(pointerItem);
+    int originalDisplayY = pointerItem.GetDisplayY();
+    WindowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    int updatedDisplayY = pointerItem.GetDisplayY();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY);
+
+    WindowSceneSessionImpl->superFoldOffsetY_ = 150;
+    WindowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    updatedDisplayY = pointerItem.GetDisplayY();
+    ASSERT_EQ(updatedDisplayY, originalDisplayY - 150);
+}
+
+/**
  * @tc.name: ConsumePointerEventInner
  * @tc.desc: ConsumePointerEventInner
  * @tc.type: FUNC
