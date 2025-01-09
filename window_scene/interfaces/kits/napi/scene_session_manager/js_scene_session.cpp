@@ -922,102 +922,105 @@ void JsSceneSession::OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFla
 
 void JsSceneSession::ProcessChangeSessionVisibilityWithStatusBarRegister()
 {
-    NotifyChangeSessionVisibilityWithStatusBarFunc func = [weakThis = wptr(this)](SessionInfo& info, bool visible) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessChangeSessionVisibilityWithStatusBarRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->ChangeSessionVisibilityWithStatusBar(info, visible);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetChangeSessionVisibilityWithStatusBarEventListener(func);
+    session->SetChangeSessionVisibilityWithStatusBarEventListener(
+        [weakThis = wptr(this), where = __func__](const SessionInfo& info, bool visible) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->ChangeSessionVisibilityWithStatusBar(info, visible);
+    });
     WLOGFD("success");
 }
 
 void JsSceneSession::ProcessSessionStateChangeRegister()
 {
-    NotifySessionStateChangeFunc func = [weakThis = wptr(this)](const SessionState& state) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessSessionStateChangeRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnSessionStateChange(state);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetSessionStateChangeListenser(func);
+    session->SetSessionStateChangeListenser([weakThis = wptr(this), where = __func__](const SessionState& state) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSessionStateChange(state);
+    });
     WLOGFD("success");
 }
 
 void JsSceneSession::ProcessBufferAvailableChangeRegister()
 {
-    NotifyBufferAvailableChangeFunc func = [weakThis = wptr(this)](const bool isAvailable) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessBufferAvailableChangeRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnBufferAvailableChange(isAvailable);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetBufferAvailableChangeListener(func);
+    session->SetBufferAvailableChangeListener([weakThis = wptr(this), where = __func__](const bool isAvailable) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnBufferAvailableChange(isAvailable);
+    });
     WLOGFD("success");
 }
 
 void JsSceneSession::ProcessCreateSubSessionRegister()
 {
-    NotifyCreateSubSessionFunc func = [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessCreateSubSessionRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnCreateSubSession(sceneSession);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    SceneSessionManager::GetInstance().RegisterCreateSubSessionListener(session->GetPersistentId(), func);
+    SceneSessionManager::GetInstance().RegisterCreateSubSessionListener(session->GetPersistentId(),
+        [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
+            auto jsSceneSession = weakThis.promote();
+            if (!jsSceneSession) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "ProcessCreateSubSessionRegister jsSceneSession is null");
+                return;
+            }
+            jsSceneSession->OnCreateSubSession(sceneSession);
+        });
     WLOGFD("success, id: %{public}d", session->GetPersistentId());
 }
 
 void JsSceneSession::ProcessBindDialogTargetRegister()
 {
-    auto onBindDialogTarget = [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnBindDialogTarget(sceneSession);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    SceneSessionManager::GetInstance().RegisterBindDialogTargetListener(session, std::move(onBindDialogTarget));
+    SceneSessionManager::GetInstance().RegisterBindDialogTargetListener(session,
+        [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
+            auto jsSceneSession = weakThis.promote();
+            if (!jsSceneSession) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+                return;
+            }
+            jsSceneSession->OnBindDialogTarget(sceneSession);
+        });
     TLOGD(WmsLogTag::WMS_DIALOG, "success");
 }
 
 void JsSceneSession::ProcessSessionRectChangeRegister()
 {
-    NotifySessionRectChangeFunc func = [weakThis = wptr(this)](const WSRect& rect,
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetSessionRectChangeCallback([weakThis = wptr(this)](const WSRect& rect,
         SizeChangeReason reason, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {}) {
         auto jsSceneSession = weakThis.promote();
@@ -1026,13 +1029,7 @@ void JsSceneSession::ProcessSessionRectChangeRegister()
             return;
         }
         jsSceneSession->OnSessionRectChange(rect, reason, displayId, rectAnimationConfig);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    session->SetSessionRectChangeCallback(func);
+    });
     WLOGFD("success");
 }
 
@@ -1043,8 +1040,7 @@ void JsSceneSession::ProcessSessionDisplayIdChangeRegister()
         TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    const char* const where = __func__;
-    session->SetSessionDisplayIdChangeCallback([where, weakThis = wptr(this)](uint64_t displayId) {
+    session->SetSessionDisplayIdChangeCallback([weakThis = wptr(this), where = __func__](uint64_t displayId) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s jsSceneSession is null", where);
@@ -1074,21 +1070,20 @@ void JsSceneSession::ProcessWindowMovingRegister()
 
 void JsSceneSession::ProcessSessionPiPControlStatusChangeRegister()
 {
-    NotifySessionPiPControlStatusChangeFunc func = [weakThis = wptr(this)](
-        WsPiPControlType controlType, WsPiPControlStatus status) {
-        auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "ProcessSessionPiPControlStatusChangeRegister jsSceneSession is null");
-            return;
-        }
-        jsSceneSession->OnSessionPiPControlStatusChange(controlType, status);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetSessionPiPControlStatusChangeCallback(func);
+    session->SetSessionPiPControlStatusChangeCallback([weakThis = wptr(this), where = __func__](
+        WsPiPControlType controlType, WsPiPControlStatus status) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSessionPiPControlStatusChange(controlType, status);
+    });
     TLOGI(WmsLogTag::WMS_PIP, "success");
 }
 
@@ -1099,15 +1094,14 @@ void JsSceneSession::ProcessAutoStartPiPStatusChangeRegister()
         TLOGE(WmsLogTag::WMS_PIP, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    NotifyAutoStartPiPStatusChangeFunc func = [weakThis = wptr(this)](bool isAutoStart, uint32_t priority) {
+    session->SetAutoStartPiPStatusChangeCallback([weakThis = wptr(this)](bool isAutoStart, uint32_t priority) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_PIP, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnAutoStartPiPStatusChange(isAutoStart, priority);
-    };
-    session->SetAutoStartPiPStatusChangeCallback(func);
+    });
     TLOGI(WmsLogTag::WMS_PIP, "success");
 }
 
@@ -1133,20 +1127,19 @@ void JsSceneSession::ProcessRaiseToTopRegister()
 /** @note @window.hierarchy */
 void JsSceneSession::ProcessRaiseToTopForPointDownRegister()
 {
-    NotifyRaiseToTopForPointDownFunc func = [weakThis = wptr(this)]() {
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetRaiseToAppTopForPointDownFunc([weakThis = wptr(this)]() {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "ProcessRaiseToTopForPointDownRegister jsSceneSession is null");
             return;
         }
         jsSceneSession->OnRaiseToTopForPointDown();
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        WLOGFE("session is nullptr, id:%{public}d", persistentId_);
-        return;
-    }
-    session->SetRaiseToAppTopForPointDownFunc(func);
+    });
     WLOGFD("success");
 }
 
@@ -3416,7 +3409,7 @@ void JsSceneSession::OnContextTransparent()
     taskScheduler_->PostMainThreadTask(task, "OnContextTransparent");
 }
 
-void JsSceneSession::ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible)
+void JsSceneSession::ChangeSessionVisibilityWithStatusBar(const SessionInfo& info, bool visible)
 {
     WLOGI("bundleName %{public}s, moduleName %{public}s, "
         "abilityName %{public}s, appIndex %{public}d, reuse %{public}d, visible %{public}d",
