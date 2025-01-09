@@ -266,10 +266,6 @@ napi_value CreateJsPiPWindowInfoObject(napi_env env, const sptr<Window>& window)
         return nullptr;
     }
     const auto& windowRect = window->GetRect();
-    if (windowRect == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get window rect failed!");
-        return nullptr;
-    }
     const auto& layoutTransform = window->GetLayoutTransform();
     float maxScale = std::min(std::max(layoutTransform.scaleX_, layoutTransform.scaleY_), MAX_PIP_SCALE);
     napi_value pipWindowSizeObj = GetPiPWindowSizeAndConvertToJsValue(env, windowRect, maxScale);
