@@ -353,7 +353,7 @@ public:
     bool GetBufferAvailableCallbackEnable() const override;
     int32_t GetCollaboratorType() const;
     WSRect GetLastSafeRect() const;
-    WSRect GetSessionTargetRect() const;
+    WSRect GetSessionTargetRectByDisplayId(DisplayId displayId) const;
     std::string GetUpdatedIconPath() const;
     std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
