@@ -37,12 +37,12 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         }
         // check zorder = 0
         if (session->GetZOrder() == 0) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, zorder 0");
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, zorder 0");
             ReportZOrderException("check zorder 0", session);
         }
         // repetitive zorder
         if (session->GetZOrder() == curZOrder) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, repetitive zorder %{public}d", session->GetZOrder());
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, repetitive zorder %{public}d", session->GetZOrder());
             ReportZOrderException("check repetitive zorder", session);
         }
         curZOrder = session->GetZOrder();
@@ -52,7 +52,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
             const auto& callingSession =
                 SceneSessionManager::GetInstance().GetSceneSession(static_cast<int32_t>(callingWindowId));
             if ((callingSession != nullptr) && (callingSession->GetZOrder() > session->GetZOrder())) {
-                TLOGE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, callingSession: %{public}d curSession: %{public}d",
+                TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, callingSession: %{public}d curSession: %{public}d",
                     callingSession->GetZOrder(), session->GetZOrder());
                 ReportZOrderException("check callingSession check for input", session);
             }
@@ -72,7 +72,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
             return false;
         }
         if (keyGuardFlag && (!session->IsShowWhenLocked()) && (session->IsAppSession())) {
-            TLOGE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err %{public}d IsShowWhenLocked", session->GetZOrder());
             ReportZOrderException("check isShowWhenLocked", session);
         }
         return false;
