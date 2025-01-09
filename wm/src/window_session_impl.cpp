@@ -2887,6 +2887,25 @@ WMError WindowSessionImpl::GetIsMidScene(bool& isMidScene)
     return WMError::WM_OK;
 }
 
+WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
+    auto task = [weakThis = wptr(this), eventName, eventValue] {
+        auto window = weakThis.promote();
+        if (!window) {
+            return;
+        }
+        std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
+        if (uiContent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "uiContent is null!");
+            return;
+        }
+        uiContent->OnContainerModalEvent(eventName, eventValue);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SendContainerModalEvent");
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
     if (!WindowHelper::IsMainWindow(GetType())) {
