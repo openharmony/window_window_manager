@@ -2494,6 +2494,13 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get the type of Window.
+     *
+     * @return The string corresponding to the Window.
+     */
+    virtual std::string GetClassType() const { return "Window"; }
 };
 }
 }
