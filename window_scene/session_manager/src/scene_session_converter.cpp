@@ -55,7 +55,7 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
     return WSError::WS_OK;
 }
 
-WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSession,
+WSError SceneSessionConverter::ConvertToMissionInfo(const sptr<SceneSession>& sceneSession,
                                                     AAFwk::MissionInfo& missionInfo)
 {
     if (sceneSession == nullptr) {
