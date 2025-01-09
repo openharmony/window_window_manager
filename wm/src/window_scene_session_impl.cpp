@@ -704,7 +704,7 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
     return needNotifyEvent;
 }
 
-void WindowSceneSessionImpl::ResetSuperFoldDisplayY(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     if (superFoldOffsetY_ == -1) {
         auto foldCreaseRegion = DisplayManager::GetInstance().GetCurrentFoldCreaseRegion();
@@ -779,7 +779,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         isExecuteDelayRaise_ = false;
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-        SingletonContainer::Get<DisplayManager>().GetFoldStatus() == FoldStatus::HALF_FOLD) {
+        DisplayManager::GetInstance().GetFoldStatus() == FoldStatus::HALF_FOLD) {
         ResetSuperFoldDisplayY(pointerEvent);
     }
     if (needNotifyEvent) {
