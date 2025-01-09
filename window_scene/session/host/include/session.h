@@ -55,7 +55,7 @@ using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId, const RectAnimationConfig& rectAnimationConfig)>;
 using NotifySessionDisplayIdChangeFunc = std::function<void(uint64_t displayId)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
-using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(SessionInfo& info, const bool visible)>;
+using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
 using NotifyLeashWindowSurfaceNodeChangedFunc = std::function<void()>;
@@ -242,6 +242,7 @@ public:
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
+    SessionInfo& EditSessionInfo();
     DisplayId GetScreenId() const;
     virtual void SetScreenId(uint64_t screenId);
     WindowType GetWindowType() const;
@@ -289,7 +290,7 @@ public:
     virtual bool NeedStartingWindowExitAnimation() const { return true; }
 
     void SetChangeSessionVisibilityWithStatusBarEventListener(
-        const NotifyChangeSessionVisibilityWithStatusBarFunc& func);
+        NotifyChangeSessionVisibilityWithStatusBarFunc&& func);
     WSError Clear(bool needStartCaller = false);
     WSError SetSessionLabel(const std::string& label);
     void SetUpdateSessionLabelListener(const NofitySessionLabelUpdatedFunc& func);

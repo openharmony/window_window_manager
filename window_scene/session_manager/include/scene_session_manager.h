@@ -131,6 +131,7 @@ using NotifyAppUseControlListFunc =
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
+using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -207,7 +208,7 @@ public:
     void SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func);
     void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
     void NotifyRecoveringFinished();
-    bool IsInputEventEnabled();
+    bool IsInputEventEnabled() const;
     void SetEnableInputEvent(bool enabled);
     void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
 
@@ -357,7 +358,7 @@ public:
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     bool CheckCollaboratorType(int32_t type);
-    sptr<SceneSession> FindSessionByAffinity(std::string affinity);
+    sptr<SceneSession> FindSessionByAffinity(const std::string& affinity);
     void AddWindowDragHotArea(DisplayId displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
     WSError UpdateMaximizeMode(int32_t persistentId, bool isMaximize);
@@ -396,11 +397,16 @@ public:
     WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
 
     std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam);
-    void RequestInputMethodCloseKeyboard(int32_t persistentId);
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     const std::map<int32_t, sptr<SceneSession>> GetSceneSessionMap();
     void GetAllSceneSession(std::vector<sptr<SceneSession>>& sceneSessions);
     void GetAllWindowVisibilityInfos(std::vector<std::pair<int32_t, uint32_t>>& windowVisibilityInfos);
+
+    /*
+     * Keyboard Window
+     */
+    void RequestInputMethodCloseKeyboard(int32_t persistentId);
+    void RegisterNotifyRootSceneOccupiedAreaChangeFunc(NotifyRootSceneOccupiedAreaChangeFunc&& func);
 
     /*
      * UIExtension
@@ -782,7 +788,7 @@ private:
     bool GetExtensionWindowIds(const sptr<IRemoteObject>& token, int32_t& persistentId, int32_t& parentId);
     void DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession);
     void EraseSceneSessionMapById(int32_t persistentId);
-    void EraseSceneSessionAndMarkDirtyLockFree(int32_t persistentId);
+    void EraseSceneSessionAndMarkDirtyLocked(int32_t persistentId);
     WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
@@ -1032,6 +1038,7 @@ private:
     void HandleKeyboardAvoidChange(const sptr<SceneSession>& sceneSession, DisplayId displayId,
         SystemKeyboardAvoidChangeReason reason);
     void UpdateKeyboardAvoidAreaActive(bool systemKeyboardAvoidAreaActive);
+    NotifyRootSceneOccupiedAreaChangeFunc onNotifyOccupiedAreaChangeForRootFunc_;
 
     /*
      * Specific Window

@@ -120,6 +120,8 @@ const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
 };
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
+constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 1;
+constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 1;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -920,10 +922,8 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     if (displayWidth == 0 || displayHeight == 0) {
         return;
     }
-
     virtualPixelRatio = GetVirtualPixelRatio(displayInfo);
     const auto& systemLimits = GetSystemSizeLimits(displayWidth, displayHeight, virtualPixelRatio);
-
     if (userLimitsSet_) {
         customizedLimits = property_->GetUserWindowLimits();
     } else {
@@ -934,7 +934,6 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits.minHeight_ = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
     }
     newLimits = systemLimits;
-
     // calculate new limit size
     if (systemLimits.minWidth_ <= customizedLimits.maxWidth_ &&
         customizedLimits.maxWidth_ <= systemLimits.maxWidth_) {
@@ -944,12 +943,16 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits.maxHeight_ <= systemLimits.maxHeight_) {
         newLimits.maxHeight_ = customizedLimits.maxHeight_;
     }
-    if (systemLimits.minWidth_ <= customizedLimits.minWidth_ &&
-        customizedLimits.minWidth_ <= newLimits.maxWidth_) {
+    uint32_t limitMinWidth = systemLimits.minWidth_;
+    uint32_t limitMinHeight = systemLimits.minHeight_;
+    if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
+        limitMinWidth = FORCE_LIMIT_MIN_FLOATING_WIDTH;
+        limitMinHeight = FORCE_LIMIT_MIN_FLOATING_HEIGHT;
+    }
+    if (limitMinWidth <= customizedLimits.minWidth_ && customizedLimits.minWidth_ <= newLimits.maxWidth_) {
         newLimits.minWidth_ = customizedLimits.minWidth_;
     }
-    if (systemLimits.minHeight_ <= customizedLimits.minHeight_ &&
-        customizedLimits.minHeight_ <= newLimits.maxHeight_) {
+    if (limitMinHeight <= customizedLimits.minHeight_ && customizedLimits.minHeight_ <= newLimits.maxHeight_) {
         newLimits.minHeight_ = customizedLimits.minHeight_;
     }
 }
@@ -3952,11 +3955,11 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
 }
 
-WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
+WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool isForce)
 {
     WLOGFI("Id:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
-        "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
-        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
+        "maxWidth:%{public}u, maxHeight:%{public}u, isForce:%{public}u", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, isForce);
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3980,6 +3983,7 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
     property_->SetUserWindowLimits({
         maxWidth, maxHeight, minWidth, minHeight, customizedLimits.maxRatio_, customizedLimits.minRatio_
     });
+    forceLimits_ = isForce;
     userLimitsSet_ = true;
     UpdateWindowSizeLimits();
     WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);

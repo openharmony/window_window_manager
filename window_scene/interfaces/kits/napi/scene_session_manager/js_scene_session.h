@@ -306,7 +306,7 @@ private:
      */
     void ProcessSetSupportWindowModesRegister();
     
-    void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
+    void ChangeSessionVisibilityWithStatusBar(const SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     void OnBufferAvailableChange(const bool isBufferAvailable);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
