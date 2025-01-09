@@ -1604,7 +1604,6 @@ bool WindowSessionImpl::IsTopmost() const
 WMError WindowSessionImpl::SetMainWindowTopmost(bool isTopmost)
 {
     if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!IsPcOrPadFreeMultiWindowMode()) {
