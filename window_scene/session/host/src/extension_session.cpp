@@ -30,6 +30,39 @@ constexpr uint32_t PID_LENGTH = 18;
 constexpr uint32_t PID_MASK = (1 << PID_LENGTH) - 1;
 constexpr uint32_t PERSISTENTID_LENGTH = 12;
 constexpr uint32_t PERSISTENTID_MASK = (1 << PERSISTENTID_LENGTH) - 1;
+
+void TryUpdateExtensionPersistentId(int32_t& persistentId)
+{
+    std::lock_guard lock(g_extensionPersistentIdMutex);
+    if (g_extensionPersistentIdSet.count(persistentId) == 0) {
+        g_extensionPersistentIdSet.insert(persistentId);
+        return;
+    }
+    uint32_t assembledPersistentId = (static_cast<uint32_t>(getpid()) & PID_MASK) << PERSISTENTID_LENGTH;
+    uint32_t persistentIdValue = assembledPersistentId | EXTENSION_ID_FLAG;
+    int32_t min = static_cast<int32_t>(persistentIdValue);
+    int32_t max = static_cast<int32_t>(persistentIdValue | PERSISTENTID_MASK);
+    uint32_t count = 0;
+    while (g_extensionPersistentIdSet.count(persistentId)) {
+        persistentId++;
+        if (persistentId > max) {
+            persistentId = min;
+        }
+        count ++;
+        if (count > PERSISTENTID_MASK) {
+            persistentId_ = INVALID_SESSION_ID;
+            TLOGE(WmsLogTag::WMS_UIEXT, "can't generate Id");
+            return;
+        }
+    }
+    g_extensionPersistentIdSet.insert(persistentId);
+}
+
+void RemoveExtensionPersistentId(int32_t persistentId)
+{
+    std::lock_guard lock(g_extensionPersistentIdMutex);
+    g_extensionPersistentIdSet.erase(persistentId);
+}
 } // namespace
 
 void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(int32_t keyEventId, bool isPreImeEvent,
@@ -135,54 +168,19 @@ void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     listener_->ResetTransferKeyEventForConsumedParams(false, WSError::WS_ERROR_IPC_FAILED);
 }
 
-void ExtensionSession::TryUpdateExtensionPersistentId()
-{
-    std::lock_guard lock(g_extensionPersistentIdMutex);
-    auto persistentId = persistentId_;
-    if (!g_extensionPersistentIdSet.count(persistentId)) {
-        g_extensionPersistentIdSet.insert(persistentId);
-        return;
-    }
-    uint32_t assembledPersistentId = ((static_cast<uint32_t>(getpid()) & PID_MASK) << PERSISTENTID_LENGTH);
-    int32_t min = static_cast<int32_t>(assembledPersistentId | EXTENSION_ID_FLAG);
-    int32_t max = static_cast<int32_t>(assembledPersistentId | EXTENSION_ID_FLAG | PERSISTENTID_MASK);
-    uint32_t count = 0;
-    while (g_extensionPersistentIdSet.count(persistentId)) {
-        persistentId++;
-        if (persistentId > max) {
-            persistentId = min;
-        }
-        count ++;
-        if (count > PERSISTENTID_MASK) {
-            persistentId_ = INVALID_SESSION_ID;
-            TLOGE(WmsLogTag::WMS_UIEXT, "can't generate Id");
-            return;
-        }
-    }
-    g_extensionPersistentIdSet.insert(persistentId);
-    persistentId_ = persistentId;
-}
-
-void ExtensionSession::RemoveExtensionPersistentId()
-{
-    std::lock_guard lock(g_extensionPersistentIdMutex);
-    g_extensionPersistentIdSet.erase(persistentId_);
-}
-
-
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
-    WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info.persistentId_);
-    TryUpdateExtensionPersistentId();
+    TryUpdateExtensionPersistentId(persistentId_);
     dataHandler_ = std::make_shared<Extension::HostDataHandler>();
+    TLOGD(WmsLogTag::WMS_UIEXT, "Create, bundle:%{public}s, module:%{public}s, ability:%{public}s, id:%{public}d.",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), persistentId_);
 }
 
 ExtensionSession::~ExtensionSession()
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "realease extension session");
-    RemoveExtensionPersistentId();
+    TLOGI(WmsLogTag::WMS_UIEXT, "realease extension, id=%{public}d", persistentId_);
+    RemoveExtensionPersistentId(persistentId_);
     if (windowEventChannel_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "window event channel is null");
         return;
