@@ -1166,8 +1166,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(compatibleModeInPc_) &&
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
-        parcel.WriteBool(isAppSupportPhoneInPc_) &&
-        parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) && parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
