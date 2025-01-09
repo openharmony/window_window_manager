@@ -2200,7 +2200,7 @@ void ScreenSessionManager::NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, 
 }
 
 void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-    ScreenPropertyChangeType screenPropertyChangeType)
+    float phyRotation, ScreenPropertyChangeType screenPropertyChangeType)
 {
     if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END) {
         TLOGI(WmsLogTag::DMS, "ROTATION_END");
@@ -2211,7 +2211,7 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float sc
         TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"", screenId);
         return;
     }
-    screenSession->SetPhysicalRotation(rotation, GetFoldDisplayMode());
+    screenSession->SetPhysicalRotation(phyRotation);
     screenSession->SetScreenComponentRotation(screenComponentRotation);
     screenSession->UpdateRotationOrientation(rotation);
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",

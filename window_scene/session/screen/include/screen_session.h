@@ -225,7 +225,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(float scaleX, float scaleY);
     void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
     Rotation ConvertIntToRotation(int rotation);
-    void SetPhysicalRotation(int rotation, FoldDisplayMode foldDisplayMode);
+    void SetPhysicalRotation(int rotation);
     void SetScreenComponentRotation(int rotation);
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
     void SetIsExtend(bool isExtend);
