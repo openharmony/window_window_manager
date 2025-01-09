@@ -27,7 +27,7 @@ bool NapiIsCallable(napi_env env, napi_value value);
 napi_status InitEnums(napi_env env, napi_value exports);
 napi_valuetype GetType(napi_env env, napi_value value);
 napi_value GetPiPWindowSizeAndConvertToJsValue(napi_env env, const Rect& rect, float scale);
-napi_value CreateJsPiPWindowInfoObject(napi_env env, sptr<Window> window);
+napi_value CreateJsPiPWindowInfoObject(napi_env env, const sptr<Window>& window);
 }
 }
 #endif //OHOS_JS_PIP_UTILS_H
