@@ -937,12 +937,13 @@ HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallT
     info.abilityName_ = "ExtensionSessionTest";
     info.bundleName_ = "ExtensionSessionTest";
     info.persistentId_ = INVALID_SESSION_ID;
-    ExtensionSession* extensionSessionA = new ExtensionSession(info);
+    sptr<ExtensionSession> extensionSessionA = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_NE(extensionSessionA, nullptr);
     info.persistentId_ = extensionSessionA->GetPersistentId();
     sptr<ExtensionSession> extensionSessionB = sptr<ExtensionSession>::MakeSptr(info);
     ASSERT_NE(extensionSessionB, nullptr);
     ASSERT_EQ(info.persistentId_ + 1, extensionSessionB->GetPersistentId());
-    delete extensionSessionA;
+    extensionSessionA.clear();
     info.persistentId_ += 4096;
     sptr<ExtensionSession> extensionSessionC = sptr<ExtensionSession>::MakeSptr(info);
     ASSERT_NE(extensionSessionC, nullptr);
