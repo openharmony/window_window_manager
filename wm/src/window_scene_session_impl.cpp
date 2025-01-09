@@ -120,8 +120,8 @@ const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
 };
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
-constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 1;
-constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 1;
+constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
+constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -946,13 +946,17 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     uint32_t limitMinWidth = systemLimits.minWidth_;
     uint32_t limitMinHeight = systemLimits.minHeight_;
     if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
-        limitMinWidth = FORCE_LIMIT_MIN_FLOATING_WIDTH;
-        limitMinHeight = FORCE_LIMIT_MIN_FLOATING_HEIGHT;
+        limitMinWidth = FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio;
+        limitMinHeight = FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio;
+        newLimits.minWidth_ = limitMinWidth;
+        newLimits.minHeight_ = limitMinHeight;
     }
-    if (limitMinWidth <= customizedLimits.minWidth_ && customizedLimits.minWidth_ <= newLimits.maxWidth_) {
+    if (limitMinWidth <= customizedLimits.minWidth_ &&
+        customizedLimits.minWidth_ <= newLimits.maxWidth_) {
         newLimits.minWidth_ = customizedLimits.minWidth_;
     }
-    if (limitMinHeight <= customizedLimits.minHeight_ && customizedLimits.minHeight_ <= newLimits.maxHeight_) {
+    if (limitMinHeight <= customizedLimits.minHeight_ &&
+        customizedLimits.minHeight_ <= newLimits.maxHeight_) {
         newLimits.minHeight_ = customizedLimits.minHeight_;
     }
 }
@@ -3955,13 +3959,13 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
 }
 
-WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool isForce)
+WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool isForcible)
 {
-    WLOGFI("Id:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
-        "maxWidth:%{public}u, maxHeight:%{public}u, isForce:%{public}u", GetWindowId(), windowLimits.minWidth_,
-        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, isForce);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
+        "maxWidth:%{public}u, maxHeight:%{public}u, isForcible:%{public}u", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, isForcible);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -3969,7 +3973,7 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool
     bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
     if (!WindowHelper::IsMainWindow(windowType) && !WindowHelper::IsSubWindow(windowType) &&
         windowType != WindowType::WINDOW_TYPE_DIALOG && !isDragEnabledSystemWin) {
-        WLOGFE("type not support. Id:%{public}u, type:%{public}u",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "type not support. Id:%{public}u, type:%{public}u",
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -3983,12 +3987,12 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool
     property_->SetUserWindowLimits({
         maxWidth, maxHeight, minWidth, minHeight, customizedLimits.maxRatio_, customizedLimits.minRatio_
     });
-    forceLimits_ = isForce;
+    forceLimits_ = isForcible;
     userLimitsSet_ = true;
     UpdateWindowSizeLimits();
     WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     if (ret != WMError::WM_OK) {
-        WLOGFE("update window proeprty failed! id: %{public}u.", GetWindowId());
+        TLOGE(WmsLogTag::WMS_LAYOUT, "update window proeprty failed! id: %{public}u.", GetWindowId());
         return ret;
     }
     UpdateNewSize();
