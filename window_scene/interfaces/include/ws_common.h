@@ -551,10 +551,10 @@ struct WSRectT {
         return ss.str();
     }
 
-    inline constexpr WSRect<T> WSRect<T>::EMPTY_RECT { 0, 0, 0, 0 };
+    static const WSRect<T> WSRect<T>::EMPTY_RECT { 0, 0, 0, 0 };
 };
 
-WSRectT::EMPTY_RECT = { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
+inline constexpr WSRectT::EMPTY_RECT { static_cast<T>(0), static_cast<T>(0), static_cast<T>(0), static_cast<T>(0) };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
