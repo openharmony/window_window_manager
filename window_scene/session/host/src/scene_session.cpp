@@ -4139,7 +4139,7 @@ WSError SceneSession::ChangeSessionVisibilityWithStatusBar(
         info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
         info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
         info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-        info.specifiedId = abilitySessionInfo->requestId;
+        info.requestId = abilitySessionInfo->requestId;
         info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
         info.requestCode = abilitySessionInfo->requestCode;
         info.callerToken_ = abilitySessionInfo->callerToken;
@@ -4172,7 +4172,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
     info.callState_ = static_cast<uint32_t>(abilitySessionInfo->state);
     info.uiAbilityId_ = abilitySessionInfo->uiAbilityId;
-    info.specifiedId = abilitySessionInfo->requestId;
+    info.requestId = abilitySessionInfo->requestId;
     info.want = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
     info.requestCode = abilitySessionInfo->requestCode;
     info.callerToken_ = abilitySessionInfo->callerToken;
@@ -4217,12 +4217,12 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
-        "supportedWindowModes.size:%{public}zu, specifiedId:%{public}d, "
+        "supportedWindowModes.size:%{public}zu, requestId:%{public}d, "
         "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
-        info.supportedWindowModes.size(), info.specifiedId,
+        info.supportedWindowModes.size(), info.requestId,
         info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
         info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight);
     return info;
