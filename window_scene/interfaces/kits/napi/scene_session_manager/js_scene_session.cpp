@@ -5663,7 +5663,7 @@ void JsSceneSession::ProcessLockStateChangeRegister()
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession=>OnLockStateChange(lockState);
+        jsSceneSession->OnLockStateChange(lockState);
     });
     TLOGI(WmsLogTag::WMS_MAIN, "success");
 }

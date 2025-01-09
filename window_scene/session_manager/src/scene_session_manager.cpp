@@ -1336,8 +1336,8 @@ void SceneSessionManager::GetMainSessionByAbility(const std::string& bundleName,
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
-            sceneSession->GetSessionInfo().moduleName == moduleName &&
-            sceneSession->GetSessionInfo().abilityName == abilityName &&
+            sceneSession->GetSessionInfo().moduleName_ == moduleName &&
+            sceneSession->GetSessionInfo().abilityName_ == abilityName &&
             sceneSession->GetSessionInfo().appIndex_ == appIndex &&
             SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             mainSessions.push_back(sceneSession);
@@ -12372,7 +12372,7 @@ WMError UnlockSessionByAbility(const std::string& bundleName, const std::string&
         for (const auto &mainSession : mainSessions) {
             TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, set LockState false, persistentId:%{public}d",
                 where, mainSessions[0]->GetPersistentId());
-            mainSessions[0]->NotifyLockStateChange(false);
+            mainSession->NotifyLockStateChange(false);
         }
         TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, erase LockState from cache set, persistentId:%{public}d",
             where, bundleName.c_str());
