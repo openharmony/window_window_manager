@@ -3462,12 +3462,7 @@ void SceneSession::ResetOcclusionAlpha()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return;
     }
-    auto sessionProperty = GetSessionProperty();
-    if (!sessionProperty) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
-        return;
-    }
-    uint8_t alpha8bit = sessionProperty->GetBackgroundAlpha();
+    uint8_t alpha8bit = GetSessionProperty()->GetBackgroundAlpha();
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u", alpha8bit);
     auto rsTransaction = RSTransactionProxy::GetInstance();
     if (rsTransaction != nullptr) {
