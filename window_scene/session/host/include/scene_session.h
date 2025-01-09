@@ -101,9 +101,15 @@ using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayI
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
+<<<<<<< HEAD
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using NotifyLockStateChangeCallback = std::function<void(boll lockState)>;
+=======
+using NotifySetSupportWindowModesFunc = std::function<void(
+    std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
+using NotifyLockStateChangeCallback = std::function<void(bool lockState)>;
+>>>>>>> 7498d216d (窗口提供设置任务中心锁定的能力)
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
