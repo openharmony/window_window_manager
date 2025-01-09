@@ -1181,42 +1181,6 @@ HWTEST_F(WindowSessionImplTest, NotifyAfterBackground, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: NotifyAfterUnfocused
- * @tc.desc: NotifyAfterUnfocused
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, NotifyAfterUnfocused, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterUnfocused start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyAfterUnfocused");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-
-    int res = 0;
-    window->NotifyAfterUnfocused(true);
-    window->NotifyAfterUnfocused(false);
-    ASSERT_EQ(res, 0);
-
-    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("NotifyAfterUnfocused",
-                          nullptr,
-                          nullptr,
-                          WindowSetUIContentType::DEFAULT,
-                          BackupAndRestoreType::NONE,
-                          nullptr,
-                          aceRet);
-    window->NotifyAfterUnfocused(true);
-    ASSERT_NE(window->GetUIContentSharedPtr(), nullptr);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyAfterUnfocused end";
-}
-
-/**
  * @tc.name: NotifyForegroundInteractiveStatus
  * @tc.desc: NotifyForegroundInteractiveStatus
  * @tc.type: FUNC
@@ -1236,53 +1200,6 @@ HWTEST_F(WindowSessionImplTest, NotifyForegroundInteractiveStatus, Function | Sm
     ASSERT_EQ(res, 0);
 
     GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyForegroundInteractiveStatus end";
-}
-
-/**
- * @tc.name: NotifyBeforeDestroy
- * @tc.desc: NotifyBeforeDestroy
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, NotifyBeforeDestroy, Function | SmallTest | Level2)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyBeforeDestroy start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyBeforeDestroy");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-
-    std::string windowName = "NotifyBeforeDestroy";
-    window->NotifyBeforeDestroy(windowName);
-    window->handler_ = nullptr;
-    window->NotifyBeforeDestroy(windowName);
-
-    // uiContent!=nullptr
-    OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    window->InitUIContent("NotifyAfterUnfocused",
-                          nullptr,
-                          nullptr,
-                          WindowSetUIContentType::DEFAULT,
-                          BackupAndRestoreType::NONE,
-                          nullptr,
-                          aceRet);
-    ASSERT_NE(window->uiContent_, nullptr);
-    window->NotifyBeforeDestroy(windowName);
-    ASSERT_EQ(window->uiContent_, nullptr);
-
-    // notifyNativeFunc_!=nullptr
-    NotifyNativeWinDestroyFunc func = [&](std::string name) {
-        GTEST_LOG_(INFO) << "NotifyNativeWinDestroyFunc";
-        ASSERT_EQ(windowName, name);
-    };
-    window->RegisterWindowDestroyedListener(func);
-    window->NotifyBeforeDestroy(windowName);
-
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyBeforeDestroy end";
 }
 
 /**
@@ -2020,6 +1937,84 @@ HWTEST_F(WindowSessionImplTest, GetStatusBarHeight, Function | SmallTest | Level
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     ASSERT_EQ(0, window->GetStatusBarHeight());
+}
+
+/**
+ * @tc.name: GetWindowStatusInner
+ * @tc.desc: GetWindowStatusInner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetWindowStatusInner, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowStatusInner");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_UNDEFINED, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_PIP));
+
+    window->SetTargetAPIVersion(14);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_FULLSCREEN, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_FULLSCREEN));
+    window->SetTargetAPIVersion(12);
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_FULLSCREEN, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_FULLSCREEN));
+
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN,
+    window->GetWindowStatusInner(WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_SPLITSCREEN,
+    window->GetWindowStatusInner(WindowMode::WINDOW_MODE_SPLIT_SECONDARY));
+
+    window->property_->maximizeMode_ = MaximizeMode::MODE_AVOID_SYSTEM_BAR;
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_MAXIMIZE, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_FLOATING));
+    window->property_->maximizeMode_ = MaximizeMode::MODE_FULL_FILL;
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_FLOATING, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_FLOATING));
+
+    window->state_ = WindowState::STATE_HIDDEN;
+    EXPECT_EQ(WindowStatus::WINDOW_STATUS_MINIMIZE, window->GetWindowStatusInner(WindowMode::WINDOW_MODE_PIP));
+}
+
+/**
+ * @tc.name: GetBackgroundColor01
+ * @tc.desc: GetBackgroundColor01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetBackgroundColor01, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetBackgroundColor01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_EQ(0, window->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: GetBackgroundColor02
+ * @tc.desc: GetBackgroundColor02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetBackgroundColor02, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetBackgroundColor02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<IAceAbilityHandler> handler = sptr<IAceAbilityHandler>();
+    window->SetAceAbilityHandler(handler);
+    EXPECT_EQ(0xffffffff, window->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: GetBackgroundColor03
+ * @tc.desc: GetBackgroundColor03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetBackgroundColor03, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetBackgroundColor03");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(0xffffffff, window->GetBackgroundColor());
 }
 } // namespace
 } // namespace Rosen

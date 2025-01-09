@@ -20,6 +20,7 @@
 
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
 #include "ws_common.h"
 
 typedef struct napi_env__* napi_env;
@@ -67,6 +68,15 @@ public:
     void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
     std::string GetClassType() const override { return "RootScene"; }
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+
+    /*
+     * Keyboard Window
+     */
+    WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    void NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info);
 
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
 
@@ -130,6 +140,8 @@ private:
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;
     std::unordered_set<sptr<IAvoidAreaChangedListener>, SptrHash<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
+    std::unordered_set<sptr<IOccupiedAreaChangeListener>, SptrHash<IOccupiedAreaChangeListener>>
+        occupiedAreaChangeListeners_;
     // Above guarded by mutex_
 };
 } // namespace Rosen

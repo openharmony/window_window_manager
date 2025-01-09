@@ -209,14 +209,14 @@ void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, floa
     screenSession->SensorRotationChange(sensorRotation);
 }
 
-void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus)
+void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate)
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");
         return;
     }
-    screenSession->HandleHoverStatusChange(hoverStatus);
+    screenSession->HandleHoverStatusChange(hoverStatus, needRotate);
 }
 
 void ScreenSessionManagerClient::OnScreenOrientationChanged(ScreenId screenId, float screenOrientation)
@@ -310,7 +310,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_,
-        screenPropertyChangeType);
+        directionInfo.phyRotation_, screenPropertyChangeType);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, directionInfo.notifyRotation_,
         screenPropertyChangeType);
 
@@ -325,7 +325,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
-    screenSession->SetPhysicalRotation(directionInfo.rotation_, foldDisplayMode);
+    screenSession->SetPhysicalRotation(directionInfo.phyRotation_);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);

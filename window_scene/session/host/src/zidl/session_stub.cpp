@@ -66,8 +66,8 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read callingTokenId failed.");
         return ERR_INVALID_DATA;
     }
-    if (!data.ReadInt32(abilitySessionInfo->tmpSpecifiedId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read tmpSpecifiedId failed.");
+    if (!data.ReadInt32(abilitySessionInfo->requestId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read requestId failed.");
         return ERR_INVALID_DATA;
     }
     if (!data.ReadBool(abilitySessionInfo->reuse)) {
@@ -144,6 +144,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW):
             return HandleSetLandscapeMultiWindow(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_MID_SCENE):
+            return HandleGetIsMidScene(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET):
             return HandleRaiseAboveTarget(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW):
@@ -513,7 +515,7 @@ int SessionStub::HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageP
 
 int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply)
 {
-    WSError errCode = OnRestoreMainWindow();
+    OnRestoreMainWindow();
     return ERR_NONE;
 }
 
@@ -940,6 +942,19 @@ int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParce
     return ERR_NONE;
 }
 
+int SessionStub::HandleGetIsMidScene(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
+    bool isMidScene = false;
+    const WSError errCode = GetIsMidScene(isMidScene);
+    if (!reply.WriteBool(isMidScene)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write isMidScene failed");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleTransferAbilityResult!");
@@ -1150,7 +1165,12 @@ int SessionStub::HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_EVENT, "Read pointer event failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = SendPointEventForMoveDrag(pointerEvent);
+    bool isExecuteDelayRaise = false;
+    if (!data.ReadBool(isExecuteDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read isExecuteDelayRaise failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -1348,7 +1368,7 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
-    WSError errCode = OnSetWindowRectAutoSave(enabled);
+    OnSetWindowRectAutoSave(enabled);
     return ERR_NONE;
 }
 

@@ -383,7 +383,7 @@ HWTEST_F(AbstractScreenControllerTest, UpdateRSTree04, Function | SmallTest | Le
     ASSERT_NE(nullptr, absController_->GetAbstractScreen(id));
     sptr<AbstractScreen> parentScreen = absController_->GetAbstractScreen(parentId);
     ASSERT_NE(nullptr, absController_->GetAbstractScreen(parentId));
-    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);;
+    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     absController_->UpdateRSTree(id, parentId, node, true, true);
 }
 
@@ -401,7 +401,7 @@ HWTEST_F(AbstractScreenControllerTest, UpdateRSTree05, Function | SmallTest | Le
     ASSERT_NE(nullptr, absController_->GetAbstractScreen(id));
     sptr<AbstractScreen> parentScreen = absController_->GetAbstractScreen(parentId);
     ASSERT_NE(nullptr, absController_->GetAbstractScreen(parentId));
-    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);;
+    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     absController_->UpdateRSTree(id, parentId, node, true, false);
 }
 
@@ -1223,7 +1223,7 @@ HWTEST_F(AbstractScreenControllerTest, UpdateRSTree06, Function | SmallTest | Le
     ASSERT_NE(nullptr, absController_->GetAbstractScreen(id));
     sptr<AbstractScreen> parentScreen = absController_->GetAbstractScreen(parentId);
     ASSERT_NE(nullptr, absController_->GetAbstractScreen(parentId));
-    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);;
+    parentScreen->rsDisplayNode_ = std::make_shared<RSDisplayNode>(config);
     absController_->UpdateRSTree(id, parentId, node, true, false);
 }
 

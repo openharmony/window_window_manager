@@ -36,6 +36,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
 #include "window_option.h"
 #include "wm_common.h"
 
@@ -115,6 +116,8 @@ public:
     bool IsPcWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError SetWindowDelayRaiseEnabled(bool isEnabled) override;
+    bool IsWindowDelayRaiseEnabled() const override;
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
         bool isCloseVisible) override;
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
@@ -294,6 +297,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+    WMError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Window Layout
@@ -318,10 +322,10 @@ public:
     WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override;
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override;
-    bool IsSystemWindow() const override;
-    bool IsAppWindow() const override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
 
     /*
      * Window Property
@@ -392,7 +396,6 @@ protected:
      */
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    bool IsAxisEvent(int32_t action);
     WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
     WMError ClearKeyEventFilter() override;
     WMError SetMouseEventFilter(MouseEventFilterFunc filter) override;
@@ -655,6 +658,7 @@ private:
      * Window Decor
      */
     DecorButtonStyle decorButtonStyle_;
+    int32_t decorHeight_ = 0;
 
     /*
      * Multi Window
@@ -674,11 +678,11 @@ private:
     /*
      * PC Event Filter
      */
-    std::shared_mutex keyEventFilterMutex_;
+    std::mutex keyEventFilterMutex_;
     KeyEventFilterFunc keyEventFilter_;
-    std::shared_mutex mouseEventFilterMutex_;
+    std::mutex mouseEventFilterMutex_;
     MouseEventFilterFunc mouseEventFilter_;
-    std::shared_mutex touchEventFilterMutex_;
+    std::mutex touchEventFilterMutex_;
     TouchEventFilterFunc touchEventFilter_;
 };
 } // namespace Rosen

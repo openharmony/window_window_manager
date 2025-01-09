@@ -286,6 +286,8 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };
 
+    napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos);
+    napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info);
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);

@@ -54,18 +54,18 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t wi
 WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t windowId);
 
 /**
- * @brief the callback function type when mouseEvent was filter
+ * @brief the callback function type when mouseEvent was filtered
  * @param mouseEvent multimodal mouseEvent
  * @since 15
  */
 typedef bool (*OH_NativeWindowManager_MouseEventFilter)(Input_MouseEvent* mouseEvent);
 
 /**
- * @brief Registers a filter callback for the window ,the callback is called when the
+ * @brief Registers a filter callback for the window, the callback is called when the
  * window is dispatched to the event
  *
  * @param windowId windowId when window is created
- * @param mouseEventFilter mouse event callback ,called when the window is dispatched
+ * @param mouseEventFilter mouse event callback, called when the window is dispatched
  * to the event
  * @return Returns the status code of the execution.
  * @since 15
@@ -74,7 +74,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterMouseEventFilter(int32_t 
     OH_NativeWindowManager_MouseEventFilter mouseEventFilter);
 
 /**
- * @brief clear callback for the window
+ * @brief clear mouse event filter callback for the window
  *
  * @param windowId windowId when window is created
  * @return Returns the status code of the execution.
@@ -83,18 +83,18 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterMouseEventFilter(int32_t 
 WindowManager_ErrorCode OH_NativeWindowManager_UnregisterMouseEventFilter(int32_t windowId);
 
 /**
- * @brief the callback function type when touchEvent was filter
+ * @brief the callback function type when touchEvent was filtered
  * @param touchEvent multimodal touchEvent
  * @since 15
  */
 typedef bool (*OH_NativeWindowManager_TouchEventFilter)(Input_TouchEvent* touchEvent);
 
 /**
- * @brief Registers a filter callback for the window ,the callback is called when the
+ * @brief Registers a filter callback for the window, the callback is called when the
  * window is dispatched to the event
  *
  * @param windowId windowId when window is created
- * @param touchEventFilter touch event callback ,called when the window is dispatched
+ * @param touchEventFilter touch event callback, called when the window is dispatched
  * to the event
  * @return Returns the status code of the execution.
  * @since 15
@@ -103,7 +103,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterTouchEventFilter(int32_t 
     OH_NativeWindowManager_TouchEventFilter touchEventFilter);
 
 /**
- * @brief clear callback for the window
+ * @brief clear touch event filter callback for the window
  *
  * @param windowId windowId when window is created
  * @return Returns the status code of the execution.

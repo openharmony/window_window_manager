@@ -104,10 +104,10 @@ inline int32_t Ceil(float val)
 } // namespace MathHelper
 
 namespace TimeHelper {
-inline int32_t GetDuration(std::chrono::time_point<std::chrono::high_resolution_clock> t0,
+inline float GetDuration(std::chrono::time_point<std::chrono::high_resolution_clock> t0,
     std::chrono::time_point<std::chrono::high_resolution_clock> t1)
 {
-    return static_cast<int32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
+    return static_cast<float>(std::chrono::duration<float, std::milli>(t1 - t0).count());
 }
 }
 

@@ -22,6 +22,7 @@
 #include "screen_scene_config.h"
 #include <surface.h>
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2664,12 +2665,70 @@ HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | Smal
 }
 
 /**
+ * @tc.name: TriggerFoldStatusChange01
+ * @tc.desc: test interface TriggerFoldStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TriggerFoldStatusChange01, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    ASSERT_NE(ssm_, nullptr);
+    FoldStatus foldStatus = FoldStatus::EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    FoldStatus res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::HALF_FOLD;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+}
+
+/**
  * @tc.name: NotifyFoldStatusChanged
  * @tc.desc: NotifyFoldStatusChanged
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTest | Level3)
 {
+#ifdef FOLD_ABILITY_ENABLE
     std::string statusParam;
     auto ret = ssm_->NotifyFoldStatusChanged(statusParam);
     ASSERT_EQ(ret, -1);
@@ -2694,6 +2753,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTe
     ssm_->HandleFoldScreenPowerInit();
     ret = ssm_->NotifyFoldStatusChanged(statusParam);
     ASSERT_EQ(ret, 0);
+#endif
 }
 
 /**
@@ -2771,6 +2831,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | SmallTest | Level3)
 {
+#ifdef FOLD_ABILITY_ENABLE
     float phyWidth = 0.0f;
     float phyHeight = 0.0f;
     bool isReset = true;
@@ -2785,6 +2846,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | Small
     ASSERT_NE(ssm_->foldScreenController_, nullptr);
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     ASSERT_FALSE(isReset);
+#endif
 }
 
 /**

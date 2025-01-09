@@ -567,17 +567,14 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     std::vector<int32_t> pointerChangeAreas;
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(sceneSession, nullptr);
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    property->SetDragEnabled(false);
-    sceneSession->SetSessionProperty(property);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->property_->SetDragEnabled(false);
     manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
     ASSERT_EQ(0, pointerChangeAreas.size());
-    property->SetDragEnabled(true);
+    sceneSession->property_->SetDragEnabled(true);
     float vpr = 1.5f;
-    property->SetDisplayId(100);
+    sceneSession->property_->SetDisplayId(100);
     int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
     int32_t pointerAreaSixteenPx = static_cast<int32_t>(POINTER_CHANGE_AREA_SIXTEEN * vpr);
     WindowLimits limits;
@@ -585,7 +582,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     limits.minHeight_ = 0;
     limits.maxWidth_ = 0;
     limits.minWidth_ = 0;
-    property->SetWindowLimits(limits);
+    sceneSession->property_->SetWindowLimits(limits);
     manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
     std::vector<int32_t> compare2 = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
         POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
@@ -593,14 +590,14 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     ASSERT_EQ(compare2, pointerChangeAreas);
     limits.maxHeight_ = 0;
     limits.maxWidth_ = 1;
-    property->SetWindowLimits(limits);
+    sceneSession->property_->SetWindowLimits(limits);
     manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
     std::vector<int32_t> compare3 = {POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
         POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,
         POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx};
     ASSERT_EQ(compare3, pointerChangeAreas);
     limits.maxHeight_ = 1;
-    property->SetWindowLimits(limits);
+    sceneSession->property_->SetWindowLimits(limits);
     manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
     std::vector<int32_t> compare4 = pointerChangeAreas = {pointerAreaSixteenPx, pointerAreaFivePx,
         pointerAreaSixteenPx, pointerAreaFivePx, pointerAreaSixteenPx,
@@ -690,22 +687,22 @@ HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | S
     std::vector<MMI::WindowInfo> windowInfoList;
     MMI::WindowInfo windowInfo;
     windowInfoList.emplace_back(windowInfo);
-    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, nullptr);
-    EXPECT_EQ(windowInfoList.size(), 1);
-
     ExtensionWindowEventInfo extensionInfo = {
         .persistentId = 12345,
         .pid = 1234
     };
+    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, nullptr, extensionInfo);
+    EXPECT_EQ(windowInfoList.size(), 1);
+    
     sceneSession->AddModalUIExtension(extensionInfo);
-    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession);
+    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
     ASSERT_EQ(windowInfoList.size(), 2);
     EXPECT_TRUE(windowInfoList[1].defaultHotAreas.empty());
 
     Rect windowRect {1, 1, 7, 8};
     extensionInfo.windowRect = windowRect;
     sceneSession->UpdateModalUIExtension(extensionInfo);
-    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession);
+    manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
     ASSERT_EQ(windowInfoList.size(), 3);
     EXPECT_EQ(windowInfoList[2].defaultHotAreas.size(), 1);
 }

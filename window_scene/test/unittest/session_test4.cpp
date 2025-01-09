@@ -925,6 +925,19 @@ HWTEST_F(WindowSessionTest4, SetOffset01, Function | SmallTest | Level2)
     ASSERT_EQ(session_->GetOffsetX(), 0);
 }
 
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetIsMidScene, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    bool isMidScene = false;
+    auto result = session_->GetIsMidScene(isMidScene);
+    ASSERT_EQ(result, WSError::WS_OK);
+    ASSERT_EQ(isMidScene, false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

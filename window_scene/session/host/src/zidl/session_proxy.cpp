@@ -45,7 +45,7 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
         !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
         !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
-        !data.WriteInt32(abilitySessionInfo->tmpSpecifiedId) ||
+        !data.WriteInt32(abilitySessionInfo->requestId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
@@ -1311,6 +1311,33 @@ WSError SessionProxy::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
     return static_cast<WSError>(ret);
 }
 
+WSError SessionProxy::GetIsMidScene(bool& isMidScene)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_MID_SCENE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(isMidScene)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Read isMidScene failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
     MessageParcel data;
@@ -1696,7 +1723,8 @@ WSError SessionProxy::ProcessPointDownSession(int32_t posX, int32_t posY)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool isExecuteDelayRaise)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1707,6 +1735,10 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     }
     if (!pointerEvent->WriteToParcel(data)) {
         WLOGFE("width pointerEvent failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isExecuteDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write isExecuteDelayRaise failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

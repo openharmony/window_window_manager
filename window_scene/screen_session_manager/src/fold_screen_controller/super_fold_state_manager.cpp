@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <hitrace_meter.h>
+#include <hisysevent.h>
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "window_manager_hilog.h"
@@ -250,6 +252,23 @@ FoldStatus SuperFoldStateManager::MatchSuperFoldStatusToFoldStatus(SuperFoldStat
     }
 }
 
+void SuperFoldStateManager::ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
+    float postureAngle)
+{
+    TLOGI(WmsLogTag::DMS, "currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
+        currentStatus, nextStatus, postureAngle);
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "NOTIFY_FOLD_STATE_CHANGE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "CURRENT_FOLD_STATUS", currentStatus,
+        "NEXT_FOLD_STATUS", nextStatus,
+        "SENSOR_POSTURE", postureAngle);
+    if (ret != 0) {
+        TLOGI(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
 void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents event)
 {
     SuperFoldStatus curState = curState_.load();
@@ -264,7 +283,11 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         isTransfer = true;
     }
 
+    float curAngle = SuperFoldSensorManager::GetInstance().GetCurAngle();
+    TLOGD(WmsLogTag::DMS, "curAngle: %{public}f", curAngle);
     if (isTransfer && action) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleSuperFoldStatusChange");
+        ReportNotifySuperFoldStatusChange(static_cast<int32_t>(curState), static_cast<int32_t>(nextState), curAngle);
         action(event);
         TransferState(nextState);
         HandleDisplayNotify(event);

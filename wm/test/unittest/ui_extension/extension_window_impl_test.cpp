@@ -141,6 +141,22 @@ HWTEST_F(ExtensionWindowImplTest, HidePrivacyContentForHost, Function | SmallTes
     EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HidePrivacyContentForHost(true));
     EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HidePrivacyContentForHost(false));
 }
+
+/**
+ * @tc.name: OccupyEvents
+ * @tc.desc: OccupyEvents Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, OccupyEvents, Function | SmallTest | Level2)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<MockWindowExtensionSessionImpl>::MakeSptr(option);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, extensionWindowImpl.OccupyEvents(0));
+    window->mockHandler_ = std::make_shared<MockDataHandler>();
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.OccupyEvents(0));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
