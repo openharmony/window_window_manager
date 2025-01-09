@@ -103,6 +103,7 @@ using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isN
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
+using NotifyLockStateChangeCallback = std::function<void(boll lockState)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -452,6 +453,8 @@ public:
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
+    void RegisterLockStateChangeCallBack(NotifyLockStateChangeCallback&& callback);
+    void NotifyLockStateChange(bool lockState);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -699,6 +702,8 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, bool> appUseControlMap_;
+    NotifyLockStateChangeCallback onLockStateChangeCallback_;
+    bool lockState_ = false;
 
     /*
      * PC Fold Screen
