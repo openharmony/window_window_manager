@@ -3254,7 +3254,7 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
             auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
             CALL_LIFECYCLE_LISTENER(AfterDidForeground, lifecycleListeners);
-            }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
     return;
 }
@@ -3302,7 +3302,7 @@ void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
             auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
             CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners);
-            }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
     return;
 }
