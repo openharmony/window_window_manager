@@ -53,6 +53,8 @@ ohos_shared_library("screen_napi") {
     "graphic_surface:surface",  # use for SurfaceUtils
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image",
+    "image_framework:image_native",
     "napi:ace_napi",
   ]
 
