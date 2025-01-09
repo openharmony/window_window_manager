@@ -321,7 +321,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
     auto taskScreenOff = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
         screenId_ = offScreenId;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_OFF);
@@ -335,7 +335,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
     AddOrRemoveDisplayNodeToTree(offScreenId, REMOVE_DISPLAY_NODE);
 
     auto taskScreenOn = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}" PRIu64 "", onScreenId);
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}" PRIu64 "", onScreenId);
         screenId_ = onScreenId;
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
@@ -358,7 +358,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
 #endif
     // on main screen
     auto taskScreenOnMain = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on main screenId");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on main screenId");
         screenId_ = SCREEN_ID_MAIN;
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
@@ -376,7 +376,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "taskScreenOnMain");
     // on sub screen
     auto taskScreenOnSub = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on sub screenId");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on sub screenId");
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPowerForFold(SCREEN_ID_SUB,

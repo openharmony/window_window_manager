@@ -40,6 +40,7 @@ const int32_t TP_TYPE_POWER_CTRL = 18;
 const std::string FULL_TP = "0";
 const std::string MAIN_TP = "1";
 const std::string MAIN_TP_OFF = "1,1";
+const std::string FULL_TP_OFF = "0.1";
 #endif
 } // namespace
 
@@ -108,7 +109,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         }
     }
     ReportFoldDisplayModeChange(displayMode);
-    ChangeScreenDisplayModeProc(screenSession, displayMode);
+    ChangeScreenDisplayModeProc(screenSession, displayMode, reason);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
@@ -119,7 +120,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
 }
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession,
-    FoldDisplayMode displayMode)
+    FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
     switch (displayMode) {
         case FoldDisplayMode::MAIN: {
@@ -133,7 +134,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeProc(sptr<ScreenSessi
             if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
                 CloseCoordinationScreen();
             } else {
-                ChangeScreenDisplayModeToFull(screenSession);
+                ChangeScreenDisplayModeToFull(screenSession, reason);
             }
             break;
         }
@@ -264,13 +265,13 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
         static_cast<int32_t>(SCREEN_ID_MAIN));
     auto taskScreenOnMain = [=] {
         // off full screen
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdFull OFF.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdFull OFF.");
         screenId_ = SCREEN_ID_FULL;
         ChangeScreenDisplayModePower(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
         SetdisplayModeChangeStatus(false);
 
         // on main screen
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdMain ON.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdMain ON.");
         screenId_ = SCREEN_ID_MAIN;
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         SetdisplayModeChangeStatus(false);
@@ -284,7 +285,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
     TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is false, begin.");
     // off full screen
     auto taskScreenOffMainOff = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, screenIdFull OFF.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, screenIdFull OFF.");
         screenId_ = SCREEN_ID_FULL;
         ChangeScreenDisplayModePower(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
         SetdisplayModeChangeStatus(false);
@@ -293,7 +294,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
     SendPropertyChangeResult(screenSession, SCREEN_ID_MAIN, ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
     bool ifTentMode = ScreenSessionManager::GetInstance().GetTentMode();
     auto taskScreenOnMainChangeScreenId = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, Change ScreenId to Main.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is false, Change ScreenId to Main.");
         screenId_ = SCREEN_ID_MAIN;
 #ifdef TP_FEATURE_ENABLE
         RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_POWER_CTRL, MAIN_TP_OFF.c_str());
@@ -333,13 +334,13 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFullWhenFoldScreenO
     TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is true, begin.");
     auto taskScreenOnFull = [=] {
         // off main screen
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdMain OFF.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdMain OFF.");
         screenId_ = SCREEN_ID_MAIN;
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
         SetdisplayModeChangeStatus(false);
 
         // on full screen
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdFull ON.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdFull ON.");
         screenId_ = SCREEN_ID_FULL;
         ChangeScreenDisplayModePower(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
         SetdisplayModeChangeStatus(false);
@@ -348,12 +349,13 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFullWhenFoldScreenO
     SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
 }
 
-void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFullWhenFoldScreenOff(sptr<ScreenSession> screenSession)
+void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFullWhenFoldScreenOff(sptr<ScreenSession> screenSession,
+    DisplayModeChangeReason reason)
 {
     TLOGI(WmsLogTag::DMS, "IsFoldScreenOn is false, begin.");
     // off main screen
     auto taskScreenOffFullOff = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdMain OFF.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdMain OFF.");
         screenId_ = SCREEN_ID_MAIN;
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
         SetdisplayModeChangeStatus(false);
@@ -362,9 +364,15 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFullWhenFoldScreenO
     SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
     // on full screen
     auto taskScreenOnFullOn = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdFull ON.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is false, screenIdFull ON.");
         screenId_ = SCREEN_ID_FULL;
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+        if (reason == DisplayModeChangeReason::RECOVER) {
+#ifdef TP_FEATURE_ENABLE
+            RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_POWER_CTRL, FULL_TP_OFF.c_str());
+#endif
+        } else {
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+        }
         SetdisplayModeChangeStatus(false);
     };
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnFullOn, "screenOnFullOnTask");
@@ -390,7 +398,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSes
         if (ScreenSessionManager::GetInstance().TryToCancelScreenOff()) {
             ChangeScreenDisplayModeToFullWhenFoldScreenOn(screenSession);
         } else {
-            ChangeScreenDisplayModeToFullWhenFoldScreenOff(screenSession);
+            ChangeScreenDisplayModeToFullWhenFoldScreenOff(screenSession, reason);
         }
     }
 }
@@ -470,7 +478,7 @@ void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
     } else if (currentState == FoldStatus::FOLDED) {
         RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
         ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
-        RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
     } else {
         TLOGE(WmsLogTag::DMS, "current state:%{public}d invalid", currentState);
     }
@@ -478,6 +486,7 @@ void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
 
 void SingleDisplayPocketFoldPolicy::ChangeOffTentMode()
 {
+    PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
     FoldDisplayMode displayMode = GetModeMatchStatus();
     ChangeScreenDisplayMode(displayMode);
 }
@@ -518,7 +527,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToCoordination()
 
     // on main screen
     auto taskScreenOnMainOn = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination: screenIdMain ON.");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination: screenIdMain ON.");
         NotifyRefreshRateEvent(true);
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
@@ -533,7 +542,7 @@ void SingleDisplayPocketFoldPolicy::CloseCoordinationScreen()
     
     // on main screen
     auto taskScreenOnMainOFF = [=] {
-        TLOGI(WmsLogTag::DMS, "CloseCoordinationScreen: screenIdMain OFF.");
+        TLOGNI(WmsLogTag::DMS, "CloseCoordinationScreen: screenIdMain OFF.");
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
         NotifyRefreshRateEvent(false);
     };

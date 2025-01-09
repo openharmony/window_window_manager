@@ -80,6 +80,8 @@ public:
     virtual ~ExtensionSession();
 
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const;
+    void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+        const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler) override;
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
         sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
@@ -118,13 +120,14 @@ public:
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
+    void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) override;
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
     bool isFirstTriggerBindModal_ = true;
     sptr<ChannelDeathRecipient> channelDeath_ = nullptr;
     sptr<WindowEventChannelListener> channelListener_ = nullptr;
-    std::shared_ptr<IDataHandler> dataHandler_;
+    std::shared_ptr<Extension::DataHandler> dataHandler_;
 };
 } // namespace OHOS::Rosen
 

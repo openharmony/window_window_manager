@@ -190,13 +190,24 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowTopmost");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WMError res = window->SetMainWindowTopmost(false);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->state_ = WindowState::STATE_CREATED;
-    WMError res = window->SetMainWindowTopmost(true);
-    ASSERT_EQ(WMError::WM_OK, res);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    res = window->SetMainWindowTopmost(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    res = window->SetMainWindowTopmost(true);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    res = window->SetMainWindowTopmost(true);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->SetMainWindowTopmost(false);
+    EXPECT_EQ(res, WMError::WM_OK);
 }
 
 /**
@@ -1134,7 +1145,7 @@ HWTEST_F(WindowSessionImplTest4, Filter, Function | SmallTest | Level2)
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->FilterKeyEvent(keyEvent);
     ASSERT_EQ(window->keyEventFilter_, nullptr);
-    window->SetKeyEventFilter([](MMI::KeyEvent& keyEvent) {
+    window->SetKeyEventFilter([](const MMI::KeyEvent& keyEvent) {
         GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetKeyEventFilter";
         return true;
     });
@@ -2330,6 +2341,28 @@ HWTEST_F(WindowSessionImplTest4, NotifySystemDensityChange01, Function | SmallTe
     float density = 1.5f;
     auto ret = window->NotifySystemDensityChange(density);
     ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetIsMidScene, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetIsMidScene");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    bool isMidScene = false;
+    auto ret = window->GetIsMidScene(isMidScene);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ASSERT_EQ(false, isMidScene);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 } // namespace

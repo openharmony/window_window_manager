@@ -179,7 +179,7 @@ HWTEST_F(OHDisplayManagerTest, OH_NativeDisplayManager_GetDefaultDisplayOrientat
 {
     NativeDisplayManager_Orientation testOrientation = NativeDisplayManager_Orientation::DISPLAY_MANAGER_LANDSCAPE;
     NativeDisplayManager_ErrorCode ret = OH_NativeDisplayManager_GetDefaultDisplayOrientation(&testOrientation);
-    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);;
+    EXPECT_EQ(ret, NativeDisplayManager_ErrorCode::DISPLAY_MANAGER_OK);
 }
 
 /**
