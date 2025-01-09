@@ -909,7 +909,7 @@ void SceneSession::NotifyLockStateChange(bool lockState)
             TLOGI(WmsLogTag::WMS_MAIN, "onLockStageChange to:%{public}d", lockState);
             session->onLockStateChangeCallback_(lockState);
         }
-    })
+    }, __func__);
 }
 
 void SceneSession::RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback)
