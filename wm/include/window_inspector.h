@@ -47,10 +47,10 @@ private:
     void* handlerConnectServerSo_ = nullptr;
     SendMessage sendMessage_ = nullptr;
     SetWMSCallback setWMSCallback_ = nullptr;
-    std::string jsonWindowListsInfoStr;
     std::weak_ptr<WMSGetWindowListsCallback> wmsGetWindowListsCallback_;
-    static sqrt<WindowInspector> CreateInstance();
-    bool ProcessArkUIInspectorMessage();
+    std::string jsonWindowListsInfoStr;
+    static sptr<WindowInspector> CreateInstance();
+    bool ProcessArkUIInspectorMessage(const std::string& message);
     void TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo);
     void SendMessageToIDE();
 };

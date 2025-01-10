@@ -24,15 +24,15 @@ constexpr char ARK_CONNECT_LIB_PATH[] = "libark_connect_inspector.z.so";
 const std::string METHOD_NAME = "WMS.windowList";
 const std::string INTERFACE_NAME = "getCurrentProcessWindowList";
 
-sqrt<WindowInspector> WindowInspector::CreateInstance()
+sptr<WindowInspector> WindowInspector::CreateInstance()
 {
-    sqrt<WindowInspector> windowInspector = new WindowInspector();
+    sptr<WindowInspector> windowInspector = new WindowInspector();
     return windowInspector;
 }
 
 WindowInspector& WindowInspector::GetInstance()
 {
-    static sqrt<WindowInspector> instance = CreateInstance();
+    static sptr<WindowInspector> instance = CreateInstance();
     return *instance;
 }
 
@@ -48,13 +48,13 @@ void WindowInspector::InitConnectServer()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "can't open %{public}s", ARK_CONNECT_LIB_PATH);
         return;
     }
-    SetWMSCallback_ = reinterpret_cast<SetWMSCallback>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    setWMSCallback_ = reinterpret_cast<SetWMSCallback>(dlsym(handlerConnectServerSo_, "SetWMSCallback"));
     if (setWMSCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load SetWMSCallback failed: %{public}s", dlerror());
         return;
     }
-    sendMessage_ = reinterpret_cast<SetWMSCallback>(dlsym(handlerConnectServerSo_, "SetWMSCallback"));
-    if (setWMSCallback_ == nullptr) {
+    sendMessage_ = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
+    if (sendMessage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load sendMessage failed: %{public}s", dlerror());
         return;
     }
@@ -68,7 +68,7 @@ bool WindowInspector::RegisterWMSConnectCallback()
     }
     setWMSCallback_([this](const char* message) {
         if (ProcessArkUIInspectorMessage(message)) {
-            sendMessageToIDE();
+            SendMessageToIDE();
         }
     });
     dlclose(handlerConnectServerSo_);
@@ -111,25 +111,25 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
     }
     for (auto const& info : windowListsInfoVec) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "info name=%{public}s, id=%{public}u, type=%{public}u, rect=%{public}s",
-              info.windowName, info.windowId, info.windowType, info.windowRect.ToString().c_str());
+            info.windowName.c_str(), info.windowId, info.windowType, info.windowRect.ToString().c_str());
     }
     TransformDataToJson(windowListsInfoVec);
     return true;
 }
 
-void TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo)
+void WindowInspector::TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo)
 {
-    nlohman::ordered_json jsonWindowListsInfo;
+    nlohmann::ordered_json jsonWindowListsInfo;
     jsonWindowListsInfo["type"] = "window";
-    jsonWindowListsInfo["content"] = nlohman::json::array();
+    jsonWindowListsInfo["content"] = nlohmann::json::array();
     for (const auto& info : windowListsInfo) {
-        nlohman::ordered_json jsonInfo;
+        nlohmann::ordered_json jsonInfo;
         jsonInfo["windowName"] = info.windowName;
         jsonInfo["winId"] = std::to_string(info.windowId);
         jsonInfo["windowType"] = std::to_string(info.windowType);
 
-        jsonInfo["rect"] = nlohman::json::array();
-        nlohman::ordered_json jsonRectInfo;
+        jsonInfo["rect"] = nlohmann::json::array();
+        nlohmann::ordered_json jsonRectInfo;
         jsonRectInfo["startX"] = std::to_string(info.windowRect.posX_);
         jsonRectInfo["startY"] = std::to_string(info.windowRect.posY_);
         jsonRectInfo["width"] = std::to_string(info.windowRect.width_);
@@ -142,12 +142,12 @@ void TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "jsonWindowListsInfoStr: %{public}s", jsonWindowListsInfoStr.c_str());
 }
 
-void WindowInspector::sendMessageToIDE()
+void WindowInspector::SendMessageToIDE()
 {
     if (sendMessage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendMessage is null");
         return;
     }
-    SendMessage_(jsonWindowListsInfoStr);
+    sendMessage_(jsonWindowListsInfoStr);
 }
 }  // namespace Rosen::OHOS
