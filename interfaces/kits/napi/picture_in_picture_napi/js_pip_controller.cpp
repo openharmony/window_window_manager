@@ -98,26 +98,27 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
     if (argc > 0) {
         callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
     }
-    NapiAsyncTask::CompleteCallback complete =
-        [weak = wptr<PictureInPictureController>(this->pipController_)]
-            (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto pipController = weak.promote();
-            if (pipController == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY),
-                    "JsPipController::OnStartPictureInPicture failed."));
-                return;
-            }
-            WMError errCode = pipController->StartPictureInPicture(StartPipType::USER_START);
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
-                    "JsPipController::OnStartPictureInPicture failed."));
-                return;
-            }
-            task.Resolve(env, NapiGetUndefined(env));
-        };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::OnStartPictureInPicture", env,
-        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask, 
+        weak = wptr<PictureInPictureController>(this->pipController_)]() {
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY),
+                "JsPipController::OnStartPictureInPicture failed."));
+            return;
+        }
+        WMError errCode = pipController->StartPictureInPicture(StartPipType::USER_START);
+        if (errCode != WMError::WM_OK) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
+                "JsPipController::OnStartPictureInPicture failed."));
+            return;
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
     return result;
 }
 
@@ -137,26 +138,28 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
     if (argc > 0) {
         callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
     }
-    NapiAsyncTask::CompleteCallback complete =
-        [weak = wptr<PictureInPictureController>(this->pipController_)]
-            (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto pipController = weak.promote();
-            if (pipController == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                    "JsPipController::OnStopPictureInPicture failed."));
-                return;
-            }
-            WMError errCode = pipController->StopPictureInPictureFromClient();
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
-                    "JsPipController::OnStopPictureInPicture failed."));
-                return;
-            }
-            task.Resolve(env, NapiGetUndefined(env));
-        };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::OnStopPictureInPicture", env,
-        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask, 
+        weak = wptr<PictureInPictureController>(this->pipController_)]() {
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "JsPipController::OnStopPictureInPicture failed."));
+            return;
+        }
+        WMError errCode = pipController->StopPictureInPictureFromClient();
+        if (errCode != WMError::WM_OK) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
+                "JsPipController::OnStopPictureInPicture failed."));
+            return;
+        }
+        task->Resolve(env, NapiGetUndefined(env));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
     return result;
 }
 
