@@ -209,6 +209,16 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         int32_t appIndex, int32_t userId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasFloatingShowing) override { return WMError::WM_OK; }
+    WMError LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex) override
+    {
+        return WMError::WM_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -985,6 +995,53 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMinimizeMainSession, Function | 
     data.WriteInt32(userId);
 
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMinimizeMainSession(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleLockSessionByAbility
+ * @tc.desc: test function : HandleLockSessionByAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbility, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "appbundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t appIndex = 0;
+
+    data.WriteString(bundleName);
+    data.WriteString(moduleName);
+    data.WriteString(abilityName);
+    data.WriteInt32(appIndex);
+
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbility(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+
+/**
+ * @tc.name: HandleUnlockSessionByAbility
+ * @tc.desc: test function : HandleUnlockSessionByAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSessionByAbility, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "appbundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t appIndex = 0;
+
+    data.WriteString(bundleName);
+    data.WriteString(moduleName);
+    data.WriteString(abilityName);
+    data.WriteInt32(appIndex);
+
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleUnlockSessionByAbility(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

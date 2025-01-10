@@ -399,6 +399,41 @@ HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo05, Function | SmallTest | Lev
     WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: LockSessionByAbility
+ * @tc.desc: SceneSesionManager test LockSessionByAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, LockSessionByAbility, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::string bundleName_ = "LockSessionByAbilityBundle";
+    std::string moduleName_ = "LockSessionByAbilityModule";
+    std::string abilityName_ = "LockSessionByAbilityAbility";
+    int32_t appIndex_ = 0;
+
+    auto result = ssm_->LockSessionByAbility(bundleName_, moduleName_, abilityName_, appIndex_);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
+
+
+/**
+ * @tc.name: UnlockSessionByAbility
+ * @tc.desc: SceneSesionManager test UnlockSessionByAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, UnlockSessionByAbility, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::string bundleName_ = "UnlockSessionByAbilityBundle";
+    std::string moduleName_ = "UnlockSessionByAbilityModule";
+    std::string abilityName_ = "UnlockSessionByAbilityAbility";
+    int32_t appIndex_ = 0;
+
+    auto result = ssm_->UnlockSessionByAbility(bundleName_, moduleName_, abilityName_, appIndex_);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
 }  // namespace
 }
 }
