@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -395,24 +395,6 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
-{
-    TLOGD(WmsLogTag::DEFAULT, "in");
-    auto jsCallback = [self = weakRef_, displayId, env = env_] {
-        auto thisListener = self.promote();
-        if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
-            return;
-        }
-        HandleScope handleScope(env);
-        napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
-        thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
-    };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
-    }
-}
-
 void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 {
     std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
@@ -477,6 +459,24 @@ void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
+    }
+}
+
+void JsWindowListener::OnDisplayIdChanged(DisplayId displayId)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    auto jsCallback = [self = weakRef_, displayId, env = env_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::DEFAULT, "[NAPI]this listener or env is nullptr");
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, static_cast<int64_t>(displayId)) };
+        thisListener->CallJsMethod(WINDOW_DISPLAYID_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to send event");
     }
 }
 
