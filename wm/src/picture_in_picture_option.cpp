@@ -14,6 +14,7 @@
  */
 
 #include "picture_in_picture_option.h"
+#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -89,6 +90,26 @@ void PipOption::SetTypeNodeRef(napi_ref ref)
 napi_ref PipOption::GetTypeNodeRef() const
 {
     return typeNode_;
+}
+
+void PipOption::RegisterPipContentListenerWithType(std::string type,
+    std::shared_ptr<NativeReference> updateNodeCallbackRef)
+{
+    pipContentlistenerMap_[type] = updateNodeCallbackRef;
+}
+
+void PipOption::UnRegisterPipContentListenerWithType(std::string type)
+{
+    pipContentlistenerMap_.erase(type);
+}
+
+std::shared_ptr<NativeReference> PipOption::GetPipContentCallbackRef(std::string type)
+{
+    auto iter = pipContentlistenerMap_.find(type);
+    if (iter == pipContentlistenerMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 void* PipOption::GetContext() const

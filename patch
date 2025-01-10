@@ -1,0 +1,986 @@
+diff --git a/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.cpp b/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.cpp
+index 1a2583b07..a0a62dc33 100644
+--- a/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.cpp
++++ b/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.cpp
+@@ -25,6 +25,14 @@ using namespace Ace;
+ namespace {
+     constexpr int32_t NUMBER_ONE = 1;
+     constexpr int32_t NUMBER_TWO = 2;
++    const std::set<std::string> PIP_CONTENT_CALLBACK {"stateChange", "nodeUpdate"};
++}
++
++napi_valuetype GetType(napi_env env, napi_value value)
++{
++    napi_valuetype res = napi_undefined;
++    napi_typeof(env, value, &res);
++    return res;
+ }
+ 
+ napi_value NapiGetUndefined(napi_env env)
+@@ -179,6 +187,36 @@ napi_value JsPipManager::OnSetTypeNodeEnabled(napi_env env, napi_callback_info i
+     return NapiGetUndefined(env);
+ }
+ 
++napi_value JsPipManager::SetPipNodeType(napi_env env, napi_callback_info info)
++{
++    JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
++    return (me != nullptr) ? me->OnSetPipNodeType(env, info) : nullptr;
++}
++
++napi_value JsPipManager::OnSetPipNodeType(napi_env env, napi_callback_info info)
++{
++    TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
++    size_t argc = 4; // 4: arg number
++    napi_value argv[4] = { nullptr };
++    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
++    if (argc != NUMBER_TWO) {
++        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
++        return NapiGetUndefined(env);
++    }
++    napi_value typeNode = argv[0];
++    bool markPip = false;
++    if (!ConvertFromJsValue(env, argv[1], markPip)) {
++        TLOGW(WmsLogTag::WMS_PIP, "Failed to convert param to bool");
++    }
++    if (typeNode != nullptr && GetType(env, typeNode) != napi_undefined) {
++        XComponentControllerErrorCode ret = XComponentController::SetSurfaceCallbackMode(env, typeNode, markPip ?
++            SurfaceCallbackMode::PIP: SurfaceCallbackMode::DEFAULT);
++        TLOGI(WmsLogTag::WMS_PIP, "set surface mode, ret: %{public}u, isPip: %{public}d",
++            static_cast<uint32_t>(ret), static_cast<uint32_t>(markPip));
++    }
++    return NapiGetUndefined(env);
++}
++
+ napi_value JsPipManager::RegisterCallback(napi_env env, napi_callback_info info)
+ {
+     JsPipManager* me = CheckParamsAndGetThis<JsPipManager>(env, info);
+@@ -207,6 +245,11 @@ napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info inf
+         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert param to cbType");
+         return NapiThrowInvalidParam(env);
+     }
++    auto iter = std::find(PIP_CONTENT_CALLBACK.begin(), PIP_CONTENT_CALLBACK.end(), cbType);
++    if (iter == PIP_CONTENT_CALLBACK.end()) {
++        TLOGE(WmsLogTag::WMS_PIP, "Callback is null or not callable");
++        return NapiThrowInvalidParam(env);
++    }
+     napi_value value = argv[1];
+     if (value == nullptr || !NapiIsCallable(env, value)) {
+         TLOGE(WmsLogTag::WMS_PIP, "Callback is null or not callable");
+@@ -215,8 +258,20 @@ napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info inf
+     std::shared_ptr<NativeReference> callbackRef;
+     napi_ref result = nullptr;
+     napi_create_reference(env, value, 1, &result);
+-    callbackRef.reset(reinterpret_cast<NativeReference*>(result));
+-    PictureInPictureManager::innerCallbackRef_ = callbackRef;
++    callbackRef.reset(reinterpret_cast<NativeReference *>(result));
++    sptr <Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
++    int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
++    sptr <PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
++    if (pipController == nullptr) {
++        TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
++        return NapiGetUndefined(env);
++    }
++    TLOGI(WmsLogTag::WMS_PIP, "OnRegisterCallback to window: %{public}u", windowId);
++    WMError errCode = pipController->RegisterPipContentListenerWithType(cbType, callbackRef);
++    if (errCode != WMError::WM_OK) {
++        TLOGE(WmsLogTag::WMS_PIP, "Failed to registerCallback");
++        return NapiGetUndefined(env);
++    }
+     TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s success!", cbType.c_str());
+     return NapiGetUndefined(env);
+ }
+@@ -230,7 +285,37 @@ napi_value JsPipManager::UnregisterCallback(napi_env env, napi_callback_info inf
+ napi_value JsPipManager::OnUnregisterCallback(napi_env env, napi_callback_info info)
+ {
+     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
+-    PictureInPictureManager::innerCallbackRef_ = nullptr;
++    size_t argc = 4;
++    napi_value argv[4] = {nullptr};
++    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
++    if (argc != NUMBER_ONE) {
++        TLOGE(WmsLogTag::WMS_PIP, "Params count not match: %{public}zu", argc);
++        return NapiThrowInvalidParam(env);
++    }
++    std::string cbType;
++    if (!ConvertFromJsValue(env, argv[0], cbType)) {
++        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert param to cbType");
++        return NapiThrowInvalidParam(env);
++    }
++    auto iter = std::find(PIP_CONTENT_CALLBACK.begin(), PIP_CONTENT_CALLBACK.end(), cbType);
++    if (iter == PIP_CONTENT_CALLBACK.end()) {
++        TLOGE(WmsLogTag::WMS_PIP, "Callback is null or not callable");
++        return NapiThrowInvalidParam(env);
++    }
++    sptr <Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
++    int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
++    sptr <PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
++    if (pipController == nullptr) {
++        TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
++        return NapiGetUndefined(env);
++    }
++    TLOGI(WmsLogTag::WMS_PIP, "UnRegisterPipContentListenerWithType to window: %{public}u", windowId);
++    WMError errCode = pipController->UnRegisterPipContentListenerWithType(cbType);
++    if (errCode != WMError::WM_OK) {
++        TLOGE(WmsLogTag::WMS_PIP, "Failed to set UnRegisterPipContentListenerWithType");
++        return NapiGetUndefined(env);
++    }
++    TLOGI(WmsLogTag::WMS_PIP, "unregister type %{public}s success!", cbType.c_str());
+     return NapiGetUndefined(env);
+ }
+ 
+@@ -250,6 +335,7 @@ napi_value JsPipManagerInit(napi_env env, napi_value exportObj)
+     BindNativeFunction(env, exportObj, "on", moduleName, JsPipManager::RegisterCallback);
+     BindNativeFunction(env, exportObj, "off", moduleName, JsPipManager::UnregisterCallback);
+     BindNativeFunction(env, exportObj, "setTypeNodeEnabled", moduleName, JsPipManager::SetTypeNodeEnabled);
++    BindNativeFunction(env, exportObj, "setPipNodeType", moduleName, JsPipManager::SetPipNodeType);
+     return NapiGetUndefined(env);
+ }
+ } // namespace Rosen
+diff --git a/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.h b/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.h
+index 90ae2aa86..a926cbcaf 100644
+--- a/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.h
++++ b/interfaces/kits/napi/picture_in_picture_napi/inner/js_pip_manager.h
+@@ -32,6 +32,7 @@ public:
+     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
+     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
+     static napi_value SetTypeNodeEnabled(napi_env env, napi_callback_info info);
++    static napi_value SetPipNodeType(napi_env env, napi_callback_info info);
+ private:
+     napi_value OnInitXComponentController(napi_env env, napi_callback_info info);
+     napi_value OnGetCustomUIController(napi_env env, napi_callback_info info);
+@@ -39,6 +40,7 @@ private:
+     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
+     napi_value OnUnregisterCallback(napi_env env, napi_callback_info info);
+     napi_value OnSetTypeNodeEnabled(napi_env env, napi_callback_info info);
++    napi_value OnSetPipNodeType(napi_env env, napi_callback_info info);
+ };
+ } // namespace Rosen
+ } // namespace OHOS
+diff --git a/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.cpp b/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.cpp
+index ef816c55d..68045a1eb 100644
+--- a/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.cpp
++++ b/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.cpp
+@@ -36,6 +36,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
+ {
+     BindNativeFunction(env, object, "startPiP", moduleName, JsPipController::StartPictureInPicture);
+     BindNativeFunction(env, object, "stopPiP", moduleName, JsPipController::StopPictureInPicture);
++    BindNativeFunction(env, object, "updateContentNode", moduleName, JsPipController::UpdateContentNode);
+     BindNativeFunction(env, object, "updateContentSize", moduleName, JsPipController::UpdateContentSize);
+     BindNativeFunction(env, object, "updatePiPControlStatus", moduleName, JsPipController::UpdatePiPControlStatus);
+     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
+@@ -186,6 +187,38 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
+     return NapiGetUndefined(env);
+ }
+ 
++napi_value JsPipController::UpdateContentNode(napi_env env, napi_callback_info info)
++{
++    JsPipController *me = CheckParamsAndGetThis<JsPipController>(env, info);
++    return (me != nullptr) ? me->OnUpdateContentNode(env, info) : nullptr;
++}
++
++napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info info)
++{
++    TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentNode is called");
++    size_t argc = 4;
++    napi_value argv[4] = {nullptr};
++    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
++    if (argc != NUMBER_ONE) {
++        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
++        return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
++    }
++    napi_value typeNode = argv[0];
++    if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
++        TLOGE(WmsLogTag::WMS_PIP, "[NAPI] invalid typeNode");
++        return NapiThrowInvalidParam(env, "invalid typeNode.");
++    }
++    if (pipController_ == nullptr) {
++        std::string errMsg = "OnUpdateNode error, controller is nullptr";
++        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
++        return NapiThrowInvalidParam(env, errMsg);
++    }
++    napi_ref typeNodeRef = nullptr;
++    napi_create_reference(env, typeNode, 1, &typeNodeRef);
++    pipController_->UpdateContentNodeRef(typeNodeRef);
++    return NapiGetUndefined(env);
++}
++
+ napi_value JsPipController::UpdateContentSize(napi_env env, napi_callback_info info)
+ {
+     JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+diff --git a/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.h b/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.h
+index 166f9c8f7..b81ed1d64 100644
+--- a/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.h
++++ b/interfaces/kits/napi/picture_in_picture_napi/js_pip_controller.h
+@@ -34,6 +34,7 @@ public:
+     static napi_value StartPictureInPicture(napi_env env, napi_callback_info info);
+     static napi_value StopPictureInPicture(napi_env env, napi_callback_info info);
+     static napi_value SetAutoStartEnabled(napi_env env, napi_callback_info info);
++    static napi_value UpdateContentNode(napi_env env, napi_callback_info info);
+     static napi_value UpdateContentSize(napi_env env, napi_callback_info info);
+     static napi_value UpdatePiPControlStatus(napi_env env, napi_callback_info info);
+     static napi_value SetPiPControlEnabled(napi_env env, napi_callback_info info);
+@@ -49,6 +50,7 @@ private:
+     napi_value OnStartPictureInPicture(napi_env env, napi_callback_info info);
+     napi_value OnStopPictureInPicture(napi_env env, napi_callback_info info);
+     napi_value OnSetAutoStartEnabled(napi_env env, napi_callback_info info);
++    napi_value OnUpdateContentNode(napi_env env, napi_callback_info info);
+     napi_value OnUpdateContentSize(napi_env env, napi_callback_info info);
+     napi_value OnUpdatePiPControlStatus(napi_env env, napi_callback_info info);
+     napi_value OnSetPiPControlEnabled(napi_env env, napi_callback_info info);
+diff --git a/interfaces/kits/napi/picture_in_picture_napi/js_pip_window_listener.cpp b/interfaces/kits/napi/picture_in_picture_napi/js_pip_window_listener.cpp
+index 1889d31b6..b2442b0b5 100644
+--- a/interfaces/kits/napi/picture_in_picture_napi/js_pip_window_listener.cpp
++++ b/interfaces/kits/napi/picture_in_picture_napi/js_pip_window_listener.cpp
+@@ -81,10 +81,6 @@ void JsPiPWindowListener::OnPictureInPictureOperationError(int32_t errorCode)
+ void JsPiPWindowListener::OnPipListenerCallback(PiPState state, int32_t errorCode)
+ {
+     TLOGI(WmsLogTag::WMS_PIP, "state: %{public}d", static_cast<int32_t>(state));
+-    if (PictureInPictureManager::innerCallbackRef_ != nullptr) {
+-        napi_value value[] = { CreateJsValue(env_, static_cast<uint32_t>(state))};
+-        CallJsFunction(env_, PictureInPictureManager::innerCallbackRef_->GetNapiValue(), value, ArraySize(value));
+-    }
+     auto napiTask = [jsCallback = jsCallBack_, state, errorCode, env = env_]() {
+         napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(state)), CreateJsValue(env, errorCode)};
+         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+diff --git a/resources/abc/pip/interface/PiPContent.js b/resources/abc/pip/interface/PiPContent.js
+index 66cf09c12..6320b7e29 100644
+--- a/resources/abc/pip/interface/PiPContent.js
++++ b/resources/abc/pip/interface/PiPContent.js
+@@ -34,6 +34,14 @@ class XCNodeController extends NodeController {
+         return this.node;
+     }
+ 
++    replaceNode(r2) {
++        let s2;
++        let t2;
++        (s2 = this.node) === null || s2 === void 0 ? void 0 : s2.removeChild(this.mXComponent);
++        this.mXComponent = r2;
++        (t2 = this.node) === null || t2 === void 0 ? void 0 : t2.appendChild(this.mXComponent);
++    }
++
+     removeNode() {
+         let h2;
+         (h2 = this.node) === null || h2 === void 0 ? void 0 : h2.removeChild(this.mXComponent);
+@@ -49,7 +57,8 @@ class PiPContent extends ViewPU {
+         this.xComponentController = new XComponentController;
+         this.nodeController = null;
+         this.mXCNodeController = null;
+-        this.useNode = false;
++        this.__useNode = new ObservedPropertySimplePU(false, this, 'useNode');
++        this.__nodeChange = new ObservedPropertySimplePU(false, this, 'nodeChange');
+         this.xComponentId = 'pipContent';
+         this.xComponentType = 'surface';
+         this.xComponent = null;
+@@ -69,6 +78,9 @@ class PiPContent extends ViewPU {
+         if (a2.useNode !== undefined) {
+             this.useNode = a2.useNode;
+         }
++        if (a2.nodeChange !== undefined) {
++            this.nodeChange = a2.nodeChange;
++        }
+         if (a2.xComponentId !== undefined) {
+             this.xComponentId = a2.xComponentId;
+         }
+@@ -83,41 +95,107 @@ class PiPContent extends ViewPU {
+     updateStateVars(z1) {
+     }
+ 
+-    purgeVariableDependenciesOnElmtId(y1) {
++    purgeVariableDependenciesOnElmtId(h2) {
++        this.__useNode.purgeDependencyOnElmtId(h2);
++        this.__nodeChange.purgeDependencyOnElmtId(h2);
++    }
++
++    aboutToBeDeleted() {
++        this.__useNode.aboutToBeDeleted();
++        this.__nodeChange.aboutToBeDeleted();
++        SubscriberManager.Get().delete(this.id__());
++        this.aboutToBeDeletedInternal();
++    }
++
++    get useNode() {
++        return this.__useNode.get();
++    }
++
++    set useNode(b) {
++        this.__useNode.set(b);
++    }
++
++    get nodeChange() {
++        return this.__nodeChange.get();
++    }
++
++    set nodeChange(a) {
++        this.__nodeChange.set(a);
++    }
++
++    validateNode(f2) {
++        if (f2 === null || f2 === undefined) {
++            console.error(TAG, `validateNode node is null`);
++            return false;
++        }
++        let g2 = f2.getNodeType();
++        if (g2 !== 'XComponent') {
++            console.error(TAG, `node type mismatch: ${g2}`);
++            return false;
++        }
++        return true;
+     }
+ 
+     aboutToAppear() {
+         this.nodeController = pip.getCustomUIController();
++        this.registerUpdateNodeListener();
+         this.xComponent = pip.getTypeNode();
+-        if (this.xComponent === null || this.xComponent === undefined) {
+-            console.error(TAG, `xComponent node is null`);
+-            return;
+-        }
+-        let u1 = this.xComponent.getNodeType();
+-        if (u1 !== 'XComponent') {
+-            console.error(`xComponent type mismatch: ${u1}`);
++        if (!this.validateNode(this.xComponent)) {
+             return;
+         }
++        this.updatePipNodeType(this.xComponent);
+         this.useNode = true;
+         pip.setTypeNodeEnabled();
+         this.mXCNodeController = new XCNodeController(this.xComponent);
+         console.info(TAG, 'use Node Controller');
+-        pip.on('stateChange', (w1) => {
+-            let x1;
+-            console.info(TAG, `stateChange state: ${w1}`);
+-            if (w1 === ABOUT_TO_STOP) {
+-                (x1 = this.mXCNodeController) === null || x1 === void 0 ? void 0 : x1.removeNode();
++        this.registerStateChangeListener();
++    }
++
++    registerStateChangeListener() {
++        pip.on('stateChange', (y1) => {
++            let z1;
++            console.info(TAG, `stateChange state:${y1}`);
++            if (y1 === ABOUT_TO_STOP) {
++                (z1 = this.mXCNodeController) === null || z1 === void 0 ? void 0 : z1.removeNode();
+             }
+         });
+     }
+ 
+-    aboutToBeDeleted() {
+-        SubscriberManager.Get().delete(this.id__());
+-        this.aboutToBeDeletedInternal();
++    registerUpdateNodeListener() {
++        pip.on('nodeUpdate', (d2) => {
++            let e2;
++            console.info(TAG, `nodeUpdate`);
++            if (!this.validateNode(d2)) {
++                return;
++            }
++            if (this.useNode) {
++                this.updatePipNodeType(d2);
++                (e2 = this.mXCNodeController) === null || e2 === void 0 ? void 0 : e2.replaceNode(d2);
++                this.nodeChange = true;
++            } else {
++                this.updatePipNodeType(d2);
++                this.mXCNodeController = new XCNodeController(d2);
++                console.info(TAG, 'update to Node Controller');
++                this.registerStateChangeListener();
++                this.useNode = true;
++            }
++        });
+     }
+ 
++    updatePipNodeType(a2) {
++        let b2 = a2.getParent();
++        if (b2 === null || b2 === undefined) {
++            pip.setPipNodeType(a2, false);
++        } else {
++            pip.setPipNodeType(a2, true);
++            b2.removeChild(a2);
++        }
++    }
++
++
+     aboutToDisappear() {
+         pip.off('stateChange');
++        pip.off('nodeUpdate');
+     }
+ 
+     initialRender() {
+@@ -127,7 +205,7 @@ class PiPContent extends ViewPU {
+         }, Stack);
+         this.observeComponentCreation2((h1, i1) => {
+             If.create();
+-            if (this.useNode) {
++            if (this.useNode || this.nodeChange) {
+                 this.ifElseBranchUpdateFunction(0, () => {
+                     this.buildNode.bind(this)();
+                 });
+diff --git a/resources/abc/pip/source/PiPContent.ets b/resources/abc/pip/source/PiPContent.ets
+index 47ab75216..bd715e5dc 100644
+--- a/resources/abc/pip/source/PiPContent.ets
++++ b/resources/abc/pip/source/PiPContent.ets
+@@ -20,10 +20,10 @@ const TAG: string = 'PiPContent';
+ const ABOUT_TO_STOP = 3;
+ 
+ class XCNodeController extends NodeController {
+-  private mXComponent: TypedFrameNode<XComponentInterface, XComponentAttribute>;
++  private mXComponent: typeNode.XComponent;
+   private node: FrameNode | null = null;
+ 
+-  constructor(xComponent: TypedFrameNode<XComponentInterface, XComponentAttribute>) {
++  constructor(xComponent: typeNode.XComponent) {
+     super();
+     this.mXComponent = xComponent;
+   }
+@@ -34,6 +34,12 @@ class XCNodeController extends NodeController {
+     return this.node;
+   }
+ 
++  replaceNode(newNode: typeNode.XComponent): void {
++    this.node?.removeChild(this.mXComponent);
++    this.mXComponent = newNode;
++    this.node?.appendChild(this.mXComponent);
++  }
++
+   removeNode() {
+     this.node?.removeChild(this.mXComponent);
+   }
+@@ -45,46 +51,91 @@ struct PiPContent {
+   private xComponentController: XComponentController = new XComponentController();
+   private nodeController: NodeController | null = null;
+   private mXCNodeController: XCNodeController | null = null;
+-  private useNode: boolean = false;
+-  private xComponent: TypedFrameNode<XComponentInterface, XComponentAttribute> | null = null;
++  @State useNode: boolean = false;
++  @State nodeChange: boolean = false;
++  private xComponent: typeNode.XComponent | null = null;
+   xComponentId: string = 'pipContent';
+   xComponentType: string = 'surface';
+ 
++  validateNode(node: typeNode.XComponent | null): boolean {
++    if (node === null || node === undefined) {
++      console.error(TAG, `validateNode node is null`);
++      return false;
++    }
++    let type: string = node.getNodeType();
++    if (type !== 'XComponent') {
++      console.error(TAG, `node type mismatch: ${type}`);
++      return false;
++    }
++    return true;
++  }
++
++  private registerUpdateNodeListener() {
++    pip.on('nodeUpdate', (newNode: typeNode.XComponent) => {
++      console.info(TAG, `nodeUpdate`);
++      if (!this.validateNode(newNode)) {
++        return;
++      }
++      if (this.useNode) {
++        pip.setPipNodeType(this.xComponent, false);
++        this.updatePipNodeType(newNode);
++        this.mXCNodeController?.replaceNode(newNode);
++        this.nodeChange = true;
++      } else {
++        this.updatePipNodeType(newNode);
++        this.mXCNodeController = new XCNodeController(newNode);
++        console.info(TAG, 'update to Node Controller');
++        this.registerStateChangeListener();
++        this.useNode = true;
++      }
++    });
++  }
++
++  private updatePipNodeType(newNode: typeNode.XComponent) {
++    let parent: FrameNode | null = newNode.getParent();
++    if (parent === null || parent === undefined) {
++      pip.setPipNodeType(newNode, false);
++    } else {
++      pip.setPipNodeType(newNode, true);
++      parent.removeChild(newNode);
++    }
++  }
++
++  private registerStateChangeListener() {
++       pip.on('stateChange', (state: number) => {
++         console.info(TAG, `stateChange state:${state}`);
++         if (state === ABOUT_TO_STOP) {
++           this.mXCNodeController?.removeNode();
++         }
++    })
++  }
++
+   aboutToAppear(): void {
+     this.nodeController = pip.getCustomUIController();
++    this.registerUpdateNodeListener();
+     this.xComponent = pip.getTypeNode();
+-    if (this.xComponent === null || this.xComponent === undefined) {
+-      console.error(TAG, `xComponent node is null`);
+-      return;
+-    }
+-    let type: string = this.xComponent.getNodeType();
+-    if (type !== 'XComponent') {
+-      console.error(TAG, `xComponent type mismatch: ${type}`);
++    if (!this.validateNode(this.xComponent)) {
+       return;
+     }
+     this.useNode = true;
++    this.updatePipNodeType(this.xComponent);
+     pip.setTypeNodeEnabled();
+     this.mXCNodeController = new XCNodeController(this.xComponent);
+     console.info(TAG, 'use Node Controller');
+-
+-    pip.on('stateChange', (state: number) => {
+-      console.info(TAG, `stateChange state:${state}`);
+-      if (state === ABOUT_TO_STOP) {
+-        this.mXCNodeController?.removeNode();
+-      }
+-    })
++    this.registerStateChangeListener();
+   }
+ 
+   aboutToDisappear(): void {
+     pip.off('stateChange');
++    pip.off('nodeUpdate');
+   }
+ 
+   build() {
+     Stack() {
+-      if (this.useNode) {
++      if (this.useNode || this.nodeChange) {
+         this.buildNode();
+       } else {
+-       this.buildXComponent();
++        this.buildXComponent();
+       }
+       if (this.nodeController !== null) {
+         this.buildCustomUI();
+diff --git a/utils/include/pip_report.h b/utils/include/pip_report.h
+index 967fcecf0..ab4a1ef55 100644
+--- a/utils/include/pip_report.h
++++ b/utils/include/pip_report.h
+@@ -32,6 +32,7 @@ public:
+     void ReportPiPControlEvent(int32_t templateType, PiPControlType controlType);
+     void ReportPiPRatio(int32_t windowWidth, int32_t windowHeight);
+     void ReportPiPRestore();
++    void ReportPiPUpdateContent();
+ private:
+     std::string GetPackageName() const;
+     std::string packageName_ = "";
+diff --git a/utils/src/pip_report.cpp b/utils/src/pip_report.cpp
+index 4a8bc2f63..4536a5ec8 100644
+--- a/utils/src/pip_report.cpp
++++ b/utils/src/pip_report.cpp
+@@ -174,5 +174,19 @@ void PiPReporter::ReportPiPRestore()
+         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
+     LOG_WHEN_ERROR(ret);
+ }
++
++void PiPReporter::ReportPiPUpdateContent()
++{
++    TLOGI(WmsLogTag::WMS_PIP, "Report pip widow update typeNode");
++    std::string eventName = "updateContent_PIP";
++    int32_t ret = HiSysEventWrite(
++        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, eventName,
++        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
++        EVENT_KEY_PNAMEID, PNAMEID,
++        EVENT_KEY_PVERSION, PVERSION,
++        EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
++    LOG_WHEN_ERROR(ret);
++}
++
+ } // namespace Rosen
+ } // namespace OHOS
+diff --git a/wm/include/picture_in_picture_controller.h b/wm/include/picture_in_picture_controller.h
+index 3c11014e8..ea7944840 100644
+--- a/wm/include/picture_in_picture_controller.h
++++ b/wm/include/picture_in_picture_controller.h
+@@ -72,6 +72,7 @@ public:
+     void SetAutoStartEnabled(bool enable);
+     void IsAutoStartEnabled(bool& enable) const;
+     void UpdateContentSize(int32_t width, int32_t height);
++    void UpdateContentNodeRef(napi_ref nodeRef);
+     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status);
+     bool IsContentSizeChanged(float width, float height, float posX, float posY);
+     void DoActionEvent(const std::string& actionName, int32_t status);
+@@ -89,6 +90,9 @@ public:
+     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
+     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
+     sptr<IPiPControlObserver> GetPictureInPictureControlObserver() const;
++    std::shared_ptr<NativeReference> GetPipContentCallbackRef(std::string);
++    WMError RegisterPipContentListenerWithType(std::string, std::shared_ptr<NativeReference> updateNodeCallbackRef);
++    WMError UnRegisterPipContentListenerWithType(std::string);
+     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
+     PiPWindowState GetControllerState();
+     std::string GetPiPNavigationId();
+@@ -113,6 +117,8 @@ private:
+     void UpdatePiPSourceRect() const;
+     void ResetExtController();
+     bool IsPullPiPAndHandleNavigation();
++    void NotifyNodeUpdate(napi_ref nodeRef);
++    void NotifyStateChangeInner(napi_env env, PiPState state);
+     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+     wptr<PictureInPictureController> weakRef_ = nullptr;
+diff --git a/wm/include/picture_in_picture_option.h b/wm/include/picture_in_picture_option.h
+index c4db609fd..13cfeb90b 100644
+--- a/wm/include/picture_in_picture_option.h
++++ b/wm/include/picture_in_picture_option.h
+@@ -20,6 +20,7 @@
+ #include "xcomponent_controller.h"
+ #include "napi/native_api.h"
+ #include "wm_common.h"
++#include "js_runtime_utils.h"
+ 
+ namespace OHOS {
+ namespace Rosen {
+@@ -35,6 +36,7 @@ public:
+     void SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status);
+     void SetPiPControlEnabled(PiPControlType controlType, PiPControlStatus enabled);
+     void SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
++    void RegisterPipContentListenerWithType(std::string, std::shared_ptr<NativeReference> updateNodeCallbackRef);
+     void SetControlGroup(std::vector<std::uint32_t> controlGroup);
+     void* GetContext() const;
+     std::string GetNavigationId() const;
+@@ -44,6 +46,8 @@ public:
+     std::vector<PiPControlEnableInfo> GetControlEnable();
+     void GetContentSize(uint32_t& width, uint32_t& height);
+     std::shared_ptr<XComponentController> GetXComponentController();
++    std::shared_ptr<NativeReference> GetPipContentCallbackRef(std::string);
++    void UnRegisterPipContentListenerWithType(std::string);
+     void SetNodeControllerRef(napi_ref ref);
+     napi_ref GetNodeControllerRef() const;
+     void SetTypeNodeRef(napi_ref ref);
+@@ -60,6 +64,7 @@ private:
+     std::vector<PiPControlEnableInfo> pipControlEnableInfoList_;
+     std::vector<std::uint32_t> controlGroup_;
+     std::shared_ptr<XComponentController> xComponentController_ = nullptr;
++    std::map<std::string, std::shared_ptr<NativeReference>> pipContentlistenerMap_;
+     napi_ref customNodeController_ = nullptr;
+     napi_ref typeNode_ = nullptr;
+     bool useTypeNode_ = false;
+diff --git a/wm/src/picture_in_picture_controller.cpp b/wm/src/picture_in_picture_controller.cpp
+index f75184799..da55e93a9 100644
+--- a/wm/src/picture_in_picture_controller.cpp
++++ b/wm/src/picture_in_picture_controller.cpp
+@@ -31,9 +31,26 @@ namespace {
+     constexpr uint32_t PIP_HIGH_PRIORITY = 1;
+     const std::string PIP_CONTENT_PATH = "/system/etc/window/resources/pip_content.abc";
+     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
++    const std::string STATE_CHANGE = "stateChange";
++    const std::string UPDATE_NODE = "nodeUpdate";
+     const int DEFAULT_ASPECT_RATIO[] = {16, 9};
+ }
+ 
++static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
++{
++    if (env == nullptr || method == nullptr) {
++        TLOGE(WmsLogTag::WMS_PIP, "env nullptr or method is nullptr");
++        return nullptr;
++    }
++    napi_value result = nullptr;
++    napi_value callResult = nullptr;
++    napi_get_undefined(env, &result);
++    napi_get_undefined(env, &callResult);
++    napi_call_function(env, result, method, argc, argv, &callResult);
++    TLOGD(WmsLogTag::WMS_PIP, "called.");
++    return callResult;
++}
++
+ uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
+ {
+     if (pipTemplateType >= static_cast<uint32_t>(PiPTemplateType::END)) {
+@@ -125,6 +142,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
+             pipOption_->GetPipTemplate(), FAILED, "window is nullptr");
+         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+     }
++    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_START);
+     for (auto& listener : pipLifeCycleListeners_) {
+         listener->OnPreparePictureInPictureStart();
+     }
+@@ -279,12 +297,14 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
+         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+     }
+     curState_ = PiPWindowState::STATE_STOPPING;
++    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_STOP);
+     for (auto& listener : pipLifeCycleListeners_) {
+         listener->OnPreparePictureInPictureStop();
+     }
+     if (!destroyWindow) {
+         ResetExtController();
+         curState_ = PiPWindowState::STATE_STOPPED;
++        NotifyStateChangeInner(env_, PiPState::STOPPED);
+         for (auto& listener : pipLifeCycleListeners_) {
+             listener->OnPictureInPictureStop();
+         }
+@@ -360,6 +380,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
+     mainWindowLifeCycleListener_ = nullptr;
+     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
+     window_ = nullptr;
++    NotifyStateChangeInner(env_, PiPState::STOPPED);
+     PictureInPictureManager::RemoveActiveController(this);
+     return WMError::WM_OK;
+ }
+@@ -462,6 +483,53 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
+     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
+ }
+ 
++void PictureInPictureController::UpdateContentNodeRef(napi_ref nodeRef)
++{
++    TLOGI(WmsLogTag::WMS_PIP, "in");
++    SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent();
++    if (pipOption_ == nullptr) {
++        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
++        return;
++    }
++    pipOption_->SetTypeNodeRef(nodeRef);
++    if (IsTypeNodeEnabled()) {
++        NotifyNodeUpdate(nodeRef);
++        return;
++    }
++    ResetExtController();
++    NotifyNodeUpdate(nodeRef);
++    if (isAutoStartEnabled_) {
++        std::string navId = pipOption_->GetNavigationId();
++        if (!navId.empty()) {
++            auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
++            if (navController) {
++                navController->DeletePIPMode(handleId_);
++                TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
++            }
++        }
++    }
++    pipOption_->SetTypeNodeEnabled(true);
++}
++
++void PictureInPictureController::NotifyNodeUpdate(napi_ref nodeRef)
++{
++    TLOGI(WmsLogTag::WMS_PIP, "in");
++    if (nodeRef == nullptr) {
++        TLOGE(WmsLogTag::WMS_PIP, "invalid nodeRef");
++        return;
++    }
++    if (PictureInPictureManager::IsActiveController(weakRef_)) {
++        std::shared_ptr<NativeReference> updateNodeCallbackRef = GetPipContentCallbackRef(UPDATE_NODE);
++        if (updateNodeCallbackRef == nullptr) {
++            TLOGE(WmsLogTag::WMS_PIP, "updateNodeCallbackRef is null");
++            return;
++        }
++        napi_value typeNode = nullptr;
++        napi_get_reference_value(env_, nodeRef, &typeNode);
++        napi_value value[] = {typeNode};
++        CallJsFunction(env_, updateNodeCallbackRef->GetNapiValue(), value, 1);
++    }
++}
+ 
+ void PictureInPictureController::UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status)
+ {
+@@ -507,6 +575,7 @@ void PictureInPictureController::PreRestorePictureInPicture()
+ {
+     TLOGI(WmsLogTag::WMS_PIP, "called");
+     curState_ = PiPWindowState::STATE_RESTORING;
++    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_RESTORE);
+     for (auto& listener : pipLifeCycleListeners_) {
+         listener->OnRestoreUserInterface();
+     }
+@@ -676,8 +745,47 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
+     return WMError::WM_OK;
+ }
+ 
++WMError PictureInPictureController::RegisterPipContentListenerWithType(std::string type,
++    std::shared_ptr<NativeReference> callbackRef)
++{
++    TLOGI(WmsLogTag::WMS_PIP, "called");
++    if (pipOption_ == nullptr) {
++        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
++        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
++    }
++    pipOption_->RegisterPipContentListenerWithType(type, callbackRef);
++    return WMError::WM_OK;
++}
++
++WMError PictureInPictureController::UnRegisterPipContentListenerWithType(std::string type)
++{
++    TLOGI(WmsLogTag::WMS_PIP, "called");
++    if (pipOption_ == nullptr) {
++        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
++        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
++    }
++    pipOption_->UnRegisterPipContentListenerWithType(type);
++    return WMError::WM_OK;
++}
++
++std::shared_ptr<NativeReference> PictureInPictureController::GetPipContentCallbackRef(std::string type)
++{
++    return pipOption_ == nullptr ? nullptr : pipOption_->GetPipContentCallbackRef(type);
++}
++
++void PictureInPictureController::NotifyStateChangeInner(napi_env env, PiPState state)
++{
++    std::shared_ptr<NativeReference> innerCallbackRef = GetPipContentCallbackRef(STATE_CHANGE);
++    if (innerCallbackRef == nullptr) {
++        return;
++    }
++    napi_value value[] = { AbilityRuntime::CreateJsValue(env, static_cast<uint32_t>(state))};
++    CallJsFunction(env, innerCallbackRef->GetNapiValue(), value, 1);
++}
++
+ void PictureInPictureController::OnPictureInPictureStart()
+ {
++    NotifyStateChangeInner(env_, PiPState::STARTED);
+     for (auto& listener : pipLifeCycleListeners_) {
+         listener->OnPictureInPictureStart();
+     }
+diff --git a/wm/src/picture_in_picture_option.cpp b/wm/src/picture_in_picture_option.cpp
+index 29bad7685..725163e0f 100644
+--- a/wm/src/picture_in_picture_option.cpp
++++ b/wm/src/picture_in_picture_option.cpp
+@@ -14,6 +14,7 @@
+  */
+ 
+ #include "picture_in_picture_option.h"
++#include "js_runtime_utils.h"
+ 
+ namespace OHOS {
+ namespace Rosen {
+@@ -91,6 +92,26 @@ napi_ref PipOption::GetTypeNodeRef() const
+     return typeNode_;
+ }
+ 
++void PipOption::RegisterPipContentListenerWithType(std::string type,
++    std::shared_ptr<NativeReference> updateNodeCallbackRef)
++{
++    pipContentlistenerMap_[type] = updateNodeCallbackRef;
++}
++
++void PipOption::UnRegisterPipContentListenerWithType(std::string type)
++{
++    pipContentlistenerMap_.erase(type);
++}
++
++std::shared_ptr<NativeReference> PipOption::GetPipContentCallbackRef(std::string type)
++{
++    auto iter = pipContentlistenerMap_.find(type);
++    if (iter == pipContentlistenerMap_.end()) {
++        return nullptr;
++    }
++    return iter->second;
++}
++
+ void* PipOption::GetContext() const
+ {
+     return contextPtr_;
+diff --git a/wm/test/unittest/picture_in_picture_controller_test.cpp b/wm/test/unittest/picture_in_picture_controller_test.cpp
+index 58f40d73d..fe45ff1fa 100644
+--- a/wm/test/unittest/picture_in_picture_controller_test.cpp
++++ b/wm/test/unittest/picture_in_picture_controller_test.cpp
+@@ -1108,6 +1108,85 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
+     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
+     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
+ }
++
++/**
++@tc.name: RegisterPipContentListenerWithType
++@tc.desc: RegisterPipContentListenerWithType
++@tc.type: FUNC
++*/
++HWTEST_F(PictureInPictureControllerTest, RegisterPipContentListenerWithType, Function | SmallTest | Level2)
++{
++    sptr mw = new MockWindow();
++    sptr option = new PipOption();
++    sptr pipControl = new PictureInPictureController(option, mw, 100, nullptr);
++    pipControl->pipOption_ = nullptr;
++    std::shared_ptr callBack = nullptr;
++    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY,
++    pipControl->RegisterPipContentListenerWithType("nodeUpdate",callBack));
++    pipControl->pipOption_ = option;
++    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPipContentListenerWithType("nodeUpdate",callBack));
++}
++/**
++
++@tc.name: UnRegisterPipContentListenerWithType
++@tc.desc: UnRegisterPipContentListenerWithType
++@tc.type: FUNC
++*/
++HWTEST_F(PictureInPictureControllerTest, UnRegisterPipContentListenerWithType, Function | SmallTest | Level2)
++{
++    sptr mw = new MockWindow();
++    sptr option = new PipOption();
++    sptr pipControl = new PictureInPictureController(option, mw, 100, nullptr);
++    pipControl->pipOption_ = nullptr;
++    std::shared_ptr callBack = nullptr;
++    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
++    pipControl->pipOption_ = option;
++    ASSERT_EQ(WMError::WM_OK, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
++}
++/**
++
++@tc.name: GetPipContentCallbackRef
++@tc.desc: GetPipContentCallbackRef
++@tc.type: FUNC
++*/
++HWTEST_F(PictureInPictureControllerTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
++{
++    sptr mw = new MockWindow();
++    sptr option = new PipOption();
++    sptr pipControl = new PictureInPictureController(option, mw, 100, nullptr);
++    pipControl->pipOption_ = nullptr;
++    std::shared_ptr callBack = nullptr;
++    pipControl->RegisterPipContentListenerWithType("nodeUpdate",callBack);
++    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
++    pipControl->pipOption_ = option;
++    pipControl->RegisterPipContentListenerWithType("nodeUpdate",callBack);
++    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
++}
++/**
++
++@tc.name: UpdateContentNodeRef
++@tc.desc: UpdateContentNodeRef
++@tc.type: FUNC
++*/
++HWTEST_F(PictureInPictureControllerTest, UpdateContentNodeRef, Function | SmallTest | Level2)
++{
++    sptr mw = new MockWindow();
++    sptr option = new PipOption();
++    sptr pipControl = new PictureInPictureController(option, mw, 100, nullptr);
++    pipControl->pipOption_ = nullptr;
++    napi_ref nodeRef = nullptr;
++    std::shared_ptr callBack = nullptr;
++    pipControl->UpdateContentNodeRef(nodeRef);
++    pipControl->pipOption_ = option;
++    pipControl->pipOption_->SetTypeNodeEnabled(true);
++    pipControl->UpdateContentNodeRef(nodeRef);
++    pipControl->pipOption_->SetTypeNodeEnabled(false);
++    pipControl->UpdateContentNodeRef(nodeRef);
++    pipControl->isAutoStartEnabled_ = true;
++    pipControl->UpdateContentNodeRef(nodeRef);
++    pipControl->isAutoStartEnabled_ = false;
++    ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
++}
+ } // namespace
+ } // namespace Rosen
+ } // namespace OHOS
+\ No newline at end of file
+diff --git a/wm/test/unittest/picture_in_picture_option_test.cpp b/wm/test/unittest/picture_in_picture_option_test.cpp
+index 54935909b..99595da50 100644
+--- a/wm/test/unittest/picture_in_picture_option_test.cpp
++++ b/wm/test/unittest/picture_in_picture_option_test.cpp
+@@ -185,6 +185,18 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Lev
+     option->SetTypeNodeEnabled(false);
+     ASSERT_TRUE(!option->IsTypeNodeEnabled());
+ }
++
++/**
++@tc.name: GetPipContentCallbackRef
++@tc.desc: RegisterPipContentListenerWithType/GetPipContentCallbackRef
++@tc.type: FUNC
++*/
++HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
++{
++    sptr option = sptr::MakeSptr();
++    option->RegisterPipContentListenerWithType("nodeUpdate",nullptr);
++    ASSERT_EQ(option->GetPipContentCallbackRef("nodeUpdate"), nullptr);
++}
+ } // namespace
+ } // namespace Rosen
+ } // namespace OHOS
+\ No newline at end of file

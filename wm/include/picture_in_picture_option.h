@@ -20,6 +20,7 @@
 #include "xcomponent_controller.h"
 #include "napi/native_api.h"
 #include "wm_common.h"
+#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,6 +36,7 @@ public:
     void SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status);
     void SetPiPControlEnabled(PiPControlType controlType, PiPControlStatus enabled);
     void SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
+    void RegisterPipContentListenerWithType(std::string, std::shared_ptr<NativeReference> updateNodeCallbackRef);
     void SetControlGroup(std::vector<std::uint32_t> controlGroup);
     void* GetContext() const;
     std::string GetNavigationId() const;
@@ -44,6 +46,8 @@ public:
     std::vector<PiPControlEnableInfo> GetControlEnable();
     void GetContentSize(uint32_t& width, uint32_t& height);
     std::shared_ptr<XComponentController> GetXComponentController();
+    std::shared_ptr<NativeReference> GetPipContentCallbackRef(std::string);
+    void UnRegisterPipContentListenerWithType(std::string);
     void SetNodeControllerRef(napi_ref ref);
     napi_ref GetNodeControllerRef() const;
     void SetTypeNodeRef(napi_ref ref);
@@ -60,6 +64,7 @@ private:
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList_;
     std::vector<std::uint32_t> controlGroup_;
     std::shared_ptr<XComponentController> xComponentController_ = nullptr;
+    std::map<std::string, std::shared_ptr<NativeReference>> pipContentlistenerMap_;
     napi_ref customNodeController_ = nullptr;
     napi_ref typeNode_ = nullptr;
     bool useTypeNode_ = false;
