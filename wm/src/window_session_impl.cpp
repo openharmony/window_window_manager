@@ -235,8 +235,8 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
             std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
             for (const auto& [_, winPair] : windowSessionMap_) {
                 if (auto window = winPair.second) {
-                    windowListsInfoVec.push_back({window->GetWindowName(), window->GetWIndowId(),
-                        static_cast<uint32_t>(window->GetType()), window->GetRect() })
+                    windowListsInfoVec.push_back({window->GetWindowName(), window->GetWindowId(),
+                        static_cast<uint32_t>(window->GetType()), window->GetRect() });
                 }
             }
         }
