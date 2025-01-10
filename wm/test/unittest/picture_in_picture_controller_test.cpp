@@ -1120,7 +1120,8 @@ HWTEST_F(PictureInPictureControllerTest, RegisterPipContentListenerWithType, Fun
     sptr option = new PipOption();
     sptr pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     pipControl->pipOption_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, 
+    pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
     pipControl->pipOption_ = option;
     ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
 }
@@ -1136,7 +1137,8 @@ HWTEST_F(PictureInPictureControllerTest, UnRegisterPipContentListenerWithType, F
     sptr option = new PipOption();
     sptr pipControl = new PictureInPictureController(option, mw, 100, nullptr);
     pipControl->pipOption_ = nullptr;
-    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, 
+    pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
     pipControl->pipOption_ = option;
     ASSERT_EQ(WMError::WM_OK, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
 }

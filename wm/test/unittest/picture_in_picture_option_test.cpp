@@ -194,7 +194,7 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Lev
 HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = sptr<PipOption>::MakeSptr();
-    option->RegisterPipContentListenerWithType("nodeUpdate",nullptr);
+    option->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
     ASSERT_EQ(option->GetPipContentCallbackRef("nodeUpdate"), nullptr);
 }
 } // namespace
