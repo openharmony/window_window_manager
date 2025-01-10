@@ -364,8 +364,7 @@ public:
     /*
      * Window Property
      */
-    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
-
+    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc&& func);
     /*
      * Window Rotation
      */
@@ -669,15 +668,6 @@ private:
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
-
-    /*
-     * Window Property
-    */
-    void NotifyPrivacyModeChange();
-    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
-    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
-    bool isPrivacyMode_ { false };
-
 
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
