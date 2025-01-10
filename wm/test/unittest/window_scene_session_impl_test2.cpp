@@ -1953,25 +1953,40 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowShadowRadius, Function | SmallTes
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetWindowShadowRadius");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowShadowRadius(0.0f));
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
 
-    windowSceneSessionImpl->surfaceNode_ = nullptr;
-    auto ret = windowSceneSessionImpl->SetWindowShadowRadius(1.0f);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    window->surfaceNode_ = nullptr;
+    auto ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    ret = windowSceneSessionImpl->SetWindowShadowRadius(1.0f);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    ret = windowSceneSessionImpl->SetWindowShadowRadius(1.0f);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto surfaceNode_mocker = CreateRSSurfaceNode();
+    ASSERT_NE(nullptr, surfaceNode_mocker);
+    window->surfaceNode_ = surfaceNode_mocker;
+    ret = window->SetWindowShadowRadius(-1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 } // namespace
 } // namespace Rosen
