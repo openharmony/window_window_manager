@@ -2715,12 +2715,13 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 
 void SceneSession::NotifyPrivacyModeChange()
 {
+    auto sessionProperty = GetSessionProperty();
     bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
     bool mixedPrivacyMode = currExtPrivacyMode || sessionProperty->GetPrivacyMode();
-    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode:%{public}d, "
+    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
         "old privacyMode:%{public}d",
-        GetPersistentId(), currExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
-    
+        GetParentId(), currExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
+
     if (mixedPrivacyMode != isPrivacyMode_) {
         isPrivacyMode_ = mixedPrivacyMode;
         if (privacyModeChangeNotifyFunc_) {
@@ -4726,17 +4727,18 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
-void SceneSession::SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func)
+void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc&& func)
 {
-    auto task = [weakThis = wptr(this)] {
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), func = std::move(func), where] {
         auto session = weakThis.promote();
-        if (session == nullptr) {
-            WLOGFE(__func__, "session is null");
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is mull", where);
             return;
         }
         session->privacyModeChangeNotifyFunc_ = func;
     };
-    PostTask(task, "UnregisterSessionChangeListeners");
+    PostTask(task, __func__);
 }
 
 bool SceneSession::IsPcOrPadEnableActivation() const

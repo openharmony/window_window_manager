@@ -71,6 +71,7 @@ const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
+
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -1493,20 +1494,19 @@ void JsSceneSession::NotifyFrameLayoutFinish()
 
 void JsSceneSession::ProcessPrivacyModeChangeRegister()
 {
-    NotifyPrivacyModeChangeFunc func = [weakThis = wptr(this)](bool isPrivacyMode) {
+    auto session = weakSession_.promote();
+    if(session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr");
+        return;
+    }
+    session->SetPrivacyModeChangeNotifyFunc([weakThis = wptr(this)] (bool isPrivacyMode) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
             return;
         }
         jsSceneSession->NotifyPrivacyModeChange(isPrivacyMode);
-    };
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "session is nullptr");
-        return;
-    }
-    session->SetPrivacyModeChangeNotifyFunc(func);
+    });
 }
 
 void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
@@ -1514,17 +1514,17 @@ void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
     TLOGI(WmsLogTag::WMS_SCB, "isPrivacyMode:%{public}d, id:%{public}d", isPrivacyMode, persistentId_);
     auto task = [weakThis = wptr(this), isPrivacyMode, env = env_]() {
         auto jsSceneSession = weakThis.promote();
-        if (!jsSceneSession) {
-            TLOGE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
+        if(!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
             return;
         }
-        auto jsCallback = jsSceneSession->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
-        if (!jsCallback) {
-            TLOGNE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
+        auto jsCallback = jsSceneSession->GetJsCallback(PRIVACY_MODE_CHANGE_CB);
+        if(!jsCallback) {
+            TLOGE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
             return;
         }
         napi_value jsIsPrivacyModeValue = CreateJsValue(env, isPrivacyMode);
-        napi_value argv[] = { jsSessionPrivacyMode };
+        napi_value argv[] = { jsIsPrivacyModeValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallback->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
