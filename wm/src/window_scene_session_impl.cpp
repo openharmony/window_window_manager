@@ -3198,22 +3198,27 @@ WMError WindowSceneSessionImpl::SetShadowRadius(float radius)
 
 WMError WindowSceneSessionImpl::SetWindowShadowRadius(float radius)
 {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
     if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window, not supported.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
     if (surfaceNode_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RSSurface node is null.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RSSurface node is nullptr.");
         return WMError::WM_ERROR_NULLPTR;
     }
 
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set window %{public}s shadow radius %{public}f.", GetWindowName().c_str(), radius);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}u shadow radius %{public}f.", GetWindowId(), radius);
     if (MathHelper::LessNotEqual(radius, 0.0f)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The shadow radius is less than zero.");
         return WMError::WM_ERROR_INVALID_PARAM;

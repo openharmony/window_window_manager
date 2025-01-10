@@ -1247,7 +1247,7 @@ public:
      * @param radius Shadow radius of window.
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_OK; }
+    virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set shadow color of window.
