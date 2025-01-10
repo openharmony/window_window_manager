@@ -61,6 +61,12 @@ public:
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
 
+    /*
+     * Window LifeCycle
+     */
+    void RegisterLockStateChangeCallback(NotifyLockStateChangeCallback&& callback) override;
+    void NotifyLockStateChange(bool lockState) override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
