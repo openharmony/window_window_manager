@@ -37,6 +37,7 @@
 #include "vsync_station.h"
 #include "window.h"
 #include "window_helper.h"
+#include "window_inspector"
 #include "window_option.h"
 #include "wm_common.h"
 
@@ -494,6 +495,7 @@ protected:
     /*
      * Window Property
      */
+    std::shared_ptr<WMSGetWindowListsCallback> onWMSGetWindowListsCallback_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
 
