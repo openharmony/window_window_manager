@@ -105,7 +105,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token, int32_t pid, int32_t uid,
     const std::string& identityToken)
 {
-    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid,
+    auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid,
         uid, identityToken]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -133,7 +133,8 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             session->pcFoldScreenController_->OnConnect();
         }
         return ret;
-    }, __func__);
+    };
+    return PostSyncTask(task, __func__);
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
