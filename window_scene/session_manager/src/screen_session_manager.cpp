@@ -710,12 +710,14 @@ void ScreenSessionManager::HandleScreenEvent(sptr<ScreenSession> screenSession,
         }
         if (phyMirrorEnable) {
             NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+            NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
             isPhyScreenConnected_ = true;
         }
         return;
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
         if (phyMirrorEnable) {
             NotifyScreenDisconnected(screenSession->GetScreenId());
+            NotifyDisplayDestroy(screenSession->GetScreenId());
             NotifyCastWhenScreenConnectChange(false);
             FreeDisplayMirrorNodeInner(screenSession);
             isPhyScreenConnected_ = false;
