@@ -4310,18 +4310,6 @@ void SceneSession::RegisterThrowSlipAnimationStateChangeCallback(std::function<v
     }, where);
 }
 
-void SceneSession::RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func)
-{
-    PostTask([weakThis = wptr(this), func = std::move(func)]() mutable {
-        auto session = weakThis.promote();
-        if (session == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr");
-            return;
-        }
-        session->onThrowSlipAnimationStateChangeFunc_ = std::move(func);
-    }, __func__);
-}
-
 bool SceneSession::IsMissionHighlighted()
 {
     if (!SessionHelper::IsMainWindow(GetWindowType())) {
