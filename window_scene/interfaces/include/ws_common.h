@@ -393,7 +393,7 @@ struct SessionInfo {
     /*
      * PC Window
      */
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
 };
 
 enum class SessionFlag : uint32_t {

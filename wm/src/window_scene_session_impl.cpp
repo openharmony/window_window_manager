@@ -834,11 +834,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         // get support modes configuration
         uint32_t windowModeSupportType = 0;
-        std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-        property_->GetSupportWindowModes(supportWindowModes);
-        auto size = supportWindowModes.size();
+        std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+        property_->GetSupportedWindowModes(supportedWindowModes);
+        auto size = supportedWindowModes.size();
         if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
-            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportWindowModes);
+            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
         } else {
             windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(abilityInfo->windowModes);
         }
@@ -2539,8 +2539,8 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
     return ret;
 }
 
-WMError WindowSceneSessionImpl::SetSupportWindowModes(
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+WMError WindowSceneSessionImpl::SetSupportedWindowModes(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
@@ -2557,13 +2557,13 @@ WMError WindowSceneSessionImpl::SetSupportWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    auto size = supportWindowModes.size();
+    auto size = supportedWindowModes.size();
     if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportWindowModes);
+    uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
     if (windowModeSupportType == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is 0");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -2576,7 +2576,7 @@ WMError WindowSceneSessionImpl::SetSupportWindowModes(
 
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->NotifySupportWindowModesChange(supportWindowModes);
+    hostSession->NotifySupportWindowModesChange(supportedWindowModes);
 
     UpdateTitleButtonVisibility();
     bool onlySupportFullScreen =
