@@ -131,6 +131,7 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::weak_ptr<AbilityRuntime::Context> context_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 
     /*
      * Window Immersive
@@ -140,9 +141,13 @@ private:
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;
     std::unordered_set<sptr<IAvoidAreaChangedListener>, SptrHash<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
+
+    /*
+     * Keyboard Window
+     */
+    mutable std::mutex occupiedAreaMutex_;
     std::unordered_set<sptr<IOccupiedAreaChangeListener>, SptrHash<IOccupiedAreaChangeListener>>
         occupiedAreaChangeListeners_;
-    // Above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS
