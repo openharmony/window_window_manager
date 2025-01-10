@@ -225,6 +225,25 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
             surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
         }
     }
+
+    if (!WindowInspector::GetInstance().RegisterWMSConnectCallback()) {
+        return;
+    }
+    onWMSGetWindowListsCallback_ = std::make_shared<WMSGetWindowListsCallback>([] {
+        std::vector<WindowListsInfo> windowListsInfoVec;
+        {
+            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+            for (const auto& [_, winPair] : windowSessionMap_) {
+                if (auto window = winPair.second) {
+                    windowListsInfoVec.push_back({window->GetWindowName(), window->GetWIndowId(),
+                        static_cast<uint32_t>(window->GetType()), window->GetRect() })
+                }
+            }
+        }
+        return windowListsInfoVec;
+    });
+    WindowInspector::GetInstance().RegisterWMSGetWindowListsCallback(
+        std::weak_ptr<WMSGetWindowListsCallback>(onWMSGetWindowListsCallback_));
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -301,6 +320,8 @@ WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
     Destroy(true, false);
+
+    WindowInspector::GetInstance().UnregisterCallback();
 }
 
 uint32_t WindowSessionImpl::GetWindowId() const
