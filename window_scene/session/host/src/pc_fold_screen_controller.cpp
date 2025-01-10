@@ -275,7 +275,7 @@ void PcFoldScreenController::UpdateSupportEnterWaterfallMode()
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "last: %{public}d, curr: %{public}d",
         lastSupportEnterWaterfallMode_, supportEnterWaterfallMode_);
-    if (!maskingSupportEnterWaterfall_ || (lastSupportEnterWaterfallMode_ == supportEnterWaterfallMode_)) {
+    if (maskingSupportEnterWaterfall_ || (lastSupportEnterWaterfallMode_ == supportEnterWaterfallMode_)) {
         return;
     }
     auto sceneSession = weakSceneSession_.promote();
