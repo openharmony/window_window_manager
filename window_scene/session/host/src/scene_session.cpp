@@ -4306,6 +4306,15 @@ bool SceneSession::IsMissionHighlighted()
         });
 }
 
+void SceneSession::MaskingEnterWaterfallMode()
+{
+    if (pcFoldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "pcFoldScreenController_ is null");
+        return;
+    }
+    pcFoldScreenController_->MaskingSupportEnterWaterfallMode();
+}
+
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
 {
     TLOGD(WmsLogTag::DEFAULT, "setListener success");

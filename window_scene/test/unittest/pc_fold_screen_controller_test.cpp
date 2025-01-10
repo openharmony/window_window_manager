@@ -866,6 +866,20 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, Function |
 }
 
 /**
+
+@tc.name: MaskingSupportEnterWaterfallMode
+@tc.desc: test function : MaskingSupportEnterWaterfallMode
+@tc.type: FUNC
+*/
+HWTEST_F(PcFoldScreenControllerTest, MaskingSupportEnterWaterfallMode, Function | SmallTest | Level3)
+{
+    controller_->maskingSupportEnterWaterfall_ = false;
+    EXPECT_FALSE(controller_->maskingSupportEnterWaterfall_);
+    controller_->MaskingSupportEnterWaterfallMode();
+    EXPECT_TRUE(controller_->maskingSupportEnterWaterfall_);
+}
+
+/**
  * @tc.name: GetPersistentId
  * @tc.desc: test function : GetPersistentId
  * @tc.type: FUNC
