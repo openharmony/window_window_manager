@@ -56,4 +56,4 @@ private:
 };
 } // namespace OHOS::Rosen
 
-#endif // PC_FOLD_SCREEN_MANAGER_H
+#endif // WINDOW_INSPECTOR_H
