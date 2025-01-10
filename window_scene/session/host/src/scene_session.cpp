@@ -745,7 +745,7 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
         }
         session->OnSessionEvent(event);
         return WSError::WS_OK;
-        }, where);
+    }, where);
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY)
