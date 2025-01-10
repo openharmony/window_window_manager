@@ -174,5 +174,19 @@ void PiPReporter::ReportPiPRestore()
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
     LOG_WHEN_ERROR(ret);
 }
+
+void PiPReporter::ReportPiPUpdateContent()
+{
+    TLOGI(WmsLogTag::WMS_PIP, "Report pip widow update typeNode");
+    std::string eventName = "updateContent_PIP";
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::MULTIWINDOW_UE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PNAMEID, PNAMEID,
+        EVENT_KEY_PVERSION, PVERSION,
+        EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
+    LOG_WHEN_ERROR(ret);
+}
+
 } // namespace Rosen
 } // namespace OHOS

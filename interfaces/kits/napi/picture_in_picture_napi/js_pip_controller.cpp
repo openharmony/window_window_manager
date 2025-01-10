@@ -36,6 +36,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "startPiP", moduleName, JsPipController::StartPictureInPicture);
     BindNativeFunction(env, object, "stopPiP", moduleName, JsPipController::StopPictureInPicture);
+    BindNativeFunction(env, object, "updateContentNode", moduleName, JsPipController::UpdateContentNode);
     BindNativeFunction(env, object, "updateContentSize", moduleName, JsPipController::UpdateContentSize);
     BindNativeFunction(env, object, "updatePiPControlStatus", moduleName, JsPipController::UpdatePiPControlStatus);
     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
@@ -183,6 +184,38 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     pipController_->SetAutoStartEnabled(enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsPipController::UpdateContentNode(napi_env env, napi_callback_info info)
+{
+    JsPipController *me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnUpdateContentNode(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentNode is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != NUMBER_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
+        return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
+    }
+    napi_value typeNode = argv[0];
+    if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
+        TLOGE(WmsLogTag::WMS_PIP, "[NAPI] invalid typeNode");
+        return NapiThrowInvalidParam(env, "invalid typeNode.");
+    }
+    if (pipController_ == nullptr) {
+        std::string errMsg = "OnUpdateNode error, controller is nullptr";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        return NapiThrowInvalidParam(env, errMsg);
+    }
+    napi_ref typeNodeRef = nullptr;
+    napi_create_reference(env, typeNode, 1, &typeNodeRef);
+    pipController_->UpdateContentNodeRef(typeNodeRef);
     return NapiGetUndefined(env);
 }
 
