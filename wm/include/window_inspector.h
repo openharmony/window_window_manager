@@ -33,8 +33,8 @@ using WMSGetWindowListsCallback = std::function<std::vector<WindowListsInfo>()>;
 class WindowInspector : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
-    bool InitConnectServer();
-    void RegisterWMSConnectCallback();
+    void InitConnectServer();
+    bool RegisterWMSConnectCallback();
     void RegisterWMSGetWindowListsCallback();
     void UnregisterCallback();
 

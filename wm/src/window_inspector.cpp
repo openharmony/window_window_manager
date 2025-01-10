@@ -61,10 +61,10 @@ void WindowInspector::InitConnectServer()
     isInitConnectSuccess_ = true;
 }
 
-void WindowInspector::RegisterWMSConnectCallback()
+bool WindowInspector::RegisterWMSConnectCallback()
 {
     if (!isInitConnectSuccess_) {
-        return;
+        return false;
     }
     setWMSCallback_([this](const char* message) {
         if (ProcessArkUIInspectorMessage(message)) {
@@ -73,6 +73,7 @@ void WindowInspector::RegisterWMSConnectCallback()
     });
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
+    return true;
 }
 
 void WindowInspector::RegisterWMSGetWindowListsCallback(const std::weak_ptr<WMSGetWindowListsCallback>& func)
@@ -124,7 +125,7 @@ void TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo)
     for (const auto& info : windowListsInfo) {
         nlohman::ordered_json jsonInfo;
         jsonInfo["windowName"] = info.windowName;
-        jsonInfo["windowId"] = std::to_string(info.windowId);
+        jsonInfo["winId"] = std::to_string(info.windowId);
         jsonInfo["windowType"] = std::to_string(info.windowType);
 
         jsonInfo["rect"] = nlohman::json::array();
