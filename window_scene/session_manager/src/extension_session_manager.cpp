@@ -82,7 +82,7 @@ float ExtensionSessionManager::GetSystemDensity(uint64_t displayId)
 
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
-    auto task = [this, newSessionInfo = sessionInfo]() -> sptr<ExtensionSession> mutable {
+    auto task = [this, newSessionInfo = sessionInfo]() mutable -> sptr<ExtensionSession> {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
         if (!newSessionInfo.config_.isDensityFollowHost_) {
             newSessionInfo.config_.density_ = GetSystemDensity(newSessionInfo.config_.displayId_);
