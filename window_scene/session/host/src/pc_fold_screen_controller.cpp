@@ -259,11 +259,23 @@ void PcFoldScreenController::UnregisterFullScreenWaterfallModeChangeCallback()
     fullScreenWaterfallModeChangeCallback_ = nullptr;
 }
 
+void PcFoldScreenController::MaskingSupportEnterWaterfallMode()
+{
+    maskingSupportEnterWaterfall_ = true;
+    auto sceneSession = weakSceneSession_.promote();
+    if (sceneSession == nullptr || sceneSession->sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session stage unavailable, id: %{public}d", GetPersistentId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "SetSupportEnterWaterfallMode masking set isSupportEnter false");
+    sceneSession->sessionStage_->SetSupportEnterWaterfallMode(false);
+}
+
 void PcFoldScreenController::UpdateSupportEnterWaterfallMode()
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "last: %{public}d, curr: %{public}d",
         lastSupportEnterWaterfallMode_, supportEnterWaterfallMode_);
-    if (lastSupportEnterWaterfallMode_ == supportEnterWaterfallMode_) {
+    if (!maskingSupportEnterWaterfall_ || (lastSupportEnterWaterfallMode_ == supportEnterWaterfallMode_)) {
         return;
     }
     auto sceneSession = weakSceneSession_.promote();

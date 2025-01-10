@@ -592,6 +592,7 @@ public:
     void OnThrowSlipAnimationStateChange(bool isAnimating);
     void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
     bool IsMissionHighlighted();
+    void MaskingEnterWaterfallMode();
 
     /*
      * Keyboard
