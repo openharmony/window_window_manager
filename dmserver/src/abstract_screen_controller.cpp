@@ -237,15 +237,9 @@ void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, S
     WLOGFI("RS screen event. rsScreenId:%{public}" PRIu64", defaultRsScreenId_:%{public}" PRIu64", event:%{public}u",
         rsScreenId, static_cast<uint64_t>(defaultRsScreenId_), static_cast<uint32_t>(screenEvent));
     if (screenEvent == ScreenEvent::CONNECTED) {
-        auto task = [this, rsScreenId] {
-            ProcessScreenConnected(rsScreenId);
-        };
-        controllerHandler_->PostTask(task, "wms:OnRsScreenConnectionChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
+        ProcessScreenConnected(rsScreenId);
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
-        auto task = [this, rsScreenId] {
-            ProcessScreenDisconnected(rsScreenId);
-        };
-        controllerHandler_->PostTask(task, "wms:OnRsScreenConnectionChange", 0, AppExecFwk::EventQueue::Priority::HIGH);
+        ProcessScreenDisconnected(rsScreenId);
     } else {
         WLOGE("unknown message:%{public}ud", static_cast<uint8_t>(screenEvent));
     }
