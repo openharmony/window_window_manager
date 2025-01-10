@@ -1330,7 +1330,7 @@ void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
     }
 }
 
-void SceneSessionManager::GetMainSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+void SceneSessionManager::GetMainSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -2100,8 +2100,8 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     UpdateParentSessionForDialog(sceneSession, property);
     std::string key = sessionInfo.bundleName_ + "_" + sessionInfo.moduleName_ + "_" + sessionInfo.abilityName_ + "_" +
         std::to_string(sessionInfo.appIndex_);
-    if (lockStateCacheSet_.find(key) != lockStateCacheSet_.end()) {
-        sceneSession->NotifyLockStateChange(true);
+    if (sessionLockStateCacheSet_.find(key) != sessionLockStateCacheSet_.end()) {
+        sceneSession->NotifySessionLockStateChange(true);
     }
 }
 
@@ -12334,7 +12334,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }, __func__);
 }
 
-WMError SceneSessionManager::LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+WMError SceneSessionManager::LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
@@ -12344,21 +12344,20 @@ WMError SceneSessionManager::LockSessionByAbility(const std::string& bundleName,
     const char* const where = __func__;
     taskScheduler_->PostAsyncTask([this, bundleName, moduleName, abilityName, appIndex, where] {
         std::vector<sptr<SceneSession>> mainSessions;
-        GetMainSessionByAbility(bundleName, moduleName, abilityName, appIndex, mainSessions);
+        GetMainSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex, mainSessions);
         if (!mainSessions.empty()) {
-            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, set LockState true, persistentId:%{public}d",
+            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, set sessionLockState true, persistentId:%{public}d",
                 where, mainSessions[0]->GetPersistentId());
-            mainSessions[0]->NotifyLockStateChange(true);
+            mainSessions[0]->NotifySessionLockStateChange(true);
         } else {
-            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, update LockState into cache set, persistentId:%{public}s",
-                where, bundleName.c_str());
-            lockStateCacheSet_.insert(
+            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, update sessionLockState into cache set", where);
+            sessionLockStateCacheSet_.insert(
                 bundleName + "_" + moduleName + "_" + abilityName + "_" + std::to_string(appIndex));
         }
     }, __func__);
     return WMError::WM_OK;
 }
-WMError SceneSessionManager::UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+WMError SceneSessionManager::UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
@@ -12368,15 +12367,13 @@ WMError SceneSessionManager::UnlockSessionByAbility(const std::string& bundleNam
     const char* const where = __func__;
     taskScheduler_->PostAsyncTask([this, bundleName, moduleName, abilityName, appIndex, where] {
         std::vector<sptr<SceneSession>> mainSessions;
-        GetMainSessionByAbility(bundleName, moduleName, abilityName, appIndex, mainSessions);
+        GetMainSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex, mainSessions);
         for (const auto &mainSession : mainSessions) {
-            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, set LockState false, persistentId:%{public}d",
-                where, mainSessions[0]->GetPersistentId());
-            mainSession->NotifyLockStateChange(false);
+            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, set sessionLockState false, persistentId:%{public}d",
+                where, mainSession->GetPersistentId());
+            mainSession->NotifySessionLockStateChange(false);
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, erase LockState from cache set, persistentId:%{public}s",
-            where, bundleName.c_str());
-        lockStateCacheSet_.erase(
+        sessionLockStateCacheSet_.erase(
             bundleName + "_" + moduleName + "_" + abilityName + "_" + std::to_string(appIndex));
     }, __func__);
     return WMError::WM_OK;

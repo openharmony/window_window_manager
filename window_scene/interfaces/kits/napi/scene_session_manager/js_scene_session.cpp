@@ -84,7 +84,7 @@ const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 const std::string SESSION_DISPLAY_ID_CHANGE_CB = "sessionDisplayIdChange";
 const std::string SET_SUPPORT_WINDOW_MODES_CB = "setSupportWindowModes";
-const std::string LOCK_STATE_CHANGE_CB = "lockStateChange";
+const std::string SESSION_LOCK_STATE_CHANGE_CB = "sessionLockStateChange";
 
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
@@ -2464,8 +2464,8 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB):
             ProcessSetSupportedWindowModesRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::LOCK_STATE_CHANGE_CB):
-            ProcessLockStateChangeRegister();
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_LOCK_STATE_CHANGE_CB):
+            ProcessSessionLockStateChangeRegister();
             break;
         default:
             break;
@@ -5649,7 +5649,7 @@ napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_in
     return NapiGetUndefined(env);
 }
 
-void JsSceneSession::ProcessLockStateChangeRegister()
+void JsSceneSession::ProcessSessionLockStateChangeRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -5657,34 +5657,34 @@ void JsSceneSession::ProcessLockStateChangeRegister()
         return;
     }
     const char* const where = __func__;
-    session->RegisterLockStateChangeCallback([weakThis = wptr(this), where](bool lockState) {
+    session->RegisterSessionLockStateChangeCallback([weakThis = wptr(this), where](bool sessionLockState) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnLockStateChange(lockState);
+        jsSceneSession->OnSessionLockStateChange(sessionLockState);
     });
     TLOGI(WmsLogTag::WMS_MAIN, "success");
 }
 
-void JsSceneSession::OnLockStateChange(bool lockState)
+void JsSceneSession::OnSessionLockStateChange(bool sessionLockState)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, lockState, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionLockState, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed.",
                 where, persistentId);
             return;
         }
-        auto jsCallBack = jsSceneSession->GetJSCallback(LOCK_STATE_CHANGE_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_LOCK_STATE_CHANGE_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
-        napi_value jsLockState = CreateJsValue(env, lockState);
-        napi_value argv[] = { jsLockState };
+        napi_value jsSessionLockState = CreateJsValue(env, sessionLockState);
+        napi_value argv[] = { jsSessionLockState };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

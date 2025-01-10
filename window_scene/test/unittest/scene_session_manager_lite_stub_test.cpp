@@ -209,16 +209,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         int32_t appIndex, int32_t userId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasFloatingShowing) override { return WMError::WM_OK; }
-    WMError LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex) override
-    {
-        return WMError::WM_OK;
-    }
-    WMError UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex) override
-    {
-        return WMError::WM_OK;
-    }
+    WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex) override { return WMError::WM_OK; }
+    WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex) override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -999,11 +993,11 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMinimizeMainSession, Function | 
 }
 
 /**
- * @tc.name: HandleLockSessionByAbility
- * @tc.desc: test function : HandleLockSessionByAbility
+ * @tc.name: HandleLockSessionByAbilityInfo
+ * @tc.desc: test function : HandleLockSessionByAbilityInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbility, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbilityInfo, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1017,17 +1011,18 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbility, Function |
     data.WriteString(abilityName);
     data.WriteInt32(appIndex);
 
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbility(data, reply);
+    auto res =
+        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 
 
 /**
- * @tc.name: HandleUnlockSessionByAbility
- * @tc.desc: test function : HandleUnlockSessionByAbility
+ * @tc.name: HandleUnlockSessionByAbilityInfo
+ * @tc.desc: test function : HandleUnlockSessionByAbilityInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSessionByAbility, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSessionByAbilityInfo, Function | SmallTest | Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1041,7 +1036,8 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnlockSessionByAbility, Function
     data.WriteString(abilityName);
     data.WriteInt32(appIndex);
 
-    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleUnlockSessionByAbility(data, reply);
+    auto res =
+        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleUnlockSessionByAbilityInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

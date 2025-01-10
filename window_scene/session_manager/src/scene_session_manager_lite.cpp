@@ -290,16 +290,16 @@ WMError SceneSessionManagerLite::MinimizeMainSession(const std::string& bundleNa
     return SceneSessionManager::GetInstance().MinimizeMainSession(bundleName, appIndex, userId);
 }
 
-WMError SceneSessionManagerLite::LockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+WMError SceneSessionManagerLite::LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex)
 {
-    return SceneSessionManager::GetInstance().LockSessionByAbility(bundleName, moduleName, abilityName, appIndex);
+    return SceneSessionManager::GetInstance().LockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
 }
 
-WMError SceneSessionManagerLite::UnlockSessionByAbility(const std::string& bundleName, const std::string& moduleName,
+WMError SceneSessionManagerLite::UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex)
 {
-    return SceneSessionManager::GetInstance().UnlockSessionByAbility(bundleName, moduleName, abilityName, appIndex);
+    return SceneSessionManager::GetInstance().UnlockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
 }
 
 WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,

@@ -64,8 +64,8 @@ public:
     /*
      * Window LifeCycle
      */
-    void RegisterLockStateChangeCallback(NotifyLockStateChangeCallback&& callback) override;
-    void NotifyLockStateChange(bool lockState) override;
+    void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
+    void NotifySessionLockStateChange(bool sessionLockState) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
