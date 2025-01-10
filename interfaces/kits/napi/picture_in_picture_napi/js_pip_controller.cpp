@@ -101,13 +101,13 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
     NapiAsyncTask::CompleteCallback complete =
         [weak = wptr<PictureInPictureController>(this->pipController_)]
             (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto promoteThis = weak.promote();
-            if (promoteThis == nullptr) {
+            auto pipController = weak.promote();
+            if (pipController == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY),
                     "JsPipController::OnStartPictureInPicture failed."));
                 return;
             }
-            WMError errCode = promoteThis->StartPictureInPicture(StartPipType::USER_START);
+            WMError errCode = pipController->StartPictureInPicture(StartPipType::USER_START);
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStartPictureInPicture failed."));
@@ -140,13 +140,13 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
     NapiAsyncTask::CompleteCallback complete =
         [weak = wptr<PictureInPictureController>(this->pipController_)]
             (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto promoteThis = weak.promote();
-            if (promoteThis == nullptr) {
+            auto pipController = weak.promote();
+            if (pipController == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
                     "JsPipController::OnStopPictureInPicture failed."));
                 return;
             }
-            WMError errCode = promoteThis->StopPictureInPictureFromClient();
+            WMError errCode = pipController->StopPictureInPictureFromClient();
             if (errCode != WMError::WM_OK) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
                     "JsPipController::OnStopPictureInPicture failed."));
@@ -328,13 +328,13 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
                     "Capability not supported.Failed to call the API due to limited device capabilities."));
                 return;
             }
-            auto promoteThis = weak.promote();
-            if (promoteThis == nullptr) {
+            auto pipController = weak.promote();
+            if (pipController == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
                     "PiP internal error."));
                 return;
             }
-            const sptr<Window>& pipWindow = promoteThis->GetPipWindow();
+            const sptr<Window>& pipWindow = pipController->GetPipWindow();
             if (pipWindow == nullptr) {
                 task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
                     "PiP internal error."));
