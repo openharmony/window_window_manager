@@ -337,4 +337,35 @@ bool MainSession::IsApplicationModal() const
 {
     return IsModal();
 }
+
+void MainSession::RegisterLockStateChangeCallback(NotifyLockStateChangeCallback&& callback)
+{
+    PostTask([this, weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        session->onLockStateChangeCallback_ = std::move(callback);
+        if (session->onLockStateChangeCallback_ && lockState_) {
+            session->onLockStateChangeCallback_(lockState_);
+        }
+    }, __func__);
+}
+
+void MainSession::NotifyLockStateChange(bool lockState)
+{
+    PostTask([this, weakThis = wptr(this), lockState] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        session->lockState_ = lockState;
+        if (session->onLockStateChangeCallback_) {
+            TLOGI(WmsLogTag::WMS_MAIN, "onLockStageChange to:%{public}d", lockState);
+            session->onLockStateChangeCallback_(lockState);
+        }
+    }, __func__);
+}
 } // namespace OHOS::Rosen
