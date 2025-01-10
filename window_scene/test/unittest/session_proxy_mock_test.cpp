@@ -104,16 +104,14 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
 HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
 {
     MockMessageParcel::ClearAllErrorFlag();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sessionProxy = new(std::nothrow) SessionProxy(iRemoteObjectMocker);
-    ASSERT_NE(sessionProxy, nullptr);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    SessionProxy* sessionProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
     WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
     MockMessageParcel::ClearAllErrorFlag();
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(property, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
