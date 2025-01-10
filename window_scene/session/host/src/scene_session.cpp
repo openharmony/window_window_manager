@@ -4879,11 +4879,11 @@ void SceneSession::SetMovable(bool movable)
     PostTask([weakThis = wptr(this), movable, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return;
         }
         if (session->moveDragController_) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s id: %{public}d, isMovable: %{public}d",
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s id: %{public}d, isMovable: %{public}d",
                 where, session->GetPersistentId(), movable);
             session->moveDragController_->SetMovable(movable);
         }
@@ -5300,7 +5300,7 @@ void SceneSession::RequestHideKeyboard(bool isAppColdStart)
                 "%{public}s Session is null, notify inputMethod framework hide keyboard failed!", where);
             return;
         }
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "%{public}s Notify inputMethod framework hide keyboard start, id: %{public}d,"
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s Notify inputMethod framework hide keyboard start, id: %{public}d,"
             "isAppColdStart: %{public}d", where, session->GetPersistentId(), isAppColdStart);
         if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput();
@@ -5443,7 +5443,7 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
         if (session->onDefaultDensityEnabledFunc_) {
             session->onDefaultDensityEnabledFunc_(isDefaultDensityEnabled);
         }
-        }, where);
+    }, where);
     return WSError::WS_OK;
 }
 
@@ -6026,7 +6026,7 @@ void SceneSession::UnregisterSessionChangeListeners()
             return;
         }
         session->Session::UnregisterSessionChangeListeners();
-        }, where);
+    }, where);
 }
 
 void SceneSession::SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func)
@@ -6099,7 +6099,7 @@ bool SceneSession::CheckPidIfMatched()
 void SceneSession::SetNeedSyncSessionRect(bool needSync)
 {
     const char* const where = __func__;
-    PostTask([weakThis = wptr(this), needSync, where]() -> void {
+    PostTask([weakThis = wptr(this), needSync, where] {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_PIPELINE, "%{public}s session is null", where);
@@ -6109,7 +6109,7 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
             "%{public}s: change isNeedSync from %{public}d to %{public}d, id:%{public}d",
             where, session->isNeedSyncSessionRect_, needSync, session->GetPersistentId());
         session->isNeedSyncSessionRect_ = needSync;
-        }, where);
+    }, where);
 }
 
 bool SceneSession::SetFrameGravity(Gravity gravity)
