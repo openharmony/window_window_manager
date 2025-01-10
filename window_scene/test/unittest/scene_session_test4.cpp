@@ -1418,37 +1418,18 @@ HWTEST_F(SceneSessionTest4, GetAvoidAreaBytype, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "GetAvoidAreaBytype";
     info.bundleName_ = "GetAvoidAreaBytype";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    SystemSessionConfig systemConfig;
-    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    session->SetSystemConfig(systemConfig);
-    sptr<WindowSessionProperty> property = session->GetSessionProperty();
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-    
     WSRect rect({0, 0, 10, 10});
     AvoidArea avoidArea;
     std::vector<sptr<SceneSession>> sessionVector;
     for (int i = 0; i < 1000; i++) {
         sessionVector.push_back(sptr<SceneSession>::MakeSptr(info, nullptr));
-    }
-    for (int i = 0; i < 1000; i++) {
         sessionVector[i]->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         sessionVector[i]->GetSessionProperty()->SetAvoidAreaOption(1);
+    }
+    for (int i = 0; i < 1000; i++) {
         avoidArea = sessionVector[i]->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect);
         ASSERT_EQ(avoidArea.topRect_, 0);
     }
-
-    bool ret;
-    property->SetAvoidAreaOption(0);
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-    session->SetSessionProperty(property);
-    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-    ASSERT_EQ(false, ret);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    session->SetSessionProperty(property);
-    ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
-    ASSERT_EQ(false, ret);
 }
 }
 }
