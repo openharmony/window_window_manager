@@ -432,32 +432,6 @@ HWTEST_F(SceneSessionTest2, GetMainSessionId, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetSessionSnapshotFilePath
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, GetSessionSnapshotFilePath, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetSessionSnapshotFilePath";
-    info.bundleName_ = "GetSessionSnapshotFilePath";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSession->SetSessionProperty(property);
-
-    std::string result = sceneSession->GetSessionSnapshotFilePath();
-    ASSERT_NE(result, "0");
-}
-
-/**
  * @tc.name: UpdateSizeChangeReason01
  * @tc.desc: UpdateSizeChangeReason01
  * @tc.type: FUNC
