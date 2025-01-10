@@ -876,6 +876,10 @@ HWTEST_F(SessionStageStubTest, HandleSetSupportEnterWaterfallMode, Function | Sm
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStageStubTest, HandleSendContainerModalEvent, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT);
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteString("name");
