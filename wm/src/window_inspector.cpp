@@ -91,11 +91,11 @@ void WindowInspector::UnregisterCallback()
 bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
 {
     nlohmann::json jsonMessage = nlohmann::json::parse(message, nullptr, false);
-    if (jsonMessage.contains("method") || jsonMessage["method"].get<std::string>() != METHOD_NAME) {
+    if (!jsonMessage.contains("method") || jsonMessage["method"].get<std::string>() != METHOD_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
         return false;
     }
-    if (jsonMessage.contains("params") || jsonMessage["params"]["interface"].get<std::string>() != INTERFACE_NAME) {
+    if (!jsonMessage.contains("params") || jsonMessage["params"]["interface"].get<std::string>() != INTERFACE_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.interface err");
         return false;
     }
