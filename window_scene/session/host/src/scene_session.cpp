@@ -242,16 +242,14 @@ void SceneSession::RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityTo
 {
     const char* const where = __func__;
     auto persistentId = GetPersistentId();
-    auto itr = std::remove_if(
+    extensionTokenInfos_.erase(std::remove_if(
         extensionTokenInfos_.begin(), extensionTokenInfos_.end(), [&abilityToken, persistentId, where]
             (const auto& tokenInfo) {
             TLOGNI(WmsLogTag::WMS_UIEXT,
                 "%{public}s UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
                 where, tokenInfo.callingTokenId, persistentId);
             return tokenInfo.abilityToken == abilityToken;
-        });
-
-    extensionTokenInfos_.erase(itr, extensionTokenInfos_.end());
+        }), extensionTokenInfos_.end());
 }
 
 void SceneSession::OnNotifyAboveLockScreen()
@@ -1313,7 +1311,7 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
     PostTask([weakThis = wptr(this), func, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         session->sessionRectChangeFunc_ = func;
@@ -1623,7 +1621,7 @@ void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChan
         }
         session->onSessionTopmostChange_ = std::move(callback);
         session->onSessionTopmostChange_(session->IsTopmost());
-    }, __func__);
+    }, where);
 }
 
 /** @note @window.hierarchy */
@@ -1768,7 +1766,7 @@ WSError SceneSession::RaiseAppMainWindowToTop()
     PostTask([weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (session->IsFocusedOnShow()) {
@@ -1792,7 +1790,7 @@ WSError SceneSession::OnNeedAvoid(bool status)
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d status %{public}d ",
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s win %{public}d status %{public}d",
             where, session->GetPersistentId(), static_cast<int32_t>(status));
         if (session->onNeedAvoid_) {
             session->onNeedAvoid_(status);
