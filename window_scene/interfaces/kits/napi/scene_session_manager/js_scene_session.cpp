@@ -154,7 +154,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_DISPLAY_ID_CHANGE_CB,          ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB},
     {SET_SUPPORT_WINDOW_MODES_CB,           ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB},
     {WINDOW_MOVING_CB,                      ListenerFuncType::WINDOW_MOVING_CB},
-    {LOCK_STATE_CHANGE_CB,                  ListenerFuncType::LOCK_STATE_CHANGE_CB},
+    {SESSION_LOCK_STATE_CHANGE_CB,          ListenerFuncType::SESSION_LOCK_STATE_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
