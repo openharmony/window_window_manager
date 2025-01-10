@@ -5307,7 +5307,7 @@ void SceneSession::RequestHideKeyboard(bool isAppColdStart)
             TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s Notify InputMethod framework hide keyboard end. id: %{public}d",
                 where, session->GetPersistentId());
         }
-        }, where);
+    }, where);
 #endif
 }
 
