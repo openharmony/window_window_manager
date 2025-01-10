@@ -260,7 +260,7 @@ public:
     void UpdateScreenRotationProperty(ScreenId screenId, const RRect& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) override;
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        ScreenPropertyChangeType screenPropertyChangeType) override;
+        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
     uint32_t GetCurvedCompressionArea() override;
     ScreenProperty GetPhyScreenProperty(ScreenId screenId) override;
     void SetScreenPrivacyState(bool hasPrivate) override;
