@@ -8037,25 +8037,6 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     return true;
 }
 
-std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId)
-{
-    WLOGFI("persistentId %{public}d", persistentId);
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        WLOGFE("sceneSession nullptr!");
-        return "";
-    }
-    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession)]() {
-        auto sceneSession = weakSceneSession.promote();
-        if (sceneSession == nullptr) {
-            WLOGFE("session is nullptr");
-            return std::string("");
-        }
-        return sceneSession->GetSessionSnapshotFilePath();
-    };
-    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotFilePath" + std::to_string(persistentId));
-}
-
 sptr<SceneSession> SceneSessionManager::SelectSesssionFromMap(const uint64_t& surfaceId)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);

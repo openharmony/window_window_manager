@@ -3274,22 +3274,6 @@ bool SceneSession::IsKeepScreenOn() const
     return GetSessionProperty()->IsKeepScreenOn();
 }
 
-std::string SceneSession::GetSessionSnapshotFilePath() const
-{
-    WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
-    if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
-        WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
-        auto snapshot = Snapshot();
-        if (scenePersistence_ != nullptr) {
-            scenePersistence_->SaveSnapshot(snapshot);
-        }
-    }
-    if (scenePersistence_ != nullptr) {
-        return scenePersistence_->GetSnapshotFilePath();
-    }
-    return "";
-}
-
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
