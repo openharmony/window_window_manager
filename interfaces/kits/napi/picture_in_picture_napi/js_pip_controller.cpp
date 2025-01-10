@@ -330,7 +330,7 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
         }
         const sptr<Window>& pipWindow = pipController->GetPipWindow();
         if (pipWindow == nullptr) {
-            TLOGE(WmsLogTag::WMS_PIP, "%{public}s", "Failed to get pip window");
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to get pip window");
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
                 "PiP internal error."));
             return;
