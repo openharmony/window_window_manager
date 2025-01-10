@@ -85,7 +85,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_DISPLAY_ID_CHANGE_CB,
     SET_SUPPORT_WINDOW_MODES_CB,
     WINDOW_MOVING_CB,
-    LOCK_STATE_CHANGE_CB,
+    SESSION_LOCK_STATE_CHANGE_CB,
 };
 
 class SceneSession;
