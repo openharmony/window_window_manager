@@ -212,7 +212,6 @@ HWTEST_F(ScreenSceneTest, SetDisplayOrientation02, Function | SmallTest | Level3
 HWTEST_F(ScreenSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Level3)
 {
     ScreenScene screenScene("UNKNOWN");
-    ;
     screenScene.SetFrameLayoutFinishCallback([]() {});
     ASSERT_EQ(1, screenScene.GetWindowId());
 }

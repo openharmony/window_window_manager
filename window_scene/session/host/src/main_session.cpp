@@ -67,7 +67,8 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        WSError ret = LOCK_GUARD_EXPR(SCENE_GUARD,
+            session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid));
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -233,7 +234,7 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
-/**
+/*
  * Notify when updating highlight instead after hightlight functionality enabled
  */
 WSError MainSession::UpdateFocus(bool isFocused)
@@ -293,17 +294,17 @@ WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
 }
 
 WSError MainSession::NotifySupportWindowModesChange(
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     const char* const where = __func__;
-    PostTask([weakThis = wptr(this), supportWindowModes = supportWindowModes, where]() mutable {
+    PostTask([weakThis = wptr(this), supportedWindowModes = supportedWindowModes, where]() mutable {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", where);
             return;
         }
-        if (session->onSetSupportWindowModesFunc_) {
-            session->onSetSupportWindowModesFunc_(std::move(supportWindowModes));
+        if (session->onSetSupportedWindowModesFunc_) {
+            session->onSetSupportedWindowModesFunc_(std::move(supportedWindowModes));
         }
     }, __func__);
     return WSError::WS_OK;

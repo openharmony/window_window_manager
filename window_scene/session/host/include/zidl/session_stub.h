@@ -68,6 +68,7 @@ private:
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
     int HandleIsStartMoving(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleGetIsMidScene(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
@@ -110,7 +111,7 @@ private:
 
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSupportWindowModes(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

@@ -20,6 +20,7 @@
 #include <string>
 #include <sstream>
 #include <cinttypes>
+#include <set>
 
 #include "setting_observer.h"
 #include "dm_common.h"
@@ -48,7 +49,7 @@ public:
     static uint32_t GetDataFromString(MultiScreenRecoverOption& option, const std::string& inputString);
     static bool GetSettingRecoveryResolutionString(std::vector<std::string>& resolutionStrings,
         const std::string& key = SETTING_RECOVERY_RESOLUTION_KEY);
-    static bool GetSettingRecoveryResolutionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& resolution);
+    static bool GetSettingRecoveryResolutionSet(std::set<ScreenId>& restoredScreenId);
     static bool GetSettingScreenModeString(std::vector<std::string>& screenModeStrings,
         const std::string& key = SETTING_SCREEN_MODE_KEY);
     static bool GetSettingScreenModeMap(std::map<ScreenId, uint32_t>& screenMode);

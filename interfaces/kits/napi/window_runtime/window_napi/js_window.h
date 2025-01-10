@@ -72,16 +72,6 @@ public:
     static napi_value LoadContentByName(napi_env env, napi_callback_info info);
     static napi_value GetUIContext(napi_env env, napi_callback_info info);
     static napi_value SetUIContent(napi_env env, napi_callback_info info);
-    static napi_value SetFullScreen(napi_env env, napi_callback_info info);
-    static napi_value SetLayoutFullScreen(napi_env env, napi_callback_info info);
-    static napi_value SetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
-    static napi_value SetSystemBarEnable(napi_env env, napi_callback_info info);
-    static napi_value SetWindowSystemBarEnable(napi_env env, napi_callback_info info);
-    static napi_value SetSystemBarProperties(napi_env env, napi_callback_info info);
-    static napi_value GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
-    static napi_value SetWindowSystemBarProperties(napi_env env, napi_callback_info info);
-    static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
-    static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
     static napi_value IsShowing(napi_env env, napi_callback_info info);
     static napi_value IsWindowShowingSync(napi_env env, napi_callback_info info);
     static napi_value SetBackgroundColor(napi_env env, napi_callback_info info);
@@ -93,6 +83,7 @@ public:
     static napi_value SetWindowFocusable(napi_env env, napi_callback_info info);
     static napi_value SetTopmost(napi_env env, napi_callback_info info);
     static napi_value SetWindowTopmost(napi_env env, napi_callback_info info);
+    static napi_value SetWindowDelayRaise(napi_env env, napi_callback_info info);
     static napi_value SetKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWakeUpScreen(napi_env env, napi_callback_info info);
@@ -118,7 +109,6 @@ public:
     static napi_value KeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
-    static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value DisableLandscapeMultiWindow(napi_env env, napi_callback_info info);
@@ -201,6 +191,23 @@ public:
     static napi_value SetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     static napi_value Restore(napi_env env, napi_callback_info info);
 
+    /*
+     * Window Immersive
+     */
+    static napi_value SetFullScreen(napi_env env, napi_callback_info info);
+    static napi_value SetLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value SetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value SetSystemBarEnable(napi_env env, napi_callback_info info);
+    static napi_value SetWindowSystemBarEnable(napi_env env, napi_callback_info info);
+    static napi_value SetSystemBarProperties(napi_env env, napi_callback_info info);
+    static napi_value GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
+    static napi_value SetWindowSystemBarProperties(napi_env env, napi_callback_info info);
+    static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
+    static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
+
 private:
     std::string GetWindowName();
     static bool ParseScaleOption(napi_env env, napi_value jsObject, Transform& trans);
@@ -235,19 +242,9 @@ private:
     napi_value OnUnregisterWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnBindDialogTarget(napi_env env, napi_callback_info info);
     napi_value OnSetDialogBackGestureEnabled(napi_env env, napi_callback_info info);
-    napi_value OnSetFullScreen(napi_env env, napi_callback_info info);
-    napi_value OnSetLayoutFullScreen(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
-    napi_value OnSetSystemBarEnable(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowSystemBarEnable(napi_env env, napi_callback_info info);
-    napi_value OnSetSystemBarProperties(napi_env env, napi_callback_info info);
-    napi_value OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info);
     napi_value OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName);
     napi_value OnGetUIContext(napi_env env, napi_callback_info info);
     napi_value OnSetUIContent(napi_env env, napi_callback_info info);
-    napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
-    napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
     napi_value OnIsShowing(napi_env env, napi_callback_info info);
     napi_value OnIsWindowShowingSync(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
@@ -260,9 +257,7 @@ private:
     napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
-    napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
-    napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
-    napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
@@ -283,6 +278,7 @@ private:
     napi_value OnSetWindowFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetTopmost(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTopmost(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowDelayRaise(napi_env env, napi_callback_info info);
     napi_value OnSetKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWakeUpScreen(napi_env env, napi_callback_info info);
@@ -371,6 +367,25 @@ private:
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
+
+    /*
+     * Window Immersive
+     */
+    napi_value OnSetFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetSystemBarEnable(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowSystemBarEnable(napi_env env, napi_callback_info info);
+    napi_value OnSetSystemBarProperties(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info);
+    napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
+    napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen
 }  // namespace OHOS

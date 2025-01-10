@@ -829,14 +829,31 @@ HWTEST_F(SessionProxyTest, NotifySupportWindowModesChange, Function | SmallTest 
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
 
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
         AppExecFwk::SupportWindowMode::FULLSCREEN,
         AppExecFwk::SupportWindowMode::SPLIT,
         AppExecFwk::SupportWindowMode::FLOATING
     };
-    WSError res = sProxy->NotifySupportWindowModesChange(supportWindowModes);
+    WSError res = sProxy->NotifySupportWindowModesChange(supportedWindowModes);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportWindowModesChange end";
+}
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+
+    bool isMidScene = false;
+    WSError res = sProxy->GetIsMidScene(isMidScene);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ASSERT_EQ(isMidScene, false);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene end";
 }
 } // namespace
 } // namespace Rosen

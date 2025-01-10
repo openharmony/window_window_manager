@@ -1002,17 +1002,17 @@ HWTEST_F(sceneSessionManagerProxyTest, SkipSnapshotByUserIdAndBundleNames, Funct
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
+ * @tc.name: UpdateScreenLockStatusForApp
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(sceneSessionManagerProxyTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+HWTEST_F(sceneSessionManagerProxyTest, UpdateScreenLockStatusForApp, Function | SmallTest | Level2)
 {
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     EXPECT_NE(sceneSessionManagerProxy, nullptr);
-    ASSERT_EQ(sceneSessionManagerProxy->ReleaseForegroundSessionScreenLock(), WMError::WM_OK);
+    ASSERT_EQ(sceneSessionManagerProxy->UpdateScreenLockStatusForApp("", true), WMError::WM_OK);
 }
 
 /**

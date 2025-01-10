@@ -732,8 +732,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenComponentRotation = data.ReadFloat();
             auto rotation = data.ReadFloat();
+            auto phyRotation = data.ReadFloat();
             auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
-            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, screenPropertyChangeType);
+            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, phyRotation,
+                screenPropertyChangeType);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {

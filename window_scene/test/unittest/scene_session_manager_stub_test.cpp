@@ -2139,15 +2139,17 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSkipSnapshotByUserIdAndBundleNames, 
 }
 
 /**
- * @tc.name: HandleReleaseForegroundSessionScreenLock
- * @tc.desc: test HandleReleaseForegroundSessionScreenLock
+ * @tc.name: HandleUpdateSessionScreenLock
+ * @tc.desc: test HandleUpdateSessionScreenLock
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest, HandleUpdateSessionScreenLock, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
-    int res = stub_->HandleReleaseForegroundSessionScreenLock(data, reply);
+    data.WriteString("");
+    data.WriteBool(true);
+    int res = stub_->HandleUpdateSessionScreenLock(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
