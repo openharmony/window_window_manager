@@ -98,7 +98,8 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
     if (argc > 0) {
         callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
     }
-    
+
+    napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
     auto asyncTask = [this, env, task = napiAsyncTask, 
         weak = wptr<PictureInPictureController>(this->pipController_)]() {
@@ -139,6 +140,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
         callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
     }
 
+    napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
     auto asyncTask = [this, env, task = napiAsyncTask, 
         weak = wptr<PictureInPictureController>(this->pipController_)]() {
