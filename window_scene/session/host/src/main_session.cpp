@@ -338,33 +338,37 @@ bool MainSession::IsApplicationModal() const
     return IsModal();
 }
 
-void MainSession::RegisterLockStateChangeCallback(NotifyLockStateChangeCallback&& callback)
+void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback)
 {
-    PostTask([this, weakThis = wptr(this), callback = std::move(callback)] {
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        session->onLockStateChangeCallback_ = std::move(callback);
-        if (session->onLockStateChangeCallback_ && lockState_) {
-            session->onLockStateChangeCallback_(lockState_);
+        session->onSessionLockStateChangeCallback_ = std::move(callback);
+        if (session->onSessionLockStateChangeCallback_ && sessionLockState_) {
+            session->onSessionLockStateChangeCallback_(sessionLockState_);
         }
     }, __func__);
 }
 
-void MainSession::NotifyLockStateChange(bool lockState)
+void MainSession::NotifySessionLockStateChange(bool sessionLockState)
 {
-    PostTask([this, weakThis = wptr(this), lockState] {
+    PostTask([weakThis = wptr(this), sessionLockState] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        session->lockState_ = lockState;
-        if (session->onLockStateChangeCallback_) {
-            TLOGI(WmsLogTag::WMS_MAIN, "onLockStageChange to:%{public}d", lockState);
-            session->onLockStateChangeCallback_(lockState);
+        if (session->sessionLockState_ == sessionLockState) {
+            TLOGW(WmsLogTag::WMS_MAIN, "sessionLockState is already %{public}d", sessionLockState);
+            return;
+        }
+        session->sessionLockState_ = sessionLockState;
+        if (session->onSessionLockStateChangeCallback_) {
+            TLOGI(WmsLogTag::WMS_MAIN, "onSessionLockStageChange to:%{public}d", sessionLockState);
+            session->onSessionLockStateChangeCallback_(sessionLockState);
         }
     }, __func__);
 }

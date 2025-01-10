@@ -1472,7 +1472,7 @@ WMError SceneSessionManagerLiteProxy::MinimizeMainSession(
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerLiteProxy::LockSessionByAbility(
+WMError SceneSessionManagerLiteProxy::LockSessionByAbilityInfo(
     const std::string& bundleName, const std::string& moduleName, const std::string& abilityName, int32_t appIndex)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
@@ -1504,7 +1504,8 @@ WMError SceneSessionManagerLiteProxy::LockSessionByAbility(
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY),
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1517,7 +1518,7 @@ WMError SceneSessionManagerLiteProxy::LockSessionByAbility(
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerLiteProxy::UnlockSessionByAbility(
+WMError SceneSessionManagerLiteProxy::UnlockSessionByAbilityInfo(
     const std::string& bundleName, const std::string& moduleName, const std::string& abilityName, int32_t appIndex)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
@@ -1549,7 +1550,8 @@ WMError SceneSessionManagerLiteProxy::UnlockSessionByAbility(
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION_BY_ABILITY),
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION_BY_ABILITY_INFO),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

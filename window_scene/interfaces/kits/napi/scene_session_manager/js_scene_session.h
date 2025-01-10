@@ -112,8 +112,8 @@ private:
     void ProcessSessionExceptionRegister();
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
-    void ProcessLockStateChangeRegister();
-    void OnLockStateChange(bool lockState);
+    void ProcessSessionLockStateChangeRegister();
+    void OnSessionLockStateChange(bool sessionLockState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
