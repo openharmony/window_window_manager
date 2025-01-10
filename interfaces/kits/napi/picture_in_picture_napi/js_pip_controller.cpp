@@ -313,38 +313,34 @@ napi_value JsPipController::GetPiPWindowInfo(napi_env env, napi_callback_info in
 napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    size_t argc = NUMBER_FOUR;
-    napi_value argv[NUMBER_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = nullptr;
-    if (argc > 0) {
-        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
-    }
-    NapiAsyncTask::CompleteCallback complete =
-        [weak = wptr<PictureInPictureController>(this->pipController_)]
-            (napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (!PictureInPictureManager::IsSupportPiP()) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
-                    "Capability not supported.Failed to call the API due to limited device capabilities."));
-                return;
-            }
-            auto pipController = weak.promote();
-            if (pipController == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
-                    "PiP internal error."));
-                return;
-            }
-            const sptr<Window>& pipWindow = pipController->GetPipWindow();
-            if (pipWindow == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
-                    "PiP internal error."));
-                return;
-            }
-            task.Resolve(env, CreateJsPiPWindowInfoObject(env, pipWindow));
-        };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::OnGetPiPWindowInfo", env,
-        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask, 
+        weak = wptr<PictureInPictureController>(this->pipController_)]() {
+        if (!PictureInPictureManager::IsSupportPiP()) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+                "Capability not supported.Failed to call the API due to limited device capabilities."));
+            return;
+        }
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        const sptr<Window>& pipWindow = pipController->GetPipWindow();
+        if (pipWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "%{public}s", "Failed to get pip window");
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        task->Resolve(env, CreateJsPiPWindowInfoObject(env, pipWindow));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
     return result;
 }
 
