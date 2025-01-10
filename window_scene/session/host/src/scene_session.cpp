@@ -106,7 +106,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const std::string& identityToken)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid,
+    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, property, token, pid,
         uid, identityToken, where] {
         auto session = weakThis.promote();
         if (!session) {
@@ -134,8 +134,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             session->pcFoldScreenController_->OnConnect();
         }
         return ret;
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 WSError SceneSession::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -967,7 +966,7 @@ void SceneSession::RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callbac
 WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), mode, where] {
+    return PostSyncTask([weakThis = wptr(this), mode, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -978,14 +977,13 @@ WSError SceneSession::SetGlobalMaximizeMode(MaximizeMode mode)
         ScenePersistentStorage::Insert("maximize_state", static_cast<int32_t>(session->maximizeMode_),
             ScenePersistentStorageType::MAXIMIZE_STATE);
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), &mode, where] {
+    return PostSyncTask([weakThis = wptr(this), &mode, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
@@ -994,8 +992,7 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
         mode = maximizeMode_;
         TLOGND(WmsLogTag::WMS_PC, "%{public}s mode: %{public}u", where, static_cast<uint32_t>(mode));
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ratio, float vpr)
@@ -1041,7 +1038,7 @@ static WSError CheckAspectRatioValid(const sptr<SceneSession>& session, float ra
 WSError SceneSession::SetAspectRatio(float ratio)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), ratio, where] {
+    return PostSyncTask([weakThis = wptr(this), ratio, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
@@ -1075,8 +1072,7 @@ WSError SceneSession::SetAspectRatio(float ratio)
             session->NotifySessionRectChange(adjustedRect, SizeChangeReason::RESIZE);
         }
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 /** @note @window.layout */
@@ -1636,7 +1632,7 @@ void SceneSession::RegisterSessionTopmostChangeCallback(NotifySessionTopmostChan
 WSError SceneSession::RaiseToAppTop()
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), where] {
+    return PostSyncTask([weakThis = wptr(this), where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s session is null", where);
@@ -1648,8 +1644,7 @@ WSError SceneSession::RaiseToAppTop()
             session->SetMainSessionUIStateDirty(true);
         }
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 /** @note @window.hierarchy */
@@ -1669,7 +1664,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), subWindowId, where] {
+    return PostSyncTask([weakThis = wptr(this), subWindowId, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s session is null", where);
@@ -1679,8 +1674,7 @@ WSError SceneSession::RaiseAboveTarget(int32_t subWindowId)
             session->onRaiseAboveTarget_(subWindowId);
         }
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 WSError SceneSession::BindDialogSessionTarget(const sptr<SceneSession>& sceneSession)
@@ -2198,21 +2192,20 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
 AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), type, rect, where]() -> AvoidArea {
+    return PostSyncTask([weakThis = wptr(this), type, rect, where]() -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
         return session->GetAvoidAreaByTypeInner(type, rect);
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), &avoidAreas, where] {
+    return PostSyncTask([weakThis = wptr(this), &avoidAreas, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
@@ -2226,8 +2219,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             avoidAreas[type] = session->GetAvoidAreaByTypeInner(type);
         }
         return WSError::WS_OK;
-    };
-    return PostSyncTask(task, where);
+    }, where);
 }
 
 WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
@@ -2390,15 +2382,14 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
     bool needNotifyClient, bool isExecuteDelayRaise)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), pointerEvent, needNotifyClient, isExecuteDelayRaise, where] {
+    return PostSyncTask([weakThis = wptr(this), pointerEvent, needNotifyClient, isExecuteDelayRaise, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::DEFAULT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         return session->TransferPointerEventInner(pointerEvent, needNotifyClient, isExecuteDelayRaise);
-    };
-    return PostSyncTask(std::move(task), where);
+    }, where);
 }
 
 WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
