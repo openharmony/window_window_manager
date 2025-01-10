@@ -2892,10 +2892,10 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     WSRect endRect = rect;
     std::function<void()> finishCallback = nullptr;
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
+    const char* const where = __func__;
     if (needSetFullScreen) {
         // maximize end rect and notify last rect
         pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
-        const char* const where = __func__;
         finishCallback = [weakThis = wptr(this), rect, where] {
             auto session = weakThis.promote();
             if (session == nullptr) {
@@ -2906,10 +2906,10 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
             session->NotifyFullScreenAfterThrowSlip(rect);
         };
     } else {
-        finishCallback = [weakThis = wptr(this), rect] {
+        finishCallback = [weakThis = wptr(this), rect, where] {
             auto session = weakThis.promote();
             if (session == nullptr) {
-                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr");
+                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
                 return;
             }
             session->OnThrowSlipAnimationStateChange(false);
@@ -2917,7 +2917,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     }
     auto throwSlipPair = std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
         pcFoldScreenController_->GetThrowSlipTimingCurve());
-    SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
+    SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, std::move(finishCallback));
     OnThrowSlipAnimationStateChange(true);
     rect = endRect;
     return needSetFullScreen;
@@ -2937,15 +2937,15 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
     PostTask([weakThis = wptr(this), rect, where] {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
             return;
         }
         if (!session->IsVisibleForeground()) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT, "session go background when throw");
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session go background when throw", where);
             return;
         }
         if (!session->isThrowSlipToFullScreen_.load()) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT, "session moved when throw");
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session moved when throw", where);
             return;
         }
         session->isThrowSlipToFullScreen_.store(false);
@@ -3134,7 +3134,7 @@ void SceneSession::SetSurfaceBoundsWithAnimation(
     const WSRect& rect, const std::function<void()>& finishCallback, bool isGlobal)
 {
     const char* const where = __func__;
-    auto interiaFunc = [weakThis = wptr(this), rect, isGlobal, where] {
+    RSNode::Animate(animationParam.first, animationParam.second, [weakThis = wptr(this), rect, isGlobal, where] {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
@@ -3142,8 +3142,7 @@ void SceneSession::SetSurfaceBoundsWithAnimation(
         }
         session->SetSurfaceBounds(rect, isGlobal, false);
         RSTransaction::FlushImplicitTransaction();
-    };
-    RSNode::Animate(animationParam.first, animationParam.second, interiaFunc, finishCallback);
+    }, finishCallback);
 }
 
 void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush)
@@ -4779,7 +4778,7 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->isTerminating_) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: is terminating, return!", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
