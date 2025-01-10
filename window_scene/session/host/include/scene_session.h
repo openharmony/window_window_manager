@@ -360,6 +360,10 @@ public:
     void RegisterSessionChangeCallback(const sptr<SceneSession::SessionChangeCallback>& sessionChangeCallback);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
+
+    /*
+     * Window Property
+     */
     void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
 
     /*
@@ -658,9 +662,6 @@ private:
         const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
         const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
-    void NotifyPrivacyModeChange();
-    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
-    bool isPrivacyMode_ { false };
 
     /*
      * PiP Window
@@ -669,9 +670,17 @@ private:
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
 
+    /*
+     * Window Property
+    */
+    void NotifyPrivacyModeChange();
+    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
+    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
+    bool isPrivacyMode_ { false };
+
+
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
-    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     static wptr<SceneSession> enterSession_;
     static std::mutex enterSessionMutex_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
