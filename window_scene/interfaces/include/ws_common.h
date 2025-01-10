@@ -371,6 +371,11 @@ struct SessionInfo {
     int32_t specifiedId = 0;
 
     /*
+     * App Use Control
+     */
+    bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
+
+    /*
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -388,7 +393,7 @@ struct SessionInfo {
     /*
      * PC Window
      */
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
 };
 
 enum class SessionFlag : uint32_t {

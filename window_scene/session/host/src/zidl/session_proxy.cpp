@@ -45,7 +45,7 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
         !data.WriteInt32(static_cast<uint32_t>(abilitySessionInfo->state)) ||
         !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
-        !data.WriteInt32(abilitySessionInfo->tmpSpecifiedId) ||
+        !data.WriteInt32(abilitySessionInfo->requestId) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
@@ -302,13 +302,13 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetFullScreenStart(reply.ReadBool());
         uint32_t size = reply.ReadUint32();
         if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
-            std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-            supportWindowModes.reserve(size);
+            std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+            supportedWindowModes.reserve(size);
             for (uint32_t i = 0; i < size; i++) {
-                supportWindowModes.push_back(
+                supportedWindowModes.push_back(
                     static_cast<AppExecFwk::SupportWindowMode>(reply.ReadInt32()));
             }
-            property->SetSupportWindowModes(supportWindowModes);
+            property->SetSupportedWindowModes(supportedWindowModes);
         }
         property->SetCompatibleModeInPc(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
@@ -1311,6 +1311,33 @@ WSError SessionProxy::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
     return static_cast<WSError>(ret);
 }
 
+WSError SessionProxy::GetIsMidScene(bool& isMidScene)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_MID_SCENE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(isMidScene)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Read isMidScene failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
     MessageParcel data;
@@ -1696,7 +1723,8 @@ WSError SessionProxy::ProcessPointDownSession(int32_t posX, int32_t posY)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool isExecuteDelayRaise)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1707,6 +1735,10 @@ WSError SessionProxy::SendPointEventForMoveDrag(const std::shared_ptr<MMI::Point
     }
     if (!pointerEvent->WriteToParcel(data)) {
         WLOGFE("width pointerEvent failed.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isExecuteDelayRaise)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write isExecuteDelayRaise failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -2210,7 +2242,7 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
 }
 
 WSError SessionProxy::NotifySupportWindowModesChange(
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2219,13 +2251,13 @@ WSError SessionProxy::NotifySupportWindowModesChange(
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    auto size = supportWindowModes.size();
+    auto size = supportedWindowModes.size();
     if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
         if (!data.WriteUint32(static_cast<uint32_t>(size))) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
         for (decltype(size) i = 0; i < size; i++) {
-            if (!data.WriteInt32(static_cast<int32_t>(supportWindowModes[i]))) {
+            if (!data.WriteInt32(static_cast<int32_t>(supportedWindowModes[i]))) {
                 return WSError::WS_ERROR_IPC_FAILED;
             }
         }

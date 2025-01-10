@@ -184,6 +184,7 @@ public:
         { return WSError::WS_OK; }
     virtual WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) { return WSError::WS_OK; }
     virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
+    virtual WSError GetIsMidScene(bool& isMidScene) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(
         const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) { return WSError::WS_OK; }
 
@@ -253,10 +254,8 @@ public:
     virtual WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) { return WSError::WS_OK; }
 
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
-    virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
-    {
-        return WSError::WS_OK;
-    }
+    virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isExecuteDelayRaise = false) { return WSError::WS_OK; }
     virtual bool IsStartMoving() { return false; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
         bool isShow) { return WSError::WS_OK; }
@@ -320,11 +319,11 @@ public:
     /**
      * @brief Callback for setting the window support modes.
      *
-     * @param supportWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.
+     * @param supportedWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError NotifySupportWindowModesChange(
-        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) { return WSError::WS_OK; }
+        const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

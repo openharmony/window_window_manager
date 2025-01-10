@@ -815,75 +815,75 @@ HWTEST_F(SceneSessionManagerTest10, RegisterRequestVsyncFunc01, Function | Small
 }
 
 /**
- * @tc.name: TestEraseSceneSessionAndMarkDirtyLockFree_01
- * @tc.desc: Test EraseSceneSessionAndMarkDirtyLockFree with erase id not exist
+ * @tc.name: TestEraseSceneSessionAndMarkDirtyLocked_01
+ * @tc.desc: Test EraseSceneSessionAndMarkDirtyLocked with erase id not exist
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLockFree_01, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLocked_01, Function | SmallTest | Level1)
 {
     // init
     ssm_->sceneSessionMap_.clear();
     ssm_->sessionMapDirty_ = 0;
 
     SessionInfo info;
-    info.abilityName_ = "EraseSceneSessionAndMarkDirtyLockFree";
-    info.bundleName_ = "EraseSceneSessionAndMarkDirtyLockFree";
+    info.abilityName_ = "EraseSceneSessionAndMarkDirtyLocked";
+    info.bundleName_ = "EraseSceneSessionAndMarkDirtyLocked";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     const int32_t validId = 100;
     const int32_t invalidId = 101;
     ssm_->sceneSessionMap_.insert({validId, sceneSession});
     // erase id not exist
-    ssm_->EraseSceneSessionAndMarkDirtyLockFree(invalidId);
+    ssm_->EraseSceneSessionAndMarkDirtyLocked(invalidId);
     ASSERT_EQ(ssm_->sessionMapDirty_, 0);
     ASSERT_NE(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
 }
 
 /**
- * @tc.name: TestEraseSceneSessionAndMarkDirtyLockFree_02
- * @tc.desc: Test EraseSceneSessionAndMarkDirtyLockFree with erase invisible session
+ * @tc.name: TestEraseSceneSessionAndMarkDirtyLocked_02
+ * @tc.desc: Test EraseSceneSessionAndMarkDirtyLocked with erase invisible session
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLockFree_02, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLocked_02, Function | SmallTest | Level1)
 {
     // init
     ssm_->sceneSessionMap_.clear();
     ssm_->sessionMapDirty_ = 0;
 
     SessionInfo info;
-    info.abilityName_ = "TestEraseSceneSessionAndMarkDirtyLockFree_02";
-    info.bundleName_ = "TestEraseSceneSessionAndMarkDirtyLockFree_02";
+    info.abilityName_ = "TestEraseSceneSessionAndMarkDirtyLocked_02";
+    info.bundleName_ = "TestEraseSceneSessionAndMarkDirtyLocked_02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     const int32_t validId = 100;
     ssm_->sceneSessionMap_.insert({validId, sceneSession});
 
     // erase invisible session
     sceneSession->isVisible_ = false;
-    ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
+    ssm_->EraseSceneSessionAndMarkDirtyLocked(validId);
     ASSERT_EQ(ssm_->sessionMapDirty_, 0);
-    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());;
+    ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
 }
 
 /**
- * @tc.name: TestEraseSceneSessionAndMarkDirtyLockFree_03
- * @tc.desc: Test EraseSceneSessionAndMarkDirtyLockFree with erase visible session
+ * @tc.name: TestEraseSceneSessionAndMarkDirtyLocked_03
+ * @tc.desc: Test EraseSceneSessionAndMarkDirtyLocked with erase visible session
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLockFree_03, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest10, TestEraseSceneSessionAndMarkDirtyLocked_03, Function | SmallTest | Level1)
 {
     // init
     ssm_->sceneSessionMap_.clear();
     ssm_->sessionMapDirty_ = 0;
 
     SessionInfo info;
-    info.abilityName_ = "TestEraseSceneSessionAndMarkDirtyLockFree_03";
-    info.bundleName_ = "TestEraseSceneSessionAndMarkDirtyLockFree_03";
+    info.abilityName_ = "TestEraseSceneSessionAndMarkDirtyLocked_03";
+    info.bundleName_ = "TestEraseSceneSessionAndMarkDirtyLocked_03";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     const int32_t validId = 100;
 
     // erase visible session
     ssm_->sceneSessionMap_.insert({validId, sceneSession});
     sceneSession->isVisible_ = true;
-    ssm_->EraseSceneSessionAndMarkDirtyLockFree(validId);
+    ssm_->EraseSceneSessionAndMarkDirtyLocked(validId);
     ASSERT_EQ(ssm_->sessionMapDirty_, static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE));
     ASSERT_EQ(ssm_->sceneSessionMap_.find(validId), ssm_->sceneSessionMap_.end());
 }
@@ -1055,6 +1055,31 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, Function | SmallTes
     appUseControlInfo.isNeedControl_ = true;
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
         ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
+}
+
+/**
+ * @tc.name: MinimizeMainSession
+ * @tc.desc: test MinimizeMainSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, MinimizeMainSession, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "MinimizeMainSessionBundle";
+    sessionInfo.abilityName_ = "MinimizeMainSessionAbility";
+    sessionInfo.appIndex_ = 0;
+    sessionInfo.windowType_ = 1;
+    sessionInfo.sessionState_ = SessionState::STATE_ACTIVE;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+
+    ssm_->sceneSessionMap_.emplace(1, sceneSession);
+    int userId = ssm_->currentUserId_.load();
+    auto result = ssm_->MinimizeMainSession(sessionInfo.bundleName_, sessionInfo.appIndex_, userId);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+
+    result = ssm_->MinimizeMainSession(sessionInfo.bundleName_, sessionInfo.appIndex_, 1);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
 }  // namespace
 }

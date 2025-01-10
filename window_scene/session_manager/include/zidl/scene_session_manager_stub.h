@@ -87,6 +87,7 @@ private:
     int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);
     int HandleRemoveExtensionWindowStageFromSCB(MessageParcel& data, MessageParcel& reply);
@@ -105,7 +106,7 @@ private:
     int HandleSkipSnapshotByUserIdAndBundleNames(MessageParcel& data, MessageParcel& reply);
     int HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
-    int HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateSessionScreenLock(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcWindow(MessageParcel& data, MessageParcel& reply);
     int HandleIsPcOrPadFreeMultiWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleIsWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);

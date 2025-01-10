@@ -17,6 +17,7 @@
 
 #include "ipc_skeleton.h"
 
+#include "ui_extension/host_data_handler.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -132,6 +133,7 @@ ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
     WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info.persistentId_);
+    dataHandler_ = std::make_shared<Extension::HostDataHandler>();
 }
 
 ExtensionSession::~ExtensionSession()
@@ -151,6 +153,18 @@ ExtensionSession::~ExtensionSession()
     channelDeath_ = nullptr;
 }
 
+std::shared_ptr<IDataHandler> ExtensionSession::GetExtensionDataHandler() const
+{
+    return dataHandler_;
+}
+
+void ExtensionSession::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+    const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
+{
+    Session::SetEventHandler(handler, exportHandler);
+    dataHandler_->SetEventHandler(handler);
+}
+
 WSError ExtensionSession::ConnectInner(
     const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -162,7 +176,7 @@ WSError ExtensionSession::ConnectInner(
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode,
-        &systemConfig, property, token, pid, uid]() {
+        &systemConfig, property, token, pid, uid]() NO_THREAD_SAFETY_ANALYSIS {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
@@ -184,6 +198,7 @@ WSError ExtensionSession::ConnectInner(
             }
         }
 
+        session->dataHandler_->SetRemoteProxyObject(sessionStage->AsObject());
         return session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
     };
@@ -485,5 +500,10 @@ int32_t ExtensionSession::GetStatusBarHeight()
         return extSessionEventCallback_->getStatusBarHeightFunc_();
     }
     return 0;
+}
+
+void ExtensionSession::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
+{
+    dataHandler_->NotifyDataConsumer(data, reply);
 }
 } // namespace OHOS::Rosen

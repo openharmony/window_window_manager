@@ -71,7 +71,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
 
     sceneSession->SetSessionProperty(property);

@@ -71,7 +71,7 @@ void PcFoldScreenController::OnConnect()
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(GetPersistentId(),
         std::weak_ptr<FoldScreenStatusChangeCallback>(onFoldScreenStatusChangeCallback_));
 
-    supportEnterWaterfallMode_ = PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId());
+    supportEnterWaterfallMode_ = PcFoldScreenManager::GetInstance().IsHalfFolded(GetDisplayId());
     UpdateSupportEnterWaterfallMode();
 }
 
@@ -106,11 +106,18 @@ bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
     return PcFoldScreenManager::GetInstance().IsHalfFolded(displayId);
 }
 
+bool PcFoldScreenController::IsAllowThrowSlip(DisplayId displayId)
+{
+    return PcFoldScreenManager::GetInstance().IsHalfFolded(displayId) &&
+           !PcFoldScreenManager::GetInstance().HasSystemKeyboard();
+}
+
 bool PcFoldScreenController::NeedFollowHandAnimation()
 {
     static bool needFollowHandAnimation =
-        system::GetParameter("persist.window.throw_slip_follow_animation.enabled", "0") == "1";
-    return needFollowHandAnimation;
+        system::GetParameter("persist.window.throw_slip_follow_animation.enabled", "1") == "1";
+    std::unique_lock<std::mutex> lock(moveMutex_);
+    return needFollowHandAnimation && (!isStartFullScreen_ || movingRectRecords_.size() > 0);
 }
 
 void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen)
@@ -120,6 +127,7 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
     std::unique_lock<std::mutex> lock(moveMutex_);
     startMoveRect_ = rect;
     isStartFullScreen_ = isStartFullScreen;
+    movingRectRecords_.clear();
 }
 
 bool PcFoldScreenController::IsStartFullScreen()
@@ -139,7 +147,7 @@ void PcFoldScreenController::RecordMoveRects(const WSRect& rect)
            TimeHelper::GetDuration(movingRectRecords_[0].first, time) > MOVING_RECORDS_TIME_LIMIT) {
         movingRectRecords_.erase(movingRectRecords_.begin());
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "records size: %{public}zu, duration: %{public}d", movingRectRecords_.size(),
+    TLOGD(WmsLogTag::WMS_LAYOUT, "records size: %{public}zu, duration: %{public}f", movingRectRecords_.size(),
         TimeHelper::GetDuration(movingRectRecords_[0].first, movingRectRecords_[movingRectRecords_.size() - 1].first));
 }
 
@@ -153,25 +161,35 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     int32_t topAvoidHeight, int32_t botAvoidHeight)
 {
     auto& manager = PcFoldScreenManager::GetInstance();
-    if (!manager.IsHalfFolded(displayId)) {
+    if (!IsAllowThrowSlip(displayId)) {
         manager.ResetArrangeRule();
         return false;
     }
+    WSRect startRect;
+    bool startFullScreen;
     {
         std::unique_lock<std::mutex> lock(moveMutex_);
         manager.ResetArrangeRule(startMoveRect_);
+        startRect = startMoveRect_;
+        startFullScreen = isStartFullScreen_;
     }
     WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, GetTitleHeight() };
-    ScreenSide startSide = manager.CalculateScreenSide(titleRect);
-    WSRectF velocity = CalculateMovingVelocity();
-    if (!manager.NeedDoThrowSlip(startSide, velocity)) {
-        manager.ResetArrangeRule(startSide);
+    ScreenSide throwSide = manager.CalculateScreenSide(titleRect);
+    const WSRectF& velocity = CalculateMovingVelocity();
+    if ((!startFullScreen && !manager.NeedDoThrowSlip(titleRect, velocity, throwSide)) ||
+        (startFullScreen && !manager.NeedDoEasyThrowSlip(titleRect, startRect, velocity, throwSide))) {
+        manager.ResetArrangeRule(throwSide);
         TLOGI(WmsLogTag::WMS_PC, "no throw rect: %{public}s", rect.ToString().c_str());
         return false;
     }
 
-    manager.ThrowSlipToOppositeSide(startSide, rect, topAvoidHeight, botAvoidHeight, GetTitleHeight());
-    manager.ResetArrangeRule(startSide);
+    // correct to start rect and throw
+    if (!isStartFullScreen_) {
+        rect.posX_ = startRect.posX_;
+        rect.posY_ = startRect.posY_;
+    }
+    manager.ThrowSlipToOppositeSide(throwSide, rect, topAvoidHeight, botAvoidHeight, GetTitleHeight());
+    manager.ResetArrangeRule(throwSide);
     TLOGI(WmsLogTag::WMS_PC, "throw to rect: %{public}s", rect.ToString().c_str());
     return true;
 }
@@ -224,7 +242,7 @@ void PcFoldScreenController::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
         controller->isFullScreenWaterfallMode_ = isWaterfallMode;
         controller->ExecuteFullScreenWaterfallModeChangeCallback();
         controller->supportEnterWaterfallMode_ =
-            !controller->isFullScreenWaterfallMode_ && controller->IsHalfFolded(controller->GetScreenId());
+            !controller->isFullScreenWaterfallMode_ && controller->IsHalfFolded(controller->GetDisplayId());
         controller->UpdateSupportEnterWaterfallMode();
     }, __func__);
 }
@@ -281,7 +299,7 @@ int32_t PcFoldScreenController::GetPersistentId() const
     return persistentId_;
 }
 
-DisplayId PcFoldScreenController::GetScreenId()
+DisplayId PcFoldScreenController::GetDisplayId()
 {
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr) {
@@ -316,9 +334,9 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
     if (recordsSize >= 2) { // temp use 2 points
         auto rect0 = movingRectRecords_[0].second;
         auto rect1 = movingRectRecords_[recordsSize - 1].second;
-        int32_t duration = TimeHelper::GetDuration(movingRectRecords_[0].first,
-            movingRectRecords_[recordsSize - 1].first);
-        if (duration <= 1) {
+        float duration = MathHelper::NonZero(TimeHelper::GetDuration(movingRectRecords_[0].first,
+            movingRectRecords_[recordsSize - 1].first));
+        if (!MathHelper::GreatNotEqual(duration, 0.0f)) {
             return velocity;
         }
         velocity.posX_ = static_cast<float>((rect1.posX_ - rect0.posX_) / static_cast<float>(duration));
