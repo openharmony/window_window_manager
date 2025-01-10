@@ -12350,7 +12350,7 @@ WMError SceneSessionManager::LockSessionByAbility(const std::string& bundleName,
                 where, mainSessions[0]->GetPersistentId());
             mainSessions[0]->NotifyLockStateChange(true);
         } else {
-            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, update LockState into cache set, persistentId:%{public}d",
+            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, update LockState into cache set, persistentId:%{public}s",
                 where, bundleName.c_str());
             lockStateCacheSet_.insert(
                 bundleName + "_" + moduleName + "_" + abilityName + "_" + std::to_string(appIndex));
@@ -12374,7 +12374,7 @@ WMError SceneSessionManager::UnlockSessionByAbility(const std::string& bundleNam
                 where, mainSessions[0]->GetPersistentId());
             mainSession->NotifyLockStateChange(false);
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, erase LockState from cache set, persistentId:%{public}d",
+        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, erase LockState from cache set, persistentId:%{public}s",
             where, bundleName.c_str());
         lockStateCacheSet_.erase(
             bundleName + "_" + moduleName + "_" + abilityName + "_" + std::to_string(appIndex));
