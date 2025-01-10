@@ -5657,7 +5657,7 @@ void JsSceneSession::ProcessLockStateChangeRegister()
         return;
     }
     const char* const where = __func__;
-    session->RegisterLockStateChangeCallBack([weakThis = wptr(this), where](bool lockState) {
+    session->RegisterLockStateChangeCallback([weakThis = wptr(this), where](bool lockState) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
@@ -5678,7 +5678,7 @@ void JsSceneSession::OnLockStateChange(bool lockState)
                 where, persistentId);
             return;
         }
-        auto jsCallBack = jsSceneSession->GetJsCallback(LOCK_STATE_CHANGE_CB);
+        auto jsCallBack = jsSceneSession->GetJSCallback(LOCK_STATE_CHANGE_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
             return;
