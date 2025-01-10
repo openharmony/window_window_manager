@@ -12411,7 +12411,7 @@ WMError SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
     auto task = [this, where, height] {
         statusBarAvoidHeight_ = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
         TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, height %{public}d", where, statusBarAvoidHeight_);
-        return WMError::WS_OK;
+        return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, "SetStatusBarAvoidHeight");
 }
