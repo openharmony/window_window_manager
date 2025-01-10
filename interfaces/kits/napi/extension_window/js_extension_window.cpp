@@ -1015,7 +1015,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         windowOption->SetOnlySupportSceneBoard(true);
-        windowOption->SetIsUIExtFirstSubWindow(true);
+        windowOption->SetExtensionTag(true);
         auto window = Window::Create(windowName, windowOption, extWindow->GetContext());
         if (window == nullptr) {
             task->Reject(env, CreateJsError(env,
