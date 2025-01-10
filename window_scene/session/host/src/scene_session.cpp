@@ -4834,7 +4834,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         if (session->isTerminating_) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: is terminating, return!", where);
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
