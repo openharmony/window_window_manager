@@ -38,6 +38,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 
 class SceneSession;
 
+using NotifyLockStateChangeCallback = std::function<void(bool lockState)>;
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
@@ -108,7 +109,6 @@ using NotifyLockStateChangeCallback = std::function<void(boll lockState)>;
 =======
 using NotifySetSupportWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
-using NotifyLockStateChangeCallback = std::function<void(bool lockState)>;
 >>>>>>> 7498d216d (窗口提供设置任务中心锁定的能力)
 
 struct UIExtensionTokenInfo {
