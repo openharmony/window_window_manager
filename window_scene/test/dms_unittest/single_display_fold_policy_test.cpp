@@ -457,20 +457,19 @@ HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayModeInner, Function | S
     
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
     DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
-    sptr<ScreenSession> screenSession = new ScreenSession;
-    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    policy.ChangeScreenDisplayModeInner(displayMode, reason);
     EXPECT_FALSE(policy.onBootAnimation_);
 
     displayMode = FoldDisplayMode::MAIN;
-    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    policy.ChangeScreenDisplayModeInner(displayMode, reason);
     EXPECT_FALSE(policy.onBootAnimation_);
 
     displayMode = FoldDisplayMode::FULL;
-    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    policy.ChangeScreenDisplayModeInner(displayMode, reason);
     EXPECT_FALSE(policy.onBootAnimation_);
 
     displayMode = FoldDisplayMode::SUB;
-    policy.ChangeScreenDisplayModeInner(screenSession, displayMode, reason);
+    policy.ChangeScreenDisplayModeInner(displayMode, reason);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 }
