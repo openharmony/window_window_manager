@@ -359,7 +359,6 @@ private:
      * Window Input Event
      */
     int32_t superFoldOffsetY_ = -1; // calculate the total height of the display_B area and crease area.
-    
 };
 } // namespace Rosen
 } // namespace OHOS
