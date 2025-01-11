@@ -408,12 +408,12 @@ HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo05, Function | SmallTest | Lev
 HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    std::string bundleName_ = "LockSessionByAbilityInfoBundle";
-    std::string moduleName_ = "LockSessionByAbilityInfoModule";
-    std::string abilityName_ = "LockSessionByAbilityInfoAbility";
-    int32_t appIndex_ = 0;
+    std::string bundleName = "LockSessionByAbilityInfoBundle";
+    std::string moduleName = "LockSessionByAbilityInfoModule";
+    std::string abilityName = "LockSessionByAbilityInfoAbility";
+    int32_t appIndex = 0;
 
-    auto result = ssm_->LockSessionByAbilityInfo(bundleName_, moduleName_, abilityName_, appIndex_);
+    auto result = ssm_->LockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
 
@@ -425,12 +425,12 @@ HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, Function | SmallTe
 HWTEST_F(SceneSessionManagerTest11, UnlockSessionByAbilityInfo, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    std::string bundleName_ = "UnlockSessionByAbilityInfoBundle";
-    std::string moduleName_ = "UnlockSessionByAbilityInfoModule";
-    std::string abilityName_ = "UnlockSessionByAbilityInfoAbility";
-    int32_t appIndex_ = 0;
+    std::string bundleName = "UnlockSessionByAbilityInfoBundle";
+    std::string moduleName = "UnlockSessionByAbilityInfoModule";
+    std::string abilityName = "UnlockSessionByAbilityInfoAbility";
+    int32_t appIndex = 0;
 
-    auto result = ssm_->UnlockSessionByAbilityInfo(bundleName_, moduleName_, abilityName_, appIndex_);
+    auto result = ssm_->UnlockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
 }  // namespace
