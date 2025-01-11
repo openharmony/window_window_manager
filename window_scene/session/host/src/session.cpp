@@ -451,6 +451,7 @@ void Session::NotifyRemoveBlank()
 
 void Session::NotifyAddSnapshot()
 {
+    SaveSnapshot(false);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
