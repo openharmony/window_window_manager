@@ -264,10 +264,10 @@ void PcFoldScreenController::MaskSupportEnterWaterfallMode()
     maskSupportEnterWaterfall_ = true;
     auto sceneSession = weakSceneSession_.promote();
     if (sceneSession == nullptr || sceneSession->sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session stage unavailable, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session unavailable, id: %{public}d", GetPersistentId());
         return;
     }
-    sceneSession->sessionStage_->SetSupportEnterWaterfallMode(false);
+    sceneSession->SetSupportEnterWaterfallMode(false);
 }
 
 void PcFoldScreenController::UpdateSupportEnterWaterfallMode()
@@ -278,12 +278,12 @@ void PcFoldScreenController::UpdateSupportEnterWaterfallMode()
         return;
     }
     auto sceneSession = weakSceneSession_.promote();
-    if (sceneSession == nullptr || sceneSession->sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session stage unavailable, id: %{public}d", GetPersistentId());
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session unavailable, id: %{public}d", GetPersistentId());
         return;
     }
     lastSupportEnterWaterfallMode_ = supportEnterWaterfallMode_;
-    sceneSession->sessionStage_->SetSupportEnterWaterfallMode(supportEnterWaterfallMode_);
+    sceneSession->SetSupportEnterWaterfallMode(supportEnterWaterfallMode_);
 }
 
 void PcFoldScreenController::ExecuteFullScreenWaterfallModeChangeCallback()
