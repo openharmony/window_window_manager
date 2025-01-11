@@ -495,7 +495,7 @@ HWTEST_F(MainSessionTest, NotifySessionLockStateChange, Function | SmallTest | L
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
 
     session->NotifySessionLockStateChange(true);
-    EXPECT_EQ(session->GetSessionLockState(), true)
+    EXPECT_EQ(session->GetSessionLockState(), true);
 }
 }
 }
