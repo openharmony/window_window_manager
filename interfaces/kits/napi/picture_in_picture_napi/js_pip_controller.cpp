@@ -101,7 +101,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
 
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask, 
+    auto asyncTask = [this, env, task = napiAsyncTask,
         weak = wptr<PictureInPictureController>(this->pipController_)]() {
         auto pipController = weak.promote();
         if (pipController == nullptr) {
@@ -142,7 +142,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
 
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask, 
+    auto asyncTask = [this, env, task = napiAsyncTask,
         weak = wptr<PictureInPictureController>(this->pipController_)]() {
         auto pipController = weak.promote();
         if (pipController == nullptr) {
@@ -320,7 +320,7 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
     TLOGI(WmsLogTag::WMS_PIP, "called");
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask, 
+    auto asyncTask = [this, env, task = napiAsyncTask,
         weak = wptr<PictureInPictureController>(this->pipController_)]() {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
