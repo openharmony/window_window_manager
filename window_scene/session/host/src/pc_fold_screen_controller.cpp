@@ -263,7 +263,7 @@ void PcFoldScreenController::MaskSupportEnterWaterfallMode()
 {
     maskSupportEnterWaterfall_ = true;
     auto sceneSession = weakSceneSession_.promote();
-    if (sceneSession == nullptr || sceneSession->sessionStage_ == nullptr) {
+    if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session unavailable, id: %{public}d", GetPersistentId());
         return;
     }
