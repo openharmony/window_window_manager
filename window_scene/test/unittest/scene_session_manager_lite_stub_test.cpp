@@ -1016,7 +1016,6 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbilityInfo, Functi
     EXPECT_EQ(ERR_NONE, res);
 }
 
-
 /**
  * @tc.name: HandleUnlockSessionByAbilityInfo
  * @tc.desc: test function : HandleUnlockSessionByAbilityInfo
