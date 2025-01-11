@@ -308,7 +308,6 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
-    void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
 
     /*
@@ -591,6 +590,7 @@ public:
     void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
     bool IsMissionHighlighted();
     void MaskSupportEnterWaterfallMode();
+    void SetSupportEnterWaterfallMode(bool isSupportEnter);
 
     /*
      * Keyboard
