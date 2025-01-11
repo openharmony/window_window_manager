@@ -101,8 +101,8 @@ using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayI
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
-using NotifySetSupportWindowModesFunc = std::function<void(
-    std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)>;
+using NotifySetSupportedWindowModesFunc = std::function<void(
+    std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -310,6 +310,7 @@ public:
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
     void RegisterSupportWindowModesCallback(NotifySetSupportWindowModesFunc&& func);
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
+    void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
 
     /*
      * PC Window Layout
@@ -321,7 +322,7 @@ public:
      * Window Immersive
      */
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
@@ -356,7 +357,6 @@ public:
     WSRect GetLastSafeRect() const;
     WSRect GetSessionTargetRectByDisplayId(DisplayId displayId) const;
     std::string GetUpdatedIconPath() const;
-    std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     int32_t GetMainSessionId();
     virtual int32_t GetMissionId() const { return persistentId_; };
@@ -373,8 +373,6 @@ public:
      * Window Watermark
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
-
-    sptr<MoveDragController> moveDragController_ = nullptr;
 
     bool IsDecorEnable() const;
     bool IsAppSession() const;
@@ -671,7 +669,7 @@ protected:
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
-    NotifySetSupportWindowModesFunc onSetSupportWindowModesFunc_;
+    NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
 
     /*
      * PiP Window
@@ -682,6 +680,7 @@ protected:
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
+    sptr<MoveDragController> moveDragController_ = nullptr;
     virtual void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
@@ -736,7 +735,7 @@ private:
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0});
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT);
 
     /*
      * Window Lifecycle

@@ -65,6 +65,7 @@ const std::string ARG_SET_SUPER_FOLD_STATUS = "-supertrans";
 const std::string ARG_SET_POSTURE_HALL = "-posture";
 const std::string ARG_SET_POSTURE_HALL_STATUS = "-registerhall"; // 关闭开合sensor报值
 const std::string ARG_SET_SECONDARY_FOLD_STATUS = "-secondary";
+const std::string ARG_CHANGE_OUTER_CMD = "outer";
 #ifdef FOLD_ABILITY_ENABLE
 constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
@@ -146,13 +147,6 @@ void ScreenSessionDumper::ExecuteDumpCmd()
         TLOGE(WmsLogTag::DMS, "params is null");
         return;
     }
-    if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
-        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
-            params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
-        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
-            params_[DUMPER_PARAM_INDEX_TWO]);
-        return;
-    }
     if (params_[0] == ARG_DUMP_HELP) {
         ShowHelpInfo();
     } else if (params_[0] == ARG_DUMP_ALL) {
@@ -176,11 +170,21 @@ void ScreenSessionDumper::ExecuteInjectCmd()
             return;
         }
     }
-
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
         dumpInfo_.append("dms.hidumper.supportdebug false\n");
+        return;
+    }
+    if (params_[0] == ARG_CHANGE_OUTER_CMD && params_.size() == DUMPER_PARAM_INDEX_TWO) {
+        ScreenSessionManager::GetInstance().MultiScreenChangeOuter(params_[1]);
+        return;
+    }
+    if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
+        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
+            params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
+        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
+            params_[DUMPER_PARAM_INDEX_TWO]);
         return;
     }
     if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {

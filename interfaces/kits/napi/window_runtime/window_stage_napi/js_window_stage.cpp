@@ -179,11 +179,11 @@ napi_value JsWindowStage::IsWindowRectAutoSave(napi_env env, napi_callback_info 
     return (me != nullptr) ? me->OnIsWindowRectAutoSave(env, info) : nullptr;
 }
 
-napi_value JsWindowStage::SetSupportWindowModes(napi_env env, napi_callback_info info)
+napi_value JsWindowStage::SetSupportedWindowModes(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
-    return (me != nullptr) ? me->OnSetSupportWindowModes(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetSupportedWindowModes(env, info) : nullptr;
 }
 
 napi_value JsWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
@@ -917,7 +917,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     return result;
 }
 
-napi_value JsWindowStage::OnSetSupportWindowModes(napi_env env, napi_callback_info info)
+napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_info info)
 {
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
@@ -941,8 +941,8 @@ napi_value JsWindowStage::OnSetSupportWindowModes(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
 
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-    if (!ConvertNativeValueToVector(env, argv[INDEX_ZERO], supportWindowModes)) {
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+    if (!ConvertNativeValueToVector(env, argv[INDEX_ZERO], supportedWindowModes)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "ConvertNativeValueToVector failed");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
@@ -952,7 +952,7 @@ napi_value JsWindowStage::OnSetSupportWindowModes(napi_env env, napi_callback_in
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakWindow = wptr(window), supportWindowModes = std::move(supportWindowModes), where,
+    auto asyncTask = [weakWindow = wptr(window), supportedWindowModes = std::move(supportedWindowModes), where,
         env, task = napiAsyncTask] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
@@ -961,7 +961,7 @@ napi_value JsWindowStage::OnSetSupportWindowModes(napi_env env, napi_callback_in
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSupportWindowModes(supportWindowModes));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSupportedWindowModes(supportedWindowModes));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "window [%{public}u, %{public}s] "
                 "set window support modes failed!", window->GetWindowId(),
@@ -1066,7 +1066,7 @@ napi_value CreateJsWindowStage(napi_env env, std::shared_ptr<Rosen::WindowScene>
     BindNativeFunction(env,
         objValue, "isWindowRectAutoSave", moduleName, JsWindowStage::IsWindowRectAutoSave);
     BindNativeFunction(env,
-        objValue, "setSupportWindowModes", moduleName, JsWindowStage::SetSupportWindowModes);
+        objValue, "setSupportedWindowModes", moduleName, JsWindowStage::SetSupportedWindowModes);
     return objValue;
 }
 }  // namespace Rosen

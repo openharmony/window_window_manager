@@ -875,10 +875,10 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
             }
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
             WLOGFE("ScreenManager::CreateVirtualScreen failed.");
-            return;
+        } else {
+            task->Resolve(env, CreateJsScreenObject(env, screen));
+            WLOGI("JsScreenManager::OnCreateVirtualScreen success");
         }
-        task->Resolve(env, CreateJsScreenObject(env, screen));
-        WLOGI("JsScreenManager::OnCreateVirtualScreen success");
         delete task;
     };
     NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
@@ -984,6 +984,7 @@ napi_value OnDestroyVirtualScreen(napi_env env, napi_callback_info info)
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(res),
                 "ScreenManager::DestroyVirtualScreen failed."));
             WLOGFE("ScreenManager::DestroyVirtualScreen failed.");
+            delete task;
             return;
         }
         task->Resolve(env, NapiGetUndefined(env));

@@ -307,7 +307,7 @@ private:
     /*
      * PC Window Layout
      */
-    void ProcessSetSupportWindowModesRegister();
+    void ProcessSetSupportedWindowModesRegister();
     
     void ChangeSessionVisibilityWithStatusBar(const SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -364,7 +364,7 @@ private:
     /*
      * PC Window Layout
      */
-    void OnSetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes);
+    void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

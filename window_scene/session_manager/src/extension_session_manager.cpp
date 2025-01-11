@@ -77,21 +77,23 @@ float ExtensionSessionManager::GetSystemDensity(uint64_t displayId)
 
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
-    auto task = [this, sessionInfo]() {
+    auto task = [this, newSessionInfo = sessionInfo]() mutable -> sptr<ExtensionSession> {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
-        SessionInfo tempSessionInfo = sessionInfo;
-        if (!tempSessionInfo.config_.isDensityFollowHost_) {
-            tempSessionInfo.config_.density_ = GetSystemDensity(tempSessionInfo.config_.displayId_);
+        if (!newSessionInfo.config_.isDensityFollowHost_) {
+            newSessionInfo.config_.density_ = GetSystemDensity(newSessionInfo.config_.displayId_);
         }
-        sptr<ExtensionSession> extensionSession = new ExtensionSession(tempSessionInfo);
+        sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(newSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
+        if (persistentId == INVALID_SESSION_ID) {
+            return nullptr;
+        }
         TLOGNI(WmsLogTag::WMS_UIEXT,
             "persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, "
             "isDensityFollowHost_: %{public}d, density_: %{public}f",
-            persistentId, tempSessionInfo.bundleName_.c_str(), tempSessionInfo.moduleName_.c_str(),
-            tempSessionInfo.abilityName_.c_str(), tempSessionInfo.config_.isDensityFollowHost_,
-            tempSessionInfo.config_.density_);
+            persistentId, newSessionInfo.bundleName_.c_str(), newSessionInfo.moduleName_.c_str(),
+            newSessionInfo.abilityName_.c_str(), newSessionInfo.config_.isDensityFollowHost_,
+            newSessionInfo.config_.density_);
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
