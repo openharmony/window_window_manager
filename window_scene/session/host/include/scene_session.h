@@ -309,7 +309,7 @@ public:
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
     void RegisterSupportWindowModesCallback(NotifySetSupportWindowModesFunc&& func);
-
+    void SetSupportEnterWaterfallMode(bool isSupportEnter);
     /*
      * PC Window Layout
      */
