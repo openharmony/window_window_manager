@@ -499,6 +499,65 @@ private:
 };
 
 /**
+ * @class SingleHandTransform
+ *
+ * @brief parameter of transform in single hand mode.
+ */
+class SingleHandTransform {
+public:
+    SingleHandTransform() : posX_(0), posY_(0), scaleX_(1.0f), scaleY_(1.0f) {}
+    ~SingleHandTransform() {}
+
+    bool operator==(const SingleHandTransform& right) const
+    {
+        return NearZero(posX_ - right.posX_) &&
+               NearZero(posY_ - right.posY_) &&
+               NearZero(scaleX_ - right.scaleX_) &&
+               NearZero(scaleY_ - right.scaleY_);
+    }
+
+    bool operator!=(const SingleHandTransform& right) const
+    {
+        return !(*this == right);
+    }
+
+    int32_t posX_;
+    int32_t posY_;
+    float scaleX_;
+    float scaleY_;
+
+    static const SingleHandTransform& Identity()
+    {
+        static SingleHandTransform I;
+        return I;
+    }
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(posX_) && parcel.WriteInt32(posY_) &&
+               parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_);
+    }
+
+    void Unmarshalling(Parcel& parcel)
+    {
+        posX_ = parcel.ReadInt32();
+        posY_ = parcel.ReadInt32();
+        scaleX_ = parcel.ReadFloat();
+        scaleY_ = parcel.ReadFloat();
+    }
+
+private:
+    static inline bool NearZero(float val)
+    {
+        return val < 0.001f && val > -0.001f;
+    }
+    static inline bool NearZero(int32_t val)
+    {
+        return val == 0;
+    }
+};
+
+/**
  * @struct RectAnimationConfig
  *
  * @brief Window RectAnimationConfig
