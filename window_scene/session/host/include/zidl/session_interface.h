@@ -134,7 +134,7 @@ public:
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
-    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) { return {}; }
+    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
