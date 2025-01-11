@@ -866,17 +866,20 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, Function |
 }
 
 /**
-
-@tc.name: MaskingSupportEnterWaterfallMode
-@tc.desc: test function : MaskingSupportEnterWaterfallMode
-@tc.type: FUNC
-*/
-HWTEST_F(PcFoldScreenControllerTest, MaskingSupportEnterWaterfallMode, Function | SmallTest | Level3)
+ * @tc.name: MaskSupportEnterWaterfallMode
+ * @tc.desc: test function : MaskSupportEnterWaterfallMode
+ * Test Procedure
+ * step1: test maskSupportEnterWaterfall_ default is false
+ * step2: test after invoking MaskSupportEnterWaterfallMode
+ *        expect maskSupportEnterWaterfall_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, MaskSupportEnterWaterfallMode, Function | SmallTest | Level3)
 {
-    controller_->maskingSupportEnterWaterfall_ = false;
-    EXPECT_FALSE(controller_->maskingSupportEnterWaterfall_);
-    controller_->MaskingSupportEnterWaterfallMode();
-    EXPECT_TRUE(controller_->maskingSupportEnterWaterfall_);
+    controller_->maskSupportEnterWaterfall_ = false;
+    EXPECT_FALSE(controller_->maskSupportEnterWaterfall_);
+    controller_->MaskSupportEnterWaterfallMode();
+    EXPECT_TRUE(controller_->maskSupportEnterWaterfall_);
 }
 
 /**
