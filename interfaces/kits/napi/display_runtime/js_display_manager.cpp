@@ -783,7 +783,7 @@ napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayMode();
+    FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayModeForExternal();
     WLOGD("[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
     return CreateJsValue(env, mode);
 }
