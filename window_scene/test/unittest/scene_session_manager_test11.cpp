@@ -25,7 +25,6 @@
 #include "mock/mock_ibundle_mgr.h"
 #include "common/include/task_scheduler.h"
 #include "session/host/include/multi_instance_manager.h"
-#include "session/host/include/main_session.h"
 
 using namespace testing;
 using namespace testing::ext;
