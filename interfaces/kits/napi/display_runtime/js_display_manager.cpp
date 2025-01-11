@@ -1051,6 +1051,18 @@ napi_value InitFoldStatus(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLDED)));
     napi_set_named_property(env, objValue, "FOLD_STATUS_HALF_FOLDED",
         CreateJsValue(env, static_cast<uint32_t>(FoldStatus::HALF_FOLD)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_EXPAND_WITH_SECOND_EXPAND",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_EXPAND_WITH_SECOND_HALF_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_FOLDED_WITH_SECOND_EXPAND",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_FOLDED_WITH_SECOND_HALF_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_EXPAND",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_HALF_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED)));
     return objValue;
 }
 
