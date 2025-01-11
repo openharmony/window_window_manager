@@ -38,6 +38,7 @@ const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
 
 class SceneSession;
 
+using NotifySessionLockStateChangeCallback = std::function<void(bool isLockedState)>;
 using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
@@ -452,6 +453,8 @@ public:
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& func);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void SetVisibilityChangedDetectFunc(VisibilityChangedDetectFunc&& func);
+    virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
+    virtual void NotifySessionLockStateChange(bool isLockedState) {}
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
