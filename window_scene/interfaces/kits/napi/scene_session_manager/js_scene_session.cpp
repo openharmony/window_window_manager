@@ -2047,14 +2047,14 @@ napi_value JsSceneSession::RemoveBlank(napi_env env, napi_callback_info info)
  */
 napi_value JsSceneSession::AddSnapshot(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_PATTERN, "In");
+    TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnAddSnapshot(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::RemoveSnapshot(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_PATTERN, "In");
+    TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnRemoveSnapshot(env, info) : nullptr;
 }
