@@ -177,6 +177,7 @@ public:
     void SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode);
 
     float CalculatePPI();
+    uint32_t CalculateDPI();
 
     // OffScreenRender
     void SetCurrentOffScreenRendering(bool enable) { isCurrentOffScreenRendering_ = enable; }
@@ -187,6 +188,9 @@ public:
     uint32_t GetScreenRealHeight() { return screenRealHeight_; }
     void SetScreenRealPPI() { screenRealPPI_ = CalculatePPI(); }
     float GetScreenRealPPI() { return screenRealPPI_; }
+    void SetScreenRealDPI() { screenRealDPI_ = CalculateDPI(); }
+    float GetScreenRealDPI() { return screenRealDPI_; }
+
 private:
     static inline bool IsVertical(Rotation rotation)
     {
