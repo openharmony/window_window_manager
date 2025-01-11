@@ -364,7 +364,7 @@ public:
     /*
      * Window Property
      */
-    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc&& func);
+    void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
 
     /*
      * Window Rotation
@@ -580,6 +580,11 @@ private:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Window Property
+     */
+    void NotifyPrivacyModeChange();
+
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
@@ -673,7 +678,6 @@ private:
     /*
      * Window Property
      */
-    void NotifyPrivacyModeChange();
     NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
