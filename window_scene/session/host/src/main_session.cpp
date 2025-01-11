@@ -362,12 +362,12 @@ void MainSession::NotifySessionLockStateChange(bool sessionLockState)
             return;
         }
         if (session->GetSessionLockState() == sessionLockState) {
-            TLOGW(WmsLogTag::WMS_MAIN, "sessionLockState is already %{public}d", sessionLockState);
+            TLOGNW(WmsLogTag::WMS_MAIN, "sessionLockState is already %{public}d", sessionLockState);
             return;
         }
         session->SetSessionLockState(sessionLockState)
         if (session->onSessionLockStateChangeCallback_) {
-            TLOGI(WmsLogTag::WMS_MAIN, "onSessionLockStageChange to:%{public}d", sessionLockState);
+            TLOGNI(WmsLogTag::WMS_MAIN, "onSessionLockStageChange to:%{public}d", sessionLockState);
             session->onSessionLockStateChangeCallback_(sessionLockState);
         }
     }, __func__);
