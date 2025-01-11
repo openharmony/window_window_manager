@@ -83,7 +83,7 @@ private:
     bool isFullScreenWaterfallMode_ { false };
     bool lastSupportEnterWaterfallMode_ { false };
     bool supportEnterWaterfallMode_ { false };
-    bool maskSupportEnterWaterfall_ { false };
+    bool maskSupportEnterWaterfallMode_ { false };
     std::function<void(bool isWaterfallMode)> fullScreenWaterfallModeChangeCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen
