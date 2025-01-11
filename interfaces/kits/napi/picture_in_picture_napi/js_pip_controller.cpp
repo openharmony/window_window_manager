@@ -324,7 +324,7 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
         weak = wptr<PictureInPictureController>(this->pipController_)]() {
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
-                "Capability not supported.Failed to call the API due to limited device capabilities."));
+                "Capability not supported. Failed to call the API due to limited device capabilities."));
             return;
         }
         auto pipController = weak.promote();
