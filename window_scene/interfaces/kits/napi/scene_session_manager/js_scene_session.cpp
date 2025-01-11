@@ -360,6 +360,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlank", moduleName, JsSceneSession::SetBlank);
     BindNativeFunction(env, objValue, "removeBlank", moduleName, JsSceneSession::RemoveBlank);
+    BindNativeFunction(env, objValue, "addSnapshot", moduleName, JsSceneSession::AddSnapshot);
+    BindNativeFunction(env, objValue, "removeSnapshot", moduleName, JsSceneSession::RemoveSnapshot);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
         JsSceneSession::SetBufferAvailableCallbackEnable);
     BindNativeFunction(env, objValue, "syncDefaultRequestedOrientation", moduleName,
@@ -2037,6 +2039,24 @@ napi_value JsSceneSession::RemoveBlank(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnRemoveBlank(env, info) : nullptr;
+}
+
+/*
+ * AddSnapshot and RemoveSnapshot must be in pair
+ * be in good control of the time RemoveSnapshot execute, do not rely on first frame callback
+ */
+napi_value JsSceneSession::AddSnapshot(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "In");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnAddSnapshot(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::RemoveSnapshot(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "In");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnRemoveSnapshot(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info)
@@ -4915,6 +4935,28 @@ napi_value JsSceneSession::OnRemoveBlank(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->NotifyRemoveBlank();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->NotifyAddSnapshot();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnRemoveSnapshot(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->NotifyRemoveSnapshot();
     return NapiGetUndefined(env);
 }
 
