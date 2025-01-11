@@ -5006,7 +5006,7 @@ bool SceneSession::RemoveToastSession(int32_t persistentId)
 void SceneSession::NotifyPiPWindowPrepareClose()
 {
     const char* const where = __func__;
-    TLOGD(WmsLogTag::WMS_PIP, "%{public}s", where);
+    TLOGD(WmsLogTag::WMS_PIP, "in");
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     PostTask([weakThis = wptr(this), callingPid, where] {
         auto session = weakThis.promote();
