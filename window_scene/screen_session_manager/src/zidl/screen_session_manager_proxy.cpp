@@ -1136,6 +1136,47 @@ DMError ScreenSessionManagerProxy::SetVirtualScreenSurface(ScreenId screenId, sp
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+DMError ScreenSessionManagerProxy::SetScreenPrivacyMaskImage(ScreenId screenId,
+    const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+{
+    WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: ENTER");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: remote is nullptr");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (privacyMaskImg != nullptr) {
+        if (!data.WriteBool(true) || !data.WriteParcelable(privacyMaskImg.get())) {
+            WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: Write privacyMaskImg failed");
+            return DMError::DM_ERROR_IPC_FAILED;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: failed");
+            return DMError::DM_ERROR_IPC_FAILED;
+        }
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: Write screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE),
+        data, reply, option) != ERR_NONE) {
+    WLOGFW("SCB: ScreenSessionManagerProxy::SetScreenPrivacyMaskImage: SendRequest failed");
+    return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)
 {
     WLOGFW("SCB: ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation: ENTER");

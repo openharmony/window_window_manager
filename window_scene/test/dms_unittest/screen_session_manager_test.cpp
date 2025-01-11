@@ -2907,6 +2907,18 @@ HWTEST_F(ScreenSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: SetScreenPrivacyMaskImage001
+ * @tc.desc: SetScreenPrivacyMaskImage001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyMaskImage001, Function | SmallTest | Level3)
+{
+    ScreenId screenId = DEFAULT_SCREEN_ID;
+    auto ret = ssm_->SetScreenPrivacyMaskImage(screenId, nullptr);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+
+/**
  * @tc.name: ScbClientDeathCallback
  * @tc.desc: ScbClientDeathCallback
  * @tc.type: FUNC

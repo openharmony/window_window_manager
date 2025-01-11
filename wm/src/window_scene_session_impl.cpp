@@ -232,7 +232,8 @@ WMError WindowSceneSessionImpl::GetParentSessionAndVerify(bool isToast, sptr<Win
             property_->GetWindowName().c_str(), GetType());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!isToast && parentSession->GetProperty()->GetSubWindowLevel() > 1 &&
+    if (!isToast && !parentSession->GetIsUIExtFirstSubWindow() &&
+        parentSession->GetProperty()->GetSubWindowLevel() >= 1 &&
         !parentSession->IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;

@@ -3277,22 +3277,6 @@ bool SceneSession::IsKeepScreenOn() const
     return GetSessionProperty()->IsKeepScreenOn();
 }
 
-std::string SceneSession::GetSessionSnapshotFilePath() const
-{
-    WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
-    if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
-        WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
-        auto snapshot = Snapshot();
-        if (scenePersistence_ != nullptr) {
-            scenePersistence_->SaveSnapshot(snapshot);
-        }
-    }
-    if (scenePersistence_ != nullptr) {
-        return scenePersistence_->GetSnapshotFilePath();
-    }
-    return "";
-}
-
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
@@ -4307,6 +4291,24 @@ bool SceneSession::IsMissionHighlighted()
         [](const sptr<SceneSession>& sceneSession) {
             return sceneSession != nullptr && sceneSession->IsMissionHighlighted();
         });
+}
+
+void SceneSession::MaskSupportEnterWaterfallMode()
+{
+    if (pcFoldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "pcFoldScreenController is null");
+        return;
+    }
+    pcFoldScreenController_->MaskSupportEnterWaterfallMode();
+}
+
+void SceneSession::SetSupportEnterWaterfallMode(bool isSupportEnter)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is nullptr");
+        return;
+    }
+    sessionStage_->SetSupportEnterWaterfallMode(isSupportEnter);
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)

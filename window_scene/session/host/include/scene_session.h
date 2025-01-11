@@ -321,7 +321,7 @@ public:
      * Window Immersive
      */
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
@@ -357,7 +357,6 @@ public:
     WSRect GetLastSafeRect() const;
     WSRect GetSessionTargetRectByDisplayId(DisplayId displayId) const;
     std::string GetUpdatedIconPath() const;
-    std::string GetSessionSnapshotFilePath() const;
     int32_t GetParentPersistentId() const;
     int32_t GetMainSessionId();
     virtual int32_t GetMissionId() const { return persistentId_; };
@@ -374,8 +373,6 @@ public:
      * Window Watermark
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
-
-    sptr<MoveDragController> moveDragController_ = nullptr;
 
     bool IsDecorEnable() const;
     bool IsAppSession() const;
@@ -594,6 +591,8 @@ public:
     void OnThrowSlipAnimationStateChange(bool isAnimating);
     void RegisterThrowSlipAnimationStateChangeCallback(std::function<void(bool isAnimating)>&& func);
     bool IsMissionHighlighted();
+    void MaskSupportEnterWaterfallMode();
+    void SetSupportEnterWaterfallMode(bool isSupportEnter);
 
     /*
      * Keyboard
@@ -683,6 +682,7 @@ protected:
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
+    sptr<MoveDragController> moveDragController_ = nullptr;
     virtual void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
@@ -737,7 +737,7 @@ private:
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) const;
-    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0});
+    AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT);
 
     /*
      * Window Lifecycle
