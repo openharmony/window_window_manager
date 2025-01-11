@@ -55,7 +55,7 @@ public:
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
     void UnregisterFullScreenWaterfallModeChangeCallback();
     void UpdateSupportEnterWaterfallMode();
-    void MaskingSupportEnterWaterfallMode();
+    void MaskSupportEnterWaterfallMode();
 
 private:
     int32_t GetPersistentId() const;
@@ -83,7 +83,7 @@ private:
     bool isFullScreenWaterfallMode_ { false };
     bool lastSupportEnterWaterfallMode_ { false };
     bool supportEnterWaterfallMode_ { false };
-    bool maskingSupportEnterWaterfall_ { false };
+    bool maskSupportEnterWaterfall_ { false };
     std::function<void(bool isWaterfallMode)> fullScreenWaterfallModeChangeCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen
