@@ -2715,12 +2715,12 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 
 void SceneSession::NotifyPrivacyModeChange()
 {
-    auto sessionProperty = GetSessionProperty();
+    bool isPrivacyMode = GetSessionProperty()->GetPrivacyMode();
     bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
-    bool mixedPrivacyMode = currExtPrivacyMode || sessionProperty->GetPrivacyMode();
+    bool mixedPrivacyMode = currExtPrivacyMode || isPrivacyMode;
     TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
-        "old privacyMode:%{public}d",
-        GetPersistentId(), currExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
+        "last privacyMode:%{public}d",
+        GetPersistentId(), currExtPrivacyMode, isPrivacyMode, isPrivacyMode_);
 
     if (mixedPrivacyMode != isPrivacyMode_) {
         isPrivacyMode_ = mixedPrivacyMode;
@@ -4424,7 +4424,7 @@ void SceneSession::CalculateCombinedExtWindowFlags()
         // Only correct when each flag is true when active, and once a uiextension is active, the host is active
         std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
         combinedExtWindowFlags_.bitData = 0;
-        for (const auto& iter: extWindowFlagsMap_) {
+        for (const auto& iter : extWindowFlagsMap_) {
             combinedExtWindowFlags_.bitData |= iter.second.bitData;
         }
     }
@@ -4729,16 +4729,14 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
 
 void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc&& func)
 {
-    const char* const where = __func__;
-    auto task = [weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is mull", where);
             return;
         }
-        session->privacyModeChangeNotifyFunc_ = func;
-    };
-    PostTask(task, __func__);
+        session->privacyModeChangeNotifyFunc_ = std::move(func);
+    }, __func__);
 }
 
 bool SceneSession::IsPcOrPadEnableActivation() const
