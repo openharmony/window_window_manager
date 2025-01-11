@@ -449,6 +449,26 @@ void Session::NotifyRemoveBlank()
     }
 }
 
+void Session::NotifyAddSnapshot()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAddSnapshot();
+        }
+    }
+}
+
+void Session::NotifyRemoveSnapshot()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveSnapshot();
+        }
+    }
+}
+
 void Session::NotifyExtensionDied()
 {
     if (!SessionPermission::IsSystemCalling()) {

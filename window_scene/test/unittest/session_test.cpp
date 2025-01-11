@@ -852,6 +852,37 @@ HWTEST_F(WindowSessionTest, GetSnapshot, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: NotifyAddSnapshot
+ * @tc.desc: NotifyAddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyAddSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyAddSnapshot();
+
+    ASSERT_EQ(session_->GetSnapshot(), nullptr);
+}
+
+/**
+ * @tc.name: NotifyRemoveSnapshot
+ * @tc.desc: NotifyRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyRemoveSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    ASSERT_NE(session_->scenePersistence_, nullptr);
+
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyRemoveSnapshot();
+
+    ASSERT_EQ(session_->GetScenePersistence()->HasSnapshot(), false);
+}
+
+/**
  * @tc.name: NotifyExtensionDied
  * @tc.desc: NotifyExtensionDied Test
  * @tc.type: FUNC
