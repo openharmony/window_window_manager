@@ -85,6 +85,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_DISPLAY_ID_CHANGE_CB,
     SET_SUPPORT_WINDOW_MODES_CB,
     WINDOW_MOVING_CB,
+    SESSION_LOCK_STATE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -111,6 +112,8 @@ private:
     void ProcessSessionExceptionRegister();
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
+    void ProcessSessionLockStateChangeRegister();
+    void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
