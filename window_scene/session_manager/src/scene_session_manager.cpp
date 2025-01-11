@@ -12330,7 +12330,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }, __func__);
 }
 
-WMError SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
+void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
 {
     const char* const where = __func__;
     auto task = [this, where, height] {
@@ -12338,7 +12338,7 @@ WMError SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
         TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, height %{public}d", where, statusBarAvoidHeight_);
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task, "SetStatusBarAvoidHeight");
+    taskScheduler_->PostSyncTask(task, "SetStatusBarAvoidHeight");
 }
 
 void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
