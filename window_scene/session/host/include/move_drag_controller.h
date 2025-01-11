@@ -113,7 +113,7 @@ public:
     void SetMoveAvailableArea(DMRect& area);
     void UpdateMoveAvailableArea(DisplayId targetDisplayId);
     void SetCurrentScreenProperty(DisplayId targetDisplayId);
-    void ResetCurrentScreenProerty();
+    void ResetCurrentScreenProperty();
     void SetMoveInputBarFlag(bool moveInputBarFlag);
     bool GetMoveInputBarFlag();
     void SetInputBarCrossScreen(bool crossScreen);
@@ -121,7 +121,6 @@ public:
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
     void SetInputBarCrossAttr(MouseMoveDirection mouseMoveDirection, DisplayId targetDisplayId);
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offSetY);
-
 
     /*
      * Monitor screen connection status
@@ -136,8 +135,8 @@ private:
         int32_t pointerType_ = -1;
         int32_t originalPointerPosX_ = -1;
         int32_t originalPointerPosY_ = -1;
-        int32_t originalPointWindowX_ = -1;
-        int32_t originalPointWindowY_ = -1;
+        int32_t originalPointerWindowX_ = -1;
+        int32_t originalPointerWindowY_ = -1;
         WSRect originalRect_ = { 0, 0, 0, 0 };
         WSRect targetRect_ = { 0, 0, 0, 0 };
 
@@ -208,15 +207,15 @@ private:
     bool CheckAndInitializeMoveDragProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                             const WSRect& originalRect);
     void HandleLeftToRightCross(int32_t pointerDisplayX,
-                                int32_t pointDisplayY,
+                                int32_t pointerDisplayY,
                                 int32_t& moveDragFinalX,
                                 int32_t& moveDragFinalY,
                                 DisplayId targetDisplayId);
-    void HandleRightToLeftCross(int32_t pointerDisplayX, int32_t pointDisplayY, int32_t& moveDragFinalX,
+    void HandleRightToLeftCross(int32_t pointerDisplayX, int32_t pointerDisplayY, int32_t& moveDragFinalX,
             int32_t& moveDragFinalY, DisplayId targetDisplayId);
-    void HandleUpToBottomCross(int32_t pointerDisplayX, int32_t pointDisplayY, int32_t& moveDragFinalX,
+    void HandleUpToBottomCross(int32_t pointerDisplayX, int32_t pointerDisplayY, int32_t& moveDragFinalX,
             int32_t& moveDragFinalY, DisplayId targetDisplayId);
-    void HandleBottomToUpCross(int32_t pointerDisplayX, int32_t pointDisplayY, int32_t& moveDragFinalX,
+    void HandleBottomToUpCross(int32_t pointerDisplayX, int32_t pointerDisplayY, int32_t& moveDragFinalX,
             int32_t& moveDragFinalY, DisplayId targetDisplayId);
     void CalcMoveForSameDisplay(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                 int32_t& moveDragFinalX,

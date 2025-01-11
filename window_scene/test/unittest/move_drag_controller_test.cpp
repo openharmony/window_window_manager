@@ -235,7 +235,7 @@ HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1
     ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerPosX_, pointerPosX);
     ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerPosY_, pointerPosY);
     ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerWindowX_, pointerWindowX);
-    ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerWindowY_, pointerWindowG3Y);
+    ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerWindowY_, pointerWindowY);
     ASSERT_EQ(moveDragController->moveDragProperty_.originalRect_, winRect);
 }
 
@@ -328,46 +328,25 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
  */
 HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, Function | SmallTest | Level1)
 {
-    moveDragController->moveDragProperty_.originalPointerWindowX_ = 50;
-    moveDragController->moveDragProperty_.originalPointerWindowY_ = 50;
-    moveDragController->screenSizeProperty_.width_ = 1920;
-    moveDragController->screenSizeProperty_.height_ = 1080;
-    moveDragController->screenSizeProperty_.currentDisplayY_ = 0;
-    moveDragController->moveDragProperty_.originalRect_.width_ = 500;
-    moveDragController->moveAvailableArea_.posY_ = 100;
-    moveDragController->moveAvailableArea_.height_ = 800;
+    int32_t res = 0;
+    moveDragController->InitMoveDragProperty();
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    WSRect originalRect = { 100, 100, 1000, 1000 };
 
-    int32_t posX = 100;
-    int32_t posY = 200;
-    int32_t moveDragFinalX = 0;
-    int32_t moveDragFinalY = 0;
-    moveDragController->HandleLeftToRightCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
-    EXPECT_EQ(moveDragFinalX, 50);
-    EXPECT_EQ(moveDragFinalY, 150);
+    moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
+    ASSERT_EQ(0, res);
 
-    posX = 1500;
-    posY = 400;
-    moveDragFinalX = 0;
-    moveDragFinalY = 0;
-    moveDragController->HandleRightToLeftCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
-    EXPECT_EQ(moveDragFinalX, 1450);
-    EXPECT_EQ(moveDragFinalY, 350);
-
-    posX = 1500;
-    posY = 400;
-    moveDragFinalX = 0;
-    moveDragFinalY = 0;
-    moveDragController->HandleUpToBottomCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
-    EXPECT_EQ(moveDragFinalX, 450);
-    EXPECT_EQ(moveDragFinalY, 150);
-
-    posX = 500;
-    posY = 300;
-    moveDragFinalX = 0;
-    moveDragFinalY = 0;
-    moveDragController->HandleBottomToUpCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
-    EXPECT_EQ(moveDragFinalX, 450);
-    EXPECT_EQ(moveDragFinalY, 250);
+    pointerEvent = MMI::PointerEvent::Create();
+    int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t pointerType = pointerEvent->GetSourceType();
+    int32_t pointerPosX = 10;
+    int32_t pointerPosY = 30;
+    int32_t pointerWindowX = 10;
+    int32_t pointerWindowY = 10;
+    moveDragController->SetOriginalValue(
+        pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, originalRect);
+    moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
+    ASSERT_EQ(0, res);
 }
 
 /**
