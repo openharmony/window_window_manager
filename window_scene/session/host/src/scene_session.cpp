@@ -4293,10 +4293,19 @@ bool SceneSession::IsMissionHighlighted()
 void SceneSession::MaskSupportEnterWaterfallMode()
 {
     if (pcFoldScreenController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "pcFoldScreenController_ is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "pcFoldScreenController is null");
         return;
     }
     pcFoldScreenController_->MaskSupportEnterWaterfallMode();
+}
+
+void SceneSession::SetSupportEnterWaterfallMode(bool isSupportEnter)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is nullptr");
+        return;
+    }
+    sessionStage_->SetSupportEnterWaterfallMode(isSupportEnter);
 }
 
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
@@ -6124,15 +6133,6 @@ void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportedWindowMo
         session->onSetSupportedWindowModesFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
     }, __func__);
-}
-
-void SceneSession::SetSupportEnterWaterfallMode(bool isSupportEnter)
-{
-    if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is nullptr");
-        return;
-    }
-    sessionStage_->SetSupportEnterWaterfallMode(isSupportEnter);
 }
 
 void SceneSession::ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid)
