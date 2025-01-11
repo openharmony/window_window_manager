@@ -1202,7 +1202,7 @@ struct TitleButtonRect {
     }
 };
 
-/*
+/**
  * @struct WindowLayoutInfo
  *
  * @brief Layout info for all windows on the screen.
