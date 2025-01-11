@@ -1518,7 +1518,7 @@ void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
             TLOGNE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
             return;
         }
-        auto jsCallback = jsSceneSession->GetJsCallback(PRIVACY_MODE_CHANGE_CB);
+        auto jsCallback = jsSceneSession->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
         if(!jsCallback) {
             TLOGE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
             return;

@@ -2720,7 +2720,7 @@ void SceneSession::NotifyPrivacyModeChange()
     bool mixedPrivacyMode = currExtPrivacyMode || sessionProperty->GetPrivacyMode();
     TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
         "old privacyMode:%{public}d",
-        GetParentId(), currExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
+        GetPersistentId(), currExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
 
     if (mixedPrivacyMode != isPrivacyMode_) {
         isPrivacyMode_ = mixedPrivacyMode;
