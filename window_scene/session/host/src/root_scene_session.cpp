@@ -43,8 +43,8 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
-        if (onGetStatusBarAvoidHeight_) {
-            onGetStatusBarAvoidHeight_(statusBarRect);
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
         }
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
         TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s status bar %{public}s area %{public}s",
