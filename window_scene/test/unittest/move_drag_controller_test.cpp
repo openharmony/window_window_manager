@@ -225,12 +225,17 @@ HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1
     int32_t pointerType = pointerEvent->GetSourceType();
     int32_t pointerPosX = 10;
     int32_t pointerPosY = 30;
+    int32_t pointerWindowX = 10;
+    int32_t pointerWindowY = 10;
     WSRect winRect = { 100, 100, 1000, 1000 };
-    moveDragController->SetOriginalValue(pointerId, pointerType, pointerPosX, pointerPosY, winRect);
+    moveDragController->SetOriginalValue(
+        pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, winRect);
     ASSERT_EQ(moveDragController->moveDragProperty_.pointerId_, pointerId);
     ASSERT_EQ(moveDragController->moveDragProperty_.pointerType_, pointerType);
     ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerPosX_, pointerPosX);
     ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerPosY_, pointerPosY);
+    ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerWindowX_, pointerWindowX);
+    ASSERT_EQ(moveDragController->moveDragProperty_.originalPointerWindowY_, pointerWindowG3Y);
     ASSERT_EQ(moveDragController->moveDragProperty_.originalRect_, winRect);
 }
 
@@ -308,9 +313,102 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
     int32_t pointerType = pointerEvent->GetSourceType();
     int32_t pointerPosX = 10;
     int32_t pointerPosY = 30;
-    moveDragController->SetOriginalValue(pointerId, pointerType, pointerPosX, pointerPosY, originalRect);
+    int32_t pointerWindowX = 10;
+    int32_t pointerWindowY = 10;
+    moveDragController->SetOriginalValue(
+        pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, originalRect);
     moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
     ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: CalcMoveInputBarRect
+ * @tc.desc: test function : CalcMoveInputBarRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, Function | SmallTest | Level1)
+{
+    moveDragController->moveDragProperty_.originalPointerWindowX_ = 50;
+    moveDragController->moveDragProperty_.originalPointerWindowY_ = 50;
+    moveDragController->screenSizeProperty_.width_ = 1920;
+    moveDragController->screenSizeProperty_.height_ = 1080;
+    moveDragController->screenSizeProperty_.currentDisplayY_ = 0;
+    moveDragController->moveDragProperty_.originalRect_.width_ = 500;
+    moveDragController->moveAvailableArea_.posY_ = 100;
+    moveDragController->moveAvailableArea_.height_ = 800;
+
+    int32_t posX = 100;
+    int32_t posY = 200;
+    int32_t moveDragFinalX = 0;
+    int32_t moveDragFinalY = 0;
+    moveDragController->HandleLeftToRightCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
+    EXPECT_EQ(moveDragFinalX, 50);
+    EXPECT_EQ(moveDragFinalY, 150);
+
+    posX = 1500;
+    posY = 400;
+    moveDragFinalX = 0;
+    moveDragFinalY = 0;
+    moveDragController->HandleRightToLeftCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
+    EXPECT_EQ(moveDragFinalX, 1450);
+    EXPECT_EQ(moveDragFinalY, 350);
+
+    posX = 1500;
+    posY = 400;
+    moveDragFinalX = 0;
+    moveDragFinalY = 0;
+    moveDragController->HandleUpToBottomCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
+    EXPECT_EQ(moveDragFinalX, 450);
+    EXPECT_EQ(moveDragFinalY, 150);
+
+    posX = 500;
+    posY = 300;
+    moveDragFinalX = 0;
+    moveDragFinalY = 0;
+    moveDragController->HandleBottomToUpCross(posX, posY, moveDragFinalX, moveDragFinalY, 1);
+    EXPECT_EQ(moveDragFinalX, 450);
+    EXPECT_EQ(moveDragFinalY, 250);
+}
+
+/**
+ * @tc.name: AdjustXYByAvailableArea
+ * @tc.desc: test function : AdjustXYByAvailableArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, AdjustXYByAvailableArea, Function | SmallTest | Level1)
+{
+    DMRect moveAvailableArea = {0, 75, 3120, 1980};
+    WSRect originalRect = {10, 20, 336, 146};
+    moveDragController->moveAvailableArea_ = moveAvailableArea;
+    moveDragController->moveDragProperty_.originalRect_ = originalRect;
+
+    int32_t x;
+    int32_t y;
+
+    x = 50, y = 100;
+    moveDragController->AdjustXYByAvailableArea(x, y);
+    EXPECT_EQ(x, 50);
+    EXPECT_EQ(y, 100);
+
+    x = -10, y = 100;
+    moveDragController->AdjustXYByAvailableArea(x, y);
+    EXPECT_EQ(x, 0);
+    EXPECT_EQ(y, 100);
+
+    x = 3200, y = 200;
+    moveDragController->AdjustXYByAvailableArea(x, y);
+    EXPECT_EQ(x, 2784);
+    EXPECT_EQ(y, 200);
+
+    x = 100, y = 60;
+    moveDragController->AdjustXYByAvailableArea(x, y);
+    EXPECT_EQ(x, 100);
+    EXPECT_EQ(y, 75);
+
+    x = 100, y = 1980;
+    moveDragController->AdjustXYByAvailableArea(x, y);
+    EXPECT_EQ(x, 100);
+    EXPECT_EQ(y, 1909);
 }
 
 /**

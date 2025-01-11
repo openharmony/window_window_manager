@@ -164,6 +164,7 @@ public:
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WmErrorCode StartMoveWindow() override;
+    WmErrorCode StartMoveInputBar() override;
     WmErrorCode StopMoveWindow() override;
 
     /*

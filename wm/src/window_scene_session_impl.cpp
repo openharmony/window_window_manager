@@ -2657,6 +2657,34 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
     }
 }
 
+WmErrorCode WindowSceneSessionImpl::StartMoveInputBar()
+{
+    if (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
+          windowSystemConfig_.IsPhoneWindow())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (auto hostSession = GetHostSession()) {
+        WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE_INPUTBAR);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errorCode:%{public}d",
+            GetPersistentId(), static_cast<int>(errorCode));
+        switch (errorCode) {
+            case WSError::WS_ERROR_REPEAT_OPERATION: {
+                return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+            }
+            case WSError::WS_ERROR_NULLPTR: {
+                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            }
+            default: {
+                return WmErrorCode::WM_OK;
+            }
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is nullptr");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+}
+
 WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 {
     if (!IsPcOrPadFreeMultiWindowMode()) {
