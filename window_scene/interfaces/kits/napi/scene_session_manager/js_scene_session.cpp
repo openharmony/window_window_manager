@@ -440,8 +440,8 @@ void JsSceneSession::BindNativeMethodForFocus(napi_env env, napi_value objValue,
 
 void JsSceneSession::BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName)
 {
-    BindNativeFunction(env, objValue, "maskingEnterWaterfallMode", moduleName,
-        JsSceneSession::MaskingEnterWaterfallMode);
+    BindNativeFunction(env, objValue, "maskSupportEnterWaterfallMode", moduleName,
+        JsSceneSession::MaskSupportEnterWaterfallMode);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -1895,11 +1895,11 @@ napi_value JsSceneSession::SetSystemSceneBlockingFocus(napi_env env, napi_callba
     return (me != nullptr) ? me->OnSetSystemSceneBlockingFocus(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::MaskingEnterWaterfallMode(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::MaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnMaskingEnterWaterfallMode(env, info) : nullptr;
+    return (me != nullptr) ? me->OnMaskSupportEnterWaterfallMode(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::UpdateSizeChangeReason(napi_env env, napi_callback_info info)
@@ -2722,14 +2722,14 @@ napi_value JsSceneSession::OnSetSystemSceneBlockingFocus(napi_env env, napi_call
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnMaskingEnterWaterfallMode(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info)
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->MaskingEnterWaterfallMode();
+    session->MaskSupportEnterWaterfallMode();
     return NapiGetUndefined(env);
 }
 
