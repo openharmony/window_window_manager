@@ -1866,8 +1866,8 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
         }
-        if (onGetStatusBarAvoidHeight_) {
-            onGetStatusBarAvoidHeight_(statusBarRect);
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
         }
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d rect %{public}s status bar %{public}s",
             GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
