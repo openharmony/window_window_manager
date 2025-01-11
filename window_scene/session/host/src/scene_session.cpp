@@ -4222,7 +4222,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         PostTask(std::move(task), where);
         return WMError::WM_OK;
     }
-    return PostSyncTask(std::mvoe(task), where);
+    return PostSyncTask(std::move(task), where);
 }
 
 WMError SceneSession::SetGestureBackEnabled(bool isEnabled)
@@ -5178,7 +5178,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
             return;
         }
         if (session->autoStartPiPStatusChangeFunc_) {
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP"); 
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
             session->autoStartPiPStatusChangeFunc_(isAutoStart, priority);
         }
     }, where);
