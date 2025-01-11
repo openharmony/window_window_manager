@@ -1338,10 +1338,10 @@ void SceneSessionManager::GetMainSessionByAbilityInfo(const std::string& bundleN
     }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
-        if (!SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        if (!sceneSession || !SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             continue;
         }
-        if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
+        if (sceneSession->GetSessionInfo().bundleName_ == bundleName &&
             sceneSession->GetSessionInfo().moduleName_ == moduleName &&
             sceneSession->GetSessionInfo().abilityName_ == abilityName &&
             sceneSession->GetSessionInfo().appIndex_ == appIndex) {
@@ -2106,7 +2106,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     std::string key = sessionInfo.bundleName_ + "_" + sessionInfo.moduleName_ + "_" + sessionInfo.abilityName_ + "_" +
         std::to_string(sessionInfo.appIndex_);
     if (sessionLockedStateCacheSet_.find(key) != sessionLockedStateCacheSet_.end()) {
-        sceneSession->NotifySessionLockedStateChange(true);
+        sceneSession->NotifySessionLockStateChange(true);
     }
 }
 
