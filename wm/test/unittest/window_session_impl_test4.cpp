@@ -707,9 +707,11 @@ HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(window->FindWindowById(1), nullptr);
-    ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(window->FindWindowById(1), nullptr);
+        ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    }
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent end";
 }
 

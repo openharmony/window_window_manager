@@ -373,25 +373,6 @@ HWTEST_F(SceneSessionTest4, SetFloatingScale, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetSessionSnapshotFilePath
- * @tc.desc: GetSessionSnapshotFilePath function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, GetSessionSnapshotFilePath, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetSessionSnapshotFilePath";
-    info.bundleName_ = "GetSessionSnapshotFilePath";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->Session::SetSessionState(SessionState::STATE_DISCONNECT);
-    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSessionSnapshotFilePath", 1);
-    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
-
-    session->SetSessionState(SessionState::STATE_BACKGROUND);
-    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
-}
-
-/**
  * @tc.name: SetRequestedOrientation
  * @tc.desc: SetRequestedOrientation function
  * @tc.type: FUNC

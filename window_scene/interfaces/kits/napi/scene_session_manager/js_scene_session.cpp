@@ -2460,7 +2460,7 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             RegisterUpdateAppUseControlCallback();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB):
-            ProcessSetSupportWindowModesRegister();
+            ProcessSetSupportedWindowModesRegister();
             break;
         default:
             break;
@@ -5414,7 +5414,7 @@ void JsSceneSession::OnSetWindowRectAutoSave(bool enabled)
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::ProcessSetSupportWindowModesRegister()
+void JsSceneSession::ProcessSetSupportedWindowModesRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -5423,22 +5423,22 @@ void JsSceneSession::ProcessSetSupportWindowModesRegister()
     }
     const char* const where = __func__;
     session->RegisterSupportWindowModesCallback([weakThis = wptr(this), where](
-        std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes) {
+        std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnSetSupportWindowModes(std::move(supportWindowModes));
+        jsSceneSession->OnSetSupportedWindowModes(std::move(supportedWindowModes));
     });
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "success");
 }
 
-void JsSceneSession::OnSetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes)
+void JsSceneSession::OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)
 {
     const char* const where = __func__;
     taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
-        supportWindowModes = std::move(supportWindowModes), env = env_, where] {
+        supportedWindowModes = std::move(supportedWindowModes), env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -5450,7 +5450,7 @@ void JsSceneSession::OnSetSupportWindowModes(std::vector<AppExecFwk::SupportWind
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
-        napi_value jsSupportWindowModes = CreateSupportWindowModes(env, supportWindowModes);
+        napi_value jsSupportWindowModes = CreateSupportWindowModes(env, supportedWindowModes);
         napi_value argv[] = { jsSupportWindowModes };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);

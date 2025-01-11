@@ -187,9 +187,6 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
-    if (leashWindowSurfaceNodeChangedFunc_) {
-        leashWindowSurfaceNodeChangedFunc_();
-    }
 }
 
 void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
@@ -1134,7 +1131,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetWindowRect(rect);
     property->SetPersistentId(GetPersistentId());
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-    property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
+    property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
@@ -1872,11 +1869,6 @@ WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
         pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller);
     }
     return WSError::WS_OK;
-}
-
-void Session::SetLeashWindowSurfaceNodeChangedListener(const NotifyLeashWindowSurfaceNodeChangedFunc& func)
-{
-    leashWindowSurfaceNodeChangedFunc_ = func;
 }
 
 void Session::SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func)

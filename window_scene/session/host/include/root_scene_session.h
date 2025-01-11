@@ -46,7 +46,7 @@ public:
     /*
      * Window Immersive
      */
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
 
 private:

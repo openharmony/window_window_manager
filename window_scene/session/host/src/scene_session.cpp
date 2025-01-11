@@ -3274,22 +3274,6 @@ bool SceneSession::IsKeepScreenOn() const
     return GetSessionProperty()->IsKeepScreenOn();
 }
 
-std::string SceneSession::GetSessionSnapshotFilePath() const
-{
-    WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
-    if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
-        WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
-        auto snapshot = Snapshot();
-        if (scenePersistence_ != nullptr) {
-            scenePersistence_->SaveSnapshot(snapshot);
-        }
-    }
-    if (scenePersistence_ != nullptr) {
-        return scenePersistence_->GetSnapshotFilePath();
-    }
-    return "";
-}
-
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
 {
     WLOGFI("run SaveUpdatedIcon");
@@ -4004,7 +3988,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
         if (!abilitySessionInfo->supportWindowModes.empty()) {
-            info.supportWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
+            info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
     }
@@ -4021,11 +4005,11 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
-        "supportWindowModes.size:%{public}zu, specifiedId:%{public}d",
+        "supportedWindowModes.size:%{public}zu, specifiedId:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
-        info.supportWindowModes.size(), info.specifiedId);
+        info.supportedWindowModes.size(), info.specifiedId);
     return info;
 }
 
@@ -6128,7 +6112,7 @@ bool SceneSession::IsSystemKeyboard() const
     return sessionProperty->IsSystemKeyboard();
 }
 
-void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportWindowModesFunc&& func)
+void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func)
 {
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), func = std::move(func), where] {
@@ -6137,7 +6121,7 @@ void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportWindowMode
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or func is null", where);
             return;
         }
-        session->onSetSupportWindowModesFunc_ = std::move(func);
+        session->onSetSupportedWindowModesFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
     }, __func__);
 }
