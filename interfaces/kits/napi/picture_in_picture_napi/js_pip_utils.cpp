@@ -17,8 +17,8 @@
 
 #include <string>
 #include "wm_common.h"
-#include "window_manager_hilog.h"
 #include "window.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
