@@ -104,6 +104,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
+
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
     uint32_t callingTokenId { 0 };
@@ -637,7 +638,7 @@ protected:
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
-    GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeight_;
+    GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
 
     /*
      * Gesture Back

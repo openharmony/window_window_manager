@@ -1869,7 +1869,7 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         if (onGetStatusBarAvoidHeight_) {
             onGetStatusBarAvoidHeight_(statusBarRect);
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d window rect %{public}s status bar %{public}s",
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d rect %{public}s status bar %{public}s",
             GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
@@ -5686,8 +5686,8 @@ int32_t SceneSession::GetStatusBarHeight()
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
         WSRect statusBarRect = statusBar->GetSessionRect();
-        if (onGetStatusBarAvoidHeight_) {
-            onGetStatusBarAvoidHeight_(statusBarRect);
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
         }
         height = statusBarRect.height_;
     }

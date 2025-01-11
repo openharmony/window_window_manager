@@ -12338,7 +12338,7 @@ void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
         TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, height %{public}d", where, statusBarAvoidHeight_);
         return WMError::WM_OK;
     };
-    taskScheduler_->PostSyncTask(task, "SetStatusBarAvoidHeight");
+    taskScheduler_->PostSyncTask(task, where);
 }
 
 void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
