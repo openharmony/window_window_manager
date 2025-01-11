@@ -647,7 +647,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     return WSError::WS_OK;
 }
 
-void InitializeMoveInputBar(SessionEvent event)
+void SceneSession::InitializeMoveInputBar(SessionEvent event)
 {
     if (event == SessionEvent::EVENT_START_MOVE_INPUTBAR) {
         WLOGD("[WMSCom] start init move input bar param");
