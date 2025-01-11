@@ -499,21 +499,19 @@ private:
 };
 
 /**
- * @class SingleHandTransform
+ * @struct SingleHandTransform
  *
  * @brief parameter of transform in single hand mode.
  */
-class SingleHandTransform {
-public:
-    SingleHandTransform() : posX_(0), posY_(0), scaleX_(1.0f), scaleY_(1.0f) {}
-    ~SingleHandTransform() {}
+struct SingleHandTransform {
+    SingleHandTransform() : posX(0), posY(0), scaleX(1.0f), scaleY(1.0f) {}
 
     bool operator==(const SingleHandTransform& right) const
     {
-        return NearEqual(posX_, right.posX_) &&
-               NearEqual(posY_, right.posY_) &&
-               NearEqual(scaleX_, right.scaleX_) &&
-               NearEqual(scaleY_, right.scaleY_);
+        return NearEqual(posX, right.posX) &&
+               NearEqual(posY, right.posY) &&
+               NearEqual(scaleX, right.scaleX) &&
+               NearEqual(scaleY, right.scaleY);
     }
 
     bool operator!=(const SingleHandTransform& right) const
@@ -521,10 +519,10 @@ public:
         return !(*this == right);
     }
 
-    int32_t posX_;
-    int32_t posY_;
-    float scaleX_;
-    float scaleY_;
+    int32_t posX;
+    int32_t posY;
+    float scaleX;
+    float scaleY;
 
     static const SingleHandTransform& Identity()
     {
@@ -534,16 +532,16 @@ public:
 
     bool Marshalling(Parcel& parcel) const
     {
-        return parcel.WriteInt32(posX_) && parcel.WriteInt32(posY_) &&
-               parcel.WriteFloat(scaleX_) && parcel.WriteFloat(scaleY_);
+        return parcel.WriteInt32(posX) && parcel.WriteInt32(posY) &&
+               parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY);
     }
 
     void Unmarshalling(Parcel& parcel)
     {
-        posX_ = parcel.ReadInt32();
-        posY_ = parcel.ReadInt32();
-        scaleX_ = parcel.ReadFloat();
-        scaleY_ = parcel.ReadFloat();
+        posX = parcel.ReadInt32();
+        posY = parcel.ReadInt32();
+        scaleX = parcel.ReadFloat();
+        scaleY = parcel.ReadFloat();
     }
 
 private:
