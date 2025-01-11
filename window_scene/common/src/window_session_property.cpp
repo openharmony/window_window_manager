@@ -88,7 +88,7 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::WriteActionUpdateAvoidAreaOption),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
-        &WindowSessionProperty::WriteBackgroundAlpha),
+        &WindowSessionProperty::WriteActionUpdateBackgroundAlpha),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -153,7 +153,7 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::ReadActionUpdateAvoidAreaOption),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
-        &WindowSessionProperty::ReadBackgroundAlpha),
+        &WindowSessionProperty::ReadActionUpdateBackgroundAlpha),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -1484,7 +1484,7 @@ bool WindowSessionProperty::WriteActionUpdateAvoidAreaOption(Parcel& parcel)
     return parcel.WriteUint32(avoidAreaOption_);
 }
 
-bool WindowSessionProperty::WriteBackgroundAlpha(Parcel& parcel)
+bool WindowSessionProperty::WriteActionUpdateBackgroundAlpha(Parcel& parcel)
 {
     return parcel.WriteUint8(backgroundAlpha_);
 }
@@ -1635,7 +1635,7 @@ void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
     SetAvoidAreaOption(parcel.ReadUint32());
 }
 
-void WindowSessionProperty::ReadBackgroundAlpha(Parcel& parcel)
+void WindowSessionProperty::ReadActionUpdateBackgroundAlpha(Parcel& parcel)
 {
     SetBackgroundAlpha(parcel.ReadUint8());
 }

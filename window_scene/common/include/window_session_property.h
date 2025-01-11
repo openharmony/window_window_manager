@@ -283,7 +283,7 @@ private:
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
-    bool WriteBackgroundAlpha(Parcel& parcel);
+    bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -310,7 +310,7 @@ private:
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
-    void ReadBackgroundAlpha(Parcel& parcel);
+    void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
