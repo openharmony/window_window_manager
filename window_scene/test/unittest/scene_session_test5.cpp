@@ -868,6 +868,7 @@ HWTEST_F(SceneSessionTest5, ResetOcclusionAlpha, Function | SmallTest | Level2)
     session->surfaceNode_ = surfaceNode;
     session->leashWinSurfaceNode_ = nullptr;
     session->ResetOcclusionAlpha();
+    EXPECT_EQ(nullptr, session->GetLeashWinSurfaceNode());
     session->leashWinSurfaceNode_ = surfaceNode;
     session->ResetOcclusionAlpha();
     EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
