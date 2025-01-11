@@ -12346,10 +12346,6 @@ WMError SceneSessionManager::LockSessionByAbilityInfo(const std::string& bundleN
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "LockSession permission denied");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     const char* const where = __func__;
     taskScheduler_->PostAsyncTask([this, bundleName, moduleName, abilityName, appIndex, where] {
         std::vector<sptr<SceneSession>> mainSessions;
@@ -12372,10 +12368,6 @@ WMError SceneSessionManager::UnlockSessionByAbilityInfo(const std::string& bundl
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        TLOGW(WmsLogTag::WMS_LIFE, "LockSession permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     const char* const where = __func__;
