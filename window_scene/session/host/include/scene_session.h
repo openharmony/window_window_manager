@@ -308,7 +308,6 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
-    void RegisterSupportWindowModesCallback(NotifySetSupportWindowModesFunc&& func);
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
 
