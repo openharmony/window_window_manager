@@ -2624,14 +2624,14 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::ResetSceneSessionInfoWant(sptr<AAFwk::SessionInfo>& sceneSessionInfo)
+void SceneSessionManager::ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo)
 {
     if (sceneSessionInfo->resultCode == -1) {
-        OHOS::AAFwk::Want want;
+        AAFwk::Want want;
         std::string keySessionId = sceneSessionInfo->want.GetStringParam(ATOMIC_SERVICE_SESSION_ID);
         want.SetParam(ATOMIC_SERVICE_SESSION_ID, keySessionId);
-        sceneSessionInfo->want = want;
-        TLOGNI(WmsLogTag::WMS_MAIN, "sceneSessionInfo.resultCode: %{public}d, keySessionId: %{public}s",
+        sceneSessionInfo->want = std::move(want);
+        TLOGI(WmsLogTag::WMS_MAIN, "sceneSessionInfo.resultCode: %{public}d, keySessionId: %{public}s",
             sceneSessionInfo->resultCode, keySessionId.c_str());
     }
 }
