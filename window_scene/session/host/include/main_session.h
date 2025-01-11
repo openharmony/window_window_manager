@@ -65,8 +65,8 @@ public:
      * Window LifeCycle
      */
     void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
-    void NotifySessionLockStateChange(bool sessionLockState) override;
-    void SetSessionLockState(bool sessionLockState);
+    void NotifySessionLockStateChange(bool isLockedState) override;
+    void SetSessionLockState(bool isLockedState);
     bool GetSessionLockState() const;
 
 protected:
@@ -75,16 +75,12 @@ protected:
     void NotifyClientToUpdateInteractive(bool interactive) override;
     bool isClientInteractive_ = true;
 
-    /*
-     * Window LifeCycle
-     */
-    NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
-
 private:
     /*
      * Window LifeCycle
      */
-    bool sessionLockState_ = false;
+    NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
+    bool isLockedState_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

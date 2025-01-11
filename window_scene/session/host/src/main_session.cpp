@@ -353,33 +353,33 @@ void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateC
     }, __func__);
 }
 
-void MainSession::NotifySessionLockStateChange(bool sessionLockState)
+void MainSession::NotifySessionLockStateChange(bool isLockedState)
 {
-    PostTask([weakThis = wptr(this), sessionLockState] {
+    PostTask([weakThis = wptr(this), isLockedState] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        if (session->GetSessionLockState() == sessionLockState) {
-            TLOGNW(WmsLogTag::WMS_MAIN, "sessionLockState is already %{public}d", sessionLockState);
+        if (session->GetSessionLockState() == isLockedState) {
+            TLOGNW(WmsLogTag::WMS_MAIN, "isLockedState is already %{public}d", isLockedState);
             return;
         }
-        session->SetSessionLockState(sessionLockState);
+        session->SetSessionLockState(isLockedState);
         if (session->onSessionLockStateChangeCallback_) {
-            TLOGNI(WmsLogTag::WMS_MAIN, "onSessionLockStageChange to:%{public}d", sessionLockState);
-            session->onSessionLockStateChangeCallback_(sessionLockState);
+            TLOGNI(WmsLogTag::WMS_MAIN, "onSessionLockStageChange to:%{public}d", isLockedState);
+            session->onSessionLockStateChangeCallback_(isLockedState);
         }
     }, __func__);
 }
 
-void MainSession::SetSessionLockState(bool sessionLockState)
+void MainSession::SetSessionLockState(bool isLockedState)
 {
-    sessionLockState_ = sessionLockState;
+    isLockedState_ = isLockedState;
 }
 
 bool MainSession::GetSessionLockState() const
 {
-    return sessionLockState_;
+    return isLockedState_;
 }
 } // namespace OHOS::Rosen
