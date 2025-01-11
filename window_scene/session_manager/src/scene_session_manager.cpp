@@ -12355,11 +12355,11 @@ WMError SceneSessionManager::LockSessionByAbilityInfo(const std::string& bundleN
         std::vector<sptr<SceneSession>> mainSessions;
         GetMainSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex, mainSessions);
         if (!mainSessions.empty()) {
-            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, set sessionLockState true, persistentId:%{public}d",
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, set sessionLockState true, persistentId:%{public}d",
                 where, mainSessions[0]->GetPersistentId());
             mainSessions[0]->NotifySessionLockStateChange(true);
         } else {
-            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, update sessionLockState into cache set", where);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, update sessionLockState into cache set", where);
             sessionLockStateCacheSet_.insert(
                 bundleName + "_" + moduleName + "_" + abilityName + "_" + std::to_string(appIndex));
         }
@@ -12383,7 +12383,7 @@ WMError SceneSessionManager::UnlockSessionByAbilityInfo(const std::string& bundl
         std::vector<sptr<SceneSession>> mainSessions;
         GetMainSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex, mainSessions);
         for (const auto &mainSession : mainSessions) {
-            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, set sessionLockState false, persistentId:%{public}d",
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, set sessionLockState false, persistentId:%{public}d",
                 where, mainSession->GetPersistentId());
             mainSession->NotifySessionLockStateChange(false);
         }
