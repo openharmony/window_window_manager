@@ -89,7 +89,7 @@ const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
-constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
+constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t SCALE_DIMENSION = 2;
@@ -1834,9 +1834,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetNotifyVisibleChangeFunc([this](int32_t persistentId) {
             this->NotifyVisibleChange(persistentId);
         });
-        if (sceneSession->moveDragController_) {
-            sceneSession->moveDragController_->SetIsPcWindow(systemConfig_.IsPcWindow());
-        }
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
@@ -2621,10 +2618,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
         sceneSession->GetCloseAbilityWantAndClean(sceneSessionInfo->want);
-        if (sceneSessionInfo->resultCode == -1) {
-            OHOS::AAFwk::Want want;
-            sceneSessionInfo->want = want;
-        }
+        ResetSceneSessionInfoWant(sceneSessionInfo);
         return RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
     };
     std::string taskName = "RequestSceneSessionDestruction:PID:" +
@@ -2633,12 +2627,24 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo)
+{
+    if (sceneSessionInfo->resultCode == -1) {
+        AAFwk::Want want;
+        std::string keySessionId = sceneSessionInfo->want.GetStringParam(ATOMIC_SERVICE_SESSION_ID);
+        want.SetParam(ATOMIC_SERVICE_SESSION_ID, keySessionId);
+        sceneSessionInfo->want = std::move(want);
+        TLOGI(WmsLogTag::WMS_MAIN, "sceneSessionInfo.resultCode: %{public}d, keySessionId: %{public}s",
+            sceneSessionInfo->resultCode, keySessionId.c_str());
+    }
+}
+
 void SceneSessionManager::ResetWantInfo(const sptr<SceneSession>& sceneSession)
 {
     if (const auto sessionInfoWant = sceneSession->GetSessionInfo().want) {
         const auto& bundleName = sessionInfoWant->GetElement().GetBundleName();
         const auto& abilityName = sessionInfoWant->GetElement().GetAbilityName();
-        const auto& keySessionId = sessionInfoWant->GetStringParam(KEY_SESSION_ID);
+        const auto& keySessionId = sessionInfoWant->GetStringParam(ATOMIC_SERVICE_SESSION_ID);
         AppExecFwk::ElementName element;
         element.SetBundleName(bundleName);
         element.SetAbilityName(abilityName);
@@ -2646,7 +2652,7 @@ void SceneSessionManager::ResetWantInfo(const sptr<SceneSession>& sceneSession)
         want->SetElement(element);
         want->SetBundle(bundleName);
         if (!keySessionId.empty()) {
-            want->SetParam(KEY_SESSION_ID, keySessionId);
+            want->SetParam(ATOMIC_SERVICE_SESSION_ID, keySessionId);
         }
         sceneSession->SetSessionInfoWant(want);
     }
@@ -8043,25 +8049,6 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     return true;
 }
 
-std::string SceneSessionManager::GetSessionSnapshotFilePath(int32_t persistentId)
-{
-    WLOGFI("persistentId %{public}d", persistentId);
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        WLOGFE("sceneSession nullptr!");
-        return "";
-    }
-    auto task = [this, weakSceneSession = wptr<SceneSession>(sceneSession)]() {
-        auto sceneSession = weakSceneSession.promote();
-        if (sceneSession == nullptr) {
-            WLOGFE("session is nullptr");
-            return std::string("");
-        }
-        return sceneSession->GetSessionSnapshotFilePath();
-    };
-    return taskScheduler_->PostSyncTask(task, "GetSessionSnapshotFilePath" + std::to_string(persistentId));
-}
-
 sptr<SceneSession> SceneSessionManager::SelectSesssionFromMap(const uint64_t& surfaceId)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -12330,6 +12317,33 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }, __func__);
 }
 
+WMError SceneSessionManager::HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken, bool& hasOrNot)
+{
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "AbilityToken is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Permission denied, only for SA");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+
+    return taskScheduler_->PostSyncTask([this, &abilityToken, &hasOrNot, where = __func__] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session && session->GetAbilityToken() == abilityToken &&
+                session->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT && session->IsSessionForeground()) {
+                TLOGNI(WmsLogTag::WMS_SYSTEM, "%{public}s found", where);
+                hasOrNot = true;
+                return WMError::WM_OK;
+            }
+        }
+        TLOGNI(WmsLogTag::WMS_SYSTEM, "%{public}s not found", where);
+        hasOrNot = false;
+        return WMError::WM_OK;
+    }, __func__);
+}
+
 void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
 {
     const char* const where = __func__;
@@ -12346,5 +12360,4 @@ void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
     barArea.height_ = statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT ?
         barArea.height_ : statusBarAvoidHeight_;
 }
-
 } // namespace OHOS::Rosen

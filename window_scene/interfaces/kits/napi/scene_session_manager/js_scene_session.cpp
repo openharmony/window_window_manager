@@ -313,6 +313,7 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
     BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
     BindNativeMethodForSCBSystemSession(env, objValue, moduleName);
     BindNativeMethodForFocus(env, objValue, moduleName);
+    BindNativeMethodForWaterfall(env, objValue, moduleName);
     napi_ref jsRef = nullptr;
     napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
@@ -435,6 +436,12 @@ void JsSceneSession::BindNativeMethodForFocus(napi_env env, napi_value objValue,
     BindNativeFunction(env, objValue, "setSystemFocusable", moduleName, JsSceneSession::SetSystemFocusable);
     BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
         JsSceneSession::SetSystemSceneBlockingFocus);
+}
+
+void JsSceneSession::BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName)
+{
+    BindNativeFunction(env, objValue, "maskSupportEnterWaterfallMode", moduleName,
+        JsSceneSession::MaskSupportEnterWaterfallMode);
 }
 
 JsSceneSession::JsSceneSession(napi_env env, const sptr<SceneSession>& session)
@@ -1888,6 +1895,13 @@ napi_value JsSceneSession::SetSystemSceneBlockingFocus(napi_env env, napi_callba
     return (me != nullptr) ? me->OnSetSystemSceneBlockingFocus(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::MaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnMaskSupportEnterWaterfallMode(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::UpdateSizeChangeReason(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
@@ -2705,6 +2719,17 @@ napi_value JsSceneSession::OnSetSystemSceneBlockingFocus(napi_env env, napi_call
     }
     session->SetSystemSceneBlockingFocus(blocking);
     WLOGFI("end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->MaskSupportEnterWaterfallMode();
     return NapiGetUndefined(env);
 }
 

@@ -78,6 +78,41 @@ bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& ke
     return true;
 }
 
+bool ScreenSettingHelper::GetSettingValue(const std::string& key, std::string& value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    std::string getValue = "";
+    ErrCode ret = provider.GetStringValue(key, getValue);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    value = getValue;
+    return true;
+}
+
+bool ScreenSettingHelper::SetSettingValue(const std::string& key, uint32_t value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.PutIntValue(key, value, false);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::SetSettingValue(const std::string& key, const std::string& value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.PutStringValue(key, value, false);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
 bool ScreenSettingHelper::SetSettingDefaultDpi(uint32_t& dpi, const std::string& key)
 {
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
@@ -189,7 +224,7 @@ void ScreenSettingHelper::SetSettingRotationScreenId(int32_t screenId)
         TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return;
     }
-    TLOGE(WmsLogTag::DMS, "ssucceed, ret:%{public}d", ret);
+    TLOGE(WmsLogTag::DMS, "succeed, ret:%{public}d", ret);
 }
 
 bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const std::string& key)
