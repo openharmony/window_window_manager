@@ -347,8 +347,8 @@ void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateC
             return;
         }
         session->onSessionLockStateChangeCallback_ = std::move(callback);
-        if (session->onSessionLockStateChangeCallback_ && sessionLockState_) {
-            session->onSessionLockStateChangeCallback_(sessionLockState_);
+        if (session->onSessionLockStateChangeCallback_ && session->sessionLockState_) {
+            session->onSessionLockStateChangeCallback_(session->sessionLockState_);
         }
     }, __func__);
 }
