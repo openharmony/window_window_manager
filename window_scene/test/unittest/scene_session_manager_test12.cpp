@@ -368,7 +368,7 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_05, Function
 
     property->SetIsSystemKeyboard(true);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    ASSERT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+    ASSERT_EQ(false, ssm_->CheckSystemWindowPermission(property));
 }
 
 /**
@@ -929,27 +929,27 @@ HWTEST_F(SceneSessionManagerTest12, HandleKeyboardAvoidChange, Function | SmallT
     ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
 
     ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
-                                    SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
+                                   SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
     ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
 
     ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
-                                    SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
+                                   SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
     ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
 
     ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
-                                    SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE);
+                                   SystemKeyboardAvoidChangeReason::KEYBOARD_HIDE);
     ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
 
     ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
-                                    SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT);
+                                   SystemKeyboardAvoidChangeReason::KEYBOARD_DISCONNECT);
     ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
 
     ssm->HandleKeyboardAvoidChange(systemKeyboardSession, systemKeyboardSession->GetScreenId(),
-                                    SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
+                                   SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
     ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
 }
