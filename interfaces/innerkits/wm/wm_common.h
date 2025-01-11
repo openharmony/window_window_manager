@@ -711,10 +711,10 @@ public:
 
     bool operator==(const SingleHandTransform& right) const
     {
-        return NearZero(posX_ - right.posX_) &&
-               NearZero(posY_ - right.posY_) &&
-               NearZero(scaleX_ - right.scaleX_) &&
-               NearZero(scaleY_ - right.scaleY_);
+        return NearEqual(posX_, right.posX_) &&
+               NearEqual(posY_, right.posY_) &&
+               NearEqual(scaleX_, right.scaleX_) &&
+               NearEqual(scaleY_, right.scaleY_);
     }
 
     bool operator!=(const SingleHandTransform& right) const
@@ -748,13 +748,14 @@ public:
     }
 
 private:
-    static inline bool NearZero(float val)
+    static inline bool NearEqual(float left, float right)
     {
-        return val < 0.001f && val > -0.001f;
+        return abs(left - right) < 0.001f;
     }
-    static inline bool NearZero(int32_t val)
+
+    static inline bool NearEqual(int32_t left, int32_t right)
     {
-        return val == 0;
+        return left == right;
     }
 };
 
