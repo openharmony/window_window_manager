@@ -196,7 +196,27 @@ WSRect MoveDragController::GetTargetRectByDisplayId(DisplayId displayId) const
 
 void MoveDragController::InitMoveDragProperty()
 {
-    moveDragProperty_ = {-1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
+    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
+}
+
+void MoveDragController::SetMoveInputBarFlag(bool moveInputBarFlag)
+{
+    moveInputBarFlag_ = moveInputBarFlag;
+}
+
+void MoveDragController::GetMoveInputBarFlag()
+{
+    return moveInputBarFlag_;
+}
+
+void MoveDragController::SetInputBarCrossScreen(bool crossScreen)
+{
+    inputBarCrossScreen_ = crossScreen;
+}
+
+bool MoveDragController::GetInputBarCrossScreen()
+{
+    return inputBarCrossScreen_;
 }
 
 void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
@@ -226,7 +246,7 @@ void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t 
 
 void MoveDragController::ResetCrossMoveDragProperty()
 {
-    moveDragProperty_ = {-1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
+    moveDragProperty_ = {-1, -1, -1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
     DMError error = ScreenManager::GetInstance().UnregisterScreenListener(this);
     if (error != DMError::DM_OK) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Register ScreenListener false.");
@@ -236,20 +256,24 @@ void MoveDragController::ResetCrossMoveDragProperty()
         displayIdSetDuringMoveDrag_.clear();
     }
     moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
+    moveInputBarStartDisplayId_ = DISPLAY_ID_INVALID;
     moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
     initParentNodeId_ = -1;
     originalDisplayOffsetX_ = 0;
     originalDisplayOffsetY_ = 0;
     moveDragIsInterrupted_ = false;
+    moveInputBarFlag_ = false;
 }
 
 void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
-    int32_t pointerPosY, const WSRect& winRect)
+    int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY, const WSRect& winRect)
 {
     moveDragProperty_.pointerId_ = pointerId;
     moveDragProperty_.pointerType_ = pointerType;
     moveDragProperty_.originalPointerPosX_ = pointerPosX;
     moveDragProperty_.originalPointerPosY_ = pointerPosY;
+    moveDragProperty_.originalPointWindowX_ = pointerWindowX;
+    moveDragProperty_.originalPointWindowY_ = pointerWindowY;
     moveDragProperty_.originalRect_ = winRect;
 }
 
@@ -366,6 +390,12 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         default:
             break;
     }
+
+    if (moveInputBarFlag_ && CalcMoveInputBarRect(pointerEvent, originalRect)) {
+        ProcessSessionRectChange(reason);
+        return ret;
+    }
+
     if (CalcMoveTargetRect(pointerEvent, originalRect)) {
         ProcessSessionRectChange(reason);
     }
@@ -524,6 +554,54 @@ WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
     return screenRect;
 }
 
+void MoveDragController::SetMoveAvailableArea(DMRect& area)
+{
+    moveAvailableArea_.posX_ = area.posX_;
+    moveAvailableArea_.posY_ = area.posY_;
+    moveAvailableArea_.width_ = area.width_;
+    moveAvailableArea_.height_ = area.height_;
+}
+
+void MoveDragController::UpdateMoveAvailableArea(DisplayId targetDisplayId)
+{
+    DMRect availableArea;
+    sptr<Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(targetDisplayId);
+    DMError ret = display->GetAvailableArea(availableArea);
+    SetMoveAvailableArea(availableArea);
+}
+
+void MoveDragController::SetMoveInputBarStartDisplayId(DisplayId displayId)
+{
+    moveInputBarStartDisplayId_ = displayId;
+}
+
+void MoveDragController::GetMoveInputBarStartDisplayId(DisplayId displayId)
+{
+    return moveInputBarStartDisplayId_;
+}
+
+void MoveDragController::SetCurrentScreenProperty(DisplayId targetDisplayId)
+{
+    sptr<ScreenSession> currentScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(targetDisplayId);
+    ScreenProperty currentScreenProperty = currentScreenSession->GetScreenProperty();
+    screenProperty_.currentDisplayStartX_ = currentScreenProperty.GetStartX();
+    screenProperty_.currentDisplayStartY_ = currentScreenProperty.GetStartY();
+    screenProperty_.currentDisplayX_ = currentScreenProperty.GetBounds().rect_.left_;
+    screenProperty_.currentDisplayY_ = currentScreenProperty.GetBounds().rect_.top_;
+    screenProperty_.width_ = currentScreenProperty.GetBounds().rect_.width_;
+    screenProperty_.height_ = currentScreenProperty.GetBounds().rect_.height_;
+}
+
+void MoveDragController::ResetCurrentScreenProperty()
+{
+    screenProperty_.currentDisplayStartX_ = 0;
+    screenProperty_.currentDisplayStartY_ = 0;
+    screenProperty_.currentDisplayX_ = 0;
+    screenProperty_.currentDisplayY_ = 0;
+    screenProperty_.width_ = 0;
+    screenProperty_.height_ = 0;
+}
+
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
@@ -546,9 +624,245 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
     return std::make_pair(tranX, tranY);
 }
 
+void MoveDragController::AdjustXYByAvailableArea(int32_t& x, int32_t& y)
+{
+    if (x <= moveAvailableArea_.posX_) {
+        x = moveAvailableArea_.posX_;
+    }
+
+    if (x >= moveAvailableArea_.posX_ + moveAvailableArea_.width_ - moveDragProperty_.originalRect_.width_) {
+        x = moveAvailableArea_.posX_ + moveAvailableArea_.width_ - moveDragProperty_.originalRect_.width_;
+    }
+
+    if (y <= moveAvailableArea_.posY_) {
+        x = moveAvailableArea_.posY_;
+    }
+
+    if (x >= moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_) {
+        x = moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_;
+    }
+}
+
+MouseMoveDirection MoveDragController::CalcMouseMoveDirection(DisplayId lastDisplayId, DisplayId currentDisplayId)
+{
+    sptr<ScreenSession> lastScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(lastDisplayId);
+    sptr<ScreenSession> currentScreenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSession(currentDisplayId);
+    if (!lastScreenSession || !currentScreenSession) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return default mouse move direction.");
+        return MouseMoveDirection::UNKNOWN;
+    }
+
+    ScreenProperty lastScreenProperty = lastScreenSession->GetScreenProperty();
+    ScreenProperty currentScreenProperty = currentScreenSession->GetScreenProperty();
+
+    int32_t lastOriginStartX = lastScreenProperty.GetStartX();
+    int32_t lastOriginStartY = lastScreenProperty.GetStartY();
+    int32_t currentOriginStartX = lastScreenProperty.GetStartX();
+    int32_t currentOriginStartX = lastScreenProperty.GetStartY();
+
+    int32_t lastScreenWidth = lastScreenProperty.GetBounds().rect_.width_;
+    int32_t lastScreenHeight = lastScreenProperty.GetBounds().rect_.height_;
+    int32_t currentScreenWidth = currentScreenProperty.GetBounds().rect_.width_;
+    int32_t currentScreenHeight = currentScreenProperty.GetBounds().rect_.width_;
+
+    if (currentOriginStartX == lastOriginStartX + lastScreenWidth) {
+        return MouseMoveDirection::LEFT_TO_RIGHT;
+    } else if (currentOriginStartX == lastOriginStartX - lastScreenWidth) {
+        return MouseMoveDirection::RIGHT_TO_LEFT;
+    } else if (currentOriginStartY == lastOriginStartY + lastScreenWidth) {
+        return MouseMoveDirection::UP_TO_BOTTOM;
+    } else if (currentOriginStartY == lastOriginStartY - lastScreenWidth) {
+        return MouseMoveDirection::BOTTOM_TO_UP;
+    }
+
+    return MouseMoveDirection::UNKNOWN;
+}
+
+void MoveDragController::SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY)
+{
+    originalDisplayOffsetX_ = offsetX;
+    originalDisplayOffsetY_ = offsetY;
+}
+
+void MoveDragController::SetInputBarCrossAttr(MouseMoveDirection mouseMoveDirection, DisplayId targetDisplayId)
+{
+    if (mouseMoveDirection == MouseMoveDirection::LEFT_TO_RIGHT ||
+        mouseMoveDirection == MouseMoveDirection::LEFT_TO_RIGHT) {
+        UpdateMoveAvailableArea(targetDisplayId);
+    }
+    SetInputBarCrossScreen(true);
+    moveInputBarStartDisplayId_ = targetDisplayId;
+    SetOriginalDisplayOffset(screenSizeProperty_.currentDisplayStartX_, screenSizeProperty_.currentDisplayStartY_);
+    ResetCurrentScreenProperty();
+}
+
+void MoveDragController::InitializeMoveDragPropertyNotValid(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                                            const WSRect& originalRect)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointerId = pointerEvent->GetPointerId();
+    pointerEvent->GetPointerItem(pointerId, pointerItem);
+
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+    moveDragProperty_.pointerId_ = pointerId;
+    moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
+    moveDragProperty_.originalPointerPosX_ = pointerDisplayX;
+    moveDragProperty_.originalPointerPosY_ = pointerDisplayY;
+    int32_t pointerWindowX = pointerItem.GetWindowX();
+    int32_t pointerWindowY = pointerItem.GetWindowY();
+    moveDragProperty_.originalRect_ = originalRect;
+    moveDragProperty_.originalRect_.posX_ = pointerDisplayX - pointerWindowX;
+    moveDragProperty_.originalRect_.posY_ = pointerDisplayY - pointerWindowY;
+}
+
+bool MoveDragController::CheckAndInitializeMoveDragProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                                            const WSRect& originalRect)
+{
+    if (moveDragProperty_.isEmpty()) {
+        InitializeMoveDragPropertyNotValid(pointerEvent, originalRect);
+        return false;
+    }
+    return true;
+}
+
+void MoveDragController::HandleLeftToRightCross(int32_t pointerDisplayX,
+                                                int32_t pointDisplayY,
+                                                int32_t& moveDragFinalX,
+                                                int32_t& moveDragFinalY,
+                                                DisplayId targetDisplayId)
+{
+    if (pointerDisplayX > moveDragProperty_.originalPointWindowX_) {
+        moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointWindowX_;
+    } else {
+        moveDragFinalX = 0;
+    }
+    moveDragFinalY = pointerDisplayY - moveDragProperty_.originalPointWindowY_;
+    SetInputBarCrossAttr(MouseMoveDirection::LEFT_TO_RIGHT, targetDisplayId);
+}
+
+void MoveDragController::HandleRightToLeftCross(int32_t pointerDisplayX,
+                                                int32_t pointDisplayY,
+                                                int32_t& moveDragFinalX,
+                                                int32_t& moveDragFinalY,
+                                                DisplayId targetDisplayId)
+{
+    if (pointerDisplayX <=
+        screenSizeProperty_.width_ - moveDragProperty_.originalRect_.width_ + moveDragProperty_.originalPointWindowX_) {
+        moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointWindowX_;
+    } else {
+        moveDragFinalX = screenProperty_.width_ - moveDragProperty_.originalRect_.width_;
+    }
+    moveDragFinalY = pointerDisplayY - moveDragProperty_.originalPointWindowY_;
+    SetInputBarCrossAttr(MouseMoveDirection::RIGHT_TO_LEFT, targetDisplayId);
+}
+
+void MoveDragController::HandleUpToBottomCross(int32_t pointerDisplayX,
+                                               int32_t pointDisplayY,
+                                               int32_t& moveDragFinalX,
+                                               int32_t& moveDragFinalY,
+                                               DisplayId targetDisplayId)
+{
+    UpdateMoveAvailableArea(targetDisplayId);
+    int32_t statusBarHeight = moveAvailableArea_.posY - screenSizeProperty_.currentDisplayY_;
+    if (pointerDisplayY >= statusBarHeight + moveDragProperty_.originalPointWindowY_) {
+        moveDragFinalY = pointerDisplayY - moveDragProperty_.originalPointWindowY_;
+    } else {
+        moveDragFinalY = statusBarHeight;
+    }
+    moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointWindowX_;
+    SetInputBarCrossAttr(MouseMoveDirection::UP_TO_BOTTOM, targetDisplayId);
+}
+
+void MoveDragController::HandleBottomToUpCross(int32_t pointerDisplayX,
+                                               int32_t pointDisplayY,
+                                               int32_t& moveDragFinalX,
+                                               int32_t& moveDragFinalY,
+                                               DisplayId targetDisplayId)
+{
+    UpdateMoveAvailableArea(targetDisplayId);
+    int32_t dockBarHeight = screenSizeProperty_.currentDisplayY_ - moveAvailableArea_.posY - moveAvailableArea_.height_;
+    if (pointerDisplayY <= screenSizeProperty_.height_ - dockBarHeight - moveDragProperty_.originalPointWindowY_) {
+        moveDragFinalY = pointerDisplayY - moveDragProperty_.originalPointWindowY_;
+    } else {
+        moveDragFinalY = screenSizeProperty_.height_ - dockBarHeight - moveDragProperty_.originalPointWindowY_;
+    }
+    moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointWindowX_;
+    SetInputBarCrossAttr(MouseMoveDirection::BOTTOM_TO_UP, targetDisplayId);
+}
+
+void MoveDragController::CalcMoveForSameDisplay(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                                int32_t& moveDragFinalX,
+                                                int32_t& moveDragFinalY)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointerId = pointerEvent->GetPointerId();
+    pointerEvent->GetPointerItem(pointerId, pointerItem);
+
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+
+    moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointWindowX_;
+    moveDragFinalY = pointerDisplayY - moveDragProperty_.originalPointWindowY_;
+    AdjustXYByAvailableArea(moveDragFinalX, moveDragFinalY);
+}
+
+bool MoveDragController::CalcMoveInputRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                           const WSRect& originalRect)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "CalcMoveInputRect");
+    if (!CheckAndInitializeMoveDragProperty(pointerEvent, originalRect)) {
+        return false;
+    }
+
+    DisplayId targetDisplayId = ststic_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
+    int32_t moveDragFinalX = 0;
+    int32_t moveDragFinalY = 0;
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+
+    if (targetDisplayId == moveInputBarStartDisplayId_) {
+        CalcMoveForSameDisplay(pointerEvent, moveDragFinalX, moveDragFinalY);
+    } else {
+        MouseMoveDirection mouseMoveDirection =
+            CalcMouseMoveDirection(moveInputBarStartDisplayId_, pointerEvent->GetTargetDisplayId());
+        if (screenSizeProperty_.isEmpty()) {
+            SetCurrentScreenProperty(targetDisplayId);
+        }
+
+        switch (mouseMoveDirection) {
+            case MouseMoveDirection::LEFT_TO_RIGHT:
+                HandleLeftToRightCross(
+                    pointerDisplayX, pointerDisplayY, moveDragFinalX, moveDragFinalY, targetDisplayId);
+                break;
+            case MouseMoveDirection::RIGHT_TO_LEFT:
+                HandleRightToLeftCross(
+                    pointerDisplayX, pointerDisplayY, moveDragFinalX, moveDragFinalY, targetDisplayId);
+                break;
+            case MouseMoveDirection::UP_TO_BOTTOM:
+                HandleUpToBottomCross(
+                    pointerDisplayX, pointerDisplayY, moveDragFinalX, moveDragFinalY, targetDisplayId);
+                break;
+            case MouseMoveDirection::BOTTOM_TO_TP:
+                HandleBottomToUpCross(
+                    pointerDisplayX, pointerDisplayY, moveDragFinalX, moveDragFinalY, targetDisplayId);
+                break;
+            default:
+                moveDragFinalX = moveDragProperty_.targetRect_.posX_;
+                moveDragFinalY = moveDragProperty_.targetRect_.posY_;
+                break;
+        }
+    }
+    moveDragProperty_.targetRect_ = { moveDragFinalX, moveDragFinalY, originalRect.width_, originalRect.height_ };
+    TLOGD(WmsLogTag::WMS_LAYOUT, "move rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+    return true;
+}
+
 bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "CalcMoveTargetRect");
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t pointerId = pointerEvent->GetPointerId();
     pointerEvent->GetPointerItem(pointerId, pointerItem);
@@ -936,6 +1250,8 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
 
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
     int32_t pointerDisplayY = pointerItem.GetDisplayY();
+    int32_t pointerDisplayWindowX = pointerItem.GetWindowX();
+    int32_t pointerDisplayWindowY = pointerItem.GetWindowY();
     switch (pointerEvent->GetPointerAction()) {
         case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
         case MMI::PointerEvent::POINTER_ACTION_DOWN:
@@ -985,8 +1301,13 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         originalRect.posX_ = windowRect.posX_;
         originalRect.posY_ = windowRect.posY_;
     }
-    SetOriginalValue(moveTempProperty_.pointerId_, moveTempProperty_.pointerType_,
-        moveTempProperty_.lastDownPointerPosX_, moveTempProperty_.lastDownPointerPosY_, originalRect);
+    SetOriginalValue(moveTempProperty_.pointerId_,
+                     moveTempProperty_.pointerType_,
+                     moveTempProperty_.lastDownPointerPosX_,
+                     moveTempProperty_.lastDownPointerPosY_,
+                     moveTempProperty_.lastDownPointerWindowX_,
+                     moveTempProperty_.lastDownPointerWindowY_,
+                     originalRect);
 
     int32_t offsetX = moveTempProperty_.lastMovePointerPosX_ - moveTempProperty_.lastDownPointerPosX_;
     int32_t offsetY = moveTempProperty_.lastMovePointerPosY_ - moveTempProperty_.lastDownPointerPosY_;

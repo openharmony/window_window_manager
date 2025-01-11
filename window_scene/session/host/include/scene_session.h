@@ -24,6 +24,7 @@
 #include "session/host/include/pc_fold_screen_controller.h"
 #include "vsync_station.h"
 #include "wm_common.h"
+#include "display_manager.h"
 
 namespace OHOS::PowerMgr {
 class RunningLock;
@@ -561,6 +562,7 @@ public:
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
+    WSError SetMoveAvailableArea(DisplayId displayId);
 
     /*
      * Window Layout
@@ -750,6 +752,7 @@ private:
     void OnMoveDragCallback(SizeChangeReason reason);
     bool IsDragResizeWhenEnd(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
+    void InitializeMoveInputBar(SessionEvent event);
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
@@ -935,7 +938,6 @@ private:
     DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     NotifyWindowMovingFunc notifyWindowMovingFunc_;
-
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
 

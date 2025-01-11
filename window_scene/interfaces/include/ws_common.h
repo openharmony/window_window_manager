@@ -456,7 +456,8 @@ enum class SessionEvent : uint32_t {
     EVENT_DRAG,
     EVENT_MAXIMIZE_WITHOUT_ANIMATION,
     EVENT_MAXIMIZE_WATERFALL,
-    EVENT_END
+    EVENT_END,
+    EVENT_START_MOVE_INPUTBAR
 };
 
 enum class BrokerStates: uint32_t {

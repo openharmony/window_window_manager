@@ -623,6 +623,45 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
+{
+    DMRect availableArea;
+    sptr<Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (display == nullptr) {
+        WLOGE("[WMSCom] Failed to get display");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+
+    DMError ret = display->GetAvailableArea(availableArea);
+    if (ret != Rosen::DMError::DM_OK) {
+        WLOGE("[WMSCom] Failed to get available area, ret: %{public}d", ret);
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+
+    WLOGD("[WMSCom] the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
+          availableArea.posX_,
+          availableArea.posY_,
+          availableArea.width_,
+          availableArea.height_);
+    moveDragController_->SetMoveAvailableArea(availableArea);
+    return WSError::WS_OK;
+}
+
+void InitializeMoveInputBar(SessionEvent event)
+{
+    if (event == SessionEvent::EVENT_START_MOVE_INPUTBAR) {
+        WLOGD("[WMSCom] start init move input bar param");
+        auto property = GetSessionProperty();
+        if (!property) {
+            return;
+        }
+        DisplayId displayId = property->GetDisplayId();
+        WSError ret = SetMoveAvailableArea(displayId);
+        moveDragController_->SetMoveInputBarStartDisplayId(displayId);
+        moveDragController_->SetMoveInputBarFlag(true);
+    }
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event]() {
@@ -633,11 +672,13 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         }
         WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
-        if (event == SessionEvent::EVENT_START_MOVE) {
+        if (event == SessionEvent::EVENT_START_MOVE || event == SessionEvent::EVENT_START_MOVE_INPUTBAR) {
+            WLOGD("[WMSCom] OnSessionEvent move");
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
+            session->InitializeMoveInputBar(event);
             session->InitializeCrossMoveDrag();
             session->moveDragController_->InitMoveDragProperty();
             if (session->pcFoldScreenController_) {
@@ -706,7 +747,9 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
 
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
-    if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE) {
+    WLOGD("[WMSCom] the sync session event is: %{public}d", event);
+    if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE &&
+        event != SessionEvent::EVENT_START_MOVE_INPUTBAR) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event or end move event, "
             "eventId=%{public}u windowId=%{public}d", event, GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
@@ -2506,8 +2549,14 @@ bool SceneSession::IsMovable()
         TLOGW(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null, id: %{public}d", GetPersistentId());
         return false;
     }
-    if (!(!moveDragController_->GetStartDragFlag() && IsFocused() && IsMovableWindowType() &&
-          moveDragController_->HasPointDown() && moveDragController_->GetMovable())) {
+
+    auto property = GetSessionProperty();
+    bool windowIsMovable = !moveDragController_->GetStartDragFlag() && IsMovableWindowType() &&
+          moveDragController_->HasPointDown() && moveDragController_->GetMovable();
+    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+        windowIsMovable &= IsFocused();
+    }
+    if (!windowIsMovable) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
             "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, movable: %{public}d",
             GetPersistentId(), moveDragController_->GetStartDragFlag(), IsFocused(), IsMovableWindowType(),
@@ -3000,6 +3049,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     WSRect globalRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
         MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
         MoveDragController::TargetRectCoordinate::GLOBAL);
+
     HandleMoveDragSurfaceNode(reason);
     HandleMoveDragSurfaceBounds(relativeRect, globalRect, reason);
     if (reason == SizeChangeReason::DRAG_END) {
