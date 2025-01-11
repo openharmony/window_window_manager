@@ -106,7 +106,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
     const std::string& identityToken)
 {
     const char* const where = __func__;
-    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig, 
+    return PostSyncTask([weakThis = wptr(this), sessionStage, eventChannel, surfaceNode, &systemConfig,
         property, token, pid, uid, identityToken, where] {
         auto session = weakThis.promote();
         if (!session) {
@@ -1267,7 +1267,7 @@ void SceneSession::NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, 
         session->isScreenAngleMismatch_ = isScreenAngleMismatch;
         session->targetScreenWidth_ = screenWidth;
         session->targetScreenHeight_ = screenHeight;
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, 
+        TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "%{public}s target isMismatch: %{public}d, width_: %{public}d, height_: %{public}d",
             where, isScreenAngleMismatch, screenWidth, screenHeight);
         return;
@@ -1402,7 +1402,7 @@ void SceneSession::SetAdjustKeyboardLayoutCallback(const NotifyKeyboardLayoutAdj
         }
         KeyboardLayoutParams params = property->GetKeyboardLayoutParams();
         session->adjustKeyboardLayoutFunc_(params);
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, 
+        TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "%{public}s Notify adjust keyboard layout when register, keyboardId: %{public}d, "
             "gravity: %{public}u, landscapeAvoidHeight: %{public}d, PortraitAvoidHeight: %{public}d, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
