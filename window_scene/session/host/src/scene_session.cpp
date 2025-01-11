@@ -2717,11 +2717,10 @@ void SceneSession::NotifyPrivacyModeChange()
 {
     bool isPrivacyMode = GetSessionProperty()->GetPrivacyMode();
     bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
-    bool mixedPrivacyMode = currExtPrivacyMode || isPrivacyMode;
     TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
         "last privacyMode:%{public}d",
         GetPersistentId(), currExtPrivacyMode, isPrivacyMode, isPrivacyMode_);
-
+    bool mixedPrivacyMode = currExtPrivacyMode || isPrivacyMode;
     if (mixedPrivacyMode != isPrivacyMode_) {
         isPrivacyMode_ = mixedPrivacyMode;
         if (privacyModeChangeNotifyFunc_) {
@@ -4727,7 +4726,7 @@ void SceneSession::SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAn
     updatePrivateStateAndNotifyFunc_ = func;
 }
 
-void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc&& func)
+void SceneSession::SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
