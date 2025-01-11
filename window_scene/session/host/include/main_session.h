@@ -66,12 +66,25 @@ public:
      */
     void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
     void NotifySessionLockStateChange(bool sessionLockState) override;
+    void SetSessionLockState(bool sessionLockState);
+    bool GetSessionLockState() const;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
     void NotifyClientToUpdateInteractive(bool interactive) override;
     bool isClientInteractive_ = true;
+
+    /*
+     * Window LifeCycle
+     */
+    NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
+
+private:
+    /*
+     * Window LifeCycle
+     */
+    bool sessionLockState_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

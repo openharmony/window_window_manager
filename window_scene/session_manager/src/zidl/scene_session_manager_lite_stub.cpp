@@ -941,7 +941,9 @@ int SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(MessageParcel& d
         return ERR_INVALID_DATA;
     }
     WMError ret = LockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -969,7 +971,9 @@ int SceneSessionManagerLiteStub::HandleUnlockSessionByAbilityInfo(MessageParcel&
         return ERR_INVALID_DATA;
     }
     WMError ret = UnlockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
-    reply.WriteInt32(static_cast<int32_t>(ret));
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

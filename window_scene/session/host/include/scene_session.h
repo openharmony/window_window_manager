@@ -708,8 +708,6 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, bool> appUseControlMap_;
-    NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
-    bool sessionLockState_ = false;
 
     /*
      * PC Fold Screen

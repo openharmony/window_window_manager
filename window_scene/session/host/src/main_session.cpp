@@ -347,8 +347,8 @@ void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateC
             return;
         }
         session->onSessionLockStateChangeCallback_ = std::move(callback);
-        if (session->onSessionLockStateChangeCallback_ && session->sessionLockState_) {
-            session->onSessionLockStateChangeCallback_(session->sessionLockState_);
+        if (session->onSessionLockStateChangeCallback_ && session->GetSessionLockState()) {
+            session->onSessionLockStateChangeCallback_(session->GetSessionLockState());
         }
     }, __func__);
 }
@@ -361,15 +361,25 @@ void MainSession::NotifySessionLockStateChange(bool sessionLockState)
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
-        if (session->sessionLockState_ == sessionLockState) {
+        if (session->GetSessionLockState() == sessionLockState) {
             TLOGW(WmsLogTag::WMS_MAIN, "sessionLockState is already %{public}d", sessionLockState);
             return;
         }
-        session->sessionLockState_ = sessionLockState;
+        session->SetSessionLockState(sessionLockState)
         if (session->onSessionLockStateChangeCallback_) {
             TLOGI(WmsLogTag::WMS_MAIN, "onSessionLockStageChange to:%{public}d", sessionLockState);
             session->onSessionLockStateChangeCallback_(sessionLockState);
         }
     }, __func__);
+}
+
+void MainSession::SetSessionLockState(bool sessionLockState)
+{
+    sessionLockState_ = sessionLockState;
+}
+
+bool MainSession::GetSessionLockState() const
+{
+    return sessionLockState_;
 }
 } // namespace OHOS::Rosen

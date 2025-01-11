@@ -576,7 +576,7 @@ public:
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
     void GetMainSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
+        const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions) const;
     WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, int32_t appIndex);
     WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,

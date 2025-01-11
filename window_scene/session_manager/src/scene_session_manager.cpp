@@ -1331,15 +1331,20 @@ void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
 }
 
 void SceneSessionManager::GetMainSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-    const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions)
+    const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions) const
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    if (bundleName.empty() || moduleName.empty() || abilityName.empty()) {
+        return;
+    }
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (!SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            continue;
+        }
         if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
             sceneSession->GetSessionInfo().moduleName_ == moduleName &&
             sceneSession->GetSessionInfo().abilityName_ == abilityName &&
-            sceneSession->GetSessionInfo().appIndex_ == appIndex &&
-            SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            sceneSession->GetSessionInfo().appIndex_ == appIndex) {
             mainSessions.push_back(sceneSession);
         }
     }
@@ -12341,6 +12346,10 @@ WMError SceneSessionManager::LockSessionByAbilityInfo(const std::string& bundleN
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGW(WmsLogTag::WMS_LIFE, "LockSession permission denied");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     const char* const where = __func__;
     taskScheduler_->PostAsyncTask([this, bundleName, moduleName, abilityName, appIndex, where] {
         std::vector<sptr<SceneSession>> mainSessions;
@@ -12357,11 +12366,16 @@ WMError SceneSessionManager::LockSessionByAbilityInfo(const std::string& bundleN
     }, __func__);
     return WMError::WM_OK;
 }
+
 WMError SceneSessionManager::UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, int32_t appIndex)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        TLOGW(WmsLogTag::WMS_LIFE, "LockSession permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     const char* const where = __func__;

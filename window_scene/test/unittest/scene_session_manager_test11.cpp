@@ -25,6 +25,7 @@
 #include "mock/mock_ibundle_mgr.h"
 #include "common/include/task_scheduler.h"
 #include "session/host/include/multi_instance_manager.h"
+#include "session/host/include/main_session.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -432,6 +433,73 @@ HWTEST_F(SceneSessionManagerTest11, UnlockSessionByAbilityInfo, Function | Small
 
     auto result = ssm_->UnlockSessionByAbilityInfo(bundleName_, moduleName_, abilityName_, appIndex_);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
+
+/**
+ * @tc.name: GetMainSessionByAbilityInfo01
+ * @tc.desc: SceneSesionManager test GetMainSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetMainSessionByAbilityInfo01, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::string bundleName = "GetMainSessionByAbilityInfoBundle";
+    std::string moduleName = "GetMainSessionByAbilityInfoModule";
+    std::string abilityName = "GetMainSessionByAbilityInfoAbility";
+    int32_t appIndex = 0;
+    SessionInfo info;
+    info.bundleName_ = bundleName;
+    info.moduleName_ = moduleName;
+    info.abilityName_ = "infoAbilityName";
+    info.appIndex_ = appIndex;
+    info.windowType_ = 1;
+    info.persistentId_ = 1;
+
+    sptr<SceneSession> mainSession1 = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(mainSession1, nullptr);
+    ssm_->sceneSessionMap_.insert({1, mainSession1});
+
+    std::vector<sptr<SceneSession>> mainSessions;
+    ssm_->GetMainSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex, mainSessions);
+    ASSERT_EQ(mainSessions.empty(), true);
+
+    info.abilityName_ = abilityName;
+    info.persistentId_ = 2;
+    sptr<SceneSession> mainSession2 = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(mainSession2, nullptr);
+    ssm_->sceneSessionMap_.insert({2, mainSession2});
+
+    ssm_->GetMainSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex, mainSessions);
+    ASSERT_EQ(mainSessions.empty(), false);
+}
+
+/**
+ * @tc.name: GetMainSessionByAbilityInfo02
+ * @tc.desc: SceneSesionManager test GetMainSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetMainSessionByAbilityInfo02, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::string bundleName = "GetMainSessionByAbilityInfoBundle";
+    std::string moduleName = "GetMainSessionByAbilityInfoModule";
+    std::string abilityName = "GetMainSessionByAbilityInfoAbility";
+    int32_t appIndex = 0;
+    SessionInfo info;
+    info.bundleName_ = bundleName;
+    info.moduleName_ = moduleName;
+    info.abilityName_ = abilityName;
+    info.appIndex_ = appIndex;
+    info.windowType_ = 2000;
+    info.persistentId_ = 3;
+
+    sptr<SceneSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(mainSession, nullptr);
+    ssm_->sceneSessionMap_.insert({3, mainSession});
+
+    std::vector<sptr<SceneSession>> mainSessions;
+    ssm_->GetMainSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex, mainSessions);
+    ASSERT_EQ(mainSessions.empty(), true);
 }
 }  // namespace
 }
