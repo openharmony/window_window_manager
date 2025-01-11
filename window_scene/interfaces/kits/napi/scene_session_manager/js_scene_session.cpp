@@ -5656,22 +5656,20 @@ void JsSceneSession::ProcessSessionLockStateChangeRegister()
         TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    const char* const where = __func__;
-    session->RegisterSessionLockStateChangeCallback([weakThis = wptr(this), where](bool sessionLockState) {
+    session->RegisterSessionLockStateChangeCallback([weakThis = wptr(this), where = __func__](bool isLockedState) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->OnSessionLockStateChange(sessionLockState);
+        jsSceneSession->OnSessionLockStateChange(isLockedState);
     });
     TLOGI(WmsLogTag::WMS_MAIN, "success");
 }
 
-void JsSceneSession::OnSessionLockStateChange(bool sessionLockState)
+void JsSceneSession::OnSessionLockStateChange(bool isLockedState)
 {
-    const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionLockState, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isLockedState, env = env_, where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed.",
@@ -5683,7 +5681,7 @@ void JsSceneSession::OnSessionLockStateChange(bool sessionLockState)
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
-        napi_value jsSessionLockState = CreateJsValue(env, sessionLockState);
+        napi_value jsSessionLockState = CreateJsValue(env, isLockedState);
         napi_value argv[] = { jsSessionLockState };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };

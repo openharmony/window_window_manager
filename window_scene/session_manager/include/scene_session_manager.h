@@ -1224,7 +1224,7 @@ private:
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
-    std::unordered_set<std::string> sessionLockStateCacheSet_;
+    std::unordered_set<std::string> sessionLockedStateCacheSet_;
 };
 } // namespace OHOS::Rosen
 
