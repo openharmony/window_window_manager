@@ -2749,8 +2749,8 @@ napi_value JsSceneSession::OnMaskSupportEnterWaterfallMode(napi_env env, napi_ca
 
 napi_value JsSceneSession::OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARG_INDEX_4;
-    napi_value argv[ARG_INDEX_4] = { nullptr };
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_INDEX_1) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
