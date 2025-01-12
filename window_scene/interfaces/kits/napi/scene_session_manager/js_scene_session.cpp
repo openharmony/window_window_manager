@@ -388,6 +388,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetBehindWindowFilterEnabled);
     BindNativeFunction(env, objValue, "setFreezeImmediately", moduleName,
         JsSceneSession::SetFreezeImmediately);
+    BindNativeFunction(env, objValue, "updateFullScreenWaterfallMode", moduleName,
+        JsSceneSession::UpdateFullScreenWaterfallMode);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2163,6 +2165,13 @@ napi_value JsSceneSession::SetFreezeImmediately(napi_env env, napi_callback_info
     TLOGD(WmsLogTag::DEFAULT, "in");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetFreezeImmediately(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::UpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnUpdateFullScreenWaterfallMode(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info)
@@ -5531,6 +5540,33 @@ napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_in
         }
         return pixelMapObj;
     }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_INDEX_4;
+    napi_value argv[ARG_INDEX_4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_INDEX_1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isWaterfallMode = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isWaterfallMode)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to isWaterfallMode");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->UpdateFullScreenWaterfallMode(isWaterfallMode);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

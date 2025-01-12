@@ -385,8 +385,6 @@ HWTEST_F(SceneSessionManagerTest6, UpdateWindowMode, Function | SmallTest | Leve
     ASSERT_NE(nullptr, ssm_);
     ret = ssm_->UpdateWindowMode(2, 0);
     EXPECT_EQ(WSError::WS_OK, ret);
-    ssm_->UpdateWindowMode(2, static_cast<int32_t>(WindowMode::WINDOW_MODE_FULLSCREEN_WATERFALL));
-    EXPECT_EQ(sceneSession->GetWindowMode(), WindowMode::WINDOW_MODE_FULLSCREEN);
 }
 
 /**
