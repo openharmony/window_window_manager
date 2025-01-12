@@ -1368,6 +1368,9 @@ WindowMode WindowExtensionSessionImpl::GetMode() const
 WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
 {
     property_->SetWindowMode(mode);
+    if (auto uiContet = GetUIContentSharedPtr()) {
+        uiContet->NotifyWindowMode(mode);
+    }
     TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetMode());
     return WMError::WM_OK;
 }
@@ -1389,10 +1392,15 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
     dataConsumers_.emplace(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_MODE),
                            std::move(windowModeConsumer));
 
-    auto consumersEntry = [this](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                                 std::optional<AAFwk::Want>& reply) -> int32_t {
-        auto itr = dataConsumers_.find(customId);
-        if (itr == dataConsumers_.end()) {
+    auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+                                                  std::optional<AAFwk::Want>& reply) -> int32_t {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "window is nullptr");
+            return static_cast<int32_t>(DataHandlerErr::NULL_PTR);
+        }
+        auto itr = window->dataConsumers_.find(customId);
+        if (itr == window->dataConsumers_.end()) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "no consumer for %{public}u", customId);
             return static_cast<int32_t>(DataHandlerErr::NO_CONSUME_CALLBACK);
         }

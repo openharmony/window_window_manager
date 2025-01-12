@@ -74,7 +74,6 @@ public:
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
-    static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     static napi_value SetVmaCacheStatus(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
@@ -155,12 +154,10 @@ private:
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
     napi_value OnUpdateFocus(napi_env env, napi_callback_info info);
     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
-    napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     napi_value OnSetVmaCacheStatus(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
-    napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAbilityInfo(napi_env env, napi_callback_info info);
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
@@ -178,7 +175,6 @@ private:
     napi_value OnGetRssData(napi_env env, napi_callback_info info);
     napi_value OnRegisterRssData(napi_env env, napi_callback_info info);
     napi_value OnUnregisterRssData(napi_env env, napi_callback_info info);
-    napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
     napi_value OnNotifyStackEmpty(napi_env env, napi_callback_info info);
     napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
@@ -221,14 +217,12 @@ private:
     void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName, GestureBackType type);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
-    void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
     void ProcessCreateSystemSessionRegister();
     void ProcessCreateKeyboardSessionRegister();
-    void ProcessRecoverSceneSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessStartUIAbilityErrorRegister();
@@ -250,6 +244,14 @@ private:
     void OnNotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void RegisterNotifyAppUseControlListCallback();
+
+    /*
+     * Window Recover
+     */
+    napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
+    napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
+    void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
+    void ProcessRecoverSceneSessionRegister();
 
     /*
      * PiP Window

@@ -566,7 +566,11 @@ struct Rect {
         oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
         return oss.str();
     }
+
+    static const Rect EMPTY_RECT;
 };
+
+inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
  * @struct SystemBarProperty
@@ -770,10 +774,10 @@ struct WindowLimits {
  * @brief An area of title buttons relative to the upper right corner of the window.
  */
 struct TitleButtonRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const TitleButtonRect& a) const
     {
@@ -783,6 +787,14 @@ struct TitleButtonRect {
     bool operator!=(const TitleButtonRect& a) const
     {
         return !this->operator==(a);
+    }
+
+    void ResetRect()
+    {
+        posX_ = 0;
+        posY_ = 0;
+        width_ = 0;
+        height_ = 0;
     }
 
     bool IsInsideOf(const TitleButtonRect& a) const
@@ -797,7 +809,7 @@ struct TitleButtonRect {
     }
 };
 
-/*
+/**
  * @struct WindowLayoutInfo
  *
  * @brief Layout info for all windows on the screen.

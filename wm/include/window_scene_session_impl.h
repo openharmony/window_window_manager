@@ -37,7 +37,6 @@ public:
     WMError Minimize() override;
     void StartMove() override;
     bool IsStartMoving() override;
-    WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
 
@@ -61,7 +60,7 @@ public:
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT) override;
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
@@ -69,7 +68,7 @@ public:
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
-    WMError SetWindowLimits(WindowLimits& windowLimits) override;
+    WMError SetWindowLimits(WindowLimits& windowLimits, bool isForce) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
@@ -147,8 +146,6 @@ public:
     /*
      * PC Window
      */
-    bool IsPcOrPadCapabilityEnabled() const override;
-    bool IsPcOrPadFreeMultiWindowMode() const override;
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;
 
     /*
@@ -165,7 +162,8 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
-    WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
+    WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WmErrorCode StartMoveWindow() override;
     WmErrorCode StopMoveWindow() override;
 
     /*
@@ -227,8 +225,6 @@ public:
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
-    WMError RecoverAndConnectSpecificSession();
-    WMError RecoverAndReconnectSceneSession();
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
     void LimitWindowSize(uint32_t& width, uint32_t& height);
@@ -244,6 +240,12 @@ protected:
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
+    
+    /*
+     * Window Recover
+     */
+    WMError RecoverAndConnectSpecificSession();
+    WMError RecoverAndReconnectSceneSession();
 
 private:
     WMError DestroyInner(bool needNotifyServer);
@@ -254,7 +256,6 @@ private:
     static uint32_t maxFloatingWindowSize_;
     void TransformSurfaceNode(const Transform& trans);
     void AdjustWindowAnimationFlag(bool withAnimation = false);
-    void RegisterSessionRecoverListener(bool isSpecificSession);
     WMError UpdateAnimationFlagProperty(bool withAnimation);
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
@@ -262,7 +263,7 @@ private:
     void UpdateNewSize();
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        MMI::PointerEvent::PointerItem& pointerItem);
+        MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
     void HandleEventForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem);
     void HandleDownForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -286,6 +287,11 @@ private:
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /*
+     * Window Recover
+     */
+    void RegisterSessionRecoverListener(bool isSpecificSession);
+
+    /*
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
@@ -296,6 +302,7 @@ private:
     void UpdateDefaultStatusBarColor();
     WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
+    bool forceLimits_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;
@@ -341,6 +348,11 @@ private:
      */
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
+
+    /*
+     * PC Window
+     */
+    bool isExecuteDelayRaise_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

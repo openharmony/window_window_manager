@@ -42,6 +42,12 @@ public:
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
     bool IsVisibleForeground() const override;
 
+    /*
+     * App Use Control
+     */
+    bool GetIsUseControlSession() const override;
+    void SetIsUseControlSession(bool isUseControlSession) override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     void NotifyClientToUpdateAvoidArea() override;
@@ -49,6 +55,11 @@ protected:
 private:
     KeyboardPanelRectUpdateCallback keyboardPanelRectUpdateCallback_;
     bool isNeedSyncGlobalPos_ = true; // can only accessed in main thread
+
+    /*
+     * App Use Control
+     */
+    bool isUseControlSession_ = false; // Indicates whether the session is used for controlling a main session.
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H

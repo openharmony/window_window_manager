@@ -149,8 +149,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::StartUIAbilityBySCB);
     BindNativeFunction(env, exportObj, "changeUIAbilityVisibilityBySCB", moduleName,
         JsSceneSessionManager::ChangeUIAbilityVisibilityBySCB);
-    BindNativeFunction(env, exportObj, "getSessionSnapshot", moduleName,
-        JsSceneSessionManager::GetSessionSnapshotFilePath);
     BindNativeFunction(env, exportObj, "setVmaCacheStatus", moduleName,
         JsSceneSessionManager::SetVmaCacheStatus);
     BindNativeFunction(env, exportObj, "InitWithRenderServiceAdded", moduleName,
@@ -626,6 +624,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         [](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
         RootScene::staticRootScene_->NotifyAvoidAreaChangeForRoot(avoidArea, type);
     });
+    SceneSessionManager::GetInstance().RegisterNotifyRootSceneOccupiedAreaChangeFunc(
+        [](const sptr<OccupiedAreaChangeInfo>& info) {
+        RootScene::staticRootScene_->NotifyOccupiedAreaChangeForRoot(info);
+    });
 }
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
@@ -832,13 +834,6 @@ napi_value JsSceneSessionManager::UpdateRotateAnimationConfig(napi_env env, napi
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateRotateAnimationConfig(env, info) : nullptr;
-}
-
-napi_value JsSceneSessionManager::GetSessionSnapshotFilePath(napi_env env, napi_callback_info info)
-{
-    WLOGFI("[NAPI]");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnGetSessionSnapshotFilePath(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::SetVmaCacheStatus(napi_env env, napi_callback_info info)
@@ -2292,30 +2287,6 @@ napi_value JsSceneSessionManager::OnUpdateRotateAnimationConfig(napi_env env, na
     }
     SceneSessionManager::GetInstance().UpdateRotateAnimationConfig(rotateAnimationConfig);
     return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSessionManager::OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    int32_t persistentId;
-    if (!ConvertFromJsValue(env, argv[0], persistentId)) {
-        WLOGFE("Failed to convert parameter to persistentId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    std::string path = SceneSessionManager::GetInstance().GetSessionSnapshotFilePath(persistentId);
-    napi_value result = nullptr;
-    napi_create_string_utf8(env, path.c_str(), path.length(), &result);
-    return result;
 }
 
 napi_value JsSceneSessionManager::OnSetVmaCacheStatus(napi_env env, napi_callback_info info)

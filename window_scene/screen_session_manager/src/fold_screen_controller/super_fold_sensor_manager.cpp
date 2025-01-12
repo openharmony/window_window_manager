@@ -211,6 +211,11 @@ void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents
     SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
 }
 
+float SuperFoldSensorManager::GetCurAngle()
+{
+    return curAngle_;
+}
+
 SuperFoldSensorManager::SuperFoldSensorManager() {}
 
 SuperFoldSensorManager::~SuperFoldSensorManager() {}

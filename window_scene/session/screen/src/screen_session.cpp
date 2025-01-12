@@ -39,6 +39,11 @@ const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t NO_EXIST_UID_VERSION = -1;
+const float FULL_STATUS_WIDTH = 2048;
+const float GLOBAL_FULL_STATUS_WIDTH = 3184;
+const float MAIN_STATUS_WIDTH = 1008;
+const float FULL_STATUS_OFFSET_X = 1136;
+const float SCREEN_HEIGHT = 2232;
 ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -198,6 +203,7 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
     }
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
@@ -645,19 +651,19 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
-void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus)
+void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
-    HoverStatusChange(hoverStatus);
+    HoverStatusChange(hoverStatus, needRotate);
 }
 
-void ScreenSession::HoverStatusChange(int32_t hoverStatus)
+void ScreenSession::HoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             WLOGFE("screenChangeListener is null.");
             continue;
         }
-        listener->OnHoverStatusChange(hoverStatus, screenId_);
+        listener->OnHoverStatusChange(hoverStatus, needRotate, screenId_);
     }
 }
 
@@ -752,7 +758,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     property_.SetDisplayOrientation(displayOrientation);
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation, foldDisplayMode);
     property_.UpdateDeviceRotation(targetDeviceRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
@@ -829,10 +835,10 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         rotation, displayOrientation);
 }
 
-void ScreenSession::UpdateRotationOrientation(int rotation)
+void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation, foldDisplayMode);
     property_.UpdateDeviceRotation(targetRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     WLOGFI("rotation:%{public}d, orientation:%{public}u", rotation, deviceOrientation);
@@ -1079,8 +1085,12 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
     }
 }
 
-DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation) const
+DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        rotation = static_cast<Rotation>(temp);
+    }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
     switch (rotation) {
         case Rotation::ROTATION_0: {
@@ -1682,6 +1692,39 @@ void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
     colorSpaces_ = std::move(colorSpaces);
 }
 
+bool ScreenSession::IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
+{
+    return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
+}
+
+void ScreenSession::SetScreenSnapshotRect(RSSurfaceCaptureConfig& config)
+{
+    bool isChanged = false;
+    auto width = property_.GetBounds().rect_.width_;
+    auto height = property_.GetBounds().rect_.height_;
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    if (IsWidthHeightMatch(width, height, MAIN_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        snapshotRect = {0, 0, SCREEN_HEIGHT, MAIN_STATUS_WIDTH};
+        config.mainScreenRect = snapshotRect;
+        isChanged = true;
+    } else if (IsWidthHeightMatch(width, height, FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        snapshotRect = {0, FULL_STATUS_OFFSET_X, SCREEN_HEIGHT, GLOBAL_FULL_STATUS_WIDTH};
+        config.mainScreenRect = snapshotRect;
+        isChanged = true;
+    } else if (IsWidthHeightMatch(width, height, GLOBAL_FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        snapshotRect = {0, 0, SCREEN_HEIGHT, GLOBAL_FULL_STATUS_WIDTH};
+        config.mainScreenRect = snapshotRect;
+        isChanged = true;
+    }
+    if (isChanged) {
+        TLOGI(WmsLogTag::DMS,
+            "GetScreenSnapshotRect left: %{public}f, top: %{public}f, right: %{public}f, bottom: %{public}f",
+            snapshotRect.left_, snapshotRect.top_, snapshotRect.right_, snapshotRect.bottom_);
+    } else {
+        TLOGI(WmsLogTag::DMS, "no need to set screen snapshot rect, use default rect");
+    }
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, float scaleY)
 {
     {
@@ -1698,6 +1741,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
         .scaleX = scaleX,
         .scaleY = scaleY,
     };
+    SetScreenSnapshotRect(config);
     {
         DmsXcollie dmsXcollie("DMS:GetScreenSnapshot:TakeSurfaceCapture", XCOLLIE_TIMEOUT_5S);
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);

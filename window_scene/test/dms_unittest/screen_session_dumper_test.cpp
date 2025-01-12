@@ -17,6 +17,7 @@
 
 #include "screen_session_dumper.h"
 #include "screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -25,6 +26,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
+#ifdef FOLD_ABILITY_ENABLE
 constexpr uint32_t SIZE_TWO = 2;
 constexpr uint32_t SIZE_THREE = 3;
 constexpr float POSTURE_FIRST = 93;
@@ -33,6 +35,7 @@ constexpr float POSTURE_THIRD = 0;
 constexpr uint16_t HALL_TEST = 1;
 const std::string TEST_SECONDARY_SRNSOR_POSTURE = "posture:93,180,0";
 const std::string TEST_SECONDARY_SRNSOR_HALL = "hall:1,1";
+#endif
 }
 class ScreenSessionDumperTest : public testing::Test {
 public:
@@ -720,66 +723,6 @@ HWTEST_F(ScreenSessionDumperTest, IsValidDisplayModeCommand, Function | SmallTes
 }
 
 /**
- * @tc.name: SetFoldDisplayMode
- * @tc.desc: test function : SetFoldDisplayMode
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionDumperTest, SetFoldDisplayMode, Function | SmallTest | Level1)
-{
-    int fd = 1;
-    std::vector<std::u16string> args = {u""};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    int ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, -1);
-
-    dumper->params_[0] = "-sub";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-coor";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-m";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-f";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-test";
-    ret = dumper->SetFoldDisplayMode();
-    ASSERT_EQ(ret, -1);
-}
-
-/**
- * @tc.name: SetFoldStatusLocked
- * @tc.desc: test function : SetFoldStatusLocked
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionDumperTest, SetFoldStatusLocked, Function | SmallTest | Level1)
-{
-    int fd = 1;
-    std::vector<std::u16string> args = {u""};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    int ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, -1);
-
-    dumper->params_[0] = "-l";
-    ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-u";
-    ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, 0);
-
-    dumper->params_[0] = "-test";
-    ret = dumper->SetFoldStatusLocked();
-    ASSERT_EQ(ret, -1);
-}
-
-/**
  * @tc.name: DumpTentMode
  * @tc.desc: test function : DumpTentMode
  * @tc.type: FUNC
@@ -791,22 +734,6 @@ HWTEST_F(ScreenSessionDumperTest, DumpTentMode, Function | SmallTest | Level1)
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->DumpTentMode();
     ASSERT_EQ(dumper->fd_, 1);
-}
-
-/**
- * @tc.name: SetEnterOrExitTentMode
- * @tc.desc: test function : SetEnterOrExitTentMode
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, Function | SmallTest | Level1)
-{
-    int fd = 1;
-    std::vector<std::u16string> args = {u"-h"};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    
-    dumper->SetEnterOrExitTentMode("-offtent");
-    bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
-    ASSERT_EQ(tentMode, false);
 }
 
 /**
@@ -940,7 +867,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpMultiUserInfo, Function | SmallTest | Leve
     dumper->DumpMultiUserInfo(oldScbPids, userId, scbPid);
     ASSERT_NE(dumper->dumpInfo_, std::string());
 }
-
+#ifdef FOLD_ABILITY_ENABLE
 /**
  * @tc.name: DumpFoldCreaseRegion
  * @tc.desc: test function : DumpFoldCreaseRegion
@@ -1220,11 +1147,30 @@ HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall02, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, Function | SmallTest | Level1)
 {
-    int fd = 1;
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::vector<std::u16string> args = {u"-h"};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(1, args);
+    dumper->TriggerSecondarySensor("posture:178,180,0/hall:1,1");
+    FoldStatus status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
+
     dumper->TriggerSecondarySensor("posture:93,180,0/hall:1,1");
-    ASSERT_EQ(dumper->fd_, 1);
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondarySensor("posture:150,88,0/hall:1,1");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondarySensor("posture:3,88,0/hall:1,1");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondarySensor("posture:88,3,0/hall:1,0");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::HALF_FOLD);
 }
 
 /**
@@ -1234,12 +1180,125 @@ HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor01, Function | SmallTest
  */
 HWTEST_F(ScreenSessionDumperTest, TriggerSecondaryFoldStatus01, Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(1, args);
+    dumper->TriggerSecondaryFoldStatus("z=1");
+    FoldStatus status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=2");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=3");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::HALF_FOLD);
+
+    dumper->TriggerSecondaryFoldStatus("z=11");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=21");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=12");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=22");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED);
+
+    dumper->TriggerSecondaryFoldStatus("z=13");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND);
+
+    dumper->TriggerSecondaryFoldStatus("z=23");
+    status = ScreenSessionManager::GetInstance().GetFoldStatus();
+    EXPECT_EQ(status, FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED);
+}
+
+/**
+ * @tc.name: SetFoldStatusLocked
+ * @tc.desc: test function : SetFoldStatusLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetFoldStatusLocked, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    int ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, -1);
+
+    dumper->params_[0] = "-l";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-u";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-test";
+    ret = dumper->SetFoldStatusLocked();
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SetFoldDisplayMode
+ * @tc.desc: test function : SetFoldDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetFoldDisplayMode, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    int ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, -1);
+
+    dumper->params_[0] = "-sub";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-coor";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-m";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-f";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-test";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SetEnterOrExitTentMode
+ * @tc.desc: test function : SetEnterOrExitTentMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetEnterOrExitTentMode, Function | SmallTest | Level1)
+{
     int fd = 1;
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    dumper->TriggerSecondaryFoldStatus("z=23");
-    ASSERT_EQ(dumper->fd_, 1);
+    
+    dumper->SetEnterOrExitTentMode("-offtent");
+    bool tentMode = ScreenSessionManager::GetInstance().GetTentMode();
+    ASSERT_EQ(tentMode, false);
 }
+
+#endif // FOLD_ABILITY_ENABLE
 }
 }
 }

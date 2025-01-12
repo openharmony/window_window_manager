@@ -20,6 +20,7 @@
 #include <string>
 #include <sstream>
 #include <cinttypes>
+#include <set>
 
 #include "setting_observer.h"
 #include "dm_common.h"
@@ -33,6 +34,9 @@ public:
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
     static bool SetSettingDefaultDpi(uint32_t& dpi, const std::string& key);
     static bool GetSettingValue(uint32_t& value, const std::string& key);
+    static bool SetSettingValue(const std::string& key, uint32_t value);
+    static bool GetSettingValue(const std::string& key, std::string& value);
+    static bool SetSettingValue(const std::string& key, const std::string& value);
     static void RegisterSettingCastObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingCastObserver();
     static bool GetSettingCast(bool& enable, const std::string& key = SETTING_CAST_KEY);
@@ -48,7 +52,7 @@ public:
     static uint32_t GetDataFromString(MultiScreenRecoverOption& option, const std::string& inputString);
     static bool GetSettingRecoveryResolutionString(std::vector<std::string>& resolutionStrings,
         const std::string& key = SETTING_RECOVERY_RESOLUTION_KEY);
-    static bool GetSettingRecoveryResolutionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& resolution);
+    static bool GetSettingRecoveryResolutionSet(std::set<ScreenId>& restoredScreenId);
     static bool GetSettingScreenModeString(std::vector<std::string>& screenModeStrings,
         const std::string& key = SETTING_SCREEN_MODE_KEY);
     static bool GetSettingScreenModeMap(std::map<ScreenId, uint32_t>& screenMode);
