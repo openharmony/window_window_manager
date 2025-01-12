@@ -646,7 +646,8 @@ void MoveDragController::AdjustXYByAvailableArea(int32_t& x, int32_t& y)
 
 MouseMoveDirection MoveDragController::CalcMouseMoveDirection(DisplayId lastDisplayId, DisplayId currentDisplayId)
 {
-    sptr<ScreenSession> lastScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(lastDisplayId);
+    sptr<ScreenSession> lastScreenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(lastDisplayId);
     sptr<ScreenSession> currentScreenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(currentDisplayId);
     if (!lastScreenSession || !currentScreenSession) {
