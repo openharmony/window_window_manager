@@ -3104,6 +3104,7 @@ void SceneSession::HandleMoveInputBarSurfaceNode(SizeChangeReason reason)
                 rsTransaction->Commit();
             }
         }
+        moveDragController_->SetInputBarCrossScreen(false);
     }
 }
 

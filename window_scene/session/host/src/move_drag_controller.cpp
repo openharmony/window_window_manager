@@ -583,7 +583,7 @@ DisplayId MoveDragController::GetMoveInputBarStartDisplayId()
 void MoveDragController::SetCurrentScreenProperty(DisplayId targetDisplayId)
 {
     sptr<ScreenSession> currentScreenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSession(targetDisplayId);
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(targetDisplayId);
     ScreenProperty currentScreenProperty = currentScreenSession->GetScreenProperty();
     screenSizeProperty_.currentDisplayStartX_ = currentScreenProperty.GetStartX();
     screenSizeProperty_.currentDisplayStartY_ = currentScreenProperty.GetStartY();
@@ -636,19 +636,19 @@ void MoveDragController::AdjustXYByAvailableArea(int32_t& x, int32_t& y)
     }
 
     if (y <= moveAvailableArea_.posY_) {
-        x = moveAvailableArea_.posY_;
+        y = moveAvailableArea_.posY_;
     }
 
-    if (x >= moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_) {
-        x = moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_;
+    if (y >= moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_) {
+        y = moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_;
     }
 }
 
 MouseMoveDirection MoveDragController::CalcMouseMoveDirection(DisplayId lastDisplayId, DisplayId currentDisplayId)
 {
-    sptr<ScreenSession> lastScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(lastDisplayId);
+    sptr<ScreenSession> lastScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(lastDisplayId);
     sptr<ScreenSession> currentScreenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSession(currentDisplayId);
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(currentDisplayId);
     if (!lastScreenSession || !currentScreenSession) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return default mouse move direction.");
         return MouseMoveDirection::UNKNOWN;
@@ -662,18 +662,18 @@ MouseMoveDirection MoveDragController::CalcMouseMoveDirection(DisplayId lastDisp
     int32_t currentOriginStartX = currentScreenProperty.GetStartX();
     int32_t currentOriginStartY = currentScreenProperty.GetStartY();
 
-    int32_t lastScreenWidth = lastScreenProperty.GetBounds().rect_.width_;
-    int32_t lastScreenHeight = lastScreenProperty.GetBounds().rect_.height_;
-    int32_t currentScreenWidth = currentScreenProperty.GetBounds().rect_.width_;
-    int32_t currentScreenHeight = currentScreenProperty.GetBounds().rect_.width_;
+    uint32_t lastScreenWidth = lastScreenProperty.GetBounds().rect_.width_;
+    uint32_t lastScreenHeight = lastScreenProperty.GetBounds().rect_.height_;
+    uint32_t currentScreenWidth = currentScreenProperty.GetBounds().rect_.width_;
+    uint32_t currentScreenHeight = currentScreenProperty.GetBounds().rect_.height_;
 
     if (currentOriginStartX == lastOriginStartX + lastScreenWidth) {
         return MouseMoveDirection::LEFT_TO_RIGHT;
-    } else if (currentOriginStartX == lastOriginStartX - lastScreenWidth) {
+    } else if (currentOriginStartX == lastOriginStartX - currentScreenWidth) {
         return MouseMoveDirection::RIGHT_TO_LEFT;
-    } else if (currentOriginStartY == lastOriginStartY + lastScreenWidth) {
+    } else if (currentOriginStartY == lastOriginStartY + lastScreenHeight) {
         return MouseMoveDirection::UP_TO_BOTTOM;
-    } else if (currentOriginStartY == lastOriginStartY - lastScreenWidth) {
+    } else if (currentOriginStartY == lastOriginStartY - currentScreenHeight) {
         return MouseMoveDirection::BOTTOM_TO_UP;
     }
 
@@ -689,7 +689,7 @@ void MoveDragController::SetOriginalDisplayOffset(int32_t offsetX, int32_t offse
 void MoveDragController::SetInputBarCrossAttr(MouseMoveDirection mouseMoveDirection, DisplayId targetDisplayId)
 {
     if (mouseMoveDirection == MouseMoveDirection::LEFT_TO_RIGHT ||
-        mouseMoveDirection == MouseMoveDirection::LEFT_TO_RIGHT) {
+        mouseMoveDirection == MouseMoveDirection::RIGHT_TO_LEFT) {
         UpdateMoveAvailableArea(targetDisplayId);
     }
     SetInputBarCrossScreen(true);
