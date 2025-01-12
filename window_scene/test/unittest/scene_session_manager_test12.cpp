@@ -885,13 +885,10 @@ HWTEST_F(SceneSessionManagerTest12, UpdateKeyboardAvoidAreaActive, Function | Sm
     ASSERT_EQ(true, systemKeyboardSession->IsSystemKeyboard());
     ssm->sceneSessionMap_.insert({ systemKeyboardSession->GetPersistentId(), systemKeyboardSession });
 
-    ssm->UpdateKeyboardAvoidAreaActive(DISPLAY_ID_INVALID, true);
-    ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
-    ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
-    ssm->UpdateKeyboardAvoidAreaActive(systemKeyboardSession->GetScreenId(), false);
+    ssm->UpdateKeyboardAvoidAreaActive(false);
     ASSERT_EQ(true, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(false, systemKeyboardSession->keyboardAvoidAreaActive_);
-    ssm->UpdateKeyboardAvoidAreaActive(systemKeyboardSession->GetScreenId(), true);
+    ssm->UpdateKeyboardAvoidAreaActive(true);
     ASSERT_EQ(false, keyboardSession->keyboardAvoidAreaActive_);
     ASSERT_EQ(true, systemKeyboardSession->keyboardAvoidAreaActive_);
 }
@@ -1213,6 +1210,194 @@ HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded03, Function | Sm
     sessionInfo.abilityName_ = "SCBSmartDock";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_EQ(true, ssm_->IsGetWindowLayoutInfoNeeded(sceneSession));
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground01
+ * @tc.desc: test HasFloatingWindowForeground with null abilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground01, Function | SmallTest | Level3)
+{
+    bool hasFloatWindowForeground = false;
+    WMError result = ssm_->HasFloatingWindowForeground(nullptr, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(hasFloatWindowForeground, false);
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground02
+ * @tc.desc: test HasFloatingWindowForeground with not existed abilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground02, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.sessionState_ = SessionState::STATE_ACTIVE;
+    sessionInfo.persistentId_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sptr<IRemoteObject> token1 = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession->SetAbilityToken(token1);
+    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    bool hasFloatWindowForeground = false;
+    sptr<IRemoteObject> token2 = sptr<MockIRemoteObject>::MakeSptr();
+    WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(hasFloatWindowForeground, false);
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground03
+ * @tc.desc: test HasFloatingWindowForeground with existed foreground float window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground03, Function | SmallTest | Level3)
+{
+    // create first test sceneSession
+    SessionInfo sessionInfo1;
+    sessionInfo1.sessionState_ = SessionState::STATE_ACTIVE;
+    sessionInfo1.persistentId_ = 1;
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sptr<IRemoteObject> token1 = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession1->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession1->SetAbilityToken(token1);
+    sceneSession1->SetSessionState(SessionState::STATE_ACTIVE);
+
+    // create second test sceneSession
+    SessionInfo sessionInfo2;
+    sessionInfo2.sessionState_ = SessionState::STATE_FOREGROUND;
+    sessionInfo2.persistentId_ = 2;
+
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    sptr<IRemoteObject> token2 = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession2->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession2->SetAbilityToken(token2);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
+
+    bool hasFloatWindowForeground = false;
+    WMError result = ssm_->HasFloatingWindowForeground(token1, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(hasFloatWindowForeground, true);
+
+    hasFloatWindowForeground = false;
+    result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(hasFloatWindowForeground, true);
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground04
+ * @tc.desc: test HasFloatingWindowForeground with existed background float window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground04, Function | SmallTest | Level3)
+{
+    // create first test sceneSession
+    SessionInfo sessionInfo1;
+    sessionInfo1.sessionState_ = SessionState::STATE_INACTIVE;
+    sessionInfo1.persistentId_ = 1;
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sptr<IRemoteObject> token1 = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession1->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession1->SetAbilityToken(token1);
+    sceneSession1->SetSessionState(SessionState::STATE_INACTIVE);
+
+    // create second test sceneSession
+    SessionInfo sessionInfo2;
+    sessionInfo2.sessionState_ = SessionState::STATE_BACKGROUND;
+    sessionInfo2.persistentId_ = 2;
+
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    sptr<IRemoteObject> token2 = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession2->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession2->SetAbilityToken(token2);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
+
+    bool hasFloatWindowForeground = false;
+    WMError result = ssm_->HasFloatingWindowForeground(token1, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(hasFloatWindowForeground, false);
+
+    hasFloatWindowForeground = false;
+    result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(hasFloatWindowForeground, false);
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground05
+ * @tc.desc: test HasFloatingWindowForeground with existed forground toast window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground05, Function | SmallTest | Level3)
+{
+    // create first test sceneSession
+    SessionInfo sessionInfo;
+    sessionInfo.sessionState_ = SessionState::STATE_INACTIVE;
+    sessionInfo.persistentId_ = 1;
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession->SetAbilityToken(token);
+    sceneSession->SetSessionState(SessionState::STATE_INACTIVE);
+
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+
+    bool hasFloatWindowForeground = false;
+    WMError result = ssm_->HasFloatingWindowForeground(token, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(hasFloatWindowForeground, false);
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground06
+ * @tc.desc: test HasFloatingWindowForeground with other foreground float window
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, Function | SmallTest | Level3)
+{
+    // create first test sceneSession
+    SessionInfo sessionInfo1;
+    sessionInfo1.sessionState_ = SessionState::STATE_ACTIVE;
+    sessionInfo1.persistentId_ = 1;
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sptr<IRemoteObject> token1 = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession1->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession1->SetAbilityToken(token1);
+    sceneSession1->SetSessionState(SessionState::STATE_ACTIVE);
+
+    // create second test sceneSession
+    SessionInfo sessionInfo2;
+    sessionInfo2.sessionState_ = SessionState::STATE_BACKGROUND;
+    sessionInfo2.persistentId_ = 2;
+
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    sptr<IRemoteObject> token2 = sptr<MockIRemoteObject>::MakeSptr();
+    sceneSession2->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    sceneSession2->SetAbilityToken(token2);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
+
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
+
+    bool hasFloatWindowForeground = false;
+    WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(hasFloatWindowForeground, false);
 }
 }
 } // namespace Rosen

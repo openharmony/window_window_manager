@@ -121,8 +121,9 @@ void FoldScreenController::RecoverDisplayMode()
         TLOGI(WmsLogTag::DMS, "current displayMode is correct, skip");
         return;
     }
-    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
-        TLOGI(WmsLogTag::DMS, "not single display fold device, skip");
+    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);
@@ -279,5 +280,15 @@ void FoldScreenController::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32
         return;
     }
     foldScreenPolicy_->AddOrRemoveDisplayNodeToTree(screenId, command);
+}
+
+Drawing::Rect FoldScreenController::GetScreenSnapshotRect()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        Drawing::Rect snapshotRect = {0, 0, 0, 0};
+        return snapshotRect;
+    }
+    return foldScreenPolicy_->GetScreenSnapshotRect();
 }
 } // namespace OHOS::Rosen

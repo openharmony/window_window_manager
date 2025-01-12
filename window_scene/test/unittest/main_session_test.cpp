@@ -460,23 +460,42 @@ HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, Function | SmallTest |
     info.bundleName_ = "NotifySupportWindowModesChange";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
         AppExecFwk::SupportWindowMode::FULLSCREEN,
         AppExecFwk::SupportWindowMode::SPLIT,
         AppExecFwk::SupportWindowMode::FLOATING
     };
 
-    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportedWindowModes));
 
-    session->onSetSupportWindowModesFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
+    session->onSetSupportedWindowModesFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportedWindowModes));
 
-    session->onSetSupportWindowModesFunc_ = [](
-        std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes) {
+    session->onSetSupportedWindowModesFunc_ = [](
+        std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) {
         return;
     };
 
-    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportWindowModes));
+    EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportedWindowModes));
+}
+
+/**
+ * @tc.name: NotifySessionLockStateChange
+ * @tc.desc: NotifySessionLockStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySessionLockStateChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifySessionLockStateChangeBundle";
+    info.moduleName_ = "NotifySessionLockStateChangeModule";
+    info.abilityName_ = "NotifySessionLockStateChangeAbility";
+    info.appIndex_ = 0;
+
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+
+    session->NotifySessionLockStateChange(true);
+    EXPECT_EQ(session->GetSessionLockState(), true);
 }
 }
 }

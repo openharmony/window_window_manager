@@ -528,6 +528,62 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow01, Function | SmallT
     ASSERT_EQ(false, window->windowSystemConfig_.freeMultiWindowEnable_);
     WindowSceneSessionImpl::windowSessionMap_.erase(window->GetWindowName());
 }
+
+/**
+ * @tc.name: SwitchFreeMultiWindow02
+ * @tc.desc: SwitchFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    mainWindow->property_->SetPersistentId(1);
+    mainWindow->hostSession_ = session;
+    mainWindow->property_->SetWindowName("SwitchFreeMultiWindow02_mainWindow");
+    mainWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    mainWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    mainWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    mainWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(mainWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(mainWindow->GetWindowId(), mainWindow)));
+
+    sptr<WindowSceneSessionImpl> floatWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    floatWindow->property_->SetPersistentId(2);
+    floatWindow->hostSession_ = session;
+    floatWindow->property_->SetWindowName("SwitchFreeMultiWindow02_floatWindow");
+    floatWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    floatWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    floatWindow->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    floatWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(floatWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(floatWindow->GetWindowId(), floatWindow)));
+
+    sptr<WindowSceneSessionImpl> subWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    subWindow->property_->SetPersistentId(3);
+    subWindow->hostSession_ = session;
+    subWindow->property_->SetWindowName("SwitchFreeMultiWindow03_subWindow");
+    subWindow->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    subWindow->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    subWindow->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    WindowSceneSessionImpl::windowSessionMap_.insert(std::make_pair(subWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(subWindow->GetWindowId(), subWindow)));
+
+    EXPECT_EQ(false, mainWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(false, floatWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(false, subWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(WSError::WS_OK, mainWindow->SwitchFreeMultiWindow(true));
+    EXPECT_EQ(true, mainWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(true, floatWindow->IsPcOrPadFreeMultiWindowMode());
+    EXPECT_EQ(true, subWindow->IsPcOrPadFreeMultiWindowMode());
+
+    EXPECT_EQ(WMError::WM_OK, mainWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, floatWindow->Destroy(true));
+    EXPECT_EQ(WMError::WM_OK, subWindow->Destroy(true));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

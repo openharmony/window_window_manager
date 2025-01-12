@@ -158,11 +158,20 @@ void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std
             WLOGI("COMMON_EVENT_SERVICE_ID");
             windowCommonEvent_->SubscriberEvent();
             break;
+        case MULTIMODAL_INPUT_SERVICE_ID:
+            WLOGI("MULTIMODAL_INPUT_SERVICE_ID");
+            SetWindowInputEventConsumer();
+            break;
         default:
             WLOGFW("unhandled sysabilityId: %{public}d", systemAbilityId);
             break;
     }
     WLOGI("systemAbilityId: %{public}d, end", systemAbilityId);
+}
+
+void WindowManagerService::SetWindowInputEventConsumer()
+{
+    WindowInnerManager::GetInstance().SetInputEventConsumer();
 }
 
 void WindowManagerService::OnAccountSwitched(int accountId)

@@ -289,6 +289,26 @@ HWTEST_F(WindowSessionTest2, TransferPointerEvent06, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: TransferPointerEvent07
+ * @tc.desc: isExecuteDelayRaise is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, TransferPointerEvent07, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.isSystem_ = true;
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session_->windowEventChannel_ = mockEventChannel_;
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(pointerEvent, nullptr);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    bool needNotifyClient = true;
+    bool isExecuteDelayRaise = true;
+    ASSERT_EQ(WSError::WS_OK, session_->TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise));
+}
+
+/**
  * @tc.name: TransferKeyEvent01
  * @tc.desc: !IsSystemSession() && !IsSessionValid() is true
  * @tc.type: FUNC
@@ -1124,21 +1144,20 @@ HWTEST_F(WindowSessionTest2, SetSessionState02, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListener, Function | SmallTest | Level2)
 {
     int resultValue = 0;
-    NotifyChangeSessionVisibilityWithStatusBarFunc func1 = [&resultValue](SessionInfo& info, const bool visible) {
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener([&resultValue](
+        const SessionInfo& info, const bool visible) {
         resultValue = 1;
-    };
-    NotifyChangeSessionVisibilityWithStatusBarFunc func2 = [&resultValue](SessionInfo& info, const bool visible) {
-        resultValue = 2;
-    };
-
-    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func1);
+    });
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
 
     SessionInfo info;
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 1);
 
-    session_->SetChangeSessionVisibilityWithStatusBarEventListener(func2);
+    session_->SetChangeSessionVisibilityWithStatusBarEventListener([&resultValue](
+        const SessionInfo& info, const bool visible) {
+        resultValue = 2;
+    });
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 2);
@@ -1507,7 +1526,6 @@ HWTEST_F(WindowSessionTest2, NeedCheckContextTransparent, Function | SmallTest |
     session_->SetContextTransparentFunc(func);
     ASSERT_EQ(session_->NeedCheckContextTransparent(), true);
 }
-
 }
 } // namespace Rosen
 } // namespace OHOS

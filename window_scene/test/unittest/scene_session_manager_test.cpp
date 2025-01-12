@@ -1076,7 +1076,7 @@ HWTEST_F(SceneSessionManagerTest, UpdateModalExtensionRect, Function | SmallTest
     ASSERT_NE(sceneSession, nullptr);
     Rect rect { 1, 2, 3, 4 };
     ssm_->UpdateModalExtensionRect(nullptr, rect);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
 /**
@@ -1093,7 +1093,7 @@ HWTEST_F(SceneSessionManagerTest, ProcessModalExtensionPointDown, Function | Sma
     ASSERT_NE(sceneSession, nullptr);
 
     ssm_->ProcessModalExtensionPointDown(nullptr, 0, 0);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
 /**
@@ -2227,13 +2227,13 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: release screen lock of foreground session
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: SceneSesionManager UpdateScreenLockStatusForApp
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, UpdateScreenLockStatusForApp, Function | SmallTest | Level3)
 {
-    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    auto result = ssm_->UpdateScreenLockStatusForApp("", true);
     ASSERT_EQ(result, WMError::WM_OK);
 }
 

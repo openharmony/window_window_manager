@@ -47,6 +47,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_TOP_MOST_CHANGE_CB,
     SUB_MODAL_TYPE_CHANGE_CB,
     MAIN_MODAL_TYPE_CHANGE_CB,
+    THROW_SLIP_ANIMATION_STATE_CHANGE_CB,
     FULLSCREEN_WATERFALL_MODE_CHANGE_CB,
     CLICK_CB,
     TERMINATE_SESSION_CB,
@@ -83,6 +84,8 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_APP_USE_CONTROL_CB,
     SESSION_DISPLAY_ID_CHANGE_CB,
     SET_SUPPORT_WINDOW_MODES_CB,
+    WINDOW_MOVING_CB,
+    SESSION_LOCK_STATE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -109,6 +112,8 @@ private:
     void ProcessSessionExceptionRegister();
     void ProcessPendingSessionToForegroundRegister();
     void ProcessPendingSessionToBackgroundForDelegatorRegister();
+    void ProcessSessionLockStateChangeRegister();
+    void OnSessionLockStateChange(bool isLockedState);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
     void PendingSessionActivation(SessionInfo& info);
     void PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo);
@@ -159,11 +164,14 @@ private:
     static napi_value SyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static napi_value UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static napi_value SetNeedSyncSessionRect(napi_env env, napi_callback_info info);
+    static napi_value MaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
+    static napi_value UpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetCompatibleModeInPc(napi_env env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
@@ -187,7 +195,6 @@ private:
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
     static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
-    static napi_value UpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -250,6 +257,7 @@ private:
     napi_value OnSaveSnapshotSync(napi_env env, napi_callback_info info);
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
+    napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
     napi_value OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
@@ -271,6 +279,7 @@ private:
     void ProcessMainWindowTopmostChangeRegister();
     void ProcessSubModalTypeChangeRegister();
     void ProcessMainModalTypeChangeRegister();
+    void RegisterThrowSlipAnimationStateChangeCallback();
     void RegisterFullScreenWaterfallModeChangeCallback();
     void ProcessClickRegister();
     void ProcessUpdateSessionLabelRegister();
@@ -298,13 +307,14 @@ private:
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
+    void ProcessWindowMovingRegister();
 
     /*
      * PC Window Layout
      */
-    void ProcessSetSupportWindowModesRegister();
+    void ProcessSetSupportedWindowModesRegister();
     
-    void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
+    void ChangeSessionVisibilityWithStatusBar(const SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     void OnBufferAvailableChange(const bool isBufferAvailable);
     void OnCreateSubSession(const sptr<SceneSession>& sceneSession);
@@ -326,6 +336,7 @@ private:
     void OnMainWindowTopmostChange(bool isTopmost);
     void OnSubModalTypeChange(SubWindowModalType subWindowModalType);
     void OnMainModalTypeChange(bool isModal);
+    void OnThrowSlipAnimationStateChange(bool isAnimating);
     void OnFullScreenWaterfallModeChange(bool isWaterfallMode);
     void OnClick(bool requestFocus, bool isClick);
     void UpdateSessionLabel(const std::string& label);
@@ -353,11 +364,12 @@ private:
     void NotifyPrivacyModeChange(bool isPrivacyMode);
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
 
     /*
      * PC Window Layout
      */
-    void OnSetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes);
+    void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 

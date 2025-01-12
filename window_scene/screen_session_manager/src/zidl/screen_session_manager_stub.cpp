@@ -240,6 +240,20 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(result)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::shared_ptr<Media::PixelMap> privacyMaskImg{nullptr};
+            bool isPrivacyMaskImgValid = data.ReadBool();
+            if (isPrivacyMaskImgValid) {
+                privacyMaskImg = std::shared_ptr<Media::PixelMap>(data.ReadParcelable<Media::PixelMap>());
+                DMError result = SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
+                reply.WriteInt32(static_cast<int32_t>(result));
+            } else {
+                DMError result = SetScreenPrivacyMaskImage(screenId, nullptr);
+                reply.WriteInt32(static_cast<int32_t>(result));
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             bool autoRotate = data.ReadBool();

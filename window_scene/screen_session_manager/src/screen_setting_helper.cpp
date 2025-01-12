@@ -28,7 +28,6 @@ sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
-constexpr uint32_t EXPECT_RESOLUTION_SIZE = 3;
 constexpr uint32_t DATA_SIZE_INVALID = 0xffffffff;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
 
@@ -76,6 +75,41 @@ bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& ke
         return false;
     }
     value = static_cast<uint32_t>(getValue);
+    return true;
+}
+
+bool ScreenSettingHelper::GetSettingValue(const std::string& key, std::string& value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    std::string getValue = "";
+    ErrCode ret = provider.GetStringValue(key, getValue);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    value = getValue;
+    return true;
+}
+
+bool ScreenSettingHelper::SetSettingValue(const std::string& key, uint32_t value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.PutIntValue(key, value, false);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::SetSettingValue(const std::string& key, const std::string& value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.PutStringValue(key, value, false);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        return false;
+    }
     return true;
 }
 
@@ -190,7 +224,7 @@ void ScreenSettingHelper::SetSettingRotationScreenId(int32_t screenId)
         TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return;
     }
-    TLOGE(WmsLogTag::DMS, "ssucceed, ret:%{public}d", ret);
+    TLOGE(WmsLogTag::DMS, "succeed, ret:%{public}d", ret);
 }
 
 bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const std::string& key)
@@ -326,30 +360,26 @@ bool ScreenSettingHelper::GetSettingRecoveryResolutionString(std::vector<std::st
     return true;
 }
 
-bool ScreenSettingHelper::GetSettingRecoveryResolutionMap
-    (std::map<ScreenId, std::pair<uint32_t, uint32_t>>& resolution)
+bool ScreenSettingHelper::GetSettingRecoveryResolutionSet(std::set<ScreenId>& restoredScreenId)
 {
-    std::vector<std::string> resolutionStrings;
-    bool getString = GetSettingRecoveryResolutionString(resolutionStrings);
+    std::vector<std::string> restoredScreenIdStrings;
+    bool getString = GetSettingRecoveryResolutionString(restoredScreenIdStrings);
     if (!getString) {
         TLOGE(WmsLogTag::DMS, "get string failed");
         return false;
     }
-    for (auto& resolutionString : resolutionStrings) {
-        MultiScreenRecoverOption resolutionData;
-        uint32_t dataSize = GetDataFromString(resolutionData, resolutionString);
-        if (dataSize != EXPECT_RESOLUTION_SIZE) {
+    for (auto& screenIdString : restoredScreenIdStrings) {
+        MultiScreenRecoverOption screenIdData;
+        uint32_t dataSize = GetDataFromString(screenIdData, screenIdString);
+        if (dataSize == DATA_SIZE_INVALID || dataSize == 0) {
             TLOGE(WmsLogTag::DMS, "get data failed");
             continue;
         }
-        ScreenId screenId = resolutionData.screenId_;
-        uint32_t width = resolutionData.first_;
-        uint32_t height = resolutionData.second_;
-        TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", width: %{public}d, height: %{public}d",
-            screenId, width, height);
-        resolution[screenId] = std::make_pair(width, height);
+        ScreenId screenId = screenIdData.screenId_;
+        restoredScreenId.insert(screenId);
+        TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64, screenId);
     }
-    if (resolution.empty()) {
+    if (restoredScreenId.empty()) {
         TLOGE(WmsLogTag::DMS, "nothing found");
         return false;
     }
