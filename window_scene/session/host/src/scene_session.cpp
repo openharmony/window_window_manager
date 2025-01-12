@@ -4731,7 +4731,7 @@ void SceneSession::SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& 
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is mull", where);
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
             return;
         }
         session->privacyModeChangeNotifyFunc_ = std::move(func);
