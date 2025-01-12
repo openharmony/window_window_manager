@@ -71,7 +71,6 @@ const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
-
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
