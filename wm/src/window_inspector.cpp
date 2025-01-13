@@ -20,9 +20,11 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+namespace {
 constexpr char ARK_CONNECT_LIB_PATH[] = "libark_connect_inspector.z.so";
 const std::string METHOD_NAME = "WMS.windowList";
 const std::string INTERFACE_NAME = "getCurrentProcessWindowList";
+} // namespace
 
 sptr<WindowInspector> WindowInspector::CreateInstance()
 {
@@ -129,14 +131,12 @@ void WindowInspector::TransformDataToJson(const std::vector<WindowListsInfo>& wi
         jsonInfo["windowName"] = info.windowName;
         jsonInfo["winId"] = std::to_string(info.windowId);
         jsonInfo["windowType"] = std::to_string(info.windowType);
-
-        jsonInfo["rect"] = nlohmann::json::array();
         nlohmann::ordered_json jsonRectInfo;
         jsonRectInfo["startX"] = std::to_string(info.windowRect.posX_);
         jsonRectInfo["startY"] = std::to_string(info.windowRect.posY_);
         jsonRectInfo["width"] = std::to_string(info.windowRect.width_);
         jsonRectInfo["height"] = std::to_string(info.windowRect.height_);
-        jsonInfo["rect"].push_back(std::move(jsonRectInfo));
+        jsonInfo["rect"] = jsonRectInfo;
 
         jsonWindowListsInfo["content"].push_back(std::move(jsonInfo));
     }
@@ -152,4 +152,4 @@ void WindowInspector::SendMessageToIDE()
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", jsonWindowListsInfoStr.c_str());
     sendMessage_(jsonWindowListsInfoStr);
 }
-}  // namespace Rosen::OHOS
+} // namespace Rosen::OHOS
