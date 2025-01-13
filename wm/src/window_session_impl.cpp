@@ -2900,6 +2900,7 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
             TLOGNE(WmsLogTag::WMS_EVENT, "uiContent is null!");
             return;
         }
+        TLOGNI(WmsLogTag::WMS_EVENT, "name: %{public}s, value: %{public}s", eventName, eventValue);
         uiContent->OnContainerModalEvent(eventName, eventValue);
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_SendContainerModalEvent");
