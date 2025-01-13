@@ -566,6 +566,8 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor03, Function | SmallTe
 
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowSession->DisableAppWindowDecor());
+    windowSession->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    windowSession->Destroy(true);
 }
 
 /**
