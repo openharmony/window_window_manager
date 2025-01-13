@@ -505,6 +505,11 @@ private:
  * @brief parameter of transform in single hand mode.
  */
 struct SingleHandTransform {
+    int32_t posX = 0;
+    int32_t posY = 0;
+    float scaleX = 0;
+    float scaleY = 0;
+
     bool operator==(const SingleHandTransform& right) const
     {
         return posX == right.posX && MathHelper::NearEqual(scaleX, right.scaleX) &&
@@ -514,17 +519,6 @@ struct SingleHandTransform {
     bool operator!=(const SingleHandTransform& right) const
     {
         return !(*this == right);
-    }
-
-    int32_t posX = 0;
-    int32_t posY = 0;
-    float scaleX = 0;
-    float scaleY = 0;
-
-    static const SingleHandTransform& Identity()
-    {
-        static SingleHandTransform I;
-        return I;
     }
 
     bool Marshalling(Parcel& parcel) const
