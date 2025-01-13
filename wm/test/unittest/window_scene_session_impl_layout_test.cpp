@@ -222,6 +222,9 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, Function | SmallTe
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9;
+
     WindowLimits windowLimits = { 2000, 2000, 2000, 2000, 0.0f, 0.0f };
     EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, false));
     WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
@@ -266,6 +269,9 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits06, Function | SmallTe
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
+
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9;
 
     WindowLimits windowLimits = { 2000, 2000, 2000, 2000, 0.0f, 0.0f };
     EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, true));
