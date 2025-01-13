@@ -16,8 +16,8 @@
 #include "js_pip_utils.h"
 
 #include <string>
-#include "wm_common.h"
 #include "window.h"
+#include "wm_common.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
