@@ -7069,6 +7069,17 @@ void ScreenSessionManager::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldS
     clientProxy_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
 }
 
+void ScreenSessionManager::OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion)
+{
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", isSecondaryReflexion: %{public}d", screenId,
+        isSecondaryReflexion);
+    if (!clientProxy_) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
+}
+
 int32_t ScreenSessionManager::GetCameraStatus()
 {
     return cameraStatus_;
