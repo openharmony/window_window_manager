@@ -487,7 +487,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SwitchFreeMultiWindow01, Function | SmallT
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetWindowName("SetCustomDensity01");
+    window->property_->SetWindowName("SwitchFreeMultiWindow01");
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     ref = window->SwitchFreeMultiWindow(false);
     ASSERT_EQ(WSError::WS_ERROR_REPEAT_OPERATION, ref);
