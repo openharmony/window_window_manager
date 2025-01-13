@@ -630,8 +630,10 @@ void ScreenSessionManager::FreeDisplayMirrorNodeInner(const sptr<ScreenSession> 
         if (displayNode == nullptr) {
             return;
         }
-        hdmiScreenCount_ = hdmiScreenCount_ > 0 ? hdmiScreenCount_ - 1 : 0;
-        NotifyCaptureStatusChanged();
+        if (!g_isPcDevice) {
+            hdmiScreenCount_ = hdmiScreenCount_ > 0 ? hdmiScreenCount_ - 1 : 0;
+            NotifyCaptureStatusChanged();
+        }
         displayNode->RemoveFromTree();
         mirrorSession->ReleaseDisplayNode();
         displayNode = nullptr;
@@ -1012,13 +1014,13 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
             TLOGW(WmsLogTag::DMS, "need to change screen");
             ScreenId internalScreenId = GetInternalScreenId();
             sptr<ScreenSession> internalSession = GetScreenSession(internalScreenId);
-            MultiScreenManager::GetInstance().ExternalScreenDisconnectChange(internalSession, screenSession);
 
             if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
                 MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_EXIT_STR);
             }
         } else {
             MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_MIRROR, MULTI_SCREEN_EXIT_STR);
+            NotifyCaptureStatusChanged(false);
         }
         MultiScreenPositionOptions defaultOptions = { GetDefaultScreenId(), 0, 0 };
         SetRelativePositionForDisconnect(defaultOptions);
@@ -1690,8 +1692,10 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
     screenSession->SetIsRealScreen(true);
     screenSession->SetIsCurrentInUse(true);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
-    hdmiScreenCount_ = hdmiScreenCount_ + 1;
-    NotifyCaptureStatusChanged();
+    if (!g_isPcDevice) {
+        hdmiScreenCount_ = hdmiScreenCount_ + 1;
+        NotifyCaptureStatusChanged();
+    }
     return screenSession;
 }
 
@@ -5813,6 +5817,20 @@ void ScreenSessionManager::NotifyCaptureStatusChanged()
     }
 }
 
+void ScreenSessionManager::NotifyCaptureStatusChanged(bool isCapture)
+{
+    auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER);
+    if (agents.empty()) {
+        return;
+    }
+    for (auto& agent : agents) {
+        int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        if (!IsFreezed(agentPid, DisplayManagerAgentType::CAPTURE_STATUS_CHANGED_LISTENER)) {
+            agent->NotifyCaptureStatusChanged(isCapture);
+        }
+    }
+}
+
 void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info)
 {
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER);
@@ -6733,10 +6751,23 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
     }
     if (screenMode == MultiScreenMode::SCREEN_MIRROR) {
         MultiScreenModeChange(mainScreenId, secondaryScreenId, "mirror");
-        MultiScreenPositionOptions defaultOptions = { GetDefaultScreenId(), 0, 0 };
-        SetRelativePositionForDisconnect(defaultOptions);
+        sptr<ScreenSession> screenSession = GetScreenSession(secondaryScreenId);
+        if (screenSession && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            MultiScreenPositionOptions defaultOptions = { GetDefaultScreenId(), 0, 0 };
+            SetRelativePositionForDisconnect(defaultOptions);
+            NotifyCaptureStatusChanged(true);
+        }
     } else if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
+        bool lastScreenMirror = false;
+        sptr<ScreenSession> screenSession = GetScreenSession(secondaryScreenId);
+        if (screenSession && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            lastScreenMirror = true;
+        }
         MultiScreenModeChange(mainScreenId, secondaryScreenId, "extend");
+        if (screenSession && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND &&
+            lastScreenMirror) {
+            NotifyCaptureStatusChanged(false);
+        }
     } else {
         TLOGE(WmsLogTag::DMS, "operate mode error");
     }
