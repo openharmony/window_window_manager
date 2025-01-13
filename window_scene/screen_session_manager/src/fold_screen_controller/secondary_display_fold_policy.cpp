@@ -337,4 +337,24 @@ Drawing::Rect SecondaryDisplayFoldPolicy::GetScreenSnapshotRect()
     }
     return snapshotRect;
 }
+
+void SecondaryDisplayFoldPolicy::SetMainScreenRegion(DMRect& mainScreenRegion)
+{
+    if (currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        mainScreenRegion.posX_ = 0;
+        mainScreenRegion.posY_ = 0;
+        mainScreenRegion.width_ = screenParams_[SCREEN_HEIGHT];
+        mainScreenRegion.height_ = screenParams_[MAIN_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::FULL) {
+        mainScreenRegion.posX_ = 0;
+        mainScreenRegion.posY_ = screenParams_[FULL_STATUS_OFFSET_X];
+        mainScreenRegion.width_ = screenParams_[SCREEN_HEIGHT];
+        mainScreenRegion.height_ = screenParams_[FULL_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        mainScreenRegion.posX_ = 0;
+        mainScreenRegion.posY_ = 0;
+        mainScreenRegion.width_ = screenParams_[SCREEN_HEIGHT];
+        mainScreenRegion.height_ = screenParams_[GLOBAL_FULL_STATUS_WIDTH];
+    }
+}
 } // namespace OHOS::Rosen
