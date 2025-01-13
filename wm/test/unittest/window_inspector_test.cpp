@@ -66,6 +66,43 @@ HWTEST_F(WindowInspetorTest, UnregisterCallback, Function | SmallTest | Level2)
     EXPECT_EQ(nullptr, WindowInspector::GetInstance().setWMSCallback_);
     EXPECT_EQ(nullptr, WindowInspector::GetInstance().sendMessage_);
 }
+
+/**
+ * @tc.name: ProcessArkUIInspectorMessage01
+ * @tc.desc: ProcessArkUIInspectorMessage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInspetorTest, ProcessArkUIInspectorMessage, Function | SmallTest | Level2)
+{
+    std::string message1 = "{method:WMS,params:{interface:getCurrentProcessWindowList}}";
+    auto ret = WindowInspector::GetInstance().ProcessArkUIInspectorMessage(message1);
+    EXPECT_EQ(false, ret);
+
+    std::string message2 = "{method:WMS.windowList,params:{interface:get}}";
+    ret = WindowInspector::GetInstance().ProcessArkUIInspectorMessage(message2);
+    EXPECT_EQ(false, ret);
+
+    std::string message3 = "{method:WMS.windowList,params:{interface:getCurrentProcessWindowList}}";
+    ret = WindowInspector::GetInstance().ProcessArkUIInspectorMessage(message3);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: TransformDataToJson01
+ * @tc.desc: TransformDataToJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInspetorTest, TransformDataToJson, Function | SmallTest | Level2)
+{
+    Rect windowRect = { 100, 100, 100, 100 };
+    std::vector<WindowListsInfo> windowListsInfo;
+    windowListsInfo.push_back({ "test01", 1, 1, windowRect});
+    WindowInspector::GetInstance().TransformDataToJson(windowListsInfo);
+    std::string ret =
+        "{type:window,content:[{windowName:test01,winId:1,type:1,rect:[{startX:100,startY:100,width:100,height:100}]}]"
+        "}";
+    EXPECT_EQ(ret, WindowInspector::GetInstance().jsonWindowListsInfoStr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
