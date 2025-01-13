@@ -251,7 +251,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenOn(sptr
         screenId_ = SCREEN_ID_FULL;
         ChangeScreenDisplayModePower(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
         SetdisplayModeChangeStatus(false);
-        RSInterfaces::GetInstance().NotifyScreenSwitched(SCREEN_ID_MAIN);
+
         // on main screen
         TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToMain: IsFoldScreenOn is true, screenIdMain ON.");
         screenId_ = SCREEN_ID_MAIN;
@@ -313,7 +313,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayModeToFullWhenFoldScreenOn(sptr
         screenId_ = SCREEN_ID_MAIN;
         ChangeScreenDisplayModePower(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
         SetdisplayModeChangeStatus(false);
-        RSInterfaces::GetInstance().NotifyScreenSwitched(SCREEN_ID_FULL);
+
         // on full screen
         TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToFull: IsFoldScreenOn is true, screenIdFull ON.");
         screenId_ = SCREEN_ID_FULL;
