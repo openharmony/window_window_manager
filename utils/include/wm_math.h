@@ -32,6 +32,16 @@ inline bool NearZero(float val)
     return val < POS_ZERO && val > NAG_ZERO;
 }
 
+inline bool NearEqual(float left, float right)
+{
+    return abs(left - right) < POS_ZERO;
+}
+
+inline bool NearEqual(int32_t left, int32_t right)
+{
+    return left == right;
+}
+
 inline float ToRadians(float degrees)
 {
     return degrees * PI / 180.0f;

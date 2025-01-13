@@ -504,14 +504,12 @@ private:
  * @brief parameter of transform in single hand mode.
  */
 struct SingleHandTransform {
-    SingleHandTransform() : posX(0), posY(0), scaleX(1.0f), scaleY(1.0f) {}
-
     bool operator==(const SingleHandTransform& right) const
     {
-        return NearEqual(posX, right.posX) &&
-               NearEqual(posY, right.posY) &&
-               NearEqual(scaleX, right.scaleX) &&
-               NearEqual(scaleY, right.scaleY);
+        return MathHelper::NearEqual(posX, right.posX) &&
+               MathHelper::NearEqual(posY, right.posY) &&
+               MathHelper::NearEqual(scaleX, right.scaleX) &&
+               MathHelper::NearEqual(scaleY, right.scaleY);
     }
 
     bool operator!=(const SingleHandTransform& right) const
@@ -519,10 +517,10 @@ struct SingleHandTransform {
         return !(*this == right);
     }
 
-    int32_t posX;
-    int32_t posY;
-    float scaleX;
-    float scaleY;
+    int32_t posX = 0;
+    int32_t posY = 0;
+    float scaleX = 0;
+    float scaleY = 0;
 
     static const SingleHandTransform& Identity()
     {
@@ -542,17 +540,6 @@ struct SingleHandTransform {
         posY = parcel.ReadInt32();
         scaleX = parcel.ReadFloat();
         scaleY = parcel.ReadFloat();
-    }
-
-private:
-    static inline bool NearEqual(float left, float right)
-    {
-        return abs(left - right) < 0.001f;
-    }
-
-    static inline bool NearEqual(int32_t left, int32_t right)
-    {
-        return left == right;
     }
 };
 
