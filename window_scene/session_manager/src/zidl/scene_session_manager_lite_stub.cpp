@@ -131,6 +131,12 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleNotifyAppUseControlList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MINIMIZE_MAIN_SESSION):
             return HandleMinimizeMainSession(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_HAS_FLOAT_FOREGROUND):
+            return HandleHasFloatingWindowForeground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO):
+            return HandleLockSessionByAbilityInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION_BY_ABILITY_INFO):
+            return HandleUnlockSessionByAbilityInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -908,6 +914,87 @@ int SceneSessionManagerLiteStub::HandleMinimizeMainSession(MessageParcel& data, 
     }
     WMError ret = MinimizeMainSession(bundleName, appIndex, userId);
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string moduleName;
+    if (!data.ReadString(moduleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read moduleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string abilityName;
+    if (!data.ReadString(abilityName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read abilityName");
+        return ERR_INVALID_DATA;
+    }
+    int32_t appIndex = 0;
+    if (!data.ReadInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = LockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnlockSessionByAbilityInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string moduleName;
+    if (!data.ReadString(moduleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read moduleName");
+        return ERR_INVALID_DATA;
+    }
+    std::string abilityName;
+    if (!data.ReadString(abilityName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read abilityName");
+        return ERR_INVALID_DATA;
+    }
+    int32_t appIndex = 0;
+    if (!data.ReadInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UnlockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "in");
+    sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "AbilityToken is null.");
+        return ERR_INVALID_DATA;
+    }
+    bool hasOrNot = false;
+    WMError errCode = HasFloatingWindowForeground(abilityToken, hasOrNot);
+    if (!reply.WriteBool(hasOrNot)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write hasOrNot failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

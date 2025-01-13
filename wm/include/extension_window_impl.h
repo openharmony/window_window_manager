@@ -33,7 +33,9 @@ public:
     WMError HideNonSecureWindows(bool shouldHide) override;
     WMError SetWaterMarkFlag(bool isEnable) override;
     WMError HidePrivacyContentForHost(bool needHide) override;
+    bool IsPcWindow() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError OccupyEvents(int32_t eventFlags) override;
     
 private:
     sptr<Window> windowExtensionSessionImpl_;

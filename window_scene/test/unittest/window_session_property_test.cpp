@@ -475,7 +475,6 @@ HWTEST_F(WindowSessionPropertyTest, IsFloatingWindowAppType, Function | SmallTes
 HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(nullptr, property);
     Rect rect { 4, 4, 4, 4 };
     std::vector<Rect> vRect { rect };
     property->SetPersistentId(0);
@@ -483,7 +482,7 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Lev
     EXPECT_EQ(nullptr, property->touchHotAreasChangeCallback_);
     property->SetTouchHotAreas(vRect);
 
-    auto func = [](){};
+    auto func = []() {};
     property->SetPersistentId(1);
     property->SetSessionPropertyChangeCallback(func);
     property->SetTouchHotAreas(vRect);
@@ -502,7 +501,6 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Lev
 HWTEST_F(WindowSessionPropertyTest, SetKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(nullptr, property);
     KeyboardTouchHotAreas hotAreas;
     Rect rect { 4, 4, 4, 4 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
@@ -514,7 +512,7 @@ HWTEST_F(WindowSessionPropertyTest, SetKeyboardTouchHotAreas, Function | SmallTe
     EXPECT_EQ(nullptr, property->touchHotAreasChangeCallback_);
     property->SetKeyboardTouchHotAreas(hotAreas);
 
-    auto func = [](){};
+    auto func = []() {};
     property->SetPersistentId(1);
     property->SetSessionPropertyChangeCallback(func);
     property->SetKeyboardTouchHotAreas(hotAreas);
@@ -564,15 +562,15 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSystemBarMap, Function | SmallT
  */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | SmallTest | Level2)
 {
-    Parcel parcel = Parcel();
+    Parcel parcel;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     Rect rect { 4, 4, 4, 4 };
     std::vector<Rect> vRect { rect };
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetTouchHotAreas(vRect);
     windowSessionProperty.MarshallingTouchHotAreas(parcel);
     windowSessionProperty.UnmarshallingTouchHotAreas(parcel, property);
+    ASSERT_NE(0, property->touchHotAreas_.size());
 }
 
 /**
@@ -582,9 +580,8 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
  */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
-    Parcel parcel = Parcel();
+    Parcel parcel;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     KeyboardTouchHotAreas hotAreas;
     Rect rect { 4, 4, 4, 4 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
@@ -595,6 +592,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingKeyboardTouchHotAreas, Function
     windowSessionProperty.SetKeyboardTouchHotAreas(hotAreas);
     windowSessionProperty.MarshallingKeyboardTouchHotAreas(parcel);
     windowSessionProperty.UnmarshallingKeyboardTouchHotAreas(parcel, property);
+    ASSERT_NE(0, property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_.size());
 }
 
 /**
@@ -912,8 +910,8 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
-    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
 
@@ -954,8 +952,8 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
-    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
 }
@@ -1231,9 +1229,8 @@ HWTEST_F(WindowSessionPropertyTest, SetTokenState02, Function | SmallTest | Leve
  */
 HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTest | Level2)
 {
-    Parcel parcel = Parcel();
+    Parcel parcel;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     std::vector<Rect> rects;
     for (int i = 0; i < 55; i++) {
         Rect rect { i, i, i, i };
@@ -1251,9 +1248,8 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTe
  */
 HWTEST_F(WindowSessionPropertyTest, MarshallingKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
-    Parcel parcel = Parcel();
+    Parcel parcel;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
     KeyboardTouchHotAreas hotAreas;
     for (int i = 0; i < 55; i++) {
         Rect rect { i, i, i, i };
@@ -1352,8 +1348,6 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
 HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetIsSystemKeyboard(false);
     ASSERT_EQ(false, property->IsSystemKeyboard());
     property->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, property->IsSystemKeyboard());
@@ -1386,6 +1380,35 @@ HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | L
     uint32_t avoidAreaOption = 2;
     property->SetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(2, property->GetAvoidAreaOption());
+}
+
+/**
+ * @tc.name: SetBackgroundAlpha
+ * @tc.desc: SetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 0;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+    backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+}
+
+/**
+ * @tc.name: GetBackgroundAlpha
+ * @tc.desc: GetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(2, property->GetBackgroundAlpha());
 }
 } // namespace
 } // namespace Rosen

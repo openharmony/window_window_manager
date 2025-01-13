@@ -23,6 +23,7 @@ config("window_scene_common_public_config") {
     "${window_base_path}/utils/include",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/interfaces/innerkits/dm",
+    "${window_base_path}/interfaces/innerkits/extension",
   ]
 }
 
@@ -36,6 +37,7 @@ ohos_shared_library("window_scene_common") {
     debug = false
   }
   sources = [
+    "src/extension_data_handler.cpp",
     "src/session_permission.cpp",
     "src/task_scheduler.cpp",
     "src/window_session_property.cpp",
@@ -64,17 +66,11 @@ ohos_shared_library("window_scene_common") {
     "samgr:samgr_proxy",
   ]
 
-  defines = []
-
-  if (window_manager_feature_virtual_keyboard) {
-    external_deps += [ "virtual_keyboard_service:virtual_keyboard_base" ]
-    defines += [ "OHOS_BUILD_ENABLE_VIRTUAL_KEYBOARD" ]
-  }
-
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = "window_manager"
   subsystem_name = "window"
 
+  defines = []
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }

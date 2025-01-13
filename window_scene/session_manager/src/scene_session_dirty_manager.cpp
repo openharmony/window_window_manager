@@ -222,18 +222,15 @@ static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, 
     sptr<SceneSession> session = (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) ?
         sceneSession->GetKeyboardSession() : sceneSession;
     auto sessionProperty = session->GetSessionProperty();
-
     KeyboardTouchHotAreas keyboardTouchHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
-
     auto displayId = sessionProperty->GetDisplayId();
     std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
     }
-    auto screenProperty = screensProperties[displayId];
+    const auto& screenProperty = screensProperties[displayId];
     bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
-
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         if (keyboardTouchHotAreas.isKeyboardEmpty()) {
             return;
@@ -453,14 +450,14 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
 }
 
 void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
-    MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession)
+    MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession,
+    const ExtensionWindowEventInfo& extensionInfo)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
 
-    auto extensionInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     windowInfo.id = extensionInfo.persistentId;
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
         MMI::Rect windowRect = {
@@ -479,17 +476,17 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
         };
         touchHotAreas.emplace_back(touchRect);
         windowInfo.defaultHotAreas = touchHotAreas;
-        windowInfo.pointerHotAreas = touchHotAreas;
+        windowInfo.pointerHotAreas = std::move(touchHotAreas);
         Matrix3f transform;
         CalTransform(sceneSession, transform, true);
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
-        windowInfo.transform = transformData;
+        windowInfo.transform = std::move(transformData);
     }
 
     windowInfo.agentWindowId = extensionInfo.persistentId;
     windowInfo.pid = extensionInfo.pid;
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
-    windowInfo.pointerChangeAreas = pointerChangeAreas;
+    windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
     windowInfo.zOrder = windowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
 
     windowInfoList.emplace_back(windowInfo);
@@ -523,8 +520,8 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             iter->second->GetZOrder() > sceneSessionValue->GetZOrder()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-        } else if (sceneSessionValue->HasModalUIExtension()) {
-            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
+        } else if (auto modalUIExtensionEventInfo = sceneSessionValue->GetLastModalUIExtensionEventInfo()) {
+            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue, *modalUIExtensionEventInfo);
         }
         TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);

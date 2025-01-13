@@ -17,11 +17,52 @@
 
 #include "ipc_skeleton.h"
 
+#include "ui_extension/host_data_handler.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
+std::set<int32_t> g_extensionPersistentIdSet;
+std::mutex g_extensionPersistentIdMutex;
+constexpr uint32_t EXTENSION_ID_FLAG = 0x40000000;
+constexpr uint32_t PID_LENGTH = 18;
+constexpr uint32_t PID_MASK = (1 << PID_LENGTH) - 1;
+constexpr uint32_t PERSISTENTID_LENGTH = 12;
+constexpr uint32_t PERSISTENTID_MASK = (1 << PERSISTENTID_LENGTH) - 1;
+
+void TryUpdateExtensionPersistentId(int32_t& persistentId)
+{
+    std::lock_guard lock(g_extensionPersistentIdMutex);
+    if (g_extensionPersistentIdSet.count(persistentId) == 0) {
+        g_extensionPersistentIdSet.insert(persistentId);
+        return;
+    }
+    uint32_t assembledPersistentId = (static_cast<uint32_t>(getpid()) & PID_MASK) << PERSISTENTID_LENGTH;
+    uint32_t persistentIdValue = assembledPersistentId | EXTENSION_ID_FLAG;
+    int32_t min = static_cast<int32_t>(persistentIdValue);
+    int32_t max = static_cast<int32_t>(persistentIdValue | PERSISTENTID_MASK);
+    uint32_t count = 0;
+    while (g_extensionPersistentIdSet.count(persistentId)) {
+        persistentId++;
+        if (persistentId > max) {
+            persistentId = min;
+        }
+        count++;
+        if (count > PERSISTENTID_MASK) {
+            persistentId = INVALID_SESSION_ID;
+            TLOGE(WmsLogTag::WMS_UIEXT, "can't generate Id");
+            return;
+        }
+    }
+    g_extensionPersistentIdSet.insert(persistentId);
+}
+
+void RemoveExtensionPersistentId(int32_t persistentId)
+{
+    std::lock_guard lock(g_extensionPersistentIdMutex);
+    g_extensionPersistentIdSet.erase(persistentId);
+}
 } // namespace
 
 void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(int32_t keyEventId, bool isPreImeEvent,
@@ -129,14 +170,17 @@ void ChannelDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
 {
-    WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info.persistentId_);
+    TryUpdateExtensionPersistentId(persistentId_);
+    dataHandler_ = std::make_shared<Extension::HostDataHandler>();
+    TLOGD(WmsLogTag::WMS_UIEXT, "Create, bundle:%{public}s, module:%{public}s, ability:%{public}s, id:%{public}d.",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), persistentId_);
 }
 
 ExtensionSession::~ExtensionSession()
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "realease extension session");
+    TLOGI(WmsLogTag::WMS_UIEXT, "realease extension, id=%{public}d", persistentId_);
+    RemoveExtensionPersistentId(persistentId_);
     if (windowEventChannel_ == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "window event channel is null");
         return;
@@ -151,6 +195,18 @@ ExtensionSession::~ExtensionSession()
     channelDeath_ = nullptr;
 }
 
+std::shared_ptr<IDataHandler> ExtensionSession::GetExtensionDataHandler() const
+{
+    return dataHandler_;
+}
+
+void ExtensionSession::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+    const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
+{
+    Session::SetEventHandler(handler, exportHandler);
+    dataHandler_->SetEventHandler(handler);
+}
+
 WSError ExtensionSession::ConnectInner(
     const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
@@ -162,28 +218,29 @@ WSError ExtensionSession::ConnectInner(
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto task = [weakThis = wptr(this), sessionStage, eventChannel, surfaceNode,
-        &systemConfig, property, token, pid, uid]() {
+        &systemConfig, property, token, pid, uid]() NO_THREAD_SAFETY_ANALYSIS {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "session is null");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
         if (eventChannel != nullptr) {
             sptr<IRemoteObject> remoteObject = eventChannel->AsObject();
             if (remoteObject == nullptr) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "remoteObject is null");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "remoteObject is null");
                 return WSError::WS_ERROR_DESTROYED_OBJECT;
             }
 
             session->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
             session->channelDeath_ = sptr<ChannelDeathRecipient>::MakeSptr(session->channelListener_);
             if (remoteObject->IsProxyObject() && !remoteObject->AddDeathRecipient(session->channelDeath_)) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "Failed to add death recipient");
+                TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to add death recipient");
                 return WSError::WS_ERROR_INTERNAL_ERROR;
             }
         }
 
+        session->dataHandler_->SetRemoteProxyObject(sessionStage->AsObject());
         return session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
     };
@@ -485,5 +542,10 @@ int32_t ExtensionSession::GetStatusBarHeight()
         return extSessionEventCallback_->getStatusBarHeightFunc_();
     }
     return 0;
+}
+
+void ExtensionSession::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
+{
+    dataHandler_->NotifyDataConsumer(data, reply);
 }
 } // namespace OHOS::Rosen

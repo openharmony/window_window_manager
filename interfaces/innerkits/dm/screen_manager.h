@@ -22,6 +22,7 @@
 #include "screen_group.h"
 #include "wm_single_instance.h"
 #include "wm_single_instance.h"
+#include <pixel_map.h>
 
 namespace OHOS::Rosen {
 class ScreenManager : public RefBase {
@@ -209,6 +210,15 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    
+    /**
+     * @brief Set privacy image.
+     *
+     * @param screenId Screen id.
+     * @param privacyMaskImg PixelMap object.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
 
     /**
      * @brief Resize virtual screen
@@ -264,6 +274,13 @@ public:
      * @return Power state of screen.
      */
     ScreenPowerState GetScreenPower(ScreenId screenId);
+
+    /**
+     * @brief Get screen power state.
+     *
+     * @return Power state of screen.
+     */
+    ScreenPowerState GetScreenPower();
 
     /**
      * @brief Set screen rotation lock status.

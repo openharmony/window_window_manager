@@ -65,7 +65,9 @@ namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
-using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
+using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
+using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
+using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -696,7 +698,7 @@ public:
      *
      * @return Mode of window.
      */
-    virtual WindowMode GetMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
+    virtual WindowMode GetWindowMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
 
     /**
      * @brief Get alpha of window.
@@ -913,7 +915,7 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
@@ -930,6 +932,20 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
+
+    /**
+     * @brief Is system window or not
+     *
+     * @return True means the window is system window, false means the window is not system window
+     */
+    virtual bool IsSystemWindow() const { return false; }
+
+    /**
+     * @brief Is app window or not
+     *
+     * @return True means the window is app window, false means the window is not app window
+     */
+    virtual bool IsAppWindow() const { return false; }
 
     /**
      * @brief Set this window layout full screen, with hide status bar and nav bar above on this window
@@ -1726,10 +1742,11 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) { return WMError::WM_OK; }
+
     /**
      * @brief Set keyboard touch hot areas.
      *
-     * @param rects Keybaord hot areas of touching.
+     * @param hotAreas keyboard hot areas of touching.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) { return WMError::WM_OK; }
@@ -1850,6 +1867,13 @@ public:
      * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Stop move window. It is called by application. Support pc window and pad free multi-window.
+     *
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StopMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set flag that need remove window input channel.
@@ -2017,6 +2041,13 @@ public:
     virtual bool IsFloatingWindowAppType() const { return false; }
 
     /**
+     * @brief Is pc window or not.
+     *
+     * @return True means pc window, false means the opposite.
+     */
+    virtual bool IsPcWindow() const { return false; }
+
+    /**
      * @brief Is pc window of app type or not.
      *
      * @return True means pc window of app type, false means the opposite.
@@ -2167,7 +2198,10 @@ public:
      * @param windowLimits.
      * @return WMError.
      */
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForcible = false)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
@@ -2508,12 +2542,12 @@ public:
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Set support window modes.
+     * @brief Sets the supported window modes.
      *
-     * @param supportWindowModes Support window modes of the window.
+     * @param supportedWindowModes Supported window modes of the window.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2646,6 +2680,42 @@ public:
      * @return WMError
      */
     virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
+
+    /**
+     * @brief register mouseEvent filter.
+     *
+     * @param mouseEventFilterFunc callback func when window receive mouseEvent
+     * @return WMError
+     */
+    virtual WMError SetMouseEventFilter(MouseEventFilterFunc mouseEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear mouseEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearMouseEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief register touchEvent filter.
+     *
+     * @param touchEventFilterFunc callback func when window receive touchEvent
+     * @return WMError
+     */
+    virtual WMError SetTouchEventFilter(TouchEventFilterFunc touchEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear touchEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearTouchEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register window rect change listener.
@@ -2847,6 +2917,38 @@ public:
      * @return The string corresponding to the window.
      */
     virtual std::string GetClassType() const { return "Window"; }
+
+    /**
+     * @brief Enable or disable window delay raise
+     *
+     * @param isEnabled Enable or disable window delay raise
+     */
+    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window delay raise is enabled
+     *
+     * @return True means window delay raise is enabled
+     */
+    virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
+     * @brief Get whether is mid scene.
+     *
+     * @return True - is mid scene, false - is not mid scene.
+     */
+    virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get layoutTransform of window uiContent.
+     *
+     * @return UiContent of layoutTransform.
+     */
+    virtual const Transform& GetLayoutTransform() const
+    {
+        static const Transform trans;
+        return trans;
+    }
 };
 }
 }

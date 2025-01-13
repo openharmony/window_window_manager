@@ -30,6 +30,16 @@
 #include "display_change_info.h"
 
 namespace OHOS::Rosen {
+/**
+ * @brief snapShot config
+ */
+struct SnapShotConfig {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    Media::Size imageSize_;
+    Media::Rect imageRect_;
+    int rotation_;
+};
+
 class DisplayManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
 friend class DMSDeathRecipient;
@@ -231,7 +241,8 @@ public:
      * @param errorCode error code.
      * @return PixelMap object of screenshot.
      */
-    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
+    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -254,6 +265,16 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
         const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get screenshot with option.
+     *
+     * @param snapShotConfig Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotwithConfig(const SnapShotConfig &snapShotConfig,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
      * @brief Begin to wake up screen.
@@ -622,6 +643,13 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
 
     /**
+     * @brief Get the display mode of the foldable device for external.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayModeForExternal();
+
+    /**
      * @brief Change the display mode of the foldable device.
      *
      * @param mode target display mode to change.
@@ -684,8 +712,10 @@ public:
      *
      * @param screenId ScreenId used in virtual screen.
      * @param windowIdList The windowId list to shield on cast screen.
+     * @param surfaceIdList The surfaceId list to shield on cast screen.
     */
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {});
 
     /**
      * @brief When casting the screen, the display not be skipped after the physical screen is turned off.

@@ -185,6 +185,14 @@ WMError WindowAdapter::GetUnreliableWindowInfo(int32_t windowId,
     return wmsProxy->GetUnreliableWindowInfo(windowId, infos);
 }
 
+WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetAllWindowLayoutInfo(displayId, infos);
+}
+
 WMError WindowAdapter::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -977,12 +985,20 @@ WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& water
     return wmsProxy->SetProcessWatermark(pid, watermarkName, isEnabled);
 }
 
-WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
+WMError WindowAdapter::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return wmsProxy->ReleaseForegroundSessionScreenLock();
+    return wmsProxy->UpdateScreenLockStatusForApp(bundleName, isRelease);
+}
+
+WMError WindowAdapter::IsPcWindow(bool& isPcWindow)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->IsPcWindow(isPcWindow);
 }
 
 WMError WindowAdapter::IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode)
@@ -999,6 +1015,14 @@ WMError WindowAdapter::IsWindowRectAutoSave(const std::string& key, bool& enable
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->IsWindowRectAutoSave(key, enabled);
+}
+
+WMError WindowAdapter::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId);
 }
 
 WMError WindowAdapter::GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
@@ -1040,6 +1064,22 @@ WMError WindowAdapter::GetAppDragResizeType(const std::string& bundleName, DragR
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetAppDragResizeType(bundleName, dragResizeType);
+}
+
+WMError WindowAdapter::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+}
+
+WMError WindowAdapter::NotifyWatchFocusActiveChange(bool isActive)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->NotifyWatchFocusActiveChange(isActive);
 }
 } // namespace Rosen
 } // namespace OHOS

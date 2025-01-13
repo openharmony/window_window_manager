@@ -595,6 +595,12 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
 }
 
+DMError ScreenManager::SetScreenPrivacyMaskImage(ScreenId screenId,
+    const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
+}
+
 DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(screenId, width, height);
@@ -640,6 +646,11 @@ bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChang
 ScreenPowerState ScreenManager::GetScreenPower(ScreenId dmsScreenId)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower(dmsScreenId);
+}
+
+ScreenPowerState ScreenManager::GetScreenPower()
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower();
 }
 
 DMError ScreenManager::SetScreenRotationLocked(bool isLocked)

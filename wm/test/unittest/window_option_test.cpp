@@ -30,10 +30,10 @@ const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_TEST = {
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2 },
 };
 const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_DEFAULT = {
-    { WindowType::WINDOW_TYPE_STATUS_BAR,     SYS_BAR_PROP_DEFAULT },
+    { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_DEFAULT },
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT },
 };
-}
+} // namespace
 class WindowOptionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -41,21 +41,13 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 };
-void WindowOptionTest::SetUpTestCase()
-{
-}
+void WindowOptionTest::SetUpTestCase() {}
 
-void WindowOptionTest::TearDownTestCase()
-{
-}
+void WindowOptionTest::TearDownTestCase() {}
 
-void WindowOptionTest::SetUp()
-{
-}
+void WindowOptionTest::SetUp() {}
 
-void WindowOptionTest::TearDown()
-{
-}
+void WindowOptionTest::TearDown() {}
 
 namespace {
 /**
@@ -66,7 +58,7 @@ namespace {
 HWTEST_F(WindowOptionTest, WindowRect01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    struct Rect rect = {1, 2, 3u, 4u};
+    struct Rect rect = { 1, 2, 3u, 4u };
     option->SetWindowRect(rect);
 
     ASSERT_EQ(1, option->GetWindowRect().posX_);
@@ -316,7 +308,7 @@ HWTEST_F(WindowOptionTest, HitOffset, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetHitOffset(1, 1);
-    PointInfo point = {1, 1};
+    PointInfo point = { 1, 1 };
     ASSERT_EQ(point.x, option->GetHitOffset().x);
     ASSERT_EQ(point.y, option->GetHitOffset().y);
 }
@@ -525,8 +517,7 @@ HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_EQ(false, option->IsSystemKeyboard());
     option->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, option->IsSystemKeyboard());
@@ -560,6 +551,6 @@ HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3
     option->SetIsDensityFollowHost(true);
     ASSERT_EQ(true, option->GetIsDensityFollowHost());
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

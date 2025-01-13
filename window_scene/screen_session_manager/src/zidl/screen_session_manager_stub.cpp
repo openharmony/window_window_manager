@@ -131,6 +131,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId))));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER_AUTO: {
+            reply.WriteUint32(static_cast<uint32_t>(GetScreenPower()));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF: {
             reply.WriteBool(TryToCancelScreenOff());
             break;
@@ -234,6 +238,20 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             DMError result = SetVirtualScreenSurface(screenId, bp);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(result)));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::shared_ptr<Media::PixelMap> privacyMaskImg{nullptr};
+            bool isPrivacyMaskImgValid = data.ReadBool();
+            if (isPrivacyMaskImgValid) {
+                privacyMaskImg = std::shared_ptr<Media::PixelMap>(data.ReadParcelable<Media::PixelMap>());
+                DMError result = SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
+                reply.WriteInt32(static_cast<int32_t>(result));
+            } else {
+                DMError result = SetScreenPrivacyMaskImage(screenId, nullptr);
+                reply.WriteInt32(static_cast<int32_t>(result));
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_CANVAS_ROTATION: {
@@ -378,7 +396,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT: {
             DisplayId displayId = data.ReadUint64();
             DmErrorCode errCode = DmErrorCode::DM_OK;
-            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode);
+            bool isUseDma = data.ReadBool();
+            std::shared_ptr<Media::PixelMap> displaySnapshot = GetDisplaySnapshot(displayId, &errCode, isUseDma);
             reply.WriteParcelable(displaySnapshot == nullptr ? nullptr : displaySnapshot.get());
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
             break;
@@ -669,6 +688,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetFoldStatus())));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS: {
+            static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION: {
             reply.WriteStrongParcelable(GetCurrentFoldCreaseRegion());
             break;
@@ -723,7 +746,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             auto screenId = static_cast<ScreenId>(data.ReadUint64());
             auto screenComponentRotation = data.ReadFloat();
             auto rotation = data.ReadFloat();
-            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation);
+            auto phyRotation = data.ReadFloat();
+            auto screenPropertyChangeType = static_cast<ScreenPropertyChangeType>(data.ReadUint32());
+            UpdateScreenDirectionInfo(screenId, screenComponentRotation, rotation, phyRotation,
+                screenPropertyChangeType);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_UPDATE_SCREEN_ROTATION_PROPERTY: {
@@ -842,7 +868,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 TLOGE(WmsLogTag::DMS, "Failed to receive windowIdList in stub");
                 break;
             }
-            SetVirtualScreenBlackList(screenId, windowIdList);
+            std::vector<uint64_t> surfaceIdList;
+            if (!data.ReadUInt64Vector(&surfaceIdList)) {
+                TLOGE(WmsLogTag::DMS, "Failed to receive surfaceIdList in stub");
+                break;
+            }
+            SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL: {
@@ -912,6 +943,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             int32_t cameraStatus = data.ReadInt32();
             int32_t cameraPosition = data.ReadInt32();
             SetCameraStatus(cameraStatus, cameraPosition);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_ON_DELAY_TIME: {
+            int32_t delay = data.ReadInt32();
+            int32_t ret = SetScreenOnDelayTime(delay);
+            static_cast<void>(reply.WriteInt32(ret));
             break;
         }
         default:

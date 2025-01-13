@@ -24,6 +24,7 @@
 #include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
+const uint32_t FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM = 1;
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
 
 enum class DisplayModeChangeReason : uint32_t {
@@ -51,6 +52,7 @@ public:
     virtual void BootAnimationFinishPowerInit() {};
     virtual void ChangeOnTentMode(FoldStatus currentState);
     virtual void ChangeOffTentMode();
+    virtual Drawing::Rect GetScreenSnapshotRect();
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();
@@ -66,14 +68,16 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
+    std::vector<uint32_t> screenParams_ = {};
     /*
      *    Avoid fold to expand process queues public interface
      */
     bool GetModeChangeRunningStatus();
-    virtual void SetdisplayModeChangeStatus(bool status){};
+    virtual void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false){};
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
-    
+    virtual std::vector<uint32_t> GetScreenParams() { return screenParams_; };
+
 protected:
     /*
      *    Avoid fold to expand process queues private variable

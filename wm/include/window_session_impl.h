@@ -36,6 +36,7 @@
 #include "session/host/include/zidl/session_interface.h"
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
 #include "window_option.h"
 #include "wm_common.h"
 
@@ -112,8 +113,11 @@ public:
     /*
      * PC Window
      */
+    bool IsPcWindow() const override;
     bool IsPcOrPadCapabilityEnabled() const override;
     bool IsPcOrPadFreeMultiWindowMode() const override;
+    WMError SetWindowDelayRaiseEnabled(bool isEnabled) override;
+    bool IsWindowDelayRaiseEnabled() const override;
     WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
         bool isCloseVisible) override;
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
@@ -255,6 +259,7 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    const Transform& GetLayoutTransform() const override;
 
     /*
      * Window Decor
@@ -293,6 +298,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
+    WMError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Window Layout
@@ -319,11 +325,21 @@ public:
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override;
     void NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
 
     /*
      * Window Property
      */
     WSError NotifyDisplayIdChange(DisplayId displayId);
+
+    /*
+     * Window Input Event
+     */
+    WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
+    WMError NotifyWatchFocusActiveChange(bool isActive);
+    void RegisterWatchFocusActiveChangeCallback();
+    void NotifyConsumeResultToFloatWindow(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed);
 
 protected:
     WMError Connect();
@@ -365,7 +381,6 @@ protected:
     void NotifyTransformChange(const Transform& transForm) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
-    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     bool IsVerticalOrientation(Orientation orientation) const;
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
@@ -376,6 +391,18 @@ protected:
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
+
+    /*
+     * PC Event Filter
+     */
+    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    bool FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
+    WMError ClearKeyEventFilter() override;
+    WMError SetMouseEventFilter(MouseEventFilterFunc filter) override;
+    WMError ClearMouseEventFilter() override;
+    WMError SetTouchEventFilter(TouchEventFilterFunc filter) override;
+    WMError ClearTouchEventFilter() override;
 
     /*
      * Sub Window
@@ -415,8 +442,6 @@ protected:
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
-    virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
-    virtual WMError ClearKeyEventFilter() override;
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
@@ -472,6 +497,12 @@ protected:
      */
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
+
+    /*
+     * Window Input Event
+     */
+    bool GetWatchGestureConsumed() const;
+    void SetWatchGestureConsumed(bool isWatchGestureConsumed);
 
 private:
     //Trans between colorGamut and colorSpace
@@ -609,8 +640,6 @@ private:
 
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
-    std::shared_mutex keyEventFilterMutex_;
-    KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
 
@@ -625,11 +654,13 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
-
+    Transform layoutTransform_;
+    
     /*
      * Window Decor
      */
     DecorButtonStyle decorButtonStyle_;
+    int32_t decorHeight_ = 0;
 
     /*
      * Multi Window
@@ -640,6 +671,21 @@ private:
      * PC Window
      */
     uint32_t targetAPIVersion_ = 0;
+
+    /*
+     * Window Input Event
+     */
+    bool isWatchGestureConsumed_ = false;
+
+    /*
+     * PC Event Filter
+     */
+    std::mutex keyEventFilterMutex_;
+    KeyEventFilterFunc keyEventFilter_;
+    std::mutex mouseEventFilterMutex_;
+    MouseEventFilterFunc mouseEventFilter_;
+    std::mutex touchEventFilterMutex_;
+    TouchEventFilterFunc touchEventFilter_;
 };
 } // namespace Rosen
 } // namespace OHOS

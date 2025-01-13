@@ -60,7 +60,7 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
@@ -69,10 +69,14 @@ public:
     WSError SetAspectRatio(float ratio) override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+    WSError GetIsMidScene(bool& isMidScene) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;
 
+    /*
+     * UIExtension
+     */
     WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WSError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError TransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -83,6 +87,7 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void TriggerBindModalUIExtension() override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
@@ -90,7 +95,8 @@ public:
     WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
-    WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isExecuteDelayRaise = false) override;
     bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
@@ -120,7 +126,7 @@ public:
     WSError RemoveStartingWindow() override;
 
     WSError NotifySupportWindowModesChange(
-        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
+        const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

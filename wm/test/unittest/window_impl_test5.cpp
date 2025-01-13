@@ -29,13 +29,13 @@ namespace Rosen {
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 class MockOccupiedAreaChangeListener : public IOccupiedAreaChangeListener {
 public:
-    MOCK_METHOD2(OnSizeChange, void(const sptr<OccupiedAreaChangeInfo>& info,
-        const std::shared_ptr<RSTransaction>& rsTransaction));
+    MOCK_METHOD2(OnSizeChange,
+                 void(const sptr<OccupiedAreaChangeInfo>& info, const std::shared_ptr<RSTransaction>& rsTransaction));
 };
 
 class MockMmiPointerEvent : public MMI::PointerEvent {
 public:
-    MockMmiPointerEvent(): MMI::PointerEvent(0) {}
+    MockMmiPointerEvent() : MMI::PointerEvent(0) {}
 };
 
 class MockWindowDragListener : public IWindowDragListener {
@@ -55,17 +55,11 @@ public:
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
-void WindowImplTest5::SetUpTestCase()
-{
-}
+void WindowImplTest5::SetUpTestCase() {}
 
-void WindowImplTest5::TearDownTestCase()
-{
-}
+void WindowImplTest5::TearDownTestCase() {}
 
-void WindowImplTest5::SetUp()
-{
-}
+void WindowImplTest5::SetUp() {}
 
 void WindowImplTest5::TearDown()
 {
@@ -155,8 +149,8 @@ HWTEST_F(WindowImplTest5, GetSystemAlarmWindowDefaultSize, Function | SmallTest 
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetSystemAlarmWindowDefaultSize");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
-    Rect defaultRect { 10, 10, 10, 10 };
-    Rect resRect { 0, 0, 0, 0 };
+    Rect defaultRect{ 10, 10, 10, 10 };
+    Rect resRect{ 0, 0, 0, 0 };
 
     SingletonContainer::GetInstance().destroyed_ = true;
     resRect = window->GetSystemAlarmWindowDefaultSize(defaultRect);
@@ -600,7 +594,7 @@ HWTEST_F(WindowImplTest5, ConsumePointerEvent02, Function | SmallTest | Level1)
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
 
-    Rect rect { 0, 0, 10u, 10u };
+    Rect rect{ 0, 0, 10u, 10u };
     window->property_->SetWindowRect(rect);
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MockMmiPointerEvent>();
@@ -701,7 +695,7 @@ HWTEST_F(WindowImplTest5, NotifyDragEvent, Function | SmallTest | Level1)
     listener = sptr<MockWindowDragListener>::MakeSptr();
     window->windowDragListeners_.push_back(listener);
     EXPECT_CALL(*listener, OnDrag(_, _, _));
-    PointInfo point({10, 20});
+    PointInfo point({ 10, 20 });
     window->NotifyDragEvent(point, DragEvent::DRAG_EVENT_OUT);
     window->windowDragListeners_.clear();
 }
@@ -1138,8 +1132,8 @@ HWTEST_F(WindowImplTest5, DestroyFloatingWindow, Function | SmallTest | Level1)
     std::vector<sptr<WindowImpl>> v;
     std::vector<sptr<WindowImpl>> v2;
     v.push_back(windowImpl);
-    appFloatingWindowMap.insert({0, v});
-    appFloatingWindowMap.insert({0, v2});
+    appFloatingWindowMap.insert({ 0, v });
+    appFloatingWindowMap.insert({ 0, v2 });
     window->appFloatingWindowMap_ = appFloatingWindowMap;
     window->DestroyFloatingWindow();
 }
@@ -1166,8 +1160,8 @@ HWTEST_F(WindowImplTest5, DestroyDialogWindow, Function | SmallTest | Level1)
     std::vector<sptr<WindowImpl>> v;
     std::vector<sptr<WindowImpl>> v2;
     v.push_back(windowImpl);
-    appDialogWindowMap.insert({0, v});
-    appDialogWindowMap.insert({0, v2});
+    appDialogWindowMap.insert({ 0, v });
+    appDialogWindowMap.insert({ 0, v2 });
     window->appDialogWindowMap_ = appDialogWindowMap;
     window->DestroyFloatingWindow();
 }
@@ -1183,8 +1177,7 @@ HWTEST_F(WindowImplTest5, GetOriginalAbilityInfo, Function | SmallTest | Level1)
     option->SetWindowName("GetOriginalAbilityInfo");
     sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
 
-    std::shared_ptr<AbilityRuntime::Context> context =
-        std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
     window->context_ = context;
     ASSERT_EQ(nullptr, window->GetOriginalAbilityInfo());
 }
@@ -1342,6 +1335,6 @@ HWTEST_F(WindowImplTest5, GetVirtualPixelRatio01, Function | SmallTest | Level1)
     vpr = window->GetVirtualPixelRatio();
     ASSERT_NE(vpr, 1.0f);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

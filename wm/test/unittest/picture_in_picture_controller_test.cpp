@@ -16,12 +16,12 @@
 #include <gtest/gtest.h>
 
 #include <gmock/gmock.h>
+#include "ability_context_impl.h"
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
 #include "window.h"
 #include "wm_common.h"
 #include "xcomponent_controller.h"
-#include "ability_context_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,9 +46,9 @@ public:
     MOCK_METHOD2(GetGlobalPosition, XComponentControllerErrorCode(float& offsetX, float& offsetY));
     MOCK_METHOD2(GetSize, XComponentControllerErrorCode(float& width, float& height));
     MOCK_METHOD1(SetExtController,
-        XComponentControllerErrorCode(std::shared_ptr<XComponentController> xComponentController));
+                 XComponentControllerErrorCode(std::shared_ptr<XComponentController> xComponentController));
     MOCK_METHOD1(ResetExtController,
-        XComponentControllerErrorCode(std::shared_ptr<XComponentController> xComponentController));
+                 XComponentControllerErrorCode(std::shared_ptr<XComponentController> xComponentController));
 };
 
 class PictureInPictureControllerTest : public testing::Test {
@@ -59,21 +59,13 @@ public:
     void TearDown() override;
 };
 
-void PictureInPictureControllerTest::SetUpTestCase()
-{
-}
+void PictureInPictureControllerTest::SetUpTestCase() {}
 
-void PictureInPictureControllerTest::TearDownTestCase()
-{
-}
+void PictureInPictureControllerTest::TearDownTestCase() {}
 
-void PictureInPictureControllerTest::SetUp()
-{
-}
+void PictureInPictureControllerTest::SetUp() {}
 
-void PictureInPictureControllerTest::TearDown()
-{
-}
+void PictureInPictureControllerTest::TearDown() {}
 
 namespace {
 
@@ -535,7 +527,7 @@ HWTEST_F(PictureInPictureControllerTest, UpdateContentSize02, Function | SmallTe
     pipControl->mainWindowXComponentController_ = xComponentController;
     pipControl->UpdateContentSize(width, height);
     pipControl->pipOption_->SetTypeNodeEnabled(false);
-    pipControl->windowRect_ = {0, 0, 0, 0};
+    pipControl->windowRect_ = { 0, 0, 0, 0 };
     pipControl->IsContentSizeChanged(0, 0, 0, 0);
     pipControl->UpdateContentSize(width, height);
     pipControl->IsContentSizeChanged(10, 10, 10, 10);
@@ -582,7 +574,7 @@ HWTEST_F(PictureInPictureControllerTest, IsContentSizeChanged, Function | SmallT
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipControl =
         new (std::nothrow) PictureInPictureController(option, mw, 100, nullptr);
-    pipControl->windowRect_ = {0, 0, 0, 0};
+    pipControl->windowRect_ = { 0, 0, 0, 0 };
     ASSERT_EQ(true, pipControl->IsContentSizeChanged(10.5, 0, 0, 0));
     ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 10.5, 0, 0));
     ASSERT_EQ(true, pipControl->IsContentSizeChanged(0, 0, 10.5, 0));
@@ -861,10 +853,12 @@ HWTEST_F(PictureInPictureControllerTest, ResetExtController, Function | SmallTes
     pipControl->mainWindowXComponentController_ = xComponentController1;
     pipControl->ResetExtController();
     pipControl->pipXComponentController_ = xComponentController;
-    EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
-            .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_TYPE_ERROR));
+    EXPECT_CALL(*(xComponentController1), ResetExtController(_))
+        .Times(1)
+        .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_TYPE_ERROR));
     pipControl->ResetExtController();
-    EXPECT_CALL(*(xComponentController1), ResetExtController(_)).Times(1)
+    EXPECT_CALL(*(xComponentController1), ResetExtController(_))
+        .Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
     pipControl->ResetExtController();
 }
@@ -951,10 +945,12 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
     pipControl->pipXComponentController_ = xComponentController;
     ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->SetXComponentController(xComponentController));
     pipControl->mainWindowXComponentController_ = xComponentController1;
-    EXPECT_CALL(*(xComponentController1), SetExtController(_)).Times(1)
+    EXPECT_CALL(*(xComponentController1), SetExtController(_))
+        .Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_TYPE_ERROR));
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->SetXComponentController(xComponentController));
-    EXPECT_CALL(*(xComponentController1), SetExtController(_)).Times(1)
+    EXPECT_CALL(*(xComponentController1), SetExtController(_))
+        .Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
     ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
 }
@@ -1009,8 +1005,7 @@ HWTEST_F(PictureInPictureControllerTest, DestroyPictureInPictureWindow, Function
     ASSERT_NE(nullptr, mw);
     sptr<PipOption> option = new (std::nothrow) PipOption();
     ASSERT_NE(nullptr, option);
-    sptr<PictureInPictureController> pipControl =
-        sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    sptr<PictureInPictureController> pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
 
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR, pipControl->DestroyPictureInPictureWindow());
@@ -1104,15 +1099,15 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureInner, Function | S
     pipControl->pipOption_ = option;
     pipControl->window_ = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR,
-        pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
+              pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
     pipControl->mainWindow_ = mw;
     ASSERT_EQ(WMError::WM_ERROR_PIP_INTERNAL_ERROR,
-        pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
+              pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
     auto window = sptr<MockWindow>::MakeSptr();
     pipControl->window_ = window;
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, true));
     ASSERT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureInner(StopPipType::NULL_STOP, false));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS
