@@ -2912,8 +2912,8 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     if (MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
-    if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-        WindowHelper::IsSystemWindow(GetWindowType())) {
+    if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+        WindowHelper::IsSystemWindow(GetWindowType())) && !moveDragController_->GetMoveInputBarFlag()) {
         NotifySessionRectChange(rect, reason);
     } else {
         NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
@@ -3049,8 +3049,8 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     WSRect globalRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
         MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
         MoveDragController::TargetRectCoordinate::GLOBAL);
-    moveDragController_->GetMoveInputBarFlag() ? HandleMoveInputBarSurfaceNode(reason)
-                                               : HandleMoveDragSurfaceNode(reason);
+
+    HandleMoveDragSurfaceNode(reason);
     HandleMoveDragSurfaceBounds(relativeRect, globalRect, reason);
     if (reason == SizeChangeReason::DRAG_END) {
         HandleMoveDragEnd(relativeRect, reason);
@@ -3070,42 +3070,6 @@ bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
         WindowHelper::IsMainWindow(property->GetWindowType());
     return reason == SizeChangeReason::DRAG && isPcOrPcModeMainWindow &&
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
-}
-
-void SceneSession::HandleMoveInputBarSurfaceNode(SizeChangeReason reason)
-{
-    auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
-    if (movedSurfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
-        return;
-    }
-    if (moveDragController_->GetInputBarCrossScreen()) {
-        WLOGD("[WMSCom] this is move input bar cross screen");
-        if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
-            auto rsTransaction = RSTransactionProxy::GetInstance();
-            if (rsTransaction != nullptr) {
-                rsTransaction->Begin();
-            }
-
-            DisplayId displayId = moveDragController_->GetMoveInputBarStartDisplayId();
-            auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
-            if (screenSession == nullptr) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "ScreenSession is null");
-                return;
-            }
-            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-                TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to add cross parent child");
-                return;
-            }
-            movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            screenSession->GetDisplayNode()->AddChild(movedSurfaceNode, -1);
-            TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
-            if (rsTransaction != nullptr) {
-                rsTransaction->Commit();
-            }
-        }
-        moveDragController_->SetInputBarCrossScreen(false);
-    }
 }
 
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
