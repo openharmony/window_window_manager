@@ -291,4 +291,13 @@ Drawing::Rect FoldScreenController::GetScreenSnapshotRect()
     }
     return foldScreenPolicy_->GetScreenSnapshotRect();
 }
+
+void FoldScreenController::SetMainScreenRegion(DMRect& mainScreenRegion)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetMainScreenRegion(mainScreenRegion);
+}
 } // namespace OHOS::Rosen

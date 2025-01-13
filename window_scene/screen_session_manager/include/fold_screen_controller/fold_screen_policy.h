@@ -53,6 +53,7 @@ public:
     virtual void ChangeOnTentMode(FoldStatus currentState);
     virtual void ChangeOffTentMode();
     virtual Drawing::Rect GetScreenSnapshotRect();
+    virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();

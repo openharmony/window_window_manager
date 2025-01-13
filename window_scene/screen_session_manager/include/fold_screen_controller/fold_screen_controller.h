@@ -56,6 +56,7 @@ public:
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
     Drawing::Rect GetScreenSnapshotRect();
+    void SetMainScreenRegion(DMRect& mainScreenRegion);
     /*
      *    Avoid fold to expand process queues public interface
      */
