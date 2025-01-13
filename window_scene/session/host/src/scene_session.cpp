@@ -1127,12 +1127,14 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), winRect_.posX_, winRect_.posY_, winRect_.width_, winRect_.height_, reason_);
 
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    GetAllAvoidAreas(avoidAreas);
     // once reason is undefined, not use rsTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
     if (reason_ == SizeChangeReason::UNDEFINED || reason_ == SizeChangeReason::RESIZE || IsMoveToOrDragMove(reason_)) {
-        ret = Session::UpdateRect(winRect_, reason_, updateReason, nullptr);
+        ret = Session::UpdateRectWithAvoidArea(winRect_, reason_, updateReason, nullptr, avoidAreas);
     } else {
-        ret = Session::UpdateRect(winRect_, reason_, updateReason, rsTransaction);
+        ret = Session::UpdateRectWithAvoidArea(winRect_, reason_, updateReason, rsTransaction, avoidAreas);
 #ifdef DEVICE_STATUS_ENABLE
         // When the drag is in progress, the drag window needs to be notified to rotate.
         if (rsTransaction != nullptr) {
@@ -1153,17 +1155,7 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
             TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
-        if (ret == WSError::WS_OK) {
-            if (session->specificCallback_ != nullptr) {
-                if (Session::IsScbCoreEnabled()) {
-                    session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
-                } else {
-                    session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
-                }
-            }
-        }
-        return ret;
+        return session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
     }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
@@ -1706,9 +1698,8 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
         return ret;
     }
     if (isLayoutFinished) {
-        if (specificCallback_ && specificCallback_->onUpdateAvoidAreaByType_) {
-            specificCallback_->onUpdateAvoidAreaByType_(GetPersistentId(), AvoidAreaType::TYPE_SYSTEM);
-        }
+        UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
+        NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
     } else {
         dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
     }

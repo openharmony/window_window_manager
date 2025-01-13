@@ -172,7 +172,7 @@ WSError SessionStageProxy::UpdateDisplayId(uint64_t displayId)
 }
 
 WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const SceneAnimationConfig& config)
+    const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -212,6 +212,21 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     if (!data.WriteInt32(config.animationDuration_)) {
         TLOGE(WmsLogTag::DEFAULT, "Write animation duration failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteUint32(avoidAreas.size())) {
+        TLOGE(WmsLogTag::DEFAULT, "Write avoid area size failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    for (const auto& [type, avoidArea] : avoidAreas) {
+        if (!data.WriteUint32(static_cast<uint32_t>(type))) {
+            TLOGE(WmsLogTag::DEFAULT, "Write avoid area type failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        if (!data.WriteParcelable(&avoidArea)) {
+            TLOGE(WmsLogTag::DEFAULT, "Write avoid area failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
     }
 
     sptr<IRemoteObject> remote = Remote();

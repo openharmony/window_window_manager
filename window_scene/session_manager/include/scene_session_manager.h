@@ -716,12 +716,9 @@ private:
     /*
      * Window Immersive
      */
-    bool UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
-        const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
-    void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
+    void UpdateAvoidSessionAvoidArea(WindowType type);
     void UpdateNormalSessionAvoidArea(int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
-    void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
     void UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate);
 
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);

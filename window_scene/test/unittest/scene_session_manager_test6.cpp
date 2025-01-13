@@ -1827,69 +1827,6 @@ HWTEST_F(SceneSessionManagerTest6, OnDisplayStateChange, Function | SmallTest | 
 }
 
 /**
- * @tc.name: UpdateSessionAvoidAreaIfNeed
- * @tc.desc: UpdateSessionAvoidAreaIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 0;
-    sptr<SceneSession> sceneSession = nullptr;
-    AvoidArea avoidArea;
-    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_KEYBOARD;
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->enterRecent_ = false;
-    auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    ssm_->enterRecent_ = true;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
-    sessionInfo.abilityName_ = "UpdateSessionAvoidAreaIfNeed";
-    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    ssm_->enterRecent_ = false;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    ssm_->lastUpdatedAvoidArea_.clear();
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: UpdateSessionAvoidAreaIfNeed01
- * @tc.desc: UpdateSessionAvoidAreaIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed01, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 0;
-    AvoidArea avoidArea;
-    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_KEYBOARD;
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
-    sessionInfo.abilityName_ = "UpdateSessionAvoidAreaIfNeed";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->enterRecent_ = false;
-    std::map<AvoidAreaType, AvoidArea> mapAvoidAreaType;
-    mapAvoidAreaType.insert(std::make_pair(avoidAreaType, avoidArea));
-    ssm_->lastUpdatedAvoidArea_.insert(std::make_pair(persistentId, mapAvoidAreaType));
-    auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    avoidArea.topRect_.posX_ = 1;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
-}
-
-/**
  * @tc.name: CheckIfReuseSession
  * @tc.desc: CheckIfReuseSession
  * @tc.type: FUNC
