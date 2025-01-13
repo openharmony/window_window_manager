@@ -456,14 +456,14 @@ HWTEST_F(WindowSceneSessionImplTest4, ResetSuperFoldDisplayY, Function | SmallTe
 
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(nullptr, pointerEvent);
-    MMI::PointerEvent::PointerItem pointerItem;
     windowSceneSessionImpl->superFoldOffsetY_ = 150;
+    MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetDisplayY(100);
     pointerEvent->AddPointerItem(pointerItem);
-    int originalDisplayY = pointerItem.GetDisplayY();
+    int32_t originalDisplayY = pointerItem.GetDisplayY();
     windowSceneSessionImpl->ResetSuperFoldDisplayY(pointerEvent);
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
-    int updatedDisplayY = pointerItem.GetDisplayY();
+    int32_t updatedDisplayY = pointerItem.GetDisplayY();
     ASSERT_EQ(updatedDisplayY, originalDisplayY);
 
     pointerItem.SetDisplayY(150);

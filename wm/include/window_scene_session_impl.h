@@ -279,13 +279,17 @@ private:
     void IgnoreClickEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType, float vpr, const WSRect& rect);
-    void ResetSuperFoldDisplayY(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
     void CalculateNewLimitsByLimits(
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+    
+    /*
+     * Window Input Event
+     */
+    void ResetSuperFoldDisplayY(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /*
      * Window Recover

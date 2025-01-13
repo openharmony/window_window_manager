@@ -717,7 +717,7 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
             TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "creaseRects is empty");
             return;
         }
-        auto rect = creaseRects.front();
+        const auto& rect = creaseRects.front();
         superFoldOffsetY_ = rect.height_ + rect.posY_;
         TLOGI(WmsLogTag::WMS_EVENT, "height: %{public}d, posY: %{public}d", rect.height_, rect.posY_);
     }
@@ -726,8 +726,7 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
         TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "pointerItem is empty");
         return;
     }
-    auto displayY = pointerItem.GetDisplayY();
-    if (displayY >= superFoldOffsetY_) {
+    if (auto displayY = pointerItem.GetDisplayY(); displayY >= superFoldOffsetY_) {
         pointerItem.SetDisplayY(displayY - superFoldOffsetY_);
         pointerEvent->AddPointerItem(pointerItem);
         TLOGD(WmsLogTag::WMS_EVENT, "Calculated superFoldOffsetY: %{public}d", superFoldOffsetY_);
