@@ -95,6 +95,43 @@ HWTEST_F(SessionProxyMockTest, TransferAccessibilityEvent03, Function | SmallTes
     MockMessageParcel::ClearAllErrorFlag();
     WLOGI("TransferAccessibilityEvent03 end");
 }
+
+/**
+ * @tc.name: UpdateSessionPropertyByAction
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, Function | SmallTest | Level2)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    SessionProxy* sessionProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+    WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    ASSERT_EQ(WMError::WM_OK, sessionProxy->UpdateSessionPropertyByAction(nullptr,
+        WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON));
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

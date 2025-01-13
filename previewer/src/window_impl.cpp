@@ -161,7 +161,7 @@ WindowType WindowImpl::GetType() const
     return WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
-WindowMode WindowImpl::GetMode() const
+WindowMode WindowImpl::GetWindowMode() const
 {
     return windowMode_;
 }
