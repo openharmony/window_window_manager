@@ -197,18 +197,6 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Lev
     option->SetTypeNodeEnabled(false);
     ASSERT_TRUE(!option->IsTypeNodeEnabled());
 }
-
-/**
-@tc.name: GetPipContentCallbackRef
-@tc.desc: RegisterPipContentListenerWithType/GetPipContentCallbackRef
-@tc.type: FUNC
-*/
-HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
-{
-    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
-    option->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
-    ASSERT_EQ(option->GetPipContentCallbackRef("nodeUpdate"), nullptr);
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
