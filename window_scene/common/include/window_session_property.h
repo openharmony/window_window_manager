@@ -393,7 +393,7 @@ private:
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
-    uint8_t backgroundAlpha_ = 0xff;
+    uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
 
     /*
      * Sub Window
