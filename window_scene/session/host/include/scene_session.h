@@ -749,7 +749,6 @@ private:
      * Move Drag
      */
     void HandleMoveDragSurfaceNode(SizeChangeReason reason);
-    void HandleMoveInputBarSurfaceNode(SizeChangeReason reason);
     void OnMoveDragCallback(SizeChangeReason reason);
     bool IsDragResizeWhenEnd(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
