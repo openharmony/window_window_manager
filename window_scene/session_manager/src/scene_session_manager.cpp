@@ -1857,6 +1857,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
+        sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
+            return this->GetStatusBarAvoidHeight(barArea);
+        });
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -12410,5 +12413,22 @@ WMError SceneSessionManager::HasFloatingWindowForeground(const sptr<IRemoteObjec
         hasOrNot = false;
         return WMError::WM_OK;
     }, __func__);
+}
+
+void SceneSessionManager::SetStatusBarAvoidHeight(int32_t height)
+{
+    const char* const where = __func__;
+    auto task = [this, where, height] {
+        statusBarAvoidHeight_ = height >= 0 ? height : INVALID_STATUS_BAR_AVOID_HEIGHT;
+        TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s, height %{public}d", where, statusBarAvoidHeight_);
+        return WMError::WM_OK;
+    };
+    taskScheduler_->PostSyncTask(task, where);
+}
+
+void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
+{
+    barArea.height_ = statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT ?
+        barArea.height_ : statusBarAvoidHeight_;
 }
 } // namespace OHOS::Rosen
