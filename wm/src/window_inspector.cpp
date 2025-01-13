@@ -90,6 +90,7 @@ void WindowInspector::UnregisterCallback()
 
 bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "called");
     nlohmann::json jsonMessage = nlohmann::json::parse(message, nullptr, false);
     if (!jsonMessage.contains("method") || jsonMessage["method"].get<std::string>() != METHOD_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
@@ -103,6 +104,7 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
     auto callback = wmsGetWindowListsCallback_.lock();
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "wmsGetWindowListsCallback is null");
+        return false;
     }
     auto windowListsInfoVec = (*callback)();
     if (windowListsInfoVec.empty()) {
@@ -139,7 +141,6 @@ void WindowInspector::TransformDataToJson(const std::vector<WindowListsInfo>& wi
         jsonWindowListsInfo["content"].push_back(std::move(jsonInfo));
     }
     jsonWindowListsInfoStr = jsonWindowListsInfo.dump();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "jsonWindowListsInfoStr: %{public}s", jsonWindowListsInfoStr.c_str());
 }
 
 void WindowInspector::SendMessageToIDE()
@@ -148,6 +149,7 @@ void WindowInspector::SendMessageToIDE()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendMessage is null");
         return;
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "jsonWindowListsInfoStr: %{public}s", jsonWindowListsInfoStr.c_str());
     sendMessage_(jsonWindowListsInfoStr);
 }
 }  // namespace Rosen::OHOS
