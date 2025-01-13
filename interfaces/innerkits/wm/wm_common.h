@@ -707,10 +707,8 @@ private:
 struct SingleHandTransform {
     bool operator==(const SingleHandTransform& right) const
     {
-        return MathHelper::NearEqual(posX, right.posX) &&
-               MathHelper::NearEqual(posY, right.posY) &&
-               MathHelper::NearEqual(scaleX, right.scaleX) &&
-               MathHelper::NearEqual(scaleY, right.scaleY);
+        return posX == right.posX && MathHelper::NearEqual(scaleX, right.scaleX) &&
+               posY == right.posY && MathHelper::NearEqual(scaleY, right.scaleY);
     }
 
     bool operator!=(const SingleHandTransform& right) const
