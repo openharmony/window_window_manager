@@ -3997,6 +3997,10 @@ napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_c
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    if ((systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    }
     int32_t height = 0;
     if (!ConvertFromJsValue(env, argv[0], height)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to height");

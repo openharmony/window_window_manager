@@ -5693,7 +5693,7 @@ int32_t SceneSession::GetStatusBarHeight()
         }
         height = statusBarRect.height_;
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "height %{public}d", height);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}d", GetPersistentId(), height);
     return height;
 }
 
