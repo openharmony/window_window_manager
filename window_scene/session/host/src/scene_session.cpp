@@ -3480,6 +3480,26 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
 }
 
+void SceneSession::ResetOcclusionAlpha()
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::ResetAbilityBGAlpha");
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
+        return;
+    }
+    uint8_t alpha8bit = GetSessionProperty()->GetBackgroundAlpha();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u, windowId=%{public}d", alpha8bit, GetPersistentId());
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
+    surfaceNode->SetAbilityBGAlpha(alpha8bit);
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
+}
+
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
@@ -4389,6 +4409,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateWindowModeSupportType(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
             return HandleActionUpdateAvoidAreaOption(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA):
+            return HandleBackgroundAlpha(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4701,6 +4723,18 @@ WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSession
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     sessionProperty->SetAvoidAreaOption(property->GetAvoidAreaOption());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sessionProperty->SetBackgroundAlpha(property->GetBackgroundAlpha());
     return WMError::WM_OK;
 }
 

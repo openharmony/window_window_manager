@@ -259,6 +259,7 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    const Transform& GetLayoutTransform() const override;
 
     /*
      * Window Decor
@@ -654,7 +655,8 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
-
+    Transform layoutTransform_;
+    
     /*
      * Window Decor
      */
