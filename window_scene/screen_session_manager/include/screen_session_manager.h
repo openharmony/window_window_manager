@@ -442,6 +442,7 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     void SetScreenCorrection();
+    bool IsScreenCasting();
 
     /**
      * On/Off screen
