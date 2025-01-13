@@ -979,6 +979,7 @@ HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, Function | SmallTe
     std::vector<sptr<WindowLayoutInfo>> info;
     ssm_->GetAllWindowLayoutInfo(VIRTUAL_DISPLAY_ID, info);
     ssm_->sceneSessionMap_.clear();
+    ASSERT_NE(info.size(), 0);
     ASSERT_EQ(-972, info[0]->rect.posY_);
 }
 
@@ -1014,6 +1015,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function 
     std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
     ssm_->sceneSessionMap_.clear();
+    ASSERT_NE(filteredSessions.size(), 0);
     ASSERT_EQ(130, filteredSessions[0]->GetSessionRect().posY_);
 }
 
