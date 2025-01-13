@@ -712,7 +712,7 @@ void WindowSceneSessionImpl::ResetSuperFoldDisplayY(const std::shared_ptr<MMI::P
             TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "foldCreaseRegion is nullptr");
             return;
         }
-        auto creaseRects = foldCreaseRegion->GetCreaseRects();
+        const auto& creaseRects = foldCreaseRegion->GetCreaseRects();
         if (creaseRects.empty()) {
             TLOGE(WmsLogTag::WMS_INPUT_KEY_FLOW, "creaseRects is empty");
             return;
