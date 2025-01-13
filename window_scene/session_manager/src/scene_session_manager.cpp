@@ -1864,6 +1864,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
+        sceneSession->SetSingleHandTransform(singleHandTransform_);
     }
     return sceneSession;
 }
@@ -4927,9 +4928,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------" << std::endl;
     oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
-        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]"
-        << std::endl;
-
+        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]" << std::endl;
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
@@ -4967,6 +4966,8 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         count++;
     }
     oss << "Focus window: " << GetFocusedSessionId() << std::endl;
+    oss << "SingleHand: X[" << singleHandTransform_.posX << "] Y[" << singleHandTransform_.posY << "] scale["
+        << singleHandTransform_.scaleX << "]" << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
@@ -6055,6 +6056,64 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
     return sceneSession->UpdateWindowMode(mode);
+}
+
+SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform()
+{
+    return singleHandTransform_;
+}
+
+void SceneSessionManager::NotifySingleHandInfoChange(
+    float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode)
+{
+    const char* const funcName = __func__;
+    taskScheduler_->PostAsyncTask([this, singleHandScaleX, singleHandScaleY, singleHandMode, funcName] {
+        if (!systemConfig_.IsPhoneWindow()) {
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: only support phone", funcName);
+            return;
+        }
+        int32_t displayWidth = 0;
+        int32_t displayHeight = 0;
+        ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        if (!GetDisplaySizeById(defaultScreenId, displayWidth, displayHeight)) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: get display size failed", funcName);
+            return;
+        }
+        switch (singleHandMode) {
+            case SingleHandMode::MIDDLE:
+                singleHandTransform_.posX = 0;
+                singleHandTransform_.posY = 0;
+                break;
+            case SingleHandMode::LEFT:
+                singleHandTransform_.posX = 0;
+                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                break;
+            case SingleHandMode::RIGHT:
+                singleHandTransform_.posX = displayWidth * (1 - singleHandScaleX);
+                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                break;
+            default:
+                break;
+        }
+        singleHandTransform_.scaleX = singleHandScaleX;
+        singleHandTransform_.scaleY = singleHandScaleY;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& item : sceneSessionMap_) {
+                auto sceneSession = item.second;
+                if (sceneSession == nullptr) {
+                    continue;
+                }
+                if (!IsInDefaultScreen(sceneSession) ||
+                    sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
+                    continue;
+                }
+                sceneSession->SetSingleHandTransform(singleHandTransform_);
+                sceneSession->NotifySingleHandTransformChange(singleHandTransform_);
+            }
+        }
+        FlushWindowInfoToMMI();
+    }, funcName);
 }
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
@@ -11190,6 +11249,19 @@ void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayIn
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
     TLOGI(WmsLogTag::WMS_MAIN, "update display region to w=%{public}d, h=%{public}d", displayWidth, displayHeight);
+}
+
+bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight)
+{
+    auto region = GetDisplayRegion(displayId);
+    if (region == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "GetDisplayRegion failed, displayId:%{public}lu", displayId);
+        return false;
+    }
+    SkIRect rect = region->getBounds();
+    displayWidth = rect.fRight;
+    displayHeight = rect.fBottom;
+    return true;
 }
 
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)

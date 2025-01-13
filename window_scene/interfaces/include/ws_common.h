@@ -135,6 +135,12 @@ enum class StartMethod : int32_t {
     START_CALL
 };
 
+enum class SingleHandMode : int32_t {
+    LEFT,
+    RIGHT,
+    MIDDLE
+};
+
 /**
  * @brief collaborator type.
  */

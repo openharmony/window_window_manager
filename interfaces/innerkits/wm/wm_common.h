@@ -708,8 +708,8 @@ private:
 struct SingleHandTransform {
     int32_t posX = 0;
     int32_t posY = 0;
-    float scaleX = 0;
-    float scaleY = 0;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
 
     bool operator==(const SingleHandTransform& right) const
     {
@@ -720,6 +720,15 @@ struct SingleHandTransform {
     bool operator!=(const SingleHandTransform& right) const
     {
         return !(*this == right);
+    }
+
+    SingleHandTransform& operator=(const SingleHandTransform& right)
+    {
+        posX = right.posX;
+        posY = right.posY;
+        scaleX = right.scaleX;
+        scaleY = right.scaleY;
+        return *this;
     }
 
     bool Marshalling(Parcel& parcel) const

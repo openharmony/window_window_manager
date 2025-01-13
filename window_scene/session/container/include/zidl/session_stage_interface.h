@@ -124,6 +124,15 @@ public:
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
 
     /**
+     * @brief Notify single hand transform.
+     *
+     * Notify singleHandTransform when single hand mode changed.
+     *
+     * @param singleHandTransform transform to change.
+     */
+    virtual void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) = 0;
+
+    /**
      * @brief Set pip event to client.
      *
      * Set the pip event to client. Such as close, restore, destroy events.
