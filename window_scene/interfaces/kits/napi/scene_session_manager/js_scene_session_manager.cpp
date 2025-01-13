@@ -4000,7 +4000,7 @@ napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_c
     if (SceneSessionManager::GetInstance().GetSystemSessionConfig().IsPcWindow() ||
         SceneSessionManager::GetInstance().GetSystemSessionConfig().IsFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_IMMS, "device not support");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return NapiGetUndefined(env);
     }
     int32_t height = 0;
     if (!ConvertFromJsValue(env, argv[0], height)) {
