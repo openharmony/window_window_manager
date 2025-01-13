@@ -212,6 +212,7 @@ public:
     void GetCloseAbilityWantAndClean(AAFwk::Want& outWant);
     void SetSessionInfo(const SessionInfo& info);
     const SessionInfo& GetSessionInfo() const;
+    DisplayId GetScreenId() const;
     void SetScreenId(uint64_t screenId);
     void SetScreenIdOnServer(uint64_t screenId);
     WindowType GetWindowType() const;
