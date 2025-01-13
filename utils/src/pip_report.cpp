@@ -56,6 +56,8 @@ constexpr char EVENT_KEY_OPERATION_ERROR_REASON[] = "OPERATION_ERROR_REASON";
 constexpr char EVENT_KEY_ACTION_EVENT[] = "ACTION_EVENT";
 constexpr char EVENT_KEY_WINDOW_WIDTH[] = "WINDOW_WIDTH";
 constexpr char EVENT_KEY_WINDOW_HEIGHT[] = "WINDOW_HEIGHT";
+constexpr char TEMPLATE_TYPE[] = "TEMPLATE_TYPE";
+constexpr char ORIGIN_CONTENT_TYPE[] = "ORIGIN_CONTENT_TYPE";
 
 void PiPReporter::SetCurrentPackageName(const std::string& packageName)
 {
@@ -175,7 +177,8 @@ void PiPReporter::ReportPiPRestore()
     LOG_WHEN_ERROR(ret);
 }
 
-void PiPReporter::ReportPiPUpdateContent()
+void PiPReporter::ReportPiPUpdateContent(int32_t originType, int32_t templateType,
+    int32_t isSuccess, const std::string &errorReason)
 {
     TLOGI(WmsLogTag::WMS_PIP, "Report pip widow update typeNode");
     std::string eventName = "updateContent_PIP";
@@ -184,9 +187,12 @@ void PiPReporter::ReportPiPUpdateContent()
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_PNAMEID, PNAMEID,
         EVENT_KEY_PVERSION, PVERSION,
+        ORIGIN_CONTENT_TYPE, originType,
+        TEMPLATE_TYPE, templateType,
+        EVENT_KEY_OPERATION_CODE, isSuccess,
+        EVENT_KEY_OPERATION_ERROR_REASON, errorReason,
         EVENT_KEY_OPERATION_PACKAGE_NAME, GetPackageName());
     LOG_WHEN_ERROR(ret);
 }
-
 } // namespace Rosen
 } // namespace OHOS

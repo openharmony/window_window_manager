@@ -486,9 +486,10 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
 void PictureInPictureController::UpdateContentNodeRef(napi_ref nodeRef)
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent();
     if (pipOption_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
+        TLOGE(WmsLogTag::WMS_PIP, "option is null");
+        SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+            pipOption_->GetPipTemplate(), FAILED, "option is null");
         return;
     }
     pipOption_->SetTypeNodeRef(nodeRef);
@@ -516,18 +517,24 @@ void PictureInPictureController::NotifyNodeUpdate(napi_ref nodeRef)
     TLOGI(WmsLogTag::WMS_PIP, "in");
     if (nodeRef == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "invalid nodeRef");
+        SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+            pipOption_->GetPipTemplate(), FAILED, "invalid nodeRef");
         return;
     }
     if (PictureInPictureManager::IsActiveController(weakRef_)) {
         std::shared_ptr<NativeReference> updateNodeCallbackRef = GetPipContentCallbackRef(UPDATE_NODE);
         if (updateNodeCallbackRef == nullptr) {
             TLOGE(WmsLogTag::WMS_PIP, "updateNodeCallbackRef is null");
+            SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+                pipOption_->GetPipTemplate(), FAILED, "updateNodeCallbackRef is null");
             return;
         }
         napi_value typeNode = nullptr;
         napi_get_reference_value(env_, nodeRef, &typeNode);
         napi_value value[] = {typeNode};
         CallJsFunction(env_, updateNodeCallbackRef->GetNapiValue(), value, 1);
+        SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+            pipOption_->GetPipTemplate(), PIP_SUCCESS, "updateNode success");
     }
 }
 
@@ -745,7 +752,7 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
     return WMError::WM_OK;
 }
 
-WMError PictureInPictureController::RegisterPipContentListenerWithType(std::string type,
+WMError PictureInPictureController::RegisterPipContentListenerWithType(const std::string& type,
     std::shared_ptr<NativeReference> callbackRef)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
@@ -757,7 +764,7 @@ WMError PictureInPictureController::RegisterPipContentListenerWithType(std::stri
     return WMError::WM_OK;
 }
 
-WMError PictureInPictureController::UnRegisterPipContentListenerWithType(std::string type)
+WMError PictureInPictureController::UnRegisterPipContentListenerWithType(const std::string& type)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     if (pipOption_ == nullptr) {
@@ -768,7 +775,7 @@ WMError PictureInPictureController::UnRegisterPipContentListenerWithType(std::st
     return WMError::WM_OK;
 }
 
-std::shared_ptr<NativeReference> PictureInPictureController::GetPipContentCallbackRef(std::string type)
+std::shared_ptr<NativeReference> PictureInPictureController::GetPipContentCallbackRef(const std::string& type)
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetPipContentCallbackRef(type);
 }

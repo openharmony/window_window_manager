@@ -90,9 +90,10 @@ public:
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     sptr<IPiPControlObserver> GetPictureInPictureControlObserver() const;
-    std::shared_ptr<NativeReference> GetPipContentCallbackRef(std::string);
-    WMError RegisterPipContentListenerWithType(std::string, std::shared_ptr<NativeReference> updateNodeCallbackRef);
-    WMError UnRegisterPipContentListenerWithType(std::string);
+    std::shared_ptr<NativeReference> GetPipContentCallbackRef(const std::string&);
+    WMError RegisterPipContentListenerWithType(const std::string&,
+        std::shared_ptr<NativeReference> updateNodeCallbackRef);
+    WMError UnRegisterPipContentListenerWithType(const std::string&);
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
