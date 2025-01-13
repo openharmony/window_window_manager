@@ -33,6 +33,10 @@ class ExtensionWindow {
     return this.__extension_window__.on(type, callback);
   }
 
+  on(type, reasons, callback) {
+    return this.__extension_window__.on(type, reasons, callback);
+  }
+
   off(type, callback) {
     return this.__extension_window__.off(type, callback);
   }
@@ -51,6 +55,10 @@ class ExtensionWindow {
 
   hidePrivacyContentForHost(type, callback) {
     return this.__extension_window__.hidePrivacyContentForHost(type, callback);
+  }
+
+  occupyEvents(eventFlags) {
+    return this.__extension_window__.occupyEvents(eventFlags);
   }
 }
 

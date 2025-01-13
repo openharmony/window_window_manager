@@ -465,25 +465,36 @@ HWTEST_F(SSMgrSpecificWindowTest, ConfigKeyboardAnimation, Function | SmallTest 
 {
     WindowSceneConfig::ConfigItem animationConfig;
     WindowSceneConfig::ConfigItem itemCurve;
-    WindowSceneConfig::ConfigItem itemDurationIn;
-    WindowSceneConfig::ConfigItem itemDurationOut;
-    std::vector<int> curve = {39};
-    std::vector<int> durationIn = {39};
-    std::vector<int> durationOut = {39};
+    WindowSceneConfig::ConfigItem itemDuration;
+    // prepare ItemName
+    WindowSceneConfig::ConfigItem nameProp;
+    std::string name = "cubic";
+    nameProp.SetValue(name);
+    itemCurve.SetProperty({{ "name", nameProp}});
 
-    itemCurve.SetValue(curve);
-    itemCurve.SetValue({{"curve", itemCurve}});
-    itemDurationIn.SetValue(durationIn);
-    itemDurationIn.SetValue({{"durationIn", itemDurationIn}});
-    itemDurationOut.SetValue(durationOut);
-    itemDurationOut.SetValue({{"durationOut", itemDurationOut}});
-    animationConfig.SetValue({{"timing", itemCurve}, {"timing", itemDurationIn}, {"timing", itemDurationOut}});
-    int ret = 0;
+    // prepare duration
+    std::vector<int> durationVec = {39};
+    itemDuration.SetValue(durationVec);
+
+    // prepare timing
+    WindowSceneConfig::ConfigItem timing;
+    WindowSceneConfig::ConfigItem timingObj;
+    timingObj.SetValue({{ "curve", itemCurve }, { "duration", itemDuration}});
+    timing.SetValue({{ "timing", timingObj }});
+
+    WindowSceneConfig::ConfigItem timing2(timing);
+    // prepare animationConfig
+    animationConfig.SetValue({{ "animationIn", timing }, { "animationOut", timing2 }});
+
     ssm_->ConfigKeyboardAnimation(animationConfig);
+    ASSERT_EQ(ssm_->systemConfig_.animationIn_.curveType_, "cubic");
+    ASSERT_EQ(ssm_->systemConfig_.animationIn_.duration_, durationVec.at(0));
+
+    uint32_t result = 150;
     KeyboardSceneAnimationConfig animationIn;
     KeyboardSceneAnimationConfig animationOut;
     ssm_->ConfigDefaultKeyboardAnimation(animationIn, animationOut);
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(animationIn.duration_, result);
 }
 
 /**

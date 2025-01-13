@@ -87,6 +87,8 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::WriteActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::WriteActionUpdateBackgroundAlpha),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -150,6 +152,8 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::ReadActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::ReadActionUpdateBackgroundAlpha),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -428,6 +432,16 @@ bool WindowSessionProperty::IsMainWindowTopmost() const
     return mainWindowTopmost_;
 }
 
+void WindowSessionProperty::SetWindowDelayRaiseEnabled(bool isEnabled)
+{
+    isWindowDelayRaiseEnabled_ = isEnabled;
+}
+
+bool WindowSessionProperty::IsWindowDelayRaiseEnabled() const
+{
+    return isWindowDelayRaiseEnabled_;
+}
+
 void WindowSessionProperty::AddWindowFlag(WindowFlag flag)
 {
     flags_ |= static_cast<uint32_t>(flag);
@@ -588,16 +602,18 @@ uint32_t WindowSessionProperty::GetWindowModeSupportType() const
     return windowModeSupportType_;
 }
 
-void WindowSessionProperty::SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+void WindowSessionProperty::SetSupportedWindowModes(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
-    supportWindowModes_ = supportWindowModes;
+    supportedWindowModes_ = supportedWindowModes;
 }
 
-void WindowSessionProperty::GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const
+void WindowSessionProperty::GetSupportedWindowModes(
+    std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const
 {
     std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
-    supportWindowModes = supportWindowModes_;
+    supportedWindowModes = supportedWindowModes_;
 }
 
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
@@ -615,15 +631,14 @@ bool WindowSessionProperty::IsFloatingWindowAppType() const
     return isFloatingWindowAppType_;
 }
 
-void WindowSessionProperty::setTouchHotAreasInner(std::vector<Rect>& touchHotAreas, const std::vector<Rect>& rects)
+void WindowSessionProperty::setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas)
 {
     if (GetPersistentId() != 0 && rects != touchHotAreas) {
-        std::string rectStr;
+        std::ostringstream oss;
         for (const auto& rect : rects) {
-            rectStr = rectStr + "[" + std::to_string(rect.posX_) + "," + std::to_string(rect.posY_) +
-                "," + std::to_string(rect.width_) + "," + std::to_string(rect.height_) + "]";
+            oss << "[" << rect.posX_ << "," << rect.posY_ << "," << rect.width_ << "," << rect.height_ << "]";
         }
-        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d hot:%{public}s", GetPersistentId(), rectStr.c_str());
+        TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d hot:%{public}s", GetPersistentId(), oss.str().c_str());
     }
     touchHotAreas = rects;
 }
@@ -631,8 +646,8 @@ void WindowSessionProperty::setTouchHotAreasInner(std::vector<Rect>& touchHotAre
 void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 {
     {
-        std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
-        setTouchHotAreasInner(touchHotAreas_, rects);
+        std::lock_guard lock(touchHotAreasMutex_);
+        setTouchHotAreasInner(rects, touchHotAreas_);
     }
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
@@ -642,15 +657,15 @@ void WindowSessionProperty::SetTouchHotAreas(const std::vector<Rect>& rects)
 void WindowSessionProperty::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& keyboardTouchHotAreas)
 {
     {
-        std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+        std::lock_guard lock(touchHotAreasMutex_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, keyboardTouchHotAreas.landscapeKeyboardHotAreas_);
+            keyboardTouchHotAreas.landscapeKeyboardHotAreas_, keyboardTouchHotAreas_.landscapeKeyboardHotAreas_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.portraitKeyboardHotAreas_, keyboardTouchHotAreas.portraitKeyboardHotAreas_);
+            keyboardTouchHotAreas.portraitKeyboardHotAreas_, keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.landscapePanelHotAreas_, keyboardTouchHotAreas.landscapePanelHotAreas_);
+            keyboardTouchHotAreas.landscapePanelHotAreas_, keyboardTouchHotAreas_.landscapePanelHotAreas_);
         setTouchHotAreasInner(
-            keyboardTouchHotAreas_.portraitPanelHotAreas_, keyboardTouchHotAreas.portraitPanelHotAreas_);
+            keyboardTouchHotAreas.portraitPanelHotAreas_, keyboardTouchHotAreas_.portraitPanelHotAreas_);
     }
     if (touchHotAreasChangeCallback_) {
         touchHotAreasChangeCallback_();
@@ -659,13 +674,13 @@ void WindowSessionProperty::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas
 
 void WindowSessionProperty::GetTouchHotAreas(std::vector<Rect>& rects) const
 {
-    std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+    std::lock_guard lock(touchHotAreasMutex_);
     rects = touchHotAreas_;
 }
 
 KeyboardTouchHotAreas WindowSessionProperty::GetKeyboardTouchHotAreas() const
 {
-    std::lock_guard<std::mutex> lock(touchHotAreasMutex_);
+    std::lock_guard lock(touchHotAreasMutex_);
     return keyboardTouchHotAreas_;
 }
 
@@ -777,8 +792,8 @@ bool WindowSessionProperty::MarshallingTouchHotAreasInner(const std::vector<Rect
         return false;
     }
     for (const auto& rect : touchHotAreas) {
-        if (!(parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
-            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_))) {
+        if (!parcel.WriteInt32(rect.posX_) || !parcel.WriteInt32(rect.posY_) ||
+            !parcel.WriteUint32(rect.width_) || !parcel.WriteUint32(rect.height_)) {
             return false;
         }
     }
@@ -793,12 +808,12 @@ bool WindowSessionProperty::MarshallingTouchHotAreas(Parcel& parcel) const
 bool WindowSessionProperty::MarshallingKeyboardTouchHotAreas(Parcel& parcel) const
 {
     return MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, parcel) &&
-        MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel) &&
-        MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel) &&
-        MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel);
+           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel) &&
+           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel) &&
+           MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel);
 }
 
-void WindowSessionProperty::UnmarshallingTouchHotAreasInner(std::vector<Rect>& touchHotAreas, Parcel& parcel)
+void WindowSessionProperty::UnmarshallingTouchHotAreasInner(Parcel& parcel, std::vector<Rect>& touchHotAreas)
 {
     uint32_t size = parcel.ReadUint32();
     if (size > TOUCH_HOT_AREA_MAX_NUM) {
@@ -808,22 +823,19 @@ void WindowSessionProperty::UnmarshallingTouchHotAreasInner(std::vector<Rect>& t
         touchHotAreas.emplace_back(
             Rect{ parcel.ReadInt32(), parcel.ReadInt32(), parcel.ReadUint32(), parcel.ReadUint32() });
     }
-    return;
 }
 
 void WindowSessionProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
 {
-    UnmarshallingTouchHotAreasInner(property->touchHotAreas_, parcel);
-    return;
+    UnmarshallingTouchHotAreasInner(parcel, property->touchHotAreas_);
 }
 
 void WindowSessionProperty::UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
 {
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, parcel);
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel);
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel);
-    UnmarshallingTouchHotAreasInner(property->keyboardTouchHotAreas_.portraitPanelHotAreas_, parcel);
-    return;
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_);
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapePanelHotAreas_);
+    UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitPanelHotAreas_);
 }
 
 bool WindowSessionProperty::MarshallingPiPTemplateInfo(Parcel& parcel) const
@@ -957,10 +969,7 @@ void WindowSessionProperty::UnmarshallingWindowMask(Parcel& parcel, WindowSessio
 
 bool WindowSessionProperty::MarshallingMainWindowTopmost(Parcel& parcel) const
 {
-    if (!parcel.WriteBool(mainWindowTopmost_)) {
-        return false;
-    }
-    if (!parcel.WriteUint32(accessTokenId_)) {
+    if (!parcel.WriteBool(mainWindowTopmost_) || !parcel.WriteUint32(accessTokenId_)) {
         return false;
     }
     return true;
@@ -1159,11 +1168,11 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(compatibleModeInPc_) &&
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
-        parcel.WriteBool(isAppSupportPhoneInPc_) &&
-        parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) && parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
-        parcel.WriteUint32(avoidAreaOption_);
+        parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
+        parcel.WriteUint8(backgroundAlpha_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1245,6 +1254,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAppInstanceKey(parcel.ReadString());
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
+    property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
+    property->SetBackgroundAlpha(parcel.ReadUint8());
     return property;
 }
 
@@ -1295,6 +1306,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     trans_ = property->trans_;
     isFloatingWindowAppType_ = property->isFloatingWindowAppType_;
     touchHotAreas_ = property->touchHotAreas_;
+    keyboardTouchHotAreas_ = property->keyboardTouchHotAreas_;
     hideNonSystemFloatingWindows_ = property->hideNonSystemFloatingWindows_;
     forceHide_ = property->forceHide_;
     keepKeyboardFlag_ = property->keepKeyboardFlag_;
@@ -1327,6 +1339,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     appInstanceKey_ = property->appInstanceKey_;
     isSystemKeyboard_ = property->isSystemKeyboard_;
     avoidAreaOption_ = property->avoidAreaOption_;
+    isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
+    backgroundAlpha_ = property->backgroundAlpha_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1470,6 +1484,11 @@ bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parce
 bool WindowSessionProperty::WriteActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     return parcel.WriteUint32(avoidAreaOption_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateBackgroundAlpha(Parcel& parcel)
+{
+    return parcel.WriteUint8(backgroundAlpha_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
@@ -1616,6 +1635,11 @@ void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel
 void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     SetAvoidAreaOption(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadActionUpdateBackgroundAlpha(Parcel& parcel)
+{
+    SetBackgroundAlpha(parcel.ReadUint8());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -1811,6 +1835,16 @@ void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
 bool WindowSessionProperty::IsSystemKeyboard() const
 {
     return isSystemKeyboard_;
+}
+
+uint8_t WindowSessionProperty::GetBackgroundAlpha() const
+{
+    return backgroundAlpha_;
+}
+
+void WindowSessionProperty::SetBackgroundAlpha(uint8_t alpha)
+{
+    backgroundAlpha_ = alpha;
 }
 } // namespace Rosen
 } // namespace OHOS

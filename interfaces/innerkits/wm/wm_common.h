@@ -27,6 +27,7 @@
 
 #include "../dm/dm_common.h"
 #include "securec.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -139,7 +140,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_PRIMARY = 100,
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
+    WINDOW_MODE_PIP,
+    END = WINDOW_MODE_PIP,
 };
 
 /**
@@ -699,6 +701,43 @@ private:
 };
 
 /**
+ * @struct SingleHandTransform
+ *
+ * @brief parameter of transform in single hand mode.
+ */
+struct SingleHandTransform {
+    int32_t posX = 0;
+    int32_t posY = 0;
+    float scaleX = 0;
+    float scaleY = 0;
+
+    bool operator==(const SingleHandTransform& right) const
+    {
+        return posX == right.posX && MathHelper::NearEqual(scaleX, right.scaleX) &&
+               posY == right.posY && MathHelper::NearEqual(scaleY, right.scaleY);
+    }
+
+    bool operator!=(const SingleHandTransform& right) const
+    {
+        return !(*this == right);
+    }
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(posX) && parcel.WriteInt32(posY) &&
+               parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY);
+    }
+
+    void Unmarshalling(Parcel& parcel)
+    {
+        posX = parcel.ReadInt32();
+        posY = parcel.ReadInt32();
+        scaleX = parcel.ReadFloat();
+        scaleY = parcel.ReadFloat();
+    }
+};
+
+/**
  * @struct SystemBarProperty
  *
  * @brief Property of system bar
@@ -783,7 +822,11 @@ struct Rect {
         oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
         return oss.str();
     }
+
+    static const Rect EMPTY_RECT;
 };
+
+inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
  * @struct RectAnimationConfig
@@ -1162,10 +1205,10 @@ struct WindowLimits {
  * @brief An area of title buttons relative to the upper right corner of the window.
  */
 struct TitleButtonRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const TitleButtonRect& a) const
     {
@@ -1177,6 +1220,14 @@ struct TitleButtonRect {
         return !this->operator==(a);
     }
 
+    void ResetRect()
+    {
+        posX_ = 0;
+        posY_ = 0;
+        width_ = 0;
+        height_ = 0;
+    }
+
     bool IsUninitializedRect() const
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
@@ -1186,6 +1237,34 @@ struct TitleButtonRect {
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+};
+
+/**
+ * @struct WindowLayoutInfo
+ *
+ * @brief Layout info for all windows on the screen.
+ */
+struct WindowLayoutInfo : public Parcelable {
+    Rect rect = { 0, 0, 0, 0 };
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+  
+    static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) ||
+            !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            delete windowLayoutInfo;
+            return nullptr;
+        }
+        return windowLayoutInfo;
     }
 };
 
@@ -1374,12 +1453,11 @@ struct WindowDensityInfo {
 };
 
 /**
- * @class KeyboardLayoutParams
+ * @struct KeyboardLayoutParams
  *
- * @brief Keyboard need adjust layout
+ * @brief Keyboard needs to adjust layout
  */
-class KeyboardLayoutParams : public Parcelable {
-public:
+struct KeyboardLayoutParams : public Parcelable {
     WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     int32_t landscapeAvoidHeight_ = -1;
     int32_t portraitAvoidHeight_ = -1;
@@ -1388,15 +1466,15 @@ public:
     Rect LandscapePanelRect_ { 0, 0, 0, 0 };
     Rect PortraitPanelRect_ { 0, 0, 0, 0 };
 
-    bool operator==(const KeyboardLayoutParams& params) const
+    bool operator==(const KeyboardLayoutParams& other) const
     {
-        return (gravity_ == params.gravity_ &&
-            landscapeAvoidHeight_ == params.landscapeAvoidHeight_ &&
-            portraitAvoidHeight_ == params.portraitAvoidHeight_ &&
-            LandscapeKeyboardRect_ == params.LandscapeKeyboardRect_ &&
-            PortraitKeyboardRect_ == params.PortraitKeyboardRect_ &&
-            LandscapePanelRect_ == params.LandscapePanelRect_ &&
-            PortraitPanelRect_ == params.PortraitPanelRect_);
+        return (gravity_ == other.gravity_ &&
+                landscapeAvoidHeight_ == other.landscapeAvoidHeight_ &&
+                portraitAvoidHeight_ == other.portraitAvoidHeight_ &&
+                LandscapeKeyboardRect_ == other.LandscapeKeyboardRect_ &&
+                PortraitKeyboardRect_ == other.PortraitKeyboardRect_ &&
+                LandscapePanelRect_ == other.LandscapePanelRect_ &&
+                PortraitPanelRect_ == other.PortraitPanelRect_);
     }
 
     bool operator!=(const KeyboardLayoutParams& params) const
@@ -1407,45 +1485,44 @@ public:
     bool isEmpty() const
     {
         return LandscapeKeyboardRect_.IsUninitializedRect() && PortraitKeyboardRect_.IsUninitializedRect() &&
-            LandscapePanelRect_.IsUninitializedRect() && PortraitPanelRect_.IsUninitializedRect();
+               LandscapePanelRect_.IsUninitializedRect() && PortraitPanelRect_.IsUninitializedRect();
     }
 
     static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
-            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
 
     static inline bool ReadParcel(Parcel& parcel, Rect& rect)
     {
         return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
-            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
+               parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
     }
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
-            parcel.WriteInt32(landscapeAvoidHeight_) &&
-            parcel.WriteInt32(portraitAvoidHeight_) &&
-            WriteParcel(parcel, LandscapeKeyboardRect_) &&
-            WriteParcel(parcel, PortraitKeyboardRect_) &&
-            WriteParcel(parcel, LandscapePanelRect_) &&
-            WriteParcel(parcel, PortraitPanelRect_));
+                parcel.WriteInt32(landscapeAvoidHeight_) &&
+                parcel.WriteInt32(portraitAvoidHeight_) &&
+                WriteParcel(parcel, LandscapeKeyboardRect_) &&
+                WriteParcel(parcel, PortraitKeyboardRect_) &&
+                WriteParcel(parcel, LandscapePanelRect_) &&
+                WriteParcel(parcel, PortraitPanelRect_));
     }
 
     static KeyboardLayoutParams* Unmarshalling(Parcel& parcel)
     {
-        KeyboardLayoutParams *params = new(std::nothrow) KeyboardLayoutParams();
-        if (params == nullptr) {
-            return nullptr;
-        }
-        params->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
-        params->landscapeAvoidHeight_ = parcel.ReadInt32();
-        params->portraitAvoidHeight_ = parcel.ReadInt32();
-        if (ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
+        KeyboardLayoutParams* params = new KeyboardLayoutParams();
+        uint32_t gravity;
+        if (parcel.ReadUint32(gravity) &&
+            parcel.ReadInt32(params->landscapeAvoidHeight_) &&
+            parcel.ReadInt32(params->portraitAvoidHeight_) &&
+            ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
             ReadParcel(parcel, params->PortraitKeyboardRect_) &&
             ReadParcel(parcel, params->LandscapePanelRect_) &&
             ReadParcel(parcel, params->PortraitPanelRect_)) {
+            params->gravity_ = static_cast<WindowGravity>(gravity);
             return params;
         }
         delete params;
@@ -1456,10 +1533,9 @@ public:
 /**
  * @struct KeyboardTouchHotAreas
  *
- * @brief keyboard need set hotArea
+ * @brief Keyboard needs to set hotArea
  */
 struct KeyboardTouchHotAreas {
-public:
     std::vector<Rect> landscapeKeyboardHotAreas_;
     std::vector<Rect> portraitKeyboardHotAreas_;
     std::vector<Rect> landscapePanelHotAreas_;

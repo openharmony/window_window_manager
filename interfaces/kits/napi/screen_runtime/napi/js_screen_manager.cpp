@@ -28,6 +28,7 @@
 #include "singleton_container.h"
 #include "surface_utils.h"
 #include "window_manager_hilog.h"
+#include "pixel_map_napi.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -133,6 +134,12 @@ static napi_value SetVirtualScreenSurface(napi_env env, napi_callback_info info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
     return (me != nullptr) ? me->OnSetVirtualScreenSurface(env, info) : nullptr;
+}
+
+static napi_value SetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnSetScreenPrivacyMaskImage(env, info) : nullptr;
 }
 
 static napi_value IsScreenRotationLocked(napi_env env, napi_callback_info info)
@@ -875,10 +882,10 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
             }
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
             WLOGFE("ScreenManager::CreateVirtualScreen failed.");
-            return;
+        } else {
+            task->Resolve(env, CreateJsScreenObject(env, screen));
+            WLOGI("JsScreenManager::OnCreateVirtualScreen success");
         }
-        task->Resolve(env, CreateJsScreenObject(env, screen));
-        WLOGI("JsScreenManager::OnCreateVirtualScreen success");
         delete task;
     };
     NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
@@ -984,6 +991,7 @@ napi_value OnDestroyVirtualScreen(napi_env env, napi_callback_info info)
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(res),
                 "ScreenManager::DestroyVirtualScreen failed."));
             WLOGFE("ScreenManager::DestroyVirtualScreen failed.");
+            delete task;
             return;
         }
         task->Resolve(env, NapiGetUndefined(env));
@@ -1043,6 +1051,58 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
         delete task;
     };
     NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
+napi_value OnSetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
+{
+    WLOGI("JsScreenManager::OnSetScreenPrivacyMaskImage is called");
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    int64_t screenId = -1LL;
+    size_t argc = 4;
+    std::string errMsg = "";
+    napi_value argv[4] = {nullptr};
+    std::shared_ptr<Media::PixelMap> privacyMaskImg;
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errMsg = "Invalid args count, need 1 args at least!";
+        errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+    } else {
+        if (!ConvertFromJsValue(env, argv[0], screenId)) {
+            errMsg = "Failed to convert parameter to screen id.";
+            errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        }
+        if (argc > ARGC_ONE && GetType(env, argv[1]) == napi_object) {
+            privacyMaskImg = OHOS::Media::PixelMapNapi::GetPixelMap(env, argv[1]);
+            if (privacyMaskImg == nullptr) {
+                errMsg = "Failed to convert parameter to pixelmap.";
+                errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+            }
+        }
+    }
+    if (errCode != DmErrorCode::DM_OK) {
+        WLOGFE("JsScreenManager::OnSetScreenPrivacyMaskImage failed, Invalidate params.");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+    }
+    NapiAsyncTask::CompleteCallback complete = [screenId, privacyMaskImg](napi_env env, NapiAsyncTask& task,
+        int32_t status) {
+        auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg));
+        if (res != DmErrorCode::DM_OK) {
+            task.Reject(env, CreateJsError(env, static_cast<int32_t>(res), "SetScreenPrivacyMaskImage failed."));
+            WLOGFE("JSScreenManager::SetScreenPrivacyMaskImage failed.");
+            return;
+        } else {
+            task.Resolve(env, NapiGetUndefined(env));
+            WLOGFI("JSScreenManager::SetScreenPrivacyMaskImage success.");
+        }
+    };
+    napi_value lastParam = (privacyMaskImg != nullptr && argc >= ARGC_THREE && GetType(env, argv[ARGC_THREE - 1]) ==
+        napi_function) ? argv[ARGC_THREE - 1] : argv[ARGC_TWO - 1];
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JSScreenManager::SetScreenPrivacyMaskImage", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -1336,6 +1396,8 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "destroyVirtualScreen", moduleName, JsScreenManager::DestroyVirtualScreen);
     BindNativeFunction(env, exportObj, "setVirtualScreenSurface", moduleName,
         JsScreenManager::SetVirtualScreenSurface);
+    BindNativeFunction(env, exportObj, "setScreenPrivacyMaskImage", moduleName,
+        JsScreenManager::SetScreenPrivacyMaskImage);
     BindNativeFunction(env, exportObj, "setScreenRotationLocked", moduleName,
         JsScreenManager::SetScreenRotationLocked);
     BindNativeFunction(env, exportObj, "isScreenRotationLocked", moduleName,

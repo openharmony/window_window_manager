@@ -209,14 +209,14 @@ void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, floa
     screenSession->SensorRotationChange(sensorRotation);
 }
 
-void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus)
+void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate)
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");
         return;
     }
-    screenSession->HandleHoverStatusChange(hoverStatus);
+    screenSession->HandleHoverStatusChange(hoverStatus, needRotate);
 }
 
 void ScreenSessionManagerClient::OnScreenOrientationChanged(ScreenId screenId, float screenOrientation)
@@ -309,7 +309,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         WLOGFE("screenSessionManager_ is null");
         return;
     }
-    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_);
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, directionInfo.screenRotation_, directionInfo.rotation_,
+        directionInfo.phyRotation_, screenPropertyChangeType);
     screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, directionInfo.notifyRotation_,
         screenPropertyChangeType);
 
@@ -324,7 +325,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
         return;
     }
     auto foldDisplayMode = screenSessionManager_->GetFoldDisplayMode();
-    screenSession->SetPhysicalRotation(directionInfo.rotation_, foldDisplayMode);
+    screenSession->SetPhysicalRotation(directionInfo.phyRotation_);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);
@@ -420,6 +421,15 @@ int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
     return screenSessionManager_->SetScreenOffDelayTime(delay);
 }
 
+int32_t ScreenSessionManagerClient::SetScreenOnDelayTime(int32_t delay)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return 0;
+    }
+    return screenSessionManager_->SetScreenOnDelayTime(delay);
+}
+
 void ScreenSessionManagerClient::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
 {
     if (!screenSessionManager_) {
@@ -495,6 +505,15 @@ FoldStatus ScreenSessionManagerClient::GetFoldStatus()
         return FoldStatus::UNKNOWN;
     }
     return screenSessionManager_->GetFoldStatus();
+}
+
+SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return SuperFoldStatus::UNKNOWN;
+    }
+    return screenSessionManager_->GetSuperFoldStatus();
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,

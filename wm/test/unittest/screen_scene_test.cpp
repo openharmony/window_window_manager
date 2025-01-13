@@ -38,21 +38,13 @@ public:
     void TearDown() override;
 };
 
-void ScreenSceneTest::SetUpTestCase()
-{
-}
+void ScreenSceneTest::SetUpTestCase() {}
 
-void ScreenSceneTest::TearDownTestCase()
-{
-}
+void ScreenSceneTest::TearDownTestCase() {}
 
-void ScreenSceneTest::SetUp()
-{
-}
+void ScreenSceneTest::SetUp() {}
 
-void ScreenSceneTest::TearDown()
-{
-}
+void ScreenSceneTest::TearDown() {}
 
 namespace {
 /**
@@ -219,8 +211,8 @@ HWTEST_F(ScreenSceneTest, SetDisplayOrientation02, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSceneTest, SetFrameLayoutFinishCallback, Function | SmallTest | Level3)
 {
-    ScreenScene screenScene("UNKNOWN");;
-    screenScene.SetFrameLayoutFinishCallback([](){});
+    ScreenScene screenScene("UNKNOWN");
+    screenScene.SetFrameLayoutFinishCallback([]() {});
     ASSERT_EQ(1, screenScene.GetWindowId());
 }
 
@@ -235,6 +227,30 @@ HWTEST_F(ScreenSceneTest, SetDisplayDensity, Function | SmallTest | Level3)
     float density = 2.0f;
     screenScene.SetDisplayDensity(density);
     ASSERT_EQ(1, screenScene.GetWindowId());
+}
+
+/**
+ * @tc.name: IsSystemWindow
+ * @tc.desc: IsSystemWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, IsSystemWindow, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    bool res = screenScene.IsSystemWindow();
+    ASSERT_EQ(true, res);
+}
+
+/**
+ * @tc.name: IsAppWindow
+ * @tc.desc: IsAppWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSceneTest, IsAppWindow, Function | SmallTest | Level3)
+{
+    ScreenScene screenScene("UNKNOWN");
+    bool res = screenScene.IsAppWindow();
+    ASSERT_EQ(false, res);
 }
 } // namespace
 } // namespace Rosen

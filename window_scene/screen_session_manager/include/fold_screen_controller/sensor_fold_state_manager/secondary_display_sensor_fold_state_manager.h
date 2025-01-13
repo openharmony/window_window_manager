@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_SECONDARY_DISPLAY_FOLD_STATE_SENSOR_MANAGER_H
 
 #include "dm_common.h"
+#include <transaction/rs_interfaces.h>
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 
@@ -35,6 +36,7 @@ private:
     FoldStatus GetGlobalFoldState(FoldStatus PrimaryFoldState, FoldStatus SecondaryFoldState);
     FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle, uint16_t hall, FoldStatus state);
     FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle, uint16_t hall, FoldStatus state);
+    FoldStatus GetFoldStateUnpower(const std::vector<uint16_t> &halls);
     int32_t allowUserSensorForLargeFoldDeviceAB = 0;
     int32_t allowUserSensorForLargeFoldDeviceBC = 0;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;

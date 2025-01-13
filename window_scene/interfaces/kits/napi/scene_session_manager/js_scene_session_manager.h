@@ -42,7 +42,9 @@ enum class ListenerFunctionType : uint32_t {
     CLOSE_TARGET_FLOAT_WINDOW_CB,
     ABILITY_MANAGER_COLLABORATOR_REGISTERED_CB,
     START_PIP_FAILED_CB,
-    NOTIFY_APP_USE_CONTROL_LIST_CB
+    NOTIFY_APP_USE_CONTROL_LIST_CB,
+    WATCH_GESTURE_CONSUME_RESULT_CB,
+    WATCH_FOCUS_ACTIVE_CHANGE_CB
 };
 
 class JsSceneSessionManager final {
@@ -72,7 +74,6 @@ public:
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
-    static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     static napi_value SetVmaCacheStatus(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
@@ -120,6 +121,7 @@ public:
     static napi_value RefreshPcZOrder(napi_env env, napi_callback_info info);
     static napi_value GetWindowPid(napi_env env, napi_callback_info info);
     static napi_value UpdatePcFoldScreenStatus(napi_env env, napi_callback_info info);
+    static napi_value UpdateSystemKeyboardStatus(napi_env env, napi_callback_info info);
     static napi_value ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
@@ -152,12 +154,10 @@ private:
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
     napi_value OnUpdateFocus(napi_env env, napi_callback_info info);
     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
-    napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     napi_value OnSetVmaCacheStatus(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAllAbilityInfos(napi_env env, napi_callback_info info);
-    napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAbilityInfo(napi_env env, napi_callback_info info);
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
@@ -175,7 +175,6 @@ private:
     napi_value OnGetRssData(napi_env env, napi_callback_info info);
     napi_value OnRegisterRssData(napi_env env, napi_callback_info info);
     napi_value OnUnregisterRssData(napi_env env, napi_callback_info info);
-    napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
     napi_value OnNotifyStackEmpty(napi_env env, napi_callback_info info);
     napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
@@ -200,6 +199,7 @@ private:
     napi_value OnRefreshPcZOrder(napi_env env, napi_callback_info info);
     napi_value OnGetWindowPid(napi_env env, napi_callback_info info);
     napi_value OnUpdatePcFoldScreenStatus(napi_env env, napi_callback_info info);
+    napi_value OnUpdateSystemKeyboardStatus(napi_env env, napi_callback_info info);
     napi_value OnResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
@@ -217,14 +217,12 @@ private:
     void OnGestureNavigationEnabledUpdate(bool enable, const std::string& bundleName, GestureBackType type);
     void OnCreateSystemSession(const sptr<SceneSession>& sceneSession);
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
-    void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnStartUIAbilityError(const uint32_t errorCode);
     void OnShiftFocus(int32_t persistentId);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
     void ProcessCreateSystemSessionRegister();
     void ProcessCreateKeyboardSessionRegister();
-    void ProcessRecoverSceneSessionRegister();
     void ProcessStatusBarEnabledChangeListener();
     void ProcessGestureNavigationEnabledChangeListener();
     void ProcessStartUIAbilityErrorRegister();
@@ -248,10 +246,26 @@ private:
     void RegisterNotifyAppUseControlListCallback();
 
     /*
+     * Window Recover
+     */
+    napi_value OnNotifySessionRecoverStatus(napi_env env, napi_callback_info info);
+    napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
+    void OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo);
+    void ProcessRecoverSceneSessionRegister();
+
+    /*
      * PiP Window
      */
     void OnStartPiPFailed();
     void ProcessStartPiPFailedRegister();
+
+    /*
+     * Window Input Event
+     */
+    void RegisterWatchGestureConsumeResultCallback();
+    void OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
+    void RegisterWatchFocusActiveChangeCallback();
+    void OnWatchFocusActiveChange(bool isActive);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

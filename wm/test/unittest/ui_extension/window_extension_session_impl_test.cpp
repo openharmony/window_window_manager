@@ -14,20 +14,19 @@
  */
 
 #include <gtest/gtest.h>
-#include "session_proxy.h"
 
+#include <ability_context_impl.h>
+#include <context_impl.h>
 #include <transaction/rs_transaction.h>
-#include "ability_context_impl.h"
-#include "mock_session.h"
-#include "display_info.h"
+
 #include "accessibility_event_info.h"
-#include "window_manager_hilog.h"
-#include "window_impl.h"
-#include "native_engine.h"
-#include "window_extension_session_impl.h"
-#include "mock_uicontent.h"
-#include "context_impl.h"
+#include "display_info.h"
+#include "extension/extension_business_info.h"
+#include "extension_data_handler.h"
 #include "iremote_object_mocker.h"
+#include "mock_session.h"
+#include "mock_uicontent.h"
+#include "window_extension_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2189,6 +2188,40 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function
     window_->windowExtensionSessionSet_.insert(window_);
     window_->UpdateConfigurationSyncForAll(configuration);
     window_->windowExtensionSessionSet_.erase(window_);
+}
+
+/**
+ * @tc.name: NotifyExtensionDataConsumer01
+ * @tc.desc: Test NotifyExtensionDataConsumer with valid window mode data
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function | SmallTest | Level3)
+{
+    // Prepare and write config
+    MessageParcel data;
+    MessageParcel reply;
+    Extension::DataTransferConfig config;
+    config.subSystemId = SubSystemId::WM_UIEXT;
+    config.customId = static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_MODE);
+    config.needReply = false;
+    config.needSyncSend = true;
+    ASSERT_TRUE(data.WriteParcelable(&config));
+ 
+    // Prepare and write want data
+    AAFwk::Want want;
+    want.SetParam(Extension::WINDOW_MODE_FIELD, static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
+    ASSERT_TRUE(data.WriteParcelable(&want));
+ 
+    // Call NotifyExtensionDataConsumer
+    window_->NotifyExtensionDataConsumer(data, reply);
+ 
+    // Verify reply contains success code
+    uint32_t replyCode;
+    ASSERT_TRUE(reply.ReadUint32(replyCode));
+    ASSERT_EQ(static_cast<uint32_t>(DataHandlerErr::OK), replyCode);
+ 
+    // Verify window mode was updated
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window_->GetWindowMode());
 }
 }
 } // namespace Rosen

@@ -45,17 +45,23 @@ constexpr size_t SECONDARY_HALL_SIZE = 2;
 constexpr uint16_t FIRST_DATA = 0;
 constexpr uint16_t SECOND_DATA = 1;
 constexpr uint16_t THIRD_DATA = 2;
+const int32_t MAIN_STATUS_WIDTH = 0;
+const int32_t FULL_STATUS_WIDTH = 1;
+const int32_t GLOBAL_FULL_STATUS_WIDTH = 2;
+const int32_t SCREEN_HEIGHT = 3;
+const int32_t FULL_STATUS_OFFSET_X = 4;
+const int32_t PARAMS_VECTOR_SIZE = 5;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(SecondaryFoldSensorManager);
 
 static void SecondarySensorPostureDataCallback(SensorEvent *event)
 {
-    OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandlePostureData(event);
+    SecondaryFoldSensorManager::GetInstance().HandlePostureData(event);
 }
 
 static void SecondarySensorHallDataCallbackExt(SensorEvent *event)
 {
-    OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(event);
+    SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(event);
 }
 
 void SecondaryFoldSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy)
@@ -148,22 +154,17 @@ void SecondaryFoldSensorManager::HandlePostureData(const SensorEvent * const eve
 
 void SecondaryFoldSensorManager::NotifyFoldAngleChanged(const std::vector<float> &angles)
 {
-    size_t size = angles.size();
-    std::vector<bool> flags(true, size);
-    for (size_t i = 0; i < size; i++) {
-        if (fabs(angles[i] - oldFoldAngle[i]) < MINI_NOTIFY_FOLD_ANGLE) {
-            flags[i] = false;
-        }
-        oldFoldAngle[i] = angles[i];
-    }
-    bool flag = false;
-    for (bool f : flags) {
-        flag = flag | f;
-    }
-    if (!flag) {
+    if (angles.size() < SECONDARY_HALL_SIZE) {
         return;
     }
-    std::vector<float> notifyAngles = {angles[FIRST_DATA], angles[SECOND_DATA]};
+    bool bcFlag = fabs(angles[0] - oldFoldAngle[0]) < MINI_NOTIFY_FOLD_ANGLE;
+    bool abFlag = fabs(angles[1] - oldFoldAngle[1]) < MINI_NOTIFY_FOLD_ANGLE;
+    if (bcFlag && abFlag) {
+        return;
+    }
+    oldFoldAngle[0] = angles[0];
+    oldFoldAngle[1] = angles[1];
+    std::vector<float> notifyAngles = {angles[0], angles[1]};
     ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(notifyAngles);
 }
 
@@ -260,15 +261,50 @@ bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, u
     }
     FoldScreenSensorManager::ExtHallData *extHallData =
         reinterpret_cast<FoldScreenSensorManager::ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    uint16_t flag = (uint16_t)(*extHallData).flag;
+    uint16_t flag = static_cast<uint16_t>((*extHallData).flag);
     if (!(flag & (1 << HALL_B_C_COLUMN_ORDER)) || !(flag & (1 << HALL_A_B_COLUMN_ORDER))) {
         TLOGW(WmsLogTag::DMS, "not support Extend Hall.");
         return false;
     }
-    valueBc = (uint16_t)(*extHallData).hall; // axis of bc screen. 0: hall closed, 1: hall expaned
-    valueAb = (uint16_t)(*extHallData).hallAb;
+    valueBc = static_cast<uint16_t>((*extHallData).hall); // axis of bc screen. 0: hall closed, 1: hall expaned
+    valueAb = static_cast<uint16_t>((*extHallData).hallAb);
     TLOGI(WmsLogTag::DMS, "hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
     return true;
+}
+
+void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
+{
+    if (foldScreenPolicy_->GetScreenParams().size() != PARAMS_VECTOR_SIZE) {
+        return;
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::FULL) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X],
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = 0,
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = 0,
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    isPowerRectExe_ = true;
 }
 
 bool SecondaryFoldSensorManager::IsPostureUserCallbackInvalid() const

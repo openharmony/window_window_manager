@@ -28,7 +28,7 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const std::string WINDOW_SIZE_CHANGE_CB = "windowSizeChange";
-const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
+const std::string WINDOW_RECT_CHANGE_CB = "rectChange";
 const std::string SYSTEM_AVOID_AREA_CHANGE_CB = "systemAvoidAreaChange";
 const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
@@ -113,21 +113,13 @@ void JsExtensionWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason r
 
 void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 {
-    RectChangeReason rectChangeReason = RectChangeReason::UNDEFINED;
-    if (JS_SIZE_CHANGE_REASON.count(reason) != 0 &&
-        !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
-        rectChangeReason = JS_SIZE_CHANGE_REASON.at(reason);
-    }
-    if (currentRectChangeReason_ != RectChangeReason::DRAG && rectChangeReason == RectChangeReason::DRAG_END) {
-        rectChangeReason = RectChangeReason::MOVE;
-    }
-    if (currRect_ == rect && currentRectChangeReason_ == rectChangeReason) {
+    if (currRect_ == rect) {
         TLOGD(WmsLogTag::WMS_UIEXT, "Skip redundant rect update");
         return;
     }
     // js callback should run in js thread
     const char* const where = __func__;
-    auto jsCallback = [self = weakRef_, rect, rectChangeReason, env = env_, where] {
+    auto jsCallback = [self = weakRef_, rect, env = env_, where] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsExtensionWindowListener::OnRectChange");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
@@ -147,7 +139,8 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
             return;
         }
         napi_set_named_property(env, objValue, "rect", rectObjValue);
-        napi_set_named_property(env, objValue, "reason", CreateJsValue(env, rectChangeReason));
+        napi_set_named_property(env, objValue, "reason", CreateJsValue(env,
+            ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE));
         napi_value argv[] = { objValue };
         thisListener->CallJsMethod(WINDOW_RECT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
@@ -155,7 +148,6 @@ void JsExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason r
         TLOGE(WmsLogTag::WMS_UIEXT, "send event failed");
     }
     currRect_ = rect;
-    currentRectChangeReason_ = rectChangeReason;
 }
 
 void JsExtensionWindowListener::OnModeChange(WindowMode mode, bool hasDeco)

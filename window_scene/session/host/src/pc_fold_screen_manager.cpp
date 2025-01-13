@@ -31,8 +31,11 @@ const RSAnimationTimingCurve MOVING_CURVE =
 constexpr float TAN_25_DEG = 0.4663; // throw slip angle = 25 deg
 constexpr float VEL_B_THRESHOLD = 1.732; // 1732 dp/s
 constexpr float VEL_C_THRESHOLD = 1.345; // 1345 dp/s
+constexpr float THROW_BACKTRACING_DURATION = 100.0f;
+constexpr int32_t THROW_BACKTRACING_THRESHOLD = 200;
 constexpr float THROW_SLIP_TIME = 416.0f;
 constexpr float THROW_SLIP_DAMPING_RATIO = 0.9934f; // stiffness = 228, damping = 30
+constexpr float THROW_SLIP_DECELERATION_RATE = 0.002;
 const RSAnimationTimingProtocol THROW_SLIP_TIMING_PROTOCOL(std::round(THROW_SLIP_TIME)); // animation time
 const RSAnimationTimingCurve THROW_SLIP_CURVE =
     RSAnimationTimingCurve::CreateSpring(THROW_SLIP_TIME / 1000.0f, THROW_SLIP_DAMPING_RATIO, 0.0f);
@@ -77,31 +80,47 @@ void PcFoldScreenManager::SetDisplayInfo(DisplayId displayId, SuperFoldStatus st
 void PcFoldScreenManager::SetDisplayRects(
     const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s, %{public}s, %{public}s",
+        defaultDisplayRect.ToString().c_str(), virtualDisplayRect.ToString().c_str(),
+        foldCreaseRect.ToString().c_str());
     std::unique_lock<std::shared_mutex> lock(rectsMutex_);
     defaultDisplayRect_ = defaultDisplayRect;
     virtualDisplayRect_ = virtualDisplayRect;
     foldCreaseRect_ = foldCreaseRect;
 }
 
-SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus()
+SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus() const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return screenFoldStatus_;
 }
 
-bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId)
+bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId) const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED && displayId_ == displayId;
 }
 
-float PcFoldScreenManager::GetVpr()
+void PcFoldScreenManager::UpdateSystemKeyboardStatus(bool hasSystemKeyboard)
 {
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "status: %{public}d", hasSystemKeyboard);
     std::unique_lock<std::shared_mutex> lock(displayInfoMutex_);
+    hasSystemKeyboard_ = hasSystemKeyboard;
+}
+
+bool PcFoldScreenManager::HasSystemKeyboard() const
+{
+    std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
+    return hasSystemKeyboard_;
+}
+
+float PcFoldScreenManager::GetVpr() const
+{
+    std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return vpr_;
 }
 
-std::tuple<WSRect, WSRect, WSRect> PcFoldScreenManager::GetDisplayRects()
+std::tuple<WSRect, WSRect, WSRect> PcFoldScreenManager::GetDisplayRects() const
 {
     std::shared_lock<std::shared_mutex> lock(rectsMutex_);
     return { defaultDisplayRect_, virtualDisplayRect_, foldCreaseRect_ };
@@ -190,23 +209,123 @@ void PcFoldScreenManager::ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeigh
     rect = limitRect;
 }
 
-bool PcFoldScreenManager::NeedDoThrowSlip(ScreenSide startSide, const WSRectF& velocity)
+bool PcFoldScreenManager::NeedDoThrowSlip(const WSRect& rect, const WSRectF& velocity, ScreenSide& throwSide)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "side: %{public}d, velocity: %{public}s",
-        static_cast<int32_t>(startSide), velocity.ToString().c_str());
-    float vpr = GetVpr();
-    if (startSide == ScreenSide::FOLD_B && velocity.posY_ > VEL_B_THRESHOLD * vpr &&
-        std::abs(velocity.posX_ / MathHelper::NonZero(velocity.posY_)) < TAN_25_DEG) {
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "rect: %{public}s, velocity: %{public}s, throwSide: %{public}d",
+        rect.ToString().c_str(), velocity.ToString().c_str(), static_cast<int32_t>(throwSide));
+
+    // velocity check
+    const WSRect& backtracingRect = CalculateThrowBacktracingRect(rect, velocity);
+    if (!CheckVelocityOrientation(backtracingRect, velocity)) {
+        return false;
+    }
+
+    const ScreenSide startSide = CalculateScreenSide(backtracingRect);
+    const WSRect& endRect = CalculateThrowEnd(backtracingRect, velocity);
+    const ScreenSide endSide = CalculateScreenSide(endRect);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "backtracingRect: %{public}s, endRect: %{public}s",
+        backtracingRect.ToString().c_str(), endRect.ToString().c_str());
+    if (startSide == ScreenSide::FOLD_B && endSide == ScreenSide::FOLD_C) {
+        throwSide = startSide;
         return true;
     }
-    if (startSide == ScreenSide::FOLD_C && velocity.posY_ < -VEL_C_THRESHOLD * vpr &&
-        std::abs(velocity.posX_ / MathHelper::NonZero(velocity.posY_)) < TAN_25_DEG) {
+    if (startSide == ScreenSide::FOLD_C && endSide == ScreenSide::FOLD_B) {
+        throwSide = startSide;
         return true;
     }
     return false;
 }
 
-/**
+/*
+ * only for fullscreen cross-axis throw slip
+ */
+bool PcFoldScreenManager::NeedDoEasyThrowSlip(const WSRect& rect, const WSRect& startRect,
+    const WSRectF& velocity, ScreenSide& throwSide)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC,
+        "rect: %{public}s, startRect: %{public}s, velocity: %{public}s, throwSide: %{public}d",
+        rect.ToString().c_str(), startRect.ToString().c_str(),
+        velocity.ToString().c_str(), static_cast<int32_t>(throwSide));
+
+    ScreenSide startSide = CalculateScreenSide(startRect);
+    if (startSide == throwSide) {
+        return NeedDoThrowSlip(rect, velocity, throwSide);
+    }
+
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    WSRect easyThrowRect = rect;
+    if (startSide == ScreenSide::FOLD_B) {
+        if (rect.posY_ > virtualDisplayRect.posY_ + virtualDisplayRect.height_ / 2) { // 2: center
+            return false;
+        }
+        easyThrowRect.posY_ = foldCreaseRect.posY_;
+    } else {
+        if (rect.posY_ < defaultDisplayRect.posY_ + defaultDisplayRect.height_ / 2) { // 2: center
+            return false;
+        }
+        easyThrowRect.posY_ = foldCreaseRect.posY_ + foldCreaseRect.height_;
+    }
+    return NeedDoThrowSlip(easyThrowRect, velocity, throwSide);
+}
+
+bool PcFoldScreenManager::CheckVelocityOrientation(const WSRect& rect, const WSRectF& velocity)
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    const int32_t centerX = rect.posX_ + rect.width_ / 2; // 2: center
+    const int32_t centerY = rect.posY_ + rect.height_ / 2; // 2: center
+    ScreenSide startSide = CalculateScreenSide(rect);
+    int32_t aimX = 0;
+    int32_t aimY = 0;
+    if (startSide == ScreenSide::FOLD_B) {
+        if (MathHelper::LessNotEqual(velocity.posX_, 0.0f)) {
+            aimX = defaultDisplayRect.posX_;
+            aimY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
+        } else {
+            aimX = defaultDisplayRect.posX_ + defaultDisplayRect.width_;
+            aimY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
+        }
+        return MathHelper::GreatNotEqual(velocity.posY_,
+            std::abs(static_cast<float>(aimY - centerY) /
+                     MathHelper::NonZero(static_cast<float>(aimX - centerX)) * velocity.posX_));
+    }
+    if (startSide == ScreenSide::FOLD_C) {
+        if (MathHelper::LessNotEqual(velocity.posX_, 0.0f)) {
+            aimX = virtualDisplayRect.posX_;
+            aimY = virtualDisplayRect.posY_;
+        } else {
+            aimX = virtualDisplayRect.posX_ + virtualDisplayRect.height_;
+            aimY = virtualDisplayRect.posY_;
+        }
+        return MathHelper::LessNotEqual(velocity.posY_,
+            -std::abs(static_cast<float>(aimY - centerY) /
+                      MathHelper::NonZero(static_cast<float>(aimX - centerX)) * velocity.posX_));
+    }
+
+    return false;
+}
+
+WSRect PcFoldScreenManager::CalculateThrowBacktracingRect(const WSRect& rect, const WSRectF& velocity)
+{
+    int32_t midPosY = rect.height_ / 2 + rect.posY_; // 2: center
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    const int32_t midScreenY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
+    if ((midPosY < midScreenY - THROW_BACKTRACING_THRESHOLD && MathHelper::LessNotEqual(velocity.posY_, 0.0f)) ||
+        (midPosY > midScreenY + THROW_BACKTRACING_THRESHOLD && MathHelper::GreatNotEqual(velocity.posY_, 0.0f))) {
+        return rect;
+    }
+    return WSRect{static_cast<int32_t>(rect.posX_ - velocity.posX_ * THROW_BACKTRACING_DURATION),
+                  static_cast<int32_t>(rect.posY_ - velocity.posY_ * THROW_BACKTRACING_DURATION),
+                  rect.width_, rect.height_};
+}
+
+WSRect PcFoldScreenManager::CalculateThrowEnd(const WSRect& rect, const WSRectF& velocity)
+{
+    return WSRect{ static_cast<int32_t>(rect.posX_ + velocity.posX_ / THROW_SLIP_DECELERATION_RATE),
+                   static_cast<int32_t>(rect.posY_ + velocity.posY_ / THROW_SLIP_DECELERATION_RATE),
+                   rect.width_, rect.height_ };
+}
+
+/*
  * move rect to other side
  * @param rect: current side, moved to other side
  * @param titleHeight: used in arrange rule to avoid title bar
@@ -217,8 +336,24 @@ bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& 
     if (startSide != ScreenSide::FOLD_B && startSide != ScreenSide::FOLD_C) {
         return false;
     }
-    ScreenSide endSide = (startSide == ScreenSide::FOLD_B) ? ScreenSide::FOLD_C : ScreenSide::FOLD_B;
-    MappingRectInScreenSideWithArrangeRule(endSide, rect, topAvoidHeight, botAvoidHeight, titleHeight);
+
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    int32_t topLimit = 0;
+    int32_t botLimit = 0;
+    if (startSide == ScreenSide::FOLD_B) {
+        // C side
+        rect.posY_ = rect.posY_ + virtualDisplayRect.posY_ - defaultDisplayRect.posY_;
+        topLimit = virtualDisplayRect.posY_;
+        botLimit = virtualDisplayRect.posY_ + virtualDisplayRect.height_ - rect.height_ - botAvoidHeight;
+    } else {
+        // B side
+        rect.posY_ = rect.posY_ + defaultDisplayRect.posY_ - virtualDisplayRect.posY_;
+        topLimit = topAvoidHeight;
+        botLimit = foldCreaseRect.posY_ - rect.height_;
+    }
+    // top limit first
+    rect.posY_ = std::max(std::min(rect.posY_, botLimit), topLimit);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "end posY: %{public}d", rect.posY_);
     return true;
 }
 
@@ -308,7 +443,7 @@ void PcFoldScreenManager::MappingRectInScreenSideWithArrangeRule(ScreenSide side
     }
 }
 
-/**
+/*
  * init rule: move rect to center of display
  * @param titleHeight: in vp
  */
@@ -321,7 +456,7 @@ void PcFoldScreenManager::ApplyInitArrangeRule(WSRect& rect, WSRect& lastArrange
     lastArrangedRect = { rect.posX_, rect.posY_, RULE_TRANS_X * vpr, titleHeight * vpr };
 }
 
-/**
+/*
  * init rule: move rect to bottom-right of last arranged position
  * @param titleHeight: in vp
  */

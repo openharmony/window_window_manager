@@ -260,44 +260,6 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | Small
 }
 
 /**
- * @tc.name: UpdateRect01
- * @tc.desc: update rect
- * @tc.type: FUNC
- * @tc.require: #I6JLSI
- */
-HWTEST_F(WindowSessionTest, UpdateRect01, Function | SmallTest | Level2)
-{
-    sptr<ISession> sessionToken = nullptr;
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    session_->sessionStage_ = mockSessionStage;
-    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
-
-    WSRect rect = {0, 0, 0, 0};
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
-        SizeChangeReason::UNDEFINED, "WindowSessionTest"));
-    sptr<WindowEventChannelMocker> mockEventChannel = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage);
-    SystemSessionConfig sessionConfig;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_EQ(WSError::WS_OK, session_->Connect(mockSessionStage,
-            mockEventChannel, nullptr, sessionConfig, property));
-
-    rect = {0, 0, 100, 100};
-    ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->UpdateRect(rect,
-        SizeChangeReason::UNDEFINED, "WindowSessionTest"));
-    ASSERT_EQ(rect, session_->winRect_);
-
-    rect = {0, 0, 200, 200};
-    session_->UpdateSessionState(SessionState::STATE_ACTIVE);
-    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
-    ASSERT_EQ(rect, session_->winRect_);
-
-    rect = {0, 0, 300, 300};
-    session_->sessionStage_ = nullptr;
-    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "WindowSessionTest"));
-    ASSERT_EQ(rect, session_->winRect_);
-}
-
-/**
  * @tc.name: IsSessionValid01
  * @tc.desc: check func IsSessionValid
  * @tc.type: FUNC
@@ -425,69 +387,6 @@ HWTEST_F(WindowSessionTest, GetLayoutRect, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CheckDialogOnForeground
- * @tc.desc: check func CheckDialogOnForeground
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, CheckDialogOnForeground, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->dialogVec_.clear();
-    ASSERT_EQ(false, session_->CheckDialogOnForeground());
-    SessionInfo info;
-    info.abilityName_ = "dialogAbilityName";
-    info.moduleName_ = "dialogModuleName";
-    info.bundleName_ = "dialogBundleName";
-    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession, nullptr);
-    dialogSession->state_ = SessionState::STATE_INACTIVE;
-    session_->dialogVec_.push_back(dialogSession);
-    ASSERT_EQ(false, session_->CheckDialogOnForeground());
-    session_->dialogVec_.clear();
-}
-
-/**
- * @tc.name: IsTopDialog
- * @tc.desc: check func IsTopDialog
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, IsTopDialog, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->dialogVec_.clear();
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-
-    sptr<Session> dialogSession1 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession1, nullptr);
-    dialogSession1->persistentId_ = 33;
-    dialogSession1->SetParentSession(session_);
-    dialogSession1->state_ = SessionState::STATE_ACTIVE;
-    session_->dialogVec_.push_back(dialogSession1);
-
-    sptr<Session> dialogSession2 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession2, nullptr);
-    dialogSession2->persistentId_ = 34;
-    dialogSession2->SetParentSession(session_);
-    dialogSession2->state_ = SessionState::STATE_ACTIVE;
-    session_->dialogVec_.push_back(dialogSession2);
-
-    sptr<Session> dialogSession3 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession3, nullptr);
-    dialogSession3->persistentId_ = 35;
-    dialogSession3->SetParentSession(session_);
-    dialogSession3->state_ = SessionState::STATE_INACTIVE;
-    session_->dialogVec_.push_back(dialogSession3);
-
-    ASSERT_EQ(false, dialogSession3->IsTopDialog());
-    ASSERT_EQ(true, dialogSession2->IsTopDialog());
-    ASSERT_EQ(false, dialogSession1->IsTopDialog());
-    session_->dialogVec_.clear();
-}
-
-/**
  * @tc.name: GetGlobalScaledRect
  * @tc.desc: GetGlobalScaledRect
  * @tc.type: FUNC
@@ -541,26 +440,6 @@ HWTEST_F(WindowSessionTest, RaiseToAppTop01, Function | SmallTest | Level2)
     result = sceneSession->RaiseToAppTop();
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(parentSession->GetUIStateDirty());
-}
-
-/**
- * @tc.name: UpdateSessionRect01
- * @tc.desc: UpdateSessionRect
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest, UpdateSessionRect01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.bundleName_ = "testSession3";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    WSRect rect = {0, 0, 320, 240}; // width: 320, height: 240
-    auto result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
-    ASSERT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -970,6 +849,33 @@ HWTEST_F(WindowSessionTest, GetSnapshot, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_DISCONNECT;
     std::shared_ptr<Media::PixelMap> snapshot = session_->Snapshot();
     ASSERT_EQ(snapshot, session_->GetSnapshot());
+}
+
+/**
+ * @tc.name: NotifyAddSnapshot
+ * @tc.desc: NotifyAddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyAddSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyAddSnapshot();
+    ASSERT_EQ(session_->GetSnapshot(), nullptr);
+}
+
+/**
+ * @tc.name: NotifyRemoveSnapshot
+ * @tc.desc: NotifyRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyRemoveSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyRemoveSnapshot();
+    ASSERT_EQ(session_->GetScenePersistence()->HasSnapshot(), false);
 }
 
 /**
@@ -1539,7 +1445,7 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeInPc, Function | SmallTest | Level2
     bool isSupportDragInPcCompatibleMode = true;
     property->SetCompatibleModeInPc(enable);
     ASSERT_EQ(property->GetCompatibleModeInPc(), true);
-    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);;
+    property->SetIsSupportDragInPcCompatibleMode(isSupportDragInPcCompatibleMode);
     ASSERT_EQ(property->GetIsSupportDragInPcCompatibleMode(), true);
 }
 

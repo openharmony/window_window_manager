@@ -1320,6 +1320,23 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    auto ret = remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA), data,
+                                   reply, option);
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, ret: %{public}d", ret);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::SetSplitButtonVisible(bool isVisible)
 {
     MessageParcel data;

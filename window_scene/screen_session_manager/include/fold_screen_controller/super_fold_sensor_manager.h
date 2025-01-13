@@ -53,7 +53,9 @@ public:
     void HandleHallData(const SensorEvent * const event);
 
     void HandleSuperSensorChange(SuperFoldStatusChangeEvents events);
-    
+
+    float GetCurAngle();
+
 private:
     
     std::recursive_mutex mutex_;
