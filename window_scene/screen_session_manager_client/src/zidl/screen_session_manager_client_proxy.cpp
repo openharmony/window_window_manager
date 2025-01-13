@@ -636,6 +636,7 @@ void ScreenSessionManagerClientProxy::OnSuperFoldStatusChanged(ScreenId screenId
         return;
     }
 }
+
 void ScreenSessionManagerClientProxy::OnSecondaryReflexionChanged(ScreenId screenId, uint32_t isSecondaryReflexion)
 {
     sptr<IRemoteObject> remote = Remote();
