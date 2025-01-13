@@ -149,7 +149,7 @@ void WindowInspector::SendMessageToIDE()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendMessage is null");
         return;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "jsonWindowListsInfoStr: %{public}s", jsonWindowListsInfoStr.c_str());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", jsonWindowListsInfoStr.c_str());
     sendMessage_(jsonWindowListsInfoStr);
 }
 }  // namespace Rosen::OHOS
