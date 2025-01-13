@@ -215,16 +215,16 @@ WSError SessionStageProxy::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     }
 
     if (!data.WriteUint32(avoidAreas.size())) {
-        TLOGE(WmsLogTag::DEFAULT, "Write avoid area size failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area size failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     for (const auto& [type, avoidArea] : avoidAreas) {
         if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-            TLOGE(WmsLogTag::DEFAULT, "Write avoid area type failed");
+            TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area type failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
         if (!data.WriteParcelable(&avoidArea)) {
-            TLOGE(WmsLogTag::DEFAULT, "Write avoid area failed");
+            TLOGE(WmsLogTag::WMS_IMMS, "Write avoid area failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
