@@ -1859,6 +1859,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WindowType::WINDOW_TYPE_STATUS_BAR, sessionProperty->GetDisplayId());
     }
     for (auto& statusBar : statusBarVector) {
+        if (statusBar == nullptr) {
+            continue;
+        }
         WSRect statusBarRect = statusBar->GetSessionRect();
         bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
             isStatusBarVisible_ : statusBar->isVisible_;
@@ -5687,6 +5690,9 @@ int32_t SceneSession::GetStatusBarHeight()
     const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
+        if (statusBar == nullptr) {
+            continue;
+        }
         WSRect statusBarRect = statusBar->GetSessionRect();
         if (onGetStatusBarAvoidHeightFunc_) {
             onGetStatusBarAvoidHeightFunc_(statusBarRect);
