@@ -339,7 +339,7 @@ int ScreenSessionManagerClientStub::HandleOnSecondaryReflexionChanged(MessagePar
 {
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto isSecondaryReflexion = static_cast<uint32_t>(data.ReadUint32());
-    WLOGI("super fold status screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
+    WLOGI("secondary reflexion screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
         screenId, static_cast<uint32_t>(isSecondaryReflexion));
     OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
     return ERR_NONE;
