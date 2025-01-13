@@ -915,7 +915,7 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
@@ -2198,7 +2198,7 @@ public:
      * @param windowLimits.
      * @return WMError.
      */
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForce)
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForcible = false)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2542,12 +2542,12 @@ public:
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Set support window modes.
+     * @brief Sets the supported window modes.
      *
-     * @param supportWindowModes Support window modes of the window.
+     * @param supportedWindowModes Supported window modes of the window.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

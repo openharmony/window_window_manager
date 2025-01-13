@@ -928,16 +928,16 @@ JsSessionType GetApiType(WindowType type)
 }
 
 napi_value CreateSupportWindowModes(napi_env env,
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, supportWindowModes.size(), &arrayValue);
+    napi_create_array_with_length(env, supportedWindowModes.size(), &arrayValue);
     if (arrayValue == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
         return NapiGetUndefined(env);
     }
     int32_t index = 0;
-    for (const auto supportWindowMode : supportWindowModes) {
+    for (const auto supportWindowMode : supportedWindowModes) {
         napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(supportWindowMode)));
     }
     return arrayValue;
@@ -992,7 +992,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "isFromIcon", CreateJsValue(env, sessionInfo.isFromIcon_));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
-        CreateSupportWindowModes(env, sessionInfo.supportWindowModes));
+        CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
     }
