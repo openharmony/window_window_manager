@@ -2938,6 +2938,17 @@ public:
      * @return True - is mid scene, false - is not mid scene.
      */
     virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get layoutTransform of window uiContent.
+     *
+     * @return UiContent of layoutTransform.
+     */
+    virtual const Transform& GetLayoutTransform() const
+    {
+        static const Transform trans;
+        return trans;
+    }
 };
 }
 }

@@ -4422,6 +4422,7 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     WLOGFI("in");
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
+        layoutTransform_ = transform;
     }
 }
 
@@ -4709,6 +4710,11 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
     return targetAPIVersion_;
+}
+
+const Transform& WindowSessionImpl::GetLayoutTransform() const
+{
+    return layoutTransform_;
 }
 } // namespace Rosen
 } // namespace OHOS
