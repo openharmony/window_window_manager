@@ -166,6 +166,7 @@ private:
     static napi_value UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static napi_value SetNeedSyncSessionRect(napi_env env, napi_callback_info info);
     static napi_value MaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
+    static napi_value UpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
@@ -263,6 +264,7 @@ private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
+    napi_value OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
