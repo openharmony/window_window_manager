@@ -383,6 +383,7 @@ protected:
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
+    void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool IsVerticalOrientation(Orientation orientation) const;
@@ -662,6 +663,7 @@ private:
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
+    SingleHandTransform singleHandTransform_;
     
     /*
      * Window Decor
