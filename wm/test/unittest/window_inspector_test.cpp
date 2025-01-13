@@ -98,9 +98,8 @@ HWTEST_F(WindowInspetorTest, TransformDataToJson, Function | SmallTest | Level2)
     std::vector<WindowListsInfo> windowListsInfo;
     windowListsInfo.push_back({ "test01", 1, 1, windowRect});
     WindowInspector::GetInstance().TransformDataToJson(windowListsInfo);
-    std::string ret =
-        "{type:window,content:[{windowName:test01,winId:1,type:1,rect:[{startX:100,startY:100,width:100,height:100}]}]"
-        "}";
+    std::string ret ="{type:window,content:[{windowName:test01,winId:1,type:1,"
+        "rect:[{startX:100,startY:100,width:100,height:100}]}]}";
     EXPECT_EQ(ret, WindowInspector::GetInstance().jsonWindowListsInfoStr);
 }
 } // namespace
