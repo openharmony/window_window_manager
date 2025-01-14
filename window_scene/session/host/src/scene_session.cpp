@@ -5000,7 +5000,7 @@ void SceneSession::NotifyPiPWindowPrepareClose()
 
 WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s in", __func__);
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in", __func__);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     PostTask([weakThis = wptr(this), isLandscapeMultiWindow, callingPid, where = __func__] {
         auto session = weakThis.promote();
