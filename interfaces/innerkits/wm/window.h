@@ -144,12 +144,12 @@ public:
     virtual void AfterDestroyed() {}
 
     /**
-     * @brief Notify caller that window is paused.
+     * @brief Notify caller that window is already foreground.
      */
     virtual void AfterDidForeground() {}
 
     /**
-     * @brief Notify caller that window is destroyed.
+     * @brief Notify caller that window is already background.
      */
     virtual void AfterDidBackground() {}
 };
