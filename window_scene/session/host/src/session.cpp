@@ -451,6 +451,10 @@ void Session::NotifyRemoveBlank()
 
 void Session::NotifyAddSnapshot()
 {
+    /*
+    * for blankness prolems, persist snapshot could conflict with background process,
+    * thus no need to persist snapshot here
+    */
     SaveSnapshot(false, false);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
@@ -2328,17 +2332,16 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
         }
-        if (!requirePersist) {
-            return;
+        if (requirePersist) {
+            std::function<void()> func = [weakThis]() {
+                if (auto session = weakThis.promote()) {
+                    TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                    std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+                    session->snapshot_ = nullptr;
+                }
+            };
+            session->scenePersistence_->SaveSnapshot(pixelMap, func);
         }
-        std::function<void()> func = [weakThis]() {
-            if (auto session = weakThis.promote()) {
-                TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
-                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
-                session->snapshot_ = nullptr;
-            }
-        };
-        session->scenePersistence_->SaveSnapshot(pixelMap, func);
     };
     if (!useFfrt) {
         task();
