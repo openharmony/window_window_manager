@@ -2915,7 +2915,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     }
     auto throwSlipPair = std::make_pair(pcFoldScreenController_->GetThrowSlipTimingProtocol(),
         pcFoldScreenController_->GetThrowSlipTimingCurve());
-    SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, std::move(finishCallback));
+    SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
     OnThrowSlipAnimationStateChange(true);
     rect = endRect;
     return needSetFullScreen;
@@ -3631,8 +3631,7 @@ WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT,
-            "%{public}s, id %{public}d, isAdd: %{public}d",
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, id %{public}d, isAdd: %{public}d",
             where, session->GetPersistentId(), isAdd);
         if (isAdd) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s SetOpacityFunc not register %{public}d",
@@ -3726,13 +3725,9 @@ WSError SceneSession::SetDefaultRequestedOrientation(Orientation orientation)
             TLOGNE(WmsLogTag::DEFAULT, "%{public}s session is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
-        TLOGNI(WmsLogTag::DEFAULT, "%{public}s, id: %{public}d defaultRequestedOrientation: %{public}u",
+        TLOGNI(WmsLogTag::DEFAULT, "%{public}s id: %{public}d defaultRequestedOrientation: %{public}u",
             where, session->GetPersistentId(), static_cast<uint32_t>(orientation));
         auto property = session->GetSessionProperty();
-        if (property == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "%{public}s get session property failed", where);
-            return WSError::WS_ERROR_NULLPTR;
-        }
         property->SetRequestedOrientation(orientation);
         property->SetDefaultRequestedOrientation(orientation);
         return WSError::WS_OK;
@@ -4194,8 +4189,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     property->SetSystemCalling(isSystemCalling);
-    wptr<SceneSession> weak = this;
-    auto task = [weak, property, action, where = __func__]() -> WMError {
+    auto task = [weak = wptr(this), property, action, where = __func__]() -> WMError {
         auto sceneSession = weak.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::DEFAULT, "%{public}s the session is nullptr", where);
@@ -5001,13 +4995,12 @@ void SceneSession::NotifyPiPWindowPrepareClose()
             session->onPrepareClosePiPSession_();
         }
         TLOGND(WmsLogTag::WMS_PIP, "%{public}s, id: %{public}d", where, session->GetPersistentId());
-        return;
     }, __func__);
 }
 
 WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s", __func__);
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s in", __func__);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     PostTask([weakThis = wptr(this), isLandscapeMultiWindow, callingPid, where = __func__] {
         auto session = weakThis.promote();
@@ -5022,7 +5015,7 @@ WSError SceneSession::SetLandscapeMultiWindow(bool isLandscapeMultiWindow)
         if (session->onSetLandscapeMultiWindowFunc_) {
             session->onSetLandscapeMultiWindowFunc_(isLandscapeMultiWindow);
         }
-        TLOGND(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s, id: %{public}d, isLandscapeMultiWindow: %{public}u",
+        TLOGND(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s id: %{public}d, isLandscapeMultiWindow: %{public}u",
             where, session->GetPersistentId(), isLandscapeMultiWindow);
         return WSError::WS_OK;
     }, __func__);
@@ -5104,7 +5097,7 @@ WSError SceneSession::UpdatePiPRect(const Rect& rect, SizeChangeReason reason)
         if (reason == SizeChangeReason::PIP_START) {
             session->SetSessionRequestRect(wsRect);
         }
-        TLOGNI(WmsLogTag::WMS_PIP, "%{public}s rect:%{public}s, reason: %{public}u", where, wsRect.ToString().c_str(),
+        TLOGNI(WmsLogTag::WMS_PIP, "%{public}s rect:%{public}s, reason:%{public}u", where, wsRect.ToString().c_str(),
             static_cast<uint32_t>(reason));
         session->NotifySessionRectChange(wsRect, reason);
         return WSError::WS_OK;
@@ -5405,10 +5398,10 @@ WSError SceneSession::OnDefaultDensityEnabled(bool isDefaultDensityEnabled)
     PostTask([weakThis = wptr(this), isDefaultDensityEnabled, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s, session is null", where);
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, isDefaultDensityEnabled: %{public}d",
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s isDefaultDensityEnabled: %{public}d",
             where, isDefaultDensityEnabled);
         if (session->onDefaultDensityEnabledFunc_) {
             session->onDefaultDensityEnabledFunc_(isDefaultDensityEnabled);
@@ -5571,12 +5564,7 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
         session->SetClientDragEnable(enableDrag);
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s id: %{public}d, enableDrag: %{public}d",
             where, session->GetPersistentId(), enableDrag);
-        auto sessionProperty = session->GetSessionProperty();
-        if (!sessionProperty) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s sessionProperty is null", where);
-            return;
-        }
-        sessionProperty->SetDragEnabled(enableDrag);
+        session->GetSessionProperty()->SetDragEnabled(enableDrag);
         if (session->sessionStage_) {
             session->sessionStage_->SetEnableDragBySystem(enableDrag);
         }
