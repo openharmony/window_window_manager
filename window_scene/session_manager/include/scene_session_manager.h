@@ -343,6 +343,7 @@ public:
 
     void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
+    WSError CloneWindow(int32_t fromPersistentId, int32_t toPersistentId);
 
     /*
      * Collaborator
@@ -447,8 +448,6 @@ public:
      */
     WSError SwitchFreeMultiWindow(bool enable);
     WSError GetFreeMultiWindowEnableState(bool& enable) override;
-
-    WSError CloneWindow(int32_t fromPersistentId, int32_t toPersistentId);
 
     const SystemSessionConfig& GetSystemSessionConfig() const;
     WSError NotifyEnterRecentTask(bool enterRecent);

@@ -281,7 +281,6 @@ public:
     void SetSystemSceneOcclusionAlpha(double alpha);
     void ResetOcclusionAlpha();
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
-    void CloneWindow(NodeId surfaceNodeId);
     void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
@@ -313,6 +312,7 @@ public:
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
     void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
+    void CloneWindow(NodeId surfaceNodeId);
 
     /*
      * PC Window Layout
