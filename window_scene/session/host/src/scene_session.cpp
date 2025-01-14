@@ -1830,12 +1830,20 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     }
     DisplayId displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-        WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
+    bool isWindowFloatingOrSplit = (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
+                                    Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                                    Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    bool isWindowTypeAvailable = 
+        WindowHelper::IsMainWindow(Session::GetWindowType()) ||
+        (WindowHelper::IsSystemWindow(Session::GetWindowType()) &&
+         (GetSessionProperty()->GetAvoidAreaOption() &
+            static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) ||
+        (WindowHelper::IsSubWindow(Session::GetWindowType()) &&
+         (GetSessionProperty()->GetAvoidAreaOption() &
+            static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)));
+    bool isDeviceAvailable = (systemConfig_.IsPhoneWindow() ||
+                              (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
+    if (isWindowFloatingOrSplit && isWindowTypeAvailable && isDeviceAvailable &&
         (!screenSession || screenSession->GetName() != "HiCar")) {
         // mini floating scene no need avoid
         if (LessOrEqual(Session::GetFloatingScale(), MINI_FLOAT_SCALE)) {
