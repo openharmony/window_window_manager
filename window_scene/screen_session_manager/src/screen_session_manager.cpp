@@ -5418,6 +5418,10 @@ void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
         (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION)) {
             TLOGW(WmsLogTag::DMS, "in TentMode, SetFoldDisplayMode to %{public}d failed", displayMode);
             return;
+    } else if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        IsScreenCasting() && displayMode == FoldDisplayMode::COORDINATION) {
+        TLOGW(WmsLogTag::DMS, "is phone casting, SetFoldDisplayMode to %{public}d is not allowed", displayMode);
+        return;
     }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
@@ -7139,6 +7143,16 @@ int32_t ScreenSessionManager::GetCameraStatus()
 int32_t ScreenSessionManager::GetCameraPosition()
 {
     return cameraPosition_;
+}
+
+bool ScreenSessionManager::IsScreenCasting()
+{
+    if (virtualScreenCount_ == 0 && hdmiScreenCount_ == 0) {
+        TLOGI(WmsLogTag::DMS, "casting");
+        return true;
+    }
+    TLOGI(WmsLogTag::DMS, "not casting");
+    return false;
 }
 
 void ScreenSessionManager::SetMultiScreenOuterMode(sptr<ScreenSession>& innerSession,
