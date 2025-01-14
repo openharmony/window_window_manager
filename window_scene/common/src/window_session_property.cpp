@@ -1172,7 +1172,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
-        parcel.WriteUint8(backgroundAlpha_);
+        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(KeyboardViewMode_));
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1256,6 +1256,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAvoidAreaOption(parcel.ReadUint32());
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
     property->SetBackgroundAlpha(parcel.ReadUint8());
+    property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
     return property;
 }
 
@@ -1341,6 +1342,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
     backgroundAlpha_ = property->backgroundAlpha_;
+    KeyboardViewMode_ = property->KeyboardViewMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1835,6 +1837,16 @@ void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
 bool WindowSessionProperty::IsSystemKeyboard() const
 {
     return isSystemKeyboard_;
+}
+
+void WindowSessionProperty::SetKeyboardViewMode(KeyboardViewMode mode)
+{
+    KeyboardViewMode_ = mode;
+}
+
+KeyboardViewMode WindowSessionProperty::GetKeyboardViewMode() const
+{
+    return KeyboardViewMode_;
 }
 
 uint8_t WindowSessionProperty::GetBackgroundAlpha() const
