@@ -927,10 +927,14 @@ private:
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
 
-    // Session recover
+    /*
+     * Window Recover
+     */
     bool isRecovered_ = false;
 
-    // Multi User
+    /*
+     * Multi User
+     */
     bool isMinimizedByUserSwitch_ { false };
 
     /*
