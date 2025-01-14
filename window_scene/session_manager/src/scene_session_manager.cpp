@@ -12447,7 +12447,10 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
                 TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
                 return WSError::WS_ERROR_NULLPTR;
             }
-            nodeId = fromSceneSession->GetSurfaceNode()->GetId();
+            auto surfaceNode = fromSceneSession->GetSurfaceNode();
+            if (surfaceNode) {
+                nodeId = surfaceNode->GetId();
+            }
         }
         toSceneSession->CloneWindow(nodeId);
         TLOGI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
