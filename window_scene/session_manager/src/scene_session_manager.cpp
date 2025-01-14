@@ -189,7 +189,22 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.huawei.hmos.settings", "AccessibilityShortKeyDialog", "phone_settings"),
         std::make_tuple("com.huawei.hmos.settings", "DefaultIntentUiExtensionAbility", "phone_settings"),
         std::make_tuple("com.ohos.sceneboard", "ScbIntentUIExtensionAbility", "phone_sceneboard"),
+        std::make_tuple("com.ohos.sceneboard", "PoweroffAbility", "phone_sceneboard"),
+        std::make_tuple("com.ohos.sceneboard", "com.ohos.sceneboard.MetaBallsAbility", "metaBallsTurbo"),
         std::make_tuple("com.huawei.hmos.motiongesture", "IntentUIExtensionAbility", "entry"),
+        std::make_tuple("com.ohos.useriam.authwidget", "userauthuiextensionability", "entry"),
+        std::make_tuple("com.ohos.sceneboard", "AodStyleAbility", "phone_sceneboard"),
+        std::make_tuple("com.ohos.sceneboard", "HomeThemeComponentExtAbility", "themecomponent"),
+        std::make_tuple("com.ohos.sceneboard", "ThemePersonalizedResourceAbility", "engineservice"),
+        std::make_tuple("com.ohos.sceneboard", "ThemePersonalizedEditingAbility", "engineservice"),
+        std::make_tuple("com.ohos.sceneboard", "CoverExtensionAbility", "coverthemecomponent"),
+        std::make_tuple("com.huawei.hmos.findservice", "SystemDialogAbility", "entry"),
+        std::make_tuple("com.huawei.hmos.mediacontroller", "UIExtAbility", "phone_deviceswitch"),
+        std::make_tuple("com.huawei.hmos.mediacontroller", "AnahsDialogAbility", "phone_deviceswitch"),
+        std::make_tuple("com.huawei.hmos.security.privacycenter", "SuperPrivacyProtectedAbility", "superprivacy"),
+        std::make_tuple("com.huawei.hmos.security.privacycenter", "PermDisabledReminderAbility", "superprivacy"),
+        std::make_tuple("com.huawei.hmos.audioaccessorymanager", "NearbyAbility", "phone"),
+        std::make_tuple("com.huawei.hmos.wallet", "WalletDialogUIExtensionAbility", "entry"),
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
@@ -1539,12 +1554,12 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
         pid = sceneSession->GetCallingPid();
 
         if (!IsScreenLocked()) {
-            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
 
         if (IsUserAuthPassed()) {
-            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
             return WMError::WM_OK;
         }
 
@@ -1575,6 +1590,15 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
 void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds)
 {
     auto task = [this, &windowIds]() -> WMError {
+        if (!IsScreenLocked()) {
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            return WMError::WM_OK;
+        }
+
+        if (IsUserAuthPassed()) {
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
+            return WMError::WM_OK;
+        }
         // check every window
         for (auto windowId : windowIds) {
             auto sceneSession = GetSceneSession(windowId);
