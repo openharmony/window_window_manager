@@ -259,7 +259,8 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
-    const Transform& GetLayoutTransform() const override;
+    void SetLayoutTransform(const Transform& trans) override;
+    Transform GetLayoutTransform() const override;
 
     /*
      * Window Decor
@@ -481,6 +482,7 @@ protected:
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
+    mutable std::recursive_mutex transformMutex_;
 
     /*
      * Window Immersive

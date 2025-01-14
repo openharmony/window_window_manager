@@ -2944,9 +2944,9 @@ public:
      *
      * @return UiContent of layoutTransform.
      */
-    virtual const Transform& GetLayoutTransform() const
+    virtual Transform GetLayoutTransform() const
     {
-        static const Transform trans;
+        static Transform trans;
         return trans;
     }
 };
