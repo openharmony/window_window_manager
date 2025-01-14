@@ -288,6 +288,11 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.callState_ = info.callState_;
 }
 
+DisplayId Session::GetScreenId() const
+{
+    return sessionInfo_.screenId_;
+}
+
 void Session::SetScreenId(uint64_t screenId)
 {
     sessionInfo_.screenId_ = screenId;
