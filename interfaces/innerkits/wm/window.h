@@ -1869,7 +1869,7 @@ public:
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Start move InputBar. It is called by application.
+     * @brief Start move inputBar. It is called by application. Support pc, phone and tablet window.
      *
      * @return Error code of window.
      */
