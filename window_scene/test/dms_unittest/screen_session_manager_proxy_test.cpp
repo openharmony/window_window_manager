@@ -2366,6 +2366,29 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, Function | SmallT
     func();
     ASSERT_NE(res, nullptr);
 }
+
+/**
+ * @tc.name: SetScreenShareProtect
+ * @tc.desc: SetScreenShareProtect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetScreenShareProtect, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    const std::vector<ScreenId> screenIds = {1001, 1002};
+    bool isEnable = true;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        screenSessionManagerProxy->SetScreenShareProtect();
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
+}
 }
 }
 }

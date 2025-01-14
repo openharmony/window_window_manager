@@ -3588,6 +3588,70 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
         EXPECT_EQ(FoldStatus::UNKNOWN, status);
     }
 }
+
+/**
+ * @tc.name: GetFoldStatus
+ * @tc.desc: GetFoldStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto status = ssm_->GetFoldStatus();
+    if (ssm_->IsFoldable()) {
+        EXPECT_NE(FoldStatus::UNKNOWN, status);
+    } else {
+        EXPECT_EQ(FoldStatus::UNKNOWN, status);
+    }
+}
+
+/**
+ * @tc.name: SetScreenShareProtect
+ * @tc.desc: SetScreenShareProtect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtect, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption1";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    const std::vector<ScreenId> screenIds = {screenId, 1002};
+    bool isEnable = true;
+    ASSERT_EQ(ssm_->SetScreenShareProtect(screenIds, isEnable), DMError::DM_OK);
+    isEnable = false;
+    ASSERT_EQ(ssm_->SetScreenShareProtect(screenIds, isEnable), DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetScreenShareProtectInner
+ * @tc.desc: SetScreenShareProtectInner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption1";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    virtualOption.name_ = "createVirtualOption2";
+    auto screenId2 = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId2 != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId2 != VIRTUAL_SCREEN_ID);
+    }
+    auto screenSession = ssm_->GetScreenSession(screenId);
+    screenSession->SetShareProtect(true);
+    const std::vector<ScreenId> screenIds = {screenId, screenId2};
+    ssm_->SetScreenShareProtectInner(screenIds, isEnable);
+}
+
+
 }
 } // namespace Rosen
 } // namespace OHOS

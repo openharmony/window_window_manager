@@ -746,6 +746,19 @@ HWTEST_F(ScreenManagerTest, GetScreenInfoSrting, Function | SmallTest | Level1)
     auto result =ScreenManager::GetInstance().pImpl_->GetScreenInfoSrting(screenInfo);
     EXPECT_EQ(result, "");
 }
+
+/**
+ * @tc.name: SetScreenShareProtect
+ * @tc.desc: SetScreenShareProtect fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetScreenShareProtect, Function | SmallTest | Level1)
+{
+    const std::vector<ScreenId> screenIds;
+    bool isEnable = true;
+    auto result = ScreenManager::GetInstance().SetScreenShareProtect(screenIds, isEnable);
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

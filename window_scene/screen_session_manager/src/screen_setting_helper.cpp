@@ -25,6 +25,7 @@ namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
+sptr<SettingObserver> ScreenSettingHelper::screenShareProtectObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
@@ -495,6 +496,46 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
+}
+
+void ScreenSettingHelper::RegisterSettingScreenshareProtectObserver(SettingObserver::UpdateFunc func)
+{
+    if (screenShareProtectObserver_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    screenShareProtectObserver_ = settingProvider.CreateObserver(SETTING_SCREEN_SHARE_PROTECT_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserver(screenShareProtectObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        screenShareProtectObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingScreenshareProtectObserver()
+{
+    if (screenShareProtectObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.UnregisterObserver(screenShareProtectObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+    }
+    screenShareProtectObserver_ = nullptr;
+}
+
+bool GetSettingScreenshareProtect(bool& enable, const std::string& key)
+{
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetBoolValue(key, enable);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

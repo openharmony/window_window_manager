@@ -845,6 +845,20 @@ HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest 
     sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetPrimaryDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
 }
+
+/**
+ * @tc.name: SetScreenShareProtect
+ * @tc.desc: SetScreenShareProtect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetScreenShareProtect, Function | SmallTest | Level2)
+{
+    const std::vector<ScreenId> screenIds = {1001, 1002};
+    bool isEnable = true;
+    DisplayManagerAdapter& displayManagerAdapter = SingletonContainer::Get<DisplayManagerAdapter>();
+    auto result = displayManagerAdapter.SetScreenShareProtect(screenIds, isEnable);
+    ASSERT_NE(result, DMError::DM_OK);
+}
 }
 }
 }
