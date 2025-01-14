@@ -324,7 +324,6 @@ public:
     void SetEnableInputEvent(bool enabled);
     void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
     void SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds);
-
     void NotifyRecoveringFinished();
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId, std::unordered_set<std::string>& privacyBundles);
