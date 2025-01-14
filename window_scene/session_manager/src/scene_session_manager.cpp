@@ -3024,7 +3024,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     }
     if (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT && property->IsSystemKeyboard()) {
         // system keyboard window can only be created by virtual keyboard service
-        if (SessionPermission::IsSystemCalling()) {
+        if (SessionPermission::VerifyCallingPermission("ohos.permission.VIRTUAL_KEYBOARD_WINDOW")) {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "create system keyboard, permission check sucess.");
             return true;
         }
