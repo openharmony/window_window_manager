@@ -65,6 +65,7 @@ public:
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect(TargetRectCoordinate coordinate) const;
+    WSRect GetTargetRectByDisplayId(DisplayId displayId) const;
     void SetTargetRect(const WSRect& rect);
     WSRect GetOriginalRect() const;
     void InitMoveDragProperty();
@@ -82,7 +83,6 @@ public:
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
-    void SetIsPcWindow(bool isPcWindow);
 
     /*
      * Cross Display Move Drag
@@ -188,7 +188,6 @@ private:
     MoveDragCallback moveDragCallback_;
     int32_t persistentId_;
     WindowType winType_;
-    bool isPcWindow_ = false;
 
     enum class DragType : uint32_t {
         DRAG_UNDEFINED,

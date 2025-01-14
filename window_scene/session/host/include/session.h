@@ -58,7 +58,6 @@ using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)
 using NotifyChangeSessionVisibilityWithStatusBarFunc = std::function<void(const SessionInfo& info, bool visible)>;
 using NotifySessionStateChangeFunc = std::function<void(const SessionState& state)>;
 using NotifyBufferAvailableChangeFunc = std::function<void(const bool isAvailable)>;
-using NotifyLeashWindowSurfaceNodeChangedFunc = std::function<void()>;
 using NotifySessionStateChangeNotifyManagerFunc = std::function<void(int32_t persistentId, const SessionState& state)>;
 using NotifyRequestFocusStatusNotifyManagerFunc =
     std::function<void(int32_t persistentId, const bool isFocused, const bool byForeground, FocusChangeReason reason)>;
@@ -103,6 +102,8 @@ public:
     virtual void OnDisconnect() {}
     virtual void OnLayoutFinished() {}
     virtual void OnRemoveBlank() {}
+    virtual void OnAddSnapshot() {}
+    virtual void OnRemoveSnapshot() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnExtensionDied() {}
     virtual void OnExtensionDetachToDisplay() {}
@@ -193,6 +194,8 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
+    void NotifyAddSnapshot();
+    void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -305,7 +308,6 @@ public:
     void SetNotifyUIRequestFocusFunc(const NotifyUIRequestFocusFunc& func);
     void SetNotifyUILostFocusFunc(const NotifyUILostFocusFunc& func);
     void SetGetStateFromManagerListener(const GetStateFromManagerFunc& func);
-    void SetLeashWindowSurfaceNodeChangedListener(const NotifyLeashWindowSurfaceNodeChangedFunc& func);
 
     void SetSystemConfig(const SystemSessionConfig& systemConfig);
     void SetSnapshotScale(const float snapshotScale);
@@ -583,6 +585,7 @@ public:
      */
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
+    bool IsPcWindow() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -662,7 +665,6 @@ protected:
     NotifyChangeSessionVisibilityWithStatusBarFunc changeSessionVisibilityWithStatusBarFunc_;
     NotifySessionStateChangeFunc sessionStateChangeFunc_;
     NotifyBufferAvailableChangeFunc bufferAvailableChangeFunc_;
-    NotifyLeashWindowSurfaceNodeChangedFunc leashWindowSurfaceNodeChangedFunc_;
     NotifySessionInfoChangeNotifyManagerFunc sessionInfoChangeNotifyManagerFunc_;
     NotifySessionStateChangeNotifyManagerFunc sessionStateChangeNotifyManagerFunc_;
     NotifyRequestFocusStatusNotifyManagerFunc requestFocusStatusNotifyManagerFunc_;

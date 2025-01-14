@@ -707,9 +707,11 @@ HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(window->FindWindowById(1), nullptr);
-    ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(window->FindWindowById(1), nullptr);
+        ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    }
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent end";
 }
 
@@ -2363,6 +2365,28 @@ HWTEST_F(WindowSessionImplTest4, GetIsMidScene, Function | SmallTest | Level2)
     auto ret = window->GetIsMidScene(isMidScene);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     ASSERT_EQ(false, isMidScene);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
+ * @tc.name: GetLayoutTransform
+ * @tc.desc: GetLayoutTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetLayoutTransform, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetLayoutTransform");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Transform transform;
+    transform.scaleX_ = 1.0;
+    transform.scaleY_ = 1.0;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->NotifyTransformChange(transform);
+    Transform layoutTransform = window->GetLayoutTransform();
+    ASSERT_EQ(transform.scaleX_, layoutTransform.scaleX_);
+    ASSERT_EQ(transform.scaleY_, layoutTransform.scaleY_);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 } // namespace

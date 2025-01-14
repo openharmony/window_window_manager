@@ -656,6 +656,18 @@ HWTEST_F(SessionStageProxyTest, SetSupportEnterWaterfallMode, Function | SmallTe
     WSError res = sessionStage_->SetSupportEnterWaterfallMode(false);
     ASSERT_EQ(WSError::WS_OK, res);
 }
+
+/**
+ * @tc.name: SendContainerModalEvent
+ * @tc.desc: test function : SendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SendContainerModalEvent, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SendContainerModalEvent("name", "value");
+    ASSERT_EQ(WSError::WS_OK, res);
+}
 }
 }
 }

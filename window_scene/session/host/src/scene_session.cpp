@@ -1859,6 +1859,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WindowType::WINDOW_TYPE_STATUS_BAR, sessionProperty->GetDisplayId());
     }
     for (auto& statusBar : statusBarVector) {
+        if (statusBar == nullptr) {
+            continue;
+        }
         WSRect statusBarRect = statusBar->GetSessionRect();
         bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
             isStatusBarVisible_ : statusBar->isVisible_;
@@ -1866,8 +1869,11 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s status bar %{public}s",
-              rect.ToString().c_str(), statusBarRect.ToString().c_str());
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d rect %{public}s status bar %{public}s",
+            GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
     return;
@@ -3102,10 +3108,6 @@ void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
         return;
     }
     auto sessionProperty = GetSessionProperty();
-    if (!sessionProperty) {
-        WLOGFE("get session property is null!");
-        return;
-    }
     float tmpPosY = 0.0;
     std::vector<sptr<SceneSession>> statusBarVector;
     if (specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_) {
@@ -3276,22 +3278,6 @@ WSError SceneSession::SetKeepScreenOn(bool keepScreenOn)
 bool SceneSession::IsKeepScreenOn() const
 {
     return GetSessionProperty()->IsKeepScreenOn();
-}
-
-std::string SceneSession::GetSessionSnapshotFilePath() const
-{
-    WLOGFI("GetSessionSnapshotFilePath id %{public}d", GetPersistentId());
-    if (Session::GetSessionState() < SessionState::STATE_BACKGROUND) {
-        WLOGFI("GetSessionSnapshotFilePath UpdateSnapshot");
-        auto snapshot = Snapshot();
-        if (scenePersistence_ != nullptr) {
-            scenePersistence_->SaveSnapshot(snapshot);
-        }
-    }
-    if (scenePersistence_ != nullptr) {
-        return scenePersistence_->GetSnapshotFilePath();
-    }
-    return "";
 }
 
 void SceneSession::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& icon)
@@ -3490,6 +3476,26 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
     uint8_t alpha8bit = static_cast<uint8_t>(alpha * 255);
     WLOGFI("SetAbilityBGAlpha alpha8bit=%{public}u.", alpha8bit);
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
+    surfaceNode->SetAbilityBGAlpha(alpha8bit);
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
+}
+
+void SceneSession::ResetOcclusionAlpha()
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::ResetAbilityBGAlpha");
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
+        return;
+    }
+    uint8_t alpha8bit = GetSessionProperty()->GetBackgroundAlpha();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u, windowId=%{public}d", alpha8bit, GetPersistentId());
     auto rsTransaction = RSTransactionProxy::GetInstance();
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
@@ -4008,7 +4014,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
         if (!abilitySessionInfo->supportWindowModes.empty()) {
-            info.supportWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
+            info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
     }
@@ -4025,11 +4031,11 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
-        "supportWindowModes.size:%{public}zu, specifiedId:%{public}d",
+        "supportedWindowModes.size:%{public}zu, specifiedId:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
-        info.supportWindowModes.size(), info.specifiedId);
+        info.supportedWindowModes.size(), info.specifiedId);
     return info;
 }
 
@@ -4310,6 +4316,24 @@ bool SceneSession::IsMissionHighlighted()
         });
 }
 
+void SceneSession::MaskSupportEnterWaterfallMode()
+{
+    if (pcFoldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "pcFoldScreenController is null");
+        return;
+    }
+    pcFoldScreenController_->MaskSupportEnterWaterfallMode();
+}
+
+void SceneSession::SetSupportEnterWaterfallMode(bool isSupportEnter)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is nullptr");
+        return;
+    }
+    sessionStage_->SetSupportEnterWaterfallMode(isSupportEnter);
+}
+
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
 {
     TLOGD(WmsLogTag::DEFAULT, "setListener success");
@@ -4391,6 +4415,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateWindowModeSupportType(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
             return HandleActionUpdateAvoidAreaOption(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA):
+            return HandleBackgroundAlpha(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4706,6 +4732,18 @@ WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSession
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sessionProperty->SetBackgroundAlpha(property->GetBackgroundAlpha());
+    return WMError::WM_OK;
+}
+
 void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property)
 {
     auto systemBarProperties = property->GetSystemBarProperty();
@@ -4883,6 +4921,16 @@ WSError SceneSession::SetSplitButtonVisible(bool isVisible)
     return sessionStage_->SetSplitButtonVisible(isVisible);
 }
 
+WSError SceneSession::SendContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SendContainerModalEvent(eventName, eventValue);
+}
+
 void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback)] {
@@ -5041,12 +5089,11 @@ std::vector<sptr<SceneSession>> SceneSession::GetToastSession() const
     return toastSession_;
 }
 
-WSRect SceneSession::GetSessionTargetRect() const
+WSRect SceneSession::GetSessionTargetRectByDisplayId(DisplayId displayId) const
 {
     WSRect rect;
     if (moveDragController_) {
-        rect = moveDragController_->GetTargetRect(
-            MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
+        rect = moveDragController_->GetTargetRectByDisplayId(displayId);
     } else {
         WLOGFI("moveDragController_ is null");
     }
@@ -5647,6 +5694,11 @@ void SceneSession::RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreen
     }, __func__);
 }
 
+void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& callback)
+{
+    onGetStatusBarAvoidHeightFunc_ = std::move(callback);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -5682,11 +5734,16 @@ int32_t SceneSession::GetStatusBarHeight()
     const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
-        if (statusBar != nullptr && statusBar->GetSessionRect().height_ > height) {
-            height = statusBar->GetSessionRect().height_;
+        if (statusBar == nullptr) {
+            continue;
         }
+        WSRect statusBarRect = statusBar->GetSessionRect();
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+        }
+        height = statusBarRect.height_;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "height %{public}d", height);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}d", GetPersistentId(), height);
     return height;
 }
 
@@ -6124,7 +6181,7 @@ bool SceneSession::IsSystemKeyboard() const
     return sessionProperty->IsSystemKeyboard();
 }
 
-void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportWindowModesFunc&& func)
+void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func)
 {
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), func = std::move(func), where] {
@@ -6133,7 +6190,7 @@ void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportWindowMode
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or func is null", where);
             return;
         }
-        session->onSetSupportWindowModesFunc_ = std::move(func);
+        session->onSetSupportedWindowModesFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
     }, __func__);
 }
