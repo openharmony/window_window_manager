@@ -3631,7 +3631,7 @@ WSError SceneSession::UpdateWindowSceneAfterCustomAnimation(bool isAdd)
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s, id %{public}d, isAdd: %{public}d",
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s id %{public}d, isAdd: %{public}d",
             where, session->GetPersistentId(), isAdd);
         if (isAdd) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s SetOpacityFunc not register %{public}d",
@@ -4994,7 +4994,7 @@ void SceneSession::NotifyPiPWindowPrepareClose()
         if (session->onPrepareClosePiPSession_) {
             session->onPrepareClosePiPSession_();
         }
-        TLOGND(WmsLogTag::WMS_PIP, "%{public}s, id: %{public}d", where, session->GetPersistentId());
+        TLOGND(WmsLogTag::WMS_PIP, "%{public}s id: %{public}d", where, session->GetPersistentId());
     }, __func__);
 }
 
