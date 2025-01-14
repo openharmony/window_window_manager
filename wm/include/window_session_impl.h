@@ -299,6 +299,7 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
     WMError GetIsMidScene(bool& isMidScene) override;
+    WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
 
     /*
      * Window Layout
