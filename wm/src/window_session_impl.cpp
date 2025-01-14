@@ -4442,7 +4442,7 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     WLOGFI("in");
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
-        layoutTransform_ = transform;
+        SetLayoutTransform(transform);
     }
 }
 
@@ -4732,8 +4732,15 @@ uint32_t WindowSessionImpl::GetTargetAPIVersion() const
     return targetAPIVersion_;
 }
 
-const Transform& WindowSessionImpl::GetLayoutTransform() const
+void WindowSessionImpl::SetLayoutTransform(const Transform& transform)
 {
+    std::lock_guard<std::recursive_mutex> lock(transformMutex_);
+    layoutTransform_ = transform;
+}
+
+Transform WindowSessionImpl::GetLayoutTransform() const
+{
+    std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
 }
 } // namespace Rosen
