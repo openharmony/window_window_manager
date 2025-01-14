@@ -320,6 +320,8 @@ void ScreenSessionManager::Init()
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetScreenShareProtectInner(); };
+    ScreenSettingHelper::RegisterSettingScreenShareProtectObserver(updateFunc);
 }
 
 void ScreenSessionManager::OnStart()
@@ -7274,5 +7276,60 @@ void ScreenSessionManager::MultiScreenChangeOuter(const std::string& outerFlag)
         RecoveryMultiScreenNormalMode(innerSession, outerSession);
     }
     FixPowerStatus();
+}
+
+DMError ScreenSessionManager::SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
+    std::ostringstream oss;
+    for (ScreenId screenId : screenIds) {
+        oss << screenId << " ";
+    }
+    TLOGI(WmsLogTag::DMS, "screenIds:%{public}s, isEnable:%{public}d", oss.c_str(), isEnable);
+    for (ScreenId screenId : screenIds) {
+        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+            screenSession->SetShareProtect(isEnable);
+        }
+    }
+    SetScreenShareProtectInner();
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::SetScreenShareProtectInner()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    bool screenShareProtectValue;
+    bool ret = ScreenSettingHelper::GetSettingScreenShareProtect(screenShareProtectValue);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get setting failed, default value false");
+        screenShareProtectValue = false;
+    }
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId:%{public}" PRIu64"",
+                sessionIt.first);
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+            ScreenId rsScreenId;
+            if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId)) {
+                TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
+                continue;
+            }
+            bool requiredSkipWindow = screenSession->GetShareProtect() && screenShareProtectValue;
+            TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 " requiredSkipWindow:%{public}d",
+                sessionIt.first, requiredSkipWindow);
+            rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
+        }
+    }
 }
 } // namespace OHOS::Rosen

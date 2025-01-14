@@ -901,4 +901,10 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOp
     INIT_PROXY_CHECK_RETURN(nullptr);
     return displayManagerServiceProxy_->GetDisplaySnapshotWithOption(captureOption, errorCode);
 }
+
+DMError ScreenManagerAdapter::SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->SetScreenShareProtect(screenIds, isEnable);
+}
 } // namespace OHOS::Rosen

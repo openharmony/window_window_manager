@@ -201,6 +201,9 @@ public:
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
 
+    bool GetShareProtect();
+    void SetShareProtect(bool needShareProtect);
+
     std::string name_ { "UNKNOWN" };
     ScreenId screenId_ {};
     ScreenId rsId_ {};
@@ -297,6 +300,7 @@ private:
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
     void ReportNotifyModeChange(DisplayOrientation displayOrientation);
     sptr<ScreenSession> fakeScreenSession_ = nullptr;
+    bool needShareProtect_ = false;
     int32_t GetApiVersion();
     void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);

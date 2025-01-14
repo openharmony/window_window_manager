@@ -951,6 +951,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_SCREEN_SHARE_PROTECT: {
+            ProcSetScreenShareProtect(data, reply);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1074,5 +1078,17 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
     std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
     static_cast<void>(reply.WriteInt32(static_cast<int32_t>(errCode)));
+}
+
+void ScreenSessionManagerStub::ProcSetScreenShareProtect(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<ScreenId> screenIds;
+    if (!data.ReadUInt64Vector(&screenIds)) {
+        TLOGE(WmsLogTag::DMS, "Read screenIds failed");
+        break;
+    }
+    bool isEnable = static_cast<bool>(data.ReadBool());
+    DmErrorCode ret = SetScreenShareProtect(screenIds, isEnable);
+    reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen
