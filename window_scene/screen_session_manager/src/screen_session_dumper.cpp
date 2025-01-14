@@ -318,6 +318,30 @@ void ScreenSessionDumper::DumpFoldStatus()
             status = "HALF_FOLD";
             break;
         }
+        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND: {
+            status = "FOLD_STATUS_EXPANDED_WITH_SECOND_EXPANDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED: {
+            status = "FOLD_STATUS_EXPANDED_WITH_SECOND_HALF_FOLDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND: {
+            status = "FOLD_STATUS_FOLDED_WITH_SECOND_EXPANDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED: {
+            status = "FOLD_STATUS_FOLDED_WITH_SECOND_HALF_FOLDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND: {
+            status = "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_EXPANDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED: {
+            status = "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_HALF_FOLDED";
+            break;
+        }
         default: {
             status = "UNKNOWN";
             break;
