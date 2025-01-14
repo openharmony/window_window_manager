@@ -48,6 +48,7 @@ public:
     void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId) override {};
     void NotifyScreenMagneticStateChanged(bool isMagneticState) override {};
     void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override {};
+    void NotifyAbnormalScreenConnectChange(ScreenId screenId) override {};
 };
 }
 }

@@ -56,6 +56,30 @@ public:
         virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>&) = 0;
     };
 
+    class IAbnormalScreenConnectChangeListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify when a screen connection occurs due to an system exception.
+         */
+        virtual void NotifyAbnormalScreenConnectChange(ScreenId screenId) = 0;
+    };
+
+    /**
+     * @brief Register screen connect change listener(Only for scenarios where system exceptions occur).
+     *
+     * @param listener IAbnormalScreenConnectChangeListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
+
+    /**
+     * @brief Unregister screen connect change listener(Only for scenarios where system exceptions occur).
+     *
+     * @param listener IAbnormalScreenConnectChangeListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
+
     /**
      * @brief Register screen mode change listener.
      *
