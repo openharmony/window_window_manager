@@ -259,7 +259,7 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
-    void SetLayoutTransform(const Transform& trans) override;
+    void SetLayoutTransform(const Transform& trans);
     Transform GetLayoutTransform() const override;
 
     /*
