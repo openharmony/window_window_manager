@@ -155,6 +155,23 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: NotifyWindowTransition
+ * @tc.desc: NotifyWindowTransition test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTest | Level2)
+{
+    sptr<WindowTransitionInfo> fromInfo = nullptr;
+    sptr<WindowTransitionInfo> toInfo = nullptr;
+    ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, false));
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, wms->NotifyWindowTransition(fromInfo, toInfo, true));
+    } else {
+        ASSERT_NE(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
+    }
+}
+
+/**
  * @tc.name: StartingWindow
  * @tc.desc: StartingWindow test
  * @tc.type: FUNC
