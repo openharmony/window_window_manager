@@ -1131,12 +1131,9 @@ napi_value JsSceneSessionManager::SetIsWindowRectAutoSave(napi_env env, napi_cal
 
 napi_value JsSceneSessionManager::NotifyAboveLockScreen(napi_env env, napi_callback_info info)
 {
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    if (me == nullptr) {
-        TLOGW(WmsLogTag::WMS_SCB, "me is null");
-        return nullptr;
-    }
-    return me->OnNotifyAboveLockScreen(env, info);
+    return (me != nullptr) ? me->OnNotifyAboveLockScreen(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -2685,14 +2682,14 @@ napi_value JsSceneSessionManager::OnSetUserAuthPassed(napi_env env, napi_callbac
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     bool isUserAuthPassed = false;
     if (!ConvertFromJsValue(env, argv[0], isUserAuthPassed)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "[NAPI]Failed to convert parameter to isUserAuthPassed");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isUserAuthPassed");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);

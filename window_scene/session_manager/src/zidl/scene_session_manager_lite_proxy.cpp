@@ -900,30 +900,24 @@ WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId,
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write interfaceToken");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteInt32(windowId)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write windowId");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteUint32(tokenId)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write tokenId");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteInt32(static_cast<int32_t>(extensionAbilityType))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write extensionAbilityType");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     data.WriteParcelable(&element);
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-
     int32_t ret =
         remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UI_EXTENSION_CREATION_CHECK),
             data, reply, option);
@@ -931,18 +925,15 @@ WMError SceneSessionManagerLiteProxy::CheckUIExtensionCreation(int32_t windowId,
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Send request failed, ret:%{public}d", ret);
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     int32_t errCode = 0;
     if (!reply.ReadInt32(errCode)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to read errcode");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     if (!reply.ReadInt32(pid)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to read pid");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: errcode %{public}u", errCode);
     return static_cast<WMError>(errCode);
 }
