@@ -519,7 +519,7 @@ public:
      */
     std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
 
-    /**
+    /*
      * Screen Lock
      */
     bool IsScreenLockWindow() const;
@@ -807,7 +807,7 @@ private:
      */
     std::optional<bool> clientDragEnable_;
 
-    /**
+    /*
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };

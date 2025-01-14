@@ -461,19 +461,16 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
 int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: called");
-
     int32_t windowId = INVALID_WINDOW_ID;
     if (!data.ReadInt32(windowId)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get windowId");
         return ERR_INVALID_DATA;
     }
-
-    uint32_t token = -1;
-    if (!data.ReadUint32(token)) {
+    uint32_t tokenId = -1;
+    if (!data.ReadUint32(tokenId)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get token");
         return ERR_INVALID_DATA;
     }
-
     int32_t extAbilityTypeValue = -1;
     if (!data.ReadInt32(extAbilityTypeValue)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get extensionAbilityType");
@@ -484,27 +481,22 @@ int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& d
         return ERR_INVALID_DATA;
     }
     auto extAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(extAbilityTypeValue);
-
     sptr<AppExecFwk::ElementName> element = data.ReadParcelable<AppExecFwk::ElementName>();
     if (!element) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get element");
         return ERR_INVALID_DATA;
     }
-
     int32_t pid = INVALID_PID;
-    WMError errCode = CheckUIExtensionCreation(windowId, token, *element, extAbilityType, pid);
+    WMError errCode = CheckUIExtensionCreation(windowId, tokenId, *element, extAbilityType, pid);
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
-
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write errcode");
         return ERR_INVALID_DATA;
     }
-
     if (!reply.WriteInt32(pid)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write pid");
         return ERR_INVALID_DATA;
     }
-
     return ERR_NONE;
 }
 

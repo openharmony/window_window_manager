@@ -1528,7 +1528,7 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
-uint32_t SceneSessionManager::GetLockScreenZorder()
+uint32_t SceneSessionManager::GetLockScreenZOrder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
@@ -1544,7 +1544,9 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
 WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,
     const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
-    auto task = [this, windowId, callingTokenId, &element, extensionAbilityType, &pid]() -> WMError {
+    std::ostringstream ss;
+    ss << "UIExtOnLockCheck" << "_" << windowId << "_" << callingTokenId;
+    return taskScheduler_->PostSyncTask([this, windowId, callingTokenId, &element, extensionAbilityType, &pid]() {
         pid = INVALID_PID;
         auto sceneSession = GetSceneSession(windowId);
         if (sceneSession == nullptr) {
@@ -1552,38 +1554,28 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         pid = sceneSession->GetCallingPid();
-
         if (!IsScreenLocked()) {
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
-
         if (IsUserAuthPassed()) {
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
             return WMError::WM_OK;
         }
-
         // 1. check window whether can show on main window
-        if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
+        if (!sceneSession->IsShowOnLockScreen(GetLockScreenZOrder())) {
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not called on lock screen");
             return WMError::WM_OK;
         }
-
         // 2. check permission
         if (!IsUIExtCanShowOnLockScreen(element, callingTokenId, extensionAbilityType)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: no permisson, window id %{public}d, %{public}d", windowId,
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-
         TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
         return WMError::WM_OK;
-    };
-
-    std::ostringstream ss;
-    ss << "UIExtOnLockCheck"
-       << "_" << windowId << "_" << callingTokenId;
-    return taskScheduler_->PostSyncTask(task, ss.str());
+    }, ss.str());
 }
 
 // windowIds are all main window
@@ -1594,7 +1586,6 @@ void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& wi
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
-
         if (IsUserAuthPassed()) {
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
             return WMError::WM_OK;
@@ -10036,10 +10027,9 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             TLOGI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession or already destroyed");
             return;
         }
+        auto abilityToken = iter->second;
         int32_t persistentId = INVALID_SESSION_ID;
         int32_t parentId = INVALID_SESSION_ID;
-
-        auto abilityToken = iter->second;
         if (!GetExtensionWindowIds(abilityToken, persistentId, parentId)) {
             TLOGE(WmsLogTag::WMS_UIEXT, "Get UIExtension window ids by token failed");
             return;
@@ -10180,7 +10170,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
             info.extensionAbilityType);
         parentSession->AddExtensionTokenInfo(tokenInfo);
         parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
-        if (usage == UIExtensionUsage::MODAL && parentSession) {
+        if (usage == UIExtensionUsage::MODAL) {
             ExtensionWindowEventInfo extensionInfo {
                 .persistentId = persistentId,
                 .pid = pid,

@@ -479,7 +479,7 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
-    /**
+    /*
      * UIExtension
      */
     bool IsShowOnLockScreen(uint32_t lockScreenZOrder);
@@ -780,7 +780,7 @@ private:
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
 
-    /**
+    /*
      * UIExtension
      */
     std::atomic_bool shouldHideNonSecureWindows_ { false };

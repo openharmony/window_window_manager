@@ -199,13 +199,13 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return nullptr;
     }
+    WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
+        const std::vector<AppUseControlInfo>& controlList) override { return WSError::WS_OK; }
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) override
     {
         return WMError::WM_OK;
     }
-    WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
-        const std::vector<AppUseControlInfo>& controlList) override { return WSError::WS_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
