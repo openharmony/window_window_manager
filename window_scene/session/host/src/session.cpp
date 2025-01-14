@@ -2332,16 +2332,17 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
         }
-        if (requirePersist) {
-            std::function<void()> func = [weakThis]() {
-                if (auto session = weakThis.promote()) {
-                    TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
-                    std::lock_guard<std::mutex> lock(session->snapshotMutex_);
-                    session->snapshot_ = nullptr;
-                }
-            };
-            session->scenePersistence_->SaveSnapshot(pixelMap, func);
+        if (!requirePersist) {
+            return;
         }
+        std::function<void()> func = [weakThis]() {
+            if (auto session = weakThis.promote()) {
+                TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
+                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
+                session->snapshot_ = nullptr;
+            }
+        };
+        session->scenePersistence_->SaveSnapshot(pixelMap, func);
     };
     if (!useFfrt) {
         task();
