@@ -452,9 +452,9 @@ void Session::NotifyRemoveBlank()
 void Session::NotifyAddSnapshot()
 {
     /*
-    * for blankness prolems, persist snapshot could conflict with background process,
-    * thus no need to persist snapshot here
-    */
+     * for blankness prolems, persist snapshot could conflict with background process,
+     * thus no need to persist snapshot here
+     */
     SaveSnapshot(false, false);
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
