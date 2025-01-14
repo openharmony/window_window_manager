@@ -585,6 +585,7 @@ public:
      */
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
+    bool IsPcWindow() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

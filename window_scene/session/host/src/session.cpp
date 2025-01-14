@@ -3721,4 +3721,9 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
     }
     return nullptr;
 }
+
+bool Session::IsPcWindow() const
+{
+    return systemConfig_.IsPcWindow();
+}
 } // namespace OHOS::Rosen

@@ -4921,6 +4921,16 @@ WSError SceneSession::SetSplitButtonVisible(bool isVisible)
     return sessionStage_->SetSplitButtonVisible(isVisible);
 }
 
+WSError SceneSession::SendContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SendContainerModalEvent(eventName, eventValue);
+}
+
 void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback)] {
