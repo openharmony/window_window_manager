@@ -798,21 +798,6 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange02, Function | SmallTest 
 }
 
 /**
- * @tc.name: SetWindowFlags
- * @tc.desc: SetWindowFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, SetWindowFlags, Function | SmallTest | Level3)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
-    sessionInfo.abilityName_ = "DumpSessionWithId";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
-    ASSERT_NE(nullptr, ssm_);
-}
-
-/**
  * @tc.name: ProcessModalTopmostRequestFocusImmdediately
  * @tc.desc: ProcessModalTopmostRequestFocusImmdediately
  * @tc.type: FUNC
