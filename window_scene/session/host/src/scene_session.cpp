@@ -241,7 +241,7 @@ void SceneSession::RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityTo
     auto persistentId = GetPersistentId();
     extensionTokenInfos_.erase(std::remove_if(
         extensionTokenInfos_.begin(), extensionTokenInfos_.end(),
-            [&abilityToken, persistentId, where = __func__](const auto& tokenInfo) {
+        [&abilityToken, persistentId, where = __func__](const auto& tokenInfo) {
             TLOGNI(WmsLogTag::WMS_UIEXT,
                 "%{public}s UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
                 where, tokenInfo.callingTokenId, persistentId);
@@ -1014,10 +1014,6 @@ WSError SceneSession::SetAspectRatio(float ratio)
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
-        }
-        if (!session->GetSessionProperty()) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s Set ratio failed, property is null", where);
-            return WSError::WS_ERROR_NULLPTR;
         }
         float vpr = 1.5f; // 1.5f: default virtual pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
@@ -2446,14 +2442,14 @@ void SceneSession::ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>&
 
 void SceneSession::SetWindowMovingCallback(NotifyWindowMovingFunc&& func)
 {
-    PostTask([weakThis = wptr(this), funcName = __func__, func = std::move(func)] {
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func)] {
         auto session = weakThis.promote();
         if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session or func is null", funcName);
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: session or func is null", where);
             return;
         }
         session->notifyWindowMovingFunc_ = std::move(func);
-        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", funcName,
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d", where,
             session->GetPersistentId());
     }, __func__);
 }
