@@ -285,6 +285,11 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+    
+    /*
+     * Window Input Event
+     */
+    void ResetSuperFoldDisplayY(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /*
      * Window Recover
@@ -353,6 +358,11 @@ private:
      * PC Window
      */
     bool isExecuteDelayRaise_ = false;
+
+    /*
+     * Window Input Event
+     */
+    int32_t superFoldOffsetY_ = -1; // calculate the total height of the display_B area and crease area.
 };
 } // namespace Rosen
 } // namespace OHOS
