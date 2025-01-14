@@ -243,8 +243,8 @@ void SceneSession::RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityTo
     const char* const where = __func__;
     auto persistentId = GetPersistentId();
     extensionTokenInfos_.erase(std::remove_if(
-        extensionTokenInfos_.begin(), extensionTokenInfos_.end(), [&abilityToken, persistentId, where]
-            (const auto& tokenInfo) {
+        extensionTokenInfos_.begin(), extensionTokenInfos_.end(),
+            [&abilityToken, persistentId, where](const auto& tokenInfo) {
             TLOGNI(WmsLogTag::WMS_UIEXT,
                 "%{public}s UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
                 where, tokenInfo.callingTokenId, persistentId);
@@ -984,7 +984,7 @@ WSError SceneSession::GetGlobalMaximizeMode(MaximizeMode& mode)
     return PostSyncTask([weakThis = wptr(this), &mode, where] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_PC, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         mode = maximizeMode_;
