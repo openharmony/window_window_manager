@@ -386,6 +386,8 @@ public:
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
     bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
+    void SetStatusBarAvoidHeight(int32_t height);
+    void GetStatusBarAvoidHeight(WSRect& barArea);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -532,6 +534,8 @@ public:
     void RegisterCreateSubSessionListener(int32_t persistentId, const NotifyCreateSubSessionFunc& func);
     void RegisterBindDialogTargetListener(const sptr<SceneSession>& session, NotifyBindDialogSessionFunc&& func);
     void UnregisterSpecificSessionCreateListener(int32_t persistentId);
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) override;
 
     /*
      * Window Lifecycle
@@ -573,6 +577,12 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
+    void GetMainSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions) const;
+    WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex);
+    WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, int32_t appIndex);
 
 protected:
     SceneSessionManager();
@@ -651,6 +661,7 @@ private:
     void GetAllClearableSessions(std::vector<sptr<SceneSession>>& sessionVector);
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
+    void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
 
     /*
      * Window Focus
@@ -1155,6 +1166,8 @@ private:
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
+    static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
+    int32_t statusBarAvoidHeight_ = INVALID_STATUS_BAR_AVOID_HEIGHT;
 
     struct SessionInfoList {
         int32_t uid_;
@@ -1215,6 +1228,7 @@ private:
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
+    std::unordered_set<std::string> sessionLockedStateCacheSet_;
 };
 } // namespace OHOS::Rosen
 

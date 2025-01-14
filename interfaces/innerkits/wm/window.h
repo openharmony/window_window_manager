@@ -698,7 +698,7 @@ public:
      *
      * @return Mode of window.
      */
-    virtual WindowMode GetMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
+    virtual WindowMode GetWindowMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
 
     /**
      * @brief Get alpha of window.
@@ -915,7 +915,7 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
@@ -2938,6 +2938,17 @@ public:
      * @return True - is mid scene, false - is not mid scene.
      */
     virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get layoutTransform of window uiContent.
+     *
+     * @return UiContent of layoutTransform.
+     */
+    virtual Transform GetLayoutTransform() const
+    {
+        static Transform trans;
+        return trans;
+    }
 };
 }
 }

@@ -20,6 +20,7 @@
 #include <system_ability.h>
 #include <mutex>
 #include <condition_variable>
+#include <pixel_map.h>
 
 #include "common/include/task_scheduler.h"
 #include "dm_common.h"
@@ -104,6 +105,8 @@ public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
                                          const sptr<IRemoteObject>& displayManagerAgent) override;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
+        const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override;
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
@@ -404,6 +407,7 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void NotifyCaptureStatusChanged();
+    void NotifyCaptureStatusChanged(bool IsCaptured);
     DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         DMRect mainScreenRegion, ScreenId& screenGroupId);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
@@ -425,6 +429,7 @@ private:
     void GetInternalAndExternalSession(sptr<ScreenSession>& internalSession, sptr<ScreenSession>& externalSession);
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
+    void RefreshMirrorScreenRegion(ScreenId screenId);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -438,6 +443,7 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     void SetScreenCorrection();
+    bool IsScreenCasting();
 
     /**
      * On/Off screen

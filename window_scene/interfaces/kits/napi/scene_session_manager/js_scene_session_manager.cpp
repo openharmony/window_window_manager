@@ -238,6 +238,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetIsWindowRectAutoSave);
     BindNativeFunction(env, exportObj, "notifyAboveLockScreen", moduleName,
         JsSceneSessionManager::NotifyAboveLockScreen);
+    BindNativeFunction(env, exportObj, "setStatusBarAvoidHeight", moduleName,
+        JsSceneSessionManager::SetStatusBarAvoidHeight);
     return NapiGetUndefined(env);
 }
 
@@ -1213,6 +1215,12 @@ napi_value JsSceneSessionManager::NotifyAboveLockScreen(napi_env env, napi_callb
         return nullptr;
     }
     return me->OnNotifyAboveLockScreen(env, info);
+}
+
+napi_value JsSceneSessionManager::SetStatusBarAvoidHeight(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetStatusBarAvoidHeight(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3976,5 +3984,34 @@ void JsSceneSessionManager::OnWatchFocusActiveChange(bool isActive)
         napi_value argv[] = { isActiveValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
+}
+
+napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    if (SceneSessionManager::GetInstance().GetSystemSessionConfig().IsPcWindow() ||
+        SceneSessionManager::GetInstance().GetSystemSessionConfig().IsFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_DEVICE_NOT_SUPPORT),
+            "Device is not supported"));
+        return NapiGetUndefined(env);
+    }
+    int32_t height = 0;
+    if (!ConvertFromJsValue(env, argv[0], height)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to height");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetStatusBarAvoidHeight(height);
+    return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen

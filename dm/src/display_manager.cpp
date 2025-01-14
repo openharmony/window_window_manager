@@ -1041,6 +1041,7 @@ FoldDisplayMode DisplayManager::Impl::GetFoldDisplayModeForExternal()
     }
     return displayMode;
 }
+
 void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
 {
     pImpl_->SetFoldDisplayMode(mode);
