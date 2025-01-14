@@ -181,8 +181,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetProcessWatermark(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE):
             return HandleGetWindowIdsByCoordinate(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK):
-            return HandleReleaseForegroundSessionScreenLock(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK):
+            return HandleUpdateSessionScreenLock(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE):
@@ -1502,9 +1502,19 @@ int SceneSessionManagerStub::HandleGetWindowIdsByCoordinate(MessageParcel& data,
     return ERR_NONE;
 }
 
-int SceneSessionManagerStub::HandleReleaseForegroundSessionScreenLock(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerStub::HandleUpdateSessionScreenLock(MessageParcel& data, MessageParcel& reply)
 {
-    WMError errCode = ReleaseForegroundSessionScreenLock();
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read bundleName failed.");
+        return ERR_INVALID_DATA;
+    }
+    bool isRelease = false;
+    if (!data.ReadBool(isRelease)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read isRelease failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateScreenLockStatusForApp(bundleName, isRelease);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

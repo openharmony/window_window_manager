@@ -54,8 +54,6 @@ constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
-const std::string SHELL_BUNDLE_NAME = "com.huawei.shell_assistant";
-const std::string SHELL_APP_IDENTIFIER = "5765880207854632823";
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -187,9 +185,6 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
-    if (leashWindowSurfaceNodeChangedFunc_) {
-        leashWindowSurfaceNodeChangedFunc_();
-    }
 }
 
 void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
@@ -450,6 +445,27 @@ void Session::NotifyRemoveBlank()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnRemoveBlank();
+        }
+    }
+}
+
+void Session::NotifyAddSnapshot()
+{
+    SaveSnapshot(false);
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAddSnapshot();
+        }
+    }
+}
+
+void Session::NotifyRemoveSnapshot()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveSnapshot();
         }
     }
 }
@@ -1134,7 +1150,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetWindowRect(rect);
     property->SetPersistentId(GetPersistentId());
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-    property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
+    property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
@@ -1360,8 +1376,8 @@ WSError Session::Hide()
 
 WSError Session::DrawingCompleted()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
-    if (!SessionPermission::IsSameAppAsCalling(SHELL_BUNDLE_NAME, SHELL_APP_IDENTIFIER)) {
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    if (!SessionPermission::IsSystemAppCall()) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -1872,11 +1888,6 @@ WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
         pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller);
     }
     return WSError::WS_OK;
-}
-
-void Session::SetLeashWindowSurfaceNodeChangedListener(const NotifyLeashWindowSurfaceNodeChangedFunc& func)
-{
-    leashWindowSurfaceNodeChangedFunc_ = func;
 }
 
 void Session::SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func)
@@ -3709,5 +3720,10 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
         return pixelMap;
     }
     return nullptr;
+}
+
+bool Session::IsPcWindow() const
+{
+    return systemConfig_.IsPcWindow();
 }
 } // namespace OHOS::Rosen

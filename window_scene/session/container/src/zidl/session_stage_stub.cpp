@@ -186,6 +186,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSupportEnterWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
             return HandleExtensionHostData(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
+            return HandleSendContainerModalEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -710,6 +712,23 @@ int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
     NotifyExtensionDataConsumer(data, reply);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    std::string eventName = data.ReadString();
+    if (eventName.empty()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "event name is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    std::string eventValue = data.ReadString();
+    if (eventValue.empty()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "event value  is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    SendContainerModalEvent(eventName, eventValue);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
