@@ -105,7 +105,6 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
     virtual sptr<DisplayInfo> GetPrimaryDisplayInfo();
-    virtual DMError SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable);
 
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
@@ -176,6 +175,7 @@ public:
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate);
     virtual ScreenPowerState GetScreenPower();
+    virtual DMError SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable);
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };
