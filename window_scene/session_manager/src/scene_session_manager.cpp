@@ -12434,22 +12434,26 @@ void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
 
 WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId)
 {
-    auto toSceneSession = GetSceneSession(toPersistentId);
-    if (toSceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, toPersistentId => id: %{public}d", toPersistentId);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-    NodeId nodeId = 0;
-    if (fromPersistentId >= 0) {
-        auto fromSceneSession = GetSceneSession(fromPersistentId);
-        if (fromSceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, fromPersistentId = %{public}d", fromPersistentId);
+    auto task = [this, fromPersistentId, toPersistentId]() {
+        auto toSceneSession = GetSceneSession(toPersistentId);
+        if (toSceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, toPersistentId => id: %{public}d", toPersistentId);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
-        nodeId = fromSceneSession->GetSurfaceNode()->GetId();
-    }
-    toSceneSession->CloneWindow(nodeId);
-    TLOGI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
-    return WSError::WS_OK;
+        NodeId nodeId = 0;
+        // if fromPersistentId < 0, cancel cloneWindow
+        if (fromPersistentId >= 0) {
+            auto fromSceneSession = GetSceneSession(fromPersistentId);
+            if (fromSceneSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, fromPersistentId = %{public}d", fromPersistentId);
+                return WSError::WS_ERROR_INVALID_PARAM;
+            }
+            nodeId = fromSceneSession->GetSurfaceNode()->GetId();
+        }
+        toSceneSession->CloneWindow(nodeId);
+        TLOGI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
+        return WSError::WS_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, "CloneWindow");
 }
 } // namespace OHOS::Rosen
