@@ -3650,8 +3650,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallT
     const std::vector<ScreenId> screenIds = {screenId, screenId2};
     ssm_->SetScreenShareProtectInner(screenIds, isEnable);
 }
-
-
 }
 } // namespace Rosen
 } // namespace OHOS

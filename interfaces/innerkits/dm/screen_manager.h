@@ -411,7 +411,6 @@ public:
      */
     DMError SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable);
 
-    TRANS_ID_SET_SCREEN_SHARING_PROTECT
 private:
     ScreenManager();
     ~ScreenManager();
