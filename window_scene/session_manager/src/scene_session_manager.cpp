@@ -21,6 +21,7 @@
 #include <ability_manager_client.h>
 #include <application_context.h>
 #include <bundlemgr/launcher_service.h>
+#include <common/rs_common_def.h>
 #include <hisysevent.h>
 #include <parameters.h>
 #include <hitrace_meter.h>
@@ -12440,7 +12441,7 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
             TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        NodeId nodeId = 0;
+        NodeId nodeId = INVALID_NODEID;
         if (fromPersistentId >= 0) { // if fromPersistentId < 0, cancel cloneWindow
             auto fromSceneSession = GetSceneSession(fromPersistentId);
             if (fromSceneSession == nullptr) {
