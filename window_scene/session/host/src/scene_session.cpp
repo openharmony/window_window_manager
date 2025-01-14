@@ -3129,7 +3129,8 @@ void SceneSession::SetSurfaceBoundsWithAnimation(
     const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
     const WSRect& rect, const std::function<void()>& finishCallback, bool isGlobal)
 {
-    RSNode::Animate(animationParam.first, animationParam.second, [weakThis = wptr(this), rect, isGlobal, where = __func__] {
+    RSNode::Animate(animationParam.first, animationParam.second, [weakThis = wptr(this), rect,
+        isGlobal, where = __func__] {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session is nullptr", where);
@@ -4784,7 +4785,8 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
     bool needRemoveSession, bool isFromClient, bool startFail)
 {
-    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, needRemoveSession, isFromClient, startFail, where = __func__] {
+    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, needRemoveSession,
+        isFromClient, startFail, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
