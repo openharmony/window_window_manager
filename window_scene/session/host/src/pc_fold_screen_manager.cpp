@@ -309,8 +309,8 @@ WSRect PcFoldScreenManager::CalculateThrowBacktracingRect(const WSRect& rect, co
     int32_t midPosY = rect.height_ / 2 + rect.posY_; // 2: center
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     const int32_t midScreenY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
-    bool isInUpperThreshold = (midPosY < midScreenY) && (midPosY >= midScreenY - THROW_BACKTRACING_THRESHOLD);
-    bool isInLowerThreshold = (midPosY >= midScreenY) && (midPosY <= midScreenY + THROW_BACKTRACING_THRESHOLD);
+    bool isInUpperThreshold = midPosY < midScreenY && midPosY >= (midScreenY - THROW_BACKTRACING_THRESHOLD);
+    bool isInLowerThreshold = midPosY >= midScreenY && midPosY <= (midScreenY + THROW_BACKTRACING_THRESHOLD);
     if ((!isInUpperThreshold && MathHelper::LessNotEqual(velocity.posY_, 0.0f)) ||
         (!isInLowerThreshold && MathHelper::GreatNotEqual(velocity.posY_, 0.0f))) {
         return rect;
