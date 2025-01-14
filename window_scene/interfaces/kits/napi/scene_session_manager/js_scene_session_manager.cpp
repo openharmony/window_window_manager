@@ -200,8 +200,6 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getCustomDecorHeight", moduleName, JsSceneSessionManager::GetCustomDecorHeight);
     BindNativeFunction(env, exportObj, "switchFreeMultiWindow", moduleName,
         JsSceneSessionManager::SwitchFreeMultiWindow);
-    BindNativeFunction(env, exportObj, "cloneWindow", moduleName,
-        JsSceneSessionManager::CloneWindow);
     BindNativeFunction(env, exportObj, "getFreeMultiWindowConfig", moduleName,
         JsSceneSessionManager::GetFreeMultiWindowConfig);
     BindNativeFunction(env, exportObj, "getIsLayoutFullScreen", moduleName,
@@ -242,6 +240,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyAboveLockScreen);
     BindNativeFunction(env, exportObj, "setStatusBarAvoidHeight", moduleName,
         JsSceneSessionManager::SetStatusBarAvoidHeight);
+    BindNativeFunction(env, exportObj, "cloneWindow", moduleName,
+        JsSceneSessionManager::CloneWindow);
     return NapiGetUndefined(env);
 }
 
@@ -1085,13 +1085,6 @@ napi_value JsSceneSessionManager::SwitchFreeMultiWindow(napi_env env, napi_callb
     return (me != nullptr) ? me->OnSwitchFreeMultiWindow(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::CloneWindow(napi_env env, napi_callback_info info)
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "[NAPI]");
-    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnCloneWindow(env, info) : nullptr;
-}
-
 napi_value JsSceneSessionManager::GetIsLayoutFullScreen(napi_env env, napi_callback_info info)
 {
     WLOGFI("[NAPI]");
@@ -1230,6 +1223,13 @@ napi_value JsSceneSessionManager::SetStatusBarAvoidHeight(napi_env env, napi_cal
 {
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetStatusBarAvoidHeight(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::CloneWindow(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PC, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnCloneWindow(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -3339,36 +3339,6 @@ napi_value JsSceneSessionManager::OnSwitchFreeMultiWindow(napi_env env, napi_cal
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info info)
-{
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    int32_t fromPersistentId = -1;
-    int32_t toPersistentId = -1;
-    if (!ConvertFromJsValue(env, argv[0], fromPersistentId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to convert parameter fromPersistentId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    if (!ConvertFromJsValue(env, argv[ARGC_ONE], toPersistentId)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "[NAPI] Failed to convert parameter toPersistentId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "from:%{public}d to:%{public}d", fromPersistentId, toPersistentId);
-    SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId);
-    return NapiGetUndefined(env);
-}
-
 napi_value JsSceneSessionManager::OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info)
 {
     auto systemConfig = SceneSessionManager::GetInstance().GetSystemSessionConfig();
@@ -3602,6 +3572,36 @@ napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_cal
 
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: window list size: %{public}zu", windowIds.size());
     SceneSessionManager::GetInstance().OnNotifyAboveLockScreen(windowIds);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t fromPersistentId = -1;
+    int32_t toPersistentId = -1;
+    if (!ConvertFromJsValue(env, argv[0], fromPersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter fromPersistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], toPersistentId)) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter toPersistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_PC, "from:%{public}d to:%{public}d", fromPersistentId, toPersistentId);
+    SceneSessionManager::GetInstance().CloneWindow(fromPersistentId, toPersistentId);
     return NapiGetUndefined(env);
 }
 

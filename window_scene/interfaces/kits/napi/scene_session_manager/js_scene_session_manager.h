@@ -112,7 +112,6 @@ public:
     static napi_value InitScheduleUtils(napi_env env, napi_callback_info info);
     static napi_value SetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     static napi_value SwitchFreeMultiWindow(napi_env env, napi_callback_info info);
-    static napi_value CloneWindow(napi_env env, napi_callback_info info);
     static napi_value GetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
     static napi_value RefreshPcZOrder(napi_env env, napi_callback_info info);
@@ -122,6 +121,7 @@ public:
     static napi_value ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
+    static napi_value CloneWindow(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -191,7 +191,6 @@ private:
     napi_value OnSetAppDragResizeType(napi_env env, napi_callback_info info);
     napi_value OnGetCustomDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info);
-    napi_value OnCloneWindow(napi_env env, napi_callback_info info);
     napi_value OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
     napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
     napi_value OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info);
@@ -206,6 +205,7 @@ private:
     napi_value OnResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
+    napi_value OnCloneWindow(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance

@@ -683,28 +683,6 @@ WSError SceneSessionManager::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId)
-{
-
-    auto toSceneSession = GetSceneSession(toPersistentId);
-    if (toSceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_RECOVER, "Session is nullptr, toPersistentId = %{public}d", toPersistentId);
-        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    NodeId nodeId = 0;
-    if (fromPersistentId >= 0) {
-        auto fromSceneSession = GetSceneSession(fromPersistentId);
-        if (fromSceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "Session is nullptr, fromPersistentId = %{public}d", fromPersistentId);
-            return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
-        }
-        nodeId = fromSceneSession->GetSurfaceNode()->GetId();
-    }
-    toSceneSession->CloneWindow(nodeId);
-    TLOGI(WmsLogTag::WMS_RECOVER, "fromSurfaceId: %{public}" PRIu64, nodeId);
-    return WSError::WS_OK;
-}
-
 WSError SceneSessionManager::GetFreeMultiWindowEnableState(bool& enable)
 {
     enable = systemConfig_.freeMultiWindowEnable_;
@@ -12452,5 +12430,26 @@ void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
 {
     barArea.height_ = statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT ?
         barArea.height_ : statusBarAvoidHeight_;
+}
+
+WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId)
+{
+    auto toSceneSession = GetSceneSession(toPersistentId);
+    if (toSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, toPersistentId => id: %{public}d", toPersistentId);
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    NodeId nodeId = 0;
+    if (fromPersistentId >= 0) {
+        auto fromSceneSession = GetSceneSession(fromPersistentId);
+        if (fromSceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, fromPersistentId = %{public}d", fromPersistentId);
+            return WSError::WS_ERROR_INVALID_PARAM;
+        }
+        nodeId = fromSceneSession->GetSurfaceNode()->GetId();
+    }
+    toSceneSession->CloneWindow(nodeId);
+    TLOGI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen
