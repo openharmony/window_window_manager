@@ -566,6 +566,10 @@ void MoveDragController::UpdateMoveAvailableArea(DisplayId targetDisplayId)
 {
     DMRect availableArea;
     sptr<Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(targetDisplayId);
+    if (display == nullptr) {
+        WLOGE("[WMSCom] Failed to get display");
+        return;
+    }
     DMError ret = display->GetAvailableArea(availableArea);
     SetMoveAvailableArea(availableArea);
 }
@@ -584,6 +588,10 @@ void MoveDragController::SetCurrentScreenProperty(DisplayId targetDisplayId)
 {
     sptr<ScreenSession> currentScreenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(targetDisplayId);
+    if (currentScreenSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null");
+        return;
+    }
     ScreenProperty currentScreenProperty = currentScreenSession->GetScreenProperty();
     screenSizeProperty_.currentDisplayStartX_ = currentScreenProperty.GetStartX();
     screenSizeProperty_.currentDisplayStartY_ = currentScreenProperty.GetStartY();
