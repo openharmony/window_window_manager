@@ -2415,6 +2415,7 @@ int32_t Session::GetRotateAnimationDuration()
 void Session::UnregisterSessionChangeListeners()
 {
     sessionStateChangeFunc_ = nullptr;
+    keyboardStateChangeFunc_ = nullptr;
     sessionFocusableChangeFunc_ = nullptr;
     sessionTouchableChangeFunc_ = nullptr;
     clickFunc_ = nullptr;
@@ -2485,7 +2486,10 @@ void Session::NotifySessionStateChange(const SessionState& state)
         }
         TLOGND(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
-        if (session->sessionStateChangeFunc_) {
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+            session->keyboardStateChangeFunc_) {
+            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardViewMode());
+        } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
@@ -3129,6 +3133,15 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     bool isPhoneOrPadNotFreeMultiWindow =
         systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
+}
+
+void Session::SetKeybaordStateChangeListener(const NotifyKeyboardStateChangeFunc& func)
+{
+    keyboardStateChangeFunc_ = func;
+    if (state_ == SessionState::STATE_DISCONNECT) {
+        return;
+    }
+    NotifySessionStateChange(state_);
 }
 
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
