@@ -91,6 +91,7 @@ using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
+using NotifyPrivacyModeChangeFunc = std::function<void(bool isPrivacyMode)>;
 
 class SceneSession : public Session {
 public:
@@ -361,6 +362,11 @@ public:
     void SetUpdatePrivateStateAndNotifyFunc(const UpdatePrivateStateAndNotifyFunc& func);
 
     /*
+     * Window Property
+     */
+    void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
+
+    /*
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
@@ -574,6 +580,11 @@ private:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Window Property
+     */
+    void NotifyPrivacyModeChange();
+
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
@@ -663,6 +674,13 @@ private:
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
+
+    /*
+     * Window Property
+     */
+    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
+    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
+    bool isPrivacyMode_ { false };
 
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
