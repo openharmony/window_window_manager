@@ -578,7 +578,7 @@ public:
     /*
      * Free Multi Window
      */
-    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze, float blur) const;
 
     /*
      * PC Window
