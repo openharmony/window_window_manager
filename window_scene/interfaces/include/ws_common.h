@@ -555,7 +555,11 @@ struct WSRectT {
             width_ << " " << height_ << "]";
         return ss.str();
     }
+    static const WSRectT<T> EMPTY_RECT;
 };
+
+template<typename T>
+inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;

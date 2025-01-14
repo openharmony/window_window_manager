@@ -47,6 +47,11 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
+        const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override
+    {
+        return DMError::DM_OK;
+    }
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override
     {
         return DMError::DM_OK;

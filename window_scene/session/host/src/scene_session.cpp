@@ -1859,6 +1859,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             WindowType::WINDOW_TYPE_STATUS_BAR, sessionProperty->GetDisplayId());
     }
     for (auto& statusBar : statusBarVector) {
+        if (statusBar == nullptr) {
+            continue;
+        }
         WSRect statusBarRect = statusBar->GetSessionRect();
         bool isStatusBarVisible = WindowHelper::IsMainWindow(Session::GetWindowType()) ?
             isStatusBarVisible_ : statusBar->isVisible_;
@@ -1866,8 +1869,11 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d status bar not visible", GetPersistentId());
             continue;
         }
-        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s status bar %{public}s",
-              rect.ToString().c_str(), statusBarRect.ToString().c_str());
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+        }
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d rect %{public}s status bar %{public}s",
+            GetPersistentId(), rect.ToString().c_str(), statusBarRect.ToString().c_str());
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
     }
     return;
@@ -3480,6 +3486,26 @@ void SceneSession::SetSystemSceneOcclusionAlpha(double alpha)
     }
 }
 
+void SceneSession::ResetOcclusionAlpha()
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::ResetAbilityBGAlpha");
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
+        return;
+    }
+    uint8_t alpha8bit = GetSessionProperty()->GetBackgroundAlpha();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "alpha8bit=%{public}u, windowId=%{public}d", alpha8bit, GetPersistentId());
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
+    surfaceNode->SetAbilityBGAlpha(alpha8bit);
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
+}
+
 void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetForceUIFirst");
@@ -4290,6 +4316,24 @@ bool SceneSession::IsMissionHighlighted()
         });
 }
 
+void SceneSession::MaskSupportEnterWaterfallMode()
+{
+    if (pcFoldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "pcFoldScreenController is null");
+        return;
+    }
+    pcFoldScreenController_->MaskSupportEnterWaterfallMode();
+}
+
+void SceneSession::SetSupportEnterWaterfallMode(bool isSupportEnter)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage is nullptr");
+        return;
+    }
+    sessionStage_->SetSupportEnterWaterfallMode(isSupportEnter);
+}
+
 void SceneSession::SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func)
 {
     TLOGD(WmsLogTag::DEFAULT, "setListener success");
@@ -4371,6 +4415,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateWindowModeSupportType(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION):
             return HandleActionUpdateAvoidAreaOption(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA):
+            return HandleBackgroundAlpha(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4686,6 +4732,18 @@ WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSession
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sessionProperty->SetBackgroundAlpha(property->GetBackgroundAlpha());
+    return WMError::WM_OK;
+}
+
 void SceneSession::HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property)
 {
     auto systemBarProperties = property->GetSystemBarProperty();
@@ -4861,6 +4919,16 @@ WSError SceneSession::SetSplitButtonVisible(bool isVisible)
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->SetSplitButtonVisible(isVisible);
+}
+
+WSError SceneSession::SendContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->SendContainerModalEvent(eventName, eventValue);
 }
 
 void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& callback)
@@ -5626,6 +5694,11 @@ void SceneSession::RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreen
     }, __func__);
 }
 
+void SceneSession::RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& callback)
+{
+    onGetStatusBarAvoidHeightFunc_ = std::move(callback);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -5661,11 +5734,16 @@ int32_t SceneSession::GetStatusBarHeight()
     const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
-        if (statusBar != nullptr && statusBar->GetSessionRect().height_ > height) {
-            height = statusBar->GetSessionRect().height_;
+        if (statusBar == nullptr) {
+            continue;
         }
+        WSRect statusBarRect = statusBar->GetSessionRect();
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+        }
+        height = statusBarRect.height_;
     }
-    TLOGD(WmsLogTag::WMS_IMMS, "height %{public}d", height);
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d height %{public}d", GetPersistentId(), height);
     return height;
 }
 

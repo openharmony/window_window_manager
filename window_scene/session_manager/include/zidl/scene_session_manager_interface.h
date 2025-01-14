@@ -210,7 +210,7 @@ public:
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
-        const Rect& rect = {0, 0, 0, 0}) override { return {}; }
+        const Rect& rect = Rect::EMPTY_RECT) override { return {}; }
 
     /**
      * @brief get top window information by id of main window.
@@ -359,6 +359,8 @@ public:
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
         int32_t targetPersistentId) override { return WMError::WM_OK; }
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
