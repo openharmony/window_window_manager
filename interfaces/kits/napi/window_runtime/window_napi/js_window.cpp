@@ -762,6 +762,13 @@ napi_value JsWindow::SetShadow(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetShadow(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowShadowRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowShadowRadius(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetBlur(napi_env env, napi_callback_info info)
 {
     WLOGI("SetBlur");
@@ -5650,6 +5657,44 @@ napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowToken is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    double result = 0.0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], result)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Napi get radius value failed.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    float radius = static_cast<float>(result);
+    if (MathHelper::LessNotEqual(radius, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The shadow radius is less than zero.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowShadowRadius(radius));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Set failed, radius: %{public}f.", radius);
+        return NapiThrowError(env, ret);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success, radius=%{public}f.",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsWindow::OnSetBlur(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -7521,6 +7566,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "snapshot", moduleName, JsWindow::Snapshot);
     BindNativeFunction(env, object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
     BindNativeFunction(env, object, "setShadow", moduleName, JsWindow::SetShadow);
+    BindNativeFunction(env, object, "setWindowShadowRadius", moduleName, JsWindow::SetWindowShadowRadius);
     BindNativeFunction(env, object, "setBlur", moduleName, JsWindow::SetBlur);
     BindNativeFunction(env, object, "setBackdropBlur", moduleName, JsWindow::SetBackdropBlur);
     BindNativeFunction(env, object, "setBackdropBlurStyle", moduleName, JsWindow::SetBackdropBlurStyle);

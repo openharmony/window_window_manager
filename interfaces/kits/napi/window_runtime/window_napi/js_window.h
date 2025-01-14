@@ -117,6 +117,7 @@ public:
     static napi_value StartMoving(napi_env env, napi_callback_info info);
     static napi_value StopMoving(napi_env env, napi_callback_info info);
     static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
+    static napi_value EnableDrag(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -136,18 +137,18 @@ public:
     static napi_value Translate(napi_env env, napi_callback_info info);
     static napi_value GetTransitionController(napi_env env, napi_callback_info info);
 
-    // window effect
+    /*
+     * Window Property
+     */
     static napi_value SetCornerRadius(napi_env env, napi_callback_info info);
     static napi_value SetShadow(napi_env env, napi_callback_info info);
+    static napi_value SetWindowShadowRadius(napi_env env, napi_callback_info info);
     static napi_value SetBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
-    static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
-    static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
-    static napi_value EnableDrag(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
@@ -207,6 +208,8 @@ public:
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -309,9 +312,12 @@ private:
     napi_value OnGetTransitionController(napi_env env, napi_callback_info info);
     WmErrorCode CreateTransitionController(napi_env env);
 
-    // window effect
+    /*
+     * Window Property
+     */
     napi_value OnSetCornerRadius(napi_env env, napi_callback_info info);
     napi_value OnSetShadow(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowShadowRadius(napi_env env, napi_callback_info info);
     napi_value OnSetBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlurStyle(napi_env env, napi_callback_info info);

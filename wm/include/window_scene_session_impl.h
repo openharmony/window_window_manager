@@ -85,18 +85,6 @@ public:
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual uint32_t GetWindowFlags() const override;
 
-    // window effect
-    virtual WMError SetCornerRadius(float cornerRadius) override;
-    virtual WMError SetShadowRadius(float radius) override;
-    virtual WMError SetShadowColor(std::string color) override;
-    virtual WMError SetShadowOffsetX(float offsetX) override;
-    virtual WMError SetShadowOffsetY(float offsetY) override;
-    virtual WMError SetBlur(float radius) override;
-    virtual WMError SetBackdropBlur(float radius) override;
-    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
-    virtual WMError SetWindowMode(WindowMode mode) override;
-    virtual WMError SetGrayScale(float grayScale) override;
-
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
@@ -204,6 +192,17 @@ public:
     /*
      * Window Property
      */
+    virtual WMError SetCornerRadius(float cornerRadius) override;
+    virtual WMError SetShadowRadius(float radius) override;
+    virtual WMError SetShadowColor(std::string color) override;
+    virtual WMError SetShadowOffsetX(float offsetX) override;
+    virtual WMError SetShadowOffsetY(float offsetY) override;
+    virtual WMError SetBlur(float radius) override;
+    virtual WMError SetBackdropBlur(float radius) override;
+    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
+    virtual WMError SetWindowMode(WindowMode mode) override;
+    virtual WMError SetGrayScale(float grayScale) override;
+    WMError SetWindowShadowRadius(float radius) override;
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     float GetCustomDensity() const override;
