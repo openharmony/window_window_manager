@@ -1978,9 +1978,9 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowShadowRadius, Function | SmallTes
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    auto surfaceNode_mocker = CreateRSSurfaceNode();
-    ASSERT_NE(nullptr, surfaceNode_mocker);
-    window->surfaceNode_ = surfaceNode_mocker;
+    auto surfaceNodeMocker = CreateRSSurfaceNode();
+    ASSERT_NE(nullptr, surfaceNodeMocker);
+    window->surfaceNode_ = surfaceNodeMocker;
     ret = window->SetWindowShadowRadius(-1.0f);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
