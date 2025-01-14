@@ -447,6 +447,13 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         return false;
     }
     int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t startPointerId = moveDragProperty_.pointerId_;
+    int32_t startPointerType = moveDragProperty_.pointerType_;
+    if ((startPointerId != -1 && startPointerId != pointerId) ||
+        (startPointerType != -1 && pointerEvent->GetSourceType() != startPointerType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
+        return false;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
         WLOGE("Get PointerItem failed");
