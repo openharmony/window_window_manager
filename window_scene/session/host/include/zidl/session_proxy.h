@@ -101,8 +101,8 @@ public:
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
-    WSError RequestFocus(bool isFocused) override;
     void NotifyExtensionDetachToDisplay() override;
+    WSError RequestFocus(bool isFocused) override;
 
     /*
      * Gesture Back
