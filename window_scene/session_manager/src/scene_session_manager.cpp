@@ -12435,7 +12435,7 @@ void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
 
 WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId)
 {
-    return taskScheduler_->PostAsyncTask([this, fromPersistentId, toPersistentId]() {
+    return taskScheduler_->PostSyncTask([this, fromPersistentId, toPersistentId]() {
         auto toSceneSession = GetSceneSession(toPersistentId);
         if (toSceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
