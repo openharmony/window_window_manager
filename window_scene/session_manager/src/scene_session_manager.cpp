@@ -12442,7 +12442,7 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
             return WSError::WS_ERROR_NULLPTR;
         }
         NodeId nodeId = INVALID_NODEID;
-        if (fromPersistentId >= 0) { // if fromPersistentId < 0, cancel cloneWindow
+        if (fromPersistentId >= 0) { // if fromPersistentId < 0, excute CloneWindow(0) to cancel cloneWindow
             auto fromSceneSession = GetSceneSession(fromPersistentId);
             if (fromSceneSession == nullptr) {
                 TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
