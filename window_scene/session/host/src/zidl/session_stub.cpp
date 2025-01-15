@@ -234,6 +234,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSupportedWindowModes(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
             return HandleExtensionProviderData(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE):
+            return HandleStartMovingWithCoordinate(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1388,6 +1390,33 @@ int SessionStub::HandleSetSupportedWindowModes(MessageParcel& data, MessageParce
     }
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "size: %{public}u", size);
     NotifySupportWindowModesChange(supportedWindowModes);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t offsetX;
+    if (!data.ReadInt32(offsetX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read offsetX failed!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t offsetY;
+    if (!data.ReadInt32(offsetY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read offsetY failed!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t pointerPosX;
+    if (!data.ReadInt32(pointerPosX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read pointerPosX failed!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t pointerPosY;
+    if (!data.ReadInt32(pointerPosY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read pointerPosY failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = StartMovingWithCoordinate(offsetX, offsetY, pointerPosX, pointerPosY);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

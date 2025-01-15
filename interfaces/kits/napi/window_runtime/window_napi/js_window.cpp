@@ -7149,6 +7149,12 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > ARG_COUNT_ZERO) {
+        return OnStartMoveWindowWithCoordinate(env, info);
+    }
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const funcName = __func__;
     NapiAsyncTask::ExecuteCallback execute = [this, weakToken = wptr<Window>(windowToken_), err, funcName] {
@@ -7187,6 +7193,57 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnStartMoving",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "windowToken is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_TWO) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t offsetX;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], offsetX)) {
+        offsetX = 0;
+    }
+    int32_t offsetY;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], offsetY)) {
+        offsetY = 0;
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    const char* const where = __func__;
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), offsetX, offsetY, env, task = napiAsyncTask, where] {
+        auto window = windowToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        if (!WindowHelper::IsSystemWindow(window->GetType()) &&
+            !WindowHelper::IsMainWindow(window->GetType()) &&
+            !WindowHelper::IsSubWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
+            return;
+        }
+        WmErrorCode ret = window->StartMoveWindowWithCoordinate(offsetX, offsetY);
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "move window failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 

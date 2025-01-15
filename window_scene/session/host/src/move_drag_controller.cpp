@@ -514,6 +514,18 @@ void MoveDragController::MoveDragInterrupted()
     ProcessSessionRectChange(reason);
 }
 
+void MoveDragController::StopMoving()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "stop moving");
+    SizeChangeReason reason = SizeChangeReason::DRAG_END;
+    hasPointDown_ = false;
+    if (GetStartMoveFlag()) {
+        SetStartMoveFlag(false);
+        ProcessWindowDragHotAreaFunc(windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED, reason);
+    };
+    ProcessSessionRectChange(reason);
+}
+
 WSRect MoveDragController::GetScreenRectById(DisplayId displayId)
 {
     sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
@@ -974,6 +986,20 @@ WSError MoveDragController::UpdateMoveTempProperty(const std::shared_ptr<MMI::Po
             break;
     }
     return WSError::WS_OK;
+}
+
+void MoveDragController::HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+    int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect)
+{
+    moveTempProperty_.lastDownPointerPosX_ = pointerPosX;
+    moveTempProperty_.lastDownPointerPosY_ = pointerPosY;
+    moveTempProperty_.lastMovePointerPosX_ = pointerPosX;
+    moveTempProperty_.lastMovePointerPosY_ = pointerPosY;
+    moveTempProperty_.lastDownPointerWindowX_ = offsetX;
+    moveTempProperty_.lastDownPointerWindowY_ = offsetY;
+
+    moveDragProperty_.targetRect_ = winRect;
+    ProcessSessionRectChange(SizeChangeReason::DRAG_END);
 }
 
 void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool isFullToFloating)
