@@ -149,14 +149,9 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
 sptr<AAFwk::SessionInfo> WindowExtensionConnection::Impl::SetAbilitySessionInfo(
     const sptr<ExtensionSession>& extSession)
 {
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    if (!abilitySessionInfo) {
-        WLOGFE("abilitySessionInfo is nullptr");
-        return nullptr;
-    }
-    auto sessionInfo = extSession->GetSessionInfo();
+    auto abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->sessionToken = extSession->AsObject();
-    abilitySessionInfo->callerToken = sessionInfo.callerToken_;
+    abilitySessionInfo->callerToken = extSession->GetSessionInfo().callerToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
     return abilitySessionInfo;
 }

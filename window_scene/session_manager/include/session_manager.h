@@ -38,23 +38,26 @@ class SessionManager {
     WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
     
 public:
-    using SessionRecoverCallbackFunc = std::function<void()>;
-    using WindowManagerRecoverCallbackFunc = std::function<void()>;
-    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
-    using UserSwitchCallbackFunc = std::function<void()>;
-    void OnWMSConnectionChanged(
-        int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
     void ClearSessionManagerProxy();
     void Clear();
-    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
-    void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
     void OnFoundationDied();
 
     /*
+     * Multi User
+     */
+    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
+    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    void OnWMSConnectionChanged(
+        int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
+    using UserSwitchCallbackFunc = std::function<void()>;
+    void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
+
+    /*
      * Window Recover
      */
+    using WindowManagerRecoverCallbackFunc = std::function<void()>;
     void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
 
@@ -66,10 +69,17 @@ private:
     void InitSessionManagerServiceProxy();
     WMError InitMockSMSProxy();
     void InitSceneSessionManagerProxy();
+
+    /*
+     * Multi User
+     */
     void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
     void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
+
+    /*
+     * Window Recover
+     */
     void RegisterSMSRecoverListener();
-    UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
 
     std::recursive_mutex mutex_;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
@@ -86,6 +96,10 @@ private:
     WindowManagerRecoverCallbackFunc windowManagerRecoverFunc_ = nullptr;
     // above guarded by recoverMutex_
 
+    /*
+     * Multi User
+     */
+    UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
     std::mutex wmsConnectionMutex_;
     bool isWMSConnected_ = false;
     int32_t currentWMSUserId_ = INVALID_USER_ID;

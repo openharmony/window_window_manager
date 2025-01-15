@@ -38,7 +38,7 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WMError Close() override;
-    WindowMode GetMode() const override;
+    WindowMode GetWindowMode() const override;
 
     /*
      * Window Layout
@@ -60,7 +60,7 @@ public:
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT) override;
     SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetLayoutFullScreen(bool status) override;
@@ -150,7 +150,7 @@ public:
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
-    WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
+    WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WmErrorCode StartMoveWindow() override;
     WmErrorCode StopMoveWindow() override;
 
@@ -288,6 +288,11 @@ private:
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /*
+     * Window Input Event
+     */
+    void ResetSuperFoldDisplayY(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+    /*
      * Window Recover
      */
     void RegisterSessionRecoverListener(bool isSpecificSession);
@@ -354,6 +359,11 @@ private:
      * PC Window
      */
     bool isExecuteDelayRaise_ = false;
+
+    /*
+     * Window Input Event
+     */
+    int32_t superFoldOffsetY_ = -1; // calculate the total height of the display_B area and crease area.
 };
 } // namespace Rosen
 } // namespace OHOS

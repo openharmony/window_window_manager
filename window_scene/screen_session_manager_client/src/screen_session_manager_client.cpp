@@ -648,4 +648,15 @@ void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, Sup
         static_cast<uint32_t>(superFoldStatus));
     screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
 }
+
+void ScreenSessionManagerClient::OnSecondaryReflexionChanged(ScreenId screenId, uint32_t isSecondaryReflexion)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("screenId=%{public}" PRIu64 " isSecondaryReflexion=%{public}d", screenId, isSecondaryReflexion);
+    screenSession->SecondaryReflexionChange(screenId, isSecondaryReflexion);
+}
 } // namespace OHOS::Rosen

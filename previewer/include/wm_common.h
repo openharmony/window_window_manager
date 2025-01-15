@@ -566,7 +566,11 @@ struct Rect {
         oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
         return oss.str();
     }
+
+    static const Rect EMPTY_RECT;
 };
+
+inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
  * @struct SystemBarProperty
@@ -805,7 +809,7 @@ struct TitleButtonRect {
     }
 };
 
-/*
+/**
  * @struct WindowLayoutInfo
  *
  * @brief Layout info for all windows on the screen.

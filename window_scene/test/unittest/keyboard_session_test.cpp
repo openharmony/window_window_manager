@@ -103,16 +103,10 @@ HWTEST_F(KeyboardSessionTest, Show01, Function | SmallTest | Level1)
     SessionInfo info;
     info.abilityName_ = "Show01";
     info.bundleName_ = "Show01";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
-    EXPECT_NE(keyboardCb, nullptr);
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
-    ASSERT_TRUE((keyboardSession != nullptr));
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
 
     keyboardSession->isKeyboardPanelEnabled_ = true;
     ASSERT_EQ(WSError::WS_OK, keyboardSession->Show(property));
@@ -340,7 +334,7 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession, Function | SmallTest | Leve
     EXPECT_NE(callingSession, nullptr);
     ASSERT_NE(keyboardSession->keyboardCallback_, nullptr);
     keyboardSession->keyboardCallback_->onGetSceneSession =
-        [callingSession](int32_t persistentId)->sptr<SceneSession> {
+        [callingSession](int32_t persistentId) -> sptr<SceneSession> {
         return callingSession;
     };
     keyboardSession->RestoreCallingSession();
@@ -363,16 +357,14 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, Function | SmallTest | Le
     SessionInfo info;
     info.abilityName_ = "RestoreCallingSession02";
     info.bundleName_ = "RestoreCallingSession02";
-    sptr<SceneSession::SpecificSessionCallback> specificCb =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
-        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    auto specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, keyboardCb);
     info.windowType_ = 1; // 1 is main_window_type
     sptr<SceneSession> callingSession = sptr<SceneSession>::MakeSptr(info, specificCb);
     ASSERT_NE(keyboardSession->keyboardCallback_, nullptr);
     keyboardSession->keyboardCallback_->onGetSceneSession =
-        [callingSession](int32_t persistentId)->sptr<SceneSession> {
+        [callingSession](int32_t persistentId) -> sptr<SceneSession> {
         return callingSession;
     };
 
@@ -380,7 +372,6 @@ HWTEST_F(KeyboardSessionTest, RestoreCallingSession02, Function | SmallTest | Le
     keyboardSession->RestoreCallingSession();
     ASSERT_EQ(callingSession->GetOriPosYBeforeRaisedByKeyboard(), 0); // 0: default value
 }
-
 
 /**
  * @tc.name: UseFocusIdIfCallingSessionIdInvalid
@@ -452,18 +443,14 @@ HWTEST_F(KeyboardSessionTest, GetFocusedSessionId, Function | SmallTest | Level1
     sptr<KeyboardSession::KeyboardSessionCallback> keyboardCb =
         sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
     EXPECT_NE(keyboardCb, nullptr);
-    keyboardCb->onGetFocusedSessionId = []()
-    {
+    keyboardCb->onGetFocusedSessionId = []() {
         return 0;
     };
     EXPECT_NE(keyboardCb->onGetFocusedSessionId, nullptr);
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, keyboardCb);
-    EXPECT_NE(keyboardSession, nullptr);
     ASSERT_EQ(INVALID_WINDOW_ID, keyboardSession->GetFocusedSessionId());
 
     keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
-    EXPECT_NE(keyboardSession, nullptr);
-
     ASSERT_EQ(INVALID_WINDOW_ID, keyboardSession->GetFocusedSessionId());
 }
 
@@ -554,7 +541,7 @@ HWTEST_F(KeyboardSessionTest, SetCallingSessionId, Function | SmallTest | Level1
 
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->property_->SetCallingSessionId(INVALID_SESSION_ID);
-    keyboardSession->keyboardCallback_->onCallingSessionIdChange = [](int32_t callingSessionid){};
+    keyboardSession->keyboardCallback_->onCallingSessionIdChange = [](int32_t callingSessionid) {};
     keyboardSession->SetCallingSessionId(100);
     ASSERT_EQ(keyboardSession->GetCallingSessionId(), 100); // 100 is callingSessionId
 }

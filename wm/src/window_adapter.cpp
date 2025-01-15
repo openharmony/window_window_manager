@@ -985,12 +985,12 @@ WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& water
     return wmsProxy->SetProcessWatermark(pid, watermarkName, isEnabled);
 }
 
-WMError WindowAdapter::ReleaseForegroundSessionScreenLock()
+WMError WindowAdapter::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
-    return wmsProxy->ReleaseForegroundSessionScreenLock();
+    return wmsProxy->UpdateScreenLockStatusForApp(bundleName, isRelease);
 }
 
 WMError WindowAdapter::IsPcWindow(bool& isPcWindow)

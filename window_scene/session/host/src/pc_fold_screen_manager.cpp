@@ -258,12 +258,12 @@ bool PcFoldScreenManager::NeedDoEasyThrowSlip(const WSRect& rect, const WSRect& 
         if (rect.posY_ > virtualDisplayRect.posY_ + virtualDisplayRect.height_ / 2) { // 2: center
             return false;
         }
-        easyThrowRect.posY_ = foldCreaseRect.posY_;
+        easyThrowRect.posY_ = foldCreaseRect.posY_ - easyThrowRect.height_ / 2; // 2: center
     } else {
         if (rect.posY_ < defaultDisplayRect.posY_ + defaultDisplayRect.height_ / 2) { // 2: center
             return false;
         }
-        easyThrowRect.posY_ = foldCreaseRect.posY_ + foldCreaseRect.height_;
+        easyThrowRect.posY_ = foldCreaseRect.posY_ + foldCreaseRect.height_ - easyThrowRect.height_ / 2; // 2: center
     }
     return NeedDoThrowSlip(easyThrowRect, velocity, throwSide);
 }
@@ -293,7 +293,7 @@ bool PcFoldScreenManager::CheckVelocityOrientation(const WSRect& rect, const WSR
             aimX = virtualDisplayRect.posX_;
             aimY = virtualDisplayRect.posY_;
         } else {
-            aimX = virtualDisplayRect.posX_ + virtualDisplayRect.height_;
+            aimX = virtualDisplayRect.posX_ + virtualDisplayRect.width_;
             aimY = virtualDisplayRect.posY_;
         }
         return MathHelper::LessNotEqual(velocity.posY_,
@@ -309,8 +309,10 @@ WSRect PcFoldScreenManager::CalculateThrowBacktracingRect(const WSRect& rect, co
     int32_t midPosY = rect.height_ / 2 + rect.posY_; // 2: center
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     const int32_t midScreenY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
-    if ((midPosY < midScreenY - THROW_BACKTRACING_THRESHOLD && MathHelper::LessNotEqual(velocity.posY_, 0.0f)) ||
-        (midPosY > midScreenY + THROW_BACKTRACING_THRESHOLD && MathHelper::GreatNotEqual(velocity.posY_, 0.0f))) {
+    bool isInUpperThreshold = midPosY < midScreenY && midPosY >= (midScreenY - THROW_BACKTRACING_THRESHOLD);
+    bool isInLowerThreshold = midPosY >= midScreenY && midPosY <= (midScreenY + THROW_BACKTRACING_THRESHOLD);
+    if ((!isInUpperThreshold && MathHelper::LessNotEqual(velocity.posY_, 0.0f)) ||
+        (!isInLowerThreshold && MathHelper::GreatNotEqual(velocity.posY_, 0.0f))) {
         return rect;
     }
     return WSRect{static_cast<int32_t>(rect.posX_ - velocity.posX_ * THROW_BACKTRACING_DURATION),

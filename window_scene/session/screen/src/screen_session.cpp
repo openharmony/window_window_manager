@@ -203,6 +203,7 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
     }
+    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
@@ -1792,6 +1793,21 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
             continue;
         }
         listener->OnSuperFoldStatusChange(screenId, superFoldStatus);
+    }
+}
+
+void ScreenSession::SecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion)
+{
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
+        listener->OnSecondaryReflexionChange(screenId, isSecondaryReflexion);
     }
 }
 
