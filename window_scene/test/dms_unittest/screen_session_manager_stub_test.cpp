@@ -3135,7 +3135,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest147, Function | SmallTest 
     const std::vector<ScreenId> screenIds = {1001, 1002};
     bool isEnable = true;
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
-    data.WriteUInt64Vector(static_cast<uint64_t>(screenIds));
+    data.WriteUInt64Vector(screenIds);
     data.WriteBool(isEnable);
     uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SHARE_PROTECT);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
