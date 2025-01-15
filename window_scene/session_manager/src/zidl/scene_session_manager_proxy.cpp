@@ -2511,18 +2511,26 @@ WMError SceneSessionManagerProxy::GetWindowIdsByCoordinate(DisplayId displayId, 
     return ret;
 }
 
-WMError SceneSessionManagerProxy::ReleaseForegroundSessionScreenLock()
+WMError SceneSessionManagerProxy::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RELEASE_SESSION_SCREEN_LOCK),
+    if (!data.WriteString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write bundleName failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isRelease)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write isRelease failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (Remote()->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREEN_LOCK),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(reply.ReadInt32());

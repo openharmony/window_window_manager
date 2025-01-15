@@ -705,14 +705,14 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: WindowAdapter/ReleaseForegroundSessionScreenLock
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: WindowAdapter/UpdateScreenLockStatusForApp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowAdapterTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+HWTEST_F(WindowAdapterTest, UpdateScreenLockStatusForApp, Function | SmallTest | Level2)
 {
     WindowAdapter windowAdapter;
-    auto err = windowAdapter.ReleaseForegroundSessionScreenLock();
+    auto err = windowAdapter.UpdateScreenLockStatusForApp("", true);
     ASSERT_EQ(err, WMError::WM_OK);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);

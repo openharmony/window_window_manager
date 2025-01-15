@@ -32,7 +32,6 @@
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
-#include "ws_common.h"
 
 #ifdef RES_SCHED_ENABLE
 #include "res_sched_client.h"
@@ -175,8 +174,13 @@ WSRect MoveDragController::GetTargetRect(TargetRectCoordinate coordinate) const
         default:
             return moveDragProperty_.targetRect_;
     }
+    return GetTargetRectByDisplayId(relatedDisplayId);
+}
+
+WSRect MoveDragController::GetTargetRectByDisplayId(DisplayId displayId) const
+{
     sptr<ScreenSession> screenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(relatedDisplayId);
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
     if (!screenSession) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return relative coordinates.");
         return moveDragProperty_.targetRect_;
@@ -387,17 +391,10 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     }
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
-        bool isNeedFlush = false;
-        if (isStartDrag_ && isPcWindow_) {
-            surfaceNode->MarkUifirstNode(false);
-            isNeedFlush = true;
-        }
         Gravity dragGravity = GRAVITY_MAP.at(type_);
         if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
             WLOGFI("begin SetFrameGravity:%{public}d, type:%{public}d", dragGravity, type_);
             surfaceNode->SetFrameGravity(dragGravity);
-            RSTransaction::FlushImplicitTransaction();
-        } else if (isNeedFlush) {
             RSTransaction::FlushImplicitTransaction();
         }
         return;
@@ -405,9 +402,6 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
     if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
         pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-        if (!isStartDrag_ && isPcWindow_) {
-            surfaceNode->MarkUifirstNode(true);
-        }
         surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
         RSTransaction::FlushImplicitTransaction();
         WLOGFI("recover gravity to TOP_LEFT");
@@ -442,6 +436,13 @@ bool MoveDragController::ConsumeDragEvent(const std::shared_ptr<MMI::PointerEven
         return false;
     }
     int32_t pointerId = pointerEvent->GetPointerId();
+    int32_t startPointerId = moveDragProperty_.pointerId_;
+    int32_t startPointerType = moveDragProperty_.pointerType_;
+    if ((startPointerId != -1 && startPointerId != pointerId) ||
+        (startPointerType != -1 && pointerEvent->GetSourceType() != startPointerType)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
+        return false;
+    }
     MMI::PointerEvent::PointerItem pointerItem;
     if (!pointerEvent->GetPointerItem(pointerId, pointerItem)) {
         WLOGE("Get PointerItem failed");
@@ -1074,22 +1075,9 @@ void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaF
 
 void MoveDragController::OnLostFocus()
 {
-    if (isStartMove_ || isStartDrag_) {
-        WLOGFI("window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d, isDrag: %{public}d",
-            persistentId_, isStartMove_, isStartDrag_);
-        isStartMove_ = false;
-        isStartDrag_ = false;
-        NotifyWindowInputPidChange(isStartDrag_);
-        if (windowDragHotAreaType_ != WINDOW_HOT_AREA_TYPE_UNDEFINED) {
-            ProcessWindowDragHotAreaFunc(true, SizeChangeReason::DRAG_END);
-        }
-        ProcessSessionRectChange(SizeChangeReason::DRAG_END);
-    }
-}
-
-void MoveDragController::SetIsPcWindow(bool isPcWindow)
-{
-    isPcWindow_ = isPcWindow;
+    TLOGW(WmsLogTag::WMS_LAYOUT, "window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d,"
+        "isDrag: %{public}d", persistentId_, isStartMove_, isStartDrag_);
+    moveDragIsInterrupted_ = true;
 }
 
 std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()

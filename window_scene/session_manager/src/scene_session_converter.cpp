@@ -33,7 +33,7 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
         AAFwk::MissionInfo missionInfo;
         missionInfo.id = (*iter)->GetPersistentId();
         missionInfo.runningState = (*iter)->IsSessionValid() ? 0 : -1;
-        missionInfo.lockedState = ((*iter)->GetSessionInfo()).lockedState;
+        missionInfo.lockedState = (*iter)->GetSessionInfo().lockedState;
         if ((*iter)->GetSessionInfo().abilityInfo != nullptr) {
             missionInfo.label = ((*iter)->GetSessionInfo().abilityInfo)->label;
             missionInfo.iconPath = ((*iter)->GetSessionInfo().abilityInfo)->iconPath;
@@ -42,20 +42,20 @@ WSError SceneSessionConverter::ConvertToMissionInfos(std::vector<sptr<SceneSessi
         } else {
             WLOGFE("abilityInfo in SceneSession is nullptr, id: %{public}d", (*iter)->GetPersistentId());
         }
-        if (((*iter)->GetSessionInfo()).want != nullptr) {
-            missionInfo.want = *(((*iter)->GetSessionInfo()).want);
+        if ((*iter)->GetSessionInfo().want != nullptr) {
+            missionInfo.want = *((*iter)->GetSessionInfo().want);
         } else {
             WLOGFE("want in SceneSession is nullptr, id: %{public}d", (*iter)->GetPersistentId());
         }
-        missionInfo.time = ((*iter)->GetSessionInfo()).time;
-        missionInfo.continueState = (AAFwk::ContinueState)(AAFwk::ContinueState::CONTINUESTATE_UNKNOWN
-            + (((*iter)->GetSessionInfo()).continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
+        missionInfo.time = (*iter)->GetSessionInfo().time;
+        missionInfo.continueState = (AAFwk::ContinueState)(AAFwk::ContinueState::CONTINUESTATE_UNKNOWN +
+            ((*iter)->GetSessionInfo().continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
         missionInfos.push_back(std::move(missionInfo));
     }
     return WSError::WS_OK;
 }
 
-WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSession,
+WSError SceneSessionConverter::ConvertToMissionInfo(const sptr<SceneSession>& sceneSession,
                                                     AAFwk::MissionInfo& missionInfo)
 {
     if (sceneSession == nullptr) {
@@ -63,7 +63,7 @@ WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSes
     }
     missionInfo.id = sceneSession->GetPersistentId();
     missionInfo.runningState = sceneSession->IsSessionValid() ? 0 : -1;
-    missionInfo.lockedState = (sceneSession->GetSessionInfo()).lockedState;
+    missionInfo.lockedState = sceneSession->GetSessionInfo().lockedState;
     if (sceneSession->GetSessionInfo().abilityInfo != nullptr) {
         missionInfo.label = (sceneSession->GetSessionInfo().abilityInfo)->label;
         missionInfo.iconPath = (sceneSession->GetSessionInfo().abilityInfo)->iconPath;
@@ -72,14 +72,14 @@ WSError SceneSessionConverter::ConvertToMissionInfo(sptr<SceneSession>& sceneSes
     } else {
         WLOGFE("abilityInfo in SceneSession is nullptr, id: %{public}d", sceneSession->GetPersistentId());
     }
-    if ((sceneSession->GetSessionInfo()).want != nullptr) {
-        missionInfo.want = *((sceneSession->GetSessionInfo()).want);
+    if (sceneSession->GetSessionInfo().want != nullptr) {
+        missionInfo.want = *(sceneSession->GetSessionInfo().want);
     } else {
         WLOGFE("want in SceneSession is nullptr, id: %{public}d", sceneSession->GetPersistentId());
     }
-    missionInfo.time = (sceneSession->GetSessionInfo()).time;
-    missionInfo.continueState = (AAFwk::ContinueState) (AAFwk::ContinueState::CONTINUESTATE_UNKNOWN
-        + ((sceneSession->GetSessionInfo()).continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
+    missionInfo.time = sceneSession->GetSessionInfo().time;
+    missionInfo.continueState = (AAFwk::ContinueState) (AAFwk::ContinueState::CONTINUESTATE_UNKNOWN +
+        (sceneSession->GetSessionInfo().continueState - Rosen::ContinueState::CONTINUESTATE_UNKNOWN));
     return WSError::WS_OK;
 }
 }

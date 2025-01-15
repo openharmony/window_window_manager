@@ -109,10 +109,10 @@ WSError SubSession::Hide(bool needSyncHide)
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SUB, "session is null");
+            TLOGNE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
+        TLOGNI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;

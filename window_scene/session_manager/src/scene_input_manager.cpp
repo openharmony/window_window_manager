@@ -531,11 +531,11 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
                             pixelMapList = std::move(pixelMapList), forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
         if (isUserBackground_.load()) {
-            TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
+            TLOGND(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
             return;
         }
         if (sceneSessionDirty_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+            TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
             return;
         }
         sceneSessionDirty_->ResetSessionDirty();

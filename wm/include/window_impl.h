@@ -123,7 +123,7 @@ public:
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
     virtual WindowType GetType() const override;
-    virtual WindowMode GetMode() const override;
+    virtual WindowMode GetWindowMode() const override;
     virtual float GetAlpha() const override;
     virtual WindowState GetWindowState() const override;
     virtual WMError SetFocusable(bool isFocusable) override;
@@ -162,7 +162,7 @@ public:
         state_ = state;
     }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) override;
+        const Rect& rect = Rect::EMPTY_RECT) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
     

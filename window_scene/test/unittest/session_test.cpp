@@ -643,6 +643,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     sessionConfig.backgroundswitch = true;
     sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -705,6 +707,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     sessionConfig.backgroundswitch = true;
     sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -764,6 +768,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     sessionConfig.backgroundswitch = true;
     sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -849,6 +855,33 @@ HWTEST_F(WindowSessionTest, GetSnapshot, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_DISCONNECT;
     std::shared_ptr<Media::PixelMap> snapshot = session_->Snapshot();
     ASSERT_EQ(snapshot, session_->GetSnapshot());
+}
+
+/**
+ * @tc.name: NotifyAddSnapshot
+ * @tc.desc: NotifyAddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyAddSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyAddSnapshot();
+    ASSERT_EQ(session_->GetSnapshot(), nullptr);
+}
+
+/**
+ * @tc.name: NotifyRemoveSnapshot
+ * @tc.desc: NotifyRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyRemoveSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyRemoveSnapshot();
+    ASSERT_EQ(session_->GetScenePersistence()->HasSnapshot(), false);
 }
 
 /**

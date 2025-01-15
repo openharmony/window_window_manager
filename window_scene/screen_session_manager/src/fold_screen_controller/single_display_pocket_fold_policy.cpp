@@ -317,7 +317,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSes
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
         return;
     }
-    RSInterfaces::GetInstance().SetScreenSwitching(true);
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, MAIN_TP.c_str());
 #endif
@@ -387,7 +386,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSes
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
         return;
     }
-    RSInterfaces::GetInstance().SetScreenSwitching(true);
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_FULL);
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, FULL_TP.c_str());

@@ -54,8 +54,6 @@ constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
-const std::string SHELL_BUNDLE_NAME = "com.huawei.shell_assistant";
-const std::string SHELL_APP_IDENTIFIER = "5765880207854632823";
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -187,9 +185,6 @@ void Session::SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurf
     }
     std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     leashWinSurfaceNode_ = leashWinSurfaceNode;
-    if (leashWindowSurfaceNodeChangedFunc_) {
-        leashWindowSurfaceNodeChangedFunc_();
-    }
 }
 
 void Session::SetFrameLayoutFinishListener(const NotifyFrameLayoutFinishFunc& func)
@@ -339,6 +334,11 @@ const SessionInfo& Session::GetSessionInfo() const
     return sessionInfo_;
 }
 
+SessionInfo& Session::EditSessionInfo()
+{
+    return sessionInfo_;
+}
+
 bool Session::RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener)
 {
     return RegisterListenerLocked(lifecycleListeners_, listener);
@@ -445,6 +445,31 @@ void Session::NotifyRemoveBlank()
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
             listenerPtr->OnRemoveBlank();
+        }
+    }
+}
+
+void Session::NotifyAddSnapshot()
+{
+    /*
+     * for blankness prolems, persist snapshot could conflict with background process,
+     * thus no need to persist snapshot here
+     */
+    SaveSnapshot(false, false);
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnAddSnapshot();
+        }
+    }
+}
+
+void Session::NotifyRemoveSnapshot()
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnRemoveSnapshot();
         }
     }
 }
@@ -1129,7 +1154,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetWindowRect(rect);
     property->SetPersistentId(GetPersistentId());
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-    property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
+    property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
@@ -1355,8 +1380,8 @@ WSError Session::Hide()
 
 WSError Session::DrawingCompleted()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
-    if (!SessionPermission::IsSameAppAsCalling(SHELL_BUNDLE_NAME, SHELL_APP_IDENTIFIER)) {
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
+    if (!SessionPermission::IsSystemAppCall()) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -1542,9 +1567,16 @@ void Session::RegisterDetachCallback(const sptr<IPatternDetachCallback>& callbac
 }
 
 void Session::SetChangeSessionVisibilityWithStatusBarEventListener(
-    const NotifyChangeSessionVisibilityWithStatusBarFunc& func)
+    NotifyChangeSessionVisibilityWithStatusBarFunc&& func)
 {
-    changeSessionVisibilityWithStatusBarFunc_ = func;
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
+            return;
+        }
+        session->changeSessionVisibilityWithStatusBarFunc_ = std::move(func);
+    }, __func__);
 }
 
 void Session::SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func)
@@ -1784,9 +1816,8 @@ WSError Session::Clear(bool needStartCaller)
             return;
         }
         session->isTerminating_ = true;
-        SessionInfo info = session->GetSessionInfo();
         if (session->terminateSessionFuncNew_) {
-            session->terminateSessionFuncNew_(info, needStartCaller, false);
+            session->terminateSessionFuncNew_(session->GetSessionInfo(), needStartCaller, false);
         }
     };
     PostLifeCycleTask(task, "Clear", LifeCycleTaskType::STOP);
@@ -1795,8 +1826,7 @@ WSError Session::Clear(bool needStartCaller)
 
 void Session::SetSessionExceptionListener(NotifySessionExceptionFunc&& func, bool fromJsScene)
 {
-    const char* const where = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), where, fromJsScene] {
+    PostTask([weakThis = wptr(this), where = __func__, func = std::move(func), fromJsScene] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
@@ -1807,7 +1837,7 @@ void Session::SetSessionExceptionListener(NotifySessionExceptionFunc&& func, boo
         } else {
             session->sessionExceptionFunc_ = std::move(func);
         }
-    }, where);
+    }, __func__);
 }
 
 void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
@@ -1821,22 +1851,21 @@ void Session::SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func)
 
 void Session::SetPendingSessionToForegroundListener(NotifyPendingSessionToForegroundFunc&& func)
 {
-    const char* const where = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->pendingSessionToForegroundFunc_ = std::move(func);
-    }, where);
+    }, __func__);
 }
 
 WSError Session::PendingSessionToForeground()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
-    SessionInfo info = GetSessionInfo();
     if (pendingSessionActivationFunc_) {
+        SessionInfo info = GetSessionInfo();
         pendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
@@ -1845,31 +1874,24 @@ WSError Session::PendingSessionToForeground()
 void Session::SetPendingSessionToBackgroundForDelegatorListener(
     NotifyPendingSessionToBackgroundForDelegatorFunc&& func)
 {
-    const char* const where = __func__;
-    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is nullptr", where);
             return;
         }
         session->pendingSessionToBackgroundForDelegatorFunc_ = std::move(func);
-    }, where);
+    }, __func__);
 }
 
 WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
         GetPersistentId(), shouldBackToCaller);
-    SessionInfo info = GetSessionInfo();
     if (pendingSessionToBackgroundForDelegatorFunc_) {
-        pendingSessionToBackgroundForDelegatorFunc_(info, shouldBackToCaller);
+        pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller);
     }
     return WSError::WS_OK;
-}
-
-void Session::SetLeashWindowSurfaceNodeChangedListener(const NotifyLeashWindowSurfaceNodeChangedFunc& func)
-{
-    leashWindowSurfaceNodeChangedFunc_ = func;
 }
 
 void Session::SetRaiseToAppTopForPointDownFunc(const NotifyRaiseToTopForPointDownFunc& func)
@@ -2287,12 +2309,12 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     return nullptr;
 }
 
-void Session::SaveSnapshot(bool useFfrt)
+void Session::SaveSnapshot(bool useFfrt, bool needPersist)
 {
     if (scenePersistence_ == nullptr) {
         return;
     }
-    auto task = [weakThis = wptr(this), runInFfrt = useFfrt]() {
+    auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
@@ -2306,6 +2328,9 @@ void Session::SaveSnapshot(bool useFfrt)
         {
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
+        }
+        if (!requirePersist) {
+            return;
         }
         std::function<void()> func = [weakThis]() {
             if (auto session = weakThis.promote()) {
@@ -2767,7 +2792,7 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
     auto hotAreasChangeCallback = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            WLOGFE("session is nullptr");
+            TLOGNE(WmsLogTag::WMS_EVENT, "session is nullptr");
             return;
         }
         session->NotifySessionInfoChange();
@@ -3702,5 +3727,10 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
         return pixelMap;
     }
     return nullptr;
+}
+
+bool Session::IsPcWindow() const
+{
+    return systemConfig_.IsPcWindow();
 }
 } // namespace OHOS::Rosen
