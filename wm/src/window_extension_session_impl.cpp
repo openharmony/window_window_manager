@@ -1354,10 +1354,12 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return isPcOrPadFreeMultiWindowMode;
 }
 
-void WindowExtensionSessionImpl::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
+WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, MessageParcel& reply,
+                                                      [[maybe_unused]] MessageOption& option)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
+    return WSError::WS_OK;
 }
 
 WindowMode WindowExtensionSessionImpl::GetWindowMode() const
