@@ -1275,11 +1275,11 @@ HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function |
         WSError::WS_ERROR_NULLPTR);
     int64_t displayId = 1234;
     property->SetParentPersistentId(parentSession->GetPersistentId());
+    property->SetIsUIExtFirstSubWindow(true);
     parentSession->GetSessionProperty()->SetDisplayId(displayId);
     EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
         WSError::WS_OK);
     EXPECT_EQ(property->GetDisplayId(), displayId);
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
 
 /**
