@@ -628,7 +628,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     DMRect availableArea;
     sptr<Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        WLOGE("[WMSCom] Failed to get display");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail to get display");
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
 
@@ -673,7 +673,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
         if (event == SessionEvent::EVENT_START_MOVE || event == SessionEvent::EVENT_START_MOVE_INPUTBAR) {
-            WLOGD("[WMSCom] OnSessionEvent move");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "OnSessionEvent move");
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
             }
@@ -2552,7 +2552,7 @@ bool SceneSession::IsMovable()
 
     auto property = GetSessionProperty();
     bool windowIsMovable = !moveDragController_->GetStartDragFlag() && IsMovableWindowType() &&
-          moveDragController_->HasPointDown() && moveDragController_->GetMovable();
+                           moveDragController_->HasPointDown() && moveDragController_->GetMovable();
     if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
         windowIsMovable &= IsFocused();
     }
