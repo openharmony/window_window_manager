@@ -855,6 +855,230 @@ HWTEST_F(SessionProxyTest, GetIsMidScene, Function | SmallTest | Level2)
     ASSERT_EQ(isMidScene, false);
     GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene end";
 }
+
+/**
+ * @tc.name: ChangeSessionVisibilityWithStatusBar
+ * @tc.desc: ChangeSessionVisibilityWithStatusBar test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, ChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: ChangeSessionVisibilityWithStatusBar start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool visible = true;
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    WSError res = sProxy->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
+    ASSERT_EQ(res, WSError::WS_OK);
+    abilitySessionInfo = nullptr;
+    res = sProxy->ChangeSessionVisibilityWithStatusBar(abilitySessionInfo, visible);
+    ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
+    GTEST_LOG_(INFO) << "SessionProxyTest: ChangeSessionVisibilityWithStatusBar end";
+}
+
+/**
+ * @tc.name: SyncSessionEvent
+ * @tc.desc: SyncSessionEvent test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SyncSessionEvent, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SyncSessionEvent start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
+    WSError res = sProxy->SyncSessionEvent(aevent);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SyncSessionEvent end";
+}
+
+/**
+ * @tc.name: OnLayoutFullScreenChange
+ * @tc.desc: OnLayoutFullScreenChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnLayoutFullScreenChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnLayoutFullScreenChange start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool isLayoutFullScreen = true;
+    WSError res = sProxy->OnLayoutFullScreenChange(isLayoutFullScreen);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnLayoutFullScreenChange end";
+}
+
+/**
+ * @tc.name: OnDefaultDensityEnabled
+ * @tc.desc: OnDefaultDensityEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnDefaultDensityEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnDefaultDensityEnabled start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool isDefaultDensityEnabled = true;
+    WSError res = sProxy->OnDefaultDensityEnabled(isDefaultDensityEnabled);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnDefaultDensityEnabled end";
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromApp
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyFrameLayoutFinishFromApp, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyFrameLayoutFinishFromApp start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool notifyListener = true;
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = sProxy->NotifyFrameLayoutFinishFromApp(notifyListener, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyFrameLayoutFinishFromApp end";
+}
+
+/**
+ * @tc.name: RaiseAppMainWindowToTop
+ * @tc.desc: RaiseAppMainWindowToTop test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, RaiseAppMainWindowToTop, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: RaiseAppMainWindowToTop start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    WSError res = sProxy->RaiseAppMainWindowToTop();
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: RaiseAppMainWindowToTop end";
+}
+
+/**
+ * @tc.name: GetAllAvoidAreas
+ * @tc.desc: GetAllAvoidAreas test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetAllAvoidAreas, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAllAvoidAreas start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    WSError res = sProxy->GetAllAvoidAreas(avoidAreas);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetAllAvoidAreas end";
+}
+
+/**
+ * @tc.name: SetLandscapeMultiWindow
+ * @tc.desc: SetLandscapeMultiWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetLandscapeMultiWindow, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetLandscapeMultiWindow start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    bool isLandscapeMultiWindow = true;
+    WSError res = sProxy->SetLandscapeMultiWindow(isLandscapeMultiWindow);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetLandscapeMultiWindow end";
+}
+
+/**
+ * @tc.name: NotifySyncOn
+ * @tc.desc: NotifySyncOn test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifySyncOn, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifySyncOn();
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifySyncOn();
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifySyncOn();
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: TriggerBindModalUIExtension
+ * @tc.desc: TriggerBindModalUIExtension test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TriggerBindModalUIExtension, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->TriggerBindModalUIExtension();
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->TriggerBindModalUIExtension();
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->TriggerBindModalUIExtension();
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: NotifyPiPWindowPrepareClose
+ * @tc.desc: NotifyPiPWindowPrepareClose test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyPiPWindowPrepareClose, Function | SmallTest | Level2)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyPiPWindowPrepareClose();
+
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    sProxy->NotifyPiPWindowPrepareClose();
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyPiPWindowPrepareClose();
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: UpdatePiPRect
+ * @tc.desc: UpdatePiPRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdatePiPRect, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPRect start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+
+    Rect rect = { 200, 200, 200, 200 };
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
+    WSError res = sProxy->UpdatePiPRect(rect, reason);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPRect end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
