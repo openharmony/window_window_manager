@@ -91,16 +91,9 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
         TLOGI(WmsLogTag::WMS_PIP, "OnStartPictureInPicture abort");
         return NapiGetUndefined(env);
     }
-    size_t argc = NUMBER_FOUR;
-    napi_value argv[NUMBER_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = nullptr;
-    if (argc > 0) {
-        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
-    }
 
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [this, env, task = napiAsyncTask,
         weak = wptr<PictureInPictureController>(pipController_)]() {
         auto pipController = weak.promote();
@@ -115,6 +108,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
                 "JsPipController::OnStartPictureInPicture failed."));
             return;
         }
+        task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
@@ -132,14 +126,6 @@ napi_value JsPipController::StopPictureInPicture(napi_env env, napi_callback_inf
 napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnStopPictureInPicture is called");
-    size_t argc = NUMBER_FOUR;
-    napi_value argv[NUMBER_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = nullptr;
-    if (argc > 0) {
-        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
-    }
-
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
     auto asyncTask = [this, env, task = napiAsyncTask,
