@@ -16,6 +16,8 @@
 #ifndef WINDOW_INSPECTOR_H
 #define WINDOW_INSPECTOR_H
 
+#include <mutex>
+
 #include "wm_common.h"
 #include "wm_single_instance.h"
 
@@ -46,8 +48,9 @@ private:
     void* handlerConnectServerSo_ = nullptr;
     SendMessage sendMessage_ = nullptr;
     SetWMSCallback setWMSCallback_ = nullptr;
-    std::weak_ptr<WMSGetWindowListsCallback> wmsGetWindowListsCallback_;
+    static std::vector<std::weak_ptr<WMSGetWindowListsCallback>> wmsGetWindowListsCallbacks_;
     std::string jsonWindowListsInfoStr;
+    std::mutex callbackMutex_;
     static sptr<WindowInspector> CreateInstance();
     bool ProcessArkUIInspectorMessage(const std::string& message);
     void TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo);
