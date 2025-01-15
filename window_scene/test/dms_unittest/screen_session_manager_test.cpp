@@ -3635,9 +3635,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallT
     }
     auto screenSession = ssm_->GetScreenSession(screenId);
     screenSession->SetShareProtect(true);
-    const std::vector<ScreenId> screenIds = {screenId, screenId2};
-    bool isEnable = true;
-    ssm_->SetScreenShareProtectInner(screenIds, isEnable);
+    ssm_->SetScreenShareProtectInner();
 }
 }
 } // namespace Rosen
