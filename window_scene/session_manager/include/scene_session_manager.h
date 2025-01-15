@@ -45,12 +45,14 @@
 #include "display_info.h"
 #include "display_change_info.h"
 #include "display_change_listener.h"
+#include "screen_session_manager_client.h"
 #include "app_debug_listener_interface.h"
 #include "app_mgr_client.h"
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
 #include "screen_fold_data.h"
 #include "thread_safety_annotations.h"
+#include "window_focus_controller.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -107,7 +109,7 @@ using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const 
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName,
     GestureBackType type)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
-using ProcessShiftFocusFunc = std::function<void(int32_t persistentId)>;
+using ProcessShiftFocusFunc = std::function<void(int32_t persistentId, DisplayId displayGroupId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
     std::vector<std::string>& infos)>;
@@ -154,6 +156,12 @@ public:
      * Fold Screen Status Change Report
      */
     void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
+};
+
+class ScreenConnectionChangeListener : public IScreenConnectionChangeListener {
+public:
+    void OnScreenConnected(const sptr<ScreenSession>& screenSession) override;
+    void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -253,8 +261,8 @@ public:
     /*
      * Window Focus
      */
-    WSError SetFocusedSessionId(int32_t persistentId);
-    int32_t GetFocusedSessionId() const;
+    WSError SetFocusedSessionId(int32_t persistentId, DisplayId displayId);
+    int32_t GetFocusedSessionId(DisplayId displayId = DEFAULT_DISPLAY_ID) const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
@@ -263,9 +271,11 @@ public:
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
-    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError AddFocusGroup(DisplayId displayId);
+    WSError RemoveFocusGroup(DisplayId displayId);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -690,9 +700,9 @@ private:
     WSError RequestSessionFocusImmediately(int32_t persistentId);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
-    WSError RequestFocusBasicCheck(int32_t persistentId);
+    WSError RequestFocusBasicCheck(int32_t persistentId, sptr<FocusGroup>& focusGroup);
     bool CheckLastFocusedAppSessionFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& nextSession);
-    WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
+    WSError RequestFocusSpecificCheck(DisplayId displayId, sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     bool CheckTopmostWindowFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& sceneSession);
     bool CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
@@ -701,12 +711,14 @@ private:
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
     bool IsParentSessionVisible(const sptr<SceneSession>& session);
-    sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
-    sptr<SceneSession> GetTopNearestBlockingFocusSession(uint32_t zOrder, bool includingAppSession);
+    sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
+    sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
+        bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
-    WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
-    void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
+    WSError ShiftFocus(DisplayId displayId, sptr<SceneSession>& nextSession,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    void UpdateFocusStatus(DisplayId displayId, sptr<SceneSession>& sceneSession, bool isFocused);
+    void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused, sptr<FocusGroup>& focusGroup);
     int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
         const std::string& reason);
     void NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
@@ -945,6 +957,7 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    std::shared_ptr<WindowFocusController> windowFocusController_;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};

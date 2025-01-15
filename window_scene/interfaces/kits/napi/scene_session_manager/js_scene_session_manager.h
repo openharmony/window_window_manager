@@ -130,7 +130,7 @@ public:
     static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetLastInstanceKey(napi_env env, napi_callback_info info);
     static napi_value RefreshAppInfo(napi_env env, napi_callback_info info);
-    
+
     /*
      * Window Immersive
      */
@@ -243,7 +243,7 @@ private:
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnStartUIAbilityError(const uint32_t errorCode);
-    void OnShiftFocus(int32_t persistentId);
+    void OnShiftFocus(int32_t persistentId, DisplayId displayGroupId);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
     void ProcessCreateSystemSessionRegister();
     void ProcessCreateKeyboardSessionRegister();

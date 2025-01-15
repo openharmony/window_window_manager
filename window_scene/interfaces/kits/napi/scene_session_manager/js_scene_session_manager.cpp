@@ -449,16 +449,17 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
     taskScheduler_->PostMainThreadTask(task, info);
 }
 
-void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
+void JsSceneSessionManager::OnShiftFocus(int32_t persistentId, DisplayId displayGroupId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_FOCUS, "persistentId: %{public}d, displayGroupId: %{public}lu", persistentId, displayGroupId);
 
-    auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_]() {
+    auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_, displayGroupId]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, persistentId)};
+        napi_value argv[] = { CreateJsValue(env, persistentId),
+                              CreateJsValue(env, static_cast<int64_t>(displayGroupId)) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
@@ -570,9 +571,9 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 
 void JsSceneSessionManager::ProcessShiftFocus()
 {
-    ProcessShiftFocusFunc func = [this](int32_t persistentId) {
+    ProcessShiftFocusFunc func = [this](int32_t persistentId, DisplayId displayGroupId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
-        this->OnShiftFocus(persistentId);
+        this->OnShiftFocus(persistentId, displayGroupId);
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
@@ -1433,7 +1434,7 @@ static napi_value CreateWindowModes(napi_env env,
     }
     return arrayValue;
 }
- 
+
 static napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo)
 {
     napi_value objValue = nullptr;
@@ -1450,7 +1451,7 @@ static napi_value CreateWindowSize(napi_env env, const AppExecFwk::AbilityInfo& 
     napi_set_named_property(env, objValue, "minWindowHeight", CreateJsValue(env, abilityInfo.minWindowHeight));
     return objValue;
 }
- 
+
 static napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityInfo& abilityInfo)
 {
     napi_value objValue = nullptr;
@@ -1479,7 +1480,7 @@ static napi_value CreateAbilityItemInfo(napi_env env, const AppExecFwk::AbilityI
         CreateJsValue(env, abilityInfo.preferMultiWindowOrientation));
     return objValue;
 }
- 
+
 static napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAbilityInfo)
 {
     napi_value objValue = nullptr;
@@ -1493,7 +1494,7 @@ static napi_value CreateSCBAbilityInfo(napi_env env, const SCBAbilityInfo& scbAb
     napi_set_named_property(env, objValue, "codePath", CreateJsValue(env, scbAbilityInfo.codePath_));
     return objValue;
 }
- 
+
 static napi_value CreateAbilityInfos(napi_env env, const std::vector<SCBAbilityInfo>& scbAbilityInfos)
 {
     napi_value arrayValue = nullptr;
@@ -3627,7 +3628,7 @@ napi_value JsSceneSessionManager::OnNotifyAboveLockScreen(napi_env env, napi_cal
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
- 
+
     std::vector<int32_t> windowIds;
     if (!ConvertInt32ArrayFromJs(env, argv[0], windowIds)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Failed to convert windowIds");

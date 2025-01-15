@@ -452,7 +452,7 @@ WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::Sess
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::GetFocusSessionToken");
     MessageParcel data;
@@ -462,7 +462,10 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& 
         WLOGFE("Write interfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -480,7 +483,7 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::ElementName& element)
+WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::GetFocusSessionElement");
     MessageParcel data;
@@ -489,6 +492,10 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::Element
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("Write interfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -760,7 +767,7 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("get focus Winow info lite proxy");
     MessageParcel data;
@@ -770,7 +777,10 @@ void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -981,7 +991,7 @@ WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowMo
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
- 
+
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> remote = Remote();

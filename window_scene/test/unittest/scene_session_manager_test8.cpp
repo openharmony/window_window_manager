@@ -50,7 +50,7 @@ void SceneSessionManagerTest8::TearDownTestCase()
 
 void SceneSessionManagerTest8::SetUp()
 {
-    ssm_ = sptr<SceneSessionManager>::MakeSptr();
+    ssm_ = &SceneSessionManager::GetInstance();
     EXPECT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
 }
@@ -556,7 +556,7 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
     ssm_->Init();
     ASSERT_NE(nullptr, ssm_->eventHandler_);
 
-    ssm_->SetFocusedSessionId(2024);
+    ssm_->SetFocusedSessionId(DEFAULT_DISPLAY_ID, 2024);
     EXPECT_EQ(2024, ssm_->GetFocusedSessionId());
 
     ret = ssm_->SetBrightness(sceneSession, 3.15f);
@@ -890,7 +890,7 @@ HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, Function | SmallTest 
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->OnSessionStateChange(100, state);
-    
+
     auto ret = ssm_->UpdateMaximizeMode(1, true);
     EXPECT_EQ(WSError::WS_OK, ret);
     constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;

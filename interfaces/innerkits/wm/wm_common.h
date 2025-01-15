@@ -46,6 +46,7 @@ constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 }
 using DisplayId = uint64_t;
+constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 /**
  * @brief Enumerates type of window.
  */
@@ -1253,7 +1254,7 @@ struct WindowLayoutInfo : public Parcelable {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
                parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
-  
+
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;

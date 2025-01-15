@@ -137,8 +137,9 @@ public:
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
-    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
-    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
+    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
+    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element,
+        DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
 
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
@@ -277,7 +278,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets) override { return WMError::WM_OK; }
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
 
     /**
      * @brief Raise a window to screen top by id of window.

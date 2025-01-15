@@ -39,12 +39,19 @@ public:
     virtual void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) = 0;
 };
 
+class IScreenConnectionChangeListener : public RefBase {
+public:
+    virtual void OnScreenConnected(const sptr<ScreenSession>& screenSession) = 0;
+    virtual void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) = 0;
+};
+
 class ScreenSessionManagerClient : public ScreenSessionManagerClientStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManagerClient)
 
 public:
     void RegisterScreenConnectionListener(IScreenConnectionListener* listener);
     void RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener);
+    void RegisterScreenConnectionChangeListener(const sptr<IScreenConnectionChangeListener>& listener);
 
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
     std::map<ScreenId, ScreenProperty> GetAllScreensProperties() const;
@@ -119,6 +126,7 @@ private:
     sptr<IScreenSessionManager> screenSessionManager_;
 
     IScreenConnectionListener* screenConnectionListener_;
+    sptr<IScreenConnectionChangeListener> screenConnectionChangeListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
 };
