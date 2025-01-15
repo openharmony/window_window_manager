@@ -780,7 +780,8 @@ HWTEST_F(DisplayManagerAdapterTest, ResizeVirtualScreen, Function | SmallTest | 
 HWTEST_F(DisplayManagerAdapterTest, MakeUniqueScreen, Function | SmallTest | Level2)
 {
     std::vector<ScreenId> screenIds;
-    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
+    std::vector<displayId> displayIds;
+    DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(err, DMError::DM_OK);
     } else {

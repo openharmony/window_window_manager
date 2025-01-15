@@ -2438,7 +2438,8 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
 }
 
-DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     WLOGFI("ScreenSessionManagerProxy::MakeUniqueScreen");
     sptr<IRemoteObject> remote = Remote();
@@ -2469,6 +2470,7 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
         WLOGFE("MakeUniqueScreen fail: SendRequest failed");
         return DMError::DM_ERROR_NULLPTR;
     }
+    reply.ReadUInt64Vector(&displayIds);
     return static_cast<DMError>(reply.ReadInt32());
 }
 
