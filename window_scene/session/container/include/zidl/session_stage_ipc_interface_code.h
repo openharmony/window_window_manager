@@ -70,6 +70,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_SET_FULLSCREEN_WATERFALL_MODE,
     TRANS_ID_SET_SUPPORT_ENTER_WATERFALL_MODE,
     TRANS_ID_SEND_CONTAINER_MODAL_EVENT,
+    TRANS_ID_SET_DRAG_ACTIVATED,
 };
 }   // namespace Rosen
 }   // namespace OHOS
