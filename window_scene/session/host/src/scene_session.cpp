@@ -628,17 +628,17 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     DMRect availableArea;
     sptr<Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "fail to get display");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "fail to get display");
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
 
     DMError ret = display->GetAvailableArea(availableArea);
     if (ret != Rosen::DMError::DM_OK) {
-        WLOGE("[WMSCom] Failed to get available area, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
 
-    WLOGD("[WMSCom] the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
           availableArea.posX_,
           availableArea.posY_,
           availableArea.width_,
@@ -650,7 +650,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
 void SceneSession::InitializeMoveInputBar(SessionEvent event)
 {
     if (event == SessionEvent::EVENT_START_MOVE_INPUTBAR) {
-        WLOGD("[WMSCom] start init move input bar param");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Start init move input bar param");
         auto property = GetSessionProperty();
         if (!property) {
             return;
@@ -747,7 +747,7 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
 
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
-    WLOGD("[WMSCom] the sync session event is: %{public}d", event);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "the sync session event is: %{public}d", event);
     if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE &&
         event != SessionEvent::EVENT_START_MOVE_INPUTBAR) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event or end move event, "

@@ -2661,12 +2661,12 @@ WmErrorCode WindowSceneSessionImpl::StartMoveInputBar()
 {
     if (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
           windowSystemConfig_.IsPhoneWindow())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (auto hostSession = GetHostSession()) {
         WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE_INPUTBAR);
-        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errorCode:%{public}d",
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "id:%{public}d, errorCode:%{public}d",
             GetPersistentId(), static_cast<int>(errorCode));
         switch (errorCode) {
             case WSError::WS_ERROR_REPEAT_OPERATION: {
@@ -2680,7 +2680,7 @@ WmErrorCode WindowSceneSessionImpl::StartMoveInputBar()
             }
         }
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "hostSession is nullptr");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
 }
