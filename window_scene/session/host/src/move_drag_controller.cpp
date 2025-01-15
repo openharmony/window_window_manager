@@ -822,7 +822,6 @@ void MoveDragController::CalcMoveForSameDisplay(const std::shared_ptr<MMI::Point
 bool MoveDragController::CalcMoveInputBarRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                               const WSRect& originalRect)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "CalcMoveInputBarRect");
     if (!CheckAndInitializeMoveDragProperty(pointerEvent, originalRect)) {
         return false;
     }
@@ -876,7 +875,6 @@ bool MoveDragController::CalcMoveInputBarRect(const std::shared_ptr<MMI::Pointer
 bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const WSRect& originalRect)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "CalcMoveTargetRect");
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t pointerId = pointerEvent->GetPointerId();
     pointerEvent->GetPointerItem(pointerId, pointerItem);
