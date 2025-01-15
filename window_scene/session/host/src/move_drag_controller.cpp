@@ -567,7 +567,7 @@ void MoveDragController::UpdateMoveAvailableArea(DisplayId targetDisplayId)
     DMRect availableArea;
     sptr<Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(targetDisplayId);
     if (display == nullptr) {
-        WLOGE("[WMSCom] Failed to get display");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Failed to get display");
         return;
     }
     DMError ret = display->GetAvailableArea(availableArea);
@@ -589,7 +589,7 @@ void MoveDragController::SetCurrentScreenProperty(DisplayId targetDisplayId)
     sptr<ScreenSession> currentScreenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(targetDisplayId);
     if (currentScreenSession == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null");
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "Screen session is null");
         return;
     }
     ScreenProperty currentScreenProperty = currentScreenSession->GetScreenProperty();
@@ -659,7 +659,7 @@ MouseMoveDirection MoveDragController::CalcMouseMoveDirection(DisplayId lastDisp
     sptr<ScreenSession> currentScreenSession =
         ScreenSessionManagerClient::GetInstance().GetScreenSessionById(currentDisplayId);
     if (!lastScreenSession || !currentScreenSession) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Screen session is null, return default mouse move direction.");
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "Screen session is null, return default mouse move direction.");
         return MouseMoveDirection::UNKNOWN;
     }
 
@@ -868,7 +868,7 @@ bool MoveDragController::CalcMoveInputBarRect(const std::shared_ptr<MMI::Pointer
         }
     }
     moveDragProperty_.targetRect_ = { moveDragFinalX, moveDragFinalY, originalRect.width_, originalRect.height_ };
-    TLOGD(WmsLogTag::WMS_LAYOUT, "move rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "move rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
     return true;
 }
 
