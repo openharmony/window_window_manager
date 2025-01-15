@@ -12435,28 +12435,26 @@ void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
 
 WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId)
 {
-    auto task = [this, fromPersistentId, toPersistentId]() {
+    return taskScheduler_->PostAsyncTask([this, fromPersistentId, toPersistentId]() {
         auto toSceneSession = GetSceneSession(toPersistentId);
         if (toSceneSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
+            TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
         NodeId nodeId = INVALID_NODEID;
         if (fromPersistentId >= 0) { // if fromPersistentId < 0, cancel cloneWindow
             auto fromSceneSession = GetSceneSession(fromPersistentId);
             if (fromSceneSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
+                TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
                 return WSError::WS_ERROR_NULLPTR;
             }
-            auto surfaceNode = fromSceneSession->GetSurfaceNode();
-            if (surfaceNode) {
+            if (auto surfaceNode = fromSceneSession->GetSurfaceNode()) {
                 nodeId = surfaceNode->GetId();
             }
         }
         toSceneSession->CloneWindow(nodeId);
         TLOGI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
         return WSError::WS_OK;
-    };
-    return taskScheduler_->PostSyncTask(task, __func__);
+    }, __func__);
 }
 } // namespace OHOS::Rosen
