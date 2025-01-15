@@ -152,6 +152,7 @@ public:
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WmErrorCode StartMoveWindow() override;
+    WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
 
     /*
@@ -299,6 +300,11 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+
+    /*
+     * PC Window Layout
+     */
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
 
     /*
      * Window Immersive

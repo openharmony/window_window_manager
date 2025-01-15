@@ -324,6 +324,18 @@ public:
      */
     virtual WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) { return WSError::WS_OK; }
+
+    /**
+     * @brief Start Moving window with coordinate.
+     *
+     * @param offsetX expected pointer position x-axis offset in window when start moving.
+     * @param offsetY expected pointer position y-axis offset in window when start moving.
+     * @param pointerPosX current pointer position x-axis offset in screen.
+     * @param pointerPosY current pointer position y-axis offset in screen.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

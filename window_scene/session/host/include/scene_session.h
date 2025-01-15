@@ -1006,6 +1006,8 @@ private:
      * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
+    WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
