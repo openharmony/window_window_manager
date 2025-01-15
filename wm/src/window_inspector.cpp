@@ -66,9 +66,12 @@ void WindowInspector::InitConnectServer()
             SendMessageToIDE();
         }
     });
+    isInitConnectSuccess_ = true;
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
 }
+
+bool WindowInspector::IsInitConnectSuccess() const { return isInitConnectSuccess_; }
 
 void WindowInspector::RegisterWMSGetWindowListsCallback(const std::weak_ptr<WMSGetWindowListsCallback>& func)
 {

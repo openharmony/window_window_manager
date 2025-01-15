@@ -46,18 +46,7 @@ namespace {
 HWTEST_F(WindowInspetorTest, InitConnectServer, Function | SmallTest | Level2)
 {
     WindowInspector::GetInstance().InitConnectServer();
-    EXPECT_EQ(true, WindowInspector::GetInstance().isInitConnectSuccess_);
-}
-
-/**
- * @tc.name: RegisterWMSConnectCallback01
- * @tc.desc: RegisterWMSConnectCallback
- * @tc.type: FUNC
- */
-HWTEST_F(WindowInspetorTest, RegisterWMSConnectCallback, Function | SmallTest | Level2)
-{
-    auro ret = WindowInspector::GetInstance().RegisterWMSConnectCallback();
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(true, WindowInspector::GetInstance().IsInitConnectSuccess());
 }
 
 /**

@@ -35,23 +35,25 @@ using WMSGetWindowListsCallback = std::function<std::vector<WindowListsInfo>()>;
 class WindowInspector : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
-    void InitConnectServer();
+    bool IsInitConnectSuccess() const;
     void RegisterWMSGetWindowListsCallback(const std::weak_ptr<WMSGetWindowListsCallback>& func);
-    void UpdateWMSGetWindowListsCallback();
-    void UnregisterCallback();
 
 protected:
     WindowInspector();
     virtual ~WindowInspector();
 
 private:
+    bool isInitConnectSuccess_ = false;
     void* handlerConnectServerSo_ = nullptr;
     SendMessage sendMessage_ = nullptr;
     SetWMSCallback setWMSCallback_ = nullptr;
+    std::mutex callbackMutex_;
     static std::vector<std::weak_ptr<WMSGetWindowListsCallback>> wmsGetWindowListsCallbacks_;
     std::string jsonWindowListsInfoStr;
-    std::mutex callbackMutex_;
     static sptr<WindowInspector> CreateInstance();
+    void InitConnectServer();
+    void UpdateWMSGetWindowListsCallback();
+    void UnregisterCallback();
     bool ProcessArkUIInspectorMessage(const std::string& message);
     void TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo);
     void SendMessageToIDE();
