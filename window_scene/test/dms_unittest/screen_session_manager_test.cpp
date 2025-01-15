@@ -3597,6 +3597,8 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
 HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtect, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption1";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
@@ -3618,6 +3620,8 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtect, Function | SmallTest |
 HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr)
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption1";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
@@ -3632,6 +3636,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallT
     auto screenSession = ssm_->GetScreenSession(screenId);
     screenSession->SetShareProtect(true);
     const std::vector<ScreenId> screenIds = {screenId, screenId2};
+    bool isEnable = true;
     ssm_->SetScreenShareProtectInner(screenIds, isEnable);
 }
 }
