@@ -5731,7 +5731,7 @@ napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     double blurValue;
-    if (!ConvertFromJsValue(env, argv[0], blurValue)) {
+    if (!ConvertFromJsValue(env, argv[2], blurValue)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to blurValue");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
