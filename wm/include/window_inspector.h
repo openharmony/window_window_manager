@@ -20,7 +20,7 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-Struct WindowListsInfo {
+struct WindowListsInfo {
     std::string windowName;
     uint32_t windowId;
     uint32_t windowType;
