@@ -7289,7 +7289,7 @@ DMError ScreenSessionManager::SetScreenShareProtect(const std::vector<ScreenId>&
     for (ScreenId screenId : screenIds) {
         oss << screenId << " ";
     }
-    TLOGI(WmsLogTag::DMS, "screenIds:%{public}s, isEnable:%{public}d", oss.c_str(), isEnable);
+    TLOGI(WmsLogTag::DMS, "screenIds:%{public}s, isEnable:%{public}d", oss.str().c_str(), isEnable);
     for (ScreenId screenId : screenIds) {
         sptr<ScreenSession> screenSession = GetScreenSession(screenId);
         if (screenSession == nullptr) {
