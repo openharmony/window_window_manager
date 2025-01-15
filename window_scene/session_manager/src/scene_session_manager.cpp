@@ -2960,6 +2960,29 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
     return true;
 }
 
+bool SceneSessionManager::IsForbiddenPiP(const sptr<WindowSessionProperty>& property, const WindowType& type) {
+    auto parentSession = GetSceneSession(property->GetParentPersistentId());
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "parentSession is nullptr");
+        return false;
+    }
+    DisplayId screenId = parentSession->GetSessionProperty()->GetDisplayId();
+    if (screenId == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_PIP, "ScreenId  is nullptr");
+        return false;
+    }
+    const sprt<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(ScreenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "ScreenSession is nullptr");
+        return false;
+    }
+    if (type == WindowType::WINDOW_TYPE_PIP && (ScreenSession->GetName() == "HiCar" || ScreenSession->GetName() == "SuperLauncher")) {
+        TLOGI(WmsLogTag::WMS_PIP, "current screen name %{public}s", screenSession->GetName().c_str());
+        return true;
+    }
+    return false;
+}
+
 void SceneSessionManager::NotifyPiPWindowVisibleChange(bool screenLocked) {
     sptr<SceneSession> session = SelectSesssionFromMap(pipWindowSurfaceId_);
     if (session != nullptr) {

@@ -31,6 +31,7 @@
 #include "mock/mock_window_event_channel.h"
 #include "application_info.h"
 #include "context.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1642,6 +1643,40 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ASSERT_TRUE(ssm_->IsEnablePiPCreate(property));
+}
+
+/**
+ * @tc.name: TestIsForbiddenPiP
+ * @tc.desc: Test if pip window is forbidden to use;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, TestIsForbiddenPiP, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsForbiddenPiP start";
+    int32_t persistentId = 1001;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(persistentId);
+    ASSERT_TRUE(!ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_PIP));
+
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = persistentId;
+    sessionInfo.bundleName_ = "test1";
+    sessionInfo.abilityName = "test2";
+    sptr<SceneSession> scenesession = ssm_->createSceneSession(sessionInfo, nullptr);
+    property->SetDisplayedId(-1ULL);
+    scenesession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ASSERT_TRUE(!ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_PIP));
+
+    uint64_t displayId = 1001;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_[persistentId] = sceneSession;
+    sptr<ScreenSession> screenSession = new ScreenSession();
+    screenSession->SetName("HiCar");
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
+    ASSERT_TRUE(ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_FLOAT));
 }
 
 /**
