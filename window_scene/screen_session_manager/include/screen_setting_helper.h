@@ -60,9 +60,9 @@ public:
         const std::string& key = SETTING_RELATIVE_POSITION_KEY);
     static bool GetSettingRelativePositionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& relativePosition);
     static ScreenShape GetScreenShape(ScreenId screenId);
-    static void RegisterSettingScreenshareProtectObserver(SettingObserver::UpdateFunc func);
-    static void UnregisterSettingScreenshareProtectObserver();
-    static bool GetSettingScreenshareProtect(bool& enable, const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
+    static void RegisterSettingScreenShareProtectObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingScreenShareProtectObserver();
+    static bool GetSettingScreenShareProtect(bool& enable, const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
