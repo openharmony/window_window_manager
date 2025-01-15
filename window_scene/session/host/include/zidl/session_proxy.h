@@ -125,6 +125,11 @@ public:
      */
     WSError RemoveStartingWindow() override;
 
+    /*
+     * Window Property
+     */
+    WSError OnSetWindowCornerRadius(float cornerRadius) override;
+
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
 

@@ -718,6 +718,16 @@ bool WindowSessionProperty::GetIsNeedUpdateWindowMode() const
     return isNeedUpdateWindowMode_;
 }
 
+void WindowSessionProperty::SetWindowCornerRadius(float cornerRadius) {
+    std::lock_guard lock(cornerRadiusMutex_);
+    cornerRadius_ = cornerRadius;
+}
+
+float WindowSessionProperty::GetWindowCornerRadius() {
+    std::lock_guard lock(cornerRadiusMutex_);
+    return cornerRadius_;
+}
+
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
 {
     if (parcel.WriteUint32(limits_.maxWidth_) &&

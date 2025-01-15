@@ -113,6 +113,9 @@ private:
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetSupportWindowModes(MessageParcel& data, MessageParcel& reply);
 
+    //Window Property
+    int HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply);
+
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Rosen
