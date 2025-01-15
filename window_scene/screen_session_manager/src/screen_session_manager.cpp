@@ -7283,7 +7283,7 @@ DMError ScreenSessionManager::SetScreenShareProtect(const std::vector<ScreenId>&
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return;
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     std::ostringstream oss;
     for (ScreenId screenId : screenIds) {

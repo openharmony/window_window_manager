@@ -498,7 +498,7 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     return ScreenShape::RECTANGLE;
 }
 
-void ScreenSettingHelper::RegisterSettingScreenshareProtectObserver(SettingObserver::UpdateFunc func)
+void ScreenSettingHelper::RegisterSettingScreenShareProtectObserver(SettingObserver::UpdateFunc func)
 {
     if (screenShareProtectObserver_ != nullptr) {
         TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
@@ -513,7 +513,7 @@ void ScreenSettingHelper::RegisterSettingScreenshareProtectObserver(SettingObser
     }
 }
 
-void ScreenSettingHelper::UnregisterSettingScreenshareProtectObserver()
+void ScreenSettingHelper::UnregisterSettingScreenShareProtectObserver()
 {
     if (screenShareProtectObserver_ == nullptr) {
         TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
@@ -527,7 +527,7 @@ void ScreenSettingHelper::UnregisterSettingScreenshareProtectObserver()
     screenShareProtectObserver_ = nullptr;
 }
 
-bool GetSettingScreenshareProtect(bool& enable, const std::string& key)
+bool GetSettingScreenShareProtect(bool& enable, const std::string& key)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetBoolValue(key, enable);

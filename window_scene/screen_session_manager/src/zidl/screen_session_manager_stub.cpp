@@ -1085,7 +1085,7 @@ void ScreenSessionManagerStub::ProcSetScreenShareProtect(MessageParcel& data, Me
     std::vector<ScreenId> screenIds;
     if (!data.ReadUInt64Vector(&screenIds)) {
         TLOGE(WmsLogTag::DMS, "Read screenIds failed");
-        break;
+        return;
     }
     bool isEnable = static_cast<bool>(data.ReadBool());
     DmErrorCode ret = SetScreenShareProtect(screenIds, isEnable);
