@@ -1757,7 +1757,8 @@ DMError DisplayManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32_t wid
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds)
+DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     WLOGFI("DisplayManagerProxy::MakeUniqueScreen");
     sptr<IRemoteObject> remote = Remote();

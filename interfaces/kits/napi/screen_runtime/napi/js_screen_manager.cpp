@@ -773,7 +773,6 @@ napi_value OnStopExpand(napi_env env, napi_callback_info info)
     return result;
 }
 
-
 napi_value OnMakeUnique(napi_env env, napi_callback_info info)
 {
     WLOGI("OnMakeUnique is called");
