@@ -226,6 +226,9 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
         }
     }
 
+    if (!WindowInspector::GetInstance().IsInitConnectSuccess()) {
+        return;
+    }
     onWMSGetWindowListsCallback_ = std::make_shared<WMSGetWindowListsCallback>([] {
         std::vector<WindowListsInfo> windowListsInfoVec;
         {
