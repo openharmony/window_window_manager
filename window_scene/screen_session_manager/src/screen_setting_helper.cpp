@@ -527,7 +527,7 @@ void ScreenSettingHelper::UnregisterSettingScreenShareProtectObserver()
     screenShareProtectObserver_ = nullptr;
 }
 
-bool GetSettingScreenShareProtect(bool& enable, const std::string& key)
+bool ScreenSettingHelper::GetSettingScreenShareProtect(bool& enable, const std::string& key)
 {
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetBoolValue(key, enable);
