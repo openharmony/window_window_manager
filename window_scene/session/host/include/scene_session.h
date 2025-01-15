@@ -47,7 +47,7 @@ using GetSceneSessionVectorByTypeAndDisplayIdCallback = std::function<std::vecto
     WindowType type, DisplayId displayId)>;
 using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
 using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
-using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
+using GetIsAINavigationBarAvoidAreaValidFunc = std::function<bool(const AvoidArea& avoidArea, int32_t sessionBottom)>;
 using UpdateOccupiedAreaIfNeedCallback = std::function<void(int32_t persistentId)>;
 using NotifyWindowInfoUpdateCallback = std::function<void(int32_t persistentId, WindowUpdateType type)>;
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
@@ -125,6 +125,7 @@ public:
         GetSceneSessionVectorByTypeAndDisplayIdCallback onGetSceneSessionVectorByTypeAndDisplayId_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
+        GetIsAINavigationBarAvoidAreaValidFunc onGetIsAINavigationBarAvoidAreaValid_;
         GetStatusBarDefaultVisibilityByDisplayIdFunc onGetStatusBarDefaultVisibilityByDisplayId_;
         UpdateOccupiedAreaIfNeedCallback onUpdateOccupiedAreaIfNeed_;
         NotifyWindowInfoUpdateCallback onWindowInfoUpdate_;

@@ -2157,7 +2157,17 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
             auto type = static_cast<AvoidAreaType>(avoidType);
-            avoidAreas[type] = session->GetAvoidAreaByTypeInner(type);
+            auto area = session->GetAvoidAreaByTypeInner(type);
+            // code below aims to check if ai bar avoid area reaches window rect's bottom
+            // it should not be removed until unexpected window rect update issues were solved
+            if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+                if (session->specificCallback_ && session->specificCallback_->onGetIsAINavigationBarAvoidAreaValid_ &&
+                    !(session->specificCallback_->onGetIsAINavigationBarAvoidAreaValid_(
+                        area, session->GetSessionRect().height_))) {
+                    continue;
+                }
+            }
+            avoidAreas[type] = area;
         }
         return WSError::WS_OK;
     }, __func__);

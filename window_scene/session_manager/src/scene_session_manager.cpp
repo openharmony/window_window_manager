@@ -277,6 +277,20 @@ public:
         SceneSessionManager::GetInstance().OnBundleUpdated(bundleName, userId);
     }
 };
+
+static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+{
+    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+        !avoidArea.rightRect_.IsUninitializedRect()) {
+        return false;
+    }
+    if (avoidArea.bottomRect_.IsUninitializedRect()) {
+        return true;
+    }
+    auto diff =
+        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
+    return isVisible && diff <= 1;
+}
 } // namespace
 
 sptr<SceneSessionManager> SceneSessionManager::CreateInstance()
@@ -1266,6 +1280,9 @@ void SceneSessionManager::CreateRootSceneSession()
     };
     specificCb->onUpdateAvoidArea_ = [this](int32_t persistentId) {
         this->UpdateAvoidArea(persistentId);
+    };
+    specificCb->onGetIsAINavigationBarAvoidAreaValid_ = [this](const AvoidArea& avoidArea, int32_t sessionBottom) {
+        return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea, sessionBottom);
     };
     specificCb->onNotifyAvoidAreaChange_ = [this](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
         onNotifyAvoidAreaChangeForRootFunc_(avoidArea, type);
@@ -8779,20 +8796,6 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
         sceneSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
         sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
     }
-}
-
-static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
-{
-    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
-        !avoidArea.rightRect_.IsUninitializedRect()) {
-        return false;
-    }
-    if (avoidArea.bottomRect_.IsUninitializedRect()) {
-        return true;
-    }
-    auto diff =
-        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && diff <= 1;
 }
 
 void SceneSessionManager::UpdateNormalSessionAvoidArea(
