@@ -1825,12 +1825,12 @@ int32_t ScreenSession::GetApiVersion()
     return apiVersion;
 }
 
-void ScreenSession::SetShareProtect(bool needShareProtect);
+void ScreenSession::SetShareProtect(bool needShareProtect)
 {
     needShareProtect_ = needShareProtect;
 }
 
-DMRect ScreenSession::GetShareProtect()
+bool ScreenSession::GetShareProtect()
 {
     return needShareProtect_;
 }
