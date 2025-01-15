@@ -1088,7 +1088,7 @@ void ScreenSessionManagerStub::ProcSetScreenShareProtect(MessageParcel& data, Me
         return;
     }
     bool isEnable = static_cast<bool>(data.ReadBool());
-    DmErrorCode ret = SetScreenShareProtect(screenIds, isEnable);
+    DMError ret = SetScreenShareProtect(screenIds, isEnable);
     reply.WriteInt32(static_cast<int32_t>(ret));
 }
 } // namespace OHOS::Rosen
