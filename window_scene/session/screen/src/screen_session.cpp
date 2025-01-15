@@ -1796,6 +1796,21 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
     }
 }
 
+void ScreenSession::SecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion)
+{
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
+        listener->OnSecondaryReflexionChange(screenId, isSecondaryReflexion);
+    }
+}
+
 void ScreenSession::SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch)
 {
     isPhysicalMirrorSwitch_ = isPhysicalMirrorSwitch;
