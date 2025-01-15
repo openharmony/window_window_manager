@@ -34,8 +34,8 @@ class WindowInspector : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
     void InitConnectServer();
-    bool RegisterWMSConnectCallback();
-    void RegisterWMSGetWindowListsCallback();
+    void RegisterWMSGetWindowListsCallback(const std::weak_ptr<WMSGetWindowListsCallback>& func);
+    void UpdateWMSGetWindowListsCallback();
     void UnregisterCallback();
 
 protected:
@@ -43,7 +43,6 @@ protected:
     virtual ~WindowInspector();
 
 private:
-    bool isInitConnectSuccess_ = false;
     void* handlerConnectServerSo_ = nullptr;
     SendMessage sendMessage_ = nullptr;
     SetWMSCallback setWMSCallback_ = nullptr;

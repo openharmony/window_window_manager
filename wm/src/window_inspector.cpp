@@ -26,6 +26,8 @@ const std::string METHOD_NAME = "WMS.windowList";
 const std::string INTERFACE_NAME = "getCurrentProcessWindowList";
 } // namespace
 
+std::vector<std::weak_ptr<WMSGetWindowListsCallback>> WindowInspector::wmsGetWindowListsCallbacks_;
+
 sptr<WindowInspector> WindowInspector::CreateInstance()
 {
     sptr<WindowInspector> windowInspector = new WindowInspector();
@@ -60,14 +62,6 @@ void WindowInspector::InitConnectServer()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load sendMessage failed: %{public}s", dlerror());
         return;
     }
-    isInitConnectSuccess_ = true;
-}
-
-bool WindowInspector::RegisterWMSConnectCallback()
-{
-    if (!isInitConnectSuccess_) {
-        return false;
-    }
     setWMSCallback_([this](const char* message) {
         if (ProcessArkUIInspectorMessage(message)) {
             SendMessageToIDE();
@@ -75,24 +69,39 @@ bool WindowInspector::RegisterWMSConnectCallback()
     });
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
-    return true;
 }
 
 void WindowInspector::RegisterWMSGetWindowListsCallback(const std::weak_ptr<WMSGetWindowListsCallback>& func)
 {
-    wmsGetWindowListsCallback_ = std::move(func);
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    wmsGetWindowListsCallbacks_.push_back(func);
+}
+
+void WindowInspector::UpdateWMSGetWindowListsCallback()
+{
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    for (auto iter = wmsGetWindowListsCallbacks_.begin(); iter != wmsGetWindowListsCallbacks_.end();) {
+        auto callback = iter->lock();
+        if (callback == nullptr) {
+            iter = wmsGetWindowListsCallbacks_.erase(iter);
+            continue;
+        }
+        iter++;
+    }
 }
 
 void WindowInspector::UnregisterCallback()
 {
+    setWMSCallback_(nullptr);
     setWMSCallback_ = nullptr;
     sendMessage_ = nullptr;
-    wmsGetWindowListsCallback_.reset();
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    wmsGetWindowListsCallbacks_.clear();
 }
 
 bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "called");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "receive callback");
     nlohmann::json jsonMessage = nlohmann::json::parse(message, nullptr, false);
     if (!jsonMessage.contains("method") || jsonMessage["method"].get<std::string>() != METHOD_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
@@ -102,8 +111,8 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.interface err");
         return false;
     }
-
-    auto callback = wmsGetWindowListsCallback_.lock();
+    UpdateWMSGetWindowListsCallback();
+    auto callback = wmsGetWindowListsCallbacks_.begin()->lock();
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "wmsGetWindowListsCallback is null");
         return false;
@@ -149,7 +158,7 @@ void WindowInspector::SendMessageToIDE()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendMessage is null");
         return;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", jsonWindowListsInfoStr.c_str());
     sendMessage_(jsonWindowListsInfoStr);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", jsonWindowListsInfoStr.c_str());
 }
 } // namespace Rosen::OHOS
