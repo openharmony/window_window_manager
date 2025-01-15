@@ -21,6 +21,7 @@
 #include <ability_manager_client.h>
 #include <application_context.h>
 #include <bundlemgr/launcher_service.h>
+#include <common/rs_common_def.h>
 #include <hisysevent.h>
 #include <parameters.h>
 #include <hitrace_meter.h>
@@ -12434,5 +12435,30 @@ void SceneSessionManager::GetStatusBarAvoidHeight(WSRect& barArea)
 {
     barArea.height_ = statusBarAvoidHeight_ == INVALID_STATUS_BAR_AVOID_HEIGHT ?
         barArea.height_ : statusBarAvoidHeight_;
+}
+
+WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId)
+{
+    return taskScheduler_->PostSyncTask([this, fromPersistentId, toPersistentId]() {
+        auto toSceneSession = GetSceneSession(toPersistentId);
+        if (toSceneSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        NodeId nodeId = INVALID_NODEID;
+        if (fromPersistentId >= 0) { // if fromPersistentId < 0, excute CloneWindow(0) to cancel cloneWindow
+            if (auto fromSceneSession = GetSceneSession(fromPersistentId)) {
+                if (auto surfaceNode = fromSceneSession->GetSurfaceNode()) {
+                    nodeId = surfaceNode->GetId();
+                }
+            } else {
+                TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
+                return WSError::WS_ERROR_NULLPTR;
+            }
+        }
+        toSceneSession->CloneWindow(nodeId);
+        TLOGNI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
+        return WSError::WS_OK;
+    }, __func__);
 }
 } // namespace OHOS::Rosen
