@@ -104,6 +104,7 @@ using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isN
 using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)>;
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
+using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -277,6 +278,7 @@ public:
     void SetPrivacyMode(bool isPrivacy);
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
+    void ResetOcclusionAlpha();
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
     void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
@@ -336,6 +338,7 @@ public:
     void RegisterSystemBarPropertyChangeCallback(NotifySystemBarPropertyChangeFunc&& callback);
     void MarkAvoidAreaAsDirty();
     virtual void RecalculatePanelRectForAvoidArea(WSRect& panelRect) {}
+    void RegisterGetStatusBarAvoidHeightFunc(GetStatusBarAvoidHeightFunc&& func);
 
     void SetAbilitySessionInfo(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     void SetWindowDragHotAreaListener(const NotifyWindowDragHotAreaFunc& func);
@@ -554,6 +557,7 @@ public:
      * Multi Window
      */
     WSError SetSplitButtonVisible(bool isVisible);
+    WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue);
     void RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& func);
 
     /*
@@ -637,6 +641,7 @@ protected:
     bool PipelineNeedNotifyClientToUpdateAvoidArea(uint32_t dirty) const;
     NotifyNeedAvoidFunc onNeedAvoid_;
     NotifySystemBarPropertyChangeFunc onSystemBarPropertyChange_;
+    GetStatusBarAvoidHeightFunc onGetStatusBarAvoidHeightFunc_;
 
     /*
      * Gesture Back
@@ -849,6 +854,7 @@ private:
         WSPropertyChangeAction action);
     WMError HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
+    WMError HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
@@ -920,10 +926,14 @@ private:
     PostProcessFocusState postProcessFocusState_;
     bool postProcessProperty_ { false };
 
-    // Session recover
+    /*
+     * Window Recover
+     */
     bool isRecovered_ = false;
 
-    // Multi User
+    /*
+     * Multi User
+     */
     bool isMinimizedByUserSwitch_ { false };
 
     /*

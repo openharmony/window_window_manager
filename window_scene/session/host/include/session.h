@@ -102,6 +102,8 @@ public:
     virtual void OnDisconnect() {}
     virtual void OnLayoutFinished() {}
     virtual void OnRemoveBlank() {}
+    virtual void OnAddSnapshot() {}
+    virtual void OnRemoveSnapshot() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnExtensionDied() {}
     virtual void OnExtensionDetachToDisplay() {}
@@ -192,6 +194,8 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
+    void NotifyAddSnapshot();
+    void NotifyRemoveSnapshot();
     void NotifyExtensionDied() override;
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
@@ -224,7 +228,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
-    void SaveSnapshot(bool useFfrt);
+    void SaveSnapshot(bool useFfrt, bool needPersist = true);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -584,6 +588,7 @@ public:
      */
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
+    bool IsPcWindow() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

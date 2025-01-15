@@ -706,10 +706,6 @@ HWTEST_F(SceneSessionManagerTest4, UpdateSessionDisplayId, Function | SmallTest 
     sceneSession->sessionInfo_.screenId_ = 6;
     result = ssm_->UpdateSessionDisplayId(1, 2);
     EXPECT_EQ(result, WSError::WS_OK);
-
-    sceneSession->property_ = nullptr;
-    result = ssm_->UpdateSessionDisplayId(1, 2);
-    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 
 /**

@@ -1301,9 +1301,9 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     bool hideSplitButton = !(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     // not support fullscreen in split and floating mode, or not support float in fullscreen mode
     bool hideMaximizeButton = (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
-        (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
+        (GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetWindowMode()))) ||
         (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
-         GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+         GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     bool hideMinimizeButton = false;
     bool hideCloseButton = false;
     GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
@@ -1548,7 +1548,7 @@ std::shared_ptr<std::vector<uint8_t>> WindowSessionImpl::GetAbcContent(const std
 void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
 {
     if (auto uiContent = GetUIContentSharedPtr()) {
-        WindowMode mode = GetMode();
+        WindowMode mode = GetWindowMode();
         bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
             mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
             (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
@@ -1566,7 +1566,7 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
     auto windowChangeListeners = GetListeners<IWindowChangeListener>();
     for (auto& listener : windowChangeListeners) {
         if (listener.GetRefPtr() != nullptr) {
-            listener.GetRefPtr()->OnModeChange(GetMode(), isDecorEnable);
+            listener.GetRefPtr()->OnModeChange(GetWindowMode(), isDecorEnable);
         }
     }
 }
@@ -1574,7 +1574,7 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
 void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
 {
     if (mode == WindowMode::WINDOW_MODE_UNDEFINED) {
-        mode = GetMode();
+        mode = GetWindowMode();
     }
     if (needNotify) {
         if (auto uiContent = GetUIContentSharedPtr()) {
@@ -2889,6 +2889,26 @@ WMError WindowSessionImpl::GetIsMidScene(bool& isMidScene)
     return WMError::WM_OK;
 }
 
+WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
+    auto task = [weakThis = wptr(this), eventName, eventValue] {
+        auto window = weakThis.promote();
+        if (!window) {
+            return;
+        }
+        std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
+        if (uiContent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "uiContent is null!");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_EVENT, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
+        uiContent->OnContainerModalEvent(eventName, eventValue);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SendContainerModalEvent");
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
     if (!WindowHelper::IsMainWindow(GetType())) {
@@ -4173,6 +4193,10 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetBackgroundColor(color);
+        // 24: Shift right by 24 bits to move the alpha channel to the lowest 8 bits.
+        uint8_t alpha = static_cast<uint8_t>((color >> 24) & 0xff);
+        property_->SetBackgroundAlpha(alpha);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA);
         return WMError::WM_OK;
     }
 
@@ -4423,6 +4447,7 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     WLOGFI("in");
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->UpdateTransform(transform);
+        SetLayoutTransform(transform);
     }
 }
 
@@ -4710,6 +4735,18 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
     return targetAPIVersion_;
+}
+
+void WindowSessionImpl::SetLayoutTransform(const Transform& transform)
+{
+    std::lock_guard<std::recursive_mutex> lock(transformMutex_);
+    layoutTransform_ = transform;
+}
+
+Transform WindowSessionImpl::GetLayoutTransform() const
+{
+    std::lock_guard<std::recursive_mutex> lock(transformMutex_);
+    return layoutTransform_;
 }
 } // namespace Rosen
 } // namespace OHOS

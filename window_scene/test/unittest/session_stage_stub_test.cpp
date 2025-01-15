@@ -869,6 +869,27 @@ HWTEST_F(SessionStageStubTest, HandleSetSupportEnterWaterfallMode, Function | Sm
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleSetSupportEnterWaterfallMode(data, reply));
 }
+
+/**
+ * @tc.name: HandleSendContainerModalEvent
+ * @tc.desc: test function : HandleSendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSendContainerModalEvent, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteString("name");
+    data.WriteString("value");
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    data.WriteString("name1");
+    data.WriteString("value2");
+    ASSERT_EQ(0, sessionStageStub_->HandleSendContainerModalEvent(data, reply));
+}
 }
 }
 }

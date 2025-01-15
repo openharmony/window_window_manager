@@ -2221,7 +2221,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function
     ASSERT_EQ(static_cast<uint32_t>(DataHandlerErr::OK), replyCode);
  
     // Verify window mode was updated
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window_->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window_->GetWindowMode());
 }
 }
 } // namespace Rosen
