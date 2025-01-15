@@ -5715,7 +5715,7 @@ napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     double scaleValue;
-    if (!ConvertFromJsValue(env, argv[0], scaleValue)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], scaleValue)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to scaleValue");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -5724,14 +5724,14 @@ napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_in
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     bool isFreeze = false;
-    if (!ConvertFromJsValue(env, argv[1], isFreeze)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], isFreeze)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to isFreeze");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     double blurValue;
-    if (!ConvertFromJsValue(env, argv[2], blurValue)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], blurValue)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to blurValue");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
