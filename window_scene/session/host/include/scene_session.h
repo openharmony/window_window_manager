@@ -1016,7 +1016,7 @@ private:
     /*
      * Window Property
      */
-    NotifySetWindowCornerRadiusFunc onSetWindowCornerRadius_;
+    NotifySetWindowCornerRadiusFunc onSetWindowCornerRadiusFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

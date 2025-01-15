@@ -5614,7 +5614,7 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
-napi_value JsWindowStage::OnSetWindowCornerRadius(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -5624,7 +5624,6 @@ napi_value JsWindowStage::OnSetWindowCornerRadius(napi_env env, napi_callback_in
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
-    
     double radius = 0.0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], radius)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to radius");
@@ -5641,7 +5640,7 @@ napi_value JsWindowStage::OnSetWindowCornerRadius(napi_env env, napi_callback_in
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask, cornerRadius] {
+    auto asyncTask = [weakWindow = wptr(windowToken_), where, env, task = napiAsyncTask, cornerRadius] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
