@@ -778,11 +778,11 @@ DMError ScreenManagerAdapter::ResizeVirtualScreen(ScreenId screenId, uint32_t wi
     return displayManagerServiceProxy_->ResizeVirtualScreen(screenId, width, height);
 }
 
-DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->MakeUniqueScreen(screenIds);
+    return displayManagerServiceProxy_->MakeUniqueScreen(screenIds, displayIds);
 }
 
 DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& area)

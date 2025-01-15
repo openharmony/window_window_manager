@@ -707,7 +707,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 WLOGFE("failed to receive unique screens in stub");
                 break;
             }
-            DMError ret = MakeUniqueScreen(uniqueScreenIds);
+            std::vector<DisplayId> displayIds;
+            DMError ret = MakeUniqueScreen(uniqueScreenIds, displayIds);
+            reply.WriteUInt64Vector(displayIds);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
