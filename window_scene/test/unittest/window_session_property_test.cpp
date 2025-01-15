@@ -1381,6 +1381,19 @@ HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | L
     property->SetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(2, property->GetAvoidAreaOption());
 }
+
+/**
+ * @tc.name: SetWindowCornerRadius
+ * @tc.desc: SetWindowCornerRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    float cornerRadius = 1.0f;
+    property->SetWindowCornerRadius(cornerRadius);
+    ASSERT_EQ(cornerRadius, property->GetWindowCornerRadius());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

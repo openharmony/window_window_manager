@@ -85,6 +85,7 @@ enum class ListenerFuncType : uint32_t {
     SESSION_DISPLAY_ID_CHANGE_CB,
     SET_SUPPORT_WINDOW_MODES_CB,
     WINDOW_MOVING_CB,
+    SET_WINDOW_CORNER_RADIUS_CB,
 };
 
 class SceneSession;
@@ -300,6 +301,7 @@ private:
     void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
     void ProcessWindowMovingRegister();
+    void ProcessSetWindowCornerRadiusRegister();
 
     /*
      * PC Window Layout
@@ -357,6 +359,7 @@ private:
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
+    void OnSetWindowCornerRadius(float cornerRadius);
 
     /*
      * PC Window Layout
