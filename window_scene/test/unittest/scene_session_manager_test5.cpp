@@ -1275,7 +1275,7 @@ HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function |
         WSError::WS_ERROR_NULLPTR);
     property->SetParentPersistentId(parentSession->GetPersistentId());
     property->SetIsUIExtFirstSubWindow(true);
-    DisplayId displayId = 0;
+    constexpr DisplayId displayId = 0;
     parentSession->GetSessionProperty()->SetDisplayId(displayId);
     EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
         WSError::WS_OK);
