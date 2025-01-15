@@ -381,13 +381,14 @@ HWTEST_F(SceneSessionManagerTest10, TestCheckLastFocusedAppSessionFocus_02, Func
     info2.windowType_ = 1;
     sptr<SceneSession> nextSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
 
-    ssm_->lastFocusedAppSessionId_ = 124;
+    ssm_->windowFocusController_->UpdateFocusedAppSessionId(DEFAULT_DISPLAY_ID, 124);
     focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
 
     nextSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
-    ASSERT_EQ(0, ssm_->lastFocusedAppSessionId_);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    ASSERT_EQ(0, focusGroup->GetLastFocusedAppSessionId());
 }
 
 /**
@@ -897,7 +898,7 @@ HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | Sm
 {
     ssm_->sceneSessionMap_.clear();
     std::vector<uint32_t> zOrderList;
-    ssm_->lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    ssm_->windowFocusController_->UpdateFocusedAppSessionId(DEFAULT_DISPLAY_ID, INVALID_SESSION_ID);
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
 
     SessionInfo sessionInfo;
@@ -905,15 +906,16 @@ HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | Sm
     sessionInfo.abilityName_ = "lastFocusedAppSession";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
-    ssm_->lastFocusedAppSessionId_ = 1;
+    ssm_->windowFocusController_->UpdateFocusedAppSessionId(DEFAULT_DISPLAY_ID, 1);
     sceneSession->zOrder_ = 101;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
 
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
-    ASSERT_EQ(1, ssm_->lastFocusedAppSessionId_);
+    ASSERT_EQ(1, focusGroup->GetLastFocusedAppSessionId());
 
     zOrderList.push_back(103);
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
-    ASSERT_EQ(INVALID_SESSION_ID, ssm_->lastFocusedAppSessionId_);
+    ASSERT_EQ(INVALID_SESSION_ID, focusGroup->GetLastFocusedAppSessionId());
 }
 
 /**
@@ -982,7 +984,7 @@ HWTEST_F(SceneSessionManagerTest10, TestIsNeedSkipWindowModeTypeCheck_04, Functi
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetRSVisible(true);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    
+
     DisplayId displayId = 1001;
     sceneSession->property_->SetDisplayId(displayId);
     auto ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true);

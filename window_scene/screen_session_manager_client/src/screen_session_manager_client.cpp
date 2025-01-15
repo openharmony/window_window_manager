@@ -78,6 +78,18 @@ void ScreenSessionManagerClient::RegisterScreenConnectionListener(IScreenConnect
     WLOGFI("Success to register screen connection listener");
 }
 
+void ScreenSessionManagerClient::RegisterScreenConnectionChangeListener(
+    const sptr<IScreenConnectionChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("Failed to register screen connection change listener, listener is null");
+        return;
+    }
+
+    screenConnectionChangeListener_ = listener;
+    WLOGFI("Success to register screen connection change listener");
+}
+
 bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name)
 {
     if (rsId == SCREEN_ID_INVALID) {
@@ -130,6 +142,11 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
                 screenId, config.property.GetDensity());
             screenSession->SetScreenSceneDpi(config.property.GetDensity());
         }
+        if (screenConnectionChangeListener_) {
+            screenConnectionChangeListener_->OnScreenConnected(screenSession);
+            WLOGFI("screenConnectionChangeListener screenId: %{public}" PRIu64 " density: %{public}f ",
+                screenId, config.property.GetDensity());
+        }
         screenSession->Connect();
         return;
     }
@@ -142,6 +159,9 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         screenSession->DestroyScreenScene();
         if (screenConnectionListener_) {
             screenConnectionListener_->OnScreenDisconnected(screenSession);
+        }
+        if (screenConnectionChangeListener_) {
+            screenConnectionChangeListener_->OnScreenDisconnected(screenSession);
         }
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
