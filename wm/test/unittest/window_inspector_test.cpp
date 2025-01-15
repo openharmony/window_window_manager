@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+
 #include "window_inspector.h"
 
 using namespace testing;
@@ -24,8 +26,8 @@ class WindowInspetorTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };
 void WindowInspetorTest::SetUpTestCase() {}
 

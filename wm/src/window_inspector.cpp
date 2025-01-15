@@ -47,8 +47,7 @@ WindowInspector::~WindowInspector() { UnregisterCallback(); }
 void WindowInspector::InitConnectServer()
 {
     handlerConnectServerSo_ = dlopen(ARK_CONNECT_LIB_PATH, RTLD_NOW);
-    if (handlerConnectServerSo_ == nullptr)
-    {
+    if (handlerConnectServerSo_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "can't open %{public}s", ARK_CONNECT_LIB_PATH);
         return;
     }
@@ -139,7 +138,7 @@ void WindowInspector::TransformDataToJson(const std::vector<WindowListsInfo>& wi
         nlohmann::ordered_json jsonInfo;
         jsonInfo["windowName"] = info.windowName;
         jsonInfo["winId"] = std::to_string(info.windowId);
-        jsonInfo["windowType"] = std::to_string(info.windowType);
+        jsonInfo["type"] = std::to_string(info.windowType);
         nlohmann::ordered_json jsonRectInfo;
         jsonRectInfo["startX"] = std::to_string(info.windowRect.posX_);
         jsonRectInfo["startY"] = std::to_string(info.windowRect.posY_);
