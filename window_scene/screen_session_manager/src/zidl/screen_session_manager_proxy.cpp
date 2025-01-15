@@ -3573,7 +3573,7 @@ DMError ScreenSessionManagerProxy::SetScreenShareProtect(const std::vector<Scree
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-    if (!data.WriteUInt64Vector(static_cast<uint64_t>(screenIds))) {
+    if (!data.WriteUInt64Vector(screenIds)) {
         TLOGE(WmsLogTag::DMS, "Write screenIds failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
