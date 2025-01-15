@@ -23,7 +23,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr char ARK_CONNECT_LIB_PATH[] = "libark_connect_inspector.z.so";
 const std::string METHOD_NAME = "WMS.windowList";
-const std::string INTERFACE_NAME = "getCurrentProcessWindowList";
+const std::string COMMAND_NAME = "getCurrentProcessWindowList";
 } // namespace
 
 std::vector<std::weak_ptr<WMSGetWindowListsCallback>> WindowInspector::wmsGetWindowListsCallbacks_;
@@ -106,8 +106,8 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
         return false;
     }
-    if (!jsonMessage.contains("params") || jsonMessage["params"]["interface"].get<std::string>() != INTERFACE_NAME) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.interface err");
+    if (!jsonMessage.contains("params") || jsonMessage["params"]["command"].get<std::string>() != COMMAND_NAME) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.command err");
         return false;
     }
     UpdateWMSGetWindowListsCallback();
