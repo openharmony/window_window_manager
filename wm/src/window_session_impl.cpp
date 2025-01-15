@@ -320,8 +320,6 @@ WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
     Destroy(true, false);
-
-    WindowInspector::GetInstance().UnregisterCallback();
 }
 
 uint32_t WindowSessionImpl::GetWindowId() const
