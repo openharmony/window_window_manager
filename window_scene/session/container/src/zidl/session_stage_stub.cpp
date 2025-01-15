@@ -188,6 +188,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleExtensionHostData(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
             return HandleSendContainerModalEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
+            return HandleSetDragActivated(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -650,6 +652,18 @@ int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessagePa
         return ERR_INVALID_DATA;
     }
     SetEnableDragBySystem(enableDrag);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetDragActivated(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool dragActivated = true;
+    if (!data.ReadBool(dragActivated)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragActivated failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetDragActivated(dragActivated);
     return ERR_NONE;
 }
 
