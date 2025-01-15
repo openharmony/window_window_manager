@@ -95,11 +95,6 @@ class SceneSessionManagerMocker : public SceneSessionManager {
 public:
     SceneSessionManagerMocker() {};
     ~SceneSessionManagerMocker() {};
-
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo)
-    {
-        return mockResourceManager_;
-    };
 };
 std::shared_ptr<SceneSessionManagerMocker> mockSceneSessionManager_ = std::make_shared<SceneSessionManagerMocker>();
 
@@ -155,7 +150,6 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource01, Function | Sma
 {
     ASSERT_NE(mockSceneSessionManager_, nullptr);
     mockResourceManager_ = nullptr;
-    EXPECT_EQ(mockSceneSessionManager_->GetResourceManager(abilityInfo), nullptr);
     bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
     mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
     EXPECT_EQ(result, false);
@@ -169,8 +163,6 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource01, Function | Sma
 HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource02, Function | SmallTest | Level3)
 {
     ASSERT_NE(mockSceneSessionManager_, nullptr);
-    ASSERT_NE(mockResourceManager_, nullptr);
-    EXPECT_EQ(mockSceneSessionManager_->GetResourceManager(abilityInfo), mockResourceManager_);
     bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
     EXPECT_EQ(result, false);
 }
@@ -184,7 +176,6 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource03, Function | Sma
 {
     ASSERT_NE(mockSceneSessionManager_, nullptr);
     ASSERT_NE(mockResourceManager_, nullptr);
-    EXPECT_EQ(mockSceneSessionManager_->GetResourceManager(abilityInfo), mockResourceManager_);
     EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
         bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
     bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
@@ -200,7 +191,6 @@ HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource04, Function | Sma
 {
     ASSERT_NE(mockSceneSessionManager_, nullptr);
     ASSERT_NE(mockResourceManager_, nullptr);
-    EXPECT_EQ(mockSceneSessionManager_->GetResourceManager(abilityInfo), mockResourceManager_);
     EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
         bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
     EXPECT_CALL(*mockResourceManager_, GetMediaById(abilityInfo.startWindowIconId, path,
