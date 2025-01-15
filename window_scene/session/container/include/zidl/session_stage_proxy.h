@@ -83,6 +83,7 @@ public:
     WSError SetEnableDragBySystem(bool dragEnable) override;
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
+    WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

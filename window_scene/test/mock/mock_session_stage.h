@@ -72,6 +72,7 @@ public:
         std::vector<std::string>& info));
     MOCK_METHOD1(SetSplitButtonVisible, WSError(bool isVisible));
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
+    MOCK_METHOD2(SendContainerModalEvent, WSError(const std::string& eventName, const std::string& eventValue));
 };
 } // namespace Rosen
 } // namespace OHOS

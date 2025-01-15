@@ -407,6 +407,7 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void NotifyCaptureStatusChanged();
+    void NotifyCaptureStatusChanged(bool IsCaptured);
     DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         DMRect mainScreenRegion, ScreenId& screenGroupId);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
@@ -428,6 +429,7 @@ private:
     void GetInternalAndExternalSession(sptr<ScreenSession>& internalSession, sptr<ScreenSession>& externalSession);
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
     std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
+    void RefreshMirrorScreenRegion(ScreenId screenId);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
@@ -441,6 +443,7 @@ private:
         PowerStateChangeReason reason);
     bool IsExtendMode();
     void SetScreenCorrection();
+    bool IsScreenCasting();
 
     /**
      * On/Off screen

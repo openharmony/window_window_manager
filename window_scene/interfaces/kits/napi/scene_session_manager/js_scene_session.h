@@ -137,6 +137,7 @@ private:
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
     static napi_value SetIsMidScene(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
+    static napi_value ResetOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
     static napi_value MarkSystemSceneUIFirst(napi_env env, napi_callback_info info);
     static napi_value SetFocusable(napi_env env, napi_callback_info info);
@@ -165,6 +166,7 @@ private:
     static napi_value UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static napi_value SetNeedSyncSessionRect(napi_env env, napi_callback_info info);
     static napi_value MaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
+    static napi_value UpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
@@ -179,6 +181,8 @@ private:
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlank(napi_env env, napi_callback_info info);
     static napi_value RemoveBlank(napi_env env, napi_callback_info info);
+    static napi_value AddSnapshot(napi_env env, napi_callback_info info);
+    static napi_value RemoveSnapshot(napi_env env, napi_callback_info info);
     static napi_value SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
     static napi_value SyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     static napi_value SetIsPcAppInPad(napi_env env, napi_callback_info info);
@@ -194,6 +198,7 @@ private:
     static napi_value SaveSnapshotSync(napi_env env, napi_callback_info info);
     static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
+    static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
@@ -205,6 +210,7 @@ private:
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
     napi_value OnSetIsMidScene(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
+    napi_value OnResetOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
     napi_value OnMarkSystemSceneUIFirst(napi_env env, napi_callback_info info);
     napi_value OnSetFocusable(napi_env env, napi_callback_info info);
@@ -238,6 +244,8 @@ private:
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlank(napi_env env, napi_callback_info info);
     napi_value OnRemoveBlank(napi_env env, napi_callback_info info);
+    napi_value OnAddSnapshot(napi_env env, napi_callback_info info);
+    napi_value OnRemoveSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
     napi_value OnSyncDefaultRequestedOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetIsPcAppInPad(napi_env env, napi_callback_info info);
@@ -257,6 +265,8 @@ private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
+    napi_value OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
+    napi_value OnSendContainerModalEvent(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();

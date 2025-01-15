@@ -271,9 +271,13 @@ public:
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
 
+    /*
+     * Multi User
+     */
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
     void NotifySwitchingUser(const bool isUserActive);
     int32_t GetCurrentUserId() const;
+
     void StartWindowInfoReportLoop();
 
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
@@ -386,6 +390,8 @@ public:
     void SetIsRootSceneLastFrameLayoutFinishedFunc(IsRootSceneLastFrameLayoutFinishedFunc&& func);
     void SetStatusBarDefaultVisibilityPerDisplay(DisplayId displayId, bool visible);
     bool GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId);
+    void SetStatusBarAvoidHeight(int32_t height);
+    void GetStatusBarAvoidHeight(WSRect& barArea);
 
     WSError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible) override;
     void DealwithVisibilityChange(const std::vector<std::pair<uint64_t, WindowVisibilityState>>& visibilityChangeInfos,
@@ -957,7 +963,9 @@ private:
 
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
-    // Multi User
+    /*
+     * Multi User
+     */
     static constexpr int32_t DEFAULT_USERID = -1;
     std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
     bool isUserBackground_ = false; // Only accessed on SSM thread
@@ -1161,6 +1169,8 @@ private:
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
+    static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
+    int32_t statusBarAvoidHeight_ = INVALID_STATUS_BAR_AVOID_HEIGHT;
 
     struct SessionInfoList {
         int32_t uid_;

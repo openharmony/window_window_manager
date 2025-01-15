@@ -135,7 +135,7 @@ public:
     virtual Rect GetRect() const = 0;
     virtual Rect GetRequestRect() const = 0;
     virtual WindowType GetType() const = 0;
-    virtual WindowMode GetMode() const = 0;
+    virtual WindowMode GetWindowMode() const = 0;
     virtual float GetAlpha() const = 0;
     virtual const std::string& GetWindowName() const = 0;
     virtual uint32_t GetWindowId() const = 0;
@@ -203,6 +203,7 @@ public:
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
     virtual WMError SetShadowRadius(float radius) = 0;
+    virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetShadowColor(std::string color) = 0;
     virtual WMError SetShadowOffsetX(float offsetX) = 0;
     virtual WMError SetShadowOffsetY(float offsetY) = 0;
