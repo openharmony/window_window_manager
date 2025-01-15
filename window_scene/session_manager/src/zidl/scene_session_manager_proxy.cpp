@@ -99,6 +99,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         TLOGE(WmsLogTag::WMS_LIFE, "Read cornerRadius failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    property->SetWindowCornerRadius(cornerRadius);
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }

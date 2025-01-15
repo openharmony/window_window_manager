@@ -6253,7 +6253,7 @@ void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session or onSetWindowCornerRadiusFunc is null");
             return;
         }
-        session->onSetWindowCornerRadiusSaveFunc_ = std::move(func);
+        session->onSetWindowCornerRadiusFunc_ = std::move(func);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id: %{public}d", where,
             session->GetPersistentId());
     }, __func__);
@@ -6268,10 +6268,10 @@ WSError SceneSession::OnSetWindowCornerRadius(float cornerRadius)
             return;
         }
         if (session->onSetWindowCornerRadiusFunc_) {
-            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "Radius: %{public}s", cornerRadius);
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "Radius: %{public}f", cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
         }
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}s corner radius %{public}f",
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}d corner radius %{public}f",
             session->GetPersistentId(), cornerRadius);
     }, __func__);
     return WSError::WS_OK;

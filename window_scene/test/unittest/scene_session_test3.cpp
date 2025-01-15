@@ -707,7 +707,7 @@ HWTEST_F(SceneSessionTest3, SetWindowCornerRadiusCallback, Function | SmallTest 
  * @tc.desc: OnSetWindowCornerRadius
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, OnSetWindowCornerRadius, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, OnSetWindowCornerRadius, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "OnSetWindowCornerRadius";

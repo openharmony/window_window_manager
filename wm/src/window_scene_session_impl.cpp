@@ -3232,15 +3232,15 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}u corner radius %{public}f.", GetWindowId(), radius);
-    if (MathHelper::LessNotEqual(radius, 0.0f)) {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}u corner radius %{public}f.", GetWindowId(), cornerRadius);
+    if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The corner radius is less than zero.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
     property_->SetWindowCornerRadius(cornerRadius);
     
-    auto hostSession = GetHostSession;
+    auto hostSession = GetHostSession();
     hostSession->OnSetWindowCornerRadius(cornerRadius);
     return WMError::WM_OK;
 }
@@ -3259,7 +3259,7 @@ WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    cornerRadius = porperty_->GetWindowCornerRadius();
+    cornerRadius = property_->GetWindowCornerRadius();
     return WMError::WM_OK;
 }
 

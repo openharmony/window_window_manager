@@ -2281,7 +2281,7 @@ WSError SessionProxy::NotifySupportWindowModesChange(
 
 WSError SessionProxy::OnSetWindowCornerRadius(float cornerRadius)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius)
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);

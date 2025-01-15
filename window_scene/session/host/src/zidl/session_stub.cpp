@@ -1400,7 +1400,7 @@ int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel&
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read cornerRadius failed.");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}d", cornerRadius);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);
     OnSetWindowCornerRadius(cornerRadius);
     return ERR_NONE;
 }

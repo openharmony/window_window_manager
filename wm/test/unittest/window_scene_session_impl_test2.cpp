@@ -2024,7 +2024,7 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowCornerRadius, Function | SmallTes
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    window->property_->SetWindowMode(WindowType::WINDOW_MODE_FLOATING);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
@@ -2039,7 +2039,8 @@ HWTEST_F(WindowSceneSessionImplTest2, GetWindowCornerRadius, Function | SmallTes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetWindowCornerRadius");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetWindowCornerRadius(0.0f));
+    float cornerRadius = 0.0f;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetWindowCornerRadius(cornerRadius));
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->property_->SetPersistentId(1);
@@ -2048,7 +2049,6 @@ HWTEST_F(WindowSceneSessionImplTest2, GetWindowCornerRadius, Function | SmallTes
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    float cornerRadius = 0.0f;
     auto ret = window->GetWindowCornerRadius(cornerRadius);
     EXPECT_EQ(1.0f, cornerRadius);
 
@@ -2064,11 +2064,10 @@ HWTEST_F(WindowSceneSessionImplTest2, GetWindowCornerRadius, Function | SmallTes
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    window->property_->SetWindowMode(WindowType::WINDOW_MODE_FLOATING);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ret = window->GetWindowCornerRadius(cornerRadius);
     EXPECT_EQ(1.0f, cornerRadius);
 }
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
