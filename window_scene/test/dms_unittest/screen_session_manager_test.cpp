@@ -3598,7 +3598,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtect, Function | SmallTest |
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-    ASSERT_NE(displayManagerAgent, nullptr)
+    ASSERT_NE(displayManagerAgent, nullptr);
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption1";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
@@ -3621,7 +3621,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallT
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-    ASSERT_NE(displayManagerAgent, nullptr)
+    ASSERT_NE(displayManagerAgent, nullptr);
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "createVirtualOption1";
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
