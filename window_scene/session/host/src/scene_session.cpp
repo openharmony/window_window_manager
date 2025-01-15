@@ -3518,10 +3518,10 @@ void SceneSession::CloneWindow(NodeId surfaceNodeId)
     if (rsTransaction != nullptr) {
         rsTransaction->Begin();
     }
-    if (surfaceNode_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_PC, "%{public}s my:%{public}" PRIu64 "from=%{public}" PRIu64,
-            surfaceNode_->GetName().c_str(), surfaceNode_->GetId(), surfaceNodeId);
-        surfaceNode_->SetClonedNodeId(surfaceNodeId);
+    if (auto surfaceNode = GetSurfaceNode()) {
+        TLOGI(WmsLogTag::WMS_PC, "%{public}s this: %{public}" PRIu64 "cloned: %{public}" PRIu64,
+            surfaceNode->GetName().c_str(), surfaceNode->GetId(), surfaceNodeId);
+        surfaceNode->SetClonedNodeId(surfaceNodeId);
     }
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();

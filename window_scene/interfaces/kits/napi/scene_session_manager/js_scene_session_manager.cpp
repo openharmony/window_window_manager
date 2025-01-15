@@ -1227,7 +1227,7 @@ napi_value JsSceneSessionManager::SetStatusBarAvoidHeight(napi_env env, napi_cal
 
 napi_value JsSceneSessionManager::CloneWindow(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_PC, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnCloneWindow(env, info) : nullptr;
 }
@@ -3587,13 +3587,13 @@ napi_value JsSceneSessionManager::OnCloneWindow(napi_env env, napi_callback_info
         return NapiGetUndefined(env);
     }
     int32_t fromPersistentId = -1;
-    int32_t toPersistentId = -1;
     if (!ConvertFromJsValue(env, argv[0], fromPersistentId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter fromPersistentId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    int32_t toPersistentId = -1;
     if (!ConvertFromJsValue(env, argv[ARGC_ONE], toPersistentId)) {
         TLOGE(WmsLogTag::WMS_PC, "Failed to convert parameter toPersistentId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
