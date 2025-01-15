@@ -233,7 +233,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUPPORT_WINDOW_MODES):
             return HandleSetSupportedWindowModes(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
-            return HandleExtensionProviderData(data, reply);
+            return HandleExtensionProviderData(data, reply, option);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1303,10 +1303,10 @@ int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
-int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
-    NotifyExtensionDataConsumer(data, reply);
+    static_cast<void>(SendExtensionData(data, reply, option));
     return ERR_NONE;
 }
 
