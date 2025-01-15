@@ -8785,16 +8785,16 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
 {
     AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
         AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
-    AvoidArea avoidArea = rootSceneSession_->GetAvoidAreaByType(static_cast<AvoidAreaType>(avoidType));
-    rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), static_cast<AvoidAreaType>(avoidType));
+    AvoidArea avoidArea = rootSceneSession_->GetAvoidAreaByType(avoidType);
+    rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), avoidType);
 
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
             continue;
         }
-        sceneSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
-        sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
+        AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(avoidType);
+        sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidType);
     }
 }
 

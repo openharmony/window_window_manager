@@ -1115,7 +1115,11 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
         GetPersistentId(), winRect_.posX_, winRect_.posY_, winRect_.width_, winRect_.height_, reason_);
 
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    GetAllAvoidAreas(avoidAreas);
+    if (GetForegroundInteractiveStatus()) {
+        GetAllAvoidAreas(avoidAreas);
+    } else {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid area update rejected by recent");
+    }
     // once reason is undefined, not use rsTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
     if (reason_ == SizeChangeReason::UNDEFINED || reason_ == SizeChangeReason::RESIZE || IsMoveToOrDragMove(reason_)) {
@@ -2177,6 +2181,10 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
 {
     if (!sessionStage_) {
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (!GetForegroundInteractiveStatus()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid area update rejected by recent");
+        return WSError::WS_DO_NOTHING;
     }
     return sessionStage_->UpdateAvoidArea(avoidArea, type);
 }
