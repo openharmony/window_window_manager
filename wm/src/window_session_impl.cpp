@@ -4713,21 +4713,12 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
     if (!WindowInspector::GetInstance().IsInitConnectSuccess()) {
         return;
     }
-    onWMSGetWindowListsCallback_ = std::make_shared<WMSGetWindowListsCallback>([] {
-        std::vector<WindowListsInfo> windowListsInfoVec;
-        {
-            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-            for (const auto& [_, winPair] : windowSessionMap_) {
-                if (auto window = winPair.second) {
-                    windowListsInfoVec.push_back({window->GetWindowName(), window->GetWindowId(),
-                        static_cast<uint32_t>(window->GetType()), window->GetRect() });
-                }
-            }
-        }
-        return windowListsInfoVec;
+    onGetWMSWindowListCallback_ = sptr<GetWMSWindowListCallback>::MakeSptr([] {
+        return { window->GetWindowName(), window->GetWindowId(), static_cast<uint32_t>(window->GetType()),
+                 window->GetRect() };
     });
-    WindowInspector::GetInstance().RegisterWMSGetWindowListsCallback(
-        std::weak_ptr<WMSGetWindowListsCallback>(onWMSGetWindowListsCallback_));
+    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(
+        wptr<GetWMSWindowListCallback>(onGetWMSWindowListCallback_));
 }
 } // namespace Rosen
 } // namespace OHOS
