@@ -831,6 +831,8 @@ HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, Function | SmallTest | Lev
     info.abilityName_ = "IsInDefaultScreen";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
+    auto ret = ssm_->IsInDefaultScreen(sceneSession);
+    EXPECT_EQ(false, ret);
 }
 
 /**

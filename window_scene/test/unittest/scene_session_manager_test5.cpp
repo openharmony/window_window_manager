@@ -1257,6 +1257,32 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
 }
 
 /**
+ * @tc.name: CheckSubSessionStartedByExtensionAndSetDisplayId
+ * @tc.desc: CheckSubSessionStartedByExtensionAndSetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = ssm_->CreateSpecificSessionCallback();
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, callback);
+    ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
+    sptr<IRemoteObject> token;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
+        WSError::WS_ERROR_NULLPTR);
+    property->SetParentPersistentId(parentSession->GetPersistentId());
+    property->SetIsUIExtFirstSubWindow(true);
+    constexpr DisplayId displayId = 0;
+    parentSession->GetSessionProperty()->SetDisplayId(displayId);
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
+        WSError::WS_OK);
+    EXPECT_EQ(property->GetDisplayId(), displayId);
+}
+
+/**
  * @tc.name: ProcessDialogRequestFocusImmdediately
  * @tc.desc: ProcessDialogRequestFocusImmdediately
  * @tc.type: FUNC

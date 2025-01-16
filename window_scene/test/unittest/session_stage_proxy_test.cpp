@@ -658,6 +658,22 @@ HWTEST_F(SessionStageProxyTest, SetSupportEnterWaterfallMode, Function | SmallTe
 }
 
 /**
+ * @tc.name: SendExtensionData
+ * @tc.desc: test function : SendExtensionData
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SendExtensionData, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    data.WriteInterfaceToken(u"OpenHarmeny");
+    WSError res = sessionStage_->SendExtensionData(data, reply, option);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: SendContainerModalEvent
  * @tc.desc: test function : SendContainerModalEvent
  * @tc.type: FUNC

@@ -1766,6 +1766,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
+    property.SetScreenRealDPI();
     if (isDensityDpiLoad_) {
         if (screenId == SCREEN_ID_MAIN) {
             TLOGW(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
@@ -7135,6 +7136,17 @@ void ScreenSessionManager::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldS
     clientProxy_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
 }
 
+void ScreenSessionManager::OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion)
+{
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", isSecondaryReflexion: %{public}d", screenId,
+        isSecondaryReflexion);
+    if (!clientProxy_) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
+}
+
 int32_t ScreenSessionManager::GetCameraStatus()
 {
     return cameraStatus_;
@@ -7147,8 +7159,9 @@ int32_t ScreenSessionManager::GetCameraPosition()
 
 bool ScreenSessionManager::IsScreenCasting()
 {
-    if (virtualScreenCount_ == 0 && hdmiScreenCount_ == 0) {
-        TLOGI(WmsLogTag::DMS, "casting");
+    if (virtualScreenCount_ > 0 || hdmiScreenCount_ > 0) {
+        TLOGI(WmsLogTag::DMS, "virtualScreenCount_: %{public}" PRIu32 ", hdmiScreenCount_: %{public}d",
+            virtualScreenCount_, hdmiScreenCount_);
         return true;
     }
     TLOGI(WmsLogTag::DMS, "not casting");

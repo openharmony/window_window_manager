@@ -14,7 +14,6 @@
  */
 
 #include "js_pip_controller.h"
-
 #include "js_pip_utils.h"
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
@@ -36,6 +35,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "startPiP", moduleName, JsPipController::StartPictureInPicture);
     BindNativeFunction(env, object, "stopPiP", moduleName, JsPipController::StopPictureInPicture);
+    BindNativeFunction(env, object, "updateContentNode", moduleName, JsPipController::UpdateContentNode);
     BindNativeFunction(env, object, "updateContentSize", moduleName, JsPipController::UpdateContentSize);
     BindNativeFunction(env, object, "updatePiPControlStatus", moduleName, JsPipController::UpdatePiPControlStatus);
     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
@@ -91,16 +91,9 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
         TLOGI(WmsLogTag::WMS_PIP, "OnStartPictureInPicture abort");
         return NapiGetUndefined(env);
     }
-    size_t argc = NUMBER_FOUR;
-    napi_value argv[NUMBER_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = nullptr;
-    if (argc > 0) {
-        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
-    }
 
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [this, env, task = napiAsyncTask,
         weak = wptr<PictureInPictureController>(pipController_)]() {
         auto pipController = weak.promote();
@@ -115,6 +108,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
                 "JsPipController::OnStartPictureInPicture failed."));
             return;
         }
+        task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
@@ -132,16 +126,8 @@ napi_value JsPipController::StopPictureInPicture(napi_env env, napi_callback_inf
 napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnStopPictureInPicture is called");
-    size_t argc = NUMBER_FOUR;
-    napi_value argv[NUMBER_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = nullptr;
-    if (argc > 0) {
-        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
-    }
-
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [this, env, task = napiAsyncTask,
         weak = wptr<PictureInPictureController>(pipController_)]() {
         auto pipController = weak.promote();
@@ -191,6 +177,38 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
         return NapiGetUndefined(env);
     }
     pipController_->SetAutoStartEnabled(enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsPipController::UpdateContentNode(napi_env env, napi_callback_info info)
+{
+    JsPipController *me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnUpdateContentNode(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentNode is called");
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != NUMBER_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid:%{public}zu", argc);
+        return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
+    }
+    napi_value typeNode = argv[0];
+    if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
+        TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
+        return NapiThrowInvalidParam(env, "Invalid typeNode.");
+    }
+    if (pipController_ == nullptr) {
+        std::string errMsg = "OnUpdateNode error, controller is nullptr";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        return NapiThrowInvalidParam(env, errMsg);
+    }
+    napi_ref typeNodeRef = nullptr;
+    napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
+    pipController_->UpdateContentNodeRef(typeNodeRef);
     return NapiGetUndefined(env);
 }
 

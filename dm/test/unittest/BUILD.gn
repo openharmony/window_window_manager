@@ -126,7 +126,10 @@ ohos_unittest("dm_screen_test") {
 
   sources = [ "screen_test.cpp" ]
 
-  deps = [ ":dm_unittest_common" ]
+  deps = [
+    ":dm_unittest_common",
+    "../../../window_scene/screen_session_manager:screen_session_manager",
+  ]
 
   external_deps = [
     "c_utils:utils",

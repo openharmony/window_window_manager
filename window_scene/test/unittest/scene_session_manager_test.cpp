@@ -20,6 +20,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "screen_fold_data.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -1642,6 +1643,42 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->sceneSessionMap_.insert({100, sceneSession});
     ASSERT_TRUE(ssm_->IsEnablePiPCreate(property));
+}
+
+/**
+ * @tc.name: TestIsPiPForbidden
+ * @tc.desc: Test if pip window is forbidden to use;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsPiPForbidden start";
+    int32_t persistentId = 1001;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetParentPersistentId(persistentId);
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = persistentId;
+    sessionInfo.bundleName_ = "test1";
+    sessionInfo.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    property->SetDisplayId(-1ULL);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+
+    uint64_t displayId = 1001;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_[persistentId] = sceneSession;
+    sptr<ScreenSession> screenSession = new ScreenSession();
+    screenSession->SetName("HiCar");
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
+    ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FLOAT));
 }
 
 /**

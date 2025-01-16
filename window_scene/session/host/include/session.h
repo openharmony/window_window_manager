@@ -92,6 +92,8 @@ using VisibilityChangedDetectFunc = std::function<void(int32_t pid, bool isVisib
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
+using NofitySessionLabelAndIconUpdatedFunc =
+    std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 
 class ILifecycleListener {
 public:
@@ -228,7 +230,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
-    void SaveSnapshot(bool useFfrt);
+    void SaveSnapshot(bool useFfrt, bool needPersist = true);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -569,6 +571,8 @@ public:
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
+    void SetSingleHandTransform(const SingleHandTransform& transform);
+    SingleHandTransform GetSingleHandTransform() const;
 
     /*
      * Screen Lock
@@ -578,7 +582,7 @@ public:
     /*
      * Free Multi Window
      */
-    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scale, bool isFreeze, float blur) const;
 
     /*
      * PC Window
@@ -697,6 +701,7 @@ protected:
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_ GUARDED_BY(SCENE_GUARD);
+    NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
 
     /*
      * Window Rotate Animation
@@ -882,6 +887,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    SingleHandTransform singleHandTransform_;
 
     /*
      * Screen Lock
