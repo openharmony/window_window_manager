@@ -40,8 +40,6 @@ public:
 class SessionManagerLite {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManagerLite);
 public:
-    using UserSwitchCallbackFunc = std::function<void()>;
-    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     void ClearSessionManagerProxy();
     void Clear();
 
@@ -52,13 +50,23 @@ public:
 
     void SaveSessionListener(const sptr<ISessionListener>& listener);
     void DeleteSessionListener(const sptr<ISessionListener>& listener);
-    void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
-    void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
-    void OnWMSConnectionChanged(
-        int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
+
     void OnFoundationDied();
 
+    /*
+     * Multi User
+     */
+    using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
+    void OnWMSConnectionChanged(
+        int32_t userId, int32_t screenId, bool isConnected, const sptr<ISessionManagerService>& sessionManagerService);
+    using UserSwitchCallbackFunc = std::function<void()>;
+    void RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc);
+
+    /*
+     * Window Recover
+     */
+    void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
 
 protected:
     SessionManagerLite() = default;
@@ -68,13 +76,22 @@ private:
     void InitSessionManagerServiceProxy();
     void InitSceneSessionManagerLiteProxy();
     void InitScreenSessionManagerLiteProxy();
-    void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
+
     void DeleteAllSessionListeners();
     void ReregisterSessionListener();
-    void RegisterSMSRecoverListener();
-    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
+
     WMError InitMockSMSProxy();
-    UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
+
+    /*
+     * Multi User
+     */
+    void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
+    void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
+
+    /*
+     * Window Recover
+     */
+    void RegisterSMSRecoverListener();
 
     std::recursive_mutex mutex_;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
@@ -92,13 +109,16 @@ private:
     std::vector<sptr<ISessionListener>> sessionListeners_;
     // above guarded by listenerLock_
 
+    /*
+     * Multi User
+     */
+    UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
     std::mutex wmsConnectionMutex_;
     int32_t currentWMSUserId_ = INVALID_USER_ID;
     int32_t currentScreenId_ = DEFAULT_SCREEN_ID;
     bool isWMSConnected_ = false;
     WMSConnectionChangedCallbackFunc wmsConnectionChangedFunc_ = nullptr;
-    // above guarded by wmsConnectionMutex_, among OnWMSConnectionChanged for wms connection event, user switched,
-    // register WMSConnectionChangedListener.
+    // above guarded by wmsConnectionMutex_
 };
 } // namespace OHOS::Rosen
 

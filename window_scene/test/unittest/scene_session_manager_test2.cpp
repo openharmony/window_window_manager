@@ -1720,30 +1720,6 @@ HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetSessionSnapshotFilePath
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotFilePath, Function | SmallTest | Level3)
-{
-    string ret;
-    {
-        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
-        ssm_->sceneSessionMap_.clear();
-    }
-    ret = ssm_->GetSessionSnapshotFilePath(100);
-    ASSERT_EQ("", ret);
-
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->GetSessionSnapshotFilePath(100);
-    ASSERT_EQ("", ret);
-}
-
-/**
  * @tc.name: GetAccessibilityWindowInfo
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC

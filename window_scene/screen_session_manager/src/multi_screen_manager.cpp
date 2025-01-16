@@ -613,6 +613,7 @@ bool MultiScreenManager::AreScreensTouching(sptr<ScreenSession> mainScreenSessio
 void MultiScreenManager::MultiScreenReportDataToRss(std::string multiScreenType, std::string status)
 {
 #ifdef RES_SCHED_ENABLE
+    TLOGI(WmsLogTag::DMS, "type:%{public}s, status:%{public}s", multiScreenType.c_str(), status.c_str());
     uint32_t type = OHOS::ResourceSchedule::ResType::RES_TYPE_DISPLAY_MULTI_SCREEN;
     std::unordered_map<std::string, std::string> payload = {
         { "type", multiScreenType },
