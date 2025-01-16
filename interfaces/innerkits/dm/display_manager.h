@@ -643,6 +643,13 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
 
     /**
+     * @brief Get the display mode of the foldable device for external.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayModeForExternal();
+
+    /**
      * @brief Change the display mode of the foldable device.
      *
      * @param mode target display mode to change.

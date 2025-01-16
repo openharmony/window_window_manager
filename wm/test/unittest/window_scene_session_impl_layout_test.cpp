@@ -222,17 +222,12 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, Function | SmallTe
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9;
+
     WindowLimits windowLimits = { 2000, 2000, 2000, 2000, 0.0f, 0.0f };
     EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, false));
     WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
-    EXPECT_EQ(windowSizeLimits.maxWidth_, 2000);
-    EXPECT_EQ(windowSizeLimits.maxHeight_, 2000);
-    EXPECT_EQ(windowSizeLimits.minWidth_, 2000);
-    EXPECT_EQ(windowSizeLimits.minHeight_, 2000);
-
-    windowLimits = { 2000, 2000, 2000, 2000, 0.0f, 0.0f };
-    EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, true));
-    windowSizeLimits = window->property_->GetWindowLimits();
     EXPECT_EQ(windowSizeLimits.maxWidth_, 2000);
     EXPECT_EQ(windowSizeLimits.maxHeight_, 2000);
     EXPECT_EQ(windowSizeLimits.minWidth_, 2000);
@@ -245,6 +240,46 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, Function | SmallTe
     EXPECT_EQ(windowSizeLimits.maxHeight_, 2000);
     EXPECT_NE(windowSizeLimits.minWidth_, 100);
     EXPECT_NE(windowSizeLimits.minHeight_, 100);
+
+    windowLimits = { 10000, 10000, 30, 30, 0.0f, 0.0f };
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, false));
+    windowSizeLimits = window->property_->GetWindowLimits();
+    EXPECT_NE(windowSizeLimits.maxWidth_, 10000);
+    EXPECT_NE(windowSizeLimits.maxHeight_, 10000);
+    EXPECT_NE(windowSizeLimits.minWidth_, 30);
+    EXPECT_NE(windowSizeLimits.minHeight_, 30);
+}
+
+/**
+ * @tc.name: SetWindowLimits06
+ * @tc.desc: SetWindowLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits06, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowLimits06");
+    option->SetDisplayId(0);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_FROZEN;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 1.9;
+
+    WindowLimits windowLimits = { 2000, 2000, 2000, 2000, 0.0f, 0.0f };
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, true));
+    WindowLimits windowSizeLimits = window->property_->GetWindowLimits();
+    EXPECT_EQ(windowSizeLimits.maxWidth_, 2000);
+    EXPECT_EQ(windowSizeLimits.maxHeight_, 2000);
+    EXPECT_EQ(windowSizeLimits.minWidth_, 2000);
+    EXPECT_EQ(windowSizeLimits.minHeight_, 2000);
 
     windowLimits = { 2000, 2000, 100, 100, 0.0f, 0.0f };
     EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, true));
@@ -262,6 +297,14 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits01, Function | SmallTe
     EXPECT_EQ(windowSizeLimits.maxHeight_, 2000);
     EXPECT_EQ(windowSizeLimits.minWidth_, 100);
     EXPECT_EQ(windowSizeLimits.minHeight_, 100);
+
+    windowLimits = { 10000, 10000, 30, 30, 0.0f, 0.0f };
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(windowLimits, true));
+    windowSizeLimits = window->property_->GetWindowLimits();
+    EXPECT_NE(windowSizeLimits.maxWidth_, 10000);
+    EXPECT_NE(windowSizeLimits.maxHeight_, 10000);
+    EXPECT_NE(windowSizeLimits.minWidth_, 30);
+    EXPECT_NE(windowSizeLimits.minHeight_, 30);
 }
 
 /**
@@ -348,6 +391,14 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits05, Function | SmallTe
     sptr<SessionMocker> subSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->hostSession_ = subSession;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, true));
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetWindowLimits(windowLimits, false));
+    EXPECT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetWindowLimits(windowLimits, true));
+
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, false));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, true));
 }

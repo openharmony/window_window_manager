@@ -37,6 +37,7 @@ public:
     FoldDisplayMode GetModeMatchStatus() override;
     std::vector<uint32_t> GetScreenParams() override;
     Drawing::Rect GetScreenSnapshotRect() override;
+    void SetMainScreenRegion(DMRect& mainScreenRegion) override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);

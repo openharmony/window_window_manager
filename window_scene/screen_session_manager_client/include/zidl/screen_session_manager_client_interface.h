@@ -47,6 +47,7 @@ public:
         TRANS_ID_ON_HOVER_STATUS_CHANGED,
         TRANS_ID_ON_SCREEN_CAPTURE_NOTIFY,
         TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED,
+        TRANS_ID_ON_SECONDARY_REFLEXION_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
@@ -62,6 +63,7 @@ public:
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;
     virtual void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
+    virtual void OnSecondaryReflexionChanged(ScreenId screenId, uint32_t isSecondaryReflexion) = 0;
 
     virtual void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;
