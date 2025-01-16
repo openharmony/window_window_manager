@@ -7338,6 +7338,8 @@ void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
             bool requiredSkipWindow = screenSession->GetShareProtect() && screenSkipProtectedWindowValue;
             TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 " requiredSkipWindow:%{public}d",
                 sessionIt.first, requiredSkipWindow);
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                "SetCastScreenEnableSkipWindow(%" PRIu64")", sessionIt.first);
             rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
         }
     }
