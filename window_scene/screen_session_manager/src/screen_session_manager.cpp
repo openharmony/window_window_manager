@@ -7290,13 +7290,16 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
         oss << screenId << " ";
     }
     TLOGI(WmsLogTag::DMS, "screenIds:%{public}s, isEnable:%{public}d", oss.str().c_str(), isEnable);
-    for (ScreenId screenId : screenIds) {
-        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-        if (screenSession == nullptr) {
-            continue;
-        }
-        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
-            screenSession->SetShareProtect(isEnable);
+    {
+        std::lock_guard<std::mutex> lock(shareProtectMutex_);
+        for (ScreenId screenId : screenIds) {
+            sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+            if (screenSession == nullptr) {
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+                screenSession->SetShareProtect(isEnable);
+            }
         }
     }
     SetScreenSkipProtectedWindowInner();
@@ -7312,6 +7315,7 @@ void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
         TLOGE(WmsLogTag::DMS, "get setting failed, default value false");
         screenSkipProtectedWindowValue = false;
     }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
