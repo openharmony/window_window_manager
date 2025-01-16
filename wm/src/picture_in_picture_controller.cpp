@@ -531,7 +531,7 @@ void PictureInPictureController::NotifyNodeUpdate(napi_ref nodeRef)
         }
         napi_value typeNode = nullptr;
         napi_get_reference_value(env_, nodeRef, &typeNode);
-        napi_value value[] = {typeNode};
+        napi_value value[] = { typeNode };
         CallJsFunction(env_, updateNodeCallbackRef->GetNapiValue(), value, 1);
         SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
             pipOption_->GetPipTemplate(), PIP_SUCCESS, "updateNode success");
@@ -755,7 +755,7 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
 WMError PictureInPictureController::RegisterPipContentListenerWithType(const std::string& type,
     std::shared_ptr<NativeReference> callbackRef)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "Register type:%{public}s", type.c_str());
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
@@ -766,7 +766,7 @@ WMError PictureInPictureController::RegisterPipContentListenerWithType(const std
 
 WMError PictureInPictureController::UnRegisterPipContentListenerWithType(const std::string& type)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "called");
+    TLOGI(WmsLogTag::WMS_PIP, "Unregister type:%{public}s", type.c_str());
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
