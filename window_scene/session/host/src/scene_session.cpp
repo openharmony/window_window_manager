@@ -633,7 +633,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     }
 
     DMError ret = display->GetAvailableArea(availableArea);
-    if (ret != Rosen::DMError::DM_OK) {
+    if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
@@ -679,7 +679,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
         if (event == SessionEvent::EVENT_START_MOVE) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "OnSessionEvent move");
+            TLOGD(WmsLogTag::WMS_LAYOUT, "OnSessionEvent move windowId: %{public}d", GetWindowId());
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
             }
