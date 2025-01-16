@@ -2704,35 +2704,32 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "offset not in window");
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    if (auto hostSession = GetHostSession()) {
-        WSError errorCode;
-        MMI::PointerEvent::PointerItem pointerItem;
-        if (lastPointerEvent_ != nullptr &&
-            lastPointerEvent_->GetPointerItem(lastPointerEvent_->GetPointerId(), pointerItem)) {
-            int32_t lastDisplayX = pointerItem.GetDisplayX();
-            int32_t lastDisplayY = pointerItem.GetDisplayY();
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
-                " lastDisplayY:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY);
-            errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY);
-        } else {
-            errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
-        }
-        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
-              GetPersistentId(), static_cast<int>(errorCode));
-        switch (errorCode) {
-            case WSError::WS_ERROR_REPEAT_OPERATION: {
-                return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
-            }
-            case WSError::WS_ERROR_NULLPTR: {
-                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            }
-            default: {
-                return WmErrorCode::WM_OK;
-            }
-        }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSError errorCode;
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (lastPointerEvent_ != nullptr &&
+        lastPointerEvent_->GetPointerItem(lastPointerEvent_->GetPointerId(), pointerItem)) {
+        int32_t lastDisplayX = pointerItem.GetDisplayX();
+        int32_t lastDisplayY = pointerItem.GetDisplayY();
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
+            " lastDisplayY:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY);
+        errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY);
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    switch (errorCode) {
+        case WSError::WS_ERROR_REPEAT_OPERATION: {
+            return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+        }
+        case WSError::WS_ERROR_NULLPTR: {
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        default: {
+            return WmErrorCode::WM_OK;
+        }
     }
 }
 

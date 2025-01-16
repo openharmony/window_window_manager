@@ -1204,14 +1204,14 @@ HWTEST_F(MoveDragControllerTest, OnChange, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: StopMove
- * @tc.desc: test function : StopMove
+ * @tc.name: StopMoving
+ * @tc.desc: test function : StopMoving
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, StopMove, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, StopMoving, Function | SmallTest | Level1)
 {
     moveDragController->SetStartMoveFlag(true);
-    moveDragController->StopMove();
+    moveDragController->StopMoving();
     ASSERT_EQ(false, moveDragController->GetStartMoveFlag());
     ASSERT_EQ(false, moveDragController->hasPointDown_);
 }

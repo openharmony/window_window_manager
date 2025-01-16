@@ -7150,7 +7150,7 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARG_COUNT_ZERO) {
         return OnStartMoveWindowWithCoordinate(env, info);
@@ -7203,18 +7203,21 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, napi_callback
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_TWO) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t offsetX;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], offsetX)) {
-        offsetX = 0;
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "failed to convert parameter to offsetX");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t offsetY;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], offsetY)) {
-        offsetY = 0;
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "failed to convert parameter to offsetY");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -7226,9 +7229,7 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, napi_callback
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        if (!WindowHelper::IsSystemWindow(window->GetType()) &&
-            !WindowHelper::IsMainWindow(window->GetType()) &&
-            !WindowHelper::IsSubWindow(window->GetType())) {
+        if (!WindowHelper::IsSystemWindow(window->GetType()) && !WindowHelper::IsAppWindow(window->GetType())) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             return;
