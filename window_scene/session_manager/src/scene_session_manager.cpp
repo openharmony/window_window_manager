@@ -86,7 +86,7 @@ const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 
-constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
+constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr int32_t SCALE_DIMENSION = 2;
@@ -2389,10 +2389,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             return WSError::WS_ERROR_NULLPTR;
         }
         scnSession->GetCloseAbilityWantAndClean(scnSessionInfo->want);
-        if (scnSessionInfo->resultCode == -1) {
-            OHOS::AAFwk::Want want;
-            scnSessionInfo->want = want;
-        }
+        ResetSceneSessionInfoWant(scnSessionInfo);
         return RequestSceneSessionDestructionInner(scnSession, scnSessionInfo, needRemoveSession, isForceClean);
     };
     std::string taskName = "RequestSceneSessionDestruction:PID:" +
@@ -2401,13 +2398,25 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
     return WSError::WS_OK;
 }
 
+void SceneSessionManager::ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo)
+{
+    if (sceneSessionInfo->resultCode == -1) {
+        AAFwk::Want want;
+        std::string keySessionId = sceneSessionInfo->want.GetStringParam(ATOMIC_SERVICE_SESSION_ID);
+        want.SetParam(ATOMIC_SERVICE_SESSION_ID, keySessionId);
+        sceneSessionInfo->want = std::move(want);
+        TLOGI(WmsLogTag::WMS_MAIN, "sceneSessionInfo.resultCode: %{public}d, keySessionId: %{public}s",
+            sceneSessionInfo->resultCode, keySessionId.c_str());
+    }
+}
+
 void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
 {
     auto& sessionInfo = sceneSession->GetSessionInfo();
     if (sessionInfo.want != nullptr) {
         const auto& bundleName = sessionInfo.want->GetElement().GetBundleName();
         const auto& abilityName = sessionInfo.want->GetElement().GetAbilityName();
-        const auto& keySessionId = sessionInfo.want->GetStringParam(KEY_SESSION_ID);
+        const auto& keySessionId = sessionInfo.want->GetStringParam(ATOMIC_SERVICE_SESSION_ID);
         auto want = std::make_shared<AAFwk::Want>();
         if (want != nullptr) {
             AppExecFwk::ElementName element;
@@ -2416,7 +2425,7 @@ void SceneSessionManager::ResetWant(sptr<SceneSession>& sceneSession)
             want->SetElement(element);
             want->SetBundle(bundleName);
             if (!keySessionId.empty()) {
-                want->SetParam(KEY_SESSION_ID, keySessionId);
+                want->SetParam(ATOMIC_SERVICE_SESSION_ID, keySessionId);
             }
             sceneSession->SetSessionInfoWant(want);
         }
