@@ -86,6 +86,7 @@ enum class ListenerFuncType : uint32_t {
     SET_SUPPORT_WINDOW_MODES_CB,
     WINDOW_MOVING_CB,
     SESSION_LOCK_STATE_CHANGE_CB,
+    UPDATE_SESSION_LABEL_AND_ICON_CB,
 };
 
 class SceneSession;
@@ -316,6 +317,7 @@ private:
     void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
     void ProcessWindowMovingRegister();
+    void ProcessUpdateSessionLabelAndIconRegister();
 
     /*
      * PC Window Layout
@@ -373,6 +375,7 @@ private:
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
+    void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
 
     /*
      * PC Window Layout

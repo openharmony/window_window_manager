@@ -234,6 +234,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSupportedWindowModes(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
             return HandleExtensionProviderData(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
+            return HandleSetSessionLabelAndIcon(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE):
             return HandleStartMovingWithCoordinate(data, reply);
         default:
@@ -1390,6 +1392,26 @@ int SessionStub::HandleSetSupportedWindowModes(MessageParcel& data, MessageParce
     }
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "size: %{public}u", size);
     NotifySupportWindowModesChange(supportedWindowModes);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply)
+{
+    std::string label;
+    if (!data.ReadString(label)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read label failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
+    if (icon == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read icon failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetSessionLabelAndIcon(label, icon);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

@@ -1033,6 +1033,16 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         " result: %{public}d", GetPersistentId(), lastRect.ToString().c_str(), rect.ToString().c_str(), ret);
 }
 
+void Session::SetSingleHandTransform(const SingleHandTransform& transform)
+{
+    singleHandTransform_ = transform;
+}
+
+SingleHandTransform Session::GetSingleHandTransform() const
+{
+    return singleHandTransform_;
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
@@ -2425,6 +2435,7 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    updateSessionLabelAndIconFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }
 
@@ -3699,7 +3710,7 @@ std::shared_ptr<AppExecFwk::EventHandler> Session::GetEventHandler() const
     return handler_;
 }
 
-std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam, bool isFreeze) const
+std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool isFreeze, float blur) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "GetSnapshotWithFreeze[%d][%s]",
         persistentId_, sessionInfo_.bundleName_.c_str());
@@ -3708,15 +3719,15 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scaleParam,
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    auto scaleValue = (scaleParam < 0.0f || scaleParam < std::numeric_limits<float>::min()) ?
-        snapshotScale_ : scaleParam;
+    auto scaleValue = (scale < 0.0f || scale < std::numeric_limits<float>::min()) ?
+        snapshotScale_ : scale;
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = true,
     };
-    bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config);
+    bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config, blur);
     if (!ret) {
         TLOGE(WmsLogTag::WMS_PATTERN, "failed");
         return nullptr;
