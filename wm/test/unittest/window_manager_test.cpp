@@ -1453,13 +1453,13 @@ HWTEST_F(WindowManagerTest, NotifyWindowPidVisibilityChanged, Function | SmallTe
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: check ReleaseForegroundSessionScreenLock
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: check UpdateScreenLockStatusForApp
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, UpdateScreenLockStatusForApp, Function | SmallTest | Level2)
 {
-    auto ret = WindowManager::GetInstance().ReleaseForegroundSessionScreenLock();
+    auto ret = WindowManager::GetInstance().UpdateScreenLockStatusForApp("", true);
     ASSERT_EQ(ret, WMError::WM_OK);
 }
 

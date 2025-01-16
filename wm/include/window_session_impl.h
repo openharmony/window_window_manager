@@ -260,6 +260,8 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    void SetLayoutTransform(const Transform& trans);
+    Transform GetLayoutTransform() const override;
 
     /*
      * Window Decor
@@ -299,6 +301,7 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible) override;
     WMError GetIsMidScene(bool& isMidScene) override;
+    WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
 
     /*
      * Window Layout
@@ -481,6 +484,7 @@ protected:
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
+    mutable std::recursive_mutex transformMutex_;
 
     /*
      * Window Immersive
@@ -656,7 +660,8 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
-
+    Transform layoutTransform_;
+    
     /*
      * Window Decor
      */

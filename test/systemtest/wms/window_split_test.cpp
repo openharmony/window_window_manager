@@ -112,12 +112,12 @@ HWTEST_F(WindowSplitTest, SplitWindow01, Function | MediumTest | Level3)
     sleep(SPLIT_TEST_SLEEP_S);
 
 
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetWindowMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetWindowMode());
 
     ASSERT_EQ(WMError::WM_OK, priWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, fullWindow->GetWindowMode());
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }
@@ -153,12 +153,12 @@ HWTEST_F(WindowSplitTest, SplitWindow02, Function | MediumTest | Level3)
     sleep(SPLIT_TEST_SLEEP_S);
 
 
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, secWindow->GetMode());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, secWindow->GetWindowMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, fullWindow->GetWindowMode());
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, secWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FULLSCREEN, secWindow->GetWindowMode());
     ASSERT_EQ(WMError::WM_OK, secWindow->Hide());
     sleep(SPLIT_TEST_SLEEP_S);
 }

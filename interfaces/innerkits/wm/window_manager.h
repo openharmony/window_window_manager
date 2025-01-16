@@ -896,11 +896,13 @@ public:
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) const;
 
     /**
-     * @brief Release screen lock of foreground sessions.
+     * @brief Update screen lock status for app.
      *
-     * @return WM_OK means release success, others means failed.
+     * @param bundleName BundleName of specific app
+     * @param isRelease True means screen lock, false means reLock screen lock
+     * @return WM_OK means update success, others means failed.
      */
-    WMError ReleaseForegroundSessionScreenLock();
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
 
     /**
      * @brief Get displayId by windowId.
