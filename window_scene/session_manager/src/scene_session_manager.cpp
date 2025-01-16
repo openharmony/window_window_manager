@@ -2828,7 +2828,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         info.screenId_ = property->GetDisplayId();
 
         if (IsPiPForbidden(property, type)) {
-            TLOGI(WmsLogTag::WMS_PIP, "forbid pip");
+            TLOGNE(WmsLogTag::WMS_PIP, "forbid pip");
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
         ClosePipWindowIfExist(type);
