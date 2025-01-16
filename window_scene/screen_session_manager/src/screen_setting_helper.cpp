@@ -536,7 +536,7 @@ bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, cons
         TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
-    enable = value == 1;
+    enable = (value == 1);
     return true;
 }
 } // namespace Rosen

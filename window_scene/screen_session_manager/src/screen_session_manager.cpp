@@ -320,7 +320,6 @@ void ScreenSessionManager::Init()
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
-
 }
 
 void ScreenSessionManager::OnStart()
