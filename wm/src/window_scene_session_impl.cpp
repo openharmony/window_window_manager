@@ -2630,9 +2630,26 @@ bool WindowSceneSessionImpl::IsStartMoving()
     return isMoving;
 }
 
+bool WindowSceneSessionImpl::CalcWindowShouldMove()
+{
+    WindowType windowType = GetType();
+    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT || 
+        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+        if (windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
+            windowSystemConfig_.IsPhoneWindow()) {
+            return true;
+        }
+    }
+
+    if (IsPcOrPadFreeMultiWindowMode) {
+        return true;
+    }
+    return false;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2653,34 +2670,6 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
         }
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is nullptr");
-        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
-    }
-}
-
-WmErrorCode WindowSceneSessionImpl::StartMoveInputBar()
-{
-    if (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
-          windowSystemConfig_.IsPhoneWindow())) {
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "The device is not supported");
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    if (auto hostSession = GetHostSession()) {
-        WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE_INPUTBAR);
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "id:%{public}d, errorCode:%{public}d",
-            GetPersistentId(), static_cast<int>(errorCode));
-        switch (errorCode) {
-            case WSError::WS_ERROR_REPEAT_OPERATION: {
-                return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
-            }
-            case WSError::WS_ERROR_NULLPTR: {
-                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            }
-            default: {
-                return WmErrorCode::WM_OK;
-            }
-        }
-    } else {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "hostSession is nullptr");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
 }

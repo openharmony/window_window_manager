@@ -164,7 +164,6 @@ public:
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WmErrorCode StartMoveWindow() override;
-    WmErrorCode StartMoveInputBar() override;
     WmErrorCode StopMoveWindow() override;
 
     /*
@@ -286,6 +285,7 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+    bool CalcWindowShouldMove();
 
     /*
      * Window Recover

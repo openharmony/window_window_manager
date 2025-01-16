@@ -638,7 +638,8 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
 
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+          "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
           availableArea.posX_,
           availableArea.posY_,
           availableArea.width_,
@@ -647,19 +648,24 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     return WSError::WS_OK;
 }
 
-void SceneSession::InitializeMoveInputBar(SessionEvent event)
+WSError SceneSession::InitializeMoveInputBar(SessionEvent event)
 {
-    if (event == SessionEvent::EVENT_START_MOVE_INPUTBAR) {
+    auto property = GetSessionProperty();
+    WindowType windowType = property->GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
+        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Start init move input bar param");
-        auto property = GetSessionProperty();
-        if (!property) {
-            return;
-        }
         DisplayId displayId = property->GetDisplayId();
+
         WSError ret = SetMoveAvailableArea(displayId);
+        if (ret != WSError::WS_OK) {
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "set move availableArea error");
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
         moveDragController_->SetMoveInputBarStartDisplayId(displayId);
         moveDragController_->SetMoveInputBarFlag(true);
     }
+    return WSError::WS_OK;
 }
 
 WSError SceneSession::OnSessionEvent(SessionEvent event)
@@ -672,13 +678,16 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         }
         WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
-        if (event == SessionEvent::EVENT_START_MOVE || event == SessionEvent::EVENT_START_MOVE_INPUTBAR) {
+        if (event == SessionEvent::EVENT_START_MOVE) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "OnSessionEvent move");
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
-            session->InitializeMoveInputBar(event);
+            WSError ret = session->InitializeMoveInputBar();
+            if (ret != WSError::WS_OK) {
+                return ret;
+            }
             session->InitializeCrossMoveDrag();
             session->moveDragController_->InitMoveDragProperty();
             if (session->pcFoldScreenController_) {
@@ -748,8 +757,7 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "the sync session event is: %{public}d", event);
-    if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE &&
-        event != SessionEvent::EVENT_START_MOVE_INPUTBAR) {
+    if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event or end move event, "
             "eventId=%{public}u windowId=%{public}d", event, GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
@@ -2553,8 +2561,9 @@ bool SceneSession::IsMovable()
     auto property = GetSessionProperty();
     bool windowIsMovable = !moveDragController_->GetStartDragFlag() && IsMovableWindowType() &&
                            moveDragController_->HasPointDown() && moveDragController_->GetMovable();
-    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
-        windowIsMovable &= IsFocused();
+    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
+        property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        windowIsMovable = windowIsMovable && IsFocused();
     }
     if (!windowIsMovable) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
