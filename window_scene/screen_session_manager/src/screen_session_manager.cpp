@@ -1766,6 +1766,7 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
+    property.SetScreenRealDPI();
     if (isDensityDpiLoad_) {
         if (screenId == SCREEN_ID_MAIN) {
             TLOGW(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
@@ -7158,8 +7159,9 @@ int32_t ScreenSessionManager::GetCameraPosition()
 
 bool ScreenSessionManager::IsScreenCasting()
 {
-    if (virtualScreenCount_ == 0 && hdmiScreenCount_ == 0) {
-        TLOGI(WmsLogTag::DMS, "casting");
+    if (virtualScreenCount_ > 0 || hdmiScreenCount_ > 0) {
+        TLOGI(WmsLogTag::DMS, "virtualScreenCount_: %{public}" PRIu32 ", hdmiScreenCount_: %{public}d",
+            virtualScreenCount_, hdmiScreenCount_);
         return true;
     }
     TLOGI(WmsLogTag::DMS, "not casting");

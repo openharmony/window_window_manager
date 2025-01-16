@@ -541,6 +541,7 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor02, Function | SmallTe
 
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, windowSession->DisableAppWindowDecor());
+    windowSession->Destroy(true);
 }
 
 /**
@@ -566,6 +567,7 @@ HWTEST_F(WindowSceneSessionImplTest, DisableAppWindowDecor03, Function | SmallTe
 
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, windowSession->DisableAppWindowDecor());
+    windowSession->Destroy(true);
 }
 
 /**
