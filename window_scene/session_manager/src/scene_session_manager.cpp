@@ -2960,25 +2960,27 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
     return true;
 }
 
-bool SceneSessionManager::IsForbiddenPiP(const sptr<WindowSessionProperty>& property, const WindowType& type) {
+bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type) const
+{
     sptr<SceneSession> = GetSceneSession(property->GetParentPersistentId());
     if (parentSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "parentSession is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "invalid parentSession");
         return false;
     }
     DisplayId screenId = parentSession->GetSessionProperty()->GetDisplayId();
     if (screenId == SCREEN_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_PIP, "ScreenId  is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "invalid screenId");
         return false;
     }
-    const sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
+    sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "ScreenSession is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "invalid screenSession");
         return false;
     }
+    std::string screenName = screenSession->GetName();
     if (type == WindowType::WINDOW_TYPE_PIP &&
-       (screenSession->GetName() == "HiCar" || screenSession->GetName() == "SuperLauncher")) {
-        TLOGI(WmsLogTag::WMS_PIP, "current screen name %{public}s", screenSession->GetName().c_str());
+       (screenName == "HiCar" || screenName == "SuperLauncher")) {
+        TLOGI(WmsLogTag::WMS_PIP, "screen name %{public}s", screenName.c_str());
         return true;
     }
     return false;
