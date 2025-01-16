@@ -2961,7 +2961,7 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
 }
 
 bool SceneSessionManager::IsForbiddenPiP(const sptr<WindowSessionProperty>& property, const WindowType& type) {
-    auto parentSession = GetSceneSession(property->GetParentPersistentId());
+    sptr<SceneSession> = GetSceneSession(property->GetParentPersistentId());
     if (parentSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "parentSession is nullptr");
         return false;
@@ -2971,12 +2971,13 @@ bool SceneSessionManager::IsForbiddenPiP(const sptr<WindowSessionProperty>& prop
         TLOGE(WmsLogTag::WMS_PIP, "ScreenId  is nullptr");
         return false;
     }
-    const sprt<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(ScreenId);
+    const sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "ScreenSession is nullptr");
         return false;
     }
-    if (type == WindowType::WINDOW_TYPE_PIP && (ScreenSession->GetName() == "HiCar" || ScreenSession->GetName() == "SuperLauncher")) {
+    if (type == WindowType::WINDOW_TYPE_PIP &&
+       (screenSession->GetName() == "HiCar" || screenSession->GetName() == "SuperLauncher")) {
         TLOGI(WmsLogTag::WMS_PIP, "current screen name %{public}s", screenSession->GetName().c_str());
         return true;
     }
