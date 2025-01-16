@@ -2972,7 +2972,7 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         return false;
     }
     sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
-    if (parentProperty) {
+    if (parentProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "invalid parentProperty");
         return false;
     }
