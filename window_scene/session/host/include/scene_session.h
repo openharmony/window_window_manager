@@ -752,7 +752,7 @@ private:
     void OnMoveDragCallback(SizeChangeReason reason);
     bool IsDragResizeWhenEnd(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
-    void InitializeMoveInputBar(SessionEvent event);
+    WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
