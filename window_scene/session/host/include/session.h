@@ -92,6 +92,8 @@ using VisibilityChangedDetectFunc = std::function<void(int32_t pid, bool isVisib
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
+using NofitySessionLabelAndIconUpdatedFunc =
+    std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 
 class ILifecycleListener {
 public:
@@ -569,6 +571,8 @@ public:
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
+    void SetSingleHandTransform(const SingleHandTransform& transform);
+    SingleHandTransform GetSingleHandTransform() const;
 
     /*
      * Screen Lock
@@ -697,6 +701,7 @@ protected:
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
     VisibilityChangedDetectFunc visibilityChangedDetectFunc_ GUARDED_BY(SCENE_GUARD);
+    NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
 
     /*
      * Window Rotate Animation
@@ -882,6 +887,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    SingleHandTransform singleHandTransform_;
 
     /*
      * Screen Lock

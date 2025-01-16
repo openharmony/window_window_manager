@@ -2279,6 +2279,42 @@ WSError SessionProxy::NotifySupportWindowModesChange(
     return WSError::WS_OK;
 }
 
+WSError SessionProxy::SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(label)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write label failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(icon.get())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write icon failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionProxy::OnSetWindowCornerRadius(float cornerRadius)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);

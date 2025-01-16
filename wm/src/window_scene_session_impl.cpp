@@ -3241,8 +3241,8 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
     property_->SetWindowCornerRadius(cornerRadius);
     
     auto hostSession = GetHostSession();
-    hostSession->OnSetWindowCornerRadius(cornerRadius);
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->OnSetWindowCornerRadius(cornerRadius);
     return WMError::WM_OK;
 }
 
