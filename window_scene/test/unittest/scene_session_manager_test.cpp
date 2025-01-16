@@ -20,6 +20,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "screen_fold_data.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -31,7 +32,6 @@
 #include "mock/mock_window_event_channel.h"
 #include "application_info.h"
 #include "context.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
 
 using namespace testing;
 using namespace testing::ext;
