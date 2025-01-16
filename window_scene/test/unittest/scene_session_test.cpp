@@ -1944,6 +1944,55 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | 
     sceneSession->specificCallback_ = nullptr;
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
 }
+
+/**
+ * @tc.name: SetMousePointerDownEventStatus
+ * @tc.desc: SetMousePointerDownEventStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetMousePointerDownEventStatus, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMousePointerDownEventStatus";
+    info.bundleName_ = "SetMousePointerDownEventStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetMousePointerDownEventStatus(true);
+    EXPECT_EQ(sceneSession->GetMousePointerDownEventStatus(), true);
+}
+
+/**
+ * @tc.name: SetFingerPointerDownStatus
+ * @tc.desc: SetFingerPointerDownStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetFingerPointerDownStatus, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetFingerPointerDownStatus";
+    info.bundleName_ = "SetFingerPointerDownStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetFingerPointerDownStatus(0);
+    sceneSession->SetFingerPointerDownStatus(1);
+    auto fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 2);
+    sceneSession->RemoveFingerPointerDownStatus(0);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 1);
+
+    sceneSession->RemoveFingerPointerDownStatus(1);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 0);
+}
 } // namespace
 } // Rosen
 } // OHOS
