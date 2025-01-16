@@ -1129,12 +1129,12 @@ HWTEST_F(WindowSessionTest3, SetFreezeImmediately, Function | SmallTest | Level2
     struct RSSurfaceNodeConfig config;
     session_->surfaceNode_ = RSSurfaceNode::Create(config);
     ASSERT_NE(session_->surfaceNode_, nullptr);
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
     session_->surfaceNode_->bufferAvailable_ = true;
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true, 1.0f));
     session_->surfaceNode_ = nullptr;
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
 }
 }
 } // namespace Rosen
