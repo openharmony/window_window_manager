@@ -769,12 +769,12 @@ DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refr
         refreshRate, actualRefreshRate);
 }
 
-DMError ScreenManager::SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable)
+DMError ScreenManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
 {
     if (screenIds.empty()) {
         WLOGFI("screenIds is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenShareProtect(screenIds, isEnable);
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
 }
 } // namespace OHOS::Rosen

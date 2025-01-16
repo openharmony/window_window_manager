@@ -3590,11 +3590,11 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
 }
 
 /**
- * @tc.name: SetScreenShareProtect
- * @tc.desc: SetScreenShareProtect test
+ * @tc.name: SetScreenSkipProtectedWindow
+ * @tc.desc: SetScreenSkipProtectedWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtect, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
@@ -3607,17 +3607,17 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtect, Function | SmallTest |
     }
     const std::vector<ScreenId> screenIds = {screenId, 1002};
     bool isEnable = true;
-    ASSERT_EQ(ssm_->SetScreenShareProtect(screenIds, isEnable), DMError::DM_OK);
+    ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
     isEnable = false;
-    ASSERT_EQ(ssm_->SetScreenShareProtect(screenIds, isEnable), DMError::DM_OK);
+    ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
 }
 
 /**
- * @tc.name: SetScreenShareProtectInner
- * @tc.desc: SetScreenShareProtectInner test
+ * @tc.name: SetScreenSkipProtectedWindowInner
+ * @tc.desc: SetScreenSkipProtectedWindowInner test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallTest | Level3)
+HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
@@ -3635,7 +3635,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenShareProtectInner, Function | SmallT
     }
     auto screenSession = ssm_->GetScreenSession(screenId);
     screenSession->SetShareProtect(true);
-    ssm_->SetScreenShareProtectInner();
+    ssm_->SetScreenSkipProtectedWindowInner();
 }
 }
 } // namespace Rosen

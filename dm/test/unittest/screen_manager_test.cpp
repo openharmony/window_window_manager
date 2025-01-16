@@ -748,15 +748,15 @@ HWTEST_F(ScreenManagerTest, GetScreenInfoSrting, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: SetScreenShareProtect
- * @tc.desc: SetScreenShareProtect fun
+ * @tc.name: SetScreenSkipProtectedWindow
+ * @tc.desc: SetScreenSkipProtectedWindow fun
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, SetScreenShareProtect, Function | SmallTest | Level1)
+HWTEST_F(ScreenManagerTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level1)
 {
     const std::vector<ScreenId> screenIds;
     bool isEnable = true;
-    auto result = ScreenManager::GetInstance().SetScreenShareProtect(screenIds, isEnable);
+    auto result = ScreenManager::GetInstance().SetScreenSkipProtectedWindow(screenIds, isEnable);
     EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
 }
 }

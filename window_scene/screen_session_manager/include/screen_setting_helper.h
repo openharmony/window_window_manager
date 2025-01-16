@@ -60,9 +60,10 @@ public:
         const std::string& key = SETTING_RELATIVE_POSITION_KEY);
     static bool GetSettingRelativePositionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& relativePosition);
     static ScreenShape GetScreenShape(ScreenId screenId);
-    static void RegisterSettingScreenShareProtectObserver(SettingObserver::UpdateFunc func);
-    static void UnregisterSettingScreenShareProtectObserver();
-    static bool GetSettingScreenShareProtect(bool& enable, const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
+    static void RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingscreenSkipProtectedWindowObserver();
+    static bool GetSettingscreenSkipProtectedWindow(bool& enable,
+        const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
@@ -76,7 +77,7 @@ private:
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
-    static sptr<SettingObserver> screenShareProtectObserver_;
+    static sptr<SettingObserver> screenSkipProtectedWindowObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

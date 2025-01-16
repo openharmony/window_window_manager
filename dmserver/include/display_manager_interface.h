@@ -262,7 +262,7 @@ public:
         return nullptr;
     }
 
-    virtual DMError SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable)
+    virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
     {
         return DMError::DM_OK;
     }

@@ -902,9 +902,9 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOp
     return displayManagerServiceProxy_->GetDisplaySnapshotWithOption(captureOption, errorCode);
 }
 
-DMError ScreenManagerAdapter::SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable)
+DMError ScreenManagerAdapter::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
-    return displayManagerServiceProxy_->SetScreenShareProtect(screenIds, isEnable);
+    return displayManagerServiceProxy_->SetScreenSkipProtectedWindow(screenIds, isEnable);
 }
 } // namespace OHOS::Rosen

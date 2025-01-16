@@ -3137,7 +3137,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest147, Function | SmallTest 
     data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
     data.WriteUInt64Vector(screenIds);
     data.WriteBool(isEnable);
-    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SHARE_PROTECT);
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SKIP_PROTECTED_WINDOW);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
