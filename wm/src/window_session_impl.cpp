@@ -301,6 +301,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
 WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
+    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(onGetWMSWindowListCallback_);
     Destroy(true, false);
 }
 
@@ -4747,7 +4748,7 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 
 void WindowSessionImpl::RegisterWindowInspectorCallback()
 {
-    if (!WindowInspector::GetInstance().IsInitConnectSuccess()) {
+    if (!WindowInspector::GetInstance().ConnectServer()) {
         return;
     }
     onGetWMSWindowListCallback_ = sptr<GetWMSWindowListCallback>::MakeSptr([] {
