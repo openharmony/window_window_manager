@@ -6278,15 +6278,16 @@ void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc
 
 WSError SceneSession::OnSetWindowCornerRadius(float cornerRadius)
 {
-    PostTask([weakThis = wptr(this), cornerRadius] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), cornerRadius, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
             return;
         }
         if (session->onSetWindowCornerRadiusFunc_) {
-            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}d radius: %{public}f",
-                session->GetPersistentId(), cornerRadius);
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id %{public}d radius: %{public}f",
+                where, session->GetPersistentId(), cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
         }
     }, __func__);

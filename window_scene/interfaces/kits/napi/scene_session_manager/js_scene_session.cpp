@@ -5926,7 +5926,8 @@ void JsSceneSession::ProcessSetWindowCornerRadiusRegister()
 void JsSceneSession::OnSetWindowCornerRadius(float cornerRadius)
 {
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, cornerRadius, env = env_, where] {
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
+        cornerRadius, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
@@ -5942,7 +5943,6 @@ void JsSceneSession::OnSetWindowCornerRadius(float cornerRadius)
         napi_value jsCornerRadius = CreateJsValue(env, cornerRadius);
         napi_value argv[] = { jsCornerRadius };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-    };
-    taskScheduler_->PostMainThreadTask(task, __func__);
+    }, __func__);
 }
 } // namespace OHOS::Rosen
