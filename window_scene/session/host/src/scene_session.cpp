@@ -679,7 +679,6 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
         WLOGFI("[WMSCom] event: %{public}d", static_cast<int32_t>(event));
         session->UpdateWaterfallMode(event);
         if (event == SessionEvent::EVENT_START_MOVE) {
-            TLOGD(WmsLogTag::WMS_LAYOUT, "OnSessionEvent move windowId: %{public}d", GetWindowId());
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
             }
