@@ -118,8 +118,6 @@ private:
     void UpdatePiPSourceRect() const;
     void ResetExtController();
     bool IsPullPiPAndHandleNavigation();
-    void NotifyNodeUpdate(napi_ref nodeRef);
-    void NotifyStateChangeInner(napi_env env, PiPState state);
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     void NotifyNodeUpdate(napi_ref nodeRef);
