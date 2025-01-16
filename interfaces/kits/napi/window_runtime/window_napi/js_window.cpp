@@ -7153,7 +7153,7 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARG_COUNT_ZERO) {
-        return OnStartMoveWindowWithCoordinate(env, info);
+        return OnStartMoveWindowWithCoordinate(env, argc, argv);
     }
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const funcName = __func__;
@@ -7196,15 +7196,12 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
