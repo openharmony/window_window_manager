@@ -692,8 +692,6 @@ HWTEST_F(SceneSessionTest3, SetWindowCornerRadiusCallback, Function | SmallTest 
     info.abilityName_ = "SetWindowCornerRadiusCallback";
     info.bundleName_ = "SetWindowCornerRadiusCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->property_ = windowSessionProperty;
 
     NotifySetWindowCornerRadiusFunc func1 = [](float cornerRadius) {
         return;

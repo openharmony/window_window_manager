@@ -2022,6 +2022,11 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowCornerRadius, Function | SmallTes
     ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
 
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -2061,6 +2066,11 @@ HWTEST_F(WindowSceneSessionImplTest2, GetWindowCornerRadius, Function | SmallTes
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ret = window->GetWindowCornerRadius(cornerRadius);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);

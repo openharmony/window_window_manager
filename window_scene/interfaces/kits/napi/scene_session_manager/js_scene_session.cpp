@@ -5875,7 +5875,7 @@ void JsSceneSession::OnSetWindowCornerRadius(float cornerRadius)
                 where, persistentId);
             return;
         }
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "CornerRadius: %{public}f", cornerRadius);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: cornerRadius is %{public}f", where, cornerRadius);
         auto jsCallBack = jsSceneSession->GetJSCallback(SET_WINDOW_CORNER_RADIUS_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: jsCallBack is nullptr", where);

@@ -6285,11 +6285,10 @@ WSError SceneSession::OnSetWindowCornerRadius(float cornerRadius)
             return;
         }
         if (session->onSetWindowCornerRadiusFunc_) {
-            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "Radius: %{public}f", cornerRadius);
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}d radius: %{public}f",
+                session->GetPersistentId(), cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
         }
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}d corner radius %{public}f",
-            session->GetPersistentId(), cornerRadius);
     }, __func__);
     return WSError::WS_OK;
 }
