@@ -881,8 +881,17 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
     if (navController) {
         if (navController->IsNavDestinationInTopStack()) {
             handleId_ = navController->GetTopHandle();
+            if (handleId_ != -1 && firstHandleId_ == handleId_) {
+                navController->SetInPIPMode(handleId_);
+                TLOGI(WmsLogTag::WMS_PIP, "Not first cache navigation");
+                return true;
+            } else if (handleId_ != -1 && firstHandleId_ != -1 && firstHandleId_ != handleId_) {
+                TLOGE(WmsLogTag::WMS_PIP, "Not need cache navigation");
+                return false;
+            }
             if (handleId_ != -1) {
                 TLOGD(WmsLogTag::WMS_PIP, "Top handle id : %{public}d", handleId_);
+                firstHandleId_ = handleId_;
                 navController->SetInPIPMode(handleId_);
                 return true;
             } else {
