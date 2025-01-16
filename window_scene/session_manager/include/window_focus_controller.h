@@ -30,9 +30,9 @@ namespace OHOS {
 namespace Rosen {
 
 /**
- * @struct FocusState
+ * @struct FocusGroup
  *
- * @brief  Window focus state of a screen
+ * @brief  Window focus group of a screen
  */
 struct FocusGroup : public RefBase
 {
@@ -48,9 +48,9 @@ public:
     FocusGroup(DisplayId displayGroupId) : displayGroupId_(displayGroupId) {}
     WSError UpdateFocusedSessionId(int32_t persistentId)
     {
-        TLOGI(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId_, persistentId);
+        TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId_, persistentId);
         if (focusedSessionId_ == persistentId) {
-            TLOGI(WmsLogTag::WMS_FOCUS, "Focus scene not change, id: %{public}d", focusedSessionId_);
+            TLOGD(WmsLogTag::WMS_FOCUS, "Focus scene not change, id: %{public}d", focusedSessionId_);
             return WSError::WS_DO_NOTHING;
         }
         lastFocusedSessionId_ = focusedSessionId_;

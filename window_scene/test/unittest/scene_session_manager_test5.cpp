@@ -708,7 +708,7 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest |
     info.bundleName_ = "test2";
     FocusChangeReason reason = FocusChangeReason::SPLIT_SCREEN;
     sptr<SceneSession> sceneSession = nullptr;
-    ssm_->ShiftFocus(sceneSession, reason);
+    ssm_->ShiftFocus(DEFAULT_DISPLAY_ID, sceneSession, reason);
     info.isSystem_ = true;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
@@ -723,7 +723,7 @@ HWTEST_F(SceneSessionManagerTest5, SetShiftFocusListener, Function | SmallTest |
     ssm_->SetCallingSessionIdSessionListenser(func1);
     ProcessStartUIAbilityErrorFunc func2;
     ssm_->SetStartUIAbilityErrorListener(func2);
-    ssm_->ShiftFocus(sceneSession1, reason);
+    ssm_->ShiftFocus(DEFAULT_DISPLAY_ID, sceneSession1, reason);
 }
 
 /**

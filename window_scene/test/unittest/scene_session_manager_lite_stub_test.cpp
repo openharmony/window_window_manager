@@ -44,11 +44,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId) override
     {
         return WSError::WS_OK;
     }
-    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId) override
     {
         return WSError::WS_OK;
     }
@@ -127,7 +127,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId) override
     {
     }
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override
