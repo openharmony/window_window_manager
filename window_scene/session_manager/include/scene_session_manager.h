@@ -347,6 +347,7 @@ public:
 
     void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
+    WSError CloneWindow(int32_t fromPersistentId, int32_t toPersistentId);
 
     /*
      * Collaborator

@@ -35,6 +35,7 @@ const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -3456,7 +3457,11 @@ HWTEST_F(ScreenSessionManagerTest, ConfigureScreenSnapshotParams, Function | Sma
 {
     ssm_->OnStart();
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
-    ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 0);
+    if (g_isPcDevice) {
+        ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 1);
+    } else {
+        ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 0);
+    }
     ssm_->ConfigureScreenSnapshotParams();
 }
 
