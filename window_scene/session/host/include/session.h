@@ -569,6 +569,8 @@ public:
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
+    void SetSingleHandTransform(const SingleHandTransform& transform);
+    SingleHandTransform GetSingleHandTransform() const;
 
     /*
      * Screen Lock
@@ -882,6 +884,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    SingleHandTransform singleHandTransform_;
 
     /*
      * Screen Lock
