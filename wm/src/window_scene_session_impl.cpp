@@ -2698,6 +2698,12 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    const auto& windowRect = GetRect();
+    if (offsetX < 0 || offsetX > windowRect.width_ ||
+        offsetY < 0 || offsetY > windowRect.height_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "offset not in window");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
     if (auto hostSession = GetHostSession()) {
         WSError errorCode;
         MMI::PointerEvent::PointerItem pointerItem;
