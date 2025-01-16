@@ -558,11 +558,12 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocus, Function | SmallTest | L
     sceneSession1->focusedOnShow_ = true;
     sceneSession1->property_->focusable_ = true;
     sceneSession1->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->focusedSessionId_ = 2;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(2);
     ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
     ret = ssm_->RequestSessionFocus(1, true, reason);
     ASSERT_EQ(ret, WSError::WS_OK);
-    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -608,14 +609,15 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient, Function | SmallTest | Le
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
 
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     ssm_->RequestSessionFocus(1, false, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->RequestSessionFocus(2, false, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 2);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 2);
     ssm_->RequestSessionUnfocus(2, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->RequestSessionUnfocus(1, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 0);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 0);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -680,15 +682,16 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusClient01, Function | SmallTest | 
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
 
     ssm_->RequestSessionFocus(1, false, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->RequestSessionFocus(3, false, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 3);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 3);
     ssm_->RequestSessionFocus(2, false, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 2);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 2);
     auto ret = ssm_->RequestSessionUnfocus(3, reason);
     ASSERT_EQ(WSError::WS_DO_NOTHING, ret);
     ssm_->RequestSessionUnfocus(2, reason);
-    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->sceneSessionMap_.clear();
 }
 
@@ -753,17 +756,18 @@ HWTEST_F(SceneSessionManagerTest5, UpdateFocusStatus01, Function | SmallTest | L
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<SceneSession> sceneSession = nullptr;
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
 
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, false);
-    ASSERT_EQ(ssm_->focusedSessionId_, 1);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
-    ASSERT_NE(ssm_->focusedSessionId_, 1);
-    ssm_->focusedSessionId_ = 1;
+    ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     ssm_->UpdateFocusStatus(DEFAULT_DISPLAY_ID, sceneSession, true);
-    ASSERT_NE(ssm_->focusedSessionId_, 1);
+    ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
 }
 
 /**
@@ -797,7 +801,8 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus, Function | SmallTest |
     ssm_->sceneSessionMap_.insert({focusedSession->GetPersistentId(), focusedSession});
     ret = ssm_->RequestSessionUnfocus(1, reason);
     ASSERT_EQ(ret, WSError::WS_OK);
-    ASSERT_NE(ssm_->focusedSessionId_, 1);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    ASSERT_NE(focusGroup->GetFocusedSessionId(), 1);
     ssm_->sceneSessionMap_.clear();
 }
 

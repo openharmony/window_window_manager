@@ -6781,7 +6781,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         }
         auto focusedSessionId = focusGroup->GetFocusedSessionId();
         bool needBlockNotifyFocusStatusUntilForeground = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
-        if (modal->GetPersistentId() == focusedSessionId_ && needBlockNotifyFocusStatusUntilForeground) {
+        if (modal->GetPersistentId() == focusedSessionId && needBlockNotifyFocusStatusUntilForeground) {
             focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
             focusGroup->SetNeedBlockNotifyUnfocusStatus(false);
             NotifyFocusStatus(modalSession, true, focusGroup);

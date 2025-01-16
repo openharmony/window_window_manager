@@ -559,7 +559,8 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->ProcessFocusZOrderChange(97);
 
     sceneSession->lastZOrder_ = 2203;

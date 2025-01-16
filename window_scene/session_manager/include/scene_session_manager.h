@@ -954,9 +954,6 @@ private:
     SystemSessionConfig systemConfig_;
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;
-    int32_t focusedSessionId_ = INVALID_SESSION_ID;
-    int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
-    int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
     std::shared_ptr<WindowFocusController> windowFocusController_;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
