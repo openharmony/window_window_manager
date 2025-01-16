@@ -18,8 +18,8 @@
 #include <refbase.h>
 #include <string>
 #include "js_runtime_utils.h"
-#include "xcomponent_controller.h"
 #include "napi/native_api.h"
+#include "xcomponent_controller.h"
 #include "wm_common.h"
 
 namespace OHOS {
