@@ -1652,7 +1652,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
  */
 HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, Function | SmallTest | Level3)
 {
-    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsForbiddenPiP start";
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsPiPForbidden start";
     int32_t persistentId = 1001;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetParentPersistentId(persistentId);
@@ -1661,9 +1661,9 @@ HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, Function | SmallTest | Lev
     SessionInfo sessionInfo;
     sessionInfo.persistentId_ = persistentId;
     sessionInfo.bundleName_ = "test1";
-    sessionInfo.abilityName = "test2";
-    sptr<SceneSession> scenesession = ssm_->createSceneSession(sessionInfo, nullptr);
-    property->SetDisplayedId(-1ULL);
+    sessionInfo.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    property->SetDisplayId(-1ULL);
     scenesession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
