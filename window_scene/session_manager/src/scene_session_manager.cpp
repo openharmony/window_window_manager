@@ -2964,7 +2964,7 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
     return true;
 }
 
-bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type) const
+bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type)
 {
     sptr<SceneSession> = GetSceneSession(property->GetParentPersistentId());
     if (parentSession == nullptr) {
