@@ -1664,7 +1664,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, Function | SmallTest | Lev
     sessionInfo.abilityName_ = "test2";
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
     property->SetDisplayId(-1ULL);
-    scenesession->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
     ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
 
