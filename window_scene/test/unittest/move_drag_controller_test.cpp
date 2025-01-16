@@ -661,6 +661,8 @@ HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, Function | SmallT
 HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    moveDragController->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_NE(nullptr, pointerEvent);
         sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
@@ -691,6 +693,11 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
         pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_UP));
         ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
         pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_UNKNOWN));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId() + 1;
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+        moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType() + 1;
         ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
     }
 }

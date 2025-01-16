@@ -34,6 +34,9 @@ public:
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
     static bool SetSettingDefaultDpi(uint32_t& dpi, const std::string& key);
     static bool GetSettingValue(uint32_t& value, const std::string& key);
+    static bool SetSettingValue(const std::string& key, uint32_t value);
+    static bool GetSettingValue(const std::string& key, std::string& value);
+    static bool SetSettingValue(const std::string& key, const std::string& value);
     static void RegisterSettingCastObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingCastObserver();
     static bool GetSettingCast(bool& enable, const std::string& key = SETTING_CAST_KEY);

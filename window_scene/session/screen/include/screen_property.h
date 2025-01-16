@@ -34,6 +34,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     VIRTUAL_SCREEN_RESIZE,
     RELATIVE_POSITION_CHANGE,
     SUPER_FOLD_STATUS_CHANGE,
+    ACCESS_INFO_CHANGE,
 };
 class ScreenProperty {
 public:

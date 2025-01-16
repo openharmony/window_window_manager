@@ -52,7 +52,7 @@ public:
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) override;
-    WindowMode GetMode() const override;
+    WindowMode GetWindowMode() const override;
     WMError SetWindowMode(WindowMode mode) override;
 
     /*
@@ -69,7 +69,7 @@ public:
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
 
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT) override;
     WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) override;
     WSError NotifyAccessibilityChildTreeRegister(

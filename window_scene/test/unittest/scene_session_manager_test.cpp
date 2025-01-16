@@ -2227,13 +2227,13 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: release screen lock of foreground session
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: SceneSesionManager UpdateScreenLockStatusForApp
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, UpdateScreenLockStatusForApp, Function | SmallTest | Level3)
 {
-    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    auto result = ssm_->UpdateScreenLockStatusForApp("", true);
     ASSERT_EQ(result, WMError::WM_OK);
 }
 
