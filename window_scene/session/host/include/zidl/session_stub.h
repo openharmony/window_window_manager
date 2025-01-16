@@ -88,6 +88,7 @@ private:
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
