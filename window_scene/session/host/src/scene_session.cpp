@@ -648,7 +648,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::InitializeMoveInputBar(SessionEvent event)
+WSError SceneSession::InitializeMoveInputBar()
 {
     auto property = GetSessionProperty();
     WindowType windowType = property->GetWindowType();
