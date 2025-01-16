@@ -22,41 +22,40 @@
 #include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-struct WindowListsInfo {
+struct WindowListInfo {
     std::string windowName;
     uint32_t windowId;
     uint32_t windowType;
     Rect windowRect;
 };
-using SendMessage = void (*)(const std::string& message);
+using SendWMSMessage = void (*)(const std::string& message);
 using SetWMSCallback = void (*)(const std::function<void(const char*)>& wmsCallback);
-using WMSGetWindowListsCallback = std::function<std::vector<WindowListsInfo>()>;
+using GetWMSWindowListCallback = std::function<WindowListsInfo()>;
 
 class WindowInspector : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
-    bool IsInitConnectSuccess() const;
-    void RegisterWMSGetWindowListsCallback(const std::weak_ptr<WMSGetWindowListsCallback>& func);
-
+    bool IsConnectServerSuccess() const;
+    void RegisterGetWMSWindowListCallback(const wptr<GetWMSWindowListCallback>& func);
+    void UnregisterGetWMSWindowListCallback(const wptr<GetWMSWindowListCallback>& func);
 protected:
     WindowInspector();
     virtual ~WindowInspector();
 
 private:
-    bool isInitConnectSuccess_ = false;
+    bool isConnectServerSuccess_ = false;
     void* handlerConnectServerSo_ = nullptr;
-    SendMessage sendMessage_ = nullptr;
+    SendWMSMessage sendWMSMessage_ = nullptr;
     SetWMSCallback setWMSCallback_ = nullptr;
     std::mutex callbackMutex_;
-    static std::vector<std::weak_ptr<WMSGetWindowListsCallback>> wmsGetWindowListsCallbacks_;
-    std::string jsonWindowListsInfoStr;
+    static std::unordered_set<wptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
     static sptr<WindowInspector> CreateInstance();
-    void InitConnectServer();
-    void UpdateWMSGetWindowListsCallback();
-    void UnregisterCallback();
-    bool ProcessArkUIInspectorMessage(const std::string& message);
-    void TransformDataToJson(const std::vector<WindowListsInfo>& windowListsInfo);
-    void SendMessageToIDE();
+    void ConnectServer();
+    void CloseConnectServer();
+    void UnregisterAllCallbacks();
+    bool ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr);
+    void CreateArkUIInspectorJson(const std::vector<WindowListInfo>& windowListsInfo, std::string& jsonStr);
+    void SendMessageToIDE(std::string& jsonStr);
 };
 } // namespace OHOS::Rosen
 
