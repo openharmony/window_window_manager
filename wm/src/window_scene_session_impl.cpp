@@ -2641,7 +2641,7 @@ bool WindowSceneSessionImpl::CalcWindowShouldMove()
         }
     }
 
-    if (IsPcOrPadFreeMultiWindowMode) {
+    if (IsPcOrPadFreeMultiWindowMode()) {
         return true;
     }
     return false;
