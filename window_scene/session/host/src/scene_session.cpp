@@ -736,7 +736,6 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
 WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
     int32_t pointerPosX, int32_t pointerPosY)
 {
-    const char* const funcName = __func__;
     return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY] {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
@@ -759,7 +758,7 @@ WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
             offsetY, pointerPosX, pointerPosY, winRect);
         session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
         return WSError::WS_OK;
-    }, funcName);
+    }, __func__);
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY)
