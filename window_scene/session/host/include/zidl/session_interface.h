@@ -332,6 +332,18 @@ public:
      */
     virtual WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) { return WSError::WS_OK; }
+
+    /**
+     * @brief set session label and icon
+     *
+     * @param label
+     * @param icon
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission ohos.permission.SET_ABILITY_INSTANCE_INFO
+     * @scene 15
+     */
+    virtual WSError SetSessionLabelAndIcon(const std::string& label,
+        const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

@@ -1039,6 +1039,7 @@ private:
     uint64_t pipWindowSurfaceId_ = 0;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
+    bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange(bool isScreenLocked);
 

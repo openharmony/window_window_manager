@@ -2829,6 +2829,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         info.moduleName_ = property->GetSessionInfo().moduleName_;
         info.screenId_ = property->GetDisplayId();
 
+        if (IsPiPForbidden(property, type)) {
+            TLOGNE(WmsLogTag::WMS_PIP, "forbid pip");
+            return WSError::WS_ERROR_INVALID_PERMISSION;
+        }
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
         if (newSession == nullptr) {
@@ -2960,6 +2964,37 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
         return false;
     }
     return true;
+}
+
+bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type)
+{
+    sptr<SceneSession> parentSession = GetSceneSession(property->GetParentPersistentId());
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid parentSession");
+        return false;
+    }
+    sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
+    if (parentProperty == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid parentProperty");
+        return false;
+    }
+    DisplayId screenId = parentProperty->GetDisplayId();
+    if (screenId == SCREEN_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid screenId");
+        return false;
+    }
+    sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid screenSession");
+        return false;
+    }
+    std::string screenName = screenSession->GetName();
+    if (type == WindowType::WINDOW_TYPE_PIP &&
+       (screenName == "HiCar" || screenName == "SuperLauncher")) {
+        TLOGI(WmsLogTag::WMS_PIP, "screen name %{public}s", screenName.c_str());
+        return true;
+    }
+    return false;
 }
 
 void SceneSessionManager::NotifyPiPWindowVisibleChange(bool screenLocked) {
