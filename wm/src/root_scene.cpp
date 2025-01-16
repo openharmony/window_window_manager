@@ -391,7 +391,7 @@ void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInf
 
 std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std:: string& stringId)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "stringId: %{public}s", id_c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "stringId: %{public}s", id.c_str());
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
         return nullptr;

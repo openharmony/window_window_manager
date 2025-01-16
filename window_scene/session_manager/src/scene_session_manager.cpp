@@ -6059,6 +6059,7 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     return sceneSession->UpdateWindowMode(mode);
 }
 
+<<<<<<< HEAD
 SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform() const
 {
     return singleHandTransform_;
@@ -6117,6 +6118,8 @@ void SceneSessionManager::NotifySingleHandInfoChange(
     }, funcName);
 }
 
+=======
+>>>>>>> 711c83a3bf (singlehand register window container node)
 void SceneSessionManager::RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func)
 {
     getRSNodeByStringIDFunc_ = std::move(func);
