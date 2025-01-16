@@ -2560,7 +2560,7 @@ bool SceneSession::IsMovable()
     auto property = GetSessionProperty();
     bool windowIsMovable = !moveDragController_->GetStartDragFlag() && IsMovableWindowType() &&
                            moveDragController_->HasPointDown() && moveDragController_->GetMovable();
-    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
+    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR &&
         property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         windowIsMovable = windowIsMovable && IsFocused();
     }
