@@ -109,7 +109,8 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
         return false;
     }
-    if (!jsonMessage.contains("params") || jsonMessage["params"]["command"].get<std::string>() != COMMAND_NAME) {
+    if (!jsonMessage.contains("params") || !jsonMessage["params"].contains("command") ||
+        jsonMessage["params"]["command"].get<std::string>() != COMMAND_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.command err");
         return false;
     }
