@@ -120,6 +120,7 @@ const std::string ARG_DUMP_SCB = "-b";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
+constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -1534,11 +1535,12 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
     for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && session->IsScreenLockWindow()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
-            return session->GetZOrder();
+            return session->GetZOrder() < DEFAULT_LOCK_SCREEN_ZORDER ? DEFAULT_LOCK_SCREEN_ZORDER :
+                session->GetZOrder();
         }
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not found");
-    return 0;
+    return DEFAULT_LOCK_SCREEN_ZORDER;
 }
 
 WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,
@@ -1581,15 +1583,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
 // windowIds are all main window
 void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds)
 {
-    auto task = [this, &windowIds]() -> WMError {
-        if (!IsScreenLocked()) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
-            return WMError::WM_OK;
-        }
-        if (IsUserAuthPassed()) {
-            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
-            return WMError::WM_OK;
-        }
+    taskScheduler_->PostSyncTask([this, &windowIds]() {
         // check every window
         for (auto windowId : windowIds) {
             auto sceneSession = GetSceneSession(windowId);
@@ -1601,8 +1595,7 @@ void SceneSessionManager::OnNotifyAboveLockScreen(const std::vector<int32_t>& wi
             sceneSession->OnNotifyAboveLockScreen();
         }
         return WMError::WM_OK;
-    };
-    taskScheduler_->PostSyncTask(task, "OnNotifyAboveLockScreen");
+    }, __func__);
 }
 
 void SceneSessionManager::CreateKeyboardPanelSession(sptr<SceneSession> keyboardSession)
