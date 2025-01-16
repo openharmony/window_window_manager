@@ -234,7 +234,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenRealWidth = screenProperty.GetScreenRealWidth(),
             .screenRealHeight = screenProperty.GetScreenRealHeight(),
             .screenRealPPI = screenProperty.GetScreenRealPPI(),
-            .screenRealDPI = screenProperty.GetScreenRealDPI(),
+            .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination)};
         displayInfos.emplace_back(displayInfo);
     }

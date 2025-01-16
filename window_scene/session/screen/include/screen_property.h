@@ -189,7 +189,7 @@ public:
     void SetScreenRealPPI() { screenRealPPI_ = CalculatePPI(); }
     float GetScreenRealPPI() { return screenRealPPI_; }
     void SetScreenRealDPI() { screenRealDPI_ = CalculateDPI(); }
-    float GetScreenRealDPI() { return screenRealDPI_; }
+    uint32_t GetScreenRealDPI() { return screenRealDPI_; }
 
 private:
     static inline bool IsVertical(Rotation rotation)
