@@ -409,6 +409,14 @@ public:
     virtual WMError GetGestureBackEnabled(bool& enable) { return WMError::WM_OK; }
 
     /**
+     * @brief Flush layout size.
+     *
+     * @param width The width after layout
+     * @param height The height after layout
+     */
+    virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
+    /**
      * @brief notify window remove starting window.
      *
      * @return WMError
