@@ -2971,7 +2971,12 @@ bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& prop
         TLOGE(WmsLogTag::WMS_PIP, "invalid parentSession");
         return false;
     }
-    DisplayId screenId = parentSession->GetSessionProperty()->GetDisplayId();
+    sptr<WindowSessionProperty> parentProperty = parentSession->GetSessionProperty();
+    if (parentProperty) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid parentProperty");
+        return false;
+    }
+    DisplayId screenId = parentProperty->GetDisplayId();
     if (screenId == SCREEN_ID_INVALID) {
         TLOGE(WmsLogTag::WMS_PIP, "invalid screenId");
         return false;
