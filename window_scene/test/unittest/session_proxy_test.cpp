@@ -1121,6 +1121,20 @@ HWTEST_F(SessionProxyTest, UpdatePiPRect, Function | SmallTest | Level2)
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPRect end";
 }
+
+/**
+ * @tc.name: SetSessionLabelAndIcon
+ * @tc.desc: SetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetSessionLabelAndIcon, Function | SmallTest | Level2)
+{
+    std::string label = "SetSessionLabelAndIcon";
+    std::shared_ptr<Media::PixelMap> icon = std::make_shared<Media::PixelMap>();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->SetSessionLabelAndIcon(label, icon));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
