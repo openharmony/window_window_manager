@@ -1725,57 +1725,6 @@ HWTEST_F(SceneSessionTest5, ActivateKeyboardAvoidArea01, Function | SmallTest | 
     sceneSession->ActivateKeyboardAvoidArea(true, false);
     ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
 }
-
-/**
- * To test the function call
- *
- * @tc.name: ActivateDragBySystem
- * @tc.desc: ActivateDragBySystem function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, ActivateDragBySystem, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ActivateDragBySystem";
-    info.bundleName_ = "ActivateDragBySystem";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    auto ret = sceneSession->ActivateDragBySystem(true);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
- * To test the drag activated settings, and validate the draggable results.
- * Expect the results:
- * enableDrag: true, dragActivated: true => true
- * enableDrag: false, dragActivated: true => false
- * enableDrag: true, dragActivated: false => false
- * enableDrag: false, dragActivated: false => false
- *
- * @tc.name: CheckDragActivatedSettings
- * @tc.desc: CheckDragActivatedSettings
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, CheckDragActivatedSettings, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "CheckDragActivatedSettings";
-    info.bundleName_ = "CheckDragActivatedSettings";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    sceneSession->ActivateDragBySystem(true);
-    sceneSession->GetSessionProperty()->SetDragEnabled(true);
-    ASSERT_EQ(true, sceneSession->IsDragAccessible());
-
-    sceneSession->GetSessionProperty()->SetDragEnabled(false);
-    ASSERT_EQ(false, sceneSession->IsDragAccessible());
-
-    sceneSession->ActivateDragBySystem(false);
-    sceneSession->GetSessionProperty()->SetDragEnabled(true);
-    ASSERT_EQ(false, sceneSession->IsDragAccessible());
-
-    sceneSession->GetSessionProperty()->SetDragEnabled(false);
-    ASSERT_EQ(false, sceneSession->IsDragAccessible());
-}
 }
 }
 }

@@ -1475,8 +1475,8 @@ void Session::SetDragActivated(bool dragActivated)
 bool Session::IsDragAccessible() const
 {
     bool isDragEnabled = GetSessionProperty()->GetDragEnabled();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "dragEnabled: %{public}d, dragActivate: %{public}d",
-        isDragEnabled, dragActivated_);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "PersistentId: %{public}d, dragEnabled: %{public}d, dragActivate: %{public}d",
+        GetPersistentId(), isDragEnabled, dragActivated_);
     return isDragEnabled && dragActivated_;
 }
 

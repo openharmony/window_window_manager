@@ -5602,7 +5602,6 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
 
 WMError SceneSession::ActivateDragBySystem(bool activateDrag)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "To activate drag: %{public}d", activateDrag);
     PostTask([weakThis = wptr(this), activateDrag, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {

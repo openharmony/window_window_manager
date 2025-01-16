@@ -4731,9 +4731,9 @@ WSError WindowSessionImpl::SetDragActivated(bool dragActivated)
 bool WindowSessionImpl::IsWindowDraggable()
 {
     bool isDragEnabled = GetProperty()->GetDragEnabled();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "The window dragEnabled: %{public}d, dragActivate: %{public}d",
-        isDragEnabled, dragActivated_);
-    return isDragEnabled && dragActivated_;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "PersistentId: %{public}d, dragEnabled: %{public}d, dragActivate: %{public}d",
+        GetPersistentId(), isDragEnabled, dragActivated_.load());
+    return isDragEnabled && dragActivated_.load();
 }
 
 void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)

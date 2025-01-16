@@ -2207,7 +2207,7 @@ napi_value JsSceneSession::SetWindowEnableDragBySystem(napi_env env, napi_callba
 
 napi_value JsSceneSession::ActivateDragBySystem(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnActivateDragBySystem(env, info) : nullptr;
 }
@@ -5343,7 +5343,7 @@ napi_value JsSceneSession::OnActivateDragBySystem(napi_env env, napi_callback_in
     }
 
     bool activateDrag = true;
-    if (!ConvertFromJsValue(env, argv[0], activateDrag)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], activateDrag)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to bool");
         return NapiGetUndefined(env);
     }
