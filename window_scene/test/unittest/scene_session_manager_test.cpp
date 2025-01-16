@@ -1646,17 +1646,17 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
 }
 
 /**
- * @tc.name: TestIsForbiddenPiP
+ * @tc.name: TestIsPiPForbidden
  * @tc.desc: Test if pip window is forbidden to use;
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, TestIsForbiddenPiP, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, Function | SmallTest | Level3)
 {
     GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsForbiddenPiP start";
     int32_t persistentId = 1001;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetParentPersistentId(persistentId);
-    ASSERT_TRUE(!ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
 
     SessionInfo sessionInfo;
     sessionInfo.persistentId_ = persistentId;
@@ -1666,7 +1666,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsForbiddenPiP, Function | SmallTest | Lev
     property->SetDisplayedId(-1ULL);
     scenesession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
-    ASSERT_TRUE(!ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
 
     uint64_t displayId = 1001;
     property->SetDisplayId(displayId);
@@ -1675,8 +1675,8 @@ HWTEST_F(SceneSessionManagerTest, TestIsForbiddenPiP, Function | SmallTest | Lev
     sptr<ScreenSession> screenSession = new ScreenSession();
     screenSession->SetName("HiCar");
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
-    ASSERT_TRUE(ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_PIP));
-    ASSERT_TRUE(!ssm_->IsForbiddenPiP(property, WindowType::WINDOW_TYPE_FLOAT));
+    ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FLOAT));
 }
 
 /**
