@@ -7158,8 +7158,9 @@ int32_t ScreenSessionManager::GetCameraPosition()
 
 bool ScreenSessionManager::IsScreenCasting()
 {
-    if (virtualScreenCount_ == 0 && hdmiScreenCount_ == 0) {
-        TLOGI(WmsLogTag::DMS, "casting");
+    if (virtualScreenCount_ > 0 || hdmiScreenCount_ > 0) {
+        TLOGI(WmsLogTag::DMS, "virtualScreenCount_: %{public}" PRIu32 ", hdmiScreenCount_: %{public}d",
+            virtualScreenCount_, hdmiScreenCount_);
         return true;
     }
     TLOGI(WmsLogTag::DMS, "not casting");
