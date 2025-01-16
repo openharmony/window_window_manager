@@ -856,7 +856,7 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenShareProtect, Function | SmallTest 
     const std::vector<ScreenId> screenIds = {1001, 1002};
     bool isEnable = true;
     auto result = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenShareProtect(screenIds, isEnable);
-    ASSERT_NE(result, DMError::DM_OK);
+    ASSERT_EQ(result, DMError::DM_OK);
 }
 }
 }
