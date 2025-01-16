@@ -3559,7 +3559,7 @@ int32_t ScreenSessionManagerProxy::SetScreenOnDelayTime(int32_t delay)
     return reply.ReadInt32();
 }
 
-DMError ScreenSessionManagerProxy::SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable)
+DMError ScreenSessionManagerProxy::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -3581,7 +3581,7 @@ DMError ScreenSessionManagerProxy::SetScreenShareProtect(const std::vector<Scree
         TLOGE(WmsLogTag::DMS, "Write isEnable failed");
         return DMError::DM_ERROR_WRITE_DATA_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SHARE_PROTECT),
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SKIP_PROTECTED_WINDOW),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return DMError::DM_ERROR_IPC_FAILED;

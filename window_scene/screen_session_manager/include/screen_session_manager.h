@@ -361,7 +361,7 @@ public:
         DmErrorCode* errorCode) override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     void MultiScreenChangeOuter(const std::string& outerFlag);
-    DMError SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable) override;
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
 
 protected:
     ScreenSessionManager();
@@ -446,7 +446,7 @@ private:
     bool IsExtendMode();
     void SetScreenCorrection();
     bool IsScreenCasting();
-    void SetScreenShareProtectInner();
+    void SetScreenSkipProtectedWindowInner();
 
     /**
      * On/Off screen

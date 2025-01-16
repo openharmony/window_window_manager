@@ -320,8 +320,8 @@ void ScreenSessionManager::Init()
     // publish init
     ScreenSessionPublish::GetInstance().InitPublishEvents();
     screenEventTracker_.RecordEvent("Dms init end.");
-    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetScreenShareProtectInner(); };
-    ScreenSettingHelper::RegisterSettingScreenShareProtectObserver(updateFunc);
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetScreenSkipProtectedWindowInner(); };
+    ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(updateFunc);
 }
 
 void ScreenSessionManager::OnStart()
@@ -7278,7 +7278,7 @@ void ScreenSessionManager::MultiScreenChangeOuter(const std::string& outerFlag)
     FixPowerStatus();
 }
 
-DMError ScreenSessionManager::SetScreenShareProtect(const std::vector<ScreenId>& screenIds, bool isEnable)
+DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
@@ -7299,18 +7299,18 @@ DMError ScreenSessionManager::SetScreenShareProtect(const std::vector<ScreenId>&
             screenSession->SetShareProtect(isEnable);
         }
     }
-    SetScreenShareProtectInner();
+    SetScreenSkipProtectedWindowInner();
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::SetScreenShareProtectInner()
+void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
 {
     TLOGI(WmsLogTag::DMS, "enter");
-    bool screenShareProtectValue;
-    bool ret = ScreenSettingHelper::GetSettingScreenShareProtect(screenShareProtectValue);
+    bool screenSkipProtectedWindowValue;
+    bool ret = ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(screenSkipProtectedWindowValue);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "get setting failed, default value false");
-        screenShareProtectValue = false;
+        screenSkipProtectedWindowValue = false;
     }
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
@@ -7325,7 +7325,7 @@ void ScreenSessionManager::SetScreenShareProtectInner()
                 TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
                 continue;
             }
-            bool requiredSkipWindow = screenSession->GetShareProtect() && screenShareProtectValue;
+            bool requiredSkipWindow = screenSession->GetShareProtect() && screenSkipProtectedWindowValue;
             TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 " requiredSkipWindow:%{public}d",
                 sessionIt.first, requiredSkipWindow);
             rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
