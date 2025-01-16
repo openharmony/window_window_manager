@@ -317,6 +317,10 @@ private:
     void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
     void ProcessWindowMovingRegister();
+
+    /*
+     * Window Property
+    */
     void ProcessSetWindowCornerRadiusRegister();
 
     /*
@@ -375,6 +379,10 @@ private:
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
+
+    /*
+     * Window Property
+    */
     void OnSetWindowCornerRadius(float cornerRadius);
 
     /*

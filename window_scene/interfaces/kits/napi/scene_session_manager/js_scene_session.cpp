@@ -5874,7 +5874,7 @@ void JsSceneSession::OnSetWindowCornerRadius(float cornerRadius)
             return;
         }
         napi_value jsCornerRadius = CreateJsValue(env, cornerRadius);
-        napi_value argv[] = {jsCornerRadius};
+        napi_value argv[] = { jsCornerRadius };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);

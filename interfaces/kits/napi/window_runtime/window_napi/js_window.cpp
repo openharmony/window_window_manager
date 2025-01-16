@@ -5621,20 +5621,17 @@ napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     double radius = 0.0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], radius)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to radius");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     float cornerRadius = static_cast<float>(radius);
     if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The corner radius is less than zero.");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     const char* const where = __func__;
@@ -5648,20 +5645,17 @@ napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info in
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
             return;
         }
-        if (!WindowHelper::IsFloatOrSubWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
-            return;
-        }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowCornerRadius(cornerRadius));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "Set failed!");
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set failed."));
         } else {
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success.",
+                window->GetWindowId(), window->GetWindowName().c_str());
             task->Resolve(env, NapiGetUndefined(env));
         }
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }

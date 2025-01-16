@@ -1234,7 +1234,7 @@ public:
     virtual WMError SetCornerRadius(float cornerRadius) { return WMError::WM_OK; }
 
     /**
-     * @brief Set corner radius of window.
+     * @brief Sets corner radius of window.
      *
      * @param cornerRadius Corner radius of window.
      * @return WM_OK means set success, others means set failed.
