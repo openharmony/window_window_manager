@@ -2966,7 +2966,7 @@ bool SceneSessionManager::IsEnablePiPCreate(const sptr<WindowSessionProperty>& p
 
 bool SceneSessionManager::IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type)
 {
-    sptr<SceneSession> = GetSceneSession(property->GetParentPersistentId());
+    sptr<SceneSession>parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "invalid parentSession");
         return false;
