@@ -1433,10 +1433,6 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
 /** @note @window.hierarchy */
 WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("window raise to app top permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     auto task = [this, windowId]() {
         return windowController_->RaiseToAppTop(windowId);
     };
