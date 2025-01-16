@@ -73,7 +73,7 @@ private:
     static const constexpr char* SETTING_RECOVERY_RESOLUTION_KEY {"user_set_recovery_resolution"};
     static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_last_screen_mode"};
     static const constexpr char* SETTING_RELATIVE_POSITION_KEY {"user_set_relative_position"};
-    static const constexpr char* SETTING_SCREEN_SHARE_PROTECT_KEY {"screen_share_protect_value"};
+    static const constexpr char* SETTING_SCREEN_SHARE_PROTECT_KEY {"spamshield_screenshare_protect"};
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
