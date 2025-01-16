@@ -234,6 +234,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenRealWidth = screenProperty.GetScreenRealWidth(),
             .screenRealHeight = screenProperty.GetScreenRealHeight(),
             .screenRealPPI = screenProperty.GetScreenRealPPI(),
+            .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination)};
         displayInfos.emplace_back(displayInfo);
     }
@@ -461,7 +462,7 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.offsetX << "|" << displayInfo.offsetY << "|"
                           << displayInfo.isCurrentOffScreenRendering << "|"
                           << displayInfo.screenRealWidth << "|" << displayInfo.screenRealHeight << "|"
-                          << displayInfo.screenRealPPI << "|"
+                          << displayInfo.screenRealPPI << "|" << displayInfo.screenRealDPI << "|"
                           << static_cast<int32_t>(displayInfo.screenCombination) << ",";
     }
 
@@ -531,11 +532,11 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
                             pixelMapList = std::move(pixelMapList), forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
         if (isUserBackground_.load()) {
-            TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
+            TLOGND(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
             return;
         }
         if (sceneSessionDirty_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+            TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
             return;
         }
         sceneSessionDirty_->ResetSessionDirty();

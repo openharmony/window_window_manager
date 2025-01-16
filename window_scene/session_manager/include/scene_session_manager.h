@@ -347,6 +347,7 @@ public:
 
     void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
+    WSError CloneWindow(int32_t fromPersistentId, int32_t toPersistentId);
 
     /*
      * Collaborator
@@ -1038,6 +1039,7 @@ private:
     uint64_t pipWindowSurfaceId_ = 0;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
+    bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange(bool isScreenLocked);
 
