@@ -805,6 +805,90 @@ HWTEST_F(SessionStubTest, GetIsMidScene, Function | SmallTest | Level2)
     auto result = session_->HandleGetIsMidScene(data, reply);
     ASSERT_EQ(result, ERR_NONE);
 }
+
+/**
+ * @tc.name: HandleNotifyFrameLayoutFinish
+ * @tc.desc: sessionStub HandleNotifyFrameLayoutFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleNotifyFrameLayoutFinish(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeSessionVisibilityWithStatusBar
+ * @tc.desc: sessionStub HandleChangeSessionVisibilityWithStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleSyncSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionActivation
+ * @tc.desc: sessionStub HandlePendingSessionActivation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandlePendingSessionActivation, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandlePendingSessionActivation(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetGlobalScaledRect
+ * @tc.desc: sessionStub HandleGetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetGlobalScaledRect, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetGlobalScaledRect(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetAllAvoidAreas
+ * @tc.desc: sessionStub HandleGetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetAllAvoidAreas, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetAllAvoidAreas(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleIsStartMoving
+ * @tc.desc: sessionStub HandleIsStartMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsStartMoving, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleIsStartMoving(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
