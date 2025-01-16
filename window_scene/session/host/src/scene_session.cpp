@@ -736,18 +736,18 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
 WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
     int32_t pointerPosX, int32_t pointerPosY)
 {
-    return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY] {
+    return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY, where = __func__] {
         auto session = weakThis.promote();
         if (!session || !session->moveDragController_) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "session or moveDragController is null");
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: session or moveDragController is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->moveDragController_->GetStartMoveFlag()) {
-            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "Repeat operation, window is moving");
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: Repeat operation, window is moving", where);
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
-        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d pointerPosX:%{public}d"
-            " pointerPosY:%{public}d", offsetX, offsetY, pointerPosX, pointerPosY);
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: offsetX:%{public}d offsetY:%{public}d pointerPosX:%{public}d"
+            " pointerPosY:%{public}d", where, offsetX, offsetY, pointerPosX, pointerPosY);
         WSRect winRect = {
             pointerPosX - offsetX,
             pointerPosY - offsetY,
