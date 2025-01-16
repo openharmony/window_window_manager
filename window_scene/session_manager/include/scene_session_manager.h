@@ -471,6 +471,7 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
+    void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
 
     /*
      * Window Layout
@@ -1132,11 +1133,17 @@ private:
      */
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+<<<<<<< HEAD
     SingleHandTransform singleHandTransform_;
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
+=======
+    GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
+    void InitVsyncStation();
+    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+>>>>>>> 711c83a3bf (singlehand register window container node)
     void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
