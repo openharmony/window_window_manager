@@ -120,6 +120,7 @@ public:
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
+    static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -208,6 +209,7 @@ private:
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
+    napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance

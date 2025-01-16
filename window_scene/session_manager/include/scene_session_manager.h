@@ -68,6 +68,7 @@ class ResourceManager;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
+class RSNode;
 namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
@@ -125,6 +126,7 @@ using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& 
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
+using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
@@ -469,6 +471,7 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
+    void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
 
     /*
      * Window Property
@@ -1122,8 +1125,10 @@ private:
      */
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+    void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
      * Window Snapshot
