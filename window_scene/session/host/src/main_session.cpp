@@ -18,10 +18,10 @@
 #include <ipc_skeleton.h>
 
 #include "common/include/fold_screen_state_internel.h"
-#include "session_helper.h"
-#include "window_helper.h"
-#include "session/host/include/scene_persistent_storage.h"
 #include "common/include/session_permission.h"
+#include "window_helper.h"
+#include "session_helper.h"
+#include "session/host/include/scene_persistent_storage.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -390,7 +390,7 @@ bool MainSession::GetSessionLockState() const
 WSError MainSession::SetSessionLabelAndIcon(const std::string& label,
     const std::shared_ptr<Media::PixelMap>& icon)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", persistentId_);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     const bool pidCheck = (callingPid != -1) && (callingPid == GetCallingPid());
     if (!pidCheck ||
