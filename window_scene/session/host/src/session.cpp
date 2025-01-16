@@ -1038,7 +1038,7 @@ void Session::SetSingleHandTransform(const SingleHandTransform& transform)
     singleHandTransform_ = transform;
 }
 
-SingleHandTransform Session::GetSingleHandTransform()
+SingleHandTransform Session::GetSingleHandTransform() const
 {
     return singleHandTransform_;
 }

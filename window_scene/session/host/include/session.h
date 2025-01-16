@@ -570,7 +570,7 @@ public:
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     void SetSingleHandTransform(const SingleHandTransform& transform);
-    SingleHandTransform GetSingleHandTransform();
+    SingleHandTransform GetSingleHandTransform() const;
 
     /*
      * Screen Lock
