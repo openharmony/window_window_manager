@@ -326,7 +326,6 @@ protected:
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
-    void RegisterFrameLayoutCallback();
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     sptr<WindowSessionImpl> FindExtensionWindowWithContext();
@@ -406,6 +405,7 @@ protected:
     /*
      * Window Layout
      */
+    void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
 
@@ -546,7 +546,8 @@ private:
     /*
      * Window Layout
      */
-    std::atomic_bool windowSizeChanged_ = true;
+    WSRect layoutRect_;
+    std::atomic_bool windowSizeChanged_ = false;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;

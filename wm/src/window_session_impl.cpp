@@ -720,10 +720,10 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     auto preRect = GetRect();
-    property_->SetWindowRect(wmRect);
     if (preRect.width_ != wmRect.width_ || preRect.height_ != wmRect.height_) {
         windowSizeChanged_ = true;
     }
+    property_->SetWindowRect(wmRect);
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
@@ -869,6 +869,30 @@ void WindowSessionImpl::NotifyRotationAnimationEnd()
         task();
     } else {
         handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyRotationAnimationEnd");
+    }
+}
+
+void WindowSessionImpl::FlushLayoutSize(int32_t width, int32_t height)
+{
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        return;
+    }
+    WSRect rect = { 0, 0, width, height };
+    bool windowSizeChanged = true;
+    bool enableFrameLayoutFinishCb = true;
+    if (windowSizeChanged_.compare_exchange_strong(windowSizeChanged, false) ||
+        enableFrameLayoutFinishCb_.compare_exchange_strong(enableFrameLayoutFinishCb, false) || layoutRect_ != rect) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+            "NotifyFrameLayoutFinishFromApp, id: %u, rect: %s, notifyListener: %d",
+            GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
+        TLOGI(WmsLogTag::WMS_LAYOUT,
+            "NotifyFrameLayoutFinishFromApp, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
+            GetWindowId(), rect.ToString().c_str(), enableFrameLayoutFinishCb_.load());
+        if (auto session = GetHostSession()) {
+            session->NotifyFrameLayoutFinishFromApp(enableFrameLayoutFinishCb_, rect);
+        }
+        layoutRect_ = rect;
+        enableFrameLayoutFinishCb_ = false;
     }
 }
 
@@ -1292,40 +1316,10 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
-        RegisterFrameLayoutCallback();
         WLOGFI("UIContent Initialize, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
     return WMError::WM_OK;
-}
-
-void WindowSessionImpl::RegisterFrameLayoutCallback()
-{
-    if (!WindowHelper::IsMainWindow(GetType()) || windowSystemConfig_.uiType_ == UI_TYPE_PC) {
-        return;
-    }
-    uiContent_->SetLatestFrameLayoutFinishCallback([weakThis = wptr(this)]() {
-        auto window = weakThis.promote();
-        if (window == nullptr) {
-            return;
-        }
-        if (window->windowSizeChanged_ || window->enableFrameLayoutFinishCb_) {
-            auto windowRect = window->GetRect();
-            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
-                "NotifyFrameLayoutFinish, id: %u, rect: %s, notifyListener: %d",
-                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
-            TLOGI(WmsLogTag::WMS_LAYOUT,
-                "NotifyFrameLayoutFinish, id: %{public}u, rect: %{public}s, notifyListener: %{public}d",
-                window->GetWindowId(), windowRect.ToString().c_str(), window->enableFrameLayoutFinishCb_.load());
-            WSRect rect = { windowRect.posX_, windowRect.posY_,
-                static_cast<int32_t>(windowRect.width_), static_cast<int32_t>(windowRect.height_) };
-            if (auto session = window->GetHostSession()) {
-                session->NotifyFrameLayoutFinishFromApp(window->enableFrameLayoutFinishCb_, rect);
-            }
-            window->windowSizeChanged_ = false;
-            window->enableFrameLayoutFinishCb_ = false;
-        }
-    });
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
