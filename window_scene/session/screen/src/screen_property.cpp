@@ -594,6 +594,6 @@ float ScreenProperty::CalculatePPI()
 
 uint32_t ScreenProperty::CalculateDPI()
 {
-    return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI);
+    return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI));
 }
 } // namespace OHOS::Rosen

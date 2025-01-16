@@ -261,6 +261,7 @@ private:
     uint32_t screenRealWidth_ { UINT32_MAX };
     uint32_t screenRealHeight_ { UINT32_MAX };
     float screenRealPPI_ { 0.0f };
+    uint32_t screenRealDPI_ { 0 };
 };
 } // namespace OHOS::Rosen
 
