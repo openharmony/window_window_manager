@@ -495,9 +495,10 @@ protected:
     /*
      * Window Property
      */
-    std::shared_ptr<WMSGetWindowListsCallback> onWMSGetWindowListsCallback_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
+    std::shared_ptr<WMSGetWindowListsCallback> onWMSGetWindowListsCallback_;
+    void RegisterWindowInspectorCallback();
 
     /*
      * Window Input Event

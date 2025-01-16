@@ -225,25 +225,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
             surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
         }
     }
-
-    if (!WindowInspector::GetInstance().IsInitConnectSuccess()) {
-        return;
-    }
-    onWMSGetWindowListsCallback_ = std::make_shared<WMSGetWindowListsCallback>([] {
-        std::vector<WindowListsInfo> windowListsInfoVec;
-        {
-            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
-            for (const auto& [_, winPair] : windowSessionMap_) {
-                if (auto window = winPair.second) {
-                    windowListsInfoVec.push_back({window->GetWindowName(), window->GetWindowId(),
-                        static_cast<uint32_t>(window->GetType()), window->GetRect() });
-                }
-            }
-        }
-        return windowListsInfoVec;
-    });
-    WindowInspector::GetInstance().RegisterWMSGetWindowListsCallback(
-        std::weak_ptr<WMSGetWindowListsCallback>(onWMSGetWindowListsCallback_));
+    RegisterWindowInspectorCallback();
 }
 
 bool WindowSessionImpl::IsPcWindow() const
@@ -4724,6 +4706,28 @@ void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 uint32_t WindowSessionImpl::GetTargetAPIVersion() const
 {
     return targetAPIVersion_;
+}
+
+void WindowSessionImpl::RegisterWindowInspectorCallback()
+{
+    if (!WindowInspector::GetInstance().IsInitConnectSuccess()) {
+        return;
+    }
+    onWMSGetWindowListsCallback_ = std::make_shared<WMSGetWindowListsCallback>([] {
+        std::vector<WindowListsInfo> windowListsInfoVec;
+        {
+            std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+            for (const auto& [_, winPair] : windowSessionMap_) {
+                if (auto window = winPair.second) {
+                    windowListsInfoVec.push_back({window->GetWindowName(), window->GetWindowId(),
+                        static_cast<uint32_t>(window->GetType()), window->GetRect() });
+                }
+            }
+        }
+        return windowListsInfoVec;
+    });
+    WindowInspector::GetInstance().RegisterWMSGetWindowListsCallback(
+        std::weak_ptr<WMSGetWindowListsCallback>(onWMSGetWindowListsCallback_));
 }
 } // namespace Rosen
 } // namespace OHOS
