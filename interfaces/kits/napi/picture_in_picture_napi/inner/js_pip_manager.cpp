@@ -197,26 +197,25 @@ napi_value JsPipManager::SetPipNodeType(napi_env env, napi_callback_info info)
 napi_value JsPipManager::OnSetPipNodeType(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PIP, "[NAPI]");
-    size_t argc = NUMBER_FOUR; // 4: arg number
+    size_t argc = NUMBER_FOUR;
     napi_value argv[NUMBER_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    return NapiGetUndefined(env);
-
     if (argc != NUMBER_TWO) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid:%{public}zu", argc);
         return NapiGetUndefined(env);
     }
     napi_value typeNode = argv[0];
     bool markPip = false;
     if (!ConvertFromJsValue(env, argv[NUMBER_ONE], markPip)) {
         TLOGW(WmsLogTag::WMS_PIP, "Failed to convert param to bool");
+        return NapiGetUndefined(env);
     }
     if (typeNode != nullptr && GetType(env, typeNode) != napi_undefined) {
         XComponentControllerErrorCode ret =
-                XComponentController::SetSurfaceCallbackMode(env, typeNode, markPip ?
-                SurfaceCallbackMode::PIP: SurfaceCallbackMode::DEFAULT);
-        TLOGI(WmsLogTag::WMS_PIP, "set surface mode, ret: %{public}u, isPip: %{public}d",
-              static_cast<uint32_t>(ret), static_cast<uint32_t>(markPip));
+            XComponentController::SetSurfaceCallbackMode(env, typeNode, markPip ?
+            SurfaceCallbackMode::PIP: SurfaceCallbackMode::DEFAULT);
+        TLOGI(WmsLogTag::WMS_PIP, "set surface mode, ret:%{public}u, isPip:%{public}d",
+            static_cast<uint32_t>(ret), static_cast<uint32_t>(markPip));
     }
     return NapiGetUndefined(env);
 }
@@ -237,8 +236,8 @@ bool NapiIsCallable(napi_env env, napi_value value)
 napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < NUMBER_TWO) {
         TLOGE(WmsLogTag::WMS_PIP, "Params count not match: %{public}zu", argc);
@@ -249,9 +248,8 @@ napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info inf
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert param to cbType");
         return NapiThrowInvalidParam(env);
     }
-    auto iter = find(PIP_CONTENT_CALLBACK.begin(), PIP_CONTENT_CALLBACK.end(), cbType);
-    if (iter == PIP_CONTENT_CALLBACK.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "Callback is null or not callable");
+    if (PIP_CONTENT_CALLBACK.count(cbType) == 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "cbType is not in PIP_CONTENT_CALLBACK");
         return NapiThrowInvalidParam(env);
     }
     napi_value value = argv[1];
@@ -264,16 +262,21 @@ napi_value JsPipManager::OnRegisterCallback(napi_env env, napi_callback_info inf
     napi_create_reference(env, value, 1, &result);
     callbackRef.reset(reinterpret_cast<NativeReference*>(result));
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (pipWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to find pip window");
+        return NapiGetUndefined(env);
+    }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_PIP, "OnRegisterCallback to window: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "OnRegisterCallback to window:%{public}d", windowId);
     WMError errCode = pipController->RegisterPipContentListenerWithType(cbType, callbackRef);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to registerCallback");
+        return NapiGetUndefined(env);
     }
     TLOGI(WmsLogTag::WMS_PIP, "Register type %{public}s success!", cbType.c_str());
     return NapiGetUndefined(env);
@@ -288,11 +291,11 @@ napi_value JsPipManager::UnregisterCallback(napi_env env, napi_callback_info inf
 napi_value JsPipManager::OnUnregisterCallback(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "[NAPI]");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_ONE) {
-        TLOGE(WmsLogTag::WMS_PIP, "Params count not match: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PIP, "Params count not match:%{public}zu", argc);
         return NapiThrowInvalidParam(env);
     }
     std::string cbType;
@@ -300,24 +303,28 @@ napi_value JsPipManager::OnUnregisterCallback(napi_env env, napi_callback_info i
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert param to cbType");
         return NapiThrowInvalidParam(env);
     }
-    auto iter = find(PIP_CONTENT_CALLBACK.begin(), PIP_CONTENT_CALLBACK.end(), cbType);
-    if (iter == PIP_CONTENT_CALLBACK.end()) {
-        TLOGE(WmsLogTag::WMS_PIP, "Callback is null or not callable");
+    if (PIP_CONTENT_CALLBACK.count(cbType) == 0) {
+        TLOGE(WmsLogTag::WMS_PIP, "cbType is not in PIP_CONTENT_CALLBACK");
         return NapiThrowInvalidParam(env);
     }
     sptr<Window> pipWindow = Window::Find(PIP_WINDOW_NAME);
+    if (pipWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to find pip window");
+        return NapiGetUndefined(env);
+    }
     int32_t windowId = static_cast<int32_t>(pipWindow->GetWindowId());
     sptr<PictureInPictureController> pipController = PictureInPictureManager::GetPipControllerInfo(windowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_PIP, "UnRegisterPipContentListenerWithType to window: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_PIP, "UnRegisterPipContentListenerWithType to window:%{public}d", windowId);
     WMError errCode = pipController->UnRegisterPipContentListenerWithType(cbType);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to set UnRegisterPipContentListenerWithType");
+        return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_PIP, "unregister type %{public}s success!", cbType.c_str());
+    TLOGI(WmsLogTag::WMS_PIP, "unregister type:%{public}s success!", cbType.c_str());
     return NapiGetUndefined(env);
 }
 

@@ -38,6 +38,7 @@ namespace {
 
 static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
 {
+    TLOGD(WmsLogTag::WMS_PIP, "called.");
     if (env == nullptr || method == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "env nullptr or method is nullptr");
         return nullptr;
@@ -47,7 +48,6 @@ static napi_value CallJsFunction(napi_env env, napi_value method, napi_value con
     napi_get_undefined(env, &result);
     napi_get_undefined(env, &callResult);
     napi_call_function(env, result, method, argc, argv, &callResult);
-    TLOGD(WmsLogTag::WMS_PIP, "called.");
     return callResult;
 }
 
@@ -786,7 +786,7 @@ void PictureInPictureController::NotifyStateChangeInner(napi_env env, PiPState s
     if (innerCallbackRef == nullptr) {
         return;
     }
-    napi_value value[] = { AbilityRuntime::CreateJsValue(env, static_cast<uint32_t>(state))};
+    napi_value value[] = {AbilityRuntime::CreateJsValue(env, static_cast<uint32_t>(state))};
     CallJsFunction(env, innerCallbackRef->GetNapiValue(), value, 1);
 }
 

@@ -21,121 +21,144 @@ const TAG = 'PiPContent';
 const ABOUT_TO_STOP = 3;
 
 class XCNodeController extends NodeController {
-    constructor(k2) {
+    constructor(m2) {
         super();
         this.node = null;
-        this.mXComponent = k2;
+        this.mXComponent = m2;
     }
-
-    makeNode(i2) {
-        let j2;
-        this.node = new FrameNode(i2);
+    makeNode(l2) {
+        this.node = new FrameNode(l2);
         this.node.appendChild(this.mXComponent);
         return this.node;
     }
-
-    replaceNode(r2) {
-        let s2;
-        let t2;
-        (s2 = this.node) === null || s2 === void 0 ? void 0 : s2.removeChild(this.mXComponent);
-        this.mXComponent = r2;
-        (t2 = this.node) === null || t2 === void 0 ? void 0 : t2.appendChild(this.mXComponent);
+    replaceNode(k) {
+        this.node?.removeChild(this.mXComponent);
+        this.mXComponent = k;
+        this.node?.appendChild(this.mXComponent);
     }
-
     removeNode() {
-        let h2;
-        (h2 = this.node) === null || h2 === void 0 ? void 0 : h2.removeChild(this.mXComponent);
+        this.node?.removeChild(this.mXComponent);
     }
 }
 
 class PiPContent extends ViewPU {
-    constructor(b2, c2, d2, e2 = -1, f2 = undefined, g2) {
-        super(b2, d2, e2, g2);
+    constructor(f2, g2, h2, i2 = -1, j2 = undefined, k2) {
+        super(f2, h2, i2, k2);
         if (typeof f2 === 'function') {
-            this.paramsGenerator_ = f2;
+            this.paramsGenerator_ = j2;
         }
-        this.xComponentController = new XComponentController;
+        this.xComponentController = new XComponentController();
         this.nodeController = null;
         this.mXCNodeController = null;
         this.__useNode = new ObservedPropertySimplePU(false, this, 'useNode');
         this.__nodeChange = new ObservedPropertySimplePU(false, this, 'nodeChange');
+        this.xComponent = null;
         this.xComponentId = 'pipContent';
         this.xComponentType = 'surface';
-        this.xComponent = null;
-        this.setInitiallyProvidedValue(c2);
+        this.setInitiallyProvidedValue(g2);
+        this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(a2) {
-        if (a2.xComponentController !== undefined) {
-            this.xComponentController = a2.xComponentController;
+    setInitiallyProvidedValue(e2) {
+        if (e2.xComponentController !== undefined) {
+            this.xComponentController = e2.xComponentController;
         }
-        if (a2.nodeController !== undefined) {
-            this.nodeController = a2.nodeController;
+        if (e2.nodeController !== undefined) {
+            this.nodeController = e2.nodeController;
         }
-        if (a2.mXCNodeController !== undefined) {
-            this.mXCNodeController = a2.mXCNodeController;
+        if (e2.mXCNodeController !== undefined) {
+            this.mXCNodeController = e2.mXCNodeController;
         }
-        if (a2.useNode !== undefined) {
-            this.useNode = a2.useNode;
+        if (e2.useNode !== undefined) {
+            this.useNode = e2.useNode;
         }
-        if (a2.nodeChange !== undefined) {
-            this.nodeChange = a2.nodeChange;
+        if (e2.nodeChange !== undefined) {
+            this.nodeChange = e2.nodeChange;
         }
-        if (a2.xComponentId !== undefined) {
-            this.xComponentId = a2.xComponentId;
+        if (e2.xComponent !== undefined) {
+            this.xComponent = e2.xComponent;
         }
-        if (a2.xComponentType !== undefined) {
-            this.xComponentType = a2.xComponentType;
+        if (e2.xComponentId !== undefined) {
+            this.xComponentId = e2.xComponentId;
         }
-        if (a2.xComponent !== undefined) {
-            this.xComponent = a2.xComponent;
+        if (e2.xComponentType !== undefined) {
+            this.xComponentType = e2.xComponentType;
         }
     }
-
-    updateStateVars(z1) {
+    updateStateVars(d2) {
     }
-
-    purgeVariableDependenciesOnElmtId(h2) {
-        this.__useNode.purgeDependencyOnElmtId(h2);
-        this.__nodeChange.purgeDependencyOnElmtId(h2);
+    purgeVariableDependenciesOnElmtId(c2) {
+        this.__useNode.purgeDependencyOnElmtId(c2);
+        this.__nodeChange.purgeDependencyOnElmtId(c2);
     }
-
     aboutToBeDeleted() {
         this.__useNode.aboutToBeDeleted();
         this.__nodeChange.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get useNode() {
         return this.__useNode.get();
     }
-
-    set useNode(b) {
-        this.__useNode.set(b);
+    set useNode(j) {
+        this.__useNode.set(j);
     }
-
     get nodeChange() {
         return this.__nodeChange.get();
     }
-
-    set nodeChange(a) {
-        this.__nodeChange.set(a);
+    set nodeChange(i) {
+        this.__nodeChange.set(i);
     }
-
-    validateNode(f2) {
-        if (f2 === null || f2 === undefined) {
+    validateNode(g) {
+        if (g === null || g === undefined) {
             console.error(TAG, `validateNode node is null`);
             return false;
         }
-        let g2 = f2.getNodeType();
-        if (g2 !== 'XComponent') {
-            console.error(TAG, `node type mismatch: ${g2}`);
+        let h = g.getNodeType();
+        if (h !== 'XComponent') {
+            console.error(TAG, `node type mismatch: ${h}`);
             return false;
         }
         return true;
     }
-
+    registerUpdateNodeListener() {
+        pip.on('nodeUpdate', (f) => {
+            console.info(TAG, `nodeUpdate`);
+            if (!this.validateNode(f)) {
+                return;
+            }
+            if (this.useNode) {
+                pip.setPipNodeType(this.xComponent, false);
+                this.updatePipNodeType(f);
+                this.mXCNodeController?.replaceNode(f);
+                this.nodeChange = true;
+            }
+            else {
+                this.updatePipNodeType(f);
+                this.mXCNodeController = new XCNodeController(f);
+                console.info(TAG, 'update to Node Controller');
+                this.registerStateChangeListener();
+                this.useNode = true;
+            }
+        });
+    }
+    updatePipNodeType(c) {
+        let d = c.getParent();
+        if (d === null || d === undefined) {
+            pip.setPipNodeType(c, false);
+        }
+        else {
+            pip.setPipNodeType(c, true);
+            d.removeChild(c);
+        }
+    }
+    registerStateChangeListener() {
+        pip.on('stateChange', (b) => {
+            console.info(TAG, `stateChange state:${b}`);
+            if (b === ABOUT_TO_STOP) {
+                this.mXCNodeController?.removeNode();
+            }
+        });
+    }
     aboutToAppear() {
         this.nodeController = pip.getCustomUIController();
         this.registerUpdateNodeListener();
@@ -143,43 +166,16 @@ class PiPContent extends ViewPU {
         if (!this.validateNode(this.xComponent)) {
             return;
         }
-        this.updatePipNodeType(this.xComponent);
+        if (this.xComponent === null) {
+            console.error(TAG, `validateNode node is null`);
+            return;
+        }
         this.useNode = true;
+        this.updatePipNodeType(this.xComponent);
         pip.setTypeNodeEnabled();
         this.mXCNodeController = new XCNodeController(this.xComponent);
         console.info(TAG, 'use Node Controller');
         this.registerStateChangeListener();
-    }
-
-    registerStateChangeListener() {
-        pip.on('stateChange', (y1) => {
-            let z1;
-            console.info(TAG, `stateChange state:${y1}`);
-            if (y1 === ABOUT_TO_STOP) {
-                (z1 = this.mXCNodeController) === null || z1 === void 0 ? void 0 : z1.removeNode();
-            }
-        });
-    }
-
-    registerUpdateNodeListener() {
-        pip.on('nodeUpdate', (d2) => {
-            let e2;
-            console.info(TAG, `nodeUpdate`);
-            if (!this.validateNode(d2)) {
-                return;
-            }
-            if (this.useNode) {
-                this.updatePipNodeType(d2);
-                (e2 = this.mXCNodeController) === null || e2 === void 0 ? void 0 : e2.replaceNode(d2);
-                this.nodeChange = true;
-            } else {
-                this.updatePipNodeType(d2);
-                this.mXCNodeController = new XCNodeController(d2);
-                console.info(TAG, 'update to Node Controller');
-                this.registerStateChangeListener();
-                this.useNode = true;
-            }
-        });
     }
 
     updatePipNodeType(a2) {

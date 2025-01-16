@@ -14,7 +14,6 @@
  */
 
 #include "js_pip_controller.h"
-
 #include "js_pip_utils.h"
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
@@ -196,17 +195,17 @@ napi_value JsPipController::UpdateContentNode(napi_env env, napi_callback_info i
 napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentNode is called");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_ONE) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Argc count is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid:%{public}zu", argc);
         return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
     }
     napi_value typeNode = argv[0];
     if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI] invalid typeNode");
-        return NapiThrowInvalidParam(env, "invalid typeNode.");
+        TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
+        return NapiThrowInvalidParam(env, "Invalid typeNode.");
     }
     if (pipController_ == nullptr) {
         std::string errMsg = "OnUpdateNode error, controller is nullptr";
@@ -214,7 +213,7 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         return NapiThrowInvalidParam(env, errMsg);
     }
     napi_ref typeNodeRef = nullptr;
-    napi_create_reference(env, typeNode, 1, &typeNodeRef);
+    napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
     pipController_->UpdateContentNodeRef(typeNodeRef);
     return NapiGetUndefined(env);
 }
