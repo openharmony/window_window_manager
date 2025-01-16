@@ -164,7 +164,8 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Leve
 HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
-    ssm_->focusedSessionId_ = 0;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(0);
 
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "PostProcessFocus01";
@@ -180,7 +181,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Le
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
 
-    EXPECT_NE(1, ssm_->focusedSessionId_);
+    EXPECT_NE(1, focusGroup->GetFocusedSessionId());
 }
 
 /**

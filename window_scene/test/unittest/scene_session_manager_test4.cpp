@@ -499,8 +499,8 @@ HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos, Function | SmallTes
     sceneSession->sessionInfo_.isSystem_ = false;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->ReportWindowProfileInfos();
-
-    ssm_->focusedSessionId_ = 123;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(123);
     ssm_->ReportWindowProfileInfos();
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
