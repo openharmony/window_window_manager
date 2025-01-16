@@ -1641,8 +1641,8 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, Function | SmallTe
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession1->property->SetFocusable(true);
-    sceneSession1->property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession1->property_->SetFocusable(true);
+    sceneSession1->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession1->persistentId_ = 2;
     sceneSession1->isVisible_ = true;
     sceneSession1->state_ = SessionState::STATE_ACTIVE;
