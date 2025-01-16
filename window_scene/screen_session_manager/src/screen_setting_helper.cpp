@@ -529,12 +529,14 @@ void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
 
 bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, const std::string& key)
 {
+    int32_t value;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetBoolValue(key, enable);
+    ErrCode ret = settingProvider.GetIntValue(key, value);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
+    enable = value == 1;
     return true;
 }
 } // namespace Rosen
