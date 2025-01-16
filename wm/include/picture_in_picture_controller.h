@@ -84,16 +84,16 @@ public:
     WMError RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
+    WMError RegisterPipContentListenerWithType(const std::string&,
+        std::shared_ptr<NativeReference> updateNodeCallbackRef);
     WMError UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError UnregisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
+    WMError UnRegisterPipContentListenerWithType(const std::string&);
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     sptr<IPiPControlObserver> GetPictureInPictureControlObserver() const;
     std::shared_ptr<NativeReference> GetPipContentCallbackRef(const std::string&);
-    WMError RegisterPipContentListenerWithType(const std::string&,
-        std::shared_ptr<NativeReference> updateNodeCallbackRef);
-    WMError UnRegisterPipContentListenerWithType(const std::string&);
     WMError SetXComponentController(std::shared_ptr<XComponentController> xComponentController);
     PiPWindowState GetControllerState();
     std::string GetPiPNavigationId();
@@ -122,6 +122,8 @@ private:
     void NotifyStateChangeInner(napi_env env, PiPState state);
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
+    void NotifyNodeUpdate(napi_ref nodeRef);
+    void NotifyStateChangeInner(napi_env env, PiPState state);
     wptr<PictureInPictureController> weakRef_ = nullptr;
     sptr<PipOption> pipOption_ = nullptr;
     std::vector<sptr<IPiPLifeCycle>> pipLifeCycleListeners_;

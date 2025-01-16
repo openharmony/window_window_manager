@@ -14,7 +14,7 @@
  */
 
 import pip from '@ohos.pip';
-import { NodeController, FrameNode, TypedFrameNode, UIContext } from '@kit.ArkUI';
+import { NodeController, FrameNode, UIContext, typeNode } from '@kit.ArkUI';
 
 const TAG: string = 'PiPContent';
 const ABOUT_TO_STOP = 3;
@@ -102,11 +102,11 @@ struct PiPContent {
   }
 
   private registerStateChangeListener() {
-       pip.on('stateChange', (state: number) => {
-         console.info(TAG, `stateChange state:${state}`);
-         if (state === ABOUT_TO_STOP) {
-           this.mXCNodeController?.removeNode();
-         }
+    pip.on('stateChange', (state: number) => {
+      console.info(TAG, `stateChange state:${state}`);
+      if (state === ABOUT_TO_STOP) {
+        this.mXCNodeController?.removeNode();
+      }
     })
   }
 
@@ -115,6 +115,10 @@ struct PiPContent {
     this.registerUpdateNodeListener();
     this.xComponent = pip.getTypeNode();
     if (!this.validateNode(this.xComponent)) {
+      return;
+    }
+    if (this.xComponent === null) {
+      console.error(TAG, `validateNode node is null`);
       return;
     }
     this.useNode = true;
