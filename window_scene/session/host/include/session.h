@@ -571,6 +571,8 @@ public:
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     bool IsDragAccessible() const;
+    void SetSingleHandTransform(const SingleHandTransform& transform);
+    SingleHandTransform GetSingleHandTransform() const;
 
     /*
      * Screen Lock
@@ -580,7 +582,7 @@ public:
     /*
      * Free Multi Window
      */
-    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
+    std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scale, bool isFreeze, float blur) const;
 
     /*
      * PC Window
@@ -885,6 +887,7 @@ private:
      */
     std::optional<bool> clientDragEnable_;
     bool dragActivated_ = true;
+    SingleHandTransform singleHandTransform_;
 
     /*
      * Screen Lock

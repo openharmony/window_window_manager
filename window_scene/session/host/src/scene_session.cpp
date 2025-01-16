@@ -3511,6 +3511,23 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
     }
 }
 
+void SceneSession::CloneWindow(NodeId surfaceNodeId)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::CloneWindow");
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+    }
+    if (auto surfaceNode = GetSurfaceNode()) {
+        TLOGI(WmsLogTag::WMS_PC, "%{public}s this: %{public}" PRIu64 " cloned: %{public}" PRIu64,
+            surfaceNode->GetName().c_str(), surfaceNode->GetId(), surfaceNodeId);
+        surfaceNode->SetClonedNodeId(surfaceNodeId);
+    }
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
+}
+
 void SceneSession::MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::MarkSystemSceneUIFirst");
