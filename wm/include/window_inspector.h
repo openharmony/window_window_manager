@@ -36,8 +36,9 @@ class WindowInspector : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
     bool IsConnectServerSuccess() const;
-    void RegisterGetWMSWindowListCallback(std::string windowName, const wptr<GetWMSWindowListCallback>& func);
-    void UnregisterGetWMSWindowListCallback(std::string windowName);
+    void RegisterGetWMSWindowListCallback(const std::string& windowName,
+        std::shared_ptr<GetWMSWindowListCallback>&& func);
+    void UnregisterGetWMSWindowListCallback(const std::string& windowName);
 
 protected:
     WindowInspector();
@@ -48,9 +49,11 @@ private:
     void* handlerConnectServerSo_ = nullptr;
     SendWMSMessageFunc sendWMSMessageFunc_ = nullptr;
     SetWMSCallbackFunc setWMSCallbackFunc_ = nullptr;
+
     std::mutex callbackMutex_;
-    static std::unordered_map<std::string, sptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
-    static sptr<WindowInspector> CreateInstance();
+    std::unordered_map<std::string, sptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
+    // Above guarded by callbackMutex_
+
     void ConnectServer();
     void CloseConnectServer();
     void UnregisterAllCallbacks();
