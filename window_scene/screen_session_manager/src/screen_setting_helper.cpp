@@ -534,7 +534,7 @@ bool ScreenSettingHelper::GetHalfScreenSwitchState(const std::string& key)
     std::string strValue = "";
     ErrCode ret = halfScreenProvider.GetStringValue(key, strValue);
     if (ret != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "GetHalfScreenSwitchState failed, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return false;
     }
     if (strValue != HALF_SCREEN_SWITCH_ON) {
