@@ -44,7 +44,7 @@ private:
     DisplayId displayGroupId_ = DISPLAY_ID_INVALID;
 
 public:
-    FocusGroup(DisplayId displayGroupId) : displayGroupId_(displayGroupId) explicit {}
+    explicit FocusGroup(DisplayId displayGroupId) : displayGroupId_(displayGroupId) {}
     WSError UpdateFocusedSessionId(int32_t persistentId)
     {
         TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId_, persistentId);
