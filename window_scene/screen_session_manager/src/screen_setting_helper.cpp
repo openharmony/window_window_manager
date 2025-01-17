@@ -25,11 +25,13 @@ namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
+sptr<SettingObserver> ScreenSettingHelper::halfScreenObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
 constexpr uint32_t DATA_SIZE_INVALID = 0xffffffff;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
+const std::string HALF_SCREEN_SWITCH_ON = "0";
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -495,6 +497,50 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
+}
+
+void ScreenSettingHelper::RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func)
+{
+    if (halfScreenObserver_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "setting halfScreen observer is registered");
+        return;
+    }
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    halfScreenObserver_ = halfScreenProvider.CreateObserver(SETTING_HALF_SCREEN_SWITCH_KEY, func);
+    ErrCode ret = halfScreenProvider.RegisterObserver(halfScreenObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "halfScreen failed, ret:%{public}d", ret);
+        halfScreenObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingHalfScreenObserver()
+{
+    if (halfScreenObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = halfScreenProvider.UnregisterObserver(halfScreenObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+    }
+    halfScreenObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetHalfScreenSwitchState(const std::string& key)
+{
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
+    std::string strValue = "";
+    ErrCode ret = halfScreenProvider.GetStringValue(key, strValue);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "GetHalfScreenSwitchState failed, ret:%{public}d", ret);
+        return false;
+    }
+    if (strValue != HALF_SCREEN_SWITCH_ON) {
+        return false;
+    }
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS
