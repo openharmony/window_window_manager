@@ -1829,14 +1829,14 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
         return;
     }
     WindowMode windowMode = Session::GetWindowMode();
-    bool isWindowFloatingOrSplit = (windowMode == WindowMode::WINDOW_MODE_FLOATING ||
-                                    windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                                    windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+    bool isWindowFloatingOrSplit = windowMode == WindowMode::WINDOW_MODE_FLOATING ||
+                                   windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                                   windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     WindowType windowType = Session::GetWindowType();
-    bool isAvailableSystemWindow = (WindowHelper::IsSystemWindow(windowType) &&
-        (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW)));
-    bool isAvailableAppSubWindow = (WindowHelper::IsSubWindow(windowType) &&
-        (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)));
+    bool isAvailableSystemWindow = WindowHelper::IsSystemWindow(windowType) &&
+        (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW));
+    bool isAvailableAppSubWindow = WindowHelper::IsSubWindow(windowType) &&
+        (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW));
     bool isAvailableWindowType = WindowHelper::IsMainWindow(windowType) || isAvailableSystemWindow ||
                                  isAvailableAppSubWindow;
     bool isAvailableDevice = systemConfig_.IsPhoneWindow() ||
