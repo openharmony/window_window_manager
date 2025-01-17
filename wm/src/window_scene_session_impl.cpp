@@ -1082,8 +1082,6 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
             TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is null");
         }
     }
-    state_ = WindowState::STATE_SHOWN;
-    requestState_ = WindowState::STATE_SHOWN;
     uiContent->Foreground();
     uiContent->PreLayout();
 }
