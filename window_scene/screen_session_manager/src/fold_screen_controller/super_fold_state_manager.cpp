@@ -46,13 +46,13 @@ const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "enter DoAngleChangeFolded() func");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event");
     isHalfFolded_ = false;
 }
 
 void SuperFoldStateManager::DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "enter DoAngleChangeHalfFolded() func");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event");
     isHalfFolded_ = true;
     if (!isHalfScreenSwitchOn_) {
         TLOGI(WmsLogTag::DMS, "Half Screen Switch is off");
@@ -65,7 +65,7 @@ void SuperFoldStateManager::DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents 
 
 void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "enter DoAngleChangeExpanded() func");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event");
     isHalfFolded_ = false;
     if (isKeyboardOn_) {
         TLOGI(WmsLogTag::DMS, "Keyboard On, no need to recover");
@@ -78,7 +78,7 @@ void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents ev
 
 void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "enter DoKeyboardOn() func");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event");
     isKeyboardOn_ = true;
     if (!ChangeScreenState(true)) {
         TLOGI(WmsLogTag::DMS, "change to half screen fail!");
@@ -87,7 +87,7 @@ void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 
 void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "enter DoKeyboardOff() func");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event");
     isKeyboardOn_ = false;
     if (isHalfFolded_ && isHalfScreenSwitchOn_) {
         TLOGI(WmsLogTag::DMS, "screen is folded and switch on, no need to recover");
@@ -100,7 +100,7 @@ void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 
 void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "enter DoFoldedToHalfFolded() func");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event");
     isHalfFolded_ = true;
     if (!isHalfScreenSwitchOn_) {
         TLOGI(WmsLogTag::DMS, "Half Screen Switch is off");
