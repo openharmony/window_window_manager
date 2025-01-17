@@ -78,8 +78,8 @@ public:
     WSRect GetOriginalRect() const;
     void InitMoveDragProperty();
     void SetOriginalWindowPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
-                          int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
-                          const WSRect& winRect);
+                              int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
+                              const WSRect& winRect);
     void SetAspectRatio(float ratio);
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
