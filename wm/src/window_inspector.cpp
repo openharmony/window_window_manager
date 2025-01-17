@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "window_inspector.h"
-
 #include <dlfcn.h>
 
 #include "nlohmann/json.hpp"
+
 #include "window_manager_hilog.h"
+#include "window_inspector.h"
 
 namespace OHOS::Rosen {
 namespace {
