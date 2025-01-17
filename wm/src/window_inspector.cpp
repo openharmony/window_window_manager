@@ -30,13 +30,19 @@ const std::string COMMAND_NAME = "getCurrentProcessWindowList";
 
 WindowInspector& WindowInspector::GetInstance()
 {
-    static sptr<WindowInspector> instance = new WindowInspector();
-    return *instance;
+    static WindowInspector instance;
+    return instance;
 }
 
-WindowInspector::WindowInspector() { ConnectServer(); }
+WindowInspector::WindowInspector()
+{
+    ConnectServer();
+}
 
-WindowInspector::~WindowInspector() { UnregisterAllCallbacks(); }
+WindowInspector::~WindowInspector()
+{
+    UnregisterAllCallbacks();
+}
 
 void WindowInspector::ConnectServer()
 {
@@ -80,7 +86,7 @@ void WindowInspector::RegisterGetWMSWindowListCallback(
     if (result) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered");
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", windowId);
 }
 
 void WindowInspector::UnregisterGetWMSWindowListCallback(uint32_t windowId)
@@ -88,7 +94,7 @@ void WindowInspector::UnregisterGetWMSWindowListCallback(uint32_t windowId)
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto iter = getWMSWindowListCallbacks_.find(windowId);
     if (iter == getWMSWindowListCallbacks_.end()) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback not registered");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u callback not registered", windowId);
         return;
     }
     getWMSWindowListCallbacks_.erase(iter);
