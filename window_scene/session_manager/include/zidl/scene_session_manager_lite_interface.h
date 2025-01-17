@@ -82,6 +82,7 @@ public:
         TRANS_ID_GET_CURRENT_PIP_WINDOW_INFO,
         TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST,
         TRANS_ID_GET_ROOT_MAIN_WINDOW_ID,
+        TRANS_ID_UI_EXTENSION_CREATION_CHECK,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;

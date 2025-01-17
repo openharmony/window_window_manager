@@ -94,6 +94,7 @@ public:
     virtual void OnRemoveBlank() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnExtensionDied() {}
+    virtual void OnExtensionDetachToDisplay() {}
     virtual void OnExtensionTimeout(int32_t errorCode) {}
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
@@ -174,6 +175,7 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) override;
+    void NotifyExtensionDetachToDisplay() override;
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true);
@@ -518,6 +520,11 @@ public:
      */
     std::shared_ptr<Media::PixelMap> SetFreezeImmediately(float scaleParam, bool isFreeze) const;
 
+    /*
+     * Screen Lock
+     */
+    bool IsScreenLockWindow() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -800,6 +807,11 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+
+    /*
+     * Screen Lock
+     */
+    bool isScreenLockWindow_ { false };
 };
 } // namespace OHOS::Rosen
 

@@ -99,6 +99,12 @@ using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayI
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 
+struct UIExtensionTokenInfo {
+    bool canShowOnLockScreen { false };
+    uint32_t callingTokenId { 0 };
+    sptr<IRemoteObject> abilityToken;
+};
+
 class SceneSession : public Session {
 public:
     // callback for notify SceneSessionManager
@@ -424,6 +430,7 @@ public:
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
     void RegisterClearCallbackMapCallback(ClearCallbackMapFunc&& callback);
+    virtual WSError HideSync() { return WSError::WS_DO_NOTHING; }
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -472,6 +479,15 @@ public:
         WSPropertyChangeAction action) override;
     void SetSessionChangeByActionNotifyManagerListener(const SessionChangeByActionNotifyManagerFunc& func);
 
+    /*
+     * UIExtension
+     */
+    bool IsShowOnLockScreen(uint32_t lockScreenZOrder);
+    void AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo);
+    void RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityToken);
+    void CheckExtensionOnLockScreenToClose();
+    void CloseExtensionSync(const UIExtensionTokenInfo& tokenInfo);
+    void OnNotifyAboveLockScreen();
     void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveModalUIExtension(int32_t persistentId);
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
@@ -762,10 +778,16 @@ private:
     std::atomic_bool isStartMoving_ { false };
     std::atomic_bool isVisibleForAccessibility_ { true };
     bool isSystemSpecificSession_ { false };
+
+    /*
+     * UIExtension
+     */
     std::atomic_bool shouldHideNonSecureWindows_ { false };
     std::shared_mutex combinedExtWindowFlagsMutex_;
     ExtensionWindowFlags combinedExtWindowFlags_ { 0 };
     std::map<int32_t, ExtensionWindowFlags> extWindowFlagsMap_;
+    std::vector<UIExtensionTokenInfo> extensionTokenInfos_;
+
     int32_t customDecorHeight_ = 0;
     ForceHideState forceHideState_ { ForceHideState::NOT_HIDDEN };
     static std::shared_mutex windowDragHotAreaMutex_;

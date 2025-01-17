@@ -90,6 +90,7 @@ public:
     static napi_value RequestFocusStatus(napi_env env, napi_callback_info info);
     static napi_value RequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     static napi_value SetScreenLocked(napi_env env, napi_callback_info info);
+    static napi_value SetUserAuthPassed(napi_env env, napi_callback_info info);
     static napi_value UpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     static napi_value UpdateMaximizeMode(napi_env env, napi_callback_info info);
     static napi_value ReportData(napi_env env, napi_callback_info info);
@@ -120,6 +121,7 @@ public:
     static napi_value RemoveAppInfo(napi_env env, napi_callback_info info);
     static napi_value GetWindowPid(napi_env env, napi_callback_info info);
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
+    static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -159,6 +161,7 @@ private:
     napi_value OnRequestFocusStatus(napi_env env, napi_callback_info info);
     napi_value OnRequestAllAppSessionUnfocus(napi_env env, napi_callback_info info);
     napi_value OnSetScreenLocked(napi_env env, napi_callback_info info);
+    napi_value OnSetUserAuthPassed(napi_env env, napi_callback_info info);
     napi_value OnUpdateMaximizeMode(napi_env env, napi_callback_info info);
     napi_value OnReportData(napi_env env, napi_callback_info info);
     napi_value OnGetRssData(napi_env env, napi_callback_info info);
@@ -189,6 +192,7 @@ private:
     napi_value OnRemoveAppInfo(napi_env env, napi_callback_info info);
     napi_value OnGetWindowPid(napi_env env, napi_callback_info info);
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
+    napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
