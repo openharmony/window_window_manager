@@ -356,5 +356,142 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
     Uri uri(uriString);
     return uri;
 }
+
+ErrCode SettingProvider::RegisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName)
+{
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
+    auto uri = AssembleUriMultiUserByTable(observer->GetKey(), tableName);
+    auto helper = CreateDataShareHelperMultiUserByTable(tableName);
+    if (helper == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_NO_INIT;
+    }
+    helper->RegisterObserver(uri, observer);
+    helper->NotifyChange(uri);
+    std::thread execCb(SettingProvider::ExecRegisterCb, observer);
+    execCb.detach();
+    ReleaseDataShareHelper(helper);
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
+    WLOGFD("succeed to register observer of uri=%{public}s", uri.ToString().c_str());
+    return ERR_OK;
+}
+
+ErrCode SettingProvider::UnregisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName)
+{
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
+    auto uri = AssembleUriMultiUserByTable(observer->GetKey(), tableName);
+    auto helper = CreateDataShareHelperMultiUserByTable(tableName);
+    if (helper == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_NO_INIT;
+    }
+    helper->UnregisterObserver(uri, observer);
+    ReleaseDataShareHelper(helper);
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
+    WLOGFD("succeed to unregister observer of uri=%{public}s", uri.ToString().c_str());
+    return ERR_OK;
+}
+
+ErrCode SettingProvider::GetIntValueMultiUserByTable(const std::string& key, int32_t& value, std::string tableName)
+{
+    int64_t valueLong;
+    ErrCode ret = GetLongValueMultiUserByTable(key, valueLong, tableName);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    value = static_cast<int32_t>(valueLong);
+    return ERR_OK;
+}
+
+ErrCode SettingProvider::GetLongValueMultiUserByTable(const std::string& key, int64_t& value, std::string tableName)
+{
+    std::string valueStr;
+    ErrCode ret = GetStringValueMultiUserByTable(key, valueStr, tableName);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    value = static_cast<int64_t>(strtoll(valueStr.c_str(), nullptr, PARAM_NUM_TEN));
+    return ERR_OK;
+}
+
+ErrCode SettingProvider::GetStringValueMultiUserByTable(const std::string& key,
+    std::string& value, std::string tableName)
+{
+    std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
+    auto helper = CreateDataShareHelperMultiUserByTable(tableName);
+    if (helper == nullptr) {
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_NO_INIT;
+    }
+    std::vector<std::string> columns = {SETTING_COLUMN_VALUE};
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SETTING_COLUMN_KEYWORD, key);
+    Uri uri(AssembleUriMultiUserByTable(key, tableName));
+    auto resultSet = helper->Query(uri, predicates, columns);
+    ReleaseDataShareHelper(helper);
+    if (resultSet == nullptr) {
+        WLOGFE("helper->Query return nullptr");
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t count;
+    resultSet->GetRowCount(count);
+    if (count == 0) {
+        WLOGFW("not found value, key=%{public}s, count=%{public}d", key.c_str(), count);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        resultSet->Close();
+        return ERR_NAME_NOT_FOUND;
+    }
+    const int32_t INDEX = 0;
+    resultSet->GoToRow(INDEX);
+    int32_t ret = resultSet->GetString(INDEX, value);
+    if (ret != NativeRdb::E_OK) {
+        WLOGFW("resultSet->GetString return not ok, ret=%{public}d", ret);
+        IPCSkeleton::SetCallingIdentity(callingIdentity);
+        resultSet->Close();
+        return ERR_INVALID_VALUE;
+    }
+    resultSet->Close();
+    IPCSkeleton::SetCallingIdentity(callingIdentity);
+    return ERR_OK;
+}
+
+std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelperMultiUserByTable(std::string tableName)
+{
+    std::string uriString = "";
+    int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
+    if (userId > 0) {
+        WLOGFD("current userId: %{public}d", userId);
+        std::string userIdString = std::to_string(userId);
+        uriString = SETTING_MULTI_USER_URI + tableName + userIdString +
+            SETTING_MULTI_USER_PROXY;
+    } else {
+        WLOGFE("invalid userId: %{public}d, use default uri", userId);
+        uriString = SETTING_URI_PROXY;
+    }
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, uriString, SETTINGS_DATA_EXT_URI);
+    if (helper == nullptr) {
+        WLOGFW("helper is nullptr, uri=%{public}s", uriString.c_str());
+        return nullptr;
+    }
+    return helper;
+}
+
+Uri SettingProvider::AssembleUriMultiUserByTable(const std::string& key, std::string tableName)
+{
+    std::string uriString = "";
+    int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
+    if (userId > 0) {
+        WLOGFD("current userId: %{public}d", userId);
+        std::string userIdString = std::to_string(userId);
+        uriString = SETTING_MULTI_USER_URI + tableName + userIdString +
+            SETTING_MULTI_USER_PROXY + "&key=" + key;
+    } else {
+        WLOGFE("invalid userId: %{public}d, use default uri", userId);
+        uriString = SETTING_URI_PROXY + "&key=" + key;
+    }
+    Uri uri(uriString);
+    return uri;
+}
 } // namespace Rosen
 } // namespace OHOS
