@@ -136,7 +136,7 @@ enum class StartMethod : int32_t {
 };
 
 enum class SingleHandMode : int32_t {
-    LEFT,
+    LEFT = 0,
     RIGHT,
     MIDDLE
 };

@@ -959,8 +959,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, CheckDragActivatedInUpdatePointerAreas, F
 HWTEST_F(SceneSessionDirtyManagerTest, GetSingleHandData, Function | SmallTest | Level2)
 {
     SingleHandData testSingleHandData;
-    std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     SessionInfo mainWindowInfo;
     mainWindowInfo.abilityName_ = "TestMainWithType";
     mainWindowInfo.bundleName_ = "TestMainWithType";

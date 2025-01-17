@@ -32,6 +32,7 @@ struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
+
 struct SingleHandData {
     float scaleX = 1;
     float scaleY = 1;
