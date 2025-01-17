@@ -108,14 +108,14 @@ public:
         lastFocusedAppSessionId_ = lastFocusedAppSessionId;
     }
 
-    void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlockNotifyFocusStatusUntilForeground)
+    void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlock)
     {
-        needBlockNotifyFocusStatusUntilForeground = needBlockNotifyFocusStatusUntilForeground;
+        needBlockNotifyFocusStatusUntilForeground = needBlock;
     }
 
-    void SetNeedBlockNotifyUnfocusStatus(bool needBlockNotifyUnfocusStatus)
+    void SetNeedBlockNotifyUnfocusStatus(bool needBlock)
     {
-        needBlockNotifyUnfocusStatus = needBlockNotifyUnfocusStatus;
+        needBlockNotifyUnfocusStatus = needBlock;
     }
 };
 
