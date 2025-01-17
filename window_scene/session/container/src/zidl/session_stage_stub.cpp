@@ -188,6 +188,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleExtensionHostData(data, reply, option);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
             return HandleSendContainerModalEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE):
+            return HandleNotifyHighlightChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -323,6 +325,15 @@ int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, Mes
         return ERR_INVALID_VALUE;
     }
     WSError errCode = NotifyTransferComponentData(*wantParams);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called!");
+    bool isHighlight = data.ReadBool();
+    WSError errCode = NotifyHighlightChange(isHighlight);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }

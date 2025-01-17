@@ -117,9 +117,6 @@ public:
     Rect GetRequestRect() const;
     RectAnimationConfig GetRectAnimationConfig() const;
     WindowType GetWindowType() const;
-    bool GetFocusable() const;
-    bool GetFocusableOnShow() const;
-    bool GetTouchable() const;
     bool GetDragEnabled() const;
     bool GetHideNonSystemFloatingWindows() const;
     bool GetForceHide() const;
@@ -251,6 +248,15 @@ public:
     void SetKeyboardViewMode(KeyboardViewMode mode);
     KeyboardViewMode GetKeyboardViewMode() const;
 
+    /*
+     * Window focus
+     */
+    bool GetFocusable() const;
+    bool GetFocusableOnShow() const;
+    bool GetTouchable() const;
+    bool GetExclusivelyHighlighted() const;
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
+
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
     bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
@@ -286,6 +292,7 @@ private:
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
     bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
+    bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -313,6 +320,7 @@ private:
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
     void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
+    void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -322,9 +330,6 @@ private:
     mutable std::mutex rectAnimationConfigMutex_;
     RectAnimationConfig rectAnimationConfig_ { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
-    bool focusable_ { true };
-    bool focusableOnShow_ { true };
-    bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };
     bool isSystemCalling_ = { false };
@@ -434,6 +439,15 @@ private:
      * Window Immersive
      */
     uint32_t avoidAreaOption_ = 0;
+
+    /*
+     * Window Focus
+     */
+    bool focusable_ { true };
+    bool focusableOnShow_ { true };
+    bool touchable_ { true };
+    bool isExclusivelyHighlighted_ { true };
+
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

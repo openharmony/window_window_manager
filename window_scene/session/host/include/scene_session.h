@@ -613,6 +613,12 @@ public:
     bool IsKeyboardAvoidAreaActive() const;
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
 
+    /*
+     * Window Focus
+     */
+    bool IsRelated(sptr<SceneSession>& prevSession);
+    void SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func);
+
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -863,6 +869,8 @@ private:
     WMError HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+    WMError HandleActionUpdateExclusivelyHighlighted(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,

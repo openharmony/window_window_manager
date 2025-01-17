@@ -53,6 +53,7 @@ const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
+const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -73,7 +74,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowNoInteractionListener,
                          public IWindowRectChangeListener,
                          public IMainWindowCloseListener,
-                         public ISubWindowCloseListener {
+                         public ISubWindowCloseListener,
+                         public IWindowHighlightChangeListener {
 public:
     JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
         : env_(env), jsCallBack_(callback), caseType_(caseType), weakRef_(wptr<JsWindowListener> (this)) {}
@@ -112,6 +114,7 @@ public:
     void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void OnWindowHighlightChange(bool isHighlight) override;
 
 private:
     void OnLastStrongRef(const void *) override;

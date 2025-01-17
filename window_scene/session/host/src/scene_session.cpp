@@ -3668,6 +3668,14 @@ bool SceneSession::IsSystemSessionAboveApp() const
     return false;
 }
 
+/** @note @window.focus */
+bool SceneSession::IsRelated(sptr<SceneSession>& prevSession)
+{
+    int32_t currSessionId = GetMainSessionId();
+    int32_t prevSessionId = prevSession->GetMainSessionId();
+    return currSessionId == prevSessionId && prevSessionId != INVALID_SESSION_ID;
+}
+
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
@@ -4460,6 +4468,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateAvoidAreaOption(property, action);
         case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA):
             return HandleBackgroundAlpha(property, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED):
+            return HandleActionUpdateExclusivelyHighlighted(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4784,6 +4794,18 @@ WMError SceneSession::HandleBackgroundAlpha(const sptr<WindowSessionProperty>& p
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     sessionProperty->SetBackgroundAlpha(property->GetBackgroundAlpha());
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::HandleActionUpdateExclusivelyHighlighted(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "property is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sessionProperty->SetExclusivelyHighlighted(property->GetExclusivelyHighlighte());
     return WMError::WM_OK;
 }
 
@@ -5758,6 +5780,11 @@ void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& fun
 void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func)
 {
     privacyModeChangeNotifyFunc_ = func;
+}
+
+void SceneSession::SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func)
+{
+    highlightChangeFunc_ = func;
 }
 
 int32_t SceneSession::GetStatusBarHeight()
