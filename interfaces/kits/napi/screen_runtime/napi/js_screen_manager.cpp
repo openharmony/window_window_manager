@@ -779,8 +779,8 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_ONE) {
-        WLOGFE("Invalid args count, need one arg at least!");
+    if (argc < ARGC_TWO) {
+        WLOGFE("Invalid args count, need two arg at least!");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
     napi_value array = argv[0];
@@ -801,9 +801,6 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
     napi_value lastParam = nullptr;
-    if (argc >= ARGC_TWO && argv[ARGC_TWO - 1] != nullptr && GetType(env, argv[ARGC_TWO - 1]) == napi_function) {
-        lastParam = argv[ARGC_TWO - 1];
-    }
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [this, screenIds, env, task = napiAsyncTask.get()]() {
@@ -1475,8 +1472,7 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
         JsScreenManager::SetScreenRotationLocked);
     BindNativeFunction(env, exportObj, "isScreenRotationLocked", moduleName,
         JsScreenManager::IsScreenRotationLocked);
-    BindNativeFunction(env, exportObj, "makeUnique", moduleName,
-        JsScreenManager::MakeUnique);
+    BindNativeFunction(env, exportObj, "makeUnique", moduleName, JsScreenManager::MakeUnique);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
