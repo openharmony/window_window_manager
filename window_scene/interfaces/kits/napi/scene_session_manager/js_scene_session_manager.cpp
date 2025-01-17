@@ -4080,7 +4080,7 @@ napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env
     }
     std::string stringId;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], stringId)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to height");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to stringId");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
