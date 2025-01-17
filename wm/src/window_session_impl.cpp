@@ -4752,7 +4752,7 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winName: %{public}s connect failed", GetWindowName().c_str());
         return;
     }
-    onGetWMSWindowListCallback_ = std::make_shared<GetWMSWindowListCallback>([weakThis = wptr(this)] {
+    auto getWMSWindowListCallback = std::make_shared<GetWMSWindowListCallback>([weakThis = wptr(this)] {
         WindowListInfo windowListInfo;
         if (auto window = weakThis.promote()) {
             windowListInfo.windowName = window->GetWindowName();
@@ -4762,8 +4762,8 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
         }
         return windowListInfo;
     });
-    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(
-        GetWindowName(), std::weak_ptr<GetWMSWindowListCallback>(onGetWMSWindowListCallback_));
+    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowName(),
+                                                                    std::move(getWMSWindowListCallback));
 }
 } // namespace Rosen
 } // namespace OHOS

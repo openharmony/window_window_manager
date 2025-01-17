@@ -501,7 +501,6 @@ protected:
      */
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
-    sptr<GetWMSWindowListCallback> onGetWMSWindowListCallback_;
     void RegisterWindowInspectorCallback();
 
     /*

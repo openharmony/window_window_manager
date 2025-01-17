@@ -28,17 +28,9 @@ const std::string METHOD_NAME = "WMS.windowList";
 const std::string COMMAND_NAME = "getCurrentProcessWindowList";
 } // namespace
 
-std::unordered_map<std::string, std::weak_ptr<GetWMSWindowListCallback>> WindowInspector::getWMSWindowListCallbacks_;
-
-sptr<WindowInspector> WindowInspector::CreateInstance()
-{
-    sptr<WindowInspector> windowInspector = new WindowInspector();
-    return windowInspector;
-}
-
 WindowInspector& WindowInspector::GetInstance()
 {
-    static sptr<WindowInspector> instance = CreateInstance();
+    static sptr<WindowInspector> instance = sptr::MakeSptr<WindowInspector>();
     return *instance;
 }
 
@@ -72,9 +64,8 @@ void WindowInspector::ConnectServer()
     CloseConnectServer();
 }
 
-void WindowInspector::CloseConnectServer()
+void WindowInspector::CloseConnectFromServer()
 {
-    isConnectServerSuccess_ = false;
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
 }
@@ -82,19 +73,18 @@ void WindowInspector::CloseConnectServer()
 bool WindowInspector::IsConnectServerSuccess() const { return isConnectServerSuccess_; }
 
 void WindowInspector::RegisterGetWMSWindowListCallback(
-    std::string windowName const std::weak_ptr<GetWMSWindowListCallback>& func)
+    const std::string& windowName, std::shared_ptr<GetWMSWindowListCallback>&& func)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}s", windowName.c_str());
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto [_, result] = getWMSWindowListCallbacks_.insert_or_assign(windowName, func);
     if (result) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered", windowName.c_str());
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}s", windowName.c_str());
 }
 
-void WindowInspector::UnregisterGetWMSWindowListCallback(std::string windowName)
+void WindowInspector::UnregisterGetWMSWindowListCallback(const std::string& windowName)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}s", windowName.c_str());
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto iter = getWMSWindowListCallbacks_.find(windowName);
     if (iter == getWMSWindowListCallbacks_.end()) {
@@ -102,10 +92,12 @@ void WindowInspector::UnregisterGetWMSWindowListCallback(std::string windowName)
         return;
     }
     getWMSWindowListCallbacks_.erase(iter);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}s", windowName.c_str());
 }
 
 void WindowInspector::UnregisterAllCallbacks()
 {
+    isConnectServerSuccess_ = false;
     setWMSCallbackFunc_(nullptr);
     setWMSCallbackFunc_ = nullptr;
     sendWMSMessageFunc_ = nullptr;
@@ -130,7 +122,7 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
     {
         std::unique_lock<std::mutex> lock(callbackMutex_);
         for (auto iter = getWMSWindowListCallbacks_.begin(); iter != getWMSWindowListCallbacks_.end();) {
-            auto callback = iter->second.lock();
+            auto callback = iter->second;
             if (callback == nullptr) {
                 iter = getWMSWindowListCallbacks_.erase(iter);
                 continue;

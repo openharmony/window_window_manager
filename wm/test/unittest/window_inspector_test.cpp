@@ -58,7 +58,7 @@ HWTEST_F(WindowInspetorTest, CloseConnectServer01, Function | SmallTest | Level2
 {
     WindowInspector::GetInstance().ConnectServer();
     WindowInspector::GetInstance().CloseConnectServer();
-    EXPECT_EQ(false, WindowInspector::GetInstance().IsConnectServerSuccess());
+    EXPECT_EQ(nullptr, WindowInspector::GetInstance().handlerConnectServerSo_);
 }
 
 /**
