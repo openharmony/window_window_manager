@@ -36,8 +36,9 @@ class WindowInspector : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
     bool IsConnectServerSuccess() const;
-    void RegisterGetWMSWindowListCallback(const wptr<GetWMSWindowListCallback>& func);
-    void UnregisterGetWMSWindowListCallback(const wptr<GetWMSWindowListCallback>& func);
+    void RegisterGetWMSWindowListCallback(std::string windowName, const wptr<GetWMSWindowListCallback>& func);
+    void UnregisterGetWMSWindowListCallback(std::string windowName);
+
 protected:
     WindowInspector();
     virtual ~WindowInspector();
@@ -48,13 +49,13 @@ private:
     SendWMSMessage sendWMSMessage_ = nullptr;
     SetWMSCallback setWMSCallback_ = nullptr;
     std::mutex callbackMutex_;
-    static std::unordered_set<wptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
+    static std::unordered_map<std::string, sptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
     static sptr<WindowInspector> CreateInstance();
     void ConnectServer();
     void CloseConnectServer();
     void UnregisterAllCallbacks();
     bool ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr);
-    void CreateArkUIInspectorJson(const std::vector<WindowListInfo>& windowListsInfo, std::string& jsonStr);
+    void CreateArkUIInspectorJson(const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr);
     void SendMessageToIDE(std::string& jsonStr);
 };
 } // namespace OHOS::Rosen

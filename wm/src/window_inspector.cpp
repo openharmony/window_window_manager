@@ -22,13 +22,13 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr char ARK_CONNECT_LIB_PATH[] = "libark_connect_inspector.z.so";
-const std::string SET_WMS_CALLBACK = "SetWMSCallback";
-const std::string SEND_WMS_MESSAGE = "SendMessage";
+constexpr char SET_WMS_CALLBACK[] = "SetWMSCallback";
+constexpr char SEND_WMS_MESSAGE[] = "SendMessage";
 const std::string METHOD_NAME = "WMS.windowList";
 const std::string COMMAND_NAME = "getCurrentProcessWindowList";
 } // namespace
 
-std::unordered_set<wptr<GetWMSWindowListCallback>> WindowInspector::getWMSWindowListCallbacks_;
+std::unordered_map<std::string, std::weak_ptr<GetWMSWindowListCallback>> WindowInspector::getWMSWindowListCallbacks_;
 
 sptr<WindowInspector> WindowInspector::CreateInstance()
 {
@@ -42,9 +42,9 @@ WindowInspector& WindowInspector::GetInstance()
     return *instance;
 }
 
-WindowInspector::WindowInspector() { InitConnectServer(); }
+WindowInspector::WindowInspector() { ConnectServer(); }
 
-WindowInspector::~WindowInspector() { UnregisterCallback(); }
+WindowInspector::~WindowInspector() { UnregisterAllCallbacks(); }
 
 void WindowInspector::ConnectServer()
 {
@@ -54,15 +54,12 @@ void WindowInspector::ConnectServer()
         return;
     }
     setWMSCallback_ = reinterpret_cast<SetWMSCallback>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
-    if (setWMSCallback_ == nullptr) {
-        CloseConnectServer();
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load setWMSCallback failed: %{public}s", dlerror());
-        return;
-    }
     sendWMSMessage_ = reinterpret_cast<SendWMSMessage>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
-    if (sendWMSMessage_ == nullptr) {
+    if (setWMSCallback_ == nullptr || sendWMSMessage_ == nullptr) {
         CloseConnectServer();
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load sendWMSMessage failed: %{public}s", dlerror());
+        setWMSCallback_ = nullptr;
+        sendWMSMessage_ = nullptr;
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load failed: %{public}s", dlerror());
         return;
     }
     setWMSCallback_([this](const char* message) {
@@ -77,31 +74,43 @@ void WindowInspector::ConnectServer()
 
 void WindowInspector::CloseConnectServer()
 {
+    isConnectServerSuccess_ = false;
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
 }
 
 bool WindowInspector::IsConnectServerSuccess() const { return isConnectServerSuccess_; }
 
-void WindowInspector::RegisterGetWMSWindowListCallback(const wptr<GetWMSWindowListCallback>& func)
+void WindowInspector::RegisterGetWMSWindowListCallback(
+    std::string windowName const std::weak_ptr<GetWMSWindowListCallback>& func)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}s", windowName.c_str());
     std::unique_lock<std::mutex> lock(callbackMutex_);
-    getWMSWindowListCallbacks_.push_back(func);
+    auto [_, result] = getWMSWindowListCallbacks_.insert_or_assign(windowName, func);
+    if (result) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered", windowName.c_str());
+    }
 }
 
-void WindowInspector::UnregisterGetWMSWindowListCallback(const wptr<GetWMSWindowListCallback>& func)
+void WindowInspector::UnregisterGetWMSWindowListCallback(std::string windowName)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}s", windowName.c_str());
     std::unique_lock<std::mutex> lock(callbackMutex_);
-    getWMSWindowListCallbacks_.erase(func);
+    auto iter = getWMSWindowListCallbacks_.find(windowName);
+    if (iter == getWMSWindowListCallbacks_.end()) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback not registered", windowName.c_str());
+        return;
+    }
+    getWMSWindowListCallbacks_.erase(iter);
 }
 
-void WindowInspector::UnregisterCallback()
+void WindowInspector::UnregisterAllCallbacks()
 {
     setWMSCallback_(nullptr);
     setWMSCallback_ = nullptr;
-    sendMessage_ = nullptr;
+    sendWMSMessage_ = nullptr;
     std::unique_lock<std::mutex> lock(callbackMutex_);
-    wmsGetWindowListsCallbacks_.clear();
+    getWMSWindowListCallbacks_.clear();
 }
 
 bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr)
@@ -117,32 +126,35 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.command err");
         return false;
     }
-    std::vector<WindowListsInfo> windowListsInfoVec;
-    for (auto iter = getWMSWindowListCallbacks_.begin(); iter != getWMSWindowListCallbacks_.end();) {
-        auto callback = iter->lock();
-        if (callback == nullptr) {
-            iter = getWMSWindowListCallbacks_.erase(iter);
-            continue;
+    std::vector<WindowListInfo> windowListInfoVec;
+    {
+        std::unique_lock<std::mutex> lock(callbackMutex_);
+        for (auto iter = getWMSWindowListCallbacks_.begin(); iter != getWMSWindowListCallbacks_.end();) {
+            auto callback = iter->second.lock();
+            if (callback == nullptr) {
+                iter = getWMSWindowListCallbacks_.erase(iter);
+                continue;
+            }
+            auto windowListInfo = (*callback)();
+            windowListInfoVec.push_back(std::move(windowListInfo));
+            iter++;
         }
-        windowListsInfoVec.push_back((*callback)());
-        iter++;
     }
-
-    if (windowListsInfoVec.empty()) {
+    if (windowListInfoVec.empty()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "has no window");
         return false;
     }
-    CreateArkUIInspectorJson(windowListsInfoVec, jsonStr);
+    CreateArkUIInspectorJson(windowListInfoVec, jsonStr);
     return true;
 }
 
 void WindowInspector::CreateArkUIInspectorJson(
-    const std::vector<WindowListsInfo>& windowListsInfo, std::string& jsonStr)
+    const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr)
 {
     nlohmann::ordered_json jsonWindowListsInfo;
     jsonWindowListsInfo["type"] = "window";
     jsonWindowListsInfo["content"] = nlohmann::json::array();
-    for (const auto& info : windowListsInfo) {
+    for (const auto& info : windowListInfo) {
         nlohmann::ordered_json jsonInfo;
         jsonInfo["windowName"] = info.windowName;
         jsonInfo["winId"] = std::to_string(info.windowId);
