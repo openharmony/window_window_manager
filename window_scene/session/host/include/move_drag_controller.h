@@ -116,7 +116,7 @@ public:
     void ResetCurrentScreenProperty();
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
     void SetInputBarCrossAttr(MouseMoveDirection mouseMoveDirection, DisplayId targetDisplayId);
-    void SetOriginalDisplayOffset(int32_t offsetX, int32_t offSetY);
+    void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
 
     /*
      * Monitor screen connection status
