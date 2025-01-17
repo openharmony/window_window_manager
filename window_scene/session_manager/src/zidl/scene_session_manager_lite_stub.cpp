@@ -95,6 +95,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleUnregisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CHECK_WINDOW_ID):
             return HandleCheckWindowId(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UI_EXTENSION_CREATION_CHECK):
+            return HandleCheckUIExtensionCreation(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
             return HandleGetVisibilityWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_WINDOW_MODE_TYPE):
@@ -456,6 +458,47 @@ int SceneSessionManagerLiteStub::HandleCheckWindowId(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
+int SceneSessionManagerLiteStub::HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "UIExtOnLock: called");
+    int32_t windowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(windowId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get windowId");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t tokenId = -1;
+    if (!data.ReadUint32(tokenId)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get token");
+        return ERR_INVALID_DATA;
+    }
+    int32_t extAbilityTypeValue = -1;
+    if (!data.ReadInt32(extAbilityTypeValue)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get extensionAbilityType");
+        return ERR_INVALID_DATA;
+    }
+    if (extAbilityTypeValue < 0) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get extensionAbilityType(out of range)");
+        return ERR_INVALID_DATA;
+    }
+    auto extAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(extAbilityTypeValue);
+    sptr<AppExecFwk::ElementName> element = data.ReadParcelable<AppExecFwk::ElementName>();
+    if (!element) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to get element");
+        return ERR_INVALID_DATA;
+    }
+    int32_t pid = INVALID_PID;
+    WMError errCode = CheckUIExtensionCreation(windowId, tokenId, *element, extAbilityType, pid);
+    TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: ret %{public}u", errCode);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write errcode");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: Failed to write pid");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
 
 int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply)
 {

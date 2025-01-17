@@ -69,6 +69,8 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
+    WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
+        AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
