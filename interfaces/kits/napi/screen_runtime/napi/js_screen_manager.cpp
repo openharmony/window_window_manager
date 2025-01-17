@@ -806,7 +806,7 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [screenIds, env, task = napiAsyncTask.get()]() {
+    auto asyncTask = [this, screenIds, env, task = napiAsyncTask.get()]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeUnique");
         std::vector<DisplayId> displayIds;
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
