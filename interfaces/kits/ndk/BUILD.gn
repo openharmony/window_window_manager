@@ -20,6 +20,7 @@ ohos_ndk_headers("window_manager_header") {
   sources = [
     "oh_window_comm.h",
     "oh_window_event_filter.h",
+    "oh_window.h",
   ]
 }
 
@@ -31,6 +32,7 @@ ohos_ndk_library("native_window_manager") {
   system_capability_headers = [
     "oh_window_comm.h",
     "oh_window_event_filter.h",
+    "oh_window.h",
   ]
   min_compact_version = "12"
 }
