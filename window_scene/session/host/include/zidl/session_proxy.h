@@ -89,7 +89,7 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void TriggerBindModalUIExtension() override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
-    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;

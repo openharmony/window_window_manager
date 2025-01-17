@@ -69,6 +69,10 @@ public:
     {
         return WSError::WS_OK;
     };
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
 

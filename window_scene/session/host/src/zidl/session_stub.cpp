@@ -233,7 +233,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUPPORT_WINDOW_MODES):
             return HandleSetSupportedWindowModes(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
-            return HandleExtensionProviderData(data, reply);
+            return HandleExtensionProviderData(data, reply, option);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
             return HandleSetSessionLabelAndIcon(data, reply);
         default:
@@ -1305,10 +1305,10 @@ int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
-int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
-    NotifyExtensionDataConsumer(data, reply);
+    static_cast<void>(SendExtensionData(data, reply, option));
     return ERR_NONE;
 }
 
