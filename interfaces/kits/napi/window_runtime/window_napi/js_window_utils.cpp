@@ -19,7 +19,6 @@
 #include <sstream>
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
-#include "color_parser.h"
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
 #include "js_window.h"
@@ -480,7 +479,7 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     return objValue;
 }
 
-std::string GetHexColor(const uint32_t color)
+static std::string GetHexColor(uint32_t color)
 {
     std::stringstream ioss;
     std::string temp;
@@ -712,21 +711,7 @@ napi_value CreateStatusBarPropertyObject(napi_env env, sptr<Window>& window)
     return objValue;
 }
 
-bool GetStatusBarColorFromJs(napi_env env, napi_value jsObject, uint32_t& colorValue)
-{
-    if (!CheckTypeForNapiValue(env, jsObject, napi_object)) {
-        return false;
-    }
-    napi_value jsColor = nullptr;
-    napi_get_named_property(env, jsObject, "contentColor", &jsColor);
-    if (jsColor == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "empty content");
-        return false;
-    }
-    return ParseColorMetricsX(env, jsColor, colorValue);
-}
-
-bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType)
+static bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType)
 {
     napi_valuetype valueType = napi_undefined;
     if (napi_typeof(env, param, &valueType) != napi_ok) {
@@ -735,43 +720,39 @@ bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expect
     return valueType == expectType;
 }
 
-bool ParseColorString(napi_env env, napi_value value, uint32_t& colorValue)
+bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue)
 {
-    std::string colorStr;
-    if (!ConvertFromJsValue(env, value, colorStr)) {
+    if (!CheckTypeForNapiValue(env, value, napi_object)) {
         return false;
     }
-    return ColorParser::Parse(colorStr, colorValue);
-}
-
-bool ParseColorMetricsX(napi_env env, napi_value value, uint32_t& colorValue)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, value, &valueType);
-    if (valueType != napi_string && valueType != napi_object) {
-        TLOGD(WmsLogTag::DEFAULT, "expect string|object");
-        return false;
-    }
-
-    if (valueType == napi_string) {
-        return ParseColorString(env, value, colorValue);
-    }
-
     napi_value jsToNumeric = nullptr;
-    napi_get_named_property(env, param, "toNumeric", &jsToNumeric);
+    napi_get_named_property(env, value, "toNumeric", &jsToNumeric);
     if (!CheckTypeForNapiValue(env, jsToNumeric, napi_function)) {
-        TLOGD(WmsLogTag::DEFAULT, "expect function");
         return false;
     }
     napi_value jsColor;
-    if (napi_call_function(env, param, jsToNumeric, 0, nullptr, &jsColor) != napi_ok) {
+    if (napi_call_function(env, value, jsToNumeric, 0, nullptr, &jsColor) != napi_ok) {
         return false;
     }
     if (!CheckTypeForNapiValue(env, jsColor, napi_number)) {
-        TLOGD(WmsLogTag::DEFAULT, "expect number");
         return false;
     }
     return napi_get_value_uint32(env, jsColor, &colorValue) == napi_ok;
+}
+
+bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_string) {
+        return ConvertFromJsValue(env, value, colorStr)
+    }
+    uint32_t colorValue = 0;
+    if (ParseColorMetrics(env, value, colorValue)) {
+        colorStr = GetHexColor(colorValue);
+        return true;
+    }
+    return false;
 }
 
 bool ParseAndCheckRect(napi_env env, napi_value jsObject,
