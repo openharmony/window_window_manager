@@ -3719,8 +3719,8 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    auto scaleValue = (scale < 0.0f || scale < std::numeric_limits<float>::min()) ?
-        snapshotScale_ : scale;
+    auto scaleValue = (!MathHelper::GreatNotEqual(scale, 0.0f) ||
+        !MathHelper::GreatNotEqual(scale, std::numeric_limits<float>::min())) ? snapshotScale_ : scale;
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
