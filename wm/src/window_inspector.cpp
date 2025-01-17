@@ -16,8 +16,8 @@
 
 #include "nlohmann/json.hpp"
 
-#include "window_manager_hilog.h"
 #include "window_inspector.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 namespace {
