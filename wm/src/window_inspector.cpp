@@ -53,8 +53,8 @@ void WindowInspector::ConnectServer()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "can't open %{public}s", ARK_CONNECT_LIB_PATH);
         return;
     }
-    setWMSCallbackFunc_ = reinterpret_cast<SetWMSCallback>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
-    sendWMSMessageFunc_ = reinterpret_cast<SendWMSMessage>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
+    setWMSCallbackFunc_ = reinterpret_cast<SetWMSCallbackFunc>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
+    sendWMSMessageFunc_ = reinterpret_cast<SendWMSMessageFunc>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
     if (setWMSCallbackFunc_ == nullptr || sendWMSMessageFunc_ == nullptr) {
         CloseConnectServer();
         setWMSCallbackFunc_ = nullptr;
