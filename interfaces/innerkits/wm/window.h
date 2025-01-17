@@ -1870,14 +1870,14 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move window. It is called by application.
+     * @brief Start moving window. It is called by application.
      *
      * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Start move window. It is called by application.
+     * @brief Start moving window. It is called by application.
      *
      * @param offsetX expected pointer position x-axis offset in window when start moving.
      * @param offsetY expected pointer position y-axis offset in window when start moving.
@@ -1887,7 +1887,7 @@ public:
         int32_t offsetY) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Stop move window. It is called by application. Support pc window and pad free multi-window.
+     * @brief Stop moving window. It is called by application. Support pc window and pad free multi-window.
      *
      * @return Error code of window.
      */

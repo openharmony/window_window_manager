@@ -7218,16 +7218,17 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    const char* const where = __func__;
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), offsetX, offsetY, env, task = napiAsyncTask, where] {
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), offsetX, offsetY,
+                      env, task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-        if (!WindowHelper::IsSystemWindow(window->GetType()) && !WindowHelper::IsAppWindow(window->GetType())) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window.", where);
+        WindowType windowType = window->GetType();
+        if (!WindowHelper::IsSystemWindow(windowType) && !WindowHelper::IsAppWindow(windowType)) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window type=%{public}u", where, windowType);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             return;
         }
