@@ -30,7 +30,7 @@ extern "C" {
 typedef enum {
     /** succ. */
     OK = 0,
-    /** param is invaild */
+    /** param is invaild. */
     INVALID_PARAM = 401,
     /** device not support. */
     DEVICE_NOT_SUPPORT = 801,
@@ -92,4 +92,3 @@ typedef struct {
 #endif
 
 #endif // OH_WINDOW_COMM_H
-/** @} */
