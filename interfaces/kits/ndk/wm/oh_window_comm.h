@@ -13,27 +13,6 @@
  * limitations under the License.
  */
 
-/**
- * @addtogroup WindowManager
- * @{
- *
- *
- * @brief Provides abilities of windowManager on the native side, such as key event
- * filtration.
- *
- * @since 12
- */
-
-/**
- * @file oh_window_comm.h
- *
- * @brief Provides the comm type definitions of windowManager on the native side.
- *
- * @syscap SystemCapability.Window.SessionManager
- * @library libnative_window_manager.so
- * @kit ArkUI
- * @since 12
- */
 #ifndef OH_WINDOW_COMM_H
 #define OH_WINDOW_COMM_H
 
@@ -51,6 +30,7 @@ extern "C" {
 typedef enum {
     /** succ. */
     OK = 0,
+    /** param is invaild */
     INVALID_PARAM = 401,
     /** device not support. */
     DEVICE_NOT_SUPPORT = 801,
@@ -84,22 +64,6 @@ typedef enum {
 } WindowManager_AvoidAreaType;
 
 /**
- * @brief The type of a window
- *
- * @since 16
- */
-typedef enum {
-    /** App */
-    TYPE_APP = 0,
-    /** System alert */
-    TYPE_SYSTEM_ALERT = 1,
-    /** Float */
-    TYPE_FLOAT = 8,
-    /** Dialog */
-    TYPE_DIALOG = 16,
-} WindowManager_WindowType;
-
-/**
  * @brief Defines the window rect data structure.
  *
  * @since 16
@@ -110,59 +74,6 @@ typedef struct {
     uint32_t width;
     uint32_t height;
 } WindowManager_Rect;
-
-/**
- * @brief Properties of window
- *
- * @since 16
-*/
-typedef struct {
-    /** The position and size of the window */
-    WindowManager_Rect windowRect;
-    /** The position relative to the window and size of drawable area */
-    WindowManager_Rect drawableRect;
-    /** Window type */
-    WindowManager_WindowType type;
-    /** Whether the window is displayed in full screen mode. The default value is false */
-    bool isFullScreen;
-    /** Whether the window layout is in full screen mode(whether the window is immersive). The default value is false */
-    bool isLayoutFullScreen;
-    /** Whether the window can gain focus. The default value is true */
-    bool focusable;
-    /** Whether the window is touchable. The default value is false */
-    bool touchable;
-    /** Brightness value of window */
-    float brightness;
-    /** Whether keep screen on */
-    bool isKeepScreenOn;
-    /** Whether make window in privacy mode or not */
-    bool isPrivacyMode;
-    /** Whether is transparent or not */
-    bool isTransparent;
-    /** Window id */
-    uint32_t id;
-    /** display id */
-    uint32_t displayId;
-} WindowManager_WindowProperties;
-
-/**
- * @brief The native pixel map information defined by Image Kit.
- *
- * @since 16
- */
-struct OH_PixelmapNative;
-
-/**
- * @brief Defines the system bar property data structure.
- *
- * @since 16
- */
-typedef struct {
-    bool enable;
-    bool enableAnimation;
-    int32_t backgroundColor;
-    int32_t contentColor;
-} WindowManager_SystemBarProperty;
 
 /**
  * @brief Defines the avoid area data structure.
