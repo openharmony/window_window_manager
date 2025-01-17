@@ -274,6 +274,7 @@ public:
     void OnTentModeChanged(bool isTentMode);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
+    void RegisterSettingscreenSkipProtectedWindowObserver();
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -362,6 +363,8 @@ public:
         DmErrorCode* errorCode) override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     void MultiScreenChangeOuter(const std::string& outerFlag);
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -445,6 +448,7 @@ private:
     bool IsExtendMode();
     void SetScreenCorrection();
     bool IsScreenCasting();
+    void SetScreenSkipProtectedWindowInner();
 
     /**
      * On/Off screen
@@ -504,6 +508,7 @@ private:
     std::recursive_mutex mutex_;
     std::recursive_mutex displayInfoMutex_;
     std::shared_mutex hookInfoMutex_;
+    std::mutex shareProtectMutex_;
 
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
     ScreenIdManager screenIdManager_;

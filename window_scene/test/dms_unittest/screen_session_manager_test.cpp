@@ -3593,6 +3593,55 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
         EXPECT_EQ(FoldStatus::UNKNOWN, status);
     }
 }
+
+/**
+ * @tc.name: SetScreenSkipProtectedWindow
+ * @tc.desc: SetScreenSkipProtectedWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption1";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    const std::vector<ScreenId> screenIds = {screenId, 1002};
+    bool isEnable = true;
+    ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
+    isEnable = false;
+    ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetScreenSkipProtectedWindowInner
+ * @tc.desc: SetScreenSkipProtectedWindowInner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption1";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    virtualOption.name_ = "createVirtualOption2";
+    auto screenId2 = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId2 != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId2 != VIRTUAL_SCREEN_ID);
+    }
+    auto screenSession = ssm_->GetScreenSession(screenId);
+    screenSession->SetShareProtect(true);
+    ssm_->SetScreenSkipProtectedWindowInner();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
