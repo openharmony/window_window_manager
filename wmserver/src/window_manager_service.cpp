@@ -259,7 +259,7 @@ void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap)
 {
     sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
-    WLOGI("hot start is called");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "hot start is called");
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, false);
 }
 
@@ -267,27 +267,27 @@ void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor)
 {
     sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
-    WLOGI("cold start is called");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "cold start is called");
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, true, bgColor);
 }
 
 void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGI("WindowManagerServiceHandler CancelStartingWindow!");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "WindowManagerServiceHandler CancelStartingWindow!");
     WindowManagerService::GetInstance().CancelStartingWindow(abilityToken);
 }
 
 int32_t WindowManagerServiceHandler::MoveMissionsToForeground(const std::vector<int32_t>& missionIds,
     int32_t topMissionId)
 {
-    WLOGD("WindowManagerServiceHandler MoveMissionsToForeground!");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "WindowManagerServiceHandler MoveMissionsToForeground!");
     return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToForeground(missionIds, topMissionId));
 }
 
 int32_t WindowManagerServiceHandler::MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
     std::vector<int32_t>& result)
 {
-    WLOGD("WindowManagerServiceHandler MoveMissionsToBackground!");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "WindowManagerServiceHandler MoveMissionsToBackground!");
     return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToBackground(missionIds, result));
 }
 
@@ -839,7 +839,7 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
     bool isColdStart, uint32_t bkgColor)
 {
     if (!startingOpen_) {
-        WLOGI("startingWindow not open!");
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "startingWindow not open!");
         return;
     }
     if (info) {
@@ -853,9 +853,9 @@ void WindowManagerService::StartingWindow(sptr<WindowTransitionInfo> info, std::
 
 void WindowManagerService::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    WLOGI("begin");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "begin");
     if (!startingOpen_) {
-        WLOGI("startingWindow not open!");
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "startingWindow not open!");
         return;
     }
     auto task = [this, abilityToken]() {

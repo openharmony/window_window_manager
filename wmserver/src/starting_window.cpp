@@ -155,18 +155,20 @@ WMError StartingWindow::CreateLeashAndStartingSurfaceNode(sptr<WindowNode>& node
     rsSurfaceNodeConfig.SurfaceNodeName = "leashWindow" + std::to_string(node->GetWindowId());
     node->leashWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::LEASH_WINDOW_NODE);
     if (node->leashWinSurfaceNode_ == nullptr) {
-        WLOGFE("create leashWinSurfaceNode failed");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create leashWinSurfaceNode failed");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     rsSurfaceNodeConfig.SurfaceNodeName = "startingWindow" + std::to_string(node->GetWindowId());
     node->startingWinSurfaceNode_ = RSSurfaceNode::Create(rsSurfaceNodeConfig, RSSurfaceNodeType::STARTING_WINDOW_NODE);
     if (node->startingWinSurfaceNode_ == nullptr) {
-        WLOGFE("create startingWinSurfaceNode failed");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "create startingWinSurfaceNode failed");
         node->leashWinSurfaceNode_ = nullptr;
         return WMError::WM_ERROR_NULLPTR;
     }
-    WLOGI("Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!", node->GetWindowId());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE,
+        "Create leashWinSurfaceNode and startingWinSurfaceNode success with id:%{public}u!",
+        node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -187,7 +189,7 @@ WMError StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         return WMError::WM_OK;
     }
     if (node->startingWinSurfaceNode_ == nullptr) {
-        WLOGFE("no starting Window SurfaceNode!");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "no starting Window SurfaceNode!");
         return WMError::WM_ERROR_NULLPTR;
     }
     // set window effect
@@ -197,7 +199,7 @@ WMError StartingWindow::DrawStartingWindow(sptr<WindowNode>& node,
         return WMError::WM_OK;
     }
 
-    WLOGFD("draw background in sperate");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "draw background in sperate");
     SurfaceDraw::DrawImageRect(node->startingWinSurfaceNode_, rect, pixelMap, bkgColor);
     return WMError::WM_OK;
 }
@@ -206,7 +208,7 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
 {
     auto weakNode = weak.promote();
     if (weakNode == nullptr || !weakNode->startingWinSurfaceNode_) {
-        WLOGFE("windowNode or startingWinSurfaceNode_ is nullptr");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "windowNode or startingWinSurfaceNode_ is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
     StartAsyncTraceArgs(HITRACE_TAG_WINDOW_MANAGER, static_cast<int32_t>(TraceTaskId::START_WINDOW_ANIMATION),
@@ -215,7 +217,7 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
     auto execute = [weak]() {
         auto weakNode = weak.promote();
         if (weakNode == nullptr) {
-            WLOGFE("windowNode is nullptr");
+            TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "windowNode is nullptr");
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "StartingWindow:ExecuteAnimate(%d)",
@@ -226,12 +228,13 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
     auto finish = [weak]() {
         auto weakNode = weak.promote();
         if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
-            WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
+            TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "windowNode or leashWinSurfaceNode_ is nullptr");
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "StartingWindow:AnimateFinish(%d)",
             weakNode->GetWindowId());
-        WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "StartingWindow::Replace surfaceNode, id: %{public}u",
+            weakNode->GetWindowId());
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
         weakNode->startingWinSurfaceNode_ = nullptr;
         RSTransaction::FlushImplicitTransaction();
@@ -250,7 +253,7 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     int32_t pid, int32_t uid)
 {
     if (node == nullptr) {
-        WLOGFE("node is nullptr");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "node is nullptr");
         return;
     }
     node->surfaceNode_ = surfaceNode;
@@ -261,7 +264,8 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
     // test
     node->stateMachine_.SetWindowId(windowId);
     node->stateMachine_.SetWindowType(property->GetWindowType());
-    WLOGI("after set Id:%{public}u, requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "after set Id:%{public}u, "
+        "requestRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         node->GetWindowId(), node->GetRequestRect().posX_, node->GetRequestRect().posY_,
         node->GetRequestRect().width_, node->GetRequestRect().height_);
     // Register FirstFrame Callback to rs, replace startwin
@@ -272,17 +276,19 @@ void StartingWindow::HandleClientWindowCreate(sptr<WindowNode>& node, sptr<IWind
                 "wms:async:ShowStartingWindow");
             auto weakNode = weak.promote();
             if (weakNode == nullptr || weakNode->leashWinSurfaceNode_ == nullptr) {
-                WLOGFE("windowNode or leashWinSurfaceNode_ is nullptr");
+                TLOGNE(WmsLogTag::WMS_STARTUP_PAGE, "windowNode or leashWinSurfaceNode_ is nullptr");
                 return;
             }
-            WLOGI("StartingWindow::FirstFrameCallback come, id: %{public}u", weakNode->GetWindowId());
+            TLOGNI(WmsLogTag::WMS_STARTUP_PAGE, "StartingWindow::FirstFrameCallback come, id: %{public}u",
+                weakNode->GetWindowId());
             if (transAnimateEnable_) {
                 SetStartingWindowAnimation(weakNode);
             } else {
                 weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
                 weakNode->startingWinSurfaceNode_ = nullptr;
                 RSTransaction::FlushImplicitTransaction();
-                WLOGFI("StartingWindow::Replace surfaceNode, id: %{public}u", weakNode->GetWindowId());
+                TLOGNI(WmsLogTag::WMS_STARTUP_PAGE, "StartingWindow::Replace surfaceNode, id: %{public}u",
+                    weakNode->GetWindowId());
             }
             WindowInnerManager::GetInstance().CompleteFirstFrameDrawing(weakNode);
             weakNode->firstFrameAvailable_ = true;
@@ -297,7 +303,8 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!node->leashWinSurfaceNode_) {
-        WLOGI("cannot release leashwindow since leash is null, id:%{public}u", node->GetWindowId());
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "cannot release leashwindow since leash is null, id:%{public}u",
+            node->GetWindowId());
         return;
     }
     node->leashWinSurfaceNode_->RemoveChild(node->startingWinSurfaceNode_);
@@ -306,9 +313,10 @@ void StartingWindow::ReleaseStartWinSurfaceNode(sptr<WindowNode>& node)
     node->leashWinSurfaceNode_ = nullptr;
     node->startingWinSurfaceNode_ = nullptr;
     node->closeWinSurfaceNode_ = nullptr;
-    WLOGI("Release startwindow surfaceNode end id: %{public}u, [leashWinSurface]: use_count: %{public}ld, \
-        [startWinSurface]: use_count: %{public}ld ", node->GetWindowId(),
-        node->leashWinSurfaceNode_.use_count(), node->startingWinSurfaceNode_.use_count());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Release startwindow surfaceNode end id: %{public}u, "
+        "[leashWinSurface]: use_count: %{public}ld, [startWinSurface]: use_count: %{public}ld ",
+        node->GetWindowId(), node->leashWinSurfaceNode_.use_count(),
+        node->startingWinSurfaceNode_.use_count());
     RSTransaction::FlushImplicitTransaction();
 }
 
@@ -332,7 +340,8 @@ void StartingWindow::AddNodeOnRSTree(sptr<WindowNode>& node, bool isMultiDisplay
             return;
         }
         auto winRect = weak->GetWindowRect();
-        WLOGI("before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE,
+            "before setBounds windowRect: %{public}d, %{public}d, %{public}d, %{public}d",
             winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
         if (weak->leashWinSurfaceNode_) {
             weak->leashWinSurfaceNode_->SetBounds(winRect.posX_, winRect.posY_, winRect.width_, winRect.height_);
