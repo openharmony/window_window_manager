@@ -1171,6 +1171,7 @@ private:
     std::shared_ptr<ScbDumpSubscriber> scbDumpSubscriber_;
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
     void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
+    void DumpFocusInfo(std::ostringstream& oss);
     void DumpSessionElementInfo(const sptr<SceneSession>& session,
         const std::vector<std::string>& params, std::string& dumpInfo);
     void DumpAllSessionFocusableInfo(int32_t persistentId);

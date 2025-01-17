@@ -90,6 +90,26 @@ void ScreenSessionManagerClient::RegisterScreenConnectionChangeListener(
     WLOGFI("Success to register screen connection change listener");
 }
 
+void ScreenSessionManagerClient::NotifyScreenConnect(const sptr<ScreenSession>& screenSession)
+{
+    if (screenConnectionListener_) {
+        screenConnectionListener_->OnScreenConnected(screenSession);
+    }
+    if (screenConnectionChangeListener_) {
+        screenConnectionChangeListener_->OnScreenConnected(screenSession);
+    }
+}
+
+void ScreenSessionManagerClient::NotifyScreenDisconnect(const sptr<ScreenSession>& screenSession)
+{
+    if (screenConnectionListener_) {
+        screenConnectionListener_->OnScreenDisconnected(screenSession);
+    }
+    if (screenConnectionChangeListener_) {
+        screenConnectionChangeListener_->OnScreenDisconnected(screenSession);
+    }
+}
+
 bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name)
 {
     if (rsId == SCREEN_ID_INVALID) {
@@ -136,16 +156,11 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             screenSessionMap_.emplace(screenId, screenSession);
         }
         screenSession->SetIsExtend(isExtend);
+        NotifyScreenConnect();
         if (screenConnectionListener_) {
-            screenConnectionListener_->OnScreenConnected(screenSession);
             WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
                 screenId, config.property.GetDensity());
             screenSession->SetScreenSceneDpi(config.property.GetDensity());
-        }
-        if (screenConnectionChangeListener_) {
-            screenConnectionChangeListener_->OnScreenConnected(screenSession);
-            WLOGFI("screenConnectionChangeListener screenId: %{public}" PRIu64 " density: %{public}f ",
-                screenId, config.property.GetDensity());
         }
         screenSession->Connect();
         return;
@@ -160,9 +175,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         if (screenConnectionListener_) {
             screenConnectionListener_->OnScreenDisconnected(screenSession);
         }
-        if (screenConnectionChangeListener_) {
-            screenConnectionChangeListener_->OnScreenDisconnected(screenSession);
-        }
+        NotifyScreenDisconnect(screenSession);
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.erase(screenId);

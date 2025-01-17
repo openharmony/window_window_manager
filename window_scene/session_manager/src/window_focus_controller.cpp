@@ -17,16 +17,6 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-}
-
-#define CHECK_DISPLAY_ID_RETURN(displayId, ret)                         \
-    do {                                                                \
-        if ((displayId) == DISPLAY_ID_INVALID) {                          \
-            TLOGE(WmsLogTag::WMS_FOCUS, "display id is invalid.");      \
-            return ret;                                                 \
-        }                                                               \
-    } while (false)                                                     \
 
 WindowFocusController::WindowFocusController() noexcept
 {
@@ -49,7 +39,10 @@ DisplayId WindowFocusController::GetDisplayGroupId(DisplayId displayId)
 WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
-    CHECK_DISPLAY_ID_RETURN(displayId, WSError::WS_ERROR_INVALID_PARAM);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayId);
     focusGroupMap_.insert(std::make_pair(displayId, focusGroup));
@@ -62,7 +55,10 @@ WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
 WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
-    CHECK_DISPLAY_ID_RETURN(displayId, WSError::WS_ERROR_INVALID_PARAM);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     focusGroupMap_.erase(displayId);
     if (displayId != DEFAULT_DISPLAY_ID) {
@@ -74,7 +70,10 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
 int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
-    CHECK_DISPLAY_ID_RETURN(displayId, INVALID_SESSION_ID);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        return INVALID_SESSION_ID;
+    }
     std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     if (focusGroup == nullptr) {
@@ -136,7 +135,10 @@ std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedS
 WSError WindowFocusController::UpdateFocusedSessionId(DisplayId displayId, int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", persistentId: %{public}d", displayId, persistentId);
-    CHECK_DISPLAY_ID_RETURN(displayId, WSError::WS_ERROR_INVALID_PARAM);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     std::unique_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     if (focusGroup == nullptr) {
@@ -149,11 +151,14 @@ WSError WindowFocusController::UpdateFocusedSessionId(DisplayId displayId, int32
 WSError WindowFocusController::UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", persistentId: %{public}d", displayId, persistentId);
-    CHECK_DISPLAY_ID_RETURN(displayId, WSError::WS_ERROR_INVALID_PARAM);
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     std::unique_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     if (focusGroup == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}d", displayId);
+        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}" PRIu64, displayId);
         return WSError::WS_ERROR_NULLPTR;
     }
     return focusGroup->UpdateFocusedAppSessionId(persistentId);
