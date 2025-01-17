@@ -128,7 +128,7 @@ std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedS
         }
         allFocusGroup.emplace_back(std::make_pair(elem.first, curFocusGroup->GetFocusedSessionId()));
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "success, list size: %{public}lu", allFocusGroup.size());
+    TLOGD(WmsLogTag::WMS_FOCUS, "success, list size: %{public}u", allFocusGroup.size());
     return allFocusGroup;
 }
 

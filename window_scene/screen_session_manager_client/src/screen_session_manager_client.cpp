@@ -156,7 +156,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             screenSessionMap_.emplace(screenId, screenSession);
         }
         screenSession->SetIsExtend(isExtend);
-        NotifyScreenConnect();
+        NotifyScreenConnect(screenSession);
         if (screenConnectionListener_) {
             WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
                 screenId, config.property.GetDensity());
