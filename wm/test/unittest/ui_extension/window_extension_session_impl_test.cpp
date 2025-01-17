@@ -2229,10 +2229,11 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function
     AAFwk::Want want;
     want.SetParam(Extension::WINDOW_MODE_FIELD, static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
     ASSERT_TRUE(data.WriteParcelable(&want));
- 
-    // Call NotifyExtensionDataConsumer
-    window_->NotifyExtensionDataConsumer(data, reply);
- 
+
+    // Send data
+    MessageOption option;
+    window_->SendExtensionData(data, reply, option);
+
     // Verify reply contains success code
     uint32_t replyCode;
     ASSERT_TRUE(reply.ReadUint32(replyCode));

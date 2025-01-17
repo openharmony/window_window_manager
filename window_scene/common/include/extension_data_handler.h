@@ -65,6 +65,7 @@ protected:
     virtual bool WriteInterfaceToken(MessageParcel& data) = 0;
     DataHandlerErr ParseReply(MessageParcel& recieved, AAFwk::Want& reply, const DataTransferConfig& config);
     void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime);
+    bool IsProxyObject() const;
 
 protected:
     mutable std::mutex mutex_;
