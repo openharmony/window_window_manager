@@ -114,10 +114,6 @@ public:
     void UpdateMoveAvailableArea(DisplayId targetDisplayId);
     void SetCurrentScreenProperty(DisplayId targetDisplayId);
     void ResetCurrentScreenProperty();
-    void SetMoveInputBarFlag(bool moveInputBarFlag);
-    bool GetMoveInputBarFlag();
-    void SetInputBarCrossScreen(bool crossScreen);
-    bool GetInputBarCrossScreen();
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
     void SetInputBarCrossAttr(MouseMoveDirection mouseMoveDirection, DisplayId targetDisplayId);
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offSetY);
@@ -312,8 +308,6 @@ private:
      * Cross Display Move Drag
      */
     bool moveDragIsInterrupted_ = false;
-    bool moveInputBarFlag_ = false;
-    bool inputBarCrossScreen_ = false;
     DisplayId moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
     uint64_t initParentNodeId_ = -1ULL;

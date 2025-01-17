@@ -199,26 +199,6 @@ void MoveDragController::InitMoveDragProperty()
     moveDragProperty_ = {-1, -1, -1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
 }
 
-void MoveDragController::SetMoveInputBarFlag(bool moveInputBarFlag)
-{
-    moveInputBarFlag_ = moveInputBarFlag;
-}
-
-bool MoveDragController::GetMoveInputBarFlag()
-{
-    return moveInputBarFlag_;
-}
-
-void MoveDragController::SetInputBarCrossScreen(bool crossScreen)
-{
-    inputBarCrossScreen_ = crossScreen;
-}
-
-bool MoveDragController::GetInputBarCrossScreen()
-{
-    return inputBarCrossScreen_;
-}
-
 void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t initParentNodeId)
 {
     DMError error = ScreenManager::GetInstance().RegisterScreenListener(this);
@@ -262,7 +242,6 @@ void MoveDragController::ResetCrossMoveDragProperty()
     originalDisplayOffsetX_ = 0;
     originalDisplayOffsetY_ = 0;
     moveDragIsInterrupted_ = false;
-    moveInputBarFlag_ = false;
 }
 
 void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
@@ -391,7 +370,7 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
             break;
     }
 
-    if (moveInputBarFlag_ && CalcMoveInputBarRect(pointerEvent, originalRect)) {
+    if (WindowHelper::IsInputWindow(winType_) && CalcMoveInputBarRect(pointerEvent, originalRect)) {
         ProcessSessionRectChange(reason);
         return ret;
     }
@@ -635,16 +614,11 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
 
 void MoveDragController::AdjustXYByAvailableArea(int32_t& x, int32_t& y)
 {
-    if (x <= moveAvailableArea_.posX_) {
-        x = moveAvailableArea_.posX_;
-    }
+    std::max(moveAvailableArea_.posX_, x);
+    std::max(moveAvailableArea_.posY_, y);
 
     if (x >= moveAvailableArea_.posX_ + moveAvailableArea_.width_ - moveDragProperty_.originalRect_.width_) {
         x = moveAvailableArea_.posX_ + moveAvailableArea_.width_ - moveDragProperty_.originalRect_.width_;
-    }
-
-    if (y <= moveAvailableArea_.posY_) {
-        y = moveAvailableArea_.posY_;
     }
 
     if (y >= moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_) {
