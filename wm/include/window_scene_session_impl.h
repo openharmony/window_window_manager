@@ -129,7 +129,7 @@ public:
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
-    WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
 
     /*
      * PC Window
