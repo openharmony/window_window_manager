@@ -45,8 +45,20 @@ namespace {
  */
 HWTEST_F(WindowInspetorTest, InitConnectServer, Function | SmallTest | Level2)
 {
-    WindowInspector::GetInstance().InitConnectServer();
-    EXPECT_EQ(true, WindowInspector::GetInstance().IsInitConnectSuccess());
+    WindowInspector::GetInstance().ConnectServer();
+    EXPECT_EQ(true, WindowInspector::GetInstance().IsConnectServerSuccess());
+}
+
+/**
+ * @tc.name: CloseConnectServer01
+ * @tc.desc: CloseConnectServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInspetorTest, CloseConnectServer01, Function | SmallTest | Level2)
+{
+    WindowInspector::GetInstance().ConnectServer();
+    WindowInspector::GetInstance().CloseConnectServer();
+    EXPECT_EQ(false, WindowInspector::GetInstance().IsConnectServerSuccess());
 }
 
 /**
