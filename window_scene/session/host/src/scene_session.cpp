@@ -663,7 +663,6 @@ WSError SceneSession::InitializeMoveInputBar()
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         moveDragController_->SetMoveInputBarStartDisplayId(displayId);
-        moveDragController_->SetMoveInputBarFlag(true);
     }
     return WSError::WS_OK;
 }
@@ -2921,7 +2920,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
     if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-        WindowHelper::IsSystemWindow(GetWindowType())) && !moveDragController_->GetMoveInputBarFlag()) {
+        WindowHelper::IsSystemWindow(GetWindowType())) && !WindowHelper::IsInputWindow(GetWindowType())) {
         NotifySessionRectChange(rect, reason);
     } else {
         NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
