@@ -357,7 +357,7 @@ HWTEST_F(SceneSessionManagerTest10, TestCheckLastFocusedAppSessionFocus_01, Func
     ASSERT_NE(nextSession, nullptr);
 
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
-    focusGroup->SetLastFocusedAppSessionId(nextSession->GetPersistentId())
+    focusGroup->SetLastFocusedAppSessionId(nextSession->GetPersistentId());
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
 }
 
