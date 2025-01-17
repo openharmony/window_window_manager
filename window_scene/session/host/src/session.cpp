@@ -1045,8 +1045,8 @@ SingleHandTransform Session::GetSingleHandTransform() const
 
 void Session::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
 {
-    if (!IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());
+    if (!IsSessionForeground() && !IsVisible()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground and not visible!", GetPersistentId());
         return;
     }
     if (sessionStage_ != nullptr) {

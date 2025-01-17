@@ -6058,7 +6058,7 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     return sceneSession->UpdateWindowMode(mode);
 }
 
-SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform()
+SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform() const
 {
     return singleHandTransform_;
 }
@@ -11255,10 +11255,10 @@ bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displ
 {
     auto region = GetDisplayRegion(displayId);
     if (region == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "GetDisplayRegion failed, displayId:%{public}lu", displayId);
+        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}lu", displayId);
         return false;
     }
-    SkIRect rect = region->getBounds();
+    const SkIRect rect = region->getBounds();
     displayWidth = rect.fRight;
     displayHeight = rect.fBottom;
     return true;

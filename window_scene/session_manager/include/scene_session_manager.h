@@ -473,7 +473,7 @@ public:
     /*
      * Window Layout
      */
-    SingleHandTransform GetNormalSingleHandTransform();
+    SingleHandTransform GetNormalSingleHandTransform() const;
     void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
 
     /*
