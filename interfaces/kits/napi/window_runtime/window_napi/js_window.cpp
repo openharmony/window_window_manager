@@ -3208,7 +3208,7 @@ napi_value JsWindow::OnSetStatusBarColor(napi_env env, napi_callback_info info)
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             TLOGNE(WmsLogTag::WMS_IMMS, "set status bar property error: %{public}d", errCode);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(err),
+            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(errCode),
                 "JsWindow::OnSetStatusBarProperty failed"));
         }
     };
