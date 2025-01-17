@@ -62,7 +62,7 @@ public:
     static ScreenShape GetScreenShape(ScreenId screenId);
     static void RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingHalfScreenObserver();
-    static bool GetHalfScreenSwitchState(const std::string& key = SETTING_HALF_SCREEN_SWITCH_KEY)
+    static bool GetHalfScreenSwitchState(const std::string& key = SETTING_HALF_SCREEN_SWITCH_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
