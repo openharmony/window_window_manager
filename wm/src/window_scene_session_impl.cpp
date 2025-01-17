@@ -2745,7 +2745,7 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
     }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
-        return WMError::WM_ERROR_STATE_ABNORMALLY;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto hostSession = GetHostSession();
     if (!hostSession) {
