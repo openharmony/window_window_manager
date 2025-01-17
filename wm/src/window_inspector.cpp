@@ -80,19 +80,19 @@ void WindowInspector::RegisterGetWMSWindowListCallback(
     if (result) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered");
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u", windowId);
 }
 
 void WindowInspector::UnregisterGetWMSWindowListCallback(uint32_t windowId)
 {
     std::unique_lock<std::mutex> lock(callbackMutex_);
-    auto iter = getWMSWindowListCallbacks_.find(windowName);
+    auto iter = getWMSWindowListCallbacks_.find(windowId);
     if (iter == getWMSWindowListCallbacks_.end()) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback not registered");
         return;
     }
     getWMSWindowListCallbacks_.erase(iter);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u", windowId);
 }
 
 void WindowInspector::UnregisterAllCallbacks()
