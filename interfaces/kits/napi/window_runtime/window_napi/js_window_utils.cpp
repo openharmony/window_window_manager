@@ -19,6 +19,7 @@
 #include <sstream>
 #include "accesstoken_kit.h"
 #include "bundle_constants.h"
+#include "color_parser.h"
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
 #include "js_window.h"
@@ -479,7 +480,7 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     return objValue;
 }
 
-static std::string GetHexColor(uint32_t color)
+std::string GetHexColor(const uint32_t color)
 {
     std::stringstream ioss;
     std::string temp;
@@ -698,6 +699,79 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
     return true;
+}
+
+napi_value CreateStatusBarPropertyObject(napi_env env, sptr<Window>& window)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    SystemBarProperty status = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    napi_set_named_property(env, objValue, "contentColor",
+        CreateJsValue(env, GetHexColor(status.contentColor_)));
+    return objValue;
+}
+
+bool GetStatusBarColorFromJs(napi_env env, napi_value jsObject, uint32_t& colorValue)
+{
+    if (!CheckTypeForNapiValue(env, jsObject, napi_object)) {
+        return false;
+    }
+    napi_value jsColor = nullptr;
+    napi_get_named_property(env, jsObject, "contentColor", &jsColor);
+    if (jsColor == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "empty content");
+        return false;
+    }
+    return ParseColorMetricsX(env, jsColor, colorValue);
+}
+
+bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType)
+{
+    napi_valuetype valueType = napi_undefined;
+    if (napi_typeof(env, param, &valueType) != napi_ok) {
+        return false;
+    }
+    return valueType == expectType;
+}
+
+bool ParseColorString(napi_env env, napi_value value, uint32_t& colorValue)
+{
+    std::string colorStr;
+    if (!ConvertFromJsValue(env, value, colorStr)) {
+        return false;
+    }
+    return ColorParser::Parse(colorStr, colorValue);
+}
+
+bool ParseColorMetricsX(napi_env env, napi_value value, uint32_t& colorValue)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_string && valueType != napi_object) {
+        TLOGD(WmsLogTag::DEFAULT, "expect string|object");
+        return false;
+    }
+
+    if (valueType == napi_string) {
+        return ParseColorString(env, value, colorValue);
+    }
+
+    napi_value jsToNumeric = nullptr;
+    napi_get_named_property(env, param, "toNumeric", &jsToNumeric);
+    if (!CheckTypeForNapiValue(env, jsToNumeric, napi_function)) {
+        TLOGD(WmsLogTag::DEFAULT, "expect function");
+        return false;
+    }
+    napi_value jsColor;
+    if (napi_call_function(env, param, jsToNumeric, 0, nullptr, &jsColor) != napi_ok) {
+        return false;
+    }
+    if (!CheckTypeForNapiValue(env, jsColor, napi_number)) {
+        TLOGD(WmsLogTag::DEFAULT, "expect number");
+        return false;
+    }
+    return napi_get_value_uint32(env, jsColor, &colorValue) == napi_ok;
 }
 
 bool ParseAndCheckRect(napi_env env, napi_value jsObject,
