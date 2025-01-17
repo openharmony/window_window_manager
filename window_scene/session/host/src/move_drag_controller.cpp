@@ -614,13 +614,12 @@ std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
 
 void MoveDragController::AdjustXYByAvailableArea(int32_t& x, int32_t& y)
 {
-    std::max(moveAvailableArea_.posX_, x);
-    std::max(moveAvailableArea_.posY_, y);
+    x = std::max(moveAvailableArea_.posX_, x);
+    y = std::max(moveAvailableArea_.posY_, y);
 
     if (x >= moveAvailableArea_.posX_ + moveAvailableArea_.width_ - moveDragProperty_.originalRect_.width_) {
         x = moveAvailableArea_.posX_ + moveAvailableArea_.width_ - moveDragProperty_.originalRect_.width_;
     }
-
     if (y >= moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_) {
         y = moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_;
     }
@@ -675,7 +674,6 @@ void MoveDragController::SetInputBarCrossAttr(MouseMoveDirection mouseMoveDirect
         mouseMoveDirection == MouseMoveDirection::RIGHT_TO_LEFT) {
         UpdateMoveAvailableArea(targetDisplayId);
     }
-    SetInputBarCrossScreen(true);
     moveInputBarStartDisplayId_ = targetDisplayId;
     SetOriginalDisplayOffset(screenSizeProperty_.currentDisplayStartX_, screenSizeProperty_.currentDisplayStartY_);
     ResetCurrentScreenProperty();
@@ -853,17 +851,7 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
     int32_t pointerId = pointerEvent->GetPointerId();
     pointerEvent->GetPointerItem(pointerId, pointerItem);
     if (moveDragProperty_.isEmpty()) {
-        int32_t pointerDisplayX = pointerItem.GetDisplayX();
-        int32_t pointerDisplayY = pointerItem.GetDisplayY();
-        moveDragProperty_.pointerId_ = pointerId;
-        moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
-        moveDragProperty_.originalPointerPosX_ = pointerDisplayX;
-        moveDragProperty_.originalPointerPosY_ = pointerDisplayY;
-        int32_t pointerWindowX = pointerItem.GetWindowX();
-        int32_t pointerWindowY = pointerItem.GetWindowY();
-        moveDragProperty_.originalRect_ = originalRect;
-        moveDragProperty_.originalRect_.posX_ = pointerDisplayX - pointerWindowX;
-        moveDragProperty_.originalRect_.posY_ = pointerDisplayY - pointerWindowY;
+        InitializeMoveDragPropertyNotValid(pointerEvent, originalRect);
         return false;
     };
     if (!WindowHelper::IsSystemWindow(winType_) ||
