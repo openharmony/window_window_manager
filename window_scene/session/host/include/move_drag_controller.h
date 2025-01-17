@@ -200,11 +200,11 @@ private:
                                             const WSRect& originalRect);
     void HandleLeftToRightCross(DisplayId targetDisplayId, int32_t pointerDisplayX, int32_t pointerDisplayY,
             int32_t& moveDragFinalX, int32_t& moveDragFinalY);
-    void HandleRightToLeftCross(DisplayId targetDisplayId, int32_t pointerDisplayX, int32_t pointerDisplayY, 
+    void HandleRightToLeftCross(DisplayId targetDisplayId, int32_t pointerDisplayX, int32_t pointerDisplayY,
             int32_t& moveDragFinalX, int32_t& moveDragFinalY);
-    void HandleUpToBottomCross(DisplayId targetDisplayId, int32_t pointerDisplayX, int32_t pointerDisplayY, 
+    void HandleUpToBottomCross(DisplayId targetDisplayId, int32_t pointerDisplayX, int32_t pointerDisplayY,
             int32_t& moveDragFinalX, int32_t& moveDragFinalY);
-    void HandleBottomToUpCross(DisplayId targetDisplayId, int32_t pointerDisplayX, int32_t pointerDisplayY, 
+    void HandleBottomToUpCross(DisplayId targetDisplayId, int32_t pointerDisplayX, int32_t pointerDisplayY,
             int32_t& moveDragFinalX, int32_t& moveDragFinalY);
     void CalcMoveForSameDisplay(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                 int32_t& moveDragFinalX, int32_t& moveDragFinalY);
