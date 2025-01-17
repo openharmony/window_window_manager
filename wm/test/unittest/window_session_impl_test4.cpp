@@ -253,6 +253,31 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetDecorVisible
+ * @tc.desc: GetDecorVisible and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetDecorVisible, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorVisible start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDecorVisible");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(0);
+    bool isVisible = true;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetDecorVisible(isVisible));
+    window->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetDecorVisible(isVisible))
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_EQ(WMError::WM_OK, window->SetDecorVisible(isVisible));
+    ASSERT_FALSE(isVisible);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorVisible end";
+}
+
+/**
  * @tc.name: SetWindowTitleMoveEnabled
  * @tc.desc: SetWindowTitleMoveEnabled and check the retCode
  * @tc.type: FUNC
