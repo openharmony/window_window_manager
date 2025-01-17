@@ -19,6 +19,7 @@
 #include <modifier/rs_property.h>
 #include <modifier/rs_property_modifier.h>
 
+#include "display_manager.h"
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/pc_fold_screen_controller.h"
@@ -570,6 +571,7 @@ public:
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
+    WSError SetMoveAvailableArea(DisplayId displayId);
 
     /*
      * Window Layout
@@ -762,6 +764,7 @@ private:
     void OnMoveDragCallback(SizeChangeReason reason);
     bool IsDragResizeWhenEnd(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
+    WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
