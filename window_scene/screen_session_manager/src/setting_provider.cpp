@@ -456,7 +456,8 @@ ErrCode SettingProvider::GetStringValueMultiUserByTable(const std::string& key,
     return ERR_OK;
 }
 
-std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelperMultiUserByTable(std::string tableName)
+std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelperMultiUserByTable(
+    std::string tableName)
 {
     std::string uriString = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
