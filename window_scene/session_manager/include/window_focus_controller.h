@@ -39,8 +39,8 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
-    bool needBlockNotifyFocusStatusUntilForeground_ { false };
-    bool needBlockNotifyUnfocusStatus_ { false };
+    bool needBlockNotifyFocusStatusUntilForeground { false };
+    bool needBlockNotifyUnfocusStatus { false };
     DisplayId displayGroupId_ = DISPLAY_ID_INVALID;
 
 public:
@@ -80,12 +80,12 @@ public:
 
     bool GetNeedBlockNotifyFocusStatusUntilForeground()
     {
-        return needBlockNotifyFocusStatusUntilForeground_;
+        return needBlockNotifyFocusStatusUntilForeground;
     }
 
     bool GetNeedBlockNotifyUnfocusStatus()
     {
-        return needBlockNotifyUnfocusStatus_;
+        return needBlockNotifyUnfocusStatus;
     }
 
     DisplayId GetDisplayGroupId()
@@ -110,12 +110,12 @@ public:
 
     void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlockNotifyFocusStatusUntilForeground)
     {
-        needBlockNotifyFocusStatusUntilForeground_ = needBlockNotifyFocusStatusUntilForeground;
+        needBlockNotifyFocusStatusUntilForeground = needBlockNotifyFocusStatusUntilForeground;
     }
 
     void SetNeedBlockNotifyUnfocusStatus(bool needBlockNotifyUnfocusStatus)
     {
-        needBlockNotifyUnfocusStatus_ = needBlockNotifyUnfocusStatus;
+        needBlockNotifyUnfocusStatus = needBlockNotifyUnfocusStatus;
     }
 };
 
