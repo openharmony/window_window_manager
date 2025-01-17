@@ -418,7 +418,10 @@ ohos_shared_library("libwm_ndk") {
     "${window_base_path}/interfaces/inner_kits/wm",
   ]
 
-  sources = [ "src/oh_window_event_filter.cpp" ]
+  sources = [
+    "src/oh_window.cpp",
+    "src/oh_window_event_filter.cpp",
+  ]
 
   deps = [
     ":libwm",
@@ -429,6 +432,7 @@ ohos_shared_library("libwm_ndk") {
 
   external_deps = [
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "input:libmmi-client",
     "input:oh_input_manager",
