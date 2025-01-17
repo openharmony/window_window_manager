@@ -53,8 +53,8 @@ void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents even
 void SuperFoldStateManager::DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents event)
 {
     TLOGI(WmsLogTag::DMS, "enter DoAngleChangeHalfFolded() func");
-     isHalfFolded_ = true;
-     if (!isHalfScreenSwitchOn_) {
+    isHalfFolded_ = true;
+    if (!isHalfScreenSwitchOn_) {
         TLOGI(WmsLogTag::DMS, "Half Screen Switch is off");
         return;
     }
