@@ -203,7 +203,7 @@ public:
     static napi_value SetSystemBarProperties(napi_env env, napi_callback_info info);
     static napi_value GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     static napi_value SetWindowSystemBarProperties(napi_env env, napi_callback_info info);
-    static napi_value SetStatusBarProperty(napi_env env, napi_callback_info info);
+    static napi_value SetStatusBarColor(napi_env env, napi_callback_info info);
     static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
@@ -387,7 +387,7 @@ private:
     napi_value OnSetSystemBarProperties(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     napi_value OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info);
-    napi_value OnSetStatusBarProperty(napi_env env, napi_callback_info info);
+    napi_value OnSetStatusBarColor(napi_env env, napi_callback_info info);
     napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
