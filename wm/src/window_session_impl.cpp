@@ -4753,14 +4753,14 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
         return;
     }
     onGetWMSWindowListCallback_ = std::make_shared<GetWMSWindowListCallback>([weakThis = wptr(this)] {
-        WindowListsInfo windowListsInfo;
+        WindowListInfo windowListInfo;
         if (auto window = weakThis.promote()) {
-            windowListsInfo.windowName = window->GetWindowName();
-            windowListsInfo.windowId = window->GetWindowId();
-            windowListsInfo.windowType = static_cast<uint32_t>(window->GetType());
-            windowListsInfo.windowRect = window->GetRect();
+            windowListInfo.windowName = window->GetWindowName();
+            windowListInfo.windowId = window->GetWindowId();
+            windowListInfo.windowType = static_cast<uint32_t>(window->GetType());
+            windowListInfo.windowRect = window->GetRect();
         }
-        return windowListsInfo;
+        return windowListInfo;
     });
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(
         GetWindowName(), std::weak_ptr<GetWMSWindowListCallback>(onGetWMSWindowListCallback_));

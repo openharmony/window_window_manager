@@ -30,7 +30,7 @@ struct WindowListInfo {
 };
 using SendWMSMessage = void (*)(const std::string& message);
 using SetWMSCallback = void (*)(const std::function<void(const char*)>& wmsCallback);
-using GetWMSWindowListCallback = std::function<WindowListsInfo()>;
+using GetWMSWindowListCallback = std::function<WindowListInfo()>;
 
 class WindowInspector : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);

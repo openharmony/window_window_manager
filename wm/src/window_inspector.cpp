@@ -151,9 +151,9 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
 void WindowInspector::CreateArkUIInspectorJson(
     const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr)
 {
-    nlohmann::ordered_json jsonWindowListsInfo;
-    jsonWindowListsInfo["type"] = "window";
-    jsonWindowListsInfo["content"] = nlohmann::json::array();
+    nlohmann::ordered_json jsonWindowListInfo;
+    jsonWindowListInfo["type"] = "window";
+    jsonWindowListInfo["content"] = nlohmann::json::array();
     for (const auto& info : windowListInfo) {
         nlohmann::ordered_json jsonInfo;
         jsonInfo["windowName"] = info.windowName;
@@ -166,9 +166,9 @@ void WindowInspector::CreateArkUIInspectorJson(
         jsonRectInfo["height"] = std::to_string(info.windowRect.height_);
         jsonInfo["rect"] = jsonRectInfo;
 
-        jsonWindowListsInfo["content"].push_back(std::move(jsonInfo));
+        jsonWindowListInfo["content"].push_back(std::move(jsonInfo));
     }
-    jsonStr = jsonWindowListsInfo.dump();
+    jsonStr = jsonWindowListInfo.dump();
 }
 
 void WindowInspector::SendMessageToIDE(std::string& jsonStr)
