@@ -57,7 +57,7 @@ HWTEST_F(WindowInspetorTest, InitConnectServer, Function | SmallTest | Level2)
 HWTEST_F(WindowInspetorTest, CloseConnectServer01, Function | SmallTest | Level2)
 {
     WindowInspector::GetInstance().ConnectServer();
-    WindowInspector::GetInstance().CloseConnectServer();
+    WindowInspector::GetInstance().CloseConnectFromServer();
     EXPECT_EQ(nullptr, WindowInspector::GetInstance().handlerConnectServerSo_);
 }
 
@@ -90,10 +90,10 @@ HWTEST_F(WindowInspetorTest, ProcessArkUIInspectorMessage, Function | SmallTest 
 HWTEST_F(WindowInspetorTest, CreateArkUIInspectorJson, Function | SmallTest | Level2)
 {
     Rect windowRect = { 100, 100, 100, 100 };
-    std::vector<WindowListsInfo> windowListsInfo;
-    windowListsInfo.push_back({ "test01", 1, 1, windowRect});
+    std::vector<WindowListInfo> windowListInfo;
+    windowListInfo.push_back({ "test01", 1, 1, windowRect});
     std::string jsonStr;
-    WindowInspector::GetInstance().CreateArkUIInspectorJson(windowListsInfo, jsonStr);
+    WindowInspector::GetInstance().CreateArkUIInspectorJson(windowListInfo, jsonStr);
     std::string ret = "{\"type\":\"window\",\"content\":[{\"windowName\":\"test01\",\"winId\":\"1\",\"type\":\"1\","
                       "\"rect\":{\"startX\":\"100\",\"startY\":\"100\",\"width\":\"100\",\"height\":\"100\"}}]}";
     EXPECT_EQ(ret, jsonStr);
