@@ -51,6 +51,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
+    {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
@@ -481,6 +482,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB):
+                return ProcessWindowHighlightChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
                 WLOGFE("RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
@@ -620,6 +623,22 @@ WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<J
     WmErrorCode ret = isRegister ?
         WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener)) :
         WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowHighlightChangeRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowHighlightChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowHighlightChangeListeners(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowHighlightChangeListeners(thisListener));
+    }
     return ret;
 }
 } // namespace Rosen

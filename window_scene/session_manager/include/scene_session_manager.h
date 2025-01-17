@@ -264,6 +264,11 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
+    void UpdateHighlightStatus(sptr<SceneSession>& preSceneSession, sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus);
+    void SetHighlightSessionIds(sptr<SceneSession>& sceneSession);
+    void AddHighlightSessionIds(sptr<SceneSession>& sceneSession);
+    void RemoveHighlightSessionIds(sptr<SceneSession>& sceneSession);
+    void LogHighLight();
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -694,7 +699,7 @@ private:
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(uint32_t zOrder, bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
-    WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT, bool isProactiveUnfocus = false);
     void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
     int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
@@ -935,6 +940,7 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    std::unordered_set<int32_t> highlightIds_;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};

@@ -527,6 +527,21 @@ public:
 };
 
 /**
+ * @class IWindowHighlightChangeListener
+ *
+ * @brief IWindowHighlightChangeListener is a Listener to observe event when highlight change of window.
+ */
+class IWindowHighlightChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when when highlight status changes.
+     *
+     * @param isHighlight Whether the window is highlighted.
+     */
+    virtual void OnWindowHighlightChange(bool isHighlight) {}
+};
+
+/**
  * @class ISwitchFreeMultiWindowListener
  *
  * @brief ISwitchFreeMultiWindowListener is used to observe the free multi window state when it changed.
@@ -2979,6 +2994,44 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Register window highlight change listener.
+     * 
+     * @param listener IWindowHighlightChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+    
+    /**
+     * @brief Unregister window highlight change listener.
+     * 
+     * @param listener IWindowHighlightChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnRegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Set whether to enable exclusively highlight.
+     * 
+     * @param isExclusivelyHighlighted the value true means to enable exclusively highlight, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) { return WMError::WM_OK; }
+    
+    /**
+     * @brief Get highlight property of window.
+     * 
+     * @return True means the window is highlighted, false means the window is not highlighted.
+     */
+    virtual bool IsWindowHighlighted() { return false; }
+
 };
 }
 }

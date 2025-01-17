@@ -88,7 +88,10 @@ const std::string SESSION_LOCK_STATE_CHANGE_CB = "sessionLockStateChange";
 const std::string UPDATE_SESSION_LABEL_AND_ICON_CB = "updateSessionLabelAndIcon";
 const std::string KEYBOARD_STATE_CHANGE_CB = "keyboardStateChange";
 const std::string KEYBOARD_VIEW_MODE_CHANGE_CB = "KeyboardViewModeChange";
+const std::string HIGHLIGHT_CHANGE_CB = "highlightChange";
 
+constexpr int ARG_COUNT_1 = 1;
+constexpr int ARG_COUNT_2 = 2;
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
 constexpr int ARG_INDEX_0 = 0;
@@ -160,7 +163,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SESSION_LOCK_STATE_CHANGE_CB,          ListenerFuncType::SESSION_LOCK_STATE_CHANGE_CB},
     {UPDATE_SESSION_LABEL_AND_ICON_CB,      ListenerFuncType::UPDATE_SESSION_LABEL_AND_ICON_CB},
     {KEYBOARD_STATE_CHANGE_CB,              ListenerFuncType::KEYBOARD_STATE_CHANGE_CB},
-    {KEYBOARD_VIEW_MODE_CHANGE_CB,         ListenerFuncType::KEYBOARD_VIEW_MODE_CHANGE_CB},
+    {KEYBOARD_VIEW_MODE_CHANGE_CB,          ListenerFuncType::KEYBOARD_VIEW_MODE_CHANGE_CB},
+    {HIGHLIGHT_CHANGE_CB,                   ListenerFuncType::HIGHLIGHT_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -448,6 +452,8 @@ void JsSceneSession::BindNativeMethodForFocus(napi_env env, napi_value objValue,
     BindNativeFunction(env, objValue, "setSystemFocusable", moduleName, JsSceneSession::SetSystemFocusable);
     BindNativeFunction(env, objValue, "setSystemSceneBlockingFocus", moduleName,
         JsSceneSession::SetSystemSceneBlockingFocus);
+    BindNativeFunction(env, objValue, "setExclusivelyHighlighted", moduleName,
+        JsSceneSession::SetExclusivelyHighlighted);
 }
 
 void JsSceneSession::BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName)
@@ -1916,6 +1922,13 @@ napi_value JsSceneSession::SetSystemSceneBlockingFocus(napi_env env, napi_callba
     return (me != nullptr) ? me->OnSetSystemSceneBlockingFocus(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetExclusivelyHighlighted(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetExclusivelyHighlighted(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::MaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
@@ -2527,6 +2540,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::KEYBOARD_VIEW_MODE_CHANGE_CB):
             ProcessKeyboardViewModeChangeRegister();
             break;
+        case static_cast<uint32_t>(ListenerFuncType::HIGHLIGHT_CHANGE_CB):
+            ProcessSetHighlightChangeRegister();
+            break;
         default:
             break;
     }
@@ -2796,6 +2812,34 @@ napi_value JsSceneSession::OnSetSystemSceneBlockingFocus(napi_env env, napi_call
     }
     session->SetSystemSceneBlockingFocus(blocking);
     WLOGFI("end");
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_4;
+    napi_value argv[ARG_COUNT_4] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_1) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isExclusivelyHighlighted = true;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isExclusivelyHighlighted)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to isExclusivelyHighlighted");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetExclusivelyHighlighted(isExclusivelyHighlighted);
+    TLOGD(WmsLogTag::WMS_FOCUS, "end");
     return NapiGetUndefined(env);
 }
 
@@ -5997,5 +6041,39 @@ void JsSceneSession::OnKeyboardViewModeChange(const KeyboardViewMode& mode)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnKeyboardViewModeChange");
+}
+
+void JsSceneSession::ProcessSetHighlightChangeRegister()
+{
+    NotifyHighlightChangeFunc func = [this](bool isHighlight) {
+        this->NotifyHighlightChange(isHighlight);
+    };
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr");
+        return;
+    }
+    session->SetHighlightChangeNotifyFunc(func);
+}
+
+void JsSceneSession::NotifyHighlightChange(bool isHighlight)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "isHighlight:%{public}d, id:%{public}d", isHighlight, persistentId_);
+    auto task = [weakThis = wptr(this), isHighlight, env = env_, persistentId = persistentId_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(HIGHLIGHT_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsIsHighlight = CreateJsValue(env, isHighlight);
+        napi_value argv[] = { jsIsHighlight };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "NotifyHighlightChange");
 }
 } // namespace OHOS::Rosen

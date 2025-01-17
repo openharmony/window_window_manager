@@ -2639,6 +2639,54 @@ WSError Session::RequestFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
+void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "windowId: %{public}d property is nullptr", persistentId_);
+        return;
+    }
+    if(isExclusivelyHighlighted == property->GetExclusivelyHighlighted()){
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d", persistentId_,
+        isExclusivelyHighlighted);
+    property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
+}
+
+void Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, 
+    "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d", persistentId_,
+    isHighlight_, isHighlight, isNotifyHighlightChange);
+    if (isHighlight_ == isHighlight){
+        return WSError::WS_DO_NOTHING;
+    }
+    isHighlight_ = isHighlight;
+    if (isNotifyHighlightChange){
+        NotifyHighlightChange(isHighlight);
+        if (highlightChangeFunc_ != nullptr){
+            highlightChangeFunc_(isHighlight);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError Session::NotifyHighlightChange(bool isHighlight)
+{
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id:%{public}d state:%{public}u",
+            persistentId_, GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_ -> NotifyHighlightChange(isHighlight);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",

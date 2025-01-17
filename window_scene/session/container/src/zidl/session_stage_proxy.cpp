@@ -478,6 +478,36 @@ WSError SessionStageProxy::UpdateFocus(bool focus)
     return static_cast<WSError>(ret);
 }
 
+WSError SessionStageProxy::NotifyHighlightChange(bool isHighlight)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isHighlight)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write isHighlight failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionStageProxy::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
     MessageParcel data;

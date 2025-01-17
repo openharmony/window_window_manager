@@ -1725,6 +1725,76 @@ HWTEST_F(SceneSessionTest5, ActivateKeyboardAvoidArea01, Function | SmallTest | 
     sceneSession->ActivateKeyboardAvoidArea(true, false);
     ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
 }
+
+/**
+ * @tc.name: isRelated
+ * @tc.desc: test isRelated
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, isRelated, Function | SmallTest | Level2)
+{
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+    SessionInfo info2;
+    info2.abilityName_ = "abilityName_test2";
+    info2.bundleName_ = "bundleName_test2";
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    preSceneSession->persistentId_ = 1;
+    currSceneSession->persistentId_ = 1;
+    ASSERT_EQ(true, currSceneSession->isRelated(preSceneSession));
+    currSceneSession->persistentId_ = 2;
+    ASSERT_EQ(false, currSceneSession->isRelated(preSceneSession));
+ 
+    sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    subSession1->SetParentSession(preSceneSession);
+    subSession2->SetParentSession(currSceneSession);
+    currSceneSession->persistentId_ = 1;
+    subSession1->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    subSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ASSERT_EQ(true, subSession1->isRelated(subSession1));
+    currSceneSession->persistentId_ = 2;
+    ASSERT_EQ(false, subSession1->isRelated(subSession1));
+}
+ 
+/**
+ * @tc.name: HandleActionUpdateExclusivelyHighlighted
+ * @tc.desc: test HandleActionUpdateExclusivelyHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HandleActionUpdateExclusivelyHighlighted, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateExclusivelyHighlighted";
+    info.bundleName_ = "HandleActionUpdateExclusivelyHighlighted";
+    info.isSystem_ = true;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetExclusivelyHighlighted(true);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED;
+    auto res = session->HandleActionUpdateExclusivelyHighlighted(property, action);
+    EXPECT_EQ(WMError::WM_OK, res);
+}
+ 
+/**
+ * @tc.name: SetHighlightChangeNotifyFunc
+ * @tc.desc: SetHighlightChangeNotifyFunc Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetHighlightChangeNotifyFunc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "test";
+    info.bundleName_ = "test";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->SetHighlightChangeNotifyFunc([](int32_t persistentId) {});
+    EXPECT_NE(session->highlightChangeFunc_, nullptr);
+}
 }
 }
 }
