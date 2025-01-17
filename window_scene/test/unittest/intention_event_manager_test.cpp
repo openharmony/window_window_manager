@@ -156,11 +156,11 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent1, Function | MediumTest | Level
     inputEventListener_->OnInputEvent(keyEvent);
 
     SceneSessionManager::GetInstance().SetEnableInputEvent(true);
-    SceneSessionManager::GetInstance().SetFocusedSessionId(DEFAULT_DISPLAY_ID, INVALID_SESSION_ID);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(INVALID_SESSION_ID, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(INVALID_SESSION_ID, SceneSessionManager::GetInstance().GetFocusedSessionId());
     inputEventListener_->OnInputEvent(keyEvent);
 
-    SceneSessionManager::GetInstance().SetFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
     inputEventListener_->OnInputEvent(keyEvent);
 
     SessionInfo info;
@@ -180,7 +180,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent1, Function | MediumTest | Level
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, callback);
     EXPECT_NE(nullptr, sceneSession1);
     SceneSessionManager::GetInstance().sceneSessionMap_.emplace(std::make_pair(2, sceneSession1));
-    SceneSessionManager::GetInstance().SetFocusedSessionId(DEFAULT_DISPLAY_ID, 2);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(2, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(2, SceneSessionManager::GetInstance().GetFocusedSessionId());
     auto focusedSceneSession = SceneSessionManager::GetInstance().GetSceneSession(2);
     inputEventListener_->OnInputEvent(keyEvent);
@@ -197,7 +197,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent2, Function | MediumTest | Level
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     EXPECT_NE(nullptr, keyEvent);
     SceneSessionManager::GetInstance().SetEnableInputEvent(true);
-    SceneSessionManager::GetInstance().SetFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
     SessionInfo info;
     info.bundleName_ = "IntentionEventManager";
     info.moduleName_ = "InputEventListener";
@@ -235,7 +235,7 @@ HWTEST_F(IntentionEventManagerTest, OnInputEvent3, Function | MediumTest | Level
     std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     EXPECT_NE(nullptr, keyEvent);
     SceneSessionManager::GetInstance().SetEnableInputEvent(true);
-    SceneSessionManager::GetInstance().SetFocusedSessionId(DEFAULT_DISPLAY_ID, 1);
+    SceneSessionManager::GetInstance().SetFocusedSessionId(1, DEFAULT_DISPLAY_ID);
     SessionInfo info;
     info.bundleName_ = "IntentionEventManager";
     info.moduleName_ = "InputEventListener";

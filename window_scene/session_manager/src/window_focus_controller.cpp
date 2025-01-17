@@ -22,7 +22,7 @@ namespace {
 
 #define CHECK_DISPLAY_ID_RETURN(displayId, ret)                         \
     do {                                                                \
-        if (displayId == DISPLAY_ID_INVALID) {                          \
+        if ((displayId) == DISPLAY_ID_INVALID) {                          \
             TLOGE(WmsLogTag::WMS_FOCUS, "display id is invalid.");      \
             return ret;                                                 \
         }                                                               \
@@ -77,7 +77,7 @@ int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
     CHECK_DISPLAY_ID_RETURN(displayId, INVALID_SESSION_ID);
     std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
-    if(focusGroup == nullptr) {
+    if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}lu", displayId);
         return INVALID_SESSION_ID;
     }
@@ -100,7 +100,7 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
 {
     DisplayId displayGroupId = GetDisplayGroupId(displayId);
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}lu, displayGroupId: %{public}lu", displayId, displayGroupId);
-    if(displayGroupId == DEFAULT_DISPLAY_ID) {
+    if (displayGroupId == DEFAULT_DISPLAY_ID) {
         return focusGroupMap_[DEFAULT_DISPLAY_ID];
     }
     auto iter = focusGroupMap_.find(displayGroupId);
@@ -138,7 +138,7 @@ WSError WindowFocusController::UpdateFocusedSessionId(DisplayId displayId, int32
     CHECK_DISPLAY_ID_RETURN(displayId, WSError::WS_ERROR_INVALID_PARAM);
     std::unique_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
-    if(focusGroup == nullptr) {
+    if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}lu", displayId);
         return WSError::WS_ERROR_NULLPTR;
     }
@@ -151,7 +151,7 @@ WSError WindowFocusController::UpdateFocusedAppSessionId(DisplayId displayId, in
     CHECK_DISPLAY_ID_RETURN(displayId, WSError::WS_ERROR_INVALID_PARAM);
     std::unique_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
-    if(focusGroup == nullptr) {
+    if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}d", displayId);
         return WSError::WS_ERROR_NULLPTR;
     }
