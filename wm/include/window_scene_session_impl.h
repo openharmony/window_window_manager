@@ -285,7 +285,6 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
-    bool CalcWindowShouldMove();
 
     /*
      * Window Recover
@@ -350,6 +349,11 @@ private:
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 
+    /*
+     * Move Drag
+     */
+    bool CalcWindowShouldMove();
+    
     /*
      * PC Window
      */
