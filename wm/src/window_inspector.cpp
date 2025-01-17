@@ -30,7 +30,7 @@ const std::string COMMAND_NAME = "getCurrentProcessWindowList";
 
 WindowInspector& WindowInspector::GetInstance()
 {
-    static sptr<WindowInspector> instance = sptr::MakeSptr<WindowInspector>();
+    static sptr<WindowInspector> instance = new WindowInspector();
     return *instance;
 }
 
