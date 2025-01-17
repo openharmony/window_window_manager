@@ -472,6 +472,7 @@ public:
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
     void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
+    void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
      * Window Property
@@ -1128,7 +1129,6 @@ private:
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
-    void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
      * Window Snapshot
