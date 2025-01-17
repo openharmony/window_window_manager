@@ -3803,7 +3803,7 @@ WSError SceneSessionManager::ProcessBackEvent()
     taskScheduler_->PostAsyncTask([this]() {
         auto focusGroup = windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
         if (focusGroup == nullptr) {
-            TLOGNE(WmsLogTag::WMS_MAIN, "focus group is nullptr: %{public}lu", DEFAULT_DISPLAY_ID);
+            TLOGNE(WmsLogTag::WMS_MAIN, "focus group is nullptr: %{public}" PRIu64, DEFAULT_DISPLAY_ID);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto focusedSessionId = focusGroup->GetFocusedSessionId();
@@ -5385,7 +5385,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}lu", displayId);
+        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     // base block
@@ -5429,7 +5429,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}lu", displayId);
+        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId, focusGroup);
@@ -5485,7 +5485,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}lu", displayId);
+        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto focusedSession = GetSceneSession(focusGroup->GetFocusedSessionId());
@@ -5671,8 +5671,8 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<Scen
     return sceneSession->GetZOrder() < focusedSession->GetZOrder();
 }
 
-WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, sptr<SceneSession>& sceneSession, bool byForeground,
-    FocusChangeReason reason)
+WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, sptr<SceneSession>& sceneSession,
+    bool byForeground,FocusChangeReason reason)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
     int32_t persistentId = sceneSession->GetPersistentId();
@@ -5791,7 +5791,8 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
  * Find the session through the specific zOrder, it is located abve it, its' blockingFocus attribute is true,
  * and it is the closest;
  */
-sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder, bool includingAppSession)
+sptr<SceneSession> SceneSessionManager::GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
+    bool includingAppSession)
 {
     sptr<SceneSession> ret = nullptr;
     auto func = [this, &ret, zOrder, includingAppSession, displayId](sptr<SceneSession> session) {
@@ -5923,8 +5924,8 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, sptr<SceneSession>&
             notifySCBAfterUnfocusedFunc_();
         }
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}lu, focusedId: %{public}d, nextId: %{public}d, reason: %{public}d",
-        displayId, focusedId, nextId, reason);
+    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64
+          ", focusedId: %{public}d, nextId: %{public}d, reason: %{public}d", displayId, focusedId, nextId, reason);
     return WSError::WS_OK;
 }
 
@@ -5948,8 +5949,8 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, sptr<SceneSessi
         }
         return;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "name: %{public}s, id: %{public}d, isFocused: %{public}d, displayId: %{public}lu",
-        sceneSession->GetWindowNameAllType().c_str(), sceneSession->GetPersistentId(), isFocused, displayId);
+    TLOGD(WmsLogTag::WMS_FOCUS, "name: %{public}s, id: %{public}d, isFocused: %{public}d, displayId: %{public}" PRIu64,
+          sceneSession->GetWindowNameAllType().c_str(), sceneSession->GetPersistentId(), isFocused, displayId);
     // set focused
     if (isFocused) {
         SetFocusedSessionId(sceneSession->GetPersistentId(), displayId);
@@ -9517,11 +9518,12 @@ bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenT
 void ScreenConnectionChangeListener::OnScreenConnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "screenSession connect failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "screenSession is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "name: %{public}s, screenId: %{public}lu", screenSession->GetName().c_str(),
-        screenSession->GetScreenId());
+    TLOGI(WmsLogTag::WMS_FOCUS, "name: %{public}s, screenId: %{public}" PRIu64 ", screenType: %{public}u",
+          screenSession->GetName().c_str(), screenSession->GetScreenId(),
+          screenSession->GetScreenProperty().GetScreenType());
     if (CheckIfNeedMultipleFocus(screenSession->GetName(), screenSession->GetScreenProperty().GetScreenType())) {
         SceneSessionManager::GetInstance().AddFocusGroup(screenSession->GetScreenId());
     }
@@ -9530,11 +9532,12 @@ void ScreenConnectionChangeListener::OnScreenConnected(const sptr<ScreenSession>
 void ScreenConnectionChangeListener::OnScreenDisconnected(const sptr<ScreenSession>& screenSession)
 {
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "screenSession disconnect failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "screenSession is nullptr");
         return;
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "name: %{public}s, screenId: %{public}lu", screenSession->GetName().c_str(),
-        screenSession->GetScreenId());
+    TLOGI(WmsLogTag::WMS_FOCUS, "name: %{public}s, screenId: %{public}" PRIu64 ", screenType: %{public}u",
+          screenSession->GetName().c_str(), screenSession->GetScreenId(),
+          screenSession->GetScreenProperty().GetScreenType());
     if (CheckIfNeedMultipleFocus(screenSession->GetName(), screenSession->GetScreenProperty().GetScreenType())) {
         SceneSessionManager::GetInstance().RemoveFocusGroup(screenSession->GetScreenId());
     }
