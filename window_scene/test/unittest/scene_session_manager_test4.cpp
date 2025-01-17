@@ -1233,7 +1233,7 @@ HWTEST_F(SceneSessionManagerTest4, GetAccessibilityWindowInfo, Function | SmallT
 HWTEST_F(SceneSessionManagerTest4, ShiftAppWindowFocus02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->SetFocusedSessionId(DEFAULT_DISPLAY_ID, INVALID_SESSION_ID);
+    ssm_->SetFocusedSessionId(INVALID_SESSION_ID, DEFAULT_DISPLAY_ID);
     int32_t sourcePersistentId = INVALID_SESSION_ID;
     int32_t targetPersistentId = 1;
 

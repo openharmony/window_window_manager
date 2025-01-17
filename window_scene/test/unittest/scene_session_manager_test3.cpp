@@ -1319,10 +1319,10 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | L
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, INVALID_SESSION_ID);
     int32_t persistentId = INVALID_SESSION_ID;
-    WSError result01 = ssm_->SetFocusedSessionId(DEFAULT_DISPLAY_ID, persistentId);
+    WSError result01 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
     persistentId = 10086;
-    WSError result02 = ssm_->SetFocusedSessionId(DEFAULT_DISPLAY_ID, persistentId);
+    WSError result02 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result02, WSError::WS_OK);
     ASSERT_EQ(ssm_->GetFocusedSessionId(), 10086);
 }

@@ -34,8 +34,7 @@ namespace Rosen {
  *
  * @brief  Window focus group of a screen
  */
-struct FocusGroup : public RefBase
-{
+struct FocusGroup : public RefBase {
 private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
@@ -45,7 +44,7 @@ private:
     DisplayId displayGroupId_ = DISPLAY_ID_INVALID;
 
 public:
-    FocusGroup(DisplayId displayGroupId) : displayGroupId_(displayGroupId) {}
+    FocusGroup(DisplayId displayGroupId) : displayGroupId_(displayGroupId) explicit {}
     WSError UpdateFocusedSessionId(int32_t persistentId)
     {
         TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId_, persistentId);
@@ -139,7 +138,6 @@ private:
     std::shared_mutex focusGroupMutex_;
     std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMap_;
     std::unordered_set<DisplayId> virtualScreenDisplayIdSet_;
-
 };
 }
 }

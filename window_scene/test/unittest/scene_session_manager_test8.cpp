@@ -557,7 +557,7 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
     ssm_->Init();
     ASSERT_NE(nullptr, ssm_->eventHandler_);
 
-    ssm_->SetFocusedSessionId(DEFAULT_DISPLAY_ID, 2024);
+    ssm_->SetFocusedSessionId(2024, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(2024, ssm_->GetFocusedSessionId());
 
     ret = ssm_->SetBrightness(sceneSession, 3.15f);

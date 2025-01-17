@@ -464,7 +464,7 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& 
     }
     if (!data.WriteUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -495,7 +495,7 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::Element
     }
     if (!data.WriteUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
-        return WMError::WM_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
