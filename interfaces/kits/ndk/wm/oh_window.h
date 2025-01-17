@@ -50,6 +50,12 @@ extern "C" {
  * @param enabled If true, the status bar is displayed. If false, the status bar is hidden.
  * @param enableAnimation If true, the status bar is displayed and hidden with animation.
  *                        If false, the status bar is displayed and hidden with no animation.
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
 WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
@@ -59,6 +65,12 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
  *
  * @param windowId WindowId when window is created.
  * @param color The color value to set, the format is ARGB.
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
 WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int32_t color);
@@ -70,6 +82,12 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int3
  * @param enabled If true, the navigation bar is displayed. If false, the navigation bar is hidden.
  * @param enableAnimation If true, the navigation bar is displayed and hidden with animation.
  *                        If false, the navigation bar is displayed and hidden with no animation.
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
 WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
@@ -81,6 +99,11 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
  * @param type Type of the avoid area.
  * @param avoidArea Indicates the pointer to a WindowManager_AvoidArea object.
  * @return Returns the status code of the execution.
+ * @return Return the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
 WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
@@ -91,4 +114,3 @@ WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
 #endif
 
 #endif // OH_WINDOW_H
-/** @} */
