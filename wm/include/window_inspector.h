@@ -28,8 +28,8 @@ struct WindowListInfo {
     uint32_t windowType;
     Rect windowRect;
 };
-using SendWMSMessage = void (*)(const std::string& message);
-using SetWMSCallback = void (*)(const std::function<void(const char*)>& wmsCallback);
+using SendWMSMessageFunc = void (*)(const std::string& message);
+using SetWMSCallbackFunc = void (*)(const std::function<void(const char*)>& wmsCallback);
 using GetWMSWindowListCallback = std::function<WindowListInfo()>;
 
 class WindowInspector : public RefBase {
@@ -46,8 +46,8 @@ protected:
 private:
     bool isConnectServerSuccess_ = false;
     void* handlerConnectServerSo_ = nullptr;
-    SendWMSMessage sendWMSMessage_ = nullptr;
-    SetWMSCallback setWMSCallback_ = nullptr;
+    SendWMSMessageFunc sendWMSMessageFunc_ = nullptr;
+    SetWMSCallbackFunc setWMSCallbackFunc_ = nullptr;
     std::mutex callbackMutex_;
     static std::unordered_map<std::string, sptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
     static sptr<WindowInspector> CreateInstance();

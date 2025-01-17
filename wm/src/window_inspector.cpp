@@ -53,16 +53,16 @@ void WindowInspector::ConnectServer()
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "can't open %{public}s", ARK_CONNECT_LIB_PATH);
         return;
     }
-    setWMSCallback_ = reinterpret_cast<SetWMSCallback>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
-    sendWMSMessage_ = reinterpret_cast<SendWMSMessage>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
-    if (setWMSCallback_ == nullptr || sendWMSMessage_ == nullptr) {
+    setWMSCallbackFunc_ = reinterpret_cast<SetWMSCallback>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
+    sendWMSMessageFunc_ = reinterpret_cast<SendWMSMessage>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
+    if (setWMSCallbackFunc_ == nullptr || sendWMSMessageFunc_ == nullptr) {
         CloseConnectServer();
-        setWMSCallback_ = nullptr;
-        sendWMSMessage_ = nullptr;
+        setWMSCallbackFunc_ = nullptr;
+        sendWMSMessageFunc_ = nullptr;
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load failed: %{public}s", dlerror());
         return;
     }
-    setWMSCallback_([this](const char* message) {
+    setWMSCallbackFunc_([this](const char* message) {
         std::string jsonWindowListInfoStr;
         if (ProcessArkUIInspectorMessage(message, jsonWindowListInfoStr)) {
             SendMessageToIDE(jsonWindowListInfoStr);
@@ -106,9 +106,9 @@ void WindowInspector::UnregisterGetWMSWindowListCallback(std::string windowName)
 
 void WindowInspector::UnregisterAllCallbacks()
 {
-    setWMSCallback_(nullptr);
-    setWMSCallback_ = nullptr;
-    sendWMSMessage_ = nullptr;
+    setWMSCallbackFunc_(nullptr);
+    setWMSCallbackFunc_ = nullptr;
+    sendWMSMessageFunc_ = nullptr;
     std::unique_lock<std::mutex> lock(callbackMutex_);
     getWMSWindowListCallbacks_.clear();
 }
@@ -173,11 +173,11 @@ void WindowInspector::CreateArkUIInspectorJson(
 
 void WindowInspector::SendMessageToIDE(std::string& jsonStr)
 {
-    if (sendWMSMessage_ == nullptr) {
+    if (sendWMSMessageFunc_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendMessage is null");
         return;
     }
-    sendWMSMessage_(jsonStr);
+    sendWMSMessageFunc_(jsonStr);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", jsonStr.c_str());
 }
 } // namespace Rosen::OHOS
