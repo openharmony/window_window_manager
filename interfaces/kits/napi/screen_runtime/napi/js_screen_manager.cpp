@@ -800,24 +800,27 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
-    NapiAsyncTask::CompleteCallback complete = [this, screenIds](napi_env env, NapiAsyncTask& task, int32_t status) {
-        std::vector<DisplayId> displayIds;
-        DmErrorCode res = DM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<ScreenManager>().MakeUniqueScreen(screenIds, displayIds));
-        if (res == DmErrorCode::DM_OK && !displayIds.empty()) {
-            task.Resolve(env, CreateJsDisplayIdVectorObject(env, displayIds));
-        } else {
-            WLOGFE("Failed to make unique screen.");
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(res), "OnMakeUnique failed."));
-        }
-    };
     napi_value lastParam = nullptr;
     if (argc >= ARGC_TWO && argv[ARGC_TWO - 1] != nullptr && GetType(env, argv[ARGC_TWO - 1]) == napi_function) {
         lastParam = argv[ARGC_TWO - 1];
     }
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JSScreenManager::OnMakeUnique", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [screenIds, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeUnique");
+        std::vector<DisplayId> displayIds;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().MakeUniqueScreen(screenIds, displayIds));
+        if (ret == DmErrorCode::DM_OK && !displayIds.empty()) {
+            task->Resolve(env, CreateJsDisplayIdVectorObject(env, displayIds));
+            WLOGI("makeUnique success");
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeUnique failed."));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
     return result;
 }
 
