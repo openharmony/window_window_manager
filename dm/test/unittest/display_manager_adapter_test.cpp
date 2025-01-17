@@ -845,6 +845,19 @@ HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest 
     sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetPrimaryDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
 }
+
+/**
+ * @tc.name: SetScreenSkipProtectedWindow
+ * @tc.desc: SetScreenSkipProtectedWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level2)
+{
+    const std::vector<ScreenId> screenIds = {1001, 1002};
+    bool isEnable = true;
+    auto result = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
+    ASSERT_EQ(result, DMError::DM_OK);
+}
 }
 }
 }

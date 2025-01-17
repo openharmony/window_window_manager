@@ -200,6 +200,7 @@ public:
         DmErrorCode* errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
