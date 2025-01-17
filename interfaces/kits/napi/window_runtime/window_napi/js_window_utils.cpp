@@ -745,7 +745,7 @@ bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string&
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType == napi_string) {
-        return ConvertFromJsValue(env, value, colorStr)
+        return ConvertFromJsValue(env, value, colorStr);
     }
     uint32_t colorValue = 0;
     if (ParseColorMetrics(env, value, colorValue)) {
