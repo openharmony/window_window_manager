@@ -634,7 +634,7 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         [](const sptr<OccupiedAreaChangeInfo>& info) {
         RootScene::staticRootScene_->NotifyOccupiedAreaChangeForRoot(info);
     });
-    SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIdFunc(
+    SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIDFunc(
         [](const std::string& id) {
         return RootScene::staticRootScene_->GetRSNodeByStringID(id);
     });
@@ -4067,7 +4067,7 @@ napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_c
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::RegisterSingleHandContainerNode(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info)
 {
     size_t argc = DEFAULT_ARG_COUNT;
     napi_value argv[DEFAULT_ARG_COUNT] = { nullptr };
