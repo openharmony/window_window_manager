@@ -5923,8 +5923,8 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, sptr<SceneSession>&
             notifySCBAfterUnfocusedFunc_();
         }
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "focusedId: %{public}d, nextId: %{public}d, reason: %{public}d",
-        focusedId, nextId, reason);
+    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}lu, focusedId: %{public}d, nextId: %{public}d, reason: %{public}d",
+        displayId, focusedId, nextId, reason);
     return WSError::WS_OK;
 }
 
@@ -5948,8 +5948,8 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, sptr<SceneSessi
         }
         return;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "name: %{public}s, id: %{public}d, isFocused: %{public}d",
-        sceneSession->GetWindowNameAllType().c_str(), sceneSession->GetPersistentId(), isFocused);
+    TLOGD(WmsLogTag::WMS_FOCUS, "name: %{public}s, id: %{public}d, isFocused: %{public}d, displayId: %{public}lu",
+        sceneSession->GetWindowNameAllType().c_str(), sceneSession->GetPersistentId(), isFocused, displayId);
     // set focused
     if (isFocused) {
         SetFocusedSessionId(sceneSession->GetPersistentId(), displayId);

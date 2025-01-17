@@ -51,10 +51,6 @@ WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}lu", displayId);
     CHECK_DISPLAY_ID_RETURN(displayId, WSError::WS_ERROR_INVALID_PARAM);
     std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
-    if (displayId != DEFAULT_DISPLAY_ID && GetFocusGroupInner(displayId) != nullptr) {
-        TLOGW(WmsLogTag::WMS_FOCUS, "already had displayId: %{public}lu", displayId);
-        return WSError::WS_DO_NOTHING;
-    }
     sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayId);
     focusGroupMap_.insert(std::make_pair(displayId, focusGroup));
     if (displayId != DEFAULT_DISPLAY_ID) {
