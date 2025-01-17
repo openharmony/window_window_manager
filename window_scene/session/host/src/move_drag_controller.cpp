@@ -516,7 +516,7 @@ void MoveDragController::MoveDragInterrupted()
 
 void MoveDragController::StopMoving()
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "in");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
     SizeChangeReason reason = SizeChangeReason::DRAG_END;
     hasPointDown_ = false;
     if (GetStartMoveFlag()) {
