@@ -37,7 +37,6 @@
 #include "vsync_station.h"
 #include "window.h"
 #include "window_helper.h"
-#include "window_inspector.h"
 #include "window_option.h"
 #include "wm_common.h"
 

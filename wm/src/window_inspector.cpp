@@ -48,7 +48,7 @@ void WindowInspector::ConnectServer()
     setWMSCallbackFunc_ = reinterpret_cast<SetWMSCallbackFunc>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
     sendWMSMessageFunc_ = reinterpret_cast<SendWMSMessageFunc>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
     if (setWMSCallbackFunc_ == nullptr || sendWMSMessageFunc_ == nullptr) {
-        CloseConnectServer();
+        CloseConnectFromServer();
         setWMSCallbackFunc_ = nullptr;
         sendWMSMessageFunc_ = nullptr;
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load failed: %{public}s", dlerror());
@@ -61,7 +61,7 @@ void WindowInspector::ConnectServer()
         }
     });
     isConnectServerSuccess_ = true;
-    CloseConnectServer();
+    CloseConnectFromServer();
 }
 
 void WindowInspector::CloseConnectFromServer()
@@ -78,7 +78,7 @@ void WindowInspector::RegisterGetWMSWindowListCallback(
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto [_, result] = getWMSWindowListCallbacks_.insert_or_assign(windowName, func);
     if (result) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered", windowName.c_str());
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered");
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowName: %{public}s", windowName.c_str());
 }
@@ -88,7 +88,7 @@ void WindowInspector::UnregisterGetWMSWindowListCallback(const std::string& wind
     std::unique_lock<std::mutex> lock(callbackMutex_);
     auto iter = getWMSWindowListCallbacks_.find(windowName);
     if (iter == getWMSWindowListCallbacks_.end()) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback not registered", windowName.c_str());
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback not registered");
         return;
     }
     getWMSWindowListCallbacks_.erase(iter);
