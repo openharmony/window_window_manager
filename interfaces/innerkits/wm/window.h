@@ -2308,6 +2308,14 @@ public:
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Get the visibility of window decor.
+     *
+     * @param isVisible whether the window decor is visible.
+     * @return Errorcode of window.
+     */
+    virtual WMError GetDecorVisible(bool& isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Enable or disable move window by title bar.
      *
      * @param enable The value true means to enable window moving, and false means the opposite.

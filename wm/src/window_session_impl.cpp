@@ -2124,6 +2124,22 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::GetDecorVisible(bool& isVisible)
+{
+    TLOGD(WmsLogTag::WMS_DECOR, "in");
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "uicontent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    isVisible = uiContent->GetContainerModalTitleVisible();
+    TLOGD(WmsLogTag::WMS_DECOR, "end");
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::SetWindowTitleMoveEnabled(bool enable)
 {
     if (IsWindowSessionInvalid()) {
