@@ -84,10 +84,9 @@ WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
         errCode = window->GetAvoidAreaByType(static_cast<AvoidAreaType>(type), allAvoidArea);
         TransformedToWindowManagerAvoidArea(avoidArea, allAvoidArea);
     }, __func__);
-    if (errCode == WMError::WM_ERROR_INVALID_WINDOW) {
-        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
-    }
-    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK :
+                      errCode == WMError::WM_ERROR_INVALID_WINDOW ? WindowManager_ErrorCode::INVAILD_WINDOW_ID :
+                                                                    WindowManager_ErrorCode::SERVICE_ERROR;
 }
 
 WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
@@ -100,11 +99,16 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
         TLOGE(WmsLogTag::WMS_IMMS, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
-    eventHandler->PostSyncTask([windowId, enabled, enableAnimation, &errCode] {
+    eventHandler->PostSyncTask([windowId, enabled, enableAnimation, &errCode, where = __func__] {
         auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "window is null, windowId:%{public}d", windowId);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", windowId, where);
             errCode = WMError::WM_ERROR_INVALID_WINDOW;
+            return;
+        }
+        if (window->windowSystemConfig_.IsPcWindow()) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support", where);
+            errCode = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -112,10 +116,10 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
         property.enableAnimation_ = enableAnimation;
         errCode = window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property);
     }, __func__);
-    if (errCode == WMError::WM_ERROR_INVALID_WINDOW) {
-        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
-    }
-    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK :
+                      errCode == WMError::WM_ERROR_INVALID_WINDOW ? WindowManager_ErrorCode::INVAILD_WINDOW_ID :
+                      errCode == WMError::WM_ERROR_DEVICE_NOT_SUPPORT ? WindowManager_ErrorCode::DEVICE_NOT_SUPPORT :
+                                                                        WindowManager_ErrorCode::SERVICE_ERROR;
 }
 
 WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int32_t color)
@@ -127,21 +131,26 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int3
         TLOGE(WmsLogTag::WMS_IMMS, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
-    eventHandler->PostSyncTask([windowId, color, &errCode] {
+    eventHandler->PostSyncTask([windowId, color, &errCode, where = __func__] {
         auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "window is null, windowId:%{public}d", windowId);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", windowId, where);
             errCode = WMError::WM_ERROR_INVALID_WINDOW;
+            return;
+        }
+        if (window->windowSystemConfig_.IsPcWindow()) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support", where);
+            errCode = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.contentColor_ = color;
         errCode = window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property);
     }, __func__);
-    if (errCode == WMError::WM_ERROR_INVALID_WINDOW) {
-        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
-    }
-    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK :
+                      errCode == WMError::WM_ERROR_INVALID_WINDOW ? WindowManager_ErrorCode::INVAILD_WINDOW_ID :
+                      errCode == WMError::WM_ERROR_DEVICE_NOT_SUPPORT ? WindowManager_ErrorCode::DEVICE_NOT_SUPPORT :
+                                                                        WindowManager_ErrorCode::SERVICE_ERROR;
 }
 
 WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
@@ -154,11 +163,16 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
         TLOGE(WmsLogTag::WMS_IMMS, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
-    eventHandler->PostSyncTask([windowId, enabled, enableAnimation, &errCode] {
+    eventHandler->PostSyncTask([windowId, enabled, enableAnimation, &errCode, where = __func__] {
         auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "window is null, windowId:%{public}d", windowId);
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", windowId, where);
             errCode = WMError::WM_ERROR_INVALID_WINDOW;
+            return;
+        }
+        if (window->windowSystemConfig_.IsPcWindow()) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support", where);
+            errCode = WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
@@ -166,10 +180,10 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
         property.enableAnimation_ = enableAnimation;
         errCode = window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property);
     }, __func__);
-    if (errCode == WMError::WM_ERROR_INVALID_WINDOW) {
-        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
-    }
-    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+    return errCode == WMError::WM_OK ? WindowManager_ErrorCode::OK :
+                      errCode == WMError::WM_ERROR_INVALID_WINDOW ? WindowManager_ErrorCode::INVAILD_WINDOW_ID :
+                      errCode == WMError::WM_ERROR_DEVICE_NOT_SUPPORT ? WindowManager_ErrorCode::DEVICE_NOT_SUPPORT :
+                                                                        WindowManager_ErrorCode::SERVICE_ERROR;
 }
 }  // namespace Rosen
 }  // namespace OHOS
