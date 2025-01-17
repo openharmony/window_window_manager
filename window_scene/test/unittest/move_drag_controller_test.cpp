@@ -214,11 +214,11 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, Function | SmallTest 
 }
 
 /**
- * @tc.name: SetOriginalValue
- * @tc.desc: test function : SetOriginalValue
+ * @tc.name: SetOriginalWindowPos
+ * @tc.desc: test function : SetOriginalWindowPos
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, SetOriginalWindowPos, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -228,7 +228,7 @@ HWTEST_F(MoveDragControllerTest, SetOriginalValue, Function | SmallTest | Level1
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
     WSRect winRect = { 100, 100, 1000, 1000 };
-    moveDragController->SetOriginalValue(
+    moveDragController->SetOriginalWindowPos(
         pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, winRect);
     ASSERT_EQ(moveDragController->moveDragProperty_.pointerId_, pointerId);
     ASSERT_EQ(moveDragController->moveDragProperty_.pointerType_, pointerType);
@@ -315,7 +315,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
     int32_t pointerPosY = 30;
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
-    moveDragController->SetOriginalValue(
+    moveDragController->SetOriginalWindowPos(
         pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, originalRect);
     moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
     ASSERT_EQ(0, res);
@@ -343,7 +343,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, Function | SmallTest | Le
     int32_t pointerPosY = 30;
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
-    moveDragController->SetOriginalValue(
+    moveDragController->SetOriginalWindowPos(
         pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, originalRect);
     moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
     ASSERT_EQ(0, res);

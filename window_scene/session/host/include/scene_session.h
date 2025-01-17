@@ -938,6 +938,7 @@ private:
     DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     NotifyWindowMovingFunc notifyWindowMovingFunc_;
+    
     // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
     bool isPrivacyMode_ { false };
 

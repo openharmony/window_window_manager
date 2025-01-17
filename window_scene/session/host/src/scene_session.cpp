@@ -2556,9 +2556,9 @@ bool SceneSession::IsMovable()
         return false;
     }
 
-    auto property = GetSessionProperty();
     bool windowIsMovable = !moveDragController_->GetStartDragFlag() && IsMovableWindowType() &&
                            moveDragController_->HasPointDown() && moveDragController_->GetMovable();
+    auto property = GetSessionProperty();
     if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR &&
         property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         windowIsMovable = windowIsMovable && IsFocused();
@@ -2920,7 +2920,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
     if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-        WindowHelper::IsSystemWindow(GetWindowType())) && !WindowHelper::IsInputWindow(GetWindowType())) {
+         WindowHelper::IsSystemWindow(GetWindowType())) && !WindowHelper::IsInputWindow(GetWindowType())) {
         NotifySessionRectChange(rect, reason);
     } else {
         NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
@@ -3056,7 +3056,6 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
     WSRect globalRect = moveDragController_->GetTargetRect(reason == SizeChangeReason::DRAG_END ?
         MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
         MoveDragController::TargetRectCoordinate::GLOBAL);
-
     HandleMoveDragSurfaceNode(reason);
     HandleMoveDragSurfaceBounds(relativeRect, globalRect, reason);
     if (reason == SizeChangeReason::DRAG_END) {
