@@ -1065,6 +1065,9 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        isVerticalScreen = true;
+    }
     switch (rotation) {
         case Rotation::ROTATION_0: {
             return isVerticalScreen ? DisplayOrientation::PORTRAIT : DisplayOrientation::LANDSCAPE;
