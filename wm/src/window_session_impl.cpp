@@ -40,6 +40,7 @@
 #include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
 #include "window_adapter.h"
+#include "window_inspector.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "color_parser.h"

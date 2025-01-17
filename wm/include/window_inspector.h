@@ -51,11 +51,11 @@ private:
     SetWMSCallbackFunc setWMSCallbackFunc_ = nullptr;
 
     std::mutex callbackMutex_;
-    std::unordered_map<std::string, sptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
+    std::unordered_map<std::string, std::shared_ptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
     // Above guarded by callbackMutex_
 
     void ConnectServer();
-    void CloseConnectServer();
+    void CloseConnectFromServer();
     void UnregisterAllCallbacks();
     bool ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr);
     void CreateArkUIInspectorJson(const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr);
