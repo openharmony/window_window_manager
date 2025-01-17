@@ -119,6 +119,9 @@ private:
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
 
+    void NotifyScreenConnect(const sptr<ScreenSession>& screenSession);
+    void NotifyScreenDisconnect(const sptr<ScreenSession>& screenSession);
+
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;

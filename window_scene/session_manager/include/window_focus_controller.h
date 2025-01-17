@@ -39,8 +39,8 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
-    bool needBlockNotifyFocusStatusUntilForeground_ = false;
-    bool needBlockNotifyUnfocusStatus_ = false;
+    bool needBlockNotifyFocusStatusUntilForeground_ { false };
+    bool needBlockNotifyUnfocusStatus_ { false };
     DisplayId displayGroupId_ = DISPLAY_ID_INVALID;
 
 public:

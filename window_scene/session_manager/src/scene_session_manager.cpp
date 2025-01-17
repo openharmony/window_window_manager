@@ -4944,6 +4944,17 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
         << std::endl;
 }
 
+void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
+{
+    oss << "Focus window: " << std::endl;
+    std::vector<std::pair<DisplayId, int32_t>> allFocusedStateList = windowFocusController_->GetAllFocusedSessionList();
+    if (allFocusedStateList.size() > 0) {
+        for (const auto& focusState : allFocusedStateList) {
+            oss << "DisplayId: " << focusState.first << " Focus window: " << focusState.second << std::endl;
+        }
+    }
+}
+
 WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
 {
     int32_t screenGroupId = 0;
@@ -4988,13 +4999,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         DumpSessionInfo(session, oss);
         count++;
     }
-    oss << "Focus window: " << std::endl;
-    std::vector<std::pair<DisplayId, int32_t>> allFocusedStateList = windowFocusController_->GetAllFocusedSessionList();
-    if (allFocusedStateList.size() > 0) {
-        for (const auto& focusState : allFocusedStateList) {
-            oss << "DisplayId: " << focusState.first << " Focus window: " << focusState.second << std::endl;
-        }
-    }
+    DumpFocusInfo(oss);
     oss << "SingleHand: X[" << singleHandTransform_.posX << "] Y[" << singleHandTransform_.posY << "] scale["
         << singleHandTransform_.scaleX << "]" << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
@@ -9508,7 +9513,6 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 
 bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenType)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "name: %{public}s screenType: %{public}u", name.c_str(), screenType);
     if (screenType == ScreenType::VIRTUAL && (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine")) {
         return true;
     }
