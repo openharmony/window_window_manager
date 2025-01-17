@@ -737,8 +737,8 @@ void MoveDragController::HandleRightToLeftCross(DisplayId targetDisplayId,
                                                 int32_t& moveDragFinalX,
                                                 int32_t& moveDragFinalY)
 {
-    int32_t actualCrossScreenPos =
-        screenSizeProperty_.width_ - moveDragProperty_.originalRect_.width_ + moveDragProperty_.originalPointerWindowX_;
+    int32_t actualCrossScreenPos = screenSizeProperty_.width_ -
+        moveDragProperty_.originalRect_.width_ + moveDragProperty_.originalPointerWindowX_;
     if (pointerDisplayX <= actualCrossScreenPos) {
         moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointerWindowX_;
     } else {
@@ -786,7 +786,7 @@ void MoveDragController::HandleBottomToUpCross(DisplayId targetDisplayId,
 }
 
 void MoveDragController::CalcMoveForSameDisplay(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        int32_t& moveDragFinalX, int32_t& moveDragFinalY)
+                                                int32_t& moveDragFinalX, int32_t& moveDragFinalY)
 {
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -808,7 +808,7 @@ bool MoveDragController::CalcMoveInputBarRect(const std::shared_ptr<MMI::Pointer
     MMI::PointerEvent::PointerItem pointerItem;
     int32_t pointerId = pointerEvent->GetPointerId();
     pointerEvent->GetPointerItem(pointerId, pointerItem);
-    DisplayId targetDisplayId = static_cast<uint64_t>(pointerEvent->GetTargetDisplayId());
+    DisplayId targetDisplayId = static_cast<DisplayId>(pointerEvent->GetTargetDisplayId());
     int32_t moveDragFinalX = 0;
     int32_t moveDragFinalY = 0;
     int32_t pointerDisplayX = pointerItem.GetDisplayX();
@@ -1283,12 +1283,12 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         originalRect.posY_ = windowRect.posY_;
     }
     SetOriginalWindowPos(moveTempProperty_.pointerId_,
-                     moveTempProperty_.pointerType_,
-                     moveTempProperty_.lastDownPointerPosX_,
-                     moveTempProperty_.lastDownPointerPosY_,
-                     moveTempProperty_.lastDownPointerWindowX_,
-                     moveTempProperty_.lastDownPointerWindowY_,
-                     originalRect);
+                         moveTempProperty_.pointerType_,
+                         moveTempProperty_.lastDownPointerPosX_,
+                         moveTempProperty_.lastDownPointerPosY_,
+                         moveTempProperty_.lastDownPointerWindowX_,
+                         moveTempProperty_.lastDownPointerWindowY_,
+                         originalRect);
 
     int32_t offsetX = moveTempProperty_.lastMovePointerPosX_ - moveTempProperty_.lastDownPointerPosX_;
     int32_t offsetY = moveTempProperty_.lastMovePointerPosY_ - moveTempProperty_.lastDownPointerPosY_;
