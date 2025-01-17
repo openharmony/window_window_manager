@@ -737,8 +737,9 @@ void MoveDragController::HandleRightToLeftCross(DisplayId targetDisplayId,
                                                 int32_t& moveDragFinalX,
                                                 int32_t& moveDragFinalY)
 {
-    if (pointerDisplayX <= screenSizeProperty_.width_ - moveDragProperty_.originalRect_.width_ +
-                               moveDragProperty_.originalPointerWindowX_) {
+    int32_t actualCrossScreenPos =
+        screenSizeProperty_.width_ - moveDragProperty_.originalRect_.width_ + moveDragProperty_.originalPointerWindowX_;
+    if (pointerDisplayX <= actualCrossScreenPos) {
         moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointerWindowX_;
     } else {
         moveDragFinalX = screenSizeProperty_.width_ - moveDragProperty_.originalRect_.width_;
@@ -773,7 +774,9 @@ void MoveDragController::HandleBottomToUpCross(DisplayId targetDisplayId,
     UpdateMoveAvailableArea(targetDisplayId);
     int32_t dockBarHeight =
         screenSizeProperty_.currentDisplayY_ - moveAvailableArea_.posY_ - moveAvailableArea_.height_;
-    if (pointerDisplayY <= screenSizeProperty_.height_ - dockBarHeight - moveDragProperty_.originalPointerWindowY_) {
+    int32_t currentCrossScreenPos =
+        screenSizeProperty_.height_ - dockBarHeight - moveDragProperty_.originalPointerWindowY_;
+    if (pointerDisplayY <= currentCrossScreenPos) {
         moveDragFinalY = pointerDisplayY - moveDragProperty_.originalPointerWindowY_;
     } else {
         moveDragFinalY = screenSizeProperty_.height_ - dockBarHeight - moveDragProperty_.originalPointerWindowY_;

@@ -625,13 +625,13 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
 
 WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
 {
-    DMRect availableArea;
-    sptr<Display> display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "fail to get display");
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
 
+    DMRect availableArea;
     DMError ret = display->GetAvailableArea(availableArea);
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
@@ -640,10 +640,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
 
     TLOGD(WmsLogTag::WMS_KEYBOARD,
           "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
-          availableArea.posX_,
-          availableArea.posY_,
-          availableArea.width_,
-          availableArea.height_);
+          availableArea.posX_, availableArea.posY_, availableArea.width_, availableArea.height_);
     moveDragController_->SetMoveAvailableArea(availableArea);
     return WSError::WS_OK;
 }
