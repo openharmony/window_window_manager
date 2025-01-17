@@ -47,8 +47,10 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
-constexpr size_t TWO_PARAMS_SIZE = 2;
 constexpr size_t INDEX_THREE = 3;
+constexpr size_t INDEX_FOUR = 4;
+constexpr size_t ONE_PARAMS_SIZE = 1;
+constexpr size_t TWO_PARAMS_SIZE = 2;
 constexpr size_t THREE_PARAMS_SIZE = 3;
 constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr size_t ARG_COUNT_ZERO = 0;
@@ -4406,61 +4408,55 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
 napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[INDEX_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    if (argc < ONE_PARAMS_SIZE || argc > TWO_PARAMS_SIZE) { // 2: maximum params num
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool shouldHide = false;
-    if (errCode == WmErrorCode::WM_OK) {
-        napi_value nativeVal = argv[0];
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to shouldHide");
-            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, nativeVal, &shouldHide));
-        }
+    if (!ConvertFromJSValue(env, argv[INDEX_ZERO], shouldHide)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to shouldHide");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, shouldHide, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            WmErrorCode wmErrorCode;
+    napi_value lastParam = (argc <= ONE_PARAMS_SIZE) ? nullptr :
+        (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> CreateEmptyAsyncTask(env, lastParam, &result);
+    const char* const where = __func__;
+    auto asyncTask = [weakToken = wptr<Window> weakToken(windowToken_), shouldHide, task = napiAsyncTask, where] {
+        auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "window is nullptr."));
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
+                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WmErrorCode::WM_ERROR_NULLPTR);
+                task->Reject(env, JsErrUtils::CreateJsError(env,
+                    WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
                 return;
             }
             if (weakWindow->IsFloatingWindowAppType()) {
-                WLOGFE("HideNonSystemFloatingWindows is not allowed since window is app floating window");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s HideNonSystemFloatingWindows
+                    is not allowed since window is app floating window", where);
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
                     "HideNonSystemFloatingWindows is not allowed since window is app window"));
                 return;
             }
-            if (errCode != WmErrorCode::WM_OK) {
-                WLOGFE("Invalidate params");
-                task.Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
-                return;
-            }
             WMError ret = weakWindow->HideNonSystemFloatingWindows(shouldHide);
-            if (ret == WMError::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Hide non-system floating windows failed"));
-            }
-            WLOGI("Window [%{public}u, %{public}s] hide non-system floating windows end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-        };
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::HideNonSystemFloatingWindows",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+            if (ret != WMError::WM_OK) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "Hide non-system floating windows failed");
+                task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
+                    "Hide non-system floating windows failed"));
+                return;
+            } 
+            task.Resolve(env, NapiGetUndefined(env));
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
+                "%{public}s Window [%{public}u, %{public}s] hide non-system floating windows end",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    }
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
