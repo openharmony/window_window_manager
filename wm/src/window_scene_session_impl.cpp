@@ -2700,16 +2700,16 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offset
     }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     const auto& windowRect = GetRect();
-    if (offsetX < 0 || offsetX > windowRect.width_ ||
-        offsetY < 0 || offsetY > windowRect.height_) {
+    if (offsetX < 0 || offsetX > static_cast<int32_t>(windowRect.width_) ||
+        offsetY < 0 || offsetY > static_cast<int32_t>(windowRect.height_)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "offset not in window");
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     WSError errorCode;
     MMI::PointerEvent::PointerItem pointerItem;
     if (lastPointerEvent_ != nullptr &&
@@ -2745,7 +2745,7 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
     }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_STATE_ABNORMALLY;
     }
     auto hostSession = GetHostSession();
     if (!hostSession) {
