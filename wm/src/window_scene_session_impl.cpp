@@ -2662,9 +2662,26 @@ bool WindowSceneSessionImpl::IsStartMoving()
     return isMoving;
 }
 
+bool WindowSceneSessionImpl::CalcWindowShouldMove()
+{
+    WindowType windowType = GetType();
+    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+        if (windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
+            windowSystemConfig_.IsPhoneWindow()) {
+            return true;
+        }
+    }
+
+    if (IsPcOrPadFreeMultiWindowMode()) {
+        return true;
+    }
+    return false;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

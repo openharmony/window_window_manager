@@ -354,6 +354,11 @@ private:
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 
     /*
+     * Move Drag
+     */
+    bool CalcWindowShouldMove();
+    
+    /*
      * PC Window
      */
     bool isExecuteDelayRaise_ = false;
