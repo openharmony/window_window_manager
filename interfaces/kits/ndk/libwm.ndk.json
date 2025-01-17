@@ -22,5 +22,45 @@
     {
         "first_instroduced":"15",
         "name":"OH_NativeWindowManager_UnregisterTouchEventFilter"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_SetWindowStatusBarEnabled"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_SetWindowStatusBarColor"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_SetWindowNavigationBarEnabled"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_GetWindowAvoidArea"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_SetWindowBackgroundColor"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_SetWindowBrightness"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_SetWindowKeepScreenOn"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_SetWindowPrivacyMode"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_GetWindowProperties"
+    }
+    {
+        "first_instroduced":"16",
+        "name":"OH_Window_Snapshot"
     }
 ]
