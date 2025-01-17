@@ -302,7 +302,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
 WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
-    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowName());
+    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     Destroy(true, false);
 }
 
@@ -4750,7 +4750,7 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 void WindowSessionImpl::RegisterWindowInspectorCallback()
 {
     if (!WindowInspector::GetInstance().IsConnectServerSuccess()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winName: %{public}s connect failed", GetWindowName().c_str());
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u connect failed", GetWindowId());
         return;
     }
     auto getWMSWindowListCallback = std::make_shared<GetWMSWindowListCallback>([weakThis = wptr(this)] {
@@ -4763,8 +4763,7 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
         }
         return windowListInfo;
     });
-    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowName(),
-                                                                    std::move(getWMSWindowListCallback));
+    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 } // namespace Rosen
 } // namespace OHOS
