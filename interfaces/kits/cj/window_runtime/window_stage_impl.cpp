@@ -14,6 +14,7 @@
  */
 
 #include "window_stage_impl.h"
+#include <cstdint>
 #include "permission.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
@@ -191,6 +192,102 @@ std::shared_ptr<CJWindowStageImpl> CJWindowStageImpl::CreateCJWindowStage(
     }
     auto windowStagePtr = std::shared_ptr<CJWindowStageImpl>(ptr.GetRefPtr());
     return windowStagePtr;
+}
+
+int32_t CJWindowStageImpl::SetDefaultDensityEnabled(bool enabled)
+{
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[WindowStage] WindowScene is null or window is null");
+            return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto window = weakScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[WindowStage] Window is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetDefaultDensityEnabled(enabled));
+    return static_cast<int32_t>(ret);
+}
+
+int32_t CJWindowStageImpl::OnEvent(int64_t funcId)
+{
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[WindowStage] WindowScene is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto window = weakScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[WindowStage] Window is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = registerManager_->RegisterListener(window,
+        WINDOW_STAGE_EVENT_CB, CaseType::CASE_STAGE, funcId, 0);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Register failed, window stage [%{public}u, %{public}s] type: %{public}s",
+            window->GetWindowId(), window->GetWindowName().c_str(), WINDOW_STAGE_EVENT_CB.c_str());
+    }
+    return static_cast<int32_t>(ret);
+}
+
+int32_t CJWindowStageImpl::OffEvent(int64_t funcId)
+{
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[WindowStage] WindowScene is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto window = weakScene->GetMainWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[WindowStage] Window is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    WmErrorCode ret = registerManager_->UnregisterListener(window,
+        WINDOW_STAGE_EVENT_CB, CaseType::CASE_STAGE, funcId);
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Unregister failed, window stage [%{public}u, %{public}s] type: %{public}s",
+            window->GetWindowId(), window->GetWindowName().c_str(), WINDOW_STAGE_EVENT_CB.c_str());
+    }
+    return static_cast<int32_t>(ret);
+}
+
+int32_t CJWindowStageImpl::CreateSubWindowWithOptions(int64_t &windowId,
+    const std::string& name, const std::string& title, bool decorEnabled, bool isModal)
+{
+    auto weakScene = windowScene_.lock();
+    if (weakScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[createSubWindowWithOptions] Window scene is nullptr");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    sptr<Rosen::WindowOption> windowOption = new(std::nothrow) Rosen::WindowOption();
+    if (windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[createSubWindowWithOptions] Create option failed");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (isModal) {
+        windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    }
+    windowOption->SetSubWindowTitle(title);
+    windowOption->SetSubWindowDecorEnable(decorEnabled);
+    windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    auto window = weakScene->CreateWindow(name, windowOption);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[createSubWindowWithOptions] Create window failed");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    sptr<CJWindowImpl> windowImpl = CreateCjWindowObject(window);
+    if (windowImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "[createSubWindowWithOptions] windowImpl is null");
+        return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    windowId = windowImpl->GetID();
+    TLOGI(WmsLogTag::WMS_SUB, "[createSubWindowWithOptions] Create sub window %{public}s end", name.c_str());
+    return static_cast<int32_t>(WmErrorCode::WM_OK);
 }
 
 extern "C" {
