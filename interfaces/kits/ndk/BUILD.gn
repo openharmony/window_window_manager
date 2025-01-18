@@ -30,9 +30,9 @@ ohos_ndk_library("native_window_manager") {
   ndk_description_file = "./libwm.ndk.json"
   system_capability = "SystemCapability.Window.SessionManager"
   system_capability_headers = [
+    "oh_window.h",
     "oh_window_comm.h",
     "oh_window_event_filter.h",
-    "oh_window.h",
   ]
   min_compact_version = "12"
 }
