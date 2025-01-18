@@ -128,6 +128,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (ret != WSError::WS_OK) {
             return ret;
         }
+        session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
         session->NotifyPropertyWhenConnect();
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
