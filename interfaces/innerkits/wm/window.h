@@ -3005,22 +3005,22 @@ public:
     {
         return WMError::WM_OK;
     }
-    
+
     /**
      * @brief Unregister window highlight change listener.
      * 
      * @param listener IWindowHighlightChangeListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnRegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+    virtual WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
     {
         return WMError::WM_OK;
     }
 
     /**
      * @brief Set whether to enable exclusively highlight.
-     * 
-     * @param isExclusivelyHighlighted the value true means to enable exclusively highlight, and false means the opposite.
+     *
+     * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) { return WMError::WM_OK; }
@@ -3031,7 +3031,6 @@ public:
      * @return True means the window is highlighted, false means the window is not highlighted.
      */
     virtual bool IsWindowHighlighted() { return false; }
-
 };
 }
 }

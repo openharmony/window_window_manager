@@ -637,7 +637,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowHighlightChangeRegister(const 
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowHighlightChangeListeners(thisListener));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnRegisterWindowHighlightChangeListeners(thisListener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowHighlightChangeListeners(thisListener));
     }
     return ret;
 }

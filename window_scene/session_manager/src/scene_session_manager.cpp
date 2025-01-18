@@ -4968,11 +4968,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     }
     oss << "Focus window: " << GetFocusedSessionId() << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
-    oss << "Highlighted windows: ";
-    for( auto persistentId : highlightIds_) {
-        oss << persistentId << ",";
-    }
-    oss << std::endl;
+    oss << "Highlighted windows: " << GetHighlightIds() << std::endl;
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
 }
@@ -5932,7 +5928,7 @@ void SceneSessionManager::SetHighlightSessionIds(sptr<SceneSession>& sceneSessio
     sceneSession->UpdateHighlightStatus(true);
     highlightIds_.clear();
     highlightIds_.insert(sceneSession->GetPersistentId());
-    LogHighLight();
+    GetHighlightIds();
 }
 
 /** @note @window.focus */
@@ -5944,7 +5940,7 @@ void SceneSessionManager::AddHighlightSessionIds(sptr<SceneSession>& sceneSessio
     }
     sceneSession->UpdateHighlightStatus(true);
     highlightIds_.insert(sceneSession->GetPersistentId());
-    LogHighLight();
+    GetHighlightIds();
 }
 
 /** @note @window.focus */
@@ -5960,7 +5956,7 @@ void SceneSessionManager::RemoveHighlightSessionIds(sptr<SceneSession>& sceneSes
     } else {
         TLOGE(WmsLogTag::WMS_FOCUS, "not found scene session with id: %{public}d", sceneSession->GetPersistentId());
     }
-    LogHighLight();
+    GetHighlightIds();
 }
 
 void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
@@ -12585,14 +12581,15 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
     }, __func__);
 }
 
-void SceneSessionManager::LogHighLight()
+std::string SceneSessionManager::GetHighlightIds()
 {
-    std::string str = "";
+    std::string highlightIdsStr = "";
     for (auto persistentId : highlightIds_) {
         str += std::to_string(persistentId);
         str += ",";
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds_: %{public}s", str.c_str());
+    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds_: %{public}s", highlightIdsStr.c_str());
+    return highlightIdsStr;
 }
 
 } // namespace OHOS::Rosen

@@ -2646,7 +2646,7 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
         TLOGE(WmsLogTag::WMS_FOCUS, "windowId: %{public}d property is nullptr", persistentId_);
         return;
     }
-    if(isExclusivelyHighlighted == property->GetExclusivelyHighlighted()){
+    if (isExclusivelyHighlighted == property->GetExclusivelyHighlighted()) {
         return;
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d", persistentId_,
@@ -2656,16 +2656,16 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
 
 void Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, 
-    "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d", persistentId_,
-    isHighlight_, isHighlight, isNotifyHighlightChange);
-    if (isHighlight_ == isHighlight){
+    TLOGI(WmsLogTag::WMS_FOCUS,
+        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d",
+        persistentId_, isHighlight_, isHighlight, isNotifyHighlightChange);
+    if (isHighlight_ == isHighlight) {
         return WSError::WS_DO_NOTHING;
     }
     isHighlight_ = isHighlight;
-    if (isNotifyHighlightChange){
+    if (isNotifyHighlightChange) {
         NotifyHighlightChange(isHighlight);
-        if (highlightChangeFunc_ != nullptr){
+        if (highlightChangeFunc_ != nullptr) {
             highlightChangeFunc_(isHighlight);
         }
     }
