@@ -378,7 +378,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
         }
         if (session->specificCallback_ != nullptr) {
             if (Session::IsScbCoreEnabled()) {
-                session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+                session->MarkAvoidAreaAsDirty();
             } else {
                 session->specificCallback_->onUpdateAvoidArea_(persistentId);
             }
@@ -468,7 +468,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot)
         }
         if (session->specificCallback_ != nullptr) {
             if (Session::IsScbCoreEnabled()) {
-                session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+                session->MarkAvoidAreaAsDirty();
             } else {
                 session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             }
@@ -1118,7 +1118,7 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
     if (GetForegroundInteractiveStatus()) {
         GetAllAvoidAreas(avoidAreas);
     } else {
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid area update rejected by recent");
+        TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", GetPersistentId());
     }
     // once reason is undefined, not use rsTransaction
     // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
@@ -1685,10 +1685,9 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
         return ret;
     }
     if (isLayoutFinished) {
-        UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
-        NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
+        UpdateAvoidArea(new AvoidArea(GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM)), AvoidAreaType::TYPE_SYSTEM);
     } else {
-        dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+        MarkAvoidAreaAsDirty();
     }
     return WSError::WS_OK;
 }
@@ -2165,9 +2164,8 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
             if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
-                if (session->specificCallback_ && session->specificCallback_->onGetIsAINavigationBarAvoidAreaValid_ &&
-                    !(session->specificCallback_->onGetIsAINavigationBarAvoidAreaValid_(
-                        area, session->GetSessionRect().height_))) {
+                if (session->isAINavigationBarAvoidAreaValid_ &&
+                    !session->isAINavigationBarAvoidAreaValid_(area, session->GetSessionRect().height_)) {
                     continue;
                 }
             }
@@ -2183,7 +2181,7 @@ WSError SceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAre
         return WSError::WS_ERROR_NULLPTR;
     }
     if (!GetForegroundInteractiveStatus()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid area update rejected by recent");
+        TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", GetPersistentId());
         return WSError::WS_DO_NOTHING;
     }
     return sessionStage_->UpdateAvoidArea(avoidArea, type);
@@ -3202,7 +3200,7 @@ void SceneSession::SetFloatingScale(float floatingScale)
         if (specificCallback_ != nullptr) {
             specificCallback_->onWindowInfoUpdate_(GetPersistentId(), WindowUpdateType::WINDOW_UPDATE_PROPERTY);
             if (Session::IsScbCoreEnabled()) {
-                dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+                MarkAvoidAreaAsDirty();
             } else {
                 specificCallback_->onUpdateAvoidArea_(GetPersistentId());
             }
@@ -3326,7 +3324,7 @@ void SceneSession::UpdateRotationAvoidArea()
 {
     if (specificCallback_) {
         if (Session::IsScbCoreEnabled()) {
-            dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+            MarkAvoidAreaAsDirty();
         } else {
             specificCallback_->onUpdateAvoidArea_(GetPersistentId());
         }
@@ -5480,6 +5478,11 @@ void SceneSession::SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFun
     isLastFrameLayoutFinishedFunc_ = std::move(func);
 }
 
+void SceneSession::SetIsAINavigationBarAvoidAreaValidFunc(IsAINavigationBarAvoidAreaValidFunc&& func)
+{
+    isAINavigationBarAvoidAreaValid_ = std::move(func);
+}
+
 void SceneSession::SetStartingWindowExitAnimationFlag(bool enable)
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "SetStartingWindowExitAnimationFlag %{public}d", enable);
@@ -5909,7 +5912,8 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
     if (specificCallback_ == nullptr) {
         return;
     }
-    if (specificCallback_->onUpdateAvoidArea_) {
+    // flush avoid areas on (avoid area dirty & rect NOT dirty)
+    if (!IsDirtyWindow() && specificCallback_->onUpdateAvoidArea_) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
     if (specificCallback_->onUpdateOccupiedAreaIfNeed_) {
