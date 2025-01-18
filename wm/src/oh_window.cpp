@@ -29,8 +29,8 @@
 #include "ui_content.h"
 
 
-namespace OHOS {
-namespace Rosen {
+namespace OHOS::Rosen;
+
 static WindowManager_Rect TransformedToWindowManagerRect(const Rect& rect)
 {
     WindowManager_Rect wmRect;
@@ -49,15 +49,15 @@ static void TransformedToWindowManagerAvoidArea(WindowManager_AvoidArea* avoidAr
     avoidArea->bottomRect = TransformedToWindowManagerRect(allAvoidArea.bottomRect_);
 }
 
-static std::shared_ptr<AppExecFwk::EventHandler> GetMainEventHandler()
+static std::shared_ptr<OHOS::AppExecFwk::EventHandler> GetMainEventHandler()
 {
-    static std::shared_ptr<AppExecFwk::EventHandler> eventHandler;
+    static std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler;
     if (eventHandler == nullptr) {
-        auto mainRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+        auto mainRunner = OHOS::AppExecFwk::EventRunner::GetMainEventRunner();
         if (mainRunner == nullptr) {
             return nullptr;
         }
-        eventHandler = std::make_shared<AppExecFwk::EventHandler>(mainRunner);
+        eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(mainRunner);
     }
     return eventHandler;
 }
@@ -355,5 +355,3 @@ int32_t OH_WindowManager_GetWindowProperties(
     }, __func__); 
     return errCode;
 }
-}  // namespace Rosen
-}  // namespace OHOS
