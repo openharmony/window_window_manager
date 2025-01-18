@@ -1181,9 +1181,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
 
 WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}d", static_cast<uint32_t>(mode));
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}u", static_cast<uint32_t>(mode));
     if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}d. Use default view mode",
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default view mode",
             static_cast<uint32_t>(mode));
         mode = KeyboardViewMode::NON_IMMERSIVE_MODE;
     }
@@ -3794,10 +3794,10 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
 
 WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}d",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
         static_cast<uint32_t>(mode));
     if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "invalid view mode!");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (mode == property_->GetKeyboardViewMode()) {
@@ -3809,7 +3809,7 @@ WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ != WindowState::STATE_SHOWN) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard is no shown");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 

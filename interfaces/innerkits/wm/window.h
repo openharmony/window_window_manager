@@ -2977,7 +2977,7 @@ public:
     /**
      * @brief Show keyboard window
      *
-     * @param mode keyboard will shown with special mode.
+     * @param mode Keyboard will show with special mode.
      * @return WM_OK means window show success, others means failed.
      */
     virtual WMError ShowKeyboard(KeyboardViewMode mode)
@@ -2986,9 +2986,9 @@ public:
     }
 
     /**
-     * @brief change keyboard view mode
+     * @brief Change keyboard view mode
      *
-     * @param mode keyboard will update to the special mode.
+     * @param mode Keyboard will update to the special mode.
      * @return WM_OK means view mode update success, others means failed.
      */
     virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
