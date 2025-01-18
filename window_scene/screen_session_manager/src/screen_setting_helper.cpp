@@ -41,6 +41,9 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     dpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY, func);
+    if (dpiObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
     ErrCode ret = provider.RegisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
@@ -134,6 +137,9 @@ void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFun
     }
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     castObserver_ = castProvider.CreateObserver(SETTING_CAST_KEY, func);
+    if (castObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
     ErrCode ret = castProvider.RegisterObserver(castObserver_);
     if (ret != ERR_OK) {
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
@@ -174,6 +180,9 @@ void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::Updat
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     rotationObserver_ = settingProvider.CreateObserver(SETTING_ROTATION_KEY, func);
+    if (rotationObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
     ErrCode ret = settingProvider.RegisterObserver(rotationObserver_);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
@@ -507,6 +516,9 @@ void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(Setti
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     screenSkipProtectedWindowObserver_ = settingProvider.CreateObserver(SETTING_SCREEN_SHARE_PROTECT_KEY, func);
+    if (screenSkipProtectedWindowObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
     ErrCode ret = settingProvider.RegisterObserverByTable(screenSkipProtectedWindowObserver_,
         SETTING_SCREEN_SHARE_PROTECT_KEY);
     if (ret != ERR_OK) {
@@ -532,7 +544,7 @@ void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
 
 bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, const std::string& key)
 {
-    int32_t value;
+    int32_t value = 0;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetIntValueMultiUserByTable(key, value, SETTING_SCREEN_SHARE_PROTECT_KEY);
     if (ret != ERR_OK) {
