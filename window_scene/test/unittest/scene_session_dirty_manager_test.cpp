@@ -901,6 +901,53 @@ HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, Function | SmallTest | Level2)
     ASSERT_EQ(ret, checkStr);
 }
 
+/**
+ * To test UpdatePointerAreas with different drag activated settings
+ * To expect pointerChangeAreas changes when dragActivated and dragEnable both are true
+ *
+ * @tc.name: CheckDragActivatedInUpdatePointerAreas
+ * @tc.desc: CheckDragActivatedInUpdatePointerAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CheckDragActivatedInUpdatePointerAreas, Function | SmallTest | Level2)
+{
+    std::vector<int32_t> pointerChangeAreas;
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    sceneSession->property_->SetDragEnabled(true);
+    sceneSession->SetDragActivated(false);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+
+    sceneSession->property_->SetDragEnabled(false);
+    sceneSession->SetDragActivated(true);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+
+    sceneSession->property_->SetDragEnabled(false);
+    sceneSession->SetDragActivated(false);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+
+    sceneSession->property_->SetDragEnabled(true);
+    sceneSession->SetDragActivated(true);
+    float vpr = 1.5f;
+    sceneSession->property_->SetDisplayId(100);
+    int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
+    WindowLimits limits;
+    limits.maxHeight_ = 1;
+    limits.minHeight_ = 0;
+    limits.maxWidth_ = 0;
+    limits.minWidth_ = 0;
+    sceneSession->property_->SetWindowLimits(limits);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    std::vector<int32_t> compare = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
+        POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
+        pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
+    ASSERT_EQ(compare, pointerChangeAreas);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

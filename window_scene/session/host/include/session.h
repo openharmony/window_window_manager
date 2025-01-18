@@ -567,12 +567,14 @@ public:
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
     void ResetDirtyFlags();
+    void SetDragActivated(bool dragActivated);
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
+    bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
 
@@ -894,6 +896,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    bool dragActivated_ = true;
     SingleHandTransform singleHandTransform_;
 
     /*
