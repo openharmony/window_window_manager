@@ -234,6 +234,7 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenRealWidth = screenProperty.GetScreenRealWidth(),
             .screenRealHeight = screenProperty.GetScreenRealHeight(),
             .screenRealPPI = screenProperty.GetScreenRealPPI(),
+            .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination)};
         displayInfos.emplace_back(displayInfo);
     }
@@ -461,7 +462,7 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.offsetX << "|" << displayInfo.offsetY << "|"
                           << displayInfo.isCurrentOffScreenRendering << "|"
                           << displayInfo.screenRealWidth << "|" << displayInfo.screenRealHeight << "|"
-                          << displayInfo.screenRealPPI << "|"
+                          << displayInfo.screenRealPPI << "|" << displayInfo.screenRealDPI << "|"
                           << static_cast<int32_t>(displayInfo.screenCombination) << ",";
     }
 

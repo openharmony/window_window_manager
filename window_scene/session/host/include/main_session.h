@@ -68,6 +68,8 @@ public:
     void NotifySessionLockStateChange(bool isLockedState) override;
     void SetSessionLockState(bool isLockedState);
     bool GetSessionLockState() const;
+    WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
+    void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -79,6 +81,8 @@ private:
     /*
      * Window LifeCycle
      */
+    WSError SetSessionLabelAndIconInner(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+
     NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
     bool isLockedState_ = false;
 };

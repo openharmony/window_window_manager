@@ -185,7 +185,7 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SUPPORT_ENTER_WATERFALL_MODE):
             return HandleSetSupportEnterWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
-            return HandleExtensionHostData(data, reply);
+            return HandleExtensionHostData(data, reply, option);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
             return HandleSendContainerModalEvent(data, reply);
         default:
@@ -708,10 +708,10 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
-    NotifyExtensionDataConsumer(data, reply);
+    static_cast<void>(SendExtensionData(data, reply, option));
     return ERR_NONE;
 }
 
