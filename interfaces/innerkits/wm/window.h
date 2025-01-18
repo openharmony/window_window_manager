@@ -2997,7 +2997,7 @@ public:
 
     /**
      * @brief Register window highlight change listener.
-     * 
+     *
      * @param listener IWindowHighlightChangeListener.
      * @return WM_OK means register success, others means register failed.
      */
@@ -3008,7 +3008,7 @@ public:
 
     /**
      * @brief Unregister window highlight change listener.
-     * 
+     *
      * @param listener IWindowHighlightChangeListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
@@ -3027,7 +3027,7 @@ public:
     
     /**
      * @brief Get highlight property of window.
-     * 
+     *
      * @return True means the window is highlighted, false means the window is not highlighted.
      */
     virtual bool IsWindowHighlighted() { return false; }
