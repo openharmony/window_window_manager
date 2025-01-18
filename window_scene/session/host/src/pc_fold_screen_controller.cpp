@@ -26,6 +26,7 @@ namespace {
 // moving
 constexpr int32_t MOVING_RECORDS_SIZE_LIMIT = 5;
 constexpr int32_t MOVING_RECORDS_TIME_LIMIT = 100;
+constexpr float MOVING_DIRECTLY_BUFF = 2.0f;
 
 // arrange rule
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
@@ -128,6 +129,19 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
     startMoveRect_ = rect;
     isStartFullScreen_ = isStartFullScreen;
     movingRectRecords_.clear();
+    isStartDirectly_ = false;
+}
+
+void PcFoldScreenController::RecordStartMoveRectDirectly(const WSRect& rect, bool isStartFullScreen,
+    const WSRectF& velocity)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "rect: %{public}s, isStartFullScreen: %{public}d, velocity: %{public}s",
+        rect.ToString().c_str(), isStartFullScreen, velocity.ToString().c_str());
+    RecordStartMoveRect(rect, isStartFullScreen);
+    std::unique_lock<std::mutex> lock(moveMutex_);
+    isStartDirectly_ = true;
+    startVelocity_ = velocity;
+    startVelocity_.posY_ *= MOVING_DIRECTLY_BUFF;
 }
 
 bool PcFoldScreenController::IsStartFullScreen()
@@ -167,19 +181,24 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     }
     WSRect startRect;
     bool startFullScreen;
+    bool startDirectly;
     {
         std::unique_lock<std::mutex> lock(moveMutex_);
         manager.ResetArrangeRule(startMoveRect_);
         startRect = startMoveRect_;
         startFullScreen = isStartFullScreen_;
+        startDirectly = isStartDirectly_;
     }
-    WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, GetTitleHeight() };
+    WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, startDirectly ? rect.height_ : GetTitleHeight() };
     ScreenSide throwSide = manager.CalculateScreenSide(titleRect);
     const WSRectF& velocity = CalculateMovingVelocity();
+    if (isFullScreenWaterfallMode_) {
+        throwSide = MathHelper::GreatNotEqual(velocity.posY_, 0.0f) ? ScreenSide::FOLD_B : ScreenSide::FOLD_C;
+    }
     if ((!startFullScreen && !manager.NeedDoThrowSlip(titleRect, velocity, throwSide)) ||
         (startFullScreen && !manager.NeedDoEasyThrowSlip(titleRect, startRect, velocity, throwSide))) {
         manager.ResetArrangeRule(throwSide);
-        TLOGI(WmsLogTag::WMS_PC, "no throw rect: %{public}s", rect.ToString().c_str());
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "no throw rect: %{public}s", rect.ToString().c_str());
         return false;
     }
 
@@ -192,6 +211,28 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     manager.ResetArrangeRule(throwSide);
     TLOGI(WmsLogTag::WMS_PC, "throw to rect: %{public}s", rect.ToString().c_str());
     return true;
+}
+
+void PcFoldScreenController::ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect,
+    int32_t topAvoidHeight, int32_t botAvoidHeight)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "rect: %{public}s, floating rect: %{public}s",
+        rect.ToString().c_str(), floatingRect.ToString().c_str());
+    auto& manager = PcFoldScreenManager::GetInstance();
+    const ScreenSide side = manager.CalculateScreenSide(rect);
+    const ScreenSide floatingSide = manager.CalculateScreenSide(floatingRect);
+    rect = floatingRect;
+    if (side == floatingSide) {
+        return;
+    }
+    manager.ThrowSlipToOppositeSide(floatingSide,
+        rect, topAvoidHeight, botAvoidHeight, GetTitleHeight());
+}
+
+bool PcFoldScreenController::IsThrowSlipDirectly() const
+{
+    std::unique_lock<std::mutex> lock(moveMutex_);
+    return isStartDirectly_;
 }
 
 /**
@@ -337,6 +378,9 @@ WSRectF PcFoldScreenController::CalculateMovingVelocity()
 {
     WSRectF velocity = { 0.0f, 0.0f, 0.0f, 0.0f };
     std::unique_lock<std::mutex> lock(moveMutex_);
+    if (isStartDirectly_) {
+        return startVelocity_;
+    }
     uint32_t recordsSize = static_cast<uint32_t>(movingRectRecords_.size());
     if (recordsSize <= 1) {
         return velocity;
