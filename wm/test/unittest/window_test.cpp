@@ -1649,7 +1649,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
 
 /**
  * @tc.name: Close
- * @tc.desc: get
+ * @tc.desc: Close
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
@@ -1657,6 +1657,19 @@ HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Close();
     ASSERT_EQ(true, ret == WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: DirectClose
+ * @tc.desc: DirectClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, DirectClose, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->DirectClose();
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2672,6 +2685,34 @@ HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | 
     ASSERT_NE(window, nullptr);
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
     auto ret = window->UnregisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: RegisterWindowWillCloseListeners
+ * @tc.desc: RegisterWindowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
+    auto ret = window->RegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnRegisterWindowWillCloseListeners
+ * @tc.desc: UnRegisterWindowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnRegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
+    auto ret = window->UnRegisterWindowWillCloseListeners(listener);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
