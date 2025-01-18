@@ -698,7 +698,23 @@ HWTEST_F(PcFoldScreenControllerTest, RecordStartMoveRect, Function | SmallTest |
     WSRect rect = { 100, 100, 200, 200 };
     controller_->RecordStartMoveRect(rect, true);
     EXPECT_EQ(controller_->startMoveRect_, rect);
-    EXPECT_EQ(controller_->IsStartFullScreen(), true);
+    EXPECT_TRUE(controller_->IsStartFullScreen());
+    EXPECT_FALSE(controller_->isStartDirectly_);
+}
+
+/**
+ * @tc.name: RecordStartMoveRectDirectly
+ * @tc.desc: test function : RecordStartMoveRectDirectly, IsStartFullScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, RecordStartMoveRectDirectly, Function | SmallTest | Level1)
+{
+    WSRect rect = { 100, 100, 200, 200 };
+    controller_->RecordStartMoveRectDirectly(rect, true, B_VELOCITY);
+    EXPECT_EQ(controller_->startMoveRect_, rect);
+    EXPECT_TRUE(controller_->IsStartFullScreen());
+    EXPECT_TRUE(controller_->isStartDirectly_);
+    EXPECT_TRUE(MathHelper::GreatNotEqual(controller_->startVelocity_.posY_, 0.0f));
 }
 
 /**
@@ -801,6 +817,55 @@ HWTEST_F(PcFoldScreenControllerTest, ThrowSlip3, Function | SmallTest | Level1)
     rect.posY_ += 400;
     controller_->RecordMoveRects(rect);
     EXPECT_FALSE(controller_->ThrowSlip(DEFAULT_SCREEN_ID, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT));
+}
+
+/**
+ * @tc.name: ThrowSlip4
+ * @tc.desc: test function : ThrowSlip waterfall mode directly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, ThrowSlip4, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    WSRect rect = DISPLAY_RECT;
+    // throw to B side
+    controller_->isFullScreenWaterfallMode_ = true;
+    controller_->RecordStartMoveRectDirectly(rect, true, B_VELOCITY);
+    EXPECT_TRUE(controller_->ThrowSlip(DEFAULT_SCREEN_ID, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT));
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(rect));
+    // throw to C side
+    rect = DISPLAY_RECT;
+    controller_->isFullScreenWaterfallMode_ = true;
+    controller_->RecordStartMoveRectDirectly(rect, true, C_VELOCITY);
+    EXPECT_TRUE(controller_->ThrowSlip(DEFAULT_SCREEN_ID, rect, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT));
+    EXPECT_EQ(ScreenSide::FOLD_B, manager_.CalculateScreenSide(rect));
+}
+
+/**
+ * @tc.name: ThrowSlipFloatingRectDirectly
+ * @tc.desc: test function : ThrowSlipFloatingRectDirectly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, ThrowSlipFloatingRectDirectly, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    WSRect rect = DEFAULT_FULLSCREEN_RECT;
+    controller_->ThrowSlipFloatingRectDirectly(rect, B_RECT, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT);
+    EXPECT_EQ(B_RECT, rect);
+    rect = VIRTUAL_FULLSCREEN_RECT;
+    controller_->ThrowSlipFloatingRectDirectly(rect, B_RECT, TOP_AVOID_HEIGHT, BOT_AVOID_HEIGHT);
+    EXPECT_EQ(ScreenSide::FOLD_C, manager_.CalculateScreenSide(rect));
+}
+
+/**
+ * @tc.name: IsThrowSlipDirectly
+ * @tc.desc: test function : IsThrowSlipDirectly
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, IsThrowSlipDirectly, Function | SmallTest | Level1)
+{
+    controller_->isStartDirectly_ = true;
+    EXPECT_TRUE(controller_->IsThrowSlipDirectly());
 }
 
 /**
@@ -956,6 +1021,10 @@ HWTEST_F(PcFoldScreenControllerTest, CalculateMovingVelocity, Function | SmallTe
     EXPECT_LE(std::abs(velocity.posY_ - ratio), err);
     EXPECT_LE(std::abs(velocity.width_ - ratio), err);
     EXPECT_LE(std::abs(velocity.height_ - ratio), err);
+
+    // throw directly
+    controller_->RecordStartMoveRectDirectly(rect0, false, B_VELOCITY);
+    EXPECT_EQ(controller_->startVelocity_, controller_->CalculateMovingVelocity());
 }
 }
 }

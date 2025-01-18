@@ -38,8 +38,11 @@ public:
     bool IsAllowThrowSlip(DisplayId displayId);
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
+    void RecordStartMoveRectDirectly(const WSRect& rect, bool isStartFullScreen, const WSRectF& velocity);
     void RecordMoveRects(const WSRect& rect);
     bool ThrowSlip(DisplayId displayId, WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
+    void ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect, int32_t topAvoidHeight, int32_t botAvoidHeight);
+    bool IsThrowSlipDirectly() const;
     bool IsStartFullScreen();
     void ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
 
@@ -67,10 +70,12 @@ private:
     int32_t persistentId_;
 
     // use queue to calculate velocity
-    std::mutex moveMutex_;
+    mutable std::mutex moveMutex_;
     WSRect startMoveRect_;
     bool isStartFullScreen_ { false };
     RectRecordsVector movingRectRecords_;
+    bool isStartDirectly_ { false };
+    WSRectF startVelocity_;
     // Above guarded by moveMutex_
 
     std::shared_ptr<FoldScreenStatusChangeCallback> onFoldScreenStatusChangeCallback_;
