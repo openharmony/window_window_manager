@@ -19,6 +19,9 @@
 #include "functional"
 #include "oh_window_comm.h"
 #include "oh_window.h"
+#include "image/pixelmap_native.h"
+#include "pixelmap_native_impl.h"
+#include "ui_content.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -194,7 +197,7 @@ WindowManager_ErrorCode OH_Window_Snapshot(int32_t windowId, OH_PixelmapNative* 
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d", windowId);
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "pixelMap is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::INVALID_PARAM;        
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;;        
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -219,7 +222,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, con
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d", windowId);
     if (color == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "color is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::INVALID_PARAM;        
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;;        
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -234,7 +237,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, con
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = window->SetBackgroundColor(std::string(color));
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetBackgroundColor(std::string(color)));
     }, __func__);
     return errCode;
 }
@@ -255,7 +258,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float br
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = window->SetBrightness(brightness);
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetBrightness(brightness));
     }, __func__);
     return errCode;
 }
@@ -269,14 +272,14 @@ WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool i
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
-    eventHandler->PostSyncTask([window, isKeepScreenOn, &errCode, where = __func__] {
+    eventHandler->PostSyncTask([windowId, isKeepScreenOn, &errCode, where = __func__] {
         auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = window->SetKeepScreenOn(isKeepScreenOn);
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetKeepScreenOn(isKeepScreenOn));
     }, __func__);
     return errCode;
 }
@@ -290,14 +293,14 @@ WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool is
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
-    eventHandler->PostSyncTask([window, isPrivacy, &errCode] {
+    eventHandler->PostSyncTask([windowId, isPrivacy, &errCode, where = __func__] {
         auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = window->SetPrivacyMode(isPrivacy);
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetPrivacyMode(isPrivacy));
     }, __func__);
     return errCode;
 }
@@ -307,7 +310,7 @@ WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId, WindowMa
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d", windowId);
     if (windowProperties == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowProperties is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::INVALID_PARAM;        
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;;        
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -315,7 +318,7 @@ WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId, WindowMa
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
-    eventHandler->PostSyncTask([window, windowId, windowProperties, &errCode, where = __func__] {
+    eventHandler->PostSyncTask([windowId, windowProperties, &errCode, where = __func__] {
         auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
