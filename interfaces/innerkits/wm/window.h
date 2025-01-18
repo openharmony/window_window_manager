@@ -3030,7 +3030,7 @@ public:
      *
      * @return True means the window is highlighted, false means the window is not highlighted.
      */
-    virtual bool IsWindowHighlighted() { return false; }
+    virtual bool IsWindowHighlighted() const { return false; }
 };
 }
 }

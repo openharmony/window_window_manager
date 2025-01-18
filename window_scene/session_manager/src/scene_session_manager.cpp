@@ -12585,8 +12585,8 @@ std::string SceneSessionManager::GetHighlightIds()
 {
     std::string highlightIdsStr = "";
     for (auto persistentId : highlightIds_) {
-        str += std::to_string(persistentId);
-        str += ",";
+        highlightIdsStr += std::to_string(persistentId);
+        highlightIdsStr += ",";
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds_: %{public}s", highlightIdsStr.c_str());
     return highlightIdsStr;
