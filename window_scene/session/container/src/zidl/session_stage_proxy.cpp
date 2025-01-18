@@ -953,6 +953,32 @@ void SessionStageProxy::NotifyTransformChange(const Transform& transform)
     }
 }
 
+void SessionStageProxy::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!singleHandTransform.Marshalling(data)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "singleHandTransform marshalling failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Send Requset failed");
+    }
+}
+
 WSError SessionStageProxy::NotifyDensityFollowHost(bool isFollowHost, float densityValue)
 {
     MessageParcel data;
