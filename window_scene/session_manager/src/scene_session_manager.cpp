@@ -1543,8 +1543,13 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
         }
         pid = sceneSession->GetCallingPid();
 
-        if (!sceneSession->GetStateFromManager(ManagerState::MANAGER_STATE_SCREEN_LOCKED)) {
+        if (!IsScreenLocked()) {
             TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            return WMError::WM_OK;
+        }
+
+        if (IsUserAuthPassed()) {
+            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
             return WMError::WM_OK;
         }
 
