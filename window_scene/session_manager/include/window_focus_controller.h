@@ -47,7 +47,8 @@ public:
     void SetFocusedSessionId(int32_t persistentId) { focusedSessionId = persistentId; }
     void SetLastFocusedSessionId(int32_t persistentId) { lastFocusedSessionId = persistentId; }
     void SetLastFocusedAppSessionId(int32_t persistentId) { lastFocusedAppSessionId = persistentId; }
-    void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlock) {
+    void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlock)
+    {
         needBlockNotifyFocusStatusUntilForeground = needBlock;
     }
     void SetNeedBlockNotifyUnfocusStatus(bool needBlock) { needBlockNotifyUnfocusStatus = needBlock; }
