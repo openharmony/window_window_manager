@@ -39,6 +39,9 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    sptr<SessionStageMocker> mockSessionStage_ = nullptr;
 };
 
 void SceneSessionLayoutTest::SetUpTestCase()
@@ -51,6 +54,7 @@ void SceneSessionLayoutTest::TearDownTestCase()
 
 void SceneSessionLayoutTest::SetUp()
 {
+    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
 }
 
 void SceneSessionLayoutTest::TearDown()
@@ -682,6 +686,33 @@ HWTEST_F(SceneSessionLayoutTest, CheckDragActivatedSettings, Function | SmallTes
 
     sceneSession->GetSessionProperty()->SetDragEnabled(false);
     ASSERT_EQ(false, sceneSession->IsDragAccessible());
+}
+
+/**
+ * @tc.name: NotifySingleHandTransformChange
+ * @tc.desc: NotifySingleHandTransformChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, NotifySingleHandTransformChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySingleHandTransformChange";
+    info.bundleName_ = "NotifySingleHandTransformChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    SingleHandTransform testTransform;
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    sceneSession->NotifySingleHandTransformChange(testTransform);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    mockSessionStage_ = nullptr;
+    sceneSession->sessionStage_ = mockSessionStage_;
+    sceneSession->NotifySingleHandTransformChange(testTransform);
+
+    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage_;
+    sceneSession->NotifySingleHandTransformChange(testTransform);
+    ASSERT_NE(100, testTransform.posX);
 }
 } // namespace
 } // Rosen
