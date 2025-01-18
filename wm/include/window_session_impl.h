@@ -500,6 +500,7 @@ protected:
      */
     float lastSystemDensity_ = UNDEFINED_DENSITY;
     WSError NotifySystemDensityChange(float density);
+    void RegisterWindowInspectorCallback();
 
     /*
      * Window Input Event

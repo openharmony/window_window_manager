@@ -40,6 +40,7 @@
 #include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
 #include "window_adapter.h"
+#include "window_inspector.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "color_parser.h"
@@ -300,6 +301,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
 WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
+    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     Destroy(true, false);
 }
 
@@ -4742,6 +4744,25 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 {
     std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
+}
+
+void WindowSessionImpl::RegisterWindowInspectorCallback()
+{
+    if (!WindowInspector::GetInstance().IsConnectServerSuccess()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u connect failed", GetWindowId());
+        return;
+    }
+    auto getWMSWindowListCallback = std::make_shared<GetWMSWindowListCallback>([weakThis = wptr(this)] {
+        WindowListInfo windowListInfo;
+        if (auto window = weakThis.promote()) {
+            windowListInfo.windowName = window->GetWindowName();
+            windowListInfo.windowId = window->GetWindowId();
+            windowListInfo.windowType = static_cast<uint32_t>(window->GetType());
+            windowListInfo.windowRect = window->GetRect();
+        }
+        return windowListInfo;
+    });
+    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 } // namespace Rosen
 } // namespace OHOS
