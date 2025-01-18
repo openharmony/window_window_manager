@@ -1441,7 +1441,7 @@ int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);
-    OnSetWindowCornerRadius(cornerRadius);
+    SetWindowCornerRadius(cornerRadius);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -321,7 +321,7 @@ public:
      * @param cornerRadius corner radius of window.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetWindowCornerRadius(float cornerRadius) { return WSError::WS_OK; }
+    virtual WSError SetWindowCornerRadius(float cornerRadius) { return WSError::WS_OK; }
 
     /**
      *  Gesture Back

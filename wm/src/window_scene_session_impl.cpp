@@ -3269,7 +3269,7 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
     
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
-    hostSession->OnSetWindowCornerRadius(cornerRadius);
+    hostSession->SetWindowCornerRadius(cornerRadius);
     return WMError::WM_OK;
 }
 
