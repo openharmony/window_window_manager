@@ -97,7 +97,7 @@ typedef enum {
     WINDOW_MANAGER_WINDOW_TYPE_MAIN = 1,
     /** Float. */
     WINDOW_MANAGER_WINDOW_TYPE_FLOAT = 8,
-    /** Dialog */
+    /** Dialog. */
     WINDOW_MANAGER_WINDOW_TYPE_DIALOG = 16,
 } WindowManager_WindowType;
 
