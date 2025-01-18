@@ -7228,7 +7228,7 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
         }
         WindowType windowType = window->GetType();
         if (!WindowHelper::IsSystemWindow(windowType) && !WindowHelper::IsAppWindow(windowType)) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s This is not valid window type=%{public}u", where, windowType);
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s invalid window type:%{public}u", where, windowType);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
             return;
         }
