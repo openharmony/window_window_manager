@@ -76,7 +76,10 @@ void WindowInspector::CloseConnectFromServer()
     handlerConnectServerSo_ = nullptr;
 }
 
-bool WindowInspector::IsConnectServerSuccess() const { return isConnectServerSuccess_; }
+bool WindowInspector::IsConnectServerSuccess() const
+{
+    return isConnectServerSuccess_; 
+}
 
 void WindowInspector::RegisterGetWMSWindowListCallback(
     uint32_t windowId, std::shared_ptr<GetWMSWindowListCallback>&& func)
