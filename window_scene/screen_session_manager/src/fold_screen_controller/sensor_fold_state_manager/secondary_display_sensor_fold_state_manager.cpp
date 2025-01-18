@@ -43,7 +43,7 @@ constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr int32_t HALF_FOLD_VALUE = 3;
-constexpr int32_t REFLEXION_VALUE = 3;
+constexpr int32_t REFLEXION_VALUE = 2;
 } // namespace
 
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
@@ -54,7 +54,10 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
 {
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
-    uint32_t isSecondaryReflexion = static_cast<int32_t>(angles[REFLEXION_VALUE]);
+    if (angles.size() != ANGLES_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "angles size is not right, angles size %{public}zu", angles.size());
+    }
+    bool isSecondaryReflexion = static_cast<bool>(angles[REFLEXION_VALUE]);
     if (isSecondaryReflexion) {
         TLOGW(WmsLogTag::DMS, "SecondaryReflexion:%{public}d", isSecondaryReflexion);
         auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
@@ -170,7 +173,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float an
     return state;
 }
 
-FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState (FoldStatus mPrimaryFoldState,
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState(FoldStatus mPrimaryFoldState,
     FoldStatus mSecondaryFoldState)
 {
     FoldStatus defaultState = FoldStatus::FOLDED;

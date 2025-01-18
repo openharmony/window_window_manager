@@ -1796,7 +1796,7 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
     }
 }
 
-void ScreenSession::SecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion)
+void ScreenSession::SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
 {
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");
