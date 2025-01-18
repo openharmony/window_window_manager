@@ -65,7 +65,7 @@ static std::shared_ptr<AppExecFwk::EventHandler> GetMainEventHandler()
 /**
  * @brief Used to map from WMError to WindowManager_ErrorCode.
  */
-const std::map<WMError, WindowManager_ErrorCode> WM_NDK_TO_ERROR_CODE_MAP {
+const std::map<WMError, WindowManager_ErrorCode> OH_WINDOW_TO_ERROR_CODE_MAP {
     { WMError::WM_OK,                           WindowManager_ErrorCode::OK                                          },
     { WMError::WM_ERROR_INVALID_PARAM,          WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM      },
     { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT },
@@ -78,7 +78,7 @@ const std::map<WMError, WindowManager_ErrorCode> WM_NDK_TO_ERROR_CODE_MAP {
 /**
  * @brief Used to map from WindowType to WindowManager_WindowType.
  */
-const std::map<WindowType, WindowManager_WindowType> NATIVE_NDK_TO_WINDOW_TYPE_MAP {
+const std::map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_APP    },
     { WindowType::WINDOW_TYPE_DIALOG,              WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_DIALOG },
     { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
@@ -106,7 +106,7 @@ WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
             return;
         }
         AvoidArea allAvoidArea;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             window->GetAvoidAreaByType(static_cast<AvoidAreaType>(type), allAvoidArea));
         TransformedToWindowManagerAvoidArea(avoidArea, allAvoidArea);
     }, __func__);
@@ -136,7 +136,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.enable_ = enabled;
         property.enableAnimation_ = enableAnimation;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }, __func__);
     return errCode;
@@ -164,7 +164,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int3
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.contentColor_ = color;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }, __func__);
     return errCode;
@@ -193,7 +193,7 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
         property.enable_ = enabled;
         property.enableAnimation_ = enableAnimation;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property));
     }, __func__);
     return errCode;
@@ -242,7 +242,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, con
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetBackgroundColor(std::string(color)));
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetBackgroundColor(std::string(color)));
     }, __func__);
     return errCode;
 }
@@ -262,7 +262,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float br
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetBrightness(brightness));
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetBrightness(brightness));
     }, __func__);
     return errCode;
 }
@@ -282,7 +282,7 @@ WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool i
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetKeepScreenOn(isKeepScreenOn));
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetKeepScreenOn(isKeepScreenOn));
     }, __func__);
     return errCode;
 }
@@ -302,7 +302,7 @@ WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool is
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(window->SetPrivacyMode(isPrivacy));
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetPrivacyMode(isPrivacy));
     }, __func__);
     return errCode;
 }
@@ -327,8 +327,8 @@ WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId,
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        if (NATIVE_NDK_TO_WINDOW_TYPE_MAP.count(window->GetType()) != 0) {
-            windowProperties->type = NATIVE_NDK_TO_WINDOW_TYPE_MAP.at(window->GetType());
+        if (OH_WINDOW_TO_WINDOW_TYPE_MAP.count(window->GetType()) != 0) {
+            windowProperties->type = OH_WINDOW_TO_WINDOW_TYPE_MAP.at(window->GetType());
         } else {
             windowProperties->type = static_cast<WindowManager_WindowType>(window->GetType());
         }
