@@ -827,7 +827,7 @@ void WindowManagerService::NotifyAnimationAbilityDied(sptr<WindowTransitionInfo>
     PostAsyncTask(task, "NotifyAnimationAbilityDied");
 }
 
-WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken)
+WMError WindowManagerService::GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken, DisplayId displayId)
 {
     auto task = [this, &abilityToken]() {
         return windowController_->GetFocusWindowInfo(abilityToken);
@@ -1635,7 +1635,7 @@ MaximizeMode WindowManagerService::GetMaximizeMode()
     return maximizeMode_;
 }
 
-void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("Get Focus window info in wms");
     windowController_->GetFocusWindowInfo(focusInfo);
