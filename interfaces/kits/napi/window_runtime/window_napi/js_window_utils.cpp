@@ -705,9 +705,9 @@ napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window)
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
 
-    SystemBarProperty status = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    SystemBarProperty statusBarProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     napi_set_named_property(env, objValue, "contentColor",
-        CreateJsValue(env, GetHexColor(status.contentColor_)));
+        CreateJsValue(env, GetHexColor(statusBarProperty.contentColor_)));
     return objValue;
 }
 
