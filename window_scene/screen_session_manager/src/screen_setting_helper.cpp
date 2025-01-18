@@ -31,7 +31,7 @@ constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
 constexpr uint32_t DATA_SIZE_INVALID = 0xffffffff;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
-const std::string SETTING_SCREEN_SHARE_PROTECT_KEY = "USER_SETTINGDATA_SECURE_";
+const std::string SCREEN_SHARE_PROTECT_TABLE = "USER_SETTINGDATA_SECURE_";
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -520,7 +520,7 @@ void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(Setti
         TLOGE(WmsLogTag::DMS, "create observer failed");
     }
     ErrCode ret = settingProvider.RegisterObserverByTable(screenSkipProtectedWindowObserver_,
-        SETTING_SCREEN_SHARE_PROTECT_KEY);
+        SCREEN_SHARE_PROTECT_TABLE);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         screenSkipProtectedWindowObserver_ = nullptr;
@@ -535,7 +535,7 @@ void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.UnregisterObserverByTable(screenSkipProtectedWindowObserver_,
-        SETTING_SCREEN_SHARE_PROTECT_KEY);
+        SCREEN_SHARE_PROTECT_TABLE);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
     }
@@ -546,7 +546,7 @@ bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, cons
 {
     int32_t value = 0;
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = settingProvider.GetIntValueMultiUserByTable(key, value, SETTING_SCREEN_SHARE_PROTECT_KEY);
+    ErrCode ret = settingProvider.GetIntValueMultiUserByTable(key, value, SCREEN_SHARE_PROTECT_TABLE);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
