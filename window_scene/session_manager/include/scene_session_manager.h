@@ -134,6 +134,7 @@ using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidAr
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
+using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -479,6 +480,7 @@ public:
     SingleHandTransform GetNormalSingleHandTransform() const;
     void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
     void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
+    void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
      * Window Property
@@ -1133,17 +1135,11 @@ private:
      */
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
-<<<<<<< HEAD
     SingleHandTransform singleHandTransform_;
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
-=======
-    GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
-    void InitVsyncStation();
-    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
->>>>>>> 711c83a3bf (singlehand register window container node)
     void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*

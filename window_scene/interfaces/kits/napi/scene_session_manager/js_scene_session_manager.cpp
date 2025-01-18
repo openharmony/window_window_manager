@@ -637,7 +637,11 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         [](const sptr<OccupiedAreaChangeInfo>& info) {
         RootScene::staticRootScene_->NotifyOccupiedAreaChangeForRoot(info);
     });
+<<<<<<< HEAD
     SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIdFunc(
+=======
+    SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIDFunc(
+>>>>>>> 140ad85df3d5a097af9b47cf0f8f519e29127cd3
         [](const std::string& id) {
         return RootScene::staticRootScene_->GetRSNodeByStringID(id);
     });
@@ -4120,7 +4124,11 @@ napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_c
     return NapiGetUndefined(env);
 }
 
+<<<<<<< HEAD
 napi_value JsSceneSessionManager::RegisterSingleHandContainerNode(napi_env env, napi_callback_info info)
+=======
+napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info)
+>>>>>>> 140ad85df3d5a097af9b47cf0f8f519e29127cd3
 {
     size_t argc = DEFAULT_ARG_COUNT;
     napi_value argv[DEFAULT_ARG_COUNT] = { nullptr };
@@ -4133,7 +4141,11 @@ napi_value JsSceneSessionManager::RegisterSingleHandContainerNode(napi_env env, 
     }
     std::string stringId;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], stringId)) {
+<<<<<<< HEAD
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to height");
+=======
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to stringId");
+>>>>>>> 140ad85df3d5a097af9b47cf0f8f519e29127cd3
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
