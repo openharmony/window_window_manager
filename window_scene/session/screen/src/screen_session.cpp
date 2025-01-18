@@ -1839,4 +1839,14 @@ int32_t ScreenSession::GetApiVersion()
     lastRequestTime = currentTime;
     return apiVersion;
 }
+
+void ScreenSession::SetShareProtect(bool needShareProtect)
+{
+    needShareProtect_ = needShareProtect;
+}
+
+bool ScreenSession::GetShareProtect()
+{
+    return needShareProtect_;
+}
 } // namespace OHOS::Rosen
