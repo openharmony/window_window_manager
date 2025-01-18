@@ -1109,14 +1109,13 @@ static WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarPro
     return WMError::WM_OK;
 }
 
-static WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t contentColor)
+WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t contentColor)
 {
-    auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    if (property.contentColor_ == contentColor) {
-        TLOGI(WmsLogTag::WMS_IMMS, "current color: %{public}u, winId: %{public}u",
-            property.contentColor_, window->GetWindowId());
-        return WMError::WM_OK;
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     property.contentColor_ = contentColor;
     property.settingFlag_ = static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
