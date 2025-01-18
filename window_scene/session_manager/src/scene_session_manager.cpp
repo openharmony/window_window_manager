@@ -10508,12 +10508,12 @@ bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowI
     DisplayId displayId = inputDisplayId;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
         sceneSession->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
-        if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobleRect().posY_ >= GetFoldLowerScreenPosY()) {
+        if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
             return false;
         }
         if (displayId == VIRTUAL_DISPLAY_ID) {
-            if (sceneSession->GetSessionGlobleRect().posY_ +
-                sceneSession->GetSessionGlobleRect().height_ < GetFoldLowerScreenPosY()) {
+            if (sceneSession->GetSessionGlobalRect().posY_ +
+                sceneSession->GetSessionGlobalRect().height_ < GetFoldLowerScreenPosY()) {
                 return false;
             }
             displayId = DEFAULT_DISPLAY_ID;
