@@ -126,7 +126,6 @@ using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& 
 using AbilityManagerCollaboratorRegisteredFunc = std::function<void()>;
 using OnFlushUIParamsFunc = std::function<void()>;
 using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
-using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
