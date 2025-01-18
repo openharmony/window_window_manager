@@ -1113,6 +1113,8 @@ static WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_
 {
     auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     if (property.contentColor_ == contentColor) {
+        TLOGI(WmsLogTag::WMS_IMMS, "current color: %{public}u, winId: %{public}u",
+            property.contentColor_, window->GetWindowId());
         return WMError::WM_OK;
     }
     property.contentColor_ = contentColor;
@@ -3184,12 +3186,11 @@ napi_value JsWindow::OnSetStatusBarColor(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_IMMS, "no enough arguments");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    uint32_t contentColor;
+    uint32_t contentColor = 0;
     if (!ParseColorMetrics(env, argv[INDEX_ZERO], contentColor)) {
         TLOGE(WmsLogTag::WMS_IMMS, "parse color failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     napi_value result = nullptr;
     napi_value lastParam = (argc <= ARG_COUNT_ONE) ? nullptr :
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
@@ -3202,7 +3203,6 @@ napi_value JsWindow::OnSetStatusBarColor(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
-
         auto errCode = UpdateStatusBarProperty(window, contentColor);
         if (errCode == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
@@ -3689,7 +3689,7 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
     }
     std::string color;
     if (errCode == WmErrorCode::WM_OK && !GetWindowBackgroundColorFromJs(env, argv[0], color)) {
-        WLOGFE("Failed to convert parameter to background color");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse js color failed");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
