@@ -4022,7 +4022,8 @@ DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<Screen
     return uniqueSwitchRet;
 }
 
-DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
@@ -4041,7 +4042,7 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
             TLOGW(WmsLogTag::DMS, "make unique ignore");
             return DMError::DM_OK;
         }
-        return MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
+        return MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
     }
     for (auto screenId : screenIds) {
         ScreenId rsScreenId = SCREEN_ID_INVALID;
@@ -4057,6 +4058,7 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
             TLOGE(WmsLogTag::DMS, "screen session is nullptr");
             continue;
         }
+        displayIds.emplace_back(static_cast<uint64_t>(screenId));
         Rosen::RSDisplayNodeConfig rsConfig;
         rsConfig.screenId = rsScreenId;
         screenSession->CreateDisplayNode(rsConfig);

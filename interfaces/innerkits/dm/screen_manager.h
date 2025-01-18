@@ -147,12 +147,21 @@ public:
         MultiScreenPositionOptions secondScreenOption);
 
     /**
-    * @brief Make screens as unique-screen.
-    *
-    * @param screenIds Unique screen ids.
-    * @return DM_OK means make unique screen success, others means make unique failed.
-    */
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
     DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    /**
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
+     * @param displayIds Unique display ids.
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds);
 
     /**
      * @brief Stop expand screens.
