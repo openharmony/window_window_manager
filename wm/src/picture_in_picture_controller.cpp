@@ -889,11 +889,11 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
                 handleId_ = firstHandleId_;
                 navController->SetInPIPMode(handleId_);
                 TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
-                return true;
+            } else {
+                TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
+                firstHandleId_ = handleId_;
+                navController->SetInPIPMode(handleId_);
             }
-            TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
-            firstHandleId_ = handleId_;
-            navController->SetInPIPMode(handleId_);
             return true;
         } else {
             TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
