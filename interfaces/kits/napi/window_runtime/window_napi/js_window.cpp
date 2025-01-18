@@ -3230,7 +3230,7 @@ napi_value JsWindow::OnGetStatusBarPropertySync(napi_env env, napi_callback_info
         TLOGE(WmsLogTag::WMS_IMMS, "only main window is allowed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-    auto objValue = CreateStatusBarPropertyObject(env, windowToken_);
+    auto objValue = GetStatusBarPropertyObject(env, windowToken_);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "create property failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
