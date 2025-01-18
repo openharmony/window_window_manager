@@ -26,6 +26,8 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsListener"};
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t ARG_COUNT_ONE = 1;
 }
 
 JsWindowListener::~JsWindowListener()
@@ -579,25 +581,24 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 
 void JsWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 {
-    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_] () mutable {
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, &terminateCloseProcess, env = env_, where] () mutable {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnSubWindowClose");
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            WLOGFE("this listener or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s this listener or env is nullptr", where);
             return;
         }
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        HandleScope handleScope(env);
         bool value = terminateCloseProcess;
         napi_value returnValue = thisListener->CallJsMethod(SUB_WINDOW_CLOSE_CB.c_str(), nullptr, 0);
         if (napi_get_value_bool(env, returnValue, &value) == napi_ok) {
             terminateCloseProcess = value;
         }
-        napi_close_handle_scope(env, scope);
     };
 
     if (!eventHandler_) {
-        WLOGFE("get main event handler failed!");
+        TLOGE(WmsLogTag::WMS_SUB, "get main event handler failed!");
         return;
     }
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowRectListener::OnSubWindowClose",
@@ -627,6 +628,91 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
         return;
     }
     eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnMainWindowClose",
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+WmErrorCode JsWindowListener::CanCancelUnregister(const std::string eventType)
+{
+    if (eventType == WINDOW_WILL_CLOSE_CB) {
+        if (asyncCloseExecuteCount_.load() != 0) {
+            TLOGE(WmsLogTag::WMS_PC, "async task in excuting, not unregister");
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+    }
+    return WmErrorCode::WM_OK;
+}
+
+void JsWindowListener::InitAsyncCloseCallback(sptr<Window> window)
+{
+    if (closeAsyncCallback_ != nullptr) {
+        return;
+    }
+    TLOGD(WmsLogTag::WMS_DECOR, "init");
+    const char* const where = __func__;
+    auto thenCallback = [self = weakRef_, weakWindow = wptr<Window>(window), where](napi_env env,
+        size_t argc, napi_value* argv) {
+        auto window = weakWindow.promote();
+        auto thisListener = self.promote();
+        if (window == nullptr || thisListener == nullptr) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window or thisListener is nullptr", where);
+            return;
+        }
+        thisListener->asyncCloseExecuteCount_.fetch_sub(1);
+        bool notClose = false;
+        if (argc != ARG_COUNT_ONE || !ConvertFromJsValue(env, argv[INDEX_ZERO], notClose)) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s Failed to convert parameter to notClose", where);
+        }
+        TLOGD(WmsLogTag::WMS_DECOR, "%{public}s notClose: %{public}d", where, notClose);
+        if (!notClose) {
+            window->DirectClose();
+        }
+    };
+
+    auto catchCallback = [self = weakRef_, weakWindow = wptr<Window>(window), where](napi_env env,
+        size_t argc, napi_value* argv) {
+        auto window = weakWindow.promote();
+        auto thisListener = self.promote();
+        if (window == nullptr || thisListener == nullptr) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window or thisListener is nullptr", where);
+            return;
+        }
+        thisListener->asyncCloseExecuteCount_.fetch_sub(1);
+        window->DirectClose();
+    };
+
+    closeAsyncCallback_ = sptr<AsyncCallback>::MakeSptr(thenCallback, catchCallback);
+}
+
+void JsWindowListener::OnWindowWillClose(sptr<Window> window)
+{
+    InitAsyncCloseCallback(window);
+    const char* const where = __func__;
+    auto jsCallback = [self = weakRef_, weakWindow = wptr<Window>(window), env = env_,
+        weakCloseAsyncCallback = wptr<AsyncCallback>(closeAsyncCallback_), where] {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsWindowListener::OnWindowWillClose");
+        auto thisListener = self.promote();
+        auto window = weakWindow.promote();
+        auto closeAsyncCallback = weakCloseAsyncCallback.promote();
+        if (thisListener == nullptr || env == nullptr ||
+            window == nullptr || closeAsyncCallback == nullptr) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s this listener or env or window or "
+                "closeAsyncCallback is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value returnValue = thisListener->CallJsMethod(WINDOW_WILL_CLOSE_CB.c_str(), nullptr, 0);
+        thisListener->asyncCloseExecuteCount_.fetch_add(1);
+        bool isPromiseCallback = CallPromise(env, returnValue, closeAsyncCallback);
+        if (!isPromiseCallback) {
+            window->DirectClose();
+        }
+    };
+
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_DECOR, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostSyncTask(jsCallback, "wms:JsWindowListener::OnWindowWillClose",
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen
