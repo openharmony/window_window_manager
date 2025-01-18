@@ -60,9 +60,10 @@ private:
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
     void OnScreenDensityChange();
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
-    void OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId) override;
+    void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
+    void OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion) override;
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

@@ -24,6 +24,7 @@ constexpr float PHONE_SCREEN_DENSITY = 3.5f;
 constexpr float ELSE_SCREEN_DENSITY = 1.5f;
 constexpr float INCH_2_MM = 25.4f;
 constexpr int32_t HALF_VALUE = 2;
+constexpr int32_t TRUNCATE_TWO_DECIMALS = 100;
 constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
 constexpr float SECONDARY_ROTATION_0 = 0.0F;
 constexpr float SECONDARY_ROTATION_90 = 90.0F;
@@ -31,6 +32,8 @@ constexpr float SECONDARY_ROTATION_180 = 180.0F;
 constexpr float SECONDARY_ROTATION_270 = 270.0F;
 constexpr int32_t SECONDARY_MAIN_OFFSETY = -2176;
 constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
+constexpr float EPSILON = 1e-6f;
+constexpr float PPI_TO_DPI = 1.6f;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -572,5 +575,25 @@ void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode fol
             inputOffsetY_ = SECONDARY_MAIN_OFFSETY;
         }
     }
+}
+
+float ScreenProperty::CalculatePPI()
+{
+    int32_t phywidth = GetPhyWidth();
+    int32_t phyHeight = GetPhyHeight();
+    float phyDiagonal = std::sqrt(static_cast<float>(phywidth * phywidth + phyHeight * phyHeight));
+    if (phyDiagonal < EPSILON) {
+        return 0.0f;
+    }
+    RRect bounds = GetBounds();
+    int32_t width = bounds.rect_.GetWidth();
+    int32_t height = bounds.rect_.GetHeight();
+    float ppi = std::sqrt(static_cast<float>(width * width + height * height)) * INCH_2_MM / phyDiagonal;
+    return std::round(ppi * TRUNCATE_TWO_DECIMALS) / TRUNCATE_TWO_DECIMALS;
+}
+
+uint32_t ScreenProperty::CalculateDPI()
+{
+    return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI));
 }
 } // namespace OHOS::Rosen

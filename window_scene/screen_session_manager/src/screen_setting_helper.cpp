@@ -25,12 +25,14 @@ namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
+sptr<SettingObserver> ScreenSettingHelper::halfScreenObserver_;
+sptr<SettingObserver> ScreenSettingHelper::screenSkipProtectedWindowObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
-constexpr uint32_t EXPECT_RESOLUTION_SIZE = 3;
 constexpr uint32_t DATA_SIZE_INVALID = 0xffffffff;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
+const std::string SETTING_SCREEN_SHARE_PROTECT_KEY = "USER_SETTINGDATA_SECURE_";
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -76,6 +78,41 @@ bool ScreenSettingHelper::GetSettingValue(uint32_t& value, const std::string& ke
         return false;
     }
     value = static_cast<uint32_t>(getValue);
+    return true;
+}
+
+bool ScreenSettingHelper::GetSettingValue(const std::string& key, std::string& value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    std::string getValue = "";
+    ErrCode ret = provider.GetStringValue(key, getValue);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    value = getValue;
+    return true;
+}
+
+bool ScreenSettingHelper::SetSettingValue(const std::string& key, uint32_t value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.PutIntValue(key, value, false);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        return false;
+    }
+    return true;
+}
+
+bool ScreenSettingHelper::SetSettingValue(const std::string& key, const std::string& value)
+{
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.PutStringValue(key, value, false);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        return false;
+    }
     return true;
 }
 
@@ -190,7 +227,7 @@ void ScreenSettingHelper::SetSettingRotationScreenId(int32_t screenId)
         TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
         return;
     }
-    TLOGE(WmsLogTag::DMS, "ssucceed, ret:%{public}d", ret);
+    TLOGE(WmsLogTag::DMS, "succeed, ret:%{public}d", ret);
 }
 
 bool ScreenSettingHelper::GetSettingRotationScreenID(int32_t& screenId, const std::string& key)
@@ -326,30 +363,26 @@ bool ScreenSettingHelper::GetSettingRecoveryResolutionString(std::vector<std::st
     return true;
 }
 
-bool ScreenSettingHelper::GetSettingRecoveryResolutionMap
-    (std::map<ScreenId, std::pair<uint32_t, uint32_t>>& resolution)
+bool ScreenSettingHelper::GetSettingRecoveryResolutionSet(std::set<ScreenId>& restoredScreenId)
 {
-    std::vector<std::string> resolutionStrings;
-    bool getString = GetSettingRecoveryResolutionString(resolutionStrings);
+    std::vector<std::string> restoredScreenIdStrings;
+    bool getString = GetSettingRecoveryResolutionString(restoredScreenIdStrings);
     if (!getString) {
         TLOGE(WmsLogTag::DMS, "get string failed");
         return false;
     }
-    for (auto& resolutionString : resolutionStrings) {
-        MultiScreenRecoverOption resolutionData;
-        uint32_t dataSize = GetDataFromString(resolutionData, resolutionString);
-        if (dataSize != EXPECT_RESOLUTION_SIZE) {
+    for (auto& screenIdString : restoredScreenIdStrings) {
+        MultiScreenRecoverOption screenIdData;
+        uint32_t dataSize = GetDataFromString(screenIdData, screenIdString);
+        if (dataSize == DATA_SIZE_INVALID || dataSize == 0) {
             TLOGE(WmsLogTag::DMS, "get data failed");
             continue;
         }
-        ScreenId screenId = resolutionData.screenId_;
-        uint32_t width = resolutionData.first_;
-        uint32_t height = resolutionData.second_;
-        TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", width: %{public}d, height: %{public}d",
-            screenId, width, height);
-        resolution[screenId] = std::make_pair(width, height);
+        ScreenId screenId = screenIdData.screenId_;
+        restoredScreenId.insert(screenId);
+        TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64, screenId);
     }
-    if (resolution.empty()) {
+    if (restoredScreenId.empty()) {
         TLOGE(WmsLogTag::DMS, "nothing found");
         return false;
     }
@@ -465,6 +498,91 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
+}
+
+void ScreenSettingHelper::RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func)
+{
+    if (halfScreenObserver_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "setting halfScreen observer is registered");
+        return;
+    }
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    halfScreenObserver_ = halfScreenProvider.CreateObserver(SETTING_HALF_SCREEN_SWITCH_KEY, func);
+    ErrCode ret = halfScreenProvider.RegisterObserver(halfScreenObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "halfScreen failed, ret:%{public}d", ret);
+        halfScreenObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingHalfScreenObserver()
+{
+    if (halfScreenObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "halfScreenObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = halfScreenProvider.UnregisterObserver(halfScreenObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+    }
+    halfScreenObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetHalfScreenSwitchState(const std::string& key)
+{
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
+    int dbValue = 0;
+    ErrCode ret = halfScreenProvider.GetIntValue(key, dbValue);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "GetHalfScreenSwitchState failed, ret:%{public}d", ret);
+        return false;
+    }
+    return !dbValue;
+}
+
+void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func)
+{
+    if (screenSkipProtectedWindowObserver_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    screenSkipProtectedWindowObserver_ = settingProvider.CreateObserver(SETTING_SCREEN_SHARE_PROTECT_KEY, func);
+    ErrCode ret = settingProvider.RegisterObserverByTable(screenSkipProtectedWindowObserver_,
+        SETTING_SCREEN_SHARE_PROTECT_KEY);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        screenSkipProtectedWindowObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
+{
+    if (screenSkipProtectedWindowObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.UnregisterObserverByTable(screenSkipProtectedWindowObserver_,
+        SETTING_SCREEN_SHARE_PROTECT_KEY);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+    }
+    screenSkipProtectedWindowObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, const std::string& key)
+{
+    int32_t value;
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetIntValueMultiUserByTable(key, value, SETTING_SCREEN_SHARE_PROTECT_KEY);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    enable = (value == 1);
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

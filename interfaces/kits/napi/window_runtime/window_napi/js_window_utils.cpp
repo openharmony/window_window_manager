@@ -544,6 +544,20 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
     return objValue;
 }
 
+napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        napi_set_element(env, arrayValue, i, CreateJsWindowLayoutInfoObject(env, infos[i]));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
@@ -601,6 +615,14 @@ bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButto
         emptyParam = false;
     }
     return !emptyParam;
+}
+
+napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
+    return objValue;
 }
 
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
@@ -676,6 +698,61 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
     return true;
+}
+
+napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    SystemBarProperty statusBarProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    napi_set_named_property(env, objValue, "contentColor",
+        CreateJsValue(env, GetHexColor(statusBarProperty.contentColor_)));
+    return objValue;
+}
+
+static bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType)
+{
+    napi_valuetype valueType = napi_undefined;
+    if (napi_typeof(env, param, &valueType) != napi_ok) {
+        return false;
+    }
+    return valueType == expectType;
+}
+
+bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue)
+{
+    if (!CheckTypeForNapiValue(env, value, napi_object)) {
+        return false;
+    }
+    napi_value jsToNumeric = nullptr;
+    napi_get_named_property(env, value, "toNumeric", &jsToNumeric);
+    if (!CheckTypeForNapiValue(env, jsToNumeric, napi_function)) {
+        return false;
+    }
+    napi_value jsColor;
+    if (napi_call_function(env, value, jsToNumeric, 0, nullptr, &jsColor) != napi_ok) {
+        return false;
+    }
+    if (!CheckTypeForNapiValue(env, jsColor, napi_number)) {
+        return false;
+    }
+    return napi_get_value_uint32(env, jsColor, &colorValue) == napi_ok;
+}
+
+bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_string) {
+        return ConvertFromJsValue(env, value, colorStr);
+    }
+    uint32_t colorValue = 0;
+    if (ParseColorMetrics(env, value, colorValue)) {
+        colorStr = GetHexColor(colorValue);
+        return true;
+    }
+    return false;
 }
 
 bool ParseAndCheckRect(napi_env env, napi_value jsObject,

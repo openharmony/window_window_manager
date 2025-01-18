@@ -90,6 +90,8 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_PEN = 41,
     STATE_CHANGE_REASON_SHUT_DOWN = 42,
     STATE_CHANGE_REASON_SCREEN_CONNECT = 43,
+    STATE_CHANGE_REASON_HIBERNATE = 45,
+    STATE_CHANGE_REASON_EX_SCREEN_INIT = 46,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -497,6 +499,7 @@ struct ScreenDirectionInfo {
     int32_t notifyRotation_;
     int32_t screenRotation_;
     int32_t rotation_;
+    int32_t phyRotation_;
 };
 
 /**

@@ -62,6 +62,10 @@ napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenPrope
     napi_set_named_property(env, objValue, "bounds", CreateJsRRect(env, screenProperty.GetBounds()));
     napi_set_named_property(env, objValue, "fakeBounds", CreateJsRRect(env, screenProperty.GetFakeBounds()));
     napi_set_named_property(env, objValue, "isFakeInUse", CreateJsValue(env, screenProperty.GetIsFakeInUse()));
+    napi_set_named_property(env, objValue, "accessTranslateX", CreateJsValue(env, screenProperty.GetTranslateX()));
+    napi_set_named_property(env, objValue, "accessTranslateY", CreateJsValue(env, screenProperty.GetTranslateY()));
+    napi_set_named_property(env, objValue, "scaleX", CreateJsValue(env, screenProperty.GetScaleX()));
+    napi_set_named_property(env, objValue, "scaleY", CreateJsValue(env, screenProperty.GetScaleY()));
     return objValue;
 }
 
@@ -125,6 +129,8 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE)));
     napi_set_named_property(env, objValue, "SUPER_FOLD_STATUS_CHANGE", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE)));
+    napi_set_named_property(env, objValue, "ACCESS_INFO_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::ACCESS_INFO_CHANGE)));
     return objValue;
 }
 
@@ -244,10 +250,11 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 
 bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenDirectionInfo& directionInfo)
 {
-    napi_value jsNotifyRotation = nullptr, jsScreenRotation = nullptr, jsRotation = nullptr;
+    napi_value jsNotifyRotation = nullptr, jsScreenRotation = nullptr, jsRotation = nullptr, jsPhyRotation = nullptr;
     napi_get_named_property(env, jsObject, "notifyRotation", &jsNotifyRotation);
     napi_get_named_property(env, jsObject, "screenRotation", &jsScreenRotation);
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);
+    napi_get_named_property(env, jsObject, "phyRotation", &jsPhyRotation);
 
     if (GetType(env, jsNotifyRotation) != napi_undefined) {
         int32_t notifyRotation;
@@ -272,6 +279,14 @@ bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenD
             return false;
         }
         directionInfo.rotation_ = rotation;
+    }
+    if (GetType(env, jsPhyRotation) != napi_undefined) {
+        int32_t phyRotation;
+        if (!ConvertFromJsValue(env, jsPhyRotation, phyRotation)) {
+            WLOGFE("[NAPI]Failed to convert parameter to phyRotation");
+            return false;
+        }
+        directionInfo.phyRotation_ = phyRotation;
     }
     return true;
 }

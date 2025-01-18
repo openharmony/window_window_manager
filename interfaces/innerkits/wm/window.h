@@ -65,9 +65,9 @@ namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
-using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
-using MouseEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
-using TouchEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
+using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
+using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
+using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -698,7 +698,7 @@ public:
      *
      * @return Mode of window.
      */
-    virtual WindowMode GetMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
+    virtual WindowMode GetWindowMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
 
     /**
      * @brief Get alpha of window.
@@ -915,7 +915,7 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
@@ -1240,6 +1240,14 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetShadowRadius(float radius) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set shadow radius of window.
+     *
+     * @param radius Shadow radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set shadow color of window.
@@ -2198,7 +2206,10 @@ public:
      * @param windowLimits.
      * @return WMError.
      */
-    virtual WMError SetWindowLimits(WindowLimits& windowLimits) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetWindowLimits(WindowLimits& windowLimits, bool isForcible = false)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Register listener, if timeout(seconds) pass with no interaction, the listener will be executed.
@@ -2539,12 +2550,12 @@ public:
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Set support window modes.
+     * @brief Sets the supported window modes.
      *
-     * @param supportWindowModes Support window modes of the window.
+     * @param supportedWindowModes Supported window modes of the window.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2776,7 +2787,7 @@ public:
      * @param params
      * @return WM_OK means set success, others means set failed
      */
-    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) { return WMError::WM_OK; }
 
     /**
      * @brief Set the Dvsync Switch
@@ -2914,6 +2925,60 @@ public:
      * @return The string corresponding to the window.
      */
     virtual std::string GetClassType() const { return "Window"; }
+
+    /**
+     * @brief Enable or disable window delay raise
+     *
+     * @param isEnabled Enable or disable window delay raise
+     */
+    virtual WMError SetWindowDelayRaiseEnabled(bool isEnabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get whether window delay raise is enabled
+     *
+     * @return True means window delay raise is enabled
+     */
+    virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
+     * @brief Get whether is mid scene.
+     *
+     * @return True - is mid scene, false - is not mid scene.
+     */
+    virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get layoutTransform of window uiContent.
+     *
+     * @return UiContent of layoutTransform.
+     */
+    virtual Transform GetLayoutTransform() const
+    {
+        static Transform trans;
+        return trans;
+    }
+
+    /**
+     * @brief Show keyboard window
+     *
+     * @param mode keyboard will shown with special mode.
+     * @return WM_OK means window show success, others means failed.
+     */
+    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief change keyboard view mode
+     *
+     * @param mode keyboard will update to the special mode.
+     * @return WM_OK means view mode update success, others means failed.
+     */
+    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

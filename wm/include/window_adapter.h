@@ -46,7 +46,7 @@ public:
     virtual WMError DestroyWindow(uint32_t windowId);
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidRect,
-        const Rect& rect = {0, 0, 0, 0});
+        const Rect& rect = Rect::EMPTY_RECT);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId);
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
@@ -75,6 +75,7 @@ public:
 
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
+    virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
         sptr<RSIWindowAnimationFinishedCallback>& finishCallback);
@@ -104,18 +105,10 @@ public:
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
         SystemSessionConfig& systemConfig, sptr<IRemoteObject> token = nullptr);
-    virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
     virtual WMError DestroyAndDisconnectSpecificSession(const int32_t persistentId);
     virtual WMError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
         const sptr<IRemoteObject>& callback);
-    virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
-        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
-        sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
     WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
-    void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
-    void UnregisterSessionRecoverCallbackFunc(int32_t persistentId);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
@@ -139,9 +132,21 @@ public:
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
     virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds);
-    virtual WMError ReleaseForegroundSessionScreenLock();
+    virtual WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
     virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     virtual WMError NotifyWatchFocusActiveChange(bool isActive);
+
+    /*
+     * Window Recover
+     */
+    void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
+    void UnregisterSessionRecoverCallbackFunc(int32_t persistentId);
+    virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<ISession>& session, sptr<WindowSessionProperty> property, sptr<IRemoteObject> token = nullptr);
+    virtual void RecoverAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+        const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+        sptr<WindowSessionProperty> property, sptr<ISession>& session, sptr<IRemoteObject> token = nullptr);
 
     /*
      * PC Window
@@ -149,7 +154,7 @@ public:
     virtual WMError IsPcWindow(bool& isPcWindow);
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode);
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled);
-    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t deviceId);
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
@@ -160,11 +165,18 @@ public:
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
-    void ReregisterWindowManagerAgent();
-    void OnUserSwitch();
     bool InitWMSProxy();
     bool InitSSMProxy();
 
+    /*
+     * Multi User
+     */
+    void OnUserSwitch();
+
+    /*
+     * Window Recover
+     */
+    void ReregisterWindowManagerAgent();
     void WindowManagerAndSessionRecover();
 
     sptr<IWindowManager> GetWindowManagerServiceProxy() const;
@@ -173,10 +185,10 @@ private:
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ = false;
-    bool recoverInitialized_ = false;
     bool isRegisteredUserSwitchListener_ = false;
-    std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
+    std::map<int32_t, SessionRecoverCallbackFunc> sessionRecoverCallbackFuncMap_;
+    bool recoverInitialized_ = false;
     // above guarded by mutex_
 };
 } // namespace Rosen

@@ -731,6 +731,14 @@ public:
         std::vector<sptr<UnreliableWindowInfo>>& infos) const;
 
     /**
+     * @brief Get window layout info.
+     *
+     * @param infos window layout infos
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
+
+    /**
      * @brief Get visibility window info.
      *
      * @param infos Visible window infos
@@ -888,11 +896,13 @@ public:
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) const;
 
     /**
-     * @brief Release screen lock of foreground sessions.
+     * @brief Update screen lock status for app.
      *
-     * @return WM_OK means release success, others means failed.
+     * @param bundleName BundleName of specific app
+     * @param isRelease True means screen lock, false means reLock screen lock
+     * @return WM_OK means update success, others means failed.
      */
-    WMError ReleaseForegroundSessionScreenLock();
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
 
     /**
      * @brief Get displayId by windowId.
@@ -948,11 +958,11 @@ public:
     /**
      * @brief Shift window pointer event within the same application. Only main window and subwindow.
      *
-     * @param sourcePersistentId Window id which the pointer event shift from
-     * @param targetPersistentId Window id which the pointer event shift to
+     * @param sourceWindowId Window id which the pointer event shift from
+     * @param targetWindowId Window id which the pointer event shift to
      * @return WM_OK means shift window pointer event success, others means failed.
      */
-    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId);
+    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
 private:
     WindowManager();

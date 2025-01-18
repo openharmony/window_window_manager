@@ -850,27 +850,28 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
 
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
     ExtensionWindowEventInfo extensionInfo;
     extensionInfo.persistentId = 12345;
     extensionInfo.pid = 1234;
     extensionInfo.windowRect = { 1, 2, 3, 4 };
     sceneSession->AddModalUIExtension(extensionInfo);
-    EXPECT_TRUE(sceneSession->HasModalUIExtension());
 
     auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    EXPECT_EQ(getInfo.persistentId, extensionInfo.persistentId);
-    EXPECT_EQ(getInfo.pid, extensionInfo.pid);
-    EXPECT_EQ(getInfo.windowRect, extensionInfo.windowRect);
+    EXPECT_TRUE(getInfo);
+    EXPECT_EQ(getInfo.value().persistentId, extensionInfo.persistentId);
+    EXPECT_EQ(getInfo.value().pid, extensionInfo.pid);
+    EXPECT_EQ(getInfo.value().windowRect, extensionInfo.windowRect);
 
     Rect windowRect = { 5, 6, 7, 8 };
     extensionInfo.windowRect = windowRect;
     sceneSession->UpdateModalUIExtension(extensionInfo);
     getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    EXPECT_EQ(getInfo.windowRect, windowRect);
+    EXPECT_TRUE(getInfo);
+    EXPECT_EQ(getInfo.value().windowRect, windowRect);
 
     sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
-    EXPECT_FALSE(sceneSession->HasModalUIExtension());
+    EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
 /**
@@ -917,8 +918,7 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
-        uint64_t displayId) -> std::vector<sptr<SceneSession>> {
+    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> backgroundSession;
         return backgroundSession;
     };
@@ -928,9 +928,13 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     WSRect overlapRect = {0, 0, 0, 0};
     AvoidArea avoidArea;
-    int ret = 1;
     sceneSession->GetKeyboardAvoidArea(overlapRect, avoidArea);
-    ASSERT_EQ(ret, 1);
+    ASSERT_EQ(true, overlapRect.IsEmpty());
+    ASSERT_EQ(true, sceneSession->keyboardAvoidAreaActive_);
+    sceneSession->keyboardAvoidAreaActive_ = false;
+    sceneSession->GetKeyboardAvoidArea(overlapRect, avoidArea);
+    ASSERT_EQ(false, sceneSession->keyboardAvoidAreaActive_);
+    ASSERT_EQ(true, overlapRect.IsEmpty());
 }
 
 /**
@@ -1076,7 +1080,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     EXPECT_NE(specificCallback_, nullptr);
-        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
+        specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [](WindowType type,
             uint64_t displayId)-> std::vector<sptr<SceneSession>>
     {
         SessionInfo info_;
@@ -1161,6 +1165,24 @@ HWTEST_F(SceneSessionTest, TransferPointerEventDecorDialog, Function | SmallTest
     property->SetPersistentId(12);
     sceneSession->property_ = property;
     EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: ProcessWindowMoving
+ * @tc.desc: ProcessWindowMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, ProcessWindowMoving, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessWindowMoving";
+    info.bundleName_ = "ProcessWindowMovingBundle";
+    info.windowType_ = 1;
+    auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    sceneSession->ProcessWindowMoving(pointerEvent);
 }
 
 /**
@@ -1424,7 +1446,7 @@ HWTEST_F(SceneSessionTest, SyncSessionEvent, Function | SmallTest | Level2)
     auto result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 
-    property->isSystemCalling_ = false;
+    sceneSession->property_->isSystemCalling_ = false;
     result = sceneSession->SyncSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
@@ -1443,8 +1465,6 @@ HWTEST_F(SceneSessionTest, SetTopmost, Function | SmallTest | Level2)
     sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     EXPECT_NE(sceneSession, nullptr);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
-    sceneSession->SetSessionProperty(property);
     auto result = sceneSession->SetTopmost(false);
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_FALSE(sceneSession->IsTopmost());
@@ -1524,7 +1544,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1553,7 +1573,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect1, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1582,7 +1602,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRect2, Function | SmallTest | Level2)
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
 
@@ -1657,7 +1677,7 @@ HWTEST_F(SceneSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     ASSERT_EQ(height, 0);
     WSRect rect({0, 0, 0, 1});
     sceneSession->winRect_ = rect;
-    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
         uint64_t displayId)->std::vector<sptr<SceneSession>>
     {
         std::vector<sptr<SceneSession>> vec;
@@ -1694,7 +1714,7 @@ HWTEST_F(SceneSessionTest, GetDockHeight, Function | SmallTest | Level1)
     ASSERT_EQ(sceneSession->GetDockHeight(), 0);
     WSRect rect({0, 0, 0, 112});
     sceneSession->winRect_ = rect;
-    specificCallback_->onGetSceneSessionVectorByType_ = [&](WindowType type,
+    specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [&](WindowType type,
         uint64_t displayId)->std::vector<sptr<SceneSession>>
     {
         std::vector<sptr<SceneSession>> vec;
@@ -1831,7 +1851,7 @@ HWTEST_F(SceneSessionTest, GetScreenWidthAndHeightFromServer, Function | SmallTe
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->isActive_ = true;
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
@@ -1855,7 +1875,7 @@ HWTEST_F(SceneSessionTest, SetDefaultDisplayIdIfNeed, Function | SmallTest | Lev
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetDefaultDisplayIdIfNeed();
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetDisplayId(-1);
     sceneSession->SetSessionProperty(property);

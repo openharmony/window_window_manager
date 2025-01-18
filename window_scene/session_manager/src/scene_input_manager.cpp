@@ -178,10 +178,17 @@ void SceneInputManager::Init()
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     eventLoop_ = AppExecFwk::EventRunner::Create(FLUSH_DISPLAY_INFO_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    auto callback = [this]() {
-        FlushDisplayInfoToMMI();
-    };
-    sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
+}
+
+void SceneInputManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback)
+{
+    sceneSessionDirty_->RegisterFlushWindowInfoCallback(std::move(callback));
+}
+
+auto SceneInputManager::GetFullWindowInfoList() ->
+    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
+{
+    return sceneSessionDirty_->GetFullWindowInfoList();
 }
 
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
@@ -195,8 +202,13 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
     auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     for (auto& [screenId, screenProperty] : screensProperties) {
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
-        auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
-        auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_EVENT, "screenSession get failed, screenId: %{public}" PRIu64"", screenId);
+            continue;
+        }
+        auto screenCombination = screenSession->GetScreenCombination();
+        auto screenWidth = screenProperty.GetPhysicalTouchBounds().rect_.GetWidth();
+        auto screenHeight = screenProperty.GetPhysicalTouchBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
         Vector2f scale(screenProperty.GetScaleX(), screenProperty.GetScaleY());
         transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
@@ -215,7 +227,18 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            .ppi = screenProperty.GetXDpi()};
+            .ppi = screenProperty.GetXDpi(),
+            .offsetX = screenProperty.GetInputOffsetX(),
+            .offsetY = screenProperty.GetInputOffsetY(),
+            .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),
+            .screenRealWidth = screenProperty.GetScreenRealWidth(),
+            .screenRealHeight = screenProperty.GetScreenRealHeight(),
+            .screenRealPPI = screenProperty.GetScreenRealPPI(),
+            .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
+            .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
+            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
+            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY
+        };
         displayInfos.emplace_back(displayInfo);
     }
 }
@@ -358,8 +381,8 @@ void SceneInputManager::UpdateFocusedSessionId(int32_t focusedSessionId)
         TLOGE(WmsLogTag::WMS_EVENT, "focusedSceneSession is null");
         return;
     }
-    if (focusedSceneSession->HasModalUIExtension()) {
-        focusedSessionId_ =  focusedSceneSession->GetLastModalUIExtensionEventInfo().persistentId;
+    if (auto modalUIExtensionEventInfo = focusedSceneSession->GetLastModalUIExtensionEventInfo()) {
+        focusedSessionId_ = modalUIExtensionEventInfo.value().persistentId;
     }
 }
 
@@ -418,7 +441,9 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         }
     }
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
-    idListStream << focusedSessionId_;
+    SingleHandTransform transform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
+    idListStream << focusedSessionId_ << "|" << transform.posX << "|" << transform.posY
+        << "|" << transform.scaleX << "|" << transform.scaleY;
     std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;
@@ -438,7 +463,12 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.width << "|" << displayInfo.height << "|"
                           << static_cast<int32_t>(displayInfo.direction) << "|"
                           << static_cast<int32_t>(displayInfo.displayDirection) << "|"
-                          << static_cast<int32_t>(displayInfo.displayMode) << ",";
+                          << static_cast<int32_t>(displayInfo.displayMode) << "|"
+                          << displayInfo.offsetX << "|" << displayInfo.offsetY << "|"
+                          << displayInfo.isCurrentOffScreenRendering << "|"
+                          << displayInfo.screenRealWidth << "|" << displayInfo.screenRealHeight << "|"
+                          << displayInfo.screenRealPPI << "|" << displayInfo.screenRealDPI << "|"
+                          << static_cast<int32_t>(displayInfo.screenCombination) << ",";
     }
 
     std::string displayList = displayListStream.str();
@@ -499,22 +529,24 @@ void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::Displa
     }
 }
 
-void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
+void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& windowInfoList,
+                                              std::vector<std::shared_ptr<Media::PixelMap>>&& pixelMapList,
+                                              const bool forceFlush)
 {
-    auto task = [this, forceFlush]() {
+    eventHandler_->PostTask([this, windowInfoList = std::move(windowInfoList),
+                            pixelMapList = std::move(pixelMapList), forceFlush]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "FlushDisplayInfoToMMI");
         if (isUserBackground_.load()) {
-            TLOGD(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
+            TLOGND(WmsLogTag::WMS_MULTI_USER, "User in background, no need to flush display info");
             return;
         }
         if (sceneSessionDirty_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+            TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
             return;
         }
         sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
-        auto [windowInfoList, pixelMapList] = sceneSessionDirty_->GetFullWindowInfoList();
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
@@ -525,10 +557,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
             return;
         }
         UpdateDisplayAndWindowInfo(displayInfos, std::move(windowInfoList));
-    };
-    if (eventHandler_) {
-        eventHandler_->PostTask(task);
-    }
+    });
 }
 
 void SceneInputManager::UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap)

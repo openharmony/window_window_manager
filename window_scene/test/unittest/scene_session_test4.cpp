@@ -106,18 +106,35 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateTouchHotArea, Function | SmallTest
 }
 
 /**
- * @tc.name: HandleActionUpdateKeyboardTouchHotArea
+ * @tc.name: HandleActionUpdateKeyboardTouchHotArea01
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea01, Function | SmallTest | Level2)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
     WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
     ASSERT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: HandleActionUpdateKeyboardTouchHotArea02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, HandleActionUpdateKeyboardTouchHotArea02, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ASPECT_RATIO;
+    WMError ret = sceneSession->HandleActionUpdateKeyboardTouchHotArea(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_TYPE, ret);
 }
 
 /**
@@ -353,25 +370,6 @@ HWTEST_F(SceneSessionTest4, SetFloatingScale, Function | SmallTest | Level2)
     session->SetFloatingScale(2.176f);
     session->SetFloatingScale(3.14f);
     EXPECT_EQ(nullptr, session->specificCallback_);
-}
-
-/**
- * @tc.name: GetSessionSnapshotFilePath
- * @tc.desc: GetSessionSnapshotFilePath function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, GetSessionSnapshotFilePath, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetSessionSnapshotFilePath";
-    info.bundleName_ = "GetSessionSnapshotFilePath";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->Session::SetSessionState(SessionState::STATE_DISCONNECT);
-    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("GetSessionSnapshotFilePath", 1);
-    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
-
-    session->SetSessionState(SessionState::STATE_BACKGROUND);
-    EXPECT_EQ("GetSessionSnapshotFilePath_1.astc", session->GetSessionSnapshotFilePath());
 }
 
 /**
@@ -765,7 +763,7 @@ HWTEST_F(SceneSessionTest4, NotifyServerToUpdateRect01, Function | SmallTest | L
     info.screenId_ = 20;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     SessionUIParam uiParam;
-    SizeChangeReason reason = SizeChangeReason::UNDEFINED;;
+    SizeChangeReason reason = SizeChangeReason::UNDEFINED;
     sceneSession->SetForegroundInteractiveStatus(false);
     sceneSession->NotifyServerToUpdateRect(uiParam, reason);
     ASSERT_EQ(false, sceneSession->NotifyServerToUpdateRect(uiParam, reason));

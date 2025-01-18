@@ -44,7 +44,6 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_FOLD_STATUS = "-f";
 
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
-constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const std::string STATUS_FOLD_HALF = "-z";
 const std::string STATUS_EXPAND = "-y";
 const std::string STATUS_FOLD = "-p";
@@ -66,12 +65,16 @@ const std::string ARG_SET_SUPER_FOLD_STATUS = "-supertrans";
 const std::string ARG_SET_POSTURE_HALL = "-posture";
 const std::string ARG_SET_POSTURE_HALL_STATUS = "-registerhall"; // 关闭开合sensor报值
 const std::string ARG_SET_SECONDARY_FOLD_STATUS = "-secondary";
+const std::string ARG_CHANGE_OUTER_CMD = "outer";
+#ifdef FOLD_ABILITY_ENABLE
+constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
 constexpr size_t SECONDARY_FOLD_STATUS_INDEX_M = 0;
 constexpr size_t SECONDARY_FOLD_STATUS_INDEX_F = 1;
 constexpr size_t SECONDARY_FOLD_STATUS_INDEX_G = 2;
 constexpr size_t SECONDARY_FOLD_STATUS_COMMAND_NUM = 2;
 constexpr uint16_t HALL_EXT_DATA_FLAG = 26;
+#endif
 }
 
 static std::string GetProcessNameByPid(int32_t pid)
@@ -144,13 +147,6 @@ void ScreenSessionDumper::ExecuteDumpCmd()
         TLOGE(WmsLogTag::DMS, "params is null");
         return;
     }
-    if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
-        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
-            params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
-        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
-            params_[DUMPER_PARAM_INDEX_TWO]);
-        return;
-    }
     if (params_[0] == ARG_DUMP_HELP) {
         ShowHelpInfo();
     } else if (params_[0] == ARG_DUMP_ALL) {
@@ -174,11 +170,21 @@ void ScreenSessionDumper::ExecuteInjectCmd()
             return;
         }
     }
-
     bool isDebugMode = system::GetBoolParameter("dms.hidumper.supportdebug", false);
     if (!isDebugMode) {
         TLOGI(WmsLogTag::DMS, "Can't use DMS hidumper inject methods.");
         dumpInfo_.append("dms.hidumper.supportdebug false\n");
+        return;
+    }
+    if (params_[0] == ARG_CHANGE_OUTER_CMD && params_.size() == DUMPER_PARAM_INDEX_TWO) {
+        ScreenSessionManager::GetInstance().MultiScreenChangeOuter(params_[1]);
+        return;
+    }
+    if (params_.size() == DUMPER_PARAM_INDEX_THREE) {
+        TLOGI(WmsLogTag::DMS, "dump params[0] = %{public}s ,params[1] = %{public}s ,para,s[2] = %{public}s",
+            params_[0].c_str(), params_[DUMPER_PARAM_INDEX_ONE].c_str(), params_[DUMPER_PARAM_INDEX_TWO].c_str());
+        ScreenSessionManager::GetInstance().MultiScreenModeChange(params_[0], params_[DUMPER_PARAM_INDEX_ONE],
+            params_[DUMPER_PARAM_INDEX_TWO]);
         return;
     }
     if (params_[0] == STATUS_FOLD_HALF || params_[0] == STATUS_EXPAND || params_[0] == STATUS_FOLD) {
@@ -310,6 +316,30 @@ void ScreenSessionDumper::DumpFoldStatus()
         }
         case FoldStatus::HALF_FOLD: {
             status = "HALF_FOLD";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND: {
+            status = "FOLD_STATUS_EXPANDED_WITH_SECOND_EXPANDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED: {
+            status = "FOLD_STATUS_EXPANDED_WITH_SECOND_HALF_FOLDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND: {
+            status = "FOLD_STATUS_FOLDED_WITH_SECOND_EXPANDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED: {
+            status = "FOLD_STATUS_FOLDED_WITH_SECOND_HALF_FOLDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND: {
+            status = "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_EXPANDED";
+            break;
+        }
+        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED: {
+            status = "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_HALF_FOLDED";
             break;
         }
         default: {
@@ -725,11 +755,13 @@ int ScreenSessionDumper::SetFoldStatusLocked()
 
 void ScreenSessionDumper::SetEnterOrExitTentMode(std::string input)
 {
+#ifdef FOLD_ABILITY_ENABLE
     if (input == ARG_SET_ON_TENT_MODE) {
         ScreenSessionManager::GetInstance().OnTentModeChanged(true);
     } else if (input == ARG_SET_OFF_TENT_MODE) {
         ScreenSessionManager::GetInstance().OnTentModeChanged(false);
     }
+#endif
 }
 
 void ScreenSessionDumper::SetHoverStatusChange(std::string input)
@@ -763,6 +795,7 @@ void ScreenSessionDumper::SetHoverStatusChange(std::string input)
 
 void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
 {
+#ifdef FOLD_ABILITY_ENABLE
     std::string token;
     std::istringstream ss(input);
     std::vector<std::string> tokens;
@@ -797,10 +830,12 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
     FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
     FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
     TLOGI(WmsLogTag::DMS, "mock posture: %{public}d, hall: %{public}d ", postureVal, hallVal);
+#endif
 }
 
 void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
 {
+#ifdef FOLD_ABILITY_ENABLE
     size_t commaPos = input.find_last_of(',');
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_POSTURE_HALL_STATUS)) {
         std::string valueStr = input.substr(commaPos + 1, DUMPER_PARAM_INDEX_ONE);
@@ -829,10 +864,12 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
         }
         TLOGI(WmsLogTag::DMS, "hall and posture register status: %{public}d", value);
     }
+#endif
 }
 
 void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
 {
+#ifdef FOLD_ABILITY_ENABLE
     size_t commaPos = input.find_last_of(',');
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SUPER_FOLD_STATUS)) {
         std::string valueStr = input.substr(commaPos + 1, SUPER_FOLD_STATUS_MAX);
@@ -857,10 +894,16 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
         TLOGI(WmsLogTag::DMS, "state: %{public}d, event: %{public}d",
             SuperFoldStateManager::GetInstance().GetCurrentStatus(), value);
     }
+#endif
 }
 
 void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
 {
+#ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        TLOGD(WmsLogTag::DMS, "not secondary device");
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "secondary input: %{public}s", input.c_str());
     size_t commaPos = input.find(',');
     if (!((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_SECONDARY_FOLD_STATUS))) {
@@ -897,8 +940,9 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
         return;
     }
     ScreenSessionManager::GetInstance().SetFoldDisplayMode(displayMode);
+#endif
 }
-
+#ifdef FOLD_ABILITY_ENABLE
 bool ScreenSessionDumper::IsAllCharDigit(const std::string &firstPostureStr)
 {
     for (size_t i = 0; i < firstPostureStr.size(); i++) {
@@ -1030,5 +1074,6 @@ void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr
     TLOGI(WmsLogTag::DMS, "change fold status, %{public}s", foldStatusStr.c_str());
     ScreenSessionManager::GetInstance().TriggerFoldStatusChange(static_cast<FoldStatus>(foldStatus));
 }
+#endif
 } // Rosen
 } // OHOS

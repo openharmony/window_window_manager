@@ -239,7 +239,7 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
-            TLOGE(WmsLogTag::DMS, "Object is null!");
+            TLOGNE(WmsLogTag::DMS, "Object is null!");
             return;
         }
 
@@ -249,7 +249,7 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
         napi_value argv[] = { objValue };
         napi_value method = callback_->GetNapiValue();
         if (method == nullptr) {
-            TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
+            TLOGNE(WmsLogTag::DMS, "Failed to get method callback from object!");
             return;
         }
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
@@ -283,7 +283,7 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
-            TLOGE(WmsLogTag::DMS, "Object is null!");
+            TLOGNE(WmsLogTag::DMS, "Object is null!");
             return;
         }
 
@@ -293,7 +293,7 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
         napi_value argv[] = { objValue };
         napi_value method = callback_->GetNapiValue();
         if (method == nullptr) {
-            TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
+            TLOGNE(WmsLogTag::DMS, "Failed to get method callback from object!");
             return;
         }
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
@@ -321,7 +321,7 @@ bool JsScreenSessionManager::OnTakeOverShutdown(const PowerMgr::TakeOverInfo& in
         napi_value argv[] = {CreateJsValue(env, info.intfParam_)};
         napi_value method = callback_->GetNapiValue();
         if (method == nullptr) {
-            TLOGE(WmsLogTag::DMS, "Failed to get method callback from object!");
+            TLOGNE(WmsLogTag::DMS, "Failed to get method callback from object!");
             return;
         }
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);

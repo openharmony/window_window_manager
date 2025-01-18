@@ -953,6 +953,32 @@ void SessionStageProxy::NotifyTransformChange(const Transform& transform)
     }
 }
 
+void SessionStageProxy::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!singleHandTransform.Marshalling(data)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "singleHandTransform marshalling failed");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Send Requset failed");
+    }
+}
+
 WSError SessionStageProxy::NotifyDensityFollowHost(bool isFollowHost, float densityValue)
 {
     MessageParcel data;
@@ -1337,6 +1363,32 @@ WSError SessionStageProxy::SendExtensionData(MessageParcel& data, MessageParcel&
     return WSError::WS_OK;
 }
 
+WSError SessionStageProxy::SetDragActivated(bool dragActivated)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(dragActivated)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionStageProxy::SetSplitButtonVisible(bool isVisible)
 {
     MessageParcel data;
@@ -1437,6 +1489,36 @@ WSError SessionStageProxy::SetSupportEnterWaterfallMode(bool isSupportEnter)
         SessionStageInterfaceCode::TRANS_ID_SET_SUPPORT_ENTER_WATERFALL_MODE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::SendContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(eventName)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(eventValue)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write params failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_EVENT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;

@@ -517,8 +517,7 @@ HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
  */
 HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3)
 {
-    sptr<WindowOption> option = new (std::nothrow) WindowOption();
-    ASSERT_NE(nullptr, option);
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_EQ(false, option->IsSystemKeyboard());
     option->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, option->IsSystemKeyboard());

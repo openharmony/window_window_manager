@@ -1119,6 +1119,15 @@ WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     return ret;
 }
 
+WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
@@ -1437,11 +1446,11 @@ WMError WindowManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t win
     return ret;
 }
 
-WMError WindowManager::ReleaseForegroundSessionScreenLock()
+WMError WindowManager::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().UpdateScreenLockStatusForApp(bundleName, isRelease);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "release screen lock failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "update screen lock status failed");
     }
     return ret;
 }
@@ -1492,10 +1501,10 @@ WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragR
     return ret;
 }
 
-WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
+WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
-        sourcePersistentId, targetPersistentId);
+        sourceWindowId, targetWindowId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed");
     }

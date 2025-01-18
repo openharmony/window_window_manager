@@ -47,6 +47,11 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
+        const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override
+    {
+        return DMError::DM_OK;
+    }
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override
     {
         return DMError::DM_OK;
@@ -95,6 +100,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override { return false; }
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override { return false; }
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override { return ScreenPowerState::INVALID_STATE; }
+    virtual ScreenPowerState GetScreenPower() override { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) override { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) override {return DisplayState::UNKNOWN; }
     virtual bool TryToCancelScreenOff() override { return false; }
@@ -157,7 +163,8 @@ public:
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
 
-    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override { return DMError::DM_OK; };
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+        std::vector<DisplayId>& displayIds) override { return DMError::DM_OK; };
 
     virtual void SetClient(const sptr<IScreenSessionManagerClient>& client) {}
     virtual void SwitchUser() {}
@@ -166,7 +173,7 @@ public:
     virtual void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        ScreenPropertyChangeType screenPropertyChangeType) {}
+        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
     virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
     virtual int32_t SetScreenOnDelayTime(int32_t delay) { return 0; }

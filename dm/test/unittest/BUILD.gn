@@ -29,10 +29,14 @@ group("unittest") {
     ":dm_display_test",
     ":dm_oh_display_manager_test",
     ":dm_screen_group_test",
-    ":dm_screen_manager_test",
     ":dm_screen_test",
     ":dm_screenshot_test",
   ]
+  if (!window_manager_use_sceneboard) {
+    deps += [ ":dm_screen_manager_ut_test" ]
+  } else {
+    deps += [ ":dm_screen_manager_test" ]
+  }
 }
 
 ohos_unittest("dm_display_test") {
@@ -102,12 +106,30 @@ ohos_unittest("dm_screen_manager_test") {
   ]
 }
 
+ohos_unittest("dm_screen_manager_ut_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "../../src" ]
+
+  sources = [ "screen_manager_ut_test.cpp" ]
+
+  deps = [ ":dm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("dm_screen_test") {
   module_out_path = module_out_path
 
   sources = [ "screen_test.cpp" ]
 
-  deps = [ ":dm_unittest_common" ]
+  deps = [
+    ":dm_unittest_common",
+    "../../../window_scene/screen_session_manager:screen_session_manager",
+  ]
 
   external_deps = [
     "c_utils:utils",

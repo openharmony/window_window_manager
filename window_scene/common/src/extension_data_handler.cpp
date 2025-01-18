@@ -82,10 +82,16 @@ void DataHandler::UnregisterDataConsumer(SubSystemId subSystemId)
     TLOGI(WmsLogTag::WMS_UIEXT, "Unregister consumer for subSystemId: %{public}hhu", subSystemId);
 }
 
+bool DataHandler::IsProxyObject() const
+{
+    std::lock_guard lock(mutex_);
+    return remoteProxy_ && remoteProxy_->IsProxyObject();
+}
+
 DataHandlerErr DataHandler::PrepareSendData(MessageParcel& data, const DataTransferConfig& config,
                                             const AAFwk::Want& toSend)
 {
-    if (!WriteInterfaceToken(data)) {
+    if (IsProxyObject() && !WriteInterfaceToken(data)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write interface token failed, %{public}s", config.ToString().c_str());
         return DataHandlerErr::WRITE_PARCEL_ERROR;
     }
@@ -144,13 +150,14 @@ void DataHandler::NotifyDataConsumer(MessageParcel& recieved, MessageParcel& rep
     }
 
     std::optional<AAFwk::Want> replyWant;
-    if (config->needReply) {
+    bool needReply = (config->needSyncSend && config->needReply);
+    if (needReply) {
         replyWant = std::make_optional<AAFwk::Want>();
     }
 
     auto ret = NotifyDataConsumer(std::move(*sendWant), replyWant, *config);
     reply.WriteUint32(static_cast<uint32_t>(ret));
-    if (config->needReply) {
+    if (needReply && replyWant) {
         reply.WriteParcelable(&(replyWant.value()));
     }
 }
@@ -162,11 +169,6 @@ void DataHandler::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler
 
 void DataHandler::SetRemoteProxyObject(const sptr<IRemoteObject>& remoteObject)
 {
-    if (!remoteObject || !remoteObject->IsProxyObject()) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "failed, not proxy object");
-        return;
-    }
-
     std::lock_guard lock(mutex_);
     remoteProxy_ = remoteObject;
 }

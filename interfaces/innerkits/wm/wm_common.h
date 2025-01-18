@@ -27,6 +27,7 @@
 
 #include "../dm/dm_common.h"
 #include "securec.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -139,7 +140,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_PRIMARY = 100,
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
+    WINDOW_MODE_PIP,
+    END = WINDOW_MODE_PIP,
 };
 
 /**
@@ -699,6 +701,43 @@ private:
 };
 
 /**
+ * @struct SingleHandTransform
+ *
+ * @brief parameter of transform in single hand mode.
+ */
+struct SingleHandTransform {
+    int32_t posX = 0;
+    int32_t posY = 0;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+
+    bool operator==(const SingleHandTransform& right) const
+    {
+        return posX == right.posX && MathHelper::NearEqual(scaleX, right.scaleX) &&
+               posY == right.posY && MathHelper::NearEqual(scaleY, right.scaleY);
+    }
+
+    bool operator!=(const SingleHandTransform& right) const
+    {
+        return !(*this == right);
+    }
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(posX) && parcel.WriteInt32(posY) &&
+               parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY);
+    }
+
+    void Unmarshalling(Parcel& parcel)
+    {
+        posX = parcel.ReadInt32();
+        posY = parcel.ReadInt32();
+        scaleX = parcel.ReadFloat();
+        scaleY = parcel.ReadFloat();
+    }
+};
+
+/**
  * @struct SystemBarProperty
  *
  * @brief Property of system bar
@@ -783,7 +822,11 @@ struct Rect {
         oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
         return oss.str();
     }
+
+    static const Rect EMPTY_RECT;
 };
+
+inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
  * @struct RectAnimationConfig
@@ -1162,10 +1205,10 @@ struct WindowLimits {
  * @brief An area of title buttons relative to the upper right corner of the window.
  */
 struct TitleButtonRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const TitleButtonRect& a) const
     {
@@ -1177,6 +1220,14 @@ struct TitleButtonRect {
         return !this->operator==(a);
     }
 
+    void ResetRect()
+    {
+        posX_ = 0;
+        posY_ = 0;
+        width_ = 0;
+        height_ = 0;
+    }
+
     bool IsUninitializedRect() const
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
@@ -1186,6 +1237,34 @@ struct TitleButtonRect {
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+};
+
+/**
+ * @struct WindowLayoutInfo
+ *
+ * @brief Layout info for all windows on the screen.
+ */
+struct WindowLayoutInfo : public Parcelable {
+    Rect rect = { 0, 0, 0, 0 };
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+  
+    static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) ||
+            !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            delete windowLayoutInfo;
+            return nullptr;
+        }
+        return windowLayoutInfo;
     }
 };
 
@@ -1471,6 +1550,14 @@ struct KeyboardTouchHotAreas {
     {
         return (landscapePanelHotAreas_.empty() || portraitPanelHotAreas_.empty());
     }
+};
+
+enum class KeyboardViewMode: uint32_t {
+    NON_IMMERSIVE_MODE = 0,
+    IMMERSIVE_MODE,
+    LIGHT_IMMERSIVE_MODE,
+    DARK_IMMERSIVE_MODE,
+    VIEW_MODE_END,
 };
 }
 }

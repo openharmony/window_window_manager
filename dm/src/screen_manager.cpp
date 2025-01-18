@@ -466,6 +466,12 @@ DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, Scre
 
 DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
 {
+    std::vector<DisplayId> displayIds;
+    return MakeUniqueScreen(screenIds, displayIds);
+}
+
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds)
+{
     WLOGFD("start Make UniqueScreen");
     if (screenIds.empty()) {
         WLOGFE("screenIds is null");
@@ -475,7 +481,7 @@ DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
         WLOGFW("Make UniqueScreen failed. ScreenIds size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds);
     return ret;
 }
 
@@ -595,6 +601,12 @@ DMError ScreenManager::SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> 
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenSurface(screenId, surface);
 }
 
+DMError ScreenManager::SetScreenPrivacyMaskImage(ScreenId screenId,
+    const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
+}
+
 DMError ScreenManager::ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().ResizeVirtualScreen(screenId, width, height);
@@ -640,6 +652,11 @@ bool ScreenManager::SetScreenPowerForAll(ScreenPowerState state, PowerStateChang
 ScreenPowerState ScreenManager::GetScreenPower(ScreenId dmsScreenId)
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower(dmsScreenId);
+}
+
+ScreenPowerState ScreenManager::GetScreenPower()
+{
+    return SingletonContainer::Get<ScreenManagerAdapter>().GetScreenPower();
 }
 
 DMError ScreenManager::SetScreenRotationLocked(bool isLocked)
@@ -756,5 +773,14 @@ DMError ScreenManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refr
 {
     return SingletonContainer::Get<ScreenManagerAdapter>().SetVirtualScreenMaxRefreshRate(id,
         refreshRate, actualRefreshRate);
+}
+
+DMError ScreenManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
+{
+    if (screenIds.empty()) {
+        WLOGFI("screenIds is null");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
 }
 } // namespace OHOS::Rosen

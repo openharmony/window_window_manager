@@ -22,6 +22,7 @@
 #include "screen_group.h"
 #include "wm_single_instance.h"
 #include "wm_single_instance.h"
+#include <pixel_map.h>
 
 namespace OHOS::Rosen {
 class ScreenManager : public RefBase {
@@ -146,12 +147,21 @@ public:
         MultiScreenPositionOptions secondScreenOption);
 
     /**
-    * @brief Make screens as unique-screen.
-    *
-    * @param screenIds Unique screen ids.
-    * @return DM_OK means make unique screen success, others means make unique failed.
-    */
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
     DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    /**
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
+     * @param displayIds Unique display ids.
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds);
 
     /**
      * @brief Stop expand screens.
@@ -209,6 +219,15 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
+    
+    /**
+     * @brief Set privacy image.
+     *
+     * @param screenId Screen id.
+     * @param privacyMaskImg PixelMap object.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
 
     /**
      * @brief Resize virtual screen
@@ -264,6 +283,13 @@ public:
      * @return Power state of screen.
      */
     ScreenPowerState GetScreenPower(ScreenId screenId);
+
+    /**
+     * @brief Get screen power state.
+     *
+     * @return Power state of screen.
+     */
+    ScreenPowerState GetScreenPower();
 
     /**
      * @brief Set screen rotation lock status.
@@ -384,6 +410,16 @@ public:
      * @return True means set success, false means set failed.
      */
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
+
+    /**
+     * @brief Set screen sharing protect
+     *
+     * @param screenIds screen IDs for set the screen sharing protect.
+     * @param isEnable wether to enable the screen sharing protect.
+     * @return DM_OK means set success, others means failed.
+     */
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
+
 private:
     ScreenManager();
     ~ScreenManager();

@@ -46,6 +46,12 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+    if (property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST) &&
+        GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+        TLOGI(WmsLogTag::WMS_SUB, "UEC force hide, id: %{public}d forceHideState: %{public}d",
+            GetPersistentId(), GetForceHideState());
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
     PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -109,10 +115,10 @@ WSError SubSession::Hide(bool needSyncHide)
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SUB, "session is null");
+            TLOGNE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
+        TLOGNI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;

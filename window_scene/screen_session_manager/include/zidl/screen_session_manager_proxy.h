@@ -67,6 +67,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
+    virtual ScreenPowerState GetScreenPower() override;
     virtual bool SetDisplayState(DisplayState state) override;
     virtual DisplayState GetDisplayState(DisplayId displayId) override;
     virtual bool TryToCancelScreenOff() override;
@@ -76,6 +77,9 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
 
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
+    
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
+        const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
 
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
 
@@ -153,7 +157,7 @@ public:
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
 
     // unique screen
-    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds) override;
 
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
@@ -161,7 +165,7 @@ public:
     void UpdateScreenRotationProperty(ScreenId screenId, const RRectT<float>& bounds, float rotation,
         ScreenPropertyChangeType screenPropertyChangeType) override;
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
-        ScreenPropertyChangeType screenPropertyChangeType) override;
+        float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
     int32_t SetScreenOnDelayTime(int32_t delay) override;
@@ -196,6 +200,7 @@ public:
         DmErrorCode* errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;
