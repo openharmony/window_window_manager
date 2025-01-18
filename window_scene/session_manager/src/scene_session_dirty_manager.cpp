@@ -551,10 +551,10 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
         TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is null");
         return;
     }
-    bool dragEnabled = sessionProperty->GetDragEnabled();
-    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s dragEnabled: %{public}d", sceneSession->GetWindowName().c_str(),
-        dragEnabled);
-    if (dragEnabled) {
+    bool isDragAccessible = sceneSession->IsDragAccessible();
+    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s isDragAccessible: %{public}d", sceneSession->GetWindowName().c_str(),
+        isDragAccessible);
+    if (isDragAccessible) {
         float vpr = 1.5f; // 1.5: default vp
         auto displayId = sessionProperty->GetDisplayId();
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
@@ -587,7 +587,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
         }
     } else {
-        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is: %{public}d dragEnabled is false",
+        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is: %{public}d dragAccessible is false",
             sceneSession->GetPersistentId());
     }
 }
@@ -685,12 +685,12 @@ void SceneSessionDirtyManager::CheckIfUpdatePointAreas(WindowType windowType, co
 {
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
     bool isDecorEnabledDialog = WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    bool isDragEnabledSystemWindowButNotDialog = WindowHelper::IsSystemWindow(windowType) &&
-        !WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->GetDragEnabled();
+    bool isDragAccessibleSystemWindowButNotDialog = WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsDialogWindow(windowType) && sceneSession->IsDragAccessible();
     bool isDecorEnabledSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    bool isDragEnabledSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->GetDragEnabled();
+    bool isDragAccessibleSubWindow = WindowHelper::IsSubWindow(windowType) && sceneSession->IsDragAccessible();
     bool isUpdatePointerAreasNeeded = isMainWindow || isDecorEnabledDialog || isDecorEnabledSubWindow ||
-        isDragEnabledSubWindow || isDragEnabledSystemWindowButNotDialog;
+        isDragAccessibleSubWindow || isDragAccessibleSystemWindowButNotDialog;
     auto windowMode = windowSessionProperty->GetWindowMode();
     auto maximizeMode = windowSessionProperty->GetMaximizeMode();
     if ((windowMode == WindowMode::WINDOW_MODE_FLOATING && maximizeMode != MaximizeMode::MODE_AVOID_SYSTEM_BAR &&

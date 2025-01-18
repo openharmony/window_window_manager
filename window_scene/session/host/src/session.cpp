@@ -1477,6 +1477,19 @@ std::optional<bool> Session::GetClientDragEnable() const
     return clientDragEnable_;
 }
 
+void Session::SetDragActivated(bool dragActivated)
+{
+    dragActivated_ = dragActivated;
+}
+
+bool Session::IsDragAccessible() const
+{
+    bool isDragEnabled = GetSessionProperty()->GetDragEnabled();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "PersistentId: %{public}d, dragEnabled: %{public}d, dragActivate: %{public}d",
+        GetPersistentId(), isDragEnabled, dragActivated_);
+    return isDragEnabled && dragActivated_;
+}
+
 bool Session::IsScreenLockWindow() const
 {
     return isScreenLockWindow_;

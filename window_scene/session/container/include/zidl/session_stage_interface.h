@@ -213,6 +213,8 @@ public:
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
 
+    virtual WSError SetDragActivated(bool dragActivated) = 0;
+
     virtual WSError SetFullScreenWaterfallMode(bool isWaterfallMode) { return WSError::WS_DO_NOTHING; }
     virtual WSError SetSupportEnterWaterfallMode(bool isSupportEnter) { return WSError::WS_DO_NOTHING; }
     virtual WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) = 0;

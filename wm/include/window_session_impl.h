@@ -306,7 +306,9 @@ public:
      * Window Layout
      */
     WMError EnableDrag(bool enableDrag) override;
+    WSError SetDragActivated(bool dragActivated) override;
     WSError SetEnableDragBySystem(bool enableDrag) override;
+    bool IsWindowDraggable();
 
     /*
      * Free Multi Window
@@ -655,6 +657,7 @@ private:
     WSRect layoutRect_;
     std::atomic_bool windowSizeChanged_ = false;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
+    std::atomic_bool dragActivated_ = true;
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
