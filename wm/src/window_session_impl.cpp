@@ -1664,7 +1664,7 @@ WMError WindowSessionImpl::SetExclusivelyHighlighted(bool isExclusivelyHighlight
         property_->GetPersistentId(), isExclusivelyHighlighted);
     if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsDialogWindow(GetType()) ||
         WindowHelper::IsModalWindow(property_->GetWindowFlags())) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "window does not support set exclusivelyHighlighted, type: %{public}u, windowFlags: %{public}u ",
+        TLOGE(WmsLogTag::WMS_FOCUS, "unsupport window, type: %{public}u, windowFlags: %{public}u ",
             GetType(), property_->GetWindowFlags());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -2602,7 +2602,7 @@ EnableIfSame<T, IWindowHighlightChangeListener, sptr<IWindowHighlightChangeListe
 }
 
 WMError WindowSessionImpl::RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
-{   
+{
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -2617,7 +2617,8 @@ WMError WindowSessionImpl::RegisterWindowHighlightChangeListeners(const sptr<IWi
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+WMError WindowSessionImpl::UnregisterWindowHighlightChangeListeners(
+    const sptr<IWindowHighlightChangeListener>& listener)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;

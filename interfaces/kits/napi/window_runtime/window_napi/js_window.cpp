@@ -7503,7 +7503,8 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), exclusivelyHighlighted, env, task = napiAsyncTask, where = __func__] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), exclusivelyHighlighted, env,
+                      task = napiAsyncTask, where = __func__] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s window is nullptr", where);
@@ -7520,8 +7521,7 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
         TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s end, window [%{public}u, %{public}s]",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high
-    )) {
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }

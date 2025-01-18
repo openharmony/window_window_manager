@@ -447,7 +447,6 @@ private:
     bool focusableOnShow_ { true };
     bool touchable_ { true };
     bool isExclusivelyHighlighted_ { true };
-
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
