@@ -2383,7 +2383,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, Function |
     bool isEnable = true;
     int resultValue = 0;
     std::function<void()> func = [&]() {
-        screenSessionManagerProxy->SetScreenSkipProtectedWindow();
+        screenSessionManagerProxy->SetScreenSkipProtectedWindow(screenIds, isEnable);
         resultValue = 1;
     };
     func();
