@@ -800,7 +800,7 @@ private:
     void GetAllSessionsToReleaseScreenLock(
         std::vector<sptr<SceneSession>>& sessionsToReleaseScreenLock, const std::string& bundleName);
     bool FilterForListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-        DisplayId displayId, const sptr<SceneSession>& sceneSession);
+        DisplayId inputDisplayId, const sptr<SceneSession>& sceneSession);
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;

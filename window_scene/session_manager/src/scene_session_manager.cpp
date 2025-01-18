@@ -10503,21 +10503,36 @@ WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFil
 }
 
 bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    DisplayId displayId, const sptr<SceneSession>& sceneSession)
+    DisplayId inputDisplayId, const sptr<SceneSession>& sceneSession)
 {
+    DisplayId displayId = inputDisplayId;
+    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+        sceneSession->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
+        if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobleRect().posY_ >= GetFoldLowerScreenPosY()) {
+            return false;
+        }
+        if (displayId == VIRTUAL_DISPLAY_ID) {
+            if (sceneSession->GetSessionGlobleRect().posY_ +
+                sceneSession->GetSessionGlobleRect().height_ < GetFoldLowerScreenPosY()) {
+                return false;
+            }
+            displayId = DEFAULT_DISPLAY_ID;
+        }
+    }
     if (displayId != DISPLAY_ID_INVALID && sceneSession->GetSessionProperty()->GetDisplayId() != displayId) {
         return false;
     }
-    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::EXCLUDE_SYSTEM)) && sceneSession->GetSessionInfo().isSystem_) {
+    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::EXCLUDE_SYSTEM)) &&
+        sceneSession->GetSessionInfo().isSystem_) {
         return false;
     }
     if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::VISIBLE)) &&
-        sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        (sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
+        sceneSession->GetVisibilityState() == WINDOW_LAYER_STATE_MAX)) {
         return false;
     }
-    bool isForeground = sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
-                        sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
-    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::FOREGROUND)) && !isForeground) {
+    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::FOREGROUND)) &&
+        !IsSessionVisibleForeground(sceneSession)) {
         return false;
     }
     return true; // 用case吗
