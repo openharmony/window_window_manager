@@ -153,6 +153,13 @@ static napi_value SetScreenRotationLocked(napi_env env, napi_callback_info info)
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
     return (me != nullptr) ? me->OnSetScreenRotationLocked(env, info) : nullptr;
 }
+
+static napi_value MakeUnique(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnMakeUnique(env, info) : nullptr;
+}
+
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsScreenListener>>> jsCbMap_;
 std::mutex mtx_;
@@ -189,6 +196,21 @@ napi_value OnGetAllScreens(napi_env env, napi_callback_info info)
     };
     NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
     return result;
+}
+
+napi_value CreateJsDisplayIdVectorObject(napi_env env, std::vector<DisplayId>& displayIds)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, displayIds.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        WLOGFE("Failed to get screens");
+        return NapiGetUndefined(env);
+    }
+    size_t i = 0;
+    for (auto& displayId : displayIds) {
+        napi_set_element(env, arrayValue, i++, CreateJsValue(env, static_cast<uint32_t>(displayId)));
+    }
+    return arrayValue;
 }
 
 napi_value CreateJsScreenVectorObject(napi_env env, std::vector<sptr<Screen>>& screens)
@@ -744,6 +766,54 @@ napi_value OnStopExpand(napi_env env, napi_callback_info info)
         } else {
             task->Reject(env,
                 CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnStopExpand failed."));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
+napi_value OnMakeUnique(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnMakeUnique is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        WLOGFE("Invalid args count, need two arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
+    }
+    napi_value array = argv[0];
+    if (array == nullptr) {
+        WLOGFE("Failed to get options, options is nullptr");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get options, options is nullptr");
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, array, &size);
+    std::vector<ScreenId> screenIds;
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t screenId;
+        napi_value value = nullptr;
+        napi_get_element(env, array, i, &value);
+        if (!ConvertFromJsValue(env, value, screenId)) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
+        }
+        screenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, screenIds, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeUnique");
+        std::vector<DisplayId> displayIds;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().MakeUniqueScreen(screenIds, displayIds));
+        if (ret == DmErrorCode::DM_OK && !displayIds.empty()) {
+            task->Resolve(env, CreateJsDisplayIdVectorObject(env, displayIds));
+            WLOGI("makeUnique success");
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeUnique failed."));
         }
         delete task;
     };
@@ -1402,6 +1472,7 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
         JsScreenManager::SetScreenRotationLocked);
     BindNativeFunction(env, exportObj, "isScreenRotationLocked", moduleName,
         JsScreenManager::IsScreenRotationLocked);
+    BindNativeFunction(env, exportObj, "makeUnique", moduleName, JsScreenManager::MakeUnique);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

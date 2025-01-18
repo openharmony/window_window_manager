@@ -120,7 +120,7 @@ public:
     WSError Background(bool isFromClient = false, const std::string& identityToken = "") override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
-    void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) override;
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
     sptr<ExtensionSessionEventCallback> extSessionEventCallback_ = nullptr;
