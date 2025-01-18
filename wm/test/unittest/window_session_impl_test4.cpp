@@ -2476,7 +2476,7 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, Function | SmallTest | Lev
     window->property_->SetPersistentId(INVALID_SESSION_ID);
     ASSERT_EQ(window->IsWindowHighlighted(), false);
     window->property_->SetPersistentId(1);
-    window->isHighLighted_ = true;
+    window->isHighlighted_ = true;
     ASSERT_EQ(window->IsWindowHighlighted(), true);
 }
 
