@@ -460,7 +460,7 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId, DisplayId display
             return;
         }
         napi_value argv[] = { CreateJsValue(env, persistentId),
-                              CreateJsValue(env, static_cast<int64_t>(displayGroupId)) };
+                              CreateJsValue(env, static_cast<uint64_t>(displayGroupId)) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
