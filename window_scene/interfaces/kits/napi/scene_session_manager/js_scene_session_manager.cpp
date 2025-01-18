@@ -4142,4 +4142,3 @@ napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
- 
