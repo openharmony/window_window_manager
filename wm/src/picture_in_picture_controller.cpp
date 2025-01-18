@@ -884,7 +884,8 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
             if (handleId_ == -1) {
                 TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
                 return false;
-            }if (firstHandleId_ != -1) {
+            }
+            if (firstHandleId_ != -1) {
                 handleId_ = firstHandleId_;
                 navController->SetInPIPMode(handleId_);
                 TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
