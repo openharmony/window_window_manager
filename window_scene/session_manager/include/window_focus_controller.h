@@ -35,88 +35,46 @@ namespace Rosen {
  * @brief  Window focus group of a screen
  */
 struct FocusGroup : public RefBase {
-private:
-    int32_t focusedSessionId_ = INVALID_SESSION_ID;
-    int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
-    int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
-    bool needBlockNotifyFocusStatusUntilForeground { false };
-    bool needBlockNotifyUnfocusStatus { false };
-    DisplayId displayGroupId_ = DISPLAY_ID_INVALID;
-
 public:
-    explicit FocusGroup(DisplayId displayGroupId) : displayGroupId_(displayGroupId) {}
-    WSError UpdateFocusedSessionId(int32_t persistentId)
-    {
-        TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId_, persistentId);
-        if (focusedSessionId_ == persistentId) {
-            TLOGD(WmsLogTag::WMS_FOCUS, "Focus scene not change, id: %{public}d", focusedSessionId_);
-            return WSError::WS_DO_NOTHING;
-        }
-        lastFocusedSessionId_ = focusedSessionId_;
-        focusedSessionId_ = persistentId;
-        return WSError::WS_OK;
-    }
+    explicit FocusGroup(DisplayId displayGroupId) : displayGroupId(displayGroupId) {}
 
-    WSError UpdateFocusedAppSessionId(int32_t persistentId)
-    {
-        lastFocusedAppSessionId_ = persistentId;
-        return WSError::WS_OK;
-    }
-
-    int32_t GetFocusedSessionId()
-    {
-        return focusedSessionId_;
-    }
-
-    int32_t GetLastFocusedSessionId()
-    {
-        return lastFocusedSessionId_;
-    }
-
-    int32_t GetLastFocusedAppSessionId()
-    {
-        return lastFocusedAppSessionId_;
-    }
-
-    bool GetNeedBlockNotifyFocusStatusUntilForeground()
-    {
-        return needBlockNotifyFocusStatusUntilForeground;
-    }
-
-    bool GetNeedBlockNotifyUnfocusStatus()
-    {
-        return needBlockNotifyUnfocusStatus;
-    }
-
-    DisplayId GetDisplayGroupId()
-    {
-        return displayGroupId_;
-    }
-
-    void SetFocusedSessionId(int32_t focusedSessionId)
-    {
-        focusedSessionId_ = focusedSessionId;
-    }
-
-    void SetLastFocusedSessionId(int32_t lastFocusedSessionId)
-    {
-        lastFocusedSessionId_ = lastFocusedSessionId;
-    }
-
-    void SetLastFocusedAppSessionId(int32_t lastFocusedAppSessionId)
-    {
-        lastFocusedAppSessionId_ = lastFocusedAppSessionId;
-    }
-
-    void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlock)
-    {
+    int32_t GetFocusedSessionId() { return focusedSessionId; }
+    int32_t GetLastFocusedSessionId() { return lastFocusedSessionId; }
+    int32_t GetLastFocusedAppSessionId() { return lastFocusedAppSessionId; }
+    bool GetNeedBlockNotifyFocusStatusUntilForeground() { return needBlockNotifyFocusStatusUntilForeground; }
+    bool GetNeedBlockNotifyUnfocusStatus() { return needBlockNotifyUnfocusStatus; }
+    DisplayId GetDisplayGroupId() { return displayGroupId; }
+    void SetFocusedSessionId(int32_t persistentId) { focusedSessionId = persistentId; }
+    void SetLastFocusedSessionId(int32_t persistentId) { lastFocusedSessionId = persistentId; }
+    void SetLastFocusedAppSessionId(int32_t persistentId) { lastFocusedAppSessionId = persistentId; }
+    void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlock) {
         needBlockNotifyFocusStatusUntilForeground = needBlock;
     }
-
-    void SetNeedBlockNotifyUnfocusStatus(bool needBlock)
+    void SetNeedBlockNotifyUnfocusStatus(bool needBlock) { needBlockNotifyUnfocusStatus = needBlock; }
+    WSError UpdateFocusedSessionId(int32_t persistentId)
     {
-        needBlockNotifyUnfocusStatus = needBlock;
+        TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId, persistentId);
+        if (focusedSessionId == persistentId) {
+            TLOGD(WmsLogTag::WMS_FOCUS, "Focus scene not change, id: %{public}d", focusedSessionId);
+            return WSError::WS_DO_NOTHING;
+        }
+        lastFocusedSessionId = focusedSessionId;
+        focusedSessionId = persistentId;
+        return WSError::WS_OK;
     }
+    WSError UpdateFocusedAppSessionId(int32_t persistentId)
+    {
+        lastFocusedAppSessionId = persistentId;
+        return WSError::WS_OK;
+    }
+
+private:
+    int32_t focusedSessionId = INVALID_SESSION_ID;
+    int32_t lastFocusedSessionId = INVALID_SESSION_ID;
+    int32_t lastFocusedAppSessionId = INVALID_SESSION_ID;
+    bool needBlockNotifyFocusStatusUntilForeground { false };
+    bool needBlockNotifyUnfocusStatus { false };
+    DisplayId displayGroupId = DISPLAY_ID_INVALID;
 };
 
 class WindowFocusController {
@@ -129,15 +87,16 @@ public:
     WSError RemoveFocusGroup(DisplayId displayId);
     int32_t GetFocusedSessionId(DisplayId displayId);
     sptr<FocusGroup> GetFocusGroup(DisplayId displayId = DEFAULT_DISPLAY_ID);
-    sptr<FocusGroup> GetFocusGroupInner(DisplayId displayId);
     std::vector<std::pair<DisplayId, int32_t>> GetAllFocusedSessionList();
     WSError UpdateFocusedSessionId(DisplayId displayId, int32_t persistentId);
     WSError UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId);
 
 private:
-    std::shared_mutex focusGroupMutex_;
+    std::shared_mutex focusGroupMutex_; // Above guarded by focusGroupMutex_
     std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMap_;
     std::unordered_set<DisplayId> virtualScreenDisplayIdSet_;
+    
+    sptr<FocusGroup> GetFocusGroupInner(DisplayId displayId);
 };
 }
 }

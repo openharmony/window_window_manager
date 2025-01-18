@@ -67,6 +67,22 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
     return  WSError::WS_OK;
 }
 
+sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
+{
+    DisplayId displayGroupId = GetDisplayGroupId(displayId);
+    TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", displayGroupId: %{public}" PRIu64,
+          displayId, displayGroupId);
+    if (displayGroupId == DEFAULT_DISPLAY_ID) {
+        return focusGroupMap_[DEFAULT_DISPLAY_ID];
+    }
+    auto iter = focusGroupMap_.find(displayGroupId);
+    if (iter == focusGroupMap_.end()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Not found focus group with displayId: %{public}" PRIu64, displayId);
+        return nullptr;
+    }
+    return iter->second;
+}
+
 int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
@@ -93,22 +109,6 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
     std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     return focusGroup;
-}
-
-sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
-{
-    DisplayId displayGroupId = GetDisplayGroupId(displayId);
-    TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", displayGroupId: %{public}" PRIu64,
-          displayId, displayGroupId);
-    if (displayGroupId == DEFAULT_DISPLAY_ID) {
-        return focusGroupMap_[DEFAULT_DISPLAY_ID];
-    }
-    auto iter = focusGroupMap_.find(displayGroupId);
-    if (iter == focusGroupMap_.end()) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "Not found focus group with displayId: %{public}" PRIu64, displayId);
-        return nullptr;
-    }
-    return iter->second;
 }
 
 std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList()
