@@ -78,7 +78,7 @@ void WindowInspector::CloseConnectFromServer()
 
 bool WindowInspector::IsConnectServerSuccess() const
 {
-    return isConnectServerSuccess_; 
+    return isConnectServerSuccess_;
 }
 
 void WindowInspector::RegisterGetWMSWindowListCallback(
