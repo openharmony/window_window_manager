@@ -262,6 +262,7 @@ public:
     void SetPrivacyMode(bool isPrivacy);
     void SetSnapshotSkip(bool isSkip);
     void SetSystemSceneOcclusionAlpha(double alpha);
+    void ResetOcclusionAlpha();
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
     void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
@@ -730,6 +731,8 @@ private:
         WSPropertyChangeAction action);
     WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
+    WMError HandleActionUpdateBackgroundAlpha(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
     WMError ProcessUpdatePropertyByAction(const sptr<WindowSessionProperty>& property,
         const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property,
