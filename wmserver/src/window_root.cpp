@@ -600,7 +600,7 @@ void WindowRoot::DestroyLeakStartingWindow()
             destroyIds.push_back(iter.second->GetWindowId());
         }
     }
-    for (auto& id : destroyIds) {
+    for (auto id : destroyIds) {
         TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "Id:%{public}u", id);
         DestroyWindow(id, false);
     }

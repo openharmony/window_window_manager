@@ -84,14 +84,14 @@ void WindowController::StartingWindow(sptr<WindowTransitionInfo> info, std::shar
         }
     } else {
         if (node->stateMachine_.IsWindowNodeShownOrShowing()) {
-            TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "WindowId:%{public}u state:%{public}u!",
+            TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "WindowId: %{public}u state: %{public}u!",
                 node->GetWindowId(), static_cast<uint32_t>(node->stateMachine_.GetCurrentState()));
             return;
         }
         if (WindowHelper::IsValidWindowMode(info->GetWindowMode()) &&
             (node->GetWindowMode() != info->GetWindowMode())) {
             TLOGI(WmsLogTag::WMS_STARTUP_PAGE,
-                "set starting window mode. starting mode is: %{public}u, window mode is:%{public}u.",
+                "set starting window mode. starting mode is: %{public}u, window mode is: %{public}u.",
                 node->GetWindowMode(), info->GetWindowMode());
             node->SetWindowMode(info->GetWindowMode());
         }

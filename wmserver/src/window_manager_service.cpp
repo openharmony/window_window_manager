@@ -258,36 +258,36 @@ int32_t WindowManagerServiceHandler::GetFocusWindow(sptr<IRemoteObject>& ability
 void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap)
 {
-    sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
     TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "hot start is called");
+    sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, false);
 }
 
 void WindowManagerServiceHandler::StartingWindow(
     sptr<AAFwk::AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor)
 {
-    sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
     TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "cold start is called");
+    sptr<WindowTransitionInfo> windowInfo = new WindowTransitionInfo(info);
     WindowManagerService::GetInstance().StartingWindow(windowInfo, pixelMap, true, bgColor);
 }
 
 void WindowManagerServiceHandler::CancelStartingWindow(sptr<IRemoteObject> abilityToken)
 {
-    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "WindowManagerServiceHandler CancelStartingWindow!");
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "called");
     WindowManagerService::GetInstance().CancelStartingWindow(abilityToken);
 }
 
 int32_t WindowManagerServiceHandler::MoveMissionsToForeground(const std::vector<int32_t>& missionIds,
     int32_t topMissionId)
 {
-    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "WindowManagerServiceHandler MoveMissionsToForeground!");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "called");
     return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToForeground(missionIds, topMissionId));
 }
 
 int32_t WindowManagerServiceHandler::MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
     std::vector<int32_t>& result)
 {
-    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "WindowManagerServiceHandler MoveMissionsToBackground!");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "called");
     return static_cast<int32_t>(WindowManagerService::GetInstance().MoveMissionsToBackground(missionIds, result));
 }
 
