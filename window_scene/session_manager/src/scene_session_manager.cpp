@@ -6819,10 +6819,10 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(sptr<Sc
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
     if (std::find_if(topmostVec.begin(), topmostVec.end(),
-        [this, focusedSessionId](sptr<SceneSession>& iter) { return iter && iter->GetPersistentId() == focusedSessionId; })
-        != topmostVec.end()) {
-            TLOGND(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId);
-            return WSError::WS_OK;
+        [this, focusedSessionId](sptr<SceneSession>& iter) { return iter &&
+        iter->GetPersistentId() == focusedSessionId; }) != topmostVec.end()) {
+        TLOGND(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId);
+        return WSError::WS_OK;
     }
     WSError ret = WSError::WS_DO_NOTHING;
     for (auto topmostSession : topmostVec) {
@@ -6854,10 +6854,10 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(sptr<SceneSes
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
     if (std::find_if(dialogVec.begin(), dialogVec.end(),
-        [this, focusedSessionId](sptr<Session>& iter) { return iter && iter->GetPersistentId() == focusedSessionId; })
-        != dialogVec.end()) {
-            TLOGND(WmsLogTag::WMS_DIALOG, "dialog id: %{public}d has been focused!", focusedSessionId);
-            return WSError::WS_OK;
+        [this, focusedSessionId](sptr<Session>& iter) { return iter &&
+        iter->GetPersistentId() == focusedSessionId; }) != dialogVec.end()) {
+        TLOGND(WmsLogTag::WMS_DIALOG, "dialog id: %{public}d has been focused!", focusedSessionId);
+        return WSError::WS_OK;
     }
     WSError ret = WSError::WS_DO_NOTHING;
     for (auto dialog : dialogVec) {
