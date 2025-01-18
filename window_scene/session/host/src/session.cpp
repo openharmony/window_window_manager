@@ -1043,17 +1043,6 @@ SingleHandTransform Session::GetSingleHandTransform() const
     return singleHandTransform_;
 }
 
-void Session::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
-{
-    if (!IsSessionForeground() && !IsVisible()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground and not visible!", GetPersistentId());
-        return;
-    }
-    if (sessionStage_ != nullptr) {
-        sessionStage_->NotifySingleHandTransformChange(singleHandTransform);
-    }
-}
-
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {

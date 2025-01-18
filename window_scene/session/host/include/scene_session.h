@@ -207,6 +207,7 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;

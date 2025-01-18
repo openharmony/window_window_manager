@@ -203,33 +203,6 @@ HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level
     session->SetSingleHandTransform(transform);
     ASSERT_EQ(transform, session->GetSingleHandTransform());
 }
-
-/**
- * @tc.name: NotifySingleHandTransformChange
- * @tc.desc: NotifySingleHandTransformChange
- * @tc.type: FUNC
- */
-HWTEST_F(SessionLayoutTest, NotifySingleHandTransformChange, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifySingleHandTransformChange";
-    info.bundleName_ = "NotifySingleHandTransformChange";
-    sptr<Session> session = sptr<Session>::MakeSptr(info);
-
-    SingleHandTransform testTransform;
-    session->state_ = SessionState::STATE_BACKGROUND;
-    session->NotifySingleHandTransformChange(testTransform);
-
-    session->state_ = SessionState::STATE_FOREGROUND;
-    mockSessionStage_ = nullptr;
-    session->sessionStage_ = mockSessionStage_;
-    session->NotifySingleHandTransformChange(testTransform);
-
-    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
-    session->sessionStage_ = mockSessionStage_;
-    session->NotifySingleHandTransformChange(testTransform);
-    ASSERT_NE(100, testTransform.posX);
-}
 }
 } // namespace Rosen
 } // namespace OHOS
