@@ -131,7 +131,7 @@ public:
     /*
      * Window Property
      */
-    WSError OnSetWindowCornerRadius(float cornerRadius) override;
+    WSError SetWindowCornerRadius(float cornerRadius) override;
 
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;

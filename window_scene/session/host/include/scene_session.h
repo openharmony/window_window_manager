@@ -618,7 +618,7 @@ public:
      * Window Property
     */
     void SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func);
-    WSError OnSetWindowCornerRadius(float cornerRadius) override;
+    WSError SetWindowCornerRadius(float cornerRadius) override;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);

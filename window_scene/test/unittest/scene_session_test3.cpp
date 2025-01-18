@@ -705,20 +705,20 @@ HWTEST_F(SceneSessionTest3, SetWindowCornerRadiusCallback, Function | SmallTest 
  * @tc.desc: OnSetWindowCornerRadius
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest3, OnSetWindowCornerRadius, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest3, SetWindowCornerRadius, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "OnSetWindowCornerRadius";
-    info.bundleName_ = "OnSetWindowCornerRadius";
+    info.abilityName_ = "SetWindowCornerRadius";
+    info.bundleName_ = "SetWindowCornerRadius";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowCornerRadius(1.0f));
+    EXPECT_EQ(WSError::WS_OK, session->SetWindowCornerRadius(1.0f));
 
     NotifySetWindowCornerRadiusFunc func = [](float cornerRadius) {
         return;
     };
     session->onSetWindowCornerRadiusFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(1.0f));
+    EXPECT_EQ(WSError::WS_OK, session->SetWindowCornerRadius(1.0f));
 }
 }
 }

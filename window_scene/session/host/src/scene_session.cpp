@@ -6324,12 +6324,19 @@ void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc
             return;
         }
         session->onSetWindowCornerRadiusFunc_ = std::move(func);
+        auto property = session->GetSessionProperty();
+        if (property == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s property is null", where);
+            return;
+        }
+        float cornerRadius = property->GetWindowCornerRadius();
+        session->onSetWindowCornerRadiusFunc_(cornerRadius);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id: %{public}d", where,
             session->GetPersistentId());
     }, __func__);
 }
 
-WSError SceneSession::OnSetWindowCornerRadius(float cornerRadius)
+WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
 {
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), cornerRadius, where] {
@@ -6342,6 +6349,12 @@ WSError SceneSession::OnSetWindowCornerRadius(float cornerRadius)
             TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id %{public}d radius: %{public}f",
                 where, session->GetPersistentId(), cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
+            auto property = session->GetSessionProperty();
+            if (property == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s property is null", where);
+                return;
+            }
+            property->SetWindowCornerRadius(cornerRadius);
         }
     }, __func__);
     return WSError::WS_OK;

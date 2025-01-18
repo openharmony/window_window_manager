@@ -2341,7 +2341,7 @@ WSError SessionProxy::SetSessionLabelAndIcon(const std::string& label, const std
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::OnSetWindowCornerRadius(float cornerRadius)
+WSError SessionProxy::SetWindowCornerRadius(float cornerRadius)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);
     MessageParcel data;
