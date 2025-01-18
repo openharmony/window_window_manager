@@ -6325,12 +6325,7 @@ void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc
         }
         session->onSetWindowCornerRadiusFunc_ = std::move(func);
         auto property = session->GetSessionProperty();
-        if (property == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s property is null", where);
-            return;
-        }
-        float cornerRadius = property->GetWindowCornerRadius();
-        session->onSetWindowCornerRadiusFunc_(cornerRadius);
+        session->onSetWindowCornerRadiusFunc_(property->GetWindowCornerRadius());
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id: %{public}d", where,
             session->GetPersistentId());
     }, __func__);
@@ -6350,10 +6345,6 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
                 where, session->GetPersistentId(), cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
             auto property = session->GetSessionProperty();
-            if (property == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s property is null", where);
-                return;
-            }
             property->SetWindowCornerRadius(cornerRadius);
         }
     }, __func__);
