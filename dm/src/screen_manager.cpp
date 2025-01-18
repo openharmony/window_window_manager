@@ -466,6 +466,12 @@ DMError ScreenManager::MakeExpand(const std::vector<ExpandOption>& options, Scre
 
 DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
 {
+    std::vector<DisplayId> displayIds;
+    return MakeUniqueScreen(screenIds, displayIds);
+}
+
+DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds)
+{
     WLOGFD("start Make UniqueScreen");
     if (screenIds.empty()) {
         WLOGFE("screenIds is null");
@@ -475,7 +481,7 @@ DMError ScreenManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
         WLOGFW("Make UniqueScreen failed. ScreenIds size bigger than %{public}u.", MAX_SCREEN_SIZE);
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds);
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeUniqueScreen(screenIds, displayIds);
     return ret;
 }
 
