@@ -39,6 +39,9 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    sptr<SessionStageMocker> mockSessionStage_ = nullptr;
 };
 
 void SceneSessionLayoutTest::SetUpTestCase()
@@ -51,6 +54,7 @@ void SceneSessionLayoutTest::TearDownTestCase()
 
 void SceneSessionLayoutTest::SetUp()
 {
+    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
 }
 
 void SceneSessionLayoutTest::TearDown()
