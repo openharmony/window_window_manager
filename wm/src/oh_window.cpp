@@ -188,5 +188,168 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
     }, __func__);
     return errCode;
 }
+
+WindowManager_ErrorCode OH_Window_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d", windowId);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "pixelMap is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVALID_PARAM;        
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+    eventHandler->PostSyncTask([windowId, pixelMap, &errCode, where = __func__]() mutable {
+        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        pixelMap = new OH_PixelmapNative(window->Snapshot());
+    }, __func__);
+    return pixelMap != nullptr ? WindowManager_ErrorCode::OK : errCode;
+}
+
+WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, const char* color)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d", windowId);
+    if (color == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "color is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVALID_PARAM;        
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+    eventHandler->PostSyncTask([windowId, color, &errCode, where = __func__] {
+        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        errCode = window->SetBackgroundColor(std::string(color));
+    }, __func__);
+    return errCode;
+}
+
+WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float brightness)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d, brightness:%{public}f", windowId, brightness);
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+    eventHandler->PostSyncTask([windowId, brightness, &errCode, where = __func__] {
+        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        errCode = window->SetBrightness(brightness);
+    }, __func__);
+    return errCode;
+}
+
+WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScreenOn)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d, isKeepScreenOn:%{public}d", windowId, isKeepScreenOn);
+    auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+    eventHandler->PostSyncTask([window, isKeepScreenOn, &errCode, where = __func__] {
+        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        errCode = window->SetKeepScreenOn(isKeepScreenOn);
+    }, __func__);
+    return errCode;
+}
+
+WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d, isPrivacy:%{public}d", windowId, isPrivacy);
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+    eventHandler->PostSyncTask([window, isPrivacy, &errCode] {
+        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        errCode = window->SetPrivacyMode(isPrivacy);
+    }, __func__);
+    return errCode;
+}
+
+WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId, WindowManager_WindowProperties* windowProperties)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d", windowId);
+    if (windowProperties == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowProperties is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVALID_PARAM;        
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    eventHandler->PostSyncTask([window, windowId, windowProperties, &errCode, where = __func__] {
+        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        windowProperties->windowRect = TransformedToWindowManagerRect(window->GetRect());
+        windowProperties->type = static_cast<WindowManager_WindowType>(window->GetType());
+        windowProperties->isLayoutFullScreen = window->IsLayoutFullScreen();
+        windowProperties->isFullScreen = window->IsFullScreen();
+        windowProperties->touchable = window->GetTouchable();
+        windowProperties->focusable = window->GetFocusable();
+        windowProperties->isPrivacyMode = window->IsPrivacyMode();
+        windowProperties->isKeepScreenOn = window->IsKeepScreenOn();
+        windowProperties->brightness = window->GetBrightness();
+        windowProperties->isTransparent = window->IsTransparent();
+        windowProperties->id = window->GetWindowId();
+        windowProperties->displayId = window->GetDisplayId();
+        Rect drawableRect;
+        auto uicontent = window->GetUIContent();
+        if (uicontent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s uicontent is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+            return;
+        }
+        uicontent->GetAppPaintSize(drawableRect);
+        windowProperties->drawableRect = TransformedToWindowManagerRect(drawableRect);
+    }, __func__); 
+    return errCode;
+}
 }  // namespace Rosen
 }  // namespace OHOS
