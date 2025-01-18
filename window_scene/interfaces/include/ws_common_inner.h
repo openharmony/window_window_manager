@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Rosen {
-enum class WSPropertyChangeAction : uint32_t {
+enum class WSPropertyChangeAction : uint64_t {
     ACTION_UPDATE_RECT = 1,
     ACTION_UPDATE_MODE = 1 << 1,
     ACTION_UPDATE_FLAGS = 1 << 2,
