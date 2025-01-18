@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../include/window_focus_controller.h"
+#include "session_manager/include/window_focus_controller.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -43,7 +43,6 @@ WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayId);
     focusGroupMap_.insert(std::make_pair(displayId, focusGroup));
     if (displayId != DEFAULT_DISPLAY_ID) {
@@ -59,7 +58,6 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     focusGroupMap_.erase(displayId);
     if (displayId != DEFAULT_DISPLAY_ID) {
         virtualScreenDisplayIdSet_.erase(displayId);
@@ -90,7 +88,6 @@ int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
         return INVALID_SESSION_ID;
     }
-    std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}" PRIu64, displayId);
@@ -106,7 +103,6 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
         return nullptr;
     }
-    std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     return focusGroup;
 }
@@ -114,11 +110,7 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
 std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList()
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "in");
-    std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMapCopy;
-    {
-        std::shared_lock<std::shared_mutex> lock(focusGroupMutex_);
-        focusGroupMapCopy = focusGroupMap_;
-    }
+    std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMapCopy = focusGroupMap_;
     std::vector<std::pair<DisplayId, int32_t>> allFocusGroup;
     for (const auto& elem : focusGroupMapCopy) {
         auto curFocusGroup = elem.second;
@@ -138,7 +130,6 @@ WSError WindowFocusController::UpdateFocusedSessionId(DisplayId displayId, int32
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    std::unique_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}" PRIu64, displayId);
@@ -154,7 +145,6 @@ WSError WindowFocusController::UpdateFocusedAppSessionId(DisplayId displayId, in
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    std::unique_lock<std::shared_mutex> lock(focusGroupMutex_);
     auto focusGroup = GetFocusGroupInner(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null, displayId: %{public}" PRIu64, displayId);
