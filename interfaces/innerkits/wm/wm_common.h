@@ -1241,13 +1241,92 @@ struct TitleButtonRect {
 };
 
 /**
+ * @brief WindowInfo filter Option
+ */
+enum class WindowInfoFilterOption : uint8_t {
+    ALL = 0,
+    EXCLUDE_SYSTEM = 1, // 确定是否反义
+    VISIBLE = 1 << 1,
+    FOREGROUND = 1 << 2,
+    END,
+};
+
+/**
+ * @brief WindowInfo Type Option
+ */
+enum class WindowInfoTypeOption : uint8_t {
+    ALL = 0,
+    WINDOW_UI_INFO = 1,
+    WINDOW_DISPLAY_INFO = 1 << 1,
+    WINDOW_LAYOUT_INFO = 1 << 2,
+    WINDOW_META_INFO = 1 << 3,
+    END,
+};
+
+/**
+ * @enum WindowVisibilityState
+ *
+ * @brief Visibility state of a window
+ */
+enum WindowVisibilityState : uint32_t {
+    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = 0,
+    WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
+    WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
+    WINDOW_LAYER_STATE_MAX
+};
+
+/**
+ * @struct WindowUIInfo
+ *
+ * @brief Window UI info
+ */
+struct WindowUIInfo : public Parcelable {
+    bool Marshalling(Parcel& parcel) const override
+        { return parcel.WriteUint32(static_cast<uint32_t>(visibilityState)); }
+
+    static WindowUIInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowUIInfo* windowUIInfo = new WindowUIInfo;
+        uint32_t visibilityState = 0;
+        if (!parcel.ReadUint32(visibilityState)) {
+            delete windowUIInfo;
+            return nullptr;
+        }
+        windowUIInfo->visibilityState = static_cast<WindowVisibilityState>(visibilityState);
+        return windowUIInfo;
+    }
+
+    WindowVisibilityState visibilityState = WINDOW_LAYER_STATE_MAX;
+};
+
+/**
+ * @struct WindowDisplayInfo
+ *
+ * @brief Window display info
+ */
+struct WindowDisplayInfo : public Parcelable {
+    bool Marshalling(Parcel& parcel) const override
+        { return parcel.WriteUint64(displayId); }
+
+    static WindowDisplayInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowDisplayInfo* windowDisplayInfo = new WindowDisplayInfo;
+        if (!parcel.ReadUint64(windowDisplayInfo->displayId)) {
+            delete windowDisplayInfo;
+            return nullptr;
+        }
+        return windowDisplayInfo;
+    }
+
+    DisplayId displayId = DISPLAY_ID_INVALID;
+};
+
+/**
  * @struct WindowLayoutInfo
  *
  * @brief Layout info for all windows on the screen.
  */
 struct WindowLayoutInfo : public Parcelable {
-    Rect rect = { 0, 0, 0, 0 };
-
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
@@ -1266,6 +1345,82 @@ struct WindowLayoutInfo : public Parcelable {
         }
         return windowLayoutInfo;
     }
+    
+    Rect rect = Rect::EMPTY_RECT;
+};
+
+/**
+ * @struct WindowMetaInfo
+ *
+ * @brief Window meta info
+ */
+struct WindowMetaInfo : public Parcelable {
+    bool Marshalling(Parcel& parcel) const override
+        { return parcel.WriteInt32(windowId) &&
+                 parcel.WriteString(windowName) &&
+                 parcel.WriteString(bundleName) &&
+                 parcel.WriteString(abilityName); }
+    static WindowMetaInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowMetaInfo* windowMetaInfo = new WindowMetaInfo;
+        if (!parcel.ReadInt32(windowMetaInfo->windowId) ||
+            !parcel.ReadString(windowMetaInfo->windowName) ||
+            !parcel.ReadString(windowMetaInfo->bundleName) ||
+            !parcel.ReadString(windowMetaInfo->abilityName)) {
+            delete windowMetaInfo;
+            return nullptr;
+        }
+        return windowMetaInfo;
+    }
+    int32_t windowId = 0;
+    std::string windowName = "";
+    std::string bundleName = "";
+    std::string abilityName = "";
+};
+
+/**
+ * @struct WindowInfo
+ *
+ * @brief Classified window info
+ */
+struct WindowInfo : public Parcelable {
+    bool Marshalling(Parcel& parcel) const override
+        { return parcel.WriteUint32(static_cast<uint32_t>(windowUIInfo.visibilityState)) &&
+                 parcel.WriteUint64(windowDisplayInfo.displayId) &&
+                 parcel.WriteInt32(windowLayoutInfo.rect.posX_) &&
+                 parcel.WriteInt32(windowLayoutInfo.rect.posY_) &&
+                 parcel.WriteUint32(windowLayoutInfo.rect.width_) &&
+                 parcel.WriteUint32(windowLayoutInfo.rect.height_) &&
+                 parcel.WriteInt32(windowMetaInfo.windowId) &&
+                 parcel.WriteString(windowMetaInfo.windowName) &&
+                 parcel.WriteString(windowMetaInfo.bundleName) &&
+                 parcel.WriteString(windowMetaInfo.abilityName); }
+
+    static WindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowInfo* windowInfo = new WindowInfo;
+        uint32_t visibilityState = 0;
+        if (!parcel.ReadUint32(visibilityState) ||
+            !parcel.ReadUint64(windowInfo->windowDisplayInfo.displayId) ||
+            !parcel.ReadInt32(windowInfo->windowLayoutInfo.rect.posX_) ||
+            !parcel.ReadInt32(windowInfo->windowLayoutInfo.rect.posY_) ||
+            !parcel.ReadUint32(windowInfo->windowLayoutInfo.rect.width_) ||
+            !parcel.ReadUint32(windowInfo->windowLayoutInfo.rect.height_) ||
+            !parcel.ReadInt32(windowInfo->windowMetaInfo.windowId) ||
+            !parcel.ReadString(windowInfo->windowMetaInfo.windowName) ||
+            !parcel.ReadString(windowInfo->windowMetaInfo.bundleName) ||
+            !parcel.ReadString(windowInfo->windowMetaInfo.abilityName)) {
+            delete windowInfo;
+            return nullptr;
+        }
+        windowInfo->windowUIInfo.visibilityState = static_cast<WindowVisibilityState>(visibilityState);
+        return windowInfo;
+    }
+
+    WindowUIInfo windowUIInfo;
+    WindowDisplayInfo windowDisplayInfo;
+    WindowLayoutInfo windowLayoutInfo;
+    WindowMetaInfo windowMetaInfo;
 };
 
 /**
@@ -1490,8 +1645,10 @@ struct KeyboardLayoutParams : public Parcelable {
 
     static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
     {
-        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
-               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+        return parcel.WriteInt32(rect.posX_) &&
+               parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) &&
+               parcel.WriteUint32(rect.height_);
     }
 
     static inline bool ReadParcel(Parcel& parcel, Rect& rect)

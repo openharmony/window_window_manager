@@ -185,6 +185,16 @@ WMError WindowAdapter::GetUnreliableWindowInfo(int32_t windowId,
     return wmsProxy->GetUnreliableWindowInfo(windowId, infos);
 }
 
+WMError WindowAdapter::ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
+    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->ListWindowInfo(windowInfoFilterOption,
+        windowInfoTypeOption, static_cast<uint64_t>(displayId), infos);
+}
+
 WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

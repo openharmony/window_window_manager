@@ -142,6 +142,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleUpdateSessionWindowVisibilityListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_FOCUS):
             return HandleShiftAppWindowFocus(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_LIST_WINDOW_INFO):
+            return HandleListWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO):
             return HandleGetAllWindowLayoutInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID):
@@ -1136,6 +1138,46 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
     }
     WSError ret = ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleListWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    uint8_t windowInfoFilterOptionValue = static_cast<uint8_t>(WindowInfoFilterOption::ALL);
+    if (!data.ReadUint8(windowInfoFilterOptionValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    if (windowInfoFilterOptionValue > static_cast<uint8_t>(WindowInfoFilterOption::END)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "bad windowInfoFilterOption value");
+        return ERR_INVALID_DATA;
+    }
+    WindowInfoFilterOption windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue);
+    uint8_t windowInfoTypeOptionValue = static_cast<uint8_t>(WindowInfoTypeOption::ALL);
+    if (!data.ReadUint8(windowInfoTypeOptionValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    if (windowInfoTypeOptionValue > static_cast<uint8_t>(WindowInfoTypeOption::END)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "bad windowInfoTypeOption value");
+        return ERR_INVALID_DATA;
+    }
+    WindowInfoTypeOption windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOptionValue);
+    uint64_t displayId = DISPLAY_ID_INVALID;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<sptr<WindowInfo>> infos;
+    WMError errCode = ListWindowInfo(windowInfoFilterOption, windowInfoTypeOption, displayId, infos);
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowInfo>(reply, infos)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write window info");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

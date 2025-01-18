@@ -731,9 +731,22 @@ public:
         std::vector<sptr<UnreliableWindowInfo>>& infos) const;
 
     /**
+     * @brief List window info.
+     *
+     * @param windowInfoFilterOption Filter with layout relation between windows.
+     * @param windowInfoTypeOption Type of Which kind of window info to get.
+     * @param displayId DisplayId of which display to get window infos.
+     * @param infos Window info
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption, WindowInfoTypeOption windowInfoTypeOption,
+                           DisplayId displayId, std::vector<sptr<WindowInfo>>& infos) const;
+
+    /**
      * @brief Get window layout info.
      *
-     * @param infos window layout infos
+     * @param infos Window layout infos.
+     * @param displayId DisplayId of which display to get window layout infos.
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
