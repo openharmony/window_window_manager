@@ -63,6 +63,10 @@ public:
     static void RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingHalfScreenObserver();
     static bool GetHalfScreenSwitchState(const std::string& key = SETTING_HALF_SCREEN_SWITCH_KEY);
+    static void RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingscreenSkipProtectedWindowObserver();
+    static bool GetSettingscreenSkipProtectedWindow(bool& enable,
+        const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
@@ -73,10 +77,12 @@ private:
     static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_last_screen_mode"};
     static const constexpr char* SETTING_RELATIVE_POSITION_KEY {"user_set_relative_position"};
     static const constexpr char* SETTING_HALF_SCREEN_SWITCH_KEY {"half_screen_display"};
+    static const constexpr char* SETTING_SCREEN_SHARE_PROTECT_KEY {"spamshield_screenshare_protect"};
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
     static sptr<SettingObserver> halfScreenObserver_;
+    static sptr<SettingObserver> screenSkipProtectedWindowObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS
