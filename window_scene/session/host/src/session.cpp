@@ -2654,7 +2654,7 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
     property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
 }
 
-void Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
+WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
 {
     TLOGI(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d",

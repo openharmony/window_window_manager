@@ -4813,7 +4813,7 @@ WMError SceneSession::HandleActionUpdateExclusivelyHighlighted(const sptr<Window
         TLOGE(WmsLogTag::WMS_FOCUS, "property is null");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    sessionProperty->SetExclusivelyHighlighted(property->GetExclusivelyHighlighte());
+    sessionProperty->SetExclusivelyHighlighted(property->GetExclusivelyHighlighted());
     return WMError::WM_OK;
 }
 

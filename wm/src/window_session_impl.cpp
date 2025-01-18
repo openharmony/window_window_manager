@@ -1707,7 +1707,7 @@ bool WindowSessionImpl::IsWindowHighlighted() const
         return false;
     }
     TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isWindowHighlighted: %{public}d",
-        GetPersistentId(), isHighlight_.load());
+        GetPersistentId(), isHighLighted_.load());
     return isHighlighted_;
 }
 
