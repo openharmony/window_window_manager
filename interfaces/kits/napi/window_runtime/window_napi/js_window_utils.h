@@ -305,7 +305,7 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     bool GetSystemBarStatus(napi_env env, napi_callback_info info,
         std::map<WindowType, SystemBarProperty>& systemBarProperties,
         std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
-    napi_value CreateStatusBarPropertyObject(napi_env env, sptr<Window>& window);
+    napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window);
     bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue);
     bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr);
     bool ParseAndCheckRect(napi_env env, napi_value jsObject, const Rect& windowRect, Rect& touchableRect);

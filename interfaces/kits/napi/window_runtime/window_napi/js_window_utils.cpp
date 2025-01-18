@@ -700,7 +700,7 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     return true;
 }
 
-napi_value CreateStatusBarPropertyObject(napi_env env, sptr<Window>& window)
+napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window)
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
