@@ -53,7 +53,7 @@ public:
     virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) = 0;
     virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
     virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
-    virtual void OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion) = 0;
+    virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -273,7 +273,7 @@ public:
     std::pair<ScreenId, DMRect> GetMirrorScreenRegion();
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
-    void SecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion);
+    void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
 
 private:
