@@ -42,7 +42,7 @@ std::shared_ptr<AppExecFwk::EventHandler> GetMainEventHandler()
  * @brief Used to map from WMError to WmErrorCode.
  */
 const std::map<WMError, WindowManager_ErrorCode> WM_NDK_TO_ERROR_CODE_MAP {
-    {WMError::WM_OK,                           WindowManager_ErrorCode::WM_OK                                       },
+    {WMError::WM_OK,                           WindowManager_ErrorCode::OK                                          },
     {WMError::WM_ERROR_INVALID_PARAM,          WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM      },
     {WMError::WM_ERROR_DEVICE_NOT_SUPPORT,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT },
     {WMError::WM_ERROR_INVALID_WINDOW,         WindowManager_ErrorCode::INVAILD_WINDOW_ID                           },
@@ -75,7 +75,7 @@ WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
     TLOGD(WmsLogTag::WMS_IMMS, "windowId:%{public}d", windowId);
     if (avoidArea == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "avoidArea is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::INVALID_PARAM;        
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;        
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -91,7 +91,8 @@ WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
             return;
         }
         AvoidArea allAvoidArea;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP(window->GetAvoidAreaByType(static_cast<AvoidAreaType>(type), allAvoidArea));
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
+            window->GetAvoidAreaByType(static_cast<AvoidAreaType>(type), allAvoidArea));
         TransformedToWindowManagerAvoidArea(avoidArea, allAvoidArea);
     }, __func__);
     return errCode;
@@ -114,7 +115,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        if (window->windowSystemConfig_.IsPcWindow()) {
+        if (window->IsPcWindow()) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support", where);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT;
             return;
@@ -122,7 +123,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.enable_ = enabled;
         property.enableAnimation_ = enableAnimation;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP(
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }, __func__);
     return errCode;
@@ -144,14 +145,14 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int3
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        if (window->windowSystemConfig_.IsPcWindow()) {
+        if (window->IsPcWindow()) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support", where);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.contentColor_ = color;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP(
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }, __func__);
     return errCode;
@@ -174,7 +175,7 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        if (window->windowSystemConfig_.IsPcWindow()) {
+        if (window->IsPcWindow()) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support", where);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT;
             return;
@@ -182,7 +183,7 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
         property.enable_ = enabled;
         property.enableAnimation_ = enableAnimation;
-        errCode = WM_NDK_TO_ERROR_CODE_MAP(
+        errCode = WM_NDK_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property));
     }, __func__);
     return errCode;
