@@ -42,16 +42,26 @@ std::shared_ptr<AppExecFwk::EventHandler> GetMainEventHandler()
 }
 
 /**
- * @brief Used to map from WMError to WmErrorCode.
+ * @brief Used to map from WMError to WindowManager_ErrorCode.
  */
 const std::map<WMError, WindowManager_ErrorCode> WM_NDK_TO_ERROR_CODE_MAP {
-    {WMError::WM_OK,                           WindowManager_ErrorCode::OK                                          },
-    {WMError::WM_ERROR_INVALID_PARAM,          WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM      },
-    {WMError::WM_ERROR_DEVICE_NOT_SUPPORT,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT },
-    {WMError::WM_ERROR_INVALID_WINDOW,         WindowManager_ErrorCode::INVAILD_WINDOW_ID                           },
-    {WMError::WM_ERROR_INVALID_CALLING,        WindowManager_ErrorCode::SERVICE_ERROR                               },
-    {WMError::WM_ERROR_NULLPTR,                WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY   },
-    {WMError::WM_ERROR_SYSTEM_ABNORMALLY,      WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY  },
+    { WMError::WM_OK,                           WindowManager_ErrorCode::OK                                          },
+    { WMError::WM_ERROR_INVALID_PARAM,          WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM      },
+    { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT },
+    { WMError::WM_ERROR_INVALID_WINDOW,         WindowManager_ErrorCode::INVAILD_WINDOW_ID                           },
+    { WMError::WM_ERROR_INVALID_CALLING,        WindowManager_ErrorCode::SERVICE_ERROR                               },
+    { WMError::WM_ERROR_NULLPTR,                WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY   },
+    { WMError::WM_ERROR_SYSTEM_ABNORMALLY,      WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY  },
+};
+
+/**
+ * @brief Used to map from WindowType to WindowManager_WindowType.
+ */
+const std::map<WindowType, WindowManager_WindowType> NATIVE_NDK_TO_WINDOW_TYPE_MAP {
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_APP    },
+    { WindowType::WINDOW_TYPE_DIALOG,              WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_DIALOG },
+    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
+    { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
 };
 
 static WindowManager_Rect TransformedToWindowManagerRect(const Rect rect)
@@ -325,8 +335,12 @@ WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId, WindowMa
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
+        if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(window->GetType()) != 0) {
+            windowProperties->type = NATIVE_NDK_TO_WINDOW_TYPE_MAP.at(window->GetType());
+        } else {
+            windowProperties->type = window->GetType();
+        }
         windowProperties->windowRect = TransformedToWindowManagerRect(window->GetRect());
-        windowProperties->type = static_cast<WindowManager_WindowType>(window->GetType());
         windowProperties->isLayoutFullScreen = window->IsLayoutFullScreen();
         windowProperties->isFullScreen = window->IsFullScreen();
         windowProperties->touchable = window->GetTouchable();

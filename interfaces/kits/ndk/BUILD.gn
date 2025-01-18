@@ -18,9 +18,9 @@ import("../../../windowmanager_aafwk.gni")
 ohos_ndk_headers("window_manager_header") {
   dest_dir = "$ndk_headers_out_dir/window_manager"
   sources = [
+    "oh_window.h",
     "oh_window_comm.h",
     "oh_window_event_filter.h",
-    "oh_window.h",
   ]
 }
 
