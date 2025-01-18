@@ -176,7 +176,8 @@ WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool is
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId, WindowManager_WindowProperties* windowProperties);
+WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId,
+    WindowManager_WindowProperties* windowProperties);
 
 /**
  * @brief Obtains snapshot of window.
