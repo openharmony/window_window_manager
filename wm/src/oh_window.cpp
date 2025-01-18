@@ -335,10 +335,10 @@ WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId, WindowMa
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
             return;
         }
-        if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(window->GetType()) != 0) {
+        if (NATIVE_NDK_TO_WINDOW_TYPE_MAP.count(window->GetType()) != 0) {
             windowProperties->type = NATIVE_NDK_TO_WINDOW_TYPE_MAP.at(window->GetType());
         } else {
-            windowProperties->type = window->GetType();
+            windowProperties->type = static_cast<WindowManager_WindowType>(window->GetType());
         }
         windowProperties->windowRect = TransformedToWindowManagerRect(window->GetRect());
         windowProperties->isLayoutFullScreen = window->IsLayoutFullScreen();
