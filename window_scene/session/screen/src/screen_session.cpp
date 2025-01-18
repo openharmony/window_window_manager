@@ -1383,7 +1383,7 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
         WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
         return res;
     }
-    if (colorSpace < 0 || static_cast<int32_t>(colorSpace) >= static_cast<int32_t>(colorSpaces.size())) {
+    if (colorSpace < 0) {
         WLOGE("SetScreenColorSpace fail! rsId %{public}" PRIu64 " colorSpace %{public}d invalid.",
             rsId_, static_cast<int32_t>(colorSpace));
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -1838,5 +1838,15 @@ int32_t ScreenSession::GetApiVersion()
     }
     lastRequestTime = currentTime;
     return apiVersion;
+}
+
+void ScreenSession::SetShareProtect(bool needShareProtect)
+{
+    needShareProtect_ = needShareProtect;
+}
+
+bool ScreenSession::GetShareProtect()
+{
+    return needShareProtect_;
 }
 } // namespace OHOS::Rosen

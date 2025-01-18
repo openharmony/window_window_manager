@@ -1914,6 +1914,32 @@ WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SessionProxy::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard layout params write failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
