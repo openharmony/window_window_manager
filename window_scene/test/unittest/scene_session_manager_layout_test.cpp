@@ -31,6 +31,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
+const float SINGLE_HAND_SCALE = 0.75f;
+const float SINGLE_HAND_DEFAULT_SCALE = 1.0f;
 }
 class SceneSessionManagerLayoutTest : public testing::Test {
 public:
@@ -89,8 +91,8 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestUIType, F
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
-    float singleHandScaleX = 0.75f;
-    float singleHandScaleY = 0.75f;
+    float singleHandScaleX = SINGLE_HAND_SCALE;
+    float singleHandScaleY = SINGLE_HAND_SCALE;
     SingleHandMode singleHandMode = SingleHandMode::LEFT;
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
@@ -127,8 +129,8 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestWindowNam
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
-    float singleHandScaleX = 0.75f;
-    float singleHandScaleY = 0.75f;
+    float singleHandScaleX = SINGLE_HAND_SCALE;
+    float singleHandScaleY = SINGLE_HAND_SCALE;
     SingleHandMode singleHandMode = SingleHandMode::LEFT;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
@@ -145,8 +147,8 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestDisplayId
 {
     SingleHandTransform singleHandTransform;
     ssm_->singleHandTransform_ = singleHandTransform;
-    float singleHandScaleX = 0.75f;
-    float singleHandScaleY = 0.75f;
+    float singleHandScaleX = SINGLE_HAND_SCALE;
+    float singleHandScaleY = SINGLE_HAND_SCALE;
     SingleHandMode singleHandMode = SingleHandMode::LEFT;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
@@ -185,8 +187,8 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Fun
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
 
-    float singleHandScaleX = 0.75f;
-    float singleHandScaleY = 0.75f;
+    float singleHandScaleX = SINGLE_HAND_SCALE;
+    float singleHandScaleY = SINGLE_HAND_SCALE;
     SingleHandMode singleHandMode = SingleHandMode::LEFT;
     ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
     usleep(WAIT_SYNC_IN_NS);
@@ -194,8 +196,8 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Fun
     ASSERT_EQ(0, ssm_->singleHandTransform_.posX);
     ssm_->singleHandTransform_ = singleHandTransform;
 
-    singleHandScaleX = 0.75f;
-    singleHandScaleY = 0.75f;
+    singleHandScaleX = SINGLE_HAND_SCALE;
+    singleHandScaleY = SINGLE_HAND_SCALE;
     singleHandMode = SingleHandMode::RIGHT;
     ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
     usleep(WAIT_SYNC_IN_NS);
@@ -203,8 +205,8 @@ HWTEST_F(SceneSessionManagerLayoutTest, NotifySingleHandInfoChange_TestMode, Fun
     ASSERT_NE(0, ssm_->singleHandTransform_.posX);
     ssm_->singleHandTransform_ = singleHandTransform;
 
-    singleHandScaleX = 1.0f;
-    singleHandScaleY = 1.0f;
+    singleHandScaleX = SINGLE_HAND_DEFAULT_SCALE;
+    singleHandScaleY = SINGLE_HAND_DEFAULT_SCALE;
     singleHandMode = SingleHandMode::MIDDLE;
     ssm_->NotifySingleHandInfoChange(singleHandScaleX, singleHandScaleY, singleHandMode);
     usleep(WAIT_SYNC_IN_NS);

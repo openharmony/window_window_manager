@@ -468,8 +468,10 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
         auto singleHandData = GetSingleHandData(sceneSession);
         MMI::Rect windowRect = {
-            .x = extensionInfo.windowRect.posX_ * singleHandData.scaleX + singleHandData.singleHandX,
-            .y = extensionInfo.windowRect.posY_ * singleHandData.scaleY + singleHandData.singleHandY,
+            .x = static_cast<float>(extensionInfo.windowRect.posX_) * singleHandData.scaleX +
+                 singleHandData.singleHandX,
+            .y = static_cast<float>(extensionInfo.windowRect.posY_) * singleHandData.scaleY +
+                 singleHandData.singleHandY,
             .width = extensionInfo.windowRect.width_,
             .height = extensionInfo.windowRect.height_
         };
@@ -649,7 +651,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
     auto displayId = windowSessionProperty->GetDisplayId();
-    auto singleHandData = GetSingleHandData(sceneSession);
+    const auto& singleHandData = GetSingleHandData(sceneSession);
     CalTransform(sceneSession, transform, singleHandData);
     std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
 
@@ -695,20 +697,20 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
     SingleHandData singleHandData;
     auto sessionProperty = sceneSession->GetSessionProperty();
     auto displayId = sessionProperty->GetDisplayId();
-    std::map<ScreenId, ScreenProperty> screensProperties =
+    const std::map<ScreenId, ScreenProperty>& screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-    if (screensProperties.find(displayId) == screensProperties.end()) {
+    auto screenPropertyIter = screensProperties.find(displayId);
+    if (screenPropertyIter == screensProperties.end()) {
         return singleHandData;
     }
-    SingleHandTransform transform = sceneSession->GetSingleHandTransform();
-    auto screenProperty = screensProperties[displayId];
+    const SingleHandTransform& transform = sceneSession->GetSingleHandTransform();
     singleHandData.scaleX = transform.scaleX;
     singleHandData.scaleY = transform.scaleY;
-    singleHandData.width = screenProperty.GetBounds().rect_.GetWidth();
-    singleHandData.height = screenProperty.GetBounds().rect_.GetHeight();
+    singleHandData.width = screenPropertyIter->second.GetBounds().rect_.GetWidth();
+    singleHandData.height = screenPropertyIter->second.GetBounds().rect_.GetHeight();
     singleHandData.singleHandX = transform.posX;
     singleHandData.singleHandY = transform.posY;
-    singleHandData.pivotX = NearZero(transform.posX) ? 0.0f : singleHandData.width;
+    singleHandData.pivotX = (0 == transform.posX) ? 0.0f : singleHandData.width;
     return singleHandData;
 }
 
