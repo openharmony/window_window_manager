@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "e:/HarmonyProject/window_window_manager_git/previewer/mock/window_manager_napi",
-      "program": "e:/HarmonyProject/window_window_manager_git/previewer/mock/window_manager_napi/build/Debug/outDebug",
+      "cwd": "//wsl.localhost/Ubuntu-20.04/home/rok/workspace/foundation/window/window_manager/window_scene/session/host/src",
+      "program": "//wsl.localhost/Ubuntu-20.04/home/rok/workspace/foundation/window/window_manager/window_scene/session/host/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
