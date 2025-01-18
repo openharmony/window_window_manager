@@ -226,7 +226,6 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
             surfaceNode_->SetFrameGravity(Gravity::TOP_LEFT);
         }
     }
-    RegisterWindowInspectorCallback();
 }
 
 bool WindowSessionImpl::IsPcWindow() const
