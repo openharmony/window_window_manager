@@ -6333,11 +6333,14 @@ void SceneSessionManager::NotifySingleHandInfoChange(
                 break;
             case SingleHandMode::LEFT:
                 singleHandTransform_.posX = 0;
-                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                singleHandTransform_.posY =
+                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
                 break;
             case SingleHandMode::RIGHT:
-                singleHandTransform_.posX = displayWidth * (1 - singleHandScaleX);
-                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                singleHandTransform_.posX =
+                    static_cast<int32_t>(static_cast<float>(displayWidth) * (1 - singleHandScaleX));
+                singleHandTransform_.posY =
+                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
                 break;
             default:
                 break;
@@ -6348,10 +6351,7 @@ void SceneSessionManager::NotifySingleHandInfoChange(
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& item : sceneSessionMap_) {
                 auto sceneSession = item.second;
-                if (sceneSession == nullptr) {
-                    continue;
-                }
-                if (!IsInDefaultScreen(sceneSession) ||
+                if (sceneSession == nullptr || !IsInDefaultScreen(sceneSession) ||
                     sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
                     continue;
                 }
@@ -8441,7 +8441,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
     }
     info->uiNodeId_ = sceneSession->GetUINodeId();
-    WSRect wsrect = sceneSession->GetSessionGlobalRect(); // only accessability and mmi need global
+    WSRect wsrect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
     info->windowRect_ = {wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
@@ -11678,10 +11678,10 @@ bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displ
 {
     auto region = GetDisplayRegion(displayId);
     if (region == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}llu", displayId);
+        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}" PRIu64, displayId);
         return false;
     }
-    const SkIRect rect = region->getBounds();
+    const SkIRect& rect = region->getBounds();
     displayWidth = rect.fRight;
     displayHeight = rect.fBottom;
     return true;

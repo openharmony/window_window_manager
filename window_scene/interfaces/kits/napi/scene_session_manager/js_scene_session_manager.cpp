@@ -2575,7 +2575,7 @@ napi_value JsSceneSessionManager::OnNotifySingleHandInfoChange(napi_env env, nap
         singleHandMode = SingleHandMode::RIGHT;
     }
     SceneSessionManager::GetInstance().NotifySingleHandInfoChange(
-        singleHandScaleX, singleHandScaleY, singleHandMode);
+        static_cast<float>(singleHandScaleX), static_cast<float>(singleHandScaleY), singleHandMode);
     return NapiGetUndefined(env);
 }
 
