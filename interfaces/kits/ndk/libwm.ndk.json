@@ -25,42 +25,42 @@
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_SetWindowStatusBarEnabled"
+        "name":"OH_WindowManager_SetWindowStatusBarEnabled"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_SetWindowStatusBarColor"
+        "name":"OH_WindowManager_SetWindowStatusBarColor"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_SetWindowNavigationBarEnabled"
+        "name":"OH_WindowManager_SetWindowNavigationBarEnabled"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_GetWindowAvoidArea"
+        "name":"OH_WindowManager_GetWindowAvoidArea"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_SetWindowBackgroundColor"
+        "name":"OH_WindowManager_SetWindowBackgroundColor"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_SetWindowBrightness"
+        "name":"OH_WindowManager_SetWindowBrightness"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_SetWindowKeepScreenOn"
+        "name":"OH_WindowManager_SetWindowKeepScreenOn"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_SetWindowPrivacyMode"
+        "name":"OH_WindowManager_SetWindowPrivacyMode"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_GetWindowProperties"
+        "name":"OH_WindowManager_GetWindowProperties"
     },
     {
         "first_instroduced":"16",
-        "name":"OH_Window_Snapshot"
+        "name":"OH_WindowManager_Snapshot"
     }
 ]
