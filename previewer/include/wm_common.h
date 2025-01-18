@@ -814,7 +814,8 @@ struct TitleButtonRect {
  * @brief WindowInfo filter Option
  */
 enum class WindowInfoFilterOption : uint8_t {
-    ALL = 0,
+    START = 0,
+    ALL = START,
     EXCLUDE_SYSTEM = 1, // 确定是否反义
     VISIBLE = 1 << 1,
     FOREGROUND = 1 << 2,
@@ -825,12 +826,13 @@ enum class WindowInfoFilterOption : uint8_t {
  * @brief WindowInfo Type Option
  */
 enum class WindowInfoTypeOption : uint8_t {
-    ALL = 0,
+    START = 0,
     WINDOW_UI_INFO = 1,
     WINDOW_DISPLAY_INFO = 1 << 1,
     WINDOW_LAYOUT_INFO = 1 << 2,
     WINDOW_META_INFO = 1 << 3,
-    END,
+    ALL = -1ULL,
+    END = ALL,
 };
 
 /**

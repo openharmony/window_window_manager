@@ -3808,7 +3808,11 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
 {
     WindowMetaInfo windowMetaInfo;
     windowMetaInfo.windowId = GetWindowId();
-    windowMetaInfo.windowName = GetSessionProperty()->GetWindowName();
+    if (GetSessionInfo().isSystem_) {
+        windowMetaInfo.windowName = GetSessionInfo().abilityName_;
+    } else {
+        windowMetaInfo.windowName = GetSessionProperty()->GetWindowName();
+    }
     windowMetaInfo.bundleName = GetSessionInfo().bundleName_;
     windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
     return windowMetaInfo;

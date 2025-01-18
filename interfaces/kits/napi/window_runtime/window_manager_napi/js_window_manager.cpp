@@ -1218,13 +1218,11 @@ napi_value JsWindowManager::OnListWindowInfo(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to windowInfoFilterOption");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WindowInfoFilterOption windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue);
     uint32_t windowInfoTypeOptionValue = static_cast<uint32_t>(WindowInfoTypeOption::ALL);
     if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[INDEX_ONE], windowInfoTypeOptionValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to windowInfoFilterOption");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WindowInfoTypeOption windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOptionValue);
     int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
     if (argc > ARGC_TWO) {
         if (!ConvertFromJsValue(env, argv[INDEX_TWO], displayId)) {
@@ -1239,12 +1237,14 @@ napi_value JsWindowManager::OnListWindowInfo(napi_env env, napi_callback_info in
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [env, task = napiAsyncTask, windowInfoFilterOption,
-                      windowInfoTypeOption, displayId, where = __func__] {
+    auto asyncTask = [env, task = napiAsyncTask, windowInfoFilterOptionValue,
+                      windowInfoTypeOptionValue, displayId, where = __func__] {
         std::vector<sptr<WindowInfo>> infos;
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<WindowManager>().ListWindowInfo(windowInfoFilterOption,
-            windowInfoTypeOption, static_cast<uint64_t>(displayId), infos)); // TS侧有uint64对应的类型吗
+            SingletonContainer::Get<WindowManager>().ListWindowInfo(
+                static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue),
+                static_cast<WindowInfoTypeOption>(windowInfoTypeOptionValue),
+                static_cast<uint64_t>(displayId), infos)); // TS侧有uint64对应的类型吗
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
@@ -1253,6 +1253,10 @@ napi_value JsWindowManager::OnListWindowInfo(napi_env env, napi_callback_info in
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
         }
     };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
