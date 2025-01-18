@@ -636,6 +636,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         RegisterSessionRecoverListener(isSpecificSession);
         UpdateDefaultStatusBarColor();
         AddSetUIContentTimeoutCheck();
+        SetUIExtensionDestroyCompleteInSubWindow();
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
