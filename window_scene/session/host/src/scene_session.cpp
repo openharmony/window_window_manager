@@ -1589,6 +1589,17 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
     return WSError::WS_OK;
 }
 
+void SceneSession::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
+{
+    if (!IsSessionForeground() && !IsVisible()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground and not visible!", GetPersistentId());
+        return;
+    }
+    if (sessionStage_ != nullptr) {
+        sessionStage_->NotifySingleHandTransformChange(singleHandTransform);
+    }
+}
+
 void SceneSession::RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
