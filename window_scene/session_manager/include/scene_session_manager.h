@@ -45,12 +45,12 @@
 #include "display_info.h"
 #include "display_change_info.h"
 #include "display_change_listener.h"
-#include "screen_session_manager_client.h"
 #include "app_debug_listener_interface.h"
 #include "app_mgr_client.h"
 #include "include/core/SkRegion.h"
 #include "ability_info.h"
 #include "screen_fold_data.h"
+#include "screen_session_manager_client.h"
 #include "thread_safety_annotations.h"
 #include "window_focus_controller.h"
 
