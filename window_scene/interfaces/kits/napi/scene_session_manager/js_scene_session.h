@@ -87,6 +87,8 @@ enum class ListenerFuncType : uint32_t {
     WINDOW_MOVING_CB,
     SESSION_LOCK_STATE_CHANGE_CB,
     UPDATE_SESSION_LABEL_AND_ICON_CB,
+    KEYBOARD_STATE_CHANGE_CB,
+    KEYBOARD_VIEW_MODE_CHANGE_CB,
     SET_WINDOW_CORNER_RADIUS_CB,
 };
 
@@ -319,6 +321,8 @@ private:
     void RegisterUpdateAppUseControlCallback();
     void ProcessWindowMovingRegister();
     void ProcessUpdateSessionLabelAndIconRegister();
+    void ProcessKeyboardStateChangeRegister();
+    void ProcessKeyboardViewModeChangeRegister();
 
     /*
      * Window Property
@@ -382,6 +386,8 @@ private:
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+    void OnKeyboardStateChange(const SessionState& state, const KeyboardViewMode& mode);
+    void OnKeyboardViewModeChange(const KeyboardViewMode& mode);
 
     /*
      * Window Property

@@ -2683,6 +2683,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
             that.foldScreenPowerInit_();
         }
         that.RegisterSettingRotationObserver();
+        that.RegisterSettingscreenSkipProtectedWindowObserver();
         if (that.defaultDpi) {
             auto ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
             if (!ret) {
@@ -3859,6 +3860,13 @@ void ScreenSessionManager::RegisterSettingRotationObserver()
     ScreenSettingHelper::RegisterSettingRotationObserver(updateFunc);
 }
 
+void ScreenSessionManager::RegisterSettingscreenSkipProtectedWindowObserver()
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetScreenSkipProtectedWindowInner(); };
+    ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(updateFunc);
+}
+
 DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
 {
     if (!SessionPermission::IsSystemCalling()) {
@@ -4014,7 +4022,8 @@ DMError ScreenSessionManager::VirtualScreenUniqueSwitch(const std::vector<Screen
     return uniqueSwitchRet;
 }
 
-DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
@@ -4033,7 +4042,7 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
             TLOGW(WmsLogTag::DMS, "make unique ignore");
             return DMError::DM_OK;
         }
-        return MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
+        return MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
     }
     for (auto screenId : screenIds) {
         ScreenId rsScreenId = SCREEN_ID_INVALID;
@@ -4049,6 +4058,7 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
             TLOGE(WmsLogTag::DMS, "screen session is nullptr");
             continue;
         }
+        displayIds.emplace_back(static_cast<uint64_t>(screenId));
         Rosen::RSDisplayNodeConfig rsConfig;
         rsConfig.screenId = rsScreenId;
         screenSession->CreateDisplayNode(rsConfig);
@@ -6252,6 +6262,12 @@ void ScreenSessionManager::GetCurrentScreenPhyBounds(float& phyWidth, float& phy
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr) {
+        if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+            auto phyBounds = GetPhyScreenProperty(screenid).GetPhyBounds();
+            phyWidth = phyBounds.rect_.width_;
+            phyHeight = phyBounds.rect_.height_;
+            return;
+        }
         FoldDisplayMode displayMode = GetFoldDisplayMode();
         TLOGI(WmsLogTag::DMS, "fold screen with displayMode = %{public}u", displayMode);
         if (displayMode == FoldDisplayMode::MAIN) {
@@ -7287,5 +7303,66 @@ void ScreenSessionManager::MultiScreenChangeOuter(const std::string& outerFlag)
         RecoveryMultiScreenNormalMode(innerSession, outerSession);
     }
     FixPowerStatus();
+}
+
+DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    std::ostringstream oss;
+    for (ScreenId screenId : screenIds) {
+        oss << screenId << " ";
+    }
+    TLOGI(WmsLogTag::DMS, "screenIds:%{public}s, isEnable:%{public}d", oss.str().c_str(), isEnable);
+    {
+        std::lock_guard<std::mutex> lock(shareProtectMutex_);
+        for (ScreenId screenId : screenIds) {
+            sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+            if (screenSession == nullptr) {
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+                screenSession->SetShareProtect(isEnable);
+            }
+        }
+    }
+    SetScreenSkipProtectedWindowInner();
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    bool screenSkipProtectedWindowValue;
+    bool ret = ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(screenSkipProtectedWindowValue);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "get setting failed, default value false");
+        screenSkipProtectedWindowValue = false;
+    }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId:%{public}" PRIu64"",
+                sessionIt.first);
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+            ScreenId rsScreenId;
+            if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId)) {
+                TLOGE(WmsLogTag::DMS, "No corresponding rsId.");
+                continue;
+            }
+            bool requiredSkipWindow = screenSession->GetShareProtect() && screenSkipProtectedWindowValue;
+            TLOGI(WmsLogTag::DMS, "virtualScreenId:%{public}" PRIu64 " requiredSkipWindow:%{public}d",
+                sessionIt.first, requiredSkipWindow);
+            HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
+                "SetCastScreenEnableSkipWindow(%" PRIu64")", sessionIt.first);
+            rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
+        }
+    }
 }
 } // namespace OHOS::Rosen
