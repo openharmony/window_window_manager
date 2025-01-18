@@ -370,7 +370,6 @@ void WindowManagerProxy::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<W
         WLOGFE("Failed to write moveDragProperty!");
         return;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -399,7 +398,6 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isPointDown)
         WLOGFE("Write isPointDown failed");
         return;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");

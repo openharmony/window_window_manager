@@ -991,7 +991,6 @@ WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowMo
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> remote = Remote();

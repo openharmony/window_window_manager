@@ -986,7 +986,6 @@ HWTEST_F(SceneSessionManagerTest10, TestIsNeedSkipWindowModeTypeCheck_04, Functi
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetRSVisible(true);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-
     DisplayId displayId = 1001;
     sceneSession->property_->SetDisplayId(displayId);
     auto ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true);
