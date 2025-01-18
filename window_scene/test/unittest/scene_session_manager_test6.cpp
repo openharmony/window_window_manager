@@ -1968,7 +1968,6 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession04, Function | SmallTest |
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
     ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
-
     auto ret3 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret3, BrokerStates::BROKER_UNKOWN);
     ssm_->abilityInfoMap_.erase(list);
@@ -2005,7 +2004,6 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession05, Function | SmallTest |
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
     ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
-
     auto ret4 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret4, BrokerStates::BROKER_UNKOWN);
     ssm_->abilityInfoMap_.erase(list);

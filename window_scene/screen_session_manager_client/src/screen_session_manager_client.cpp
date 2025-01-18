@@ -82,12 +82,11 @@ void ScreenSessionManagerClient::RegisterScreenConnectionChangeListener(
     const sptr<IScreenConnectionChangeListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("Failed to register screen connection change listener, listener is null");
+        TLOGE(WmsLogTag::DMS, "Failed to register screen connection change listener, listener is null");
         return;
     }
-
     screenConnectionChangeListener_ = listener;
-    WLOGFI("Success to register screen connection change listener");
+    TLOGE(WmsLogTag::DMS, "Success to register screen connection change listener");
 }
 
 void ScreenSessionManagerClient::NotifyScreenConnect(const sptr<ScreenSession>& screenSession)
@@ -172,9 +171,6 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             return;
         }
         screenSession->DestroyScreenScene();
-        if (screenConnectionListener_) {
-            screenConnectionListener_->OnScreenDisconnected(screenSession);
-        }
         NotifyScreenDisconnect(screenSession);
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
