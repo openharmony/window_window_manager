@@ -710,6 +710,26 @@ ohos_unittest("ws_window_prepare_terminate_test") {
   ]
 }
 
+ohos_unittest("wm_oh_window_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/interfaces/kits/ndk/wm/" ]
+
+  sources = [ "oh_window_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/wm:libwm_ndk",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
 ## Build wm_unittest_common.a {{{
 config("wm_unittest_common_public_config") {
   include_dirs = [
