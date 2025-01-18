@@ -310,6 +310,9 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
 
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
+    if (isHalfScreen_) {
+        return SuperFoldStatus::KEYBOARD;
+    }
     return curState_.load();
 }
 
