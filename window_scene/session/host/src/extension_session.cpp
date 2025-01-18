@@ -23,7 +23,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
-std::set<int32_t> g_extensionPersistentIdSet;
+std::unordered_set<int32_t> g_extensionPersistentIdSet;
 std::mutex g_extensionPersistentIdMutex;
 constexpr uint32_t EXTENSION_ID_FLAG = 0x40000000;
 constexpr uint32_t PID_LENGTH = 18;
