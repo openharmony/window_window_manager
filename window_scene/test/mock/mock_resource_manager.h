@@ -188,6 +188,15 @@ public:
         return RState::ERROR;
     };
     bool AddPatchResource(const char* path, const char* patchPath) { return true; };
+    RState GetResConfigById(uint32_t resId, ResConfig& resConfig, uint32_t density = 0)
+    {
+        return RState::ERROR;
+    }
+    RState GetResConfigByName(const std::string& name, const ResType type,
+        ResConfig& resConfig, uint32_t density = 0)
+    {
+        return RState::ERROR;
+    }
     RState GetThemeDataByName(const char* name, std::map<std::string, ResData>& outValue)
     {
         return RState::ERROR;

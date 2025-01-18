@@ -16,6 +16,7 @@
 #include "session/host/include/keyboard_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
+#include <ui/rs_surface_node.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -70,6 +71,11 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, show keyboard failed");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (session->systemConfig_.IsPcWindow()) {
+            if (auto surfaceNode = session->GetSurfaceNode()) {
+                surfaceNode->SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE);
+            }
         }
         if (session->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
