@@ -391,13 +391,13 @@ void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInf
 
 std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std::string& stringId)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "stringId: %{public}s", id.c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
     if (uiContent_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
         return nullptr;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "end");
-    return uiContent_->GetRSNodeByStringID(id);
+    return uiContent_->GetRSNodeByStringID(stringId);
 }
 } // namespace Rosen
 } // namespace OHOS
