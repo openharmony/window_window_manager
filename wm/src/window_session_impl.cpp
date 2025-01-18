@@ -1689,7 +1689,7 @@ bool WindowSessionImpl::GetExclusivelyHighlighted() const
 WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
-    isHighLighted_ = isHighlight;
+    isHighlighted_ = isHighlight;
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
     auto highlightChangeListener = GetListeners<IWindowHighlightChangeListener>();
     if (highlightChangeListener != nullptr) {
@@ -1707,7 +1707,7 @@ bool WindowSessionImpl::IsWindowHighlighted() const
         return false;
     }
     TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isWindowHighlighted: %{public}d",
-        GetPersistentId(), isHighLighted_.load());
+        GetPersistentId(), isHighlighted_.load());
     return isHighlighted_;
 }
 
