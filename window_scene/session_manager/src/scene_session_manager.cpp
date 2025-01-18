@@ -11255,7 +11255,7 @@ bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displ
 {
     auto region = GetDisplayRegion(displayId);
     if (region == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}lu", displayId);
+        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}llu", displayId);
         return false;
     }
     const SkIRect rect = region->getBounds();
