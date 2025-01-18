@@ -1581,7 +1581,7 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
     return taskScheduler_->PostSyncTask(task, "CheckWindowId:" + std::to_string(windowId));
 }
 
-uint32_t SceneSessionManager::GetLockScreenZorder()
+uint32_t SceneSessionManager::GetLockScreenZOrder()
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
@@ -1618,7 +1618,7 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
         }
 
         // 1. check window whether can show on main window
-        if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
+        if (!sceneSession->IsShowOnLockScreen(GetLockScreenZOrder())) {
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not called on lock screen");
             return WMError::WM_OK;
         }
