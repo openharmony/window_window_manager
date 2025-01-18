@@ -263,11 +263,6 @@ WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float br
 WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScreenOn)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}d, isKeepScreenOn:%{public}d", windowId, isKeepScreenOn);
-    auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
-    }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
