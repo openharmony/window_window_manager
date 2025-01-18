@@ -217,7 +217,7 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
     auto execute = [weak]() {
         auto weakNode = weak.promote();
         if (weakNode == nullptr) {
-            TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "windowNode is nullptr");
+            TLOGNE(WmsLogTag::WMS_STARTUP_PAGE, "windowNode is nullptr");
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "StartingWindow:ExecuteAnimate(%d)",
@@ -233,7 +233,7 @@ WMError StartingWindow::SetStartingWindowAnimation(wptr<WindowNode> weak)
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "StartingWindow:AnimateFinish(%d)",
             weakNode->GetWindowId());
-        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "StartingWindow::Replace surfaceNode, id: %{public}u",
+        TLOGNI(WmsLogTag::WMS_STARTUP_PAGE, "StartingWindow::Replace surfaceNode, id: %{public}u",
             weakNode->GetWindowId());
         weakNode->leashWinSurfaceNode_->RemoveChild(weakNode->startingWinSurfaceNode_);
         weakNode->startingWinSurfaceNode_ = nullptr;

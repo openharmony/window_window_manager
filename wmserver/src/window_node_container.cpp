@@ -731,8 +731,8 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
         return false;
     }
     if (!node->leashWinSurfaceNode_ || !node->surfaceNode_) {
-        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "id:%{public}u leashWinSurfaceNode or surfaceNode is null"
-            " but has start window!", node->GetWindowId());
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "id:%{public}u leashWinSurfaceNode or surfaceNode is null "
+            "but has start window!", node->GetWindowId());
         return false;
     }
     TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Id: %{public}d", node->GetWindowId());
