@@ -208,6 +208,10 @@ public:
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
 
     /**
      * @brief Close pip window while stopPip is called.
@@ -336,6 +340,8 @@ public:
      */
     virtual WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
+
+    virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
 
     /**
      * @brief Start Moving window with coordinate.
