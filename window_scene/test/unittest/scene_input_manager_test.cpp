@@ -59,47 +59,51 @@ void SceneInputManagerTest::TearDown()
 namespace {
 void CheckNeedUpdateTest()
 {
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
     SceneInputManager::GetInstance().SetUserBackground(true);
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     SceneInputManager::GetInstance().lastFocusId_ = -1;
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
 
     SceneInputManager::GetInstance().lastWindowInfoList_.clear();
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     SceneInputManager::GetInstance().lastDisplayInfos_.clear();
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     SceneInputManager::GetInstance().lastWindowInfoList_.clear();
     SceneInputManager::GetInstance().lastDisplayInfos_.clear();
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
 
     if (SceneInputManager::GetInstance().lastDisplayInfos_.size() != 0) {
         MMI::DisplayInfo displayInfo;
         SceneInputManager::GetInstance().lastDisplayInfos_[0] = displayInfo;
-        SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     }
 
     if (SceneInputManager::GetInstance().lastWindowInfoList_.size() != 0) {
         MMI::WindowInfo windowInfo;
         SceneInputManager::GetInstance().lastWindowInfoList_[0] = windowInfo;
-        SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     }
 }
 
 
 void WindowInfoListZeroTest(sptr<SceneSessionManager> ssm_)
 {
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
     const auto sceneSessionMap = ssm_->GetSceneSessionMap();
     for (auto sceneSession : sceneSessionMap) {
         ssm_->DestroyDialogWithMainWindow(sceneSession.second);
     }
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
 
     for (auto sceneSession : sceneSessionMap) {
         sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
         windowSessionProperty->SetWindowType(sceneSession.second->GetWindowType());
         ssm_->RequestSceneSession(sceneSession.second->GetSessionInfo(), windowSessionProperty);
     }
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
 }
 
 void MaxWindowInfoTest(sptr<SceneSessionManager> ssm_)
@@ -120,12 +124,14 @@ void MaxWindowInfoTest(sptr<SceneSessionManager> ssm_)
             sessionList.push_back(sceneSession);
         }
     }
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
 
     for (auto session : sessionList) {
         ssm_->DestroyDialogWithMainWindow(session);
     }
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
 }
 
 /**
@@ -138,15 +144,17 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, Function | SmallTest | Le
     GTEST_LOG_(INFO) << "SceneInputManagerTest: FlushDisplayInfoToMMI start";
     int ret = 0;
     // sceneSessionDirty_ = nullptr
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
     SceneInputManager::GetInstance().isUserBackground_ = false;
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
     SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
 
     // NotNeedUpdate
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(true);
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList), true);
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
 
     auto preEventHandler = SceneInputManager::GetInstance().eventHandler_;
     SceneInputManager::GetInstance().eventHandler_ = nullptr;
@@ -185,9 +193,11 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChange, Function | SmallTest | L
     .NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ADDED);
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
 
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
     SceneInputManager::GetInstance()
     .NotifyWindowInfoChange(sceneSession, WindowUpdateType::WINDOW_UPDATE_ADDED);
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChange end";
 }
 
@@ -214,8 +224,10 @@ HWTEST_F(SceneInputManagerTest, NotifyWindowInfoChangeFromSession, Function | Sm
     SceneInputManager::GetInstance().NotifyWindowInfoChangeFromSession(sceneSession);
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
 
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
     SceneInputManager::GetInstance().NotifyWindowInfoChangeFromSession(sceneSession);
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyWindowInfoChangeFromSession end";
 }
 
@@ -248,7 +260,9 @@ HWTEST_F(SceneInputManagerTest, NotifyMMIWindowPidChange, Function | SmallTest |
     EXPECT_FALSE(sceneSession->IsStartMoving());
     SceneInputManager::GetInstance().NotifyMMIWindowPidChange(nullptr, false);
     EXPECT_FALSE(sceneSession->IsStartMoving());
-    SceneInputManager::GetInstance().FlushDisplayInfoToMMI();
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList));
     GTEST_LOG_(INFO) << "SceneInputManagerTest: NotifyMMIWindowPidChange end";
 }
 

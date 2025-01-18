@@ -68,12 +68,14 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
+    virtual ScreenPowerState GetScreenPower();
     virtual bool SetDisplayState(DisplayState state);
     virtual DisplayState GetDisplayState(DisplayId displayId);
     virtual bool TryToCancelScreenOff();
     virtual bool SetScreenBrightness(uint64_t screenId, uint32_t level);
     virtual uint32_t GetScreenBrightness(uint64_t screenId);
     virtual std::vector<DisplayId> GetAllDisplayIds();
+    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
 private:
     sptr<IRemoteObject> Remote() { return remoteObject; };
     sptr<IRemoteObject> remoteObject = nullptr;

@@ -243,10 +243,7 @@ HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, Function | SmallTe
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->UpdateOccupiedAreaIfNeed(persistentId);
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSession->SetSessionProperty(property);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ssm_->UpdateOccupiedAreaIfNeed(persistentId);
 
     persistentId = 1;
@@ -401,6 +398,40 @@ HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo05, Function | SmallTest | Lev
     SCBAbilityInfo scbAbilityInfo;
     WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LockSessionByAbilityInfo
+ * @tc.desc: SceneSesionManager test LockSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::string bundleName = "LockSessionByAbilityInfoBundle";
+    std::string moduleName = "LockSessionByAbilityInfoModule";
+    std::string abilityName = "LockSessionByAbilityInfoAbility";
+    int32_t appIndex = 0;
+
+    auto result = ssm_->LockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
+
+/**
+ * @tc.name: UnlockSessionByAbilityInfo
+ * @tc.desc: SceneSesionManager test UnlockSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, UnlockSessionByAbilityInfo, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    std::string bundleName = "UnlockSessionByAbilityInfoBundle";
+    std::string moduleName = "UnlockSessionByAbilityInfoModule";
+    std::string abilityName = "UnlockSessionByAbilityInfoAbility";
+    int32_t appIndex = 0;
+
+    auto result = ssm_->UnlockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
 }  // namespace
 }

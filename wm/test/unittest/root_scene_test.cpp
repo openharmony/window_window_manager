@@ -290,7 +290,7 @@ HWTEST_F(RootSceneTest, RegisterAvoidAreaChangeListener, Function | SmallTest | 
     rootScene.updateRootSceneAvoidAreaCallback_ = [] {};
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
     auto ret = rootScene.RegisterAvoidAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
     listener = nullptr;
     ret = rootScene.RegisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -306,7 +306,7 @@ HWTEST_F(RootSceneTest, UnregisterAvoidAreaChangeListener, Function | SmallTest 
     RootScene rootScene;
     sptr<IAvoidAreaChangedListener> listener = sptr<IAvoidAreaChangedListener>::MakeSptr();
     auto ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(WMError::WM_DO_NOTHING, ret);
     listener = nullptr;
     ret = rootScene.UnregisterAvoidAreaChangeListener(listener);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
@@ -377,6 +377,81 @@ HWTEST_F(RootSceneTest, UpdateConfigurationSyncForAll, Function | SmallTest | Le
 
     RootScene::staticRootScene_ = prevStaticRootScene;
     ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: IsSystemWindow
+ * @tc.desc: IsSystemWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, IsSystemWindow, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    bool res = rootScene.IsSystemWindow();
+    ASSERT_EQ(true, res);
+}
+
+/**
+ * @tc.name: IsAppWindow
+ * @tc.desc: IsAppWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, IsAppWindow, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    bool res = rootScene.IsAppWindow();
+    ASSERT_EQ(false, res);
+}
+
+/**
+ * @tc.name: RegisterOccupiedAreaChangeListener
+ * @tc.desc: RegisterOccupiedAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, RegisterOccupiedAreaChangeListener, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
+    auto ret = rootScene.RegisterOccupiedAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listener = nullptr;
+    ret = rootScene.RegisterOccupiedAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: UnregisterOccupiedAreaChangeListener
+ * @tc.desc: UnregisterOccupiedAreaChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UnregisterOccupiedAreaChangeListener, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
+    auto ret = rootScene.UnregisterOccupiedAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listener = nullptr;
+    ret = rootScene.UnregisterOccupiedAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: NotifyOccupiedAreaChangeForRoot
+ * @tc.desc: NotifyOccupiedAreaChangeForRoot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, NotifyOccupiedAreaChangeForRoot, Function | SmallTest | Level3)
+{
+    auto rootScene = sptr<RootScene>::MakeSptr();
+    sptr<IOccupiedAreaChangeListener> listener = sptr<IOccupiedAreaChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    auto ret = rootScene->RegisterOccupiedAreaChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    sptr<OccupiedAreaChangeInfo> info = nullptr;
+    rootScene->NotifyOccupiedAreaChangeForRoot(info);
+    info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
+    ASSERT_NE(nullptr, info);
+    rootScene->NotifyOccupiedAreaChangeForRoot(info);
 }
 } // namespace
 } // namespace Rosen

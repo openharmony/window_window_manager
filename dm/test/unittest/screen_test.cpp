@@ -21,6 +21,7 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "scene_board_judgement.h"
+#include "../../../window_scene/screen_session_manager/include/screen_scene_config.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,6 +43,7 @@ public:
 sptr<Display> ScreenTest::defaultDisplay_ = nullptr;
 ScreenId ScreenTest::defaultScreenId_ = SCREEN_ID_INVALID;
 sptr<Screen> ScreenTest::screen_ = nullptr;
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 
 void ScreenTest::SetUpTestCase()
 {
@@ -254,7 +256,11 @@ HWTEST_F(ScreenTest, GetOrientation, Function | SmallTest | Level2)
     sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
     screenInfo->SetParentId(0);
     EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
-    ASSERT_EQ(Orientation::BEGIN, screen_->GetOrientation());
+    if (g_isPcDevice) {
+        ASSERT_EQ(Orientation::VERTICAL, screen_->GetOrientation());
+    } else {
+        ASSERT_EQ(Orientation::BEGIN, screen_->GetOrientation());
+    }
 }
 
 /**

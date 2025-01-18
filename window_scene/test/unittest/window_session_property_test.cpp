@@ -1348,8 +1348,6 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
 HWTEST_F(WindowSessionPropertyTest, SetAndIsSystemKeyboard, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetIsSystemKeyboard(false);
     ASSERT_EQ(false, property->IsSystemKeyboard());
     property->SetIsSystemKeyboard(true);
     ASSERT_EQ(true, property->IsSystemKeyboard());
@@ -1382,6 +1380,35 @@ HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | L
     uint32_t avoidAreaOption = 2;
     property->SetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(2, property->GetAvoidAreaOption());
+}
+
+/**
+ * @tc.name: SetBackgroundAlpha
+ * @tc.desc: SetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 0;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+    backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+}
+
+/**
+ * @tc.name: GetBackgroundAlpha
+ * @tc.desc: GetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(2, property->GetBackgroundAlpha());
 }
 } // namespace
 } // namespace Rosen

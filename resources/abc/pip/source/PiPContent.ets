@@ -14,16 +14,16 @@
  */
 
 import pip from '@ohos.pip';
-import { NodeController, FrameNode, TypedFrameNode, UIContext } from '@kit.ArkUI';
+import { NodeController, FrameNode, UIContext, typeNode } from '@kit.ArkUI';
 
 const TAG: string = 'PiPContent';
 const ABOUT_TO_STOP = 3;
 
 class XCNodeController extends NodeController {
-  private mXComponent: TypedFrameNode<XComponentInterface, XComponentAttribute>;
+  private mXComponent: typeNode.XComponent;
   private node: FrameNode | null = null;
 
-  constructor(xComponent: TypedFrameNode<XComponentInterface, XComponentAttribute>) {
+  constructor(xComponent: typeNode.XComponent) {
     super();
     this.mXComponent = xComponent;
   }
@@ -32,6 +32,12 @@ class XCNodeController extends NodeController {
     this.node = new FrameNode(uiContext);
     this.node.appendChild(this.mXComponent);
     return this.node;
+  }
+
+  replaceNode(newNode: typeNode.XComponent): void {
+    this.node?.removeChild(this.mXComponent);
+    this.mXComponent = newNode;
+    this.node?.appendChild(this.mXComponent);
   }
 
   removeNode() {
@@ -45,28 +51,57 @@ struct PiPContent {
   private xComponentController: XComponentController = new XComponentController();
   private nodeController: NodeController | null = null;
   private mXCNodeController: XCNodeController | null = null;
-  private useNode: boolean = false;
-  private xComponent: TypedFrameNode<XComponentInterface, XComponentAttribute> | null = null;
+  @State useNode: boolean = false;
+  @State nodeChange: boolean = false;
+  private xComponent: typeNode.XComponent | null = null;
   xComponentId: string = 'pipContent';
   xComponentType: string = 'surface';
 
-  aboutToAppear(): void {
-    this.nodeController = pip.getCustomUIController();
-    this.xComponent = pip.getTypeNode();
-    if (this.xComponent === null || this.xComponent === undefined) {
-      console.error(TAG, `xComponent node is null`);
-      return;
+  validateNode(node: typeNode.XComponent | null): boolean {
+    if (node === null || node === undefined) {
+      console.error(TAG, `validateNode node is null`);
+      return false;
     }
-    let type: string = this.xComponent.getNodeType();
+    let type: string = node.getNodeType();
     if (type !== 'XComponent') {
-      console.error(TAG, `xComponent type mismatch: ${type}`);
-      return;
+      console.error(TAG, `node type mismatch: ${type}`);
+      return false;
     }
-    this.useNode = true;
-    pip.setTypeNodeEnabled();
-    this.mXCNodeController = new XCNodeController(this.xComponent);
-    console.info(TAG, 'use Node Controller');
+    return true;
+  }
 
+  private registerUpdateNodeListener() {
+    pip.on('nodeUpdate', (newNode: typeNode.XComponent) => {
+      console.info(TAG, `nodeUpdate`);
+      if (!this.validateNode(newNode)) {
+        return;
+      }
+      if (this.useNode) {
+        pip.setPipNodeType(this.xComponent, false);
+        this.updatePipNodeType(newNode);
+        this.mXCNodeController?.replaceNode(newNode);
+        this.nodeChange = true;
+      } else {
+        this.updatePipNodeType(newNode);
+        this.mXCNodeController = new XCNodeController(newNode);
+        console.info(TAG, 'update to Node Controller');
+        this.registerStateChangeListener();
+        this.useNode = true;
+      }
+    });
+  }
+
+  private updatePipNodeType(newNode: typeNode.XComponent) {
+    let parent: FrameNode | null = newNode.getParent();
+    if (parent === null || parent === undefined) {
+      pip.setPipNodeType(newNode, false);
+    } else {
+      pip.setPipNodeType(newNode, true);
+      parent.removeChild(newNode);
+    }
+  }
+
+  private registerStateChangeListener() {
     pip.on('stateChange', (state: number) => {
       console.info(TAG, `stateChange state:${state}`);
       if (state === ABOUT_TO_STOP) {
@@ -75,16 +110,36 @@ struct PiPContent {
     })
   }
 
+  aboutToAppear(): void {
+    this.nodeController = pip.getCustomUIController();
+    this.registerUpdateNodeListener();
+    this.xComponent = pip.getTypeNode();
+    if (!this.validateNode(this.xComponent)) {
+      return;
+    }
+    if (this.xComponent === null) {
+      console.error(TAG, `validateNode node is null`);
+      return;
+    }
+    this.useNode = true;
+    this.updatePipNodeType(this.xComponent);
+    pip.setTypeNodeEnabled();
+    this.mXCNodeController = new XCNodeController(this.xComponent);
+    console.info(TAG, 'use Node Controller');
+    this.registerStateChangeListener();
+  }
+
   aboutToDisappear(): void {
     pip.off('stateChange');
+    pip.off('nodeUpdate');
   }
 
   build() {
     Stack() {
-      if (this.useNode) {
+      if (this.useNode || this.nodeChange) {
         this.buildNode();
       } else {
-       this.buildXComponent();
+        this.buildXComponent();
       }
       if (this.nodeController !== null) {
         this.buildCustomUI();

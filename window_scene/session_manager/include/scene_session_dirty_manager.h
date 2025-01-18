@@ -32,6 +32,17 @@ struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
+
+struct SingleHandData {
+    float scaleX = 1;
+    float scaleY = 1;
+    float width = 0;
+    float height = 0;
+    float singleHandX = 0;
+    float singleHandY = 0;
+    float pivotX = 0;
+};
+
 class SceneSessionDirtyManager {
 private:
     enum WindowAction : uint32_t {
@@ -61,9 +72,11 @@ private:
     bool IsFilterSession(const sptr<SceneSession>& sceneSession) const;
     std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>>
         GetWindowInfo(const sptr<SceneSession>& sceneSession, const WindowAction& action) const;
+    SingleHandData GetSingleHandData(const sptr<SceneSession>& sceneSession) const;
     void CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
-        bool useUIExtension = false) const;
-    void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform, bool useUIExtension = false) const;
+        const SingleHandData& singleHandData, bool useUIExtension = false) const;
+    void CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
+        const SingleHandData& singleHandData, bool useUIExtension = false) const;
     void UpdatePrivacyMode(const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
     std::map<int32_t, sptr<SceneSession>> GetDialogSessionMap(
@@ -76,7 +89,7 @@ private:
     void UpdateWindowFlags(DisplayId displayId, const sptr<SceneSession>& sceneSession,
         MMI::WindowInfo& windowInfo) const;
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
-        const sptr<SceneSession>& sceneSession);
+        const sptr<SceneSession>& sceneSession, const ExtensionWindowEventInfo& extensionInfo);
     std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
         const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const;
     MMI::WindowInfo GetSecComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,

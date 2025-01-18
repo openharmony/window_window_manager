@@ -158,11 +158,20 @@ void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std
             WLOGI("COMMON_EVENT_SERVICE_ID");
             windowCommonEvent_->SubscriberEvent();
             break;
+        case MULTIMODAL_INPUT_SERVICE_ID:
+            WLOGI("MULTIMODAL_INPUT_SERVICE_ID");
+            SetWindowInputEventConsumer();
+            break;
         default:
             WLOGFW("unhandled sysabilityId: %{public}d", systemAbilityId);
             break;
     }
     WLOGI("systemAbilityId: %{public}d, end", systemAbilityId);
+}
+
+void WindowManagerService::SetWindowInputEventConsumer()
+{
+    WindowInnerManager::GetInstance().SetInputEventConsumer();
 }
 
 void WindowManagerService::OnAccountSwitched(int accountId)
@@ -1436,10 +1445,6 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
 /** @note @window.hierarchy */
 WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("window raise to app top permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
     auto task = [this, windowId]() {
         return windowController_->RaiseToAppTop(windowId);
     };

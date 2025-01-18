@@ -47,6 +47,10 @@ public:
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
     {
@@ -123,6 +127,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
+    virtual ScreenPowerState GetScreenPower() { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual bool TryToCancelScreenOff() = 0;
@@ -197,7 +202,8 @@ public:
     }
 
     // unique screen
-    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+        std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId)
     {
@@ -255,6 +261,11 @@ public:
     {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
+    }
+
+    virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
+    {
+        return DMError::DM_OK;
     }
 };
 } // namespace OHOS::Rosen

@@ -68,6 +68,7 @@ private:
     int HandleSendPointerEvenForMoveDrag(MessageParcel& data, MessageParcel& reply);
     int HandleIsStartMoving(MessageParcel& data, MessageParcel& reply);
     int HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleGetIsMidScene(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateRectChangeListenerRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleSetCallingSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetCustomDecorHeight(MessageParcel& data, MessageParcel& reply);
@@ -87,6 +88,7 @@ private:
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -99,8 +101,7 @@ private:
     int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply);
-    int HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply);
-    virtual void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) {}
+    int HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
@@ -110,7 +111,10 @@ private:
 
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
-    int HandleSetSupportWindowModes(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
+
+    // Keyboard
+    int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

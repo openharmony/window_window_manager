@@ -60,6 +60,7 @@ public:
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value HidePrivacyContentForHost(napi_env env, napi_callback_info info);
+    static napi_value OccupyEvents(napi_env env, napi_callback_info info);
     
 private:
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
@@ -87,6 +88,7 @@ private:
     napi_value OnHidePrivacyContentForHost(napi_env env, napi_callback_info info);
 
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+    napi_value OnOccupyEvents(napi_env env, napi_callback_info info);
     
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 

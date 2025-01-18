@@ -284,19 +284,19 @@ HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetMode
+ * @tc.name: GetWindowMode
  * @tc.desc: get mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetWindowMode, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetWindowMode());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<Window> window2 = sptr<Window>::MakeSptr();
     ASSERT_NE(nullptr, window2);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window2->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window2->GetWindowMode());
 }
 
 /**
@@ -2190,7 +2190,9 @@ HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
     WindowLimits windowLimits;
-    auto ret = window->SetWindowLimits(windowLimits);
+    auto ret = window->SetWindowLimits(windowLimits, false);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ret = window->SetWindowLimits(windowLimits, true);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -2604,6 +2606,19 @@ HWTEST_F(WindowTest, SetWindowTitle, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: SetSubWindowModal
+ * @tc.desc: SetSubWindowModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetSubWindowModal, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->SetSubWindowModal(true);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: GetWindowStatus
  * @tc.desc: GetWindowStatus
  * @tc.type: FUNC
@@ -2705,6 +2720,34 @@ HWTEST_F(WindowTest, GetDecorButtonStyle, Function | SmallTest | Level2)
     DecorButtonStyle style;
     WMError res = window->GetDecorButtonStyle(style);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+}
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    bool isMidScene = false;
+    WMError res = window->GetIsMidScene(isMidScene);
+    EXPECT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(isMidScene, false);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetLayoutTransform
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    Transform trans;
+    ASSERT_EQ(trans, window->GetLayoutTransform());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 } // namespace
 } // namespace Rosen

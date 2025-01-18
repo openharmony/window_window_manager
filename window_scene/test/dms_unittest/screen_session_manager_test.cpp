@@ -22,6 +22,7 @@
 #include "screen_scene_config.h"
 #include <surface.h>
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,6 +35,7 @@ const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3000;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -1899,7 +1901,8 @@ HWTEST_F(ScreenSessionManagerTest, MakeUniqueScreen, Function | SmallTest | Leve
 {
     vector<ScreenId> screenIds;
     screenIds.clear();
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds));
+    std::vector<DisplayId> displayIds;
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->MakeUniqueScreen(screenIds, displayIds));
 }
 
 /**
@@ -2664,12 +2667,70 @@ HWTEST_F(ScreenSessionManagerTest, NotifyAvailableAreaChanged01, Function | Smal
 }
 
 /**
+ * @tc.name: TriggerFoldStatusChange01
+ * @tc.desc: test interface TriggerFoldStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TriggerFoldStatusChange01, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    ASSERT_NE(ssm_, nullptr);
+    FoldStatus foldStatus = FoldStatus::EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    FoldStatus res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::HALF_FOLD;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+
+    foldStatus = FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED;
+    ssm_->TriggerFoldStatusChange(foldStatus);
+    res = ssm_->GetFoldStatus();
+    EXPECT_EQ(res, foldStatus);
+}
+
+/**
  * @tc.name: NotifyFoldStatusChanged
  * @tc.desc: NotifyFoldStatusChanged
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTest | Level3)
 {
+#ifdef FOLD_ABILITY_ENABLE
     std::string statusParam;
     auto ret = ssm_->NotifyFoldStatusChanged(statusParam);
     ASSERT_EQ(ret, -1);
@@ -2694,6 +2755,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, Function | SmallTe
     ssm_->HandleFoldScreenPowerInit();
     ret = ssm_->NotifyFoldStatusChanged(statusParam);
     ASSERT_EQ(ret, 0);
+#endif
 }
 
 /**
@@ -2771,6 +2833,7 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenProperty02, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | SmallTest | Level3)
 {
+#ifdef FOLD_ABILITY_ENABLE
     float phyWidth = 0.0f;
     float phyHeight = 0.0f;
     bool isReset = true;
@@ -2785,6 +2848,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, Function | Small
     ASSERT_NE(ssm_->foldScreenController_, nullptr);
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     ASSERT_FALSE(isReset);
+#endif
 }
 
 /**
@@ -2842,6 +2906,18 @@ HWTEST_F(ScreenSessionManagerTest, SwitchUser, Function | SmallTest | Level3)
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ssm->SwitchUser();
+}
+
+/**
+ * @tc.name: SetScreenPrivacyMaskImage001
+ * @tc.desc: SetScreenPrivacyMaskImage001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyMaskImage001, Function | SmallTest | Level3)
+{
+    ScreenId screenId = DEFAULT_SCREEN_ID;
+    auto ret = ssm_->SetScreenPrivacyMaskImage(screenId, nullptr);
+    ASSERT_EQ(ret, DMError::DM_OK);
 }
 
 /**
@@ -3382,7 +3458,11 @@ HWTEST_F(ScreenSessionManagerTest, ConfigureScreenSnapshotParams, Function | Sma
 {
     ssm_->OnStart();
     auto stringConfig = ScreenSceneConfig::GetStringConfig();
-    ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 0);
+    if (g_isPcDevice) {
+        ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 1);
+    } else {
+        ASSERT_EQ(stringConfig.count("screenSnapshotBundleName"), 0);
+    }
     ssm_->ConfigureScreenSnapshotParams();
 }
 
@@ -3497,6 +3577,71 @@ HWTEST_F(ScreenSessionManagerTest, SetGotScreenOffAndWakeUpBlock, Function | Sma
     ssm_->needScreenOffNotify_ = true;
     ssm_->SetGotScreenOffAndWakeUpBlock();
     ASSERT_FALSE(ssm_->needScreenOffNotify_);
+}
+
+/**
+ * @tc.name: GetFoldStatus
+ * @tc.desc: GetFoldStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto status = ssm_->GetFoldStatus();
+    if (ssm_->IsFoldable()) {
+        EXPECT_NE(FoldStatus::UNKNOWN, status);
+    } else {
+        EXPECT_EQ(FoldStatus::UNKNOWN, status);
+    }
+}
+
+/**
+ * @tc.name: SetScreenSkipProtectedWindow
+ * @tc.desc: SetScreenSkipProtectedWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption1";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    const std::vector<ScreenId> screenIds = {screenId, 1002};
+    bool isEnable = true;
+    ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
+    isEnable = false;
+    ASSERT_EQ(ssm_->SetScreenSkipProtectedWindow(screenIds, isEnable), DMError::DM_OK);
+}
+
+/**
+ * @tc.name: SetScreenSkipProtectedWindowInner
+ * @tc.desc: SetScreenSkipProtectedWindowInner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption1";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
+    }
+    virtualOption.name_ = "createVirtualOption2";
+    auto screenId2 = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId2 != VIRTUAL_SCREEN_ID) {
+        ASSERT_TRUE(screenId2 != VIRTUAL_SCREEN_ID);
+    }
+    auto screenSession = ssm_->GetScreenSession(screenId);
+    screenSession->SetShareProtect(true);
+    ssm_->SetScreenSkipProtectedWindowInner();
 }
 }
 } // namespace Rosen
