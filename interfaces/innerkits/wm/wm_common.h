@@ -722,15 +722,6 @@ struct SingleHandTransform {
         return !(*this == right);
     }
 
-    SingleHandTransform& operator=(const SingleHandTransform& right)
-    {
-        posX = right.posX;
-        posY = right.posY;
-        scaleX = right.scaleX;
-        scaleY = right.scaleY;
-        return *this;
-    }
-
     bool Marshalling(Parcel& parcel) const
     {
         return parcel.WriteInt32(posX) && parcel.WriteInt32(posY) &&
