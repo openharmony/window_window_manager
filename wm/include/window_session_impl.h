@@ -392,8 +392,14 @@ protected:
     void NotifySetUIContentComplete();
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
     std::atomic_bool setUIContentCompleted_ { false };
+    void SetUIExtensionDestroyComplete();
+    void SetUIExtensionDestroyCompleteInSubWindow();
+    void AddSetUIExtensionDestroyTimeoutCheck();
+    std::atomic_bool setUIExtensionDestroyCompleted_ { false };
+    std::atomic_bool startUIExtensionDestroyTimer_ { false };
     enum TimeoutErrorCode : int32_t {
-        SET_UICONTENT_TIMEOUT = 1000
+        SET_UICONTENT_TIMEOUT = 1000,
+        SET_UIEXTENSION_DESTROY_TIMEOUT
     };
 
     /*
