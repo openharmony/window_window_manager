@@ -884,17 +884,16 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
             if (handleId_ == -1) {
                 TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
                 return false;
-            } else if (firstHandleId_ != -1) {
+            }if (firstHandleId_ != -1) {
                 handleId_ = firstHandleId_;
                 navController->SetInPIPMode(handleId_);
                 TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
                 return true;
-            } else {
-                TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
-                firstHandleId_ = handleId_;
-                navController->SetInPIPMode(handleId_);
-                return true;
             }
+            TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
+            firstHandleId_ = handleId_;
+            navController->SetInPIPMode(handleId_);
+            return true;
         } else {
             TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
             return false;
