@@ -58,7 +58,7 @@ extern "C" {
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
+int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
 
 /**
  * @brief Set status bar content color.
@@ -73,7 +73,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int32_t color);
+int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color);
 
 /**
  * @brief Set whether to show navigation bar.
@@ -90,7 +90,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int3
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
+int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
 
 /**
  * @brief Get the avoid area
@@ -106,7 +106,7 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
+int32_t OH_WindowManager_GetWindowAvoidArea(
     int32_t windowId, WindowManager_AvoidAreaType type, WindowManager_AvoidArea* avoidArea);
 
 /**
@@ -120,7 +120,7 @@ WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY} this window state is abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, const char* color);
+int32_t OH_WindowManager_SetWindowBackgroundColor(int32_t windowId, const char* color);
 
 /**
  * @brief Sets the brightness of window.
@@ -134,7 +134,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, con
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float brightness);
+int32_t OH_WindowManager_SetWindowBrightness(int32_t windowId, float brightness);
 
 /**
  * @brief Sets whether keep screen on or not.
@@ -148,7 +148,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float br
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScreenOn);
+int32_t OH_WindowManager_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScreenOn);
 
 /**
  * @brief Sets whether is private mode or not.
@@ -162,7 +162,7 @@ WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool i
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy);
+int32_t OH_WindowManager_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy);
 
 /**
  * @brief Get the properties of current window.
@@ -176,8 +176,8 @@ WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool is
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId,
-    WindowManager_WindowProperties* windowProperties);
+int32_t OH_WindowManager_GetWindowProperties(
+    int32_t windowId, WindowManager_WindowProperties* windowProperties);
 
 /**
  * @brief Obtains snapshot of window.
@@ -191,7 +191,7 @@ WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId,
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormal.
  * @since 16
  */
-WindowManager_ErrorCode OH_Window_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap);
+int32_t OH_WindowManager_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap);
 
 #ifdef __cplusplus
 }

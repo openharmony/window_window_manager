@@ -85,7 +85,7 @@ const std::map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WINDOW_TYPE_MA
     { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
 };
 
-WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
+int32_t OH_WindowManager_GetWindowAvoidArea(
     int32_t windowId, WindowManager_AvoidAreaType type, WindowManager_AvoidArea* avoidArea)
 {
     if (avoidArea == nullptr) {
@@ -113,7 +113,7 @@ WindowManager_ErrorCode OH_Window_GetWindowAvoidArea(
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
+int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -142,7 +142,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarEnabled(int32_t windowId, bo
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int32_t color)
+int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -170,7 +170,7 @@ WindowManager_ErrorCode OH_Window_SetWindowStatusBarColor(int32_t windowId, int3
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
+int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -199,7 +199,7 @@ WindowManager_ErrorCode OH_Window_SetWindowNavigationBarEnabled(int32_t windowId
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
+int32_t OH_WindowManager_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
 {
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "pixelMap is null, windowId:%{public}d", windowId);
@@ -223,7 +223,7 @@ WindowManager_ErrorCode OH_Window_Snapshot(int32_t windowId, OH_PixelmapNative* 
     return pixelMap != nullptr ? WindowManager_ErrorCode::OK : errCode;
 }
 
-WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, const char* color)
+int32_t OH_WindowManager_SetWindowBackgroundColor(int32_t windowId, const char* color)
 {
     if (color == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "color is null, windowId:%{public}d", windowId);
@@ -247,7 +247,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBackgroundColor(int32_t windowId, con
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float brightness)
+int32_t OH_WindowManager_SetWindowBrightness(int32_t windowId, float brightness)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -267,7 +267,7 @@ WindowManager_ErrorCode OH_Window_SetWindowBrightness(int32_t windowId, float br
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScreenOn)
+int32_t OH_WindowManager_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScreenOn)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -287,7 +287,7 @@ WindowManager_ErrorCode OH_Window_SetWindowKeepScreenOn(int32_t windowId, bool i
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy)
+int32_t OH_WindowManager_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -307,8 +307,8 @@ WindowManager_ErrorCode OH_Window_SetWindowPrivacyMode(int32_t windowId, bool is
     return errCode;
 }
 
-WindowManager_ErrorCode OH_Window_GetWindowProperties(int32_t windowId,
-    WindowManager_WindowProperties* windowProperties)
+int32_t OH_WindowManager_GetWindowProperties(
+    int32_t windowId, WindowManager_WindowProperties* windowProperties)
 {
     if (windowProperties == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowProperties is null, windowId:%{public}d", windowId);
