@@ -419,8 +419,8 @@ ohos_shared_library("libwm_ndk") {
   ]
 
   sources = [
-    "src/oh_window_event_filter.cpp",
     "src/oh_window.cpp",
+    "src/oh_window_event_filter.cpp",
   ]
 
   deps = [
