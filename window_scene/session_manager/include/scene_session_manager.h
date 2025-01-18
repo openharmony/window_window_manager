@@ -677,6 +677,7 @@ private:
     /*
      * Window Focus
      */
+    std::unordered_set<int32_t> highlightIds_;
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -942,7 +943,6 @@ private:
     int32_t focusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
     int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
-    std::unordered_set<int32_t> highlightIds_;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};

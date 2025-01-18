@@ -2835,7 +2835,7 @@ napi_value JsSceneSession::OnSetExclusivelyHighlighted(napi_env env, napi_callba
     }
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr, id: %{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     session->SetExclusivelyHighlighted(isExclusivelyHighlighted);
@@ -6045,8 +6045,13 @@ void JsSceneSession::OnKeyboardViewModeChange(const KeyboardViewMode& mode)
 
 void JsSceneSession::ProcessSetHighlightChangeRegister()
 {
-    NotifyHighlightChangeFunc func = [this](bool isHighlight) {
-        this->NotifyHighlightChange(isHighlight);
+    NotifyHighlightChangeFunc func = [weakThis = wptr(this), where = __func__](bool isHighlight) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->NotifyHighlightChange(isHighlight);
     };
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -6058,11 +6063,11 @@ void JsSceneSession::ProcessSetHighlightChangeRegister()
 
 void JsSceneSession::NotifyHighlightChange(bool isHighlight)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "isHighlight:%{public}d, id:%{public}d", isHighlight, persistentId_);
+    TLOGI(WmsLogTag::WMS_FOCUS, "isHighlight: %{public}d, id: %{public}d", isHighlight, persistentId_);
     auto task = [weakThis = wptr(this), isHighlight, env = env_, persistentId = persistentId_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_FOCUS, "jsSceneSession id: %{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(HIGHLIGHT_CHANGE_CB);
