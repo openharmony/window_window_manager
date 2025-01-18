@@ -136,6 +136,9 @@ void SettingProvider::ExecRegisterCb(const sptr<SettingObserver>& observer)
 
 ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper();
@@ -155,6 +158,9 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 
 ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observer)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper();
@@ -359,6 +365,9 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
 
 ErrCode SettingProvider::RegisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUriMultiUserByTable(observer->GetKey(), tableName);
     auto helper = CreateDataShareHelperMultiUserByTable(tableName);
@@ -378,6 +387,9 @@ ErrCode SettingProvider::RegisterObserverByTable(const sptr<SettingObserver>& ob
 
 ErrCode SettingProvider::UnregisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUriMultiUserByTable(observer->GetKey(), tableName);
     auto helper = CreateDataShareHelperMultiUserByTable(tableName);
@@ -394,7 +406,7 @@ ErrCode SettingProvider::UnregisterObserverByTable(const sptr<SettingObserver>& 
 
 ErrCode SettingProvider::GetIntValueMultiUserByTable(const std::string& key, int32_t& value, std::string tableName)
 {
-    int64_t result;
+    int64_t result = 0;
     ErrCode ret = GetLongValueMultiUserByTable(key, result, tableName);
     if (ret != ERR_OK) {
         return ret;
@@ -405,7 +417,7 @@ ErrCode SettingProvider::GetIntValueMultiUserByTable(const std::string& key, int
 
 ErrCode SettingProvider::GetLongValueMultiUserByTable(const std::string& key, int64_t& value, std::string tableName)
 {
-    std::string result;
+    std::string result = "";
     ErrCode ret = GetStringValueMultiUserByTable(key, result, tableName);
     if (ret != ERR_OK) {
         return ret;
