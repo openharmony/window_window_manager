@@ -2839,6 +2839,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        newSession->GetSessionProperty()->SetWindowCornerRadius(property->GetWindowCornerRadius());
         property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
@@ -3451,8 +3452,6 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
         TLOGW(WmsLogTag::WMS_LIFE, "Invalid session type, id:%{public}d, type:%{public}d",
             newSession->GetPersistentId(), type);
     }
-    auto sessionProperty = newSession->GetSessionProperty();
-    sessionProperty->SetWindowCornerRadius(appWindowSceneConfig_.floatCornerRadius_);
 }
 
 void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags)

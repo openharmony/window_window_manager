@@ -6344,8 +6344,7 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
             TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id %{public}d radius: %{public}f",
                 where, session->GetPersistentId(), cornerRadius);
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
-            auto property = session->GetSessionProperty();
-            property->SetWindowCornerRadius(cornerRadius);
+            session->GetSessionProperty()->SetWindowCornerRadius(cornerRadius);
         }
     }, __func__);
     return WSError::WS_OK;
