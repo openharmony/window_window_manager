@@ -92,7 +92,6 @@ public:
     WSError UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId);
 
 private:
-    std::shared_mutex focusGroupMutex_; // Above guarded by focusGroupMutex_
     std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMap_;
     std::unordered_set<DisplayId> virtualScreenDisplayIdSet_;
     
