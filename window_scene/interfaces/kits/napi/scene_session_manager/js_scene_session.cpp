@@ -85,6 +85,9 @@ const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
 const std::string SESSION_DISPLAY_ID_CHANGE_CB = "sessionDisplayIdChange";
 const std::string SET_SUPPORT_WINDOW_MODES_CB = "setSupportWindowModes";
 const std::string SESSION_LOCK_STATE_CHANGE_CB = "sessionLockStateChange";
+const std::string UPDATE_SESSION_LABEL_AND_ICON_CB = "updateSessionLabelAndIcon";
+const std::string KEYBOARD_STATE_CHANGE_CB = "keyboardStateChange";
+const std::string KEYBOARD_VIEW_MODE_CHANGE_CB = "KeyboardViewModeChange";
 
 constexpr int ARG_COUNT_3 = 3;
 constexpr int ARG_COUNT_4 = 4;
@@ -155,6 +158,9 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SET_SUPPORT_WINDOW_MODES_CB,           ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB},
     {WINDOW_MOVING_CB,                      ListenerFuncType::WINDOW_MOVING_CB},
     {SESSION_LOCK_STATE_CHANGE_CB,          ListenerFuncType::SESSION_LOCK_STATE_CHANGE_CB},
+    {UPDATE_SESSION_LABEL_AND_ICON_CB,      ListenerFuncType::UPDATE_SESSION_LABEL_AND_ICON_CB},
+    {KEYBOARD_STATE_CHANGE_CB,              ListenerFuncType::KEYBOARD_STATE_CHANGE_CB},
+    {KEYBOARD_VIEW_MODE_CHANGE_CB,         ListenerFuncType::KEYBOARD_VIEW_MODE_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -2511,6 +2517,15 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSION_LOCK_STATE_CHANGE_CB):
             ProcessSessionLockStateChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_SESSION_LABEL_AND_ICON_CB):
+            ProcessUpdateSessionLabelAndIconRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::KEYBOARD_STATE_CHANGE_CB):
+            ProcessKeyboardStateChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::KEYBOARD_VIEW_MODE_CHANGE_CB):
+            ProcessKeyboardViewModeChangeRegister();
             break;
         default:
             break;
@@ -5839,5 +5854,148 @@ napi_value JsSceneSession::OnSendContainerModalEvent(napi_env env, napi_callback
     }
     session->SendContainerModalEvent(eventName, eventValue);
     return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessUpdateSessionLabelAndIconRegister()
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "in");
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetUpdateSessionLabelAndIconListener([weakThis = wptr(this), where](const std::string& label,
+        const std::shared_ptr<Media::PixelMap>& icon) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->UpdateSessionLabelAndIcon(label, icon);
+    });
+    TLOGD(WmsLogTag::WMS_MAIN, "success");
+}
+
+void JsSceneSession::UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    const char* const where = __func__;
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, label, icon, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_SESSION_LABEL_AND_ICON_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsLabel = CreateJsValue(env, label);
+        if (jsLabel == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s label is nullptr", where);
+            return;
+        }
+        napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, icon);
+        if (jsIcon == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s icon is nullptr", where);
+            return;
+        }
+        napi_value argv[] = {jsLabel, jsIcon};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
+void JsSceneSession::ProcessKeyboardStateChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetKeybaordStateChangeListener(
+        [weakThis = wptr(this), where = __func__](const SessionState& state, const KeyboardViewMode& mode) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnKeyboardStateChange(state, mode);
+    });
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "success");
+}
+
+void JsSceneSession::OnKeyboardStateChange(const SessionState& state, const KeyboardViewMode& mode)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, state: %{public}d, KeyboardViewMode: %{public}d",
+        session->GetPersistentId(), state, static_cast<uint32_t>(mode));
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, state, env = env_, mode] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "OnKeyboardStateChange jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(KEYBOARD_STATE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsKeyboardStateObj = CreateJsValue(env, state);
+        napi_value jskeyboardViewModeObj = CreateJsValue(env, mode);
+        napi_value argv[] = { jsKeyboardStateObj, jskeyboardViewModeObj };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnKeyboardStateChange, state:" + std::to_string(static_cast<int>(state)));
+}
+
+void JsSceneSession::ProcessKeyboardViewModeChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetKeyboardViewModeChangeListener(
+        [weakThis = wptr(this)](const KeyboardViewMode& mode) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "ProcessKeyboardViewModeChangeRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnKeyboardViewModeChange(mode);
+    });
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success. id: %{public}d", persistentId_);
+}
+
+void JsSceneSession::OnKeyboardViewModeChange(const KeyboardViewMode& mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Change KeyboardViewMode to %{public}d.", static_cast<uint32_t>(mode));
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, mode] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(KEYBOARD_VIEW_MODE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsKeyboardViewMode = CreateJsValue(env, static_cast<uint32_t>(mode));
+        napi_value argv[] = {jsKeyboardViewMode};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnKeyboardViewModeChange");
 }
 } // namespace OHOS::Rosen

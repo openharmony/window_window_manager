@@ -74,9 +74,12 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         if (session->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
         }
+        session->GetSessionProperty()->SetKeyboardViewMode(property->GetKeyboardViewMode());
         session->UseFocusIdIfCallingSessionIdInvalid();
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
-            session->GetPersistentId(), session->GetCallingSessionId());
+        TLOGNI(WmsLogTag::WMS_KEYBOARD,
+            "Show keyboard session, id: %{public}d, calling id: %{public}d, viewMode: %{public}d",
+            session->GetPersistentId(), session->GetCallingSessionId(),
+            static_cast<uint32_t>(property->GetKeyboardViewMode()));
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
         return session->SceneSession::Foreground(property);
     }, "Show");
@@ -697,6 +700,23 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
 }
 
+WSError KeyboardSession::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    PostTask([weakThis = wptr(this), mode]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "Session is null, change keyboard view mode failed");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->GetSessionProperty()->SetKeyboardViewMode(mode);
+        if (session->changeKeyboardViewModeFunc_) {
+            session->changeKeyboardViewModeFunc_(mode);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+    return WSError::WS_OK;
+}
+
 void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info)
 {
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
@@ -711,5 +731,18 @@ void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaC
         return;
     }
     keyboardCallback_->onNotifyOccupiedAreaChange(info);
+}
+
+void KeyboardSession::SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func)
+{
+    PostTask([weakThis = wptr(this), func, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or keyboardViewModeChangeFunc is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->changeKeyboardViewModeFunc_ = func;
+        return WSError::WS_OK;
+    }, __func__);
 }
 } // namespace OHOS::Rosen
