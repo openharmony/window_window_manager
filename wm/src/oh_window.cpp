@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+#include "oh_window.h"
+
 #include <cstdint>
 #include <functional>
 #include <mutex>
 
 #include <event_handler.h>
 #include <event_runner.h>
-#include "oh_window.h"
 #include "oh_window_comm.h"
 #include "window.h"
 #include "window_manager_hilog.h"
