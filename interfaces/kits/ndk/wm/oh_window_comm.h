@@ -23,6 +23,13 @@ extern "C" {
 #endif
 
 /**
+ * @brief The native pixel map information defined by Image Kit.
+ *
+ * @since 16
+ */
+struct OH_PixelmapNative;
+
+/**
  * @brief Enumerates the result types of the wm interface
  *
  * @since 12
@@ -79,6 +86,22 @@ typedef enum {
 } WindowManager_AvoidAreaType;
 
 /**
+ * @brief The type of a window
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Sub window. */
+    WINDOW_MANAGER_WINDOW_TYPE_APP = 0,
+    /** Main Window. */
+    WINDOW_MANAGER_WINDOW_TYPE_MAIN = 1,
+    /** Float. */
+    WINDOW_MANAGER_WINDOW_TYPE_FLOAT = 8,
+    /** Dialog */
+    WINDOW_MANAGER_WINDOW_TYPE_DIALOG = 16,
+} WindowManager_WindowType;
+
+/**
  * @brief Defines the window rect data structure.
  *
  * @since 16
@@ -93,6 +116,40 @@ typedef struct {
     /** Height of the window. */
     uint32_t height;
 } WindowManager_Rect;
+
+/**
+ * @brief Properties of window
+ *
+ * @since 16
+*/
+typedef struct {
+    /** The position and size of the window */
+    WindowManager_Rect windowRect;
+    /** The position relative to the window and size of drawable area */
+    WindowManager_Rect drawableRect;
+    /** Window type */
+    WindowManager_WindowType type;
+    /** Whether the window is displayed in full screen mode. The default value is false */
+    bool isFullScreen;
+    /** Whether the window layout is in full screen mode(whether the window is immersive). The default value is false */
+    bool isLayoutFullScreen;
+    /** Whether the window can gain focus. The default value is true */
+    bool focusable;
+    /** Whether the window is touchable. The default value is false */
+    bool touchable;
+    /** Brightness value of window */
+    float brightness;
+    /** Whether keep screen on */
+    bool isKeepScreenOn;
+    /** Whether make window in privacy mode or not */
+    bool isPrivacyMode;
+    /** Whether is transparent or not */
+    bool isTransparent;
+    /** Window id */
+    uint32_t id;
+    /** Display id */
+    uint32_t displayId;
+} WindowManager_WindowProperties;
 
 /**
  * @brief Defines the avoid area data structure.
