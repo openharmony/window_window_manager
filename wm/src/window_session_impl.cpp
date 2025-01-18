@@ -3763,7 +3763,7 @@ void WindowSessionImpl::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFr
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}" PRId64, action);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3831,6 +3831,10 @@ WMError WindowSessionImpl::SetBackgroundColor(uint32_t color)
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
         if (uiContent != nullptr) {
             uiContent->SetBackgroundColor(color);
+            // 24: Shift right by 24 bits to move the alpha channel to the lowest 8 bits.
+            uint8_t alpha = static_cast<uint8_t>((color >> 24) & 0xff);
+            property_->SetBackgroundAlpha(alpha);
+            UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA);
             return WMError::WM_OK;
         }
     }

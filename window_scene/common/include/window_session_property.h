@@ -180,6 +180,9 @@ public:
     WindowState GetWindowState() const;
     void SetWindowState(WindowState state);
 
+    uint8_t GetBackgroundAlpha() const;
+    void SetBackgroundAlpha(uint8_t alpha);
+
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
     void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
@@ -247,6 +250,7 @@ private:
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
+    bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -271,6 +275,7 @@ private:
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
+    void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex requestRectMutex_;
@@ -339,8 +344,8 @@ private:
     bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
-    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
+    static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
@@ -351,6 +356,7 @@ private:
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
+    uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
 
     /**
      * Sub Window
