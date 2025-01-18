@@ -572,7 +572,7 @@ public:
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
-    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
+    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect) const;
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
@@ -594,6 +594,14 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
+
+    /**
+     * Window Property
+     */
+    WindowUIInfo GetWindowUIInfoForWindowInfo() const;
+    WindowDisplayInfo GetWindowDisplayInfoForWindowInfo() const;
+    WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
+    WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

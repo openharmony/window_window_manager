@@ -10466,6 +10466,63 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
+WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
+    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos)
+{
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        sceneSessionMapCopy = sceneSessionMap_;
+    } // 有必要复制一个sceneSessionMap_吗
+    auto task = [this, windowInfoFilterOption, windowInfoTypeOption, displayId, sceneSessionMapCopy, &infos]() {
+        for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            if (!FilterForListWindowInfo(windowInfoFilterOption, displayId, sceneSession)) {
+                continue;
+            }
+            auto windowInfo = sptr<WindowInfo>::MakeSptr();
+            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_UI_INFO)) {
+                windowInfo->windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
+            }
+            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
+                windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
+            }
+            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
+                windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
+            }
+            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_META_INFO)) {   
+                windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+            }
+            infos.emplace_back(windowInfo);
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__); // 是否需要同步
+}
+
+bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
+    DisplayId displayId, const sptr<SceneSession>& sceneSession)
+{
+    if (displayId != DISPLAY_ID_INVALID && sceneSession->GetSessionProperty()->GetDisplayId() != displayId) {
+        return false;
+    }
+    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::EXCLUDE_SYSTEM)) && sceneSession->GetSessionInfo().isSystem_) {
+        return false;
+    }
+    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::VISIBLE)) &&
+        sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+        return false;
+    }
+    bool isForeground = sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
+                        sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
+    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::FOREGROUND)) && !isForeground) {
+        return false;
+    }
+    return true; // 用case吗
+}
+
 WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
     std::vector<sptr<WindowLayoutInfo>>& infos)
 {

@@ -41,6 +41,7 @@ public:
     static napi_value UnregisterWindowMangerCallback(napi_env env, napi_callback_info info);
     static napi_value GetTopWindow(napi_env env, napi_callback_info info);
     static napi_value GetLastWindow(napi_env env, napi_callback_info info);
+    static napi_value ListWindowInfo(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowLayoutInfo(napi_env env, napi_callback_info info);
     static napi_value SetWindowLayoutMode(napi_env env, napi_callback_info info);
     static napi_value SetGestureNavigationEnabled(napi_env env, napi_callback_info info);

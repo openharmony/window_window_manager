@@ -286,10 +286,17 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };
 
+    napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowInfo>>& infos);
+    napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowInfo>& windowInfo);
+    napi_value GetWindowUIInfoAndConvertToJsValue(napi_env env, const WindowUIInfo& windowUIInfo);
+    napi_value GetWindowDisplayInfoAndConvertToJsValue(napi_env env, const WindowDisplayInfo& windowDisplayInfo);
+    napi_value GetWindowLayoutInfoAndConvertToJsValue(napi_env env, const WindowLayoutInfo& windowLayoutInfo);
+    napi_value GetWindowMetaInfoAndConvertToJsValue(napi_env env, const WindowMetaInfo& windowMetaInfo);
     napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos);
-    napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info);
-    napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
-    napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
+    napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& windowLayoutInfo);
+    napi_value CreateJsWindowVisibilityInfoArrayObject(napi_env env,
+        const std::vector<sptr<WindowVisibilityInfo>>& infos);
+    napi_value CreateJsWindowVisibilityInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);

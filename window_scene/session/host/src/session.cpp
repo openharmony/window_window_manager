@@ -990,7 +990,7 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     return WSError::WS_OK;
 }
 
-DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
+DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
@@ -3769,5 +3769,48 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
 bool Session::IsPcWindow() const
 {
     return systemConfig_.IsPcWindow();
+}
+
+WindowUIInfo Session::GetWindowUIInfoForWindowInfo() const
+{
+    WindowUIInfo windowUIInfo;
+    windowUIInfo.visibilityState = GetVisibilityState();
+    return windowUIInfo;
+}
+
+WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
+{
+    WindowDisplayInfo windowDisplayInfo;
+    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED) {
+        WSRect sessionGlobalRect = GetSessionGlobalRect();
+        windowDisplayInfo.displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
+    } else {
+        windowDisplayInfo.displayId = GetSessionProperty()->GetDisplayId() ;
+    }
+    return windowDisplayInfo;
+}
+
+WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
+{
+    WindowLayoutInfo windowLayoutInfo;
+    WSRect sessionGlobalRect = GetSessionGlobalRect();
+    sessionGlobalRect.width_ *= GetScaleX();
+    sessionGlobalRect.height_ *= GetScaleY();
+    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED) {
+        DisplayId displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
+    }
+    windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
+                              sessionGlobalRect.width_, sessionGlobalRect.height_};
+    return windowLayoutInfo;
+}
+
+WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
+{
+    WindowMetaInfo windowMetaInfo;
+    windowMetaInfo.windowId = GetWindowId();
+    windowMetaInfo.windowName = GetSessionProperty()->GetWindowName();
+    windowMetaInfo.bundleName = GetSessionInfo().bundleName_;
+    windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
+    return windowMetaInfo;
 }
 } // namespace OHOS::Rosen
