@@ -127,6 +127,7 @@ constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
+constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -1586,11 +1587,12 @@ uint32_t SceneSessionManager::GetLockScreenZorder()
     for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && session->IsScreenLockWindow()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
-            return session->GetZOrder();
+            return session->GetZOrder() < DEFAULT_LOCK_SCREEN_ZORDER ? DEFAULT_LOCK_SCREEN_ZORDER :
+                session->GetZOrder();
         }
     }
     TLOGE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not found");
-    return 0;
+    return DEFAULT_LOCK_SCREEN_ZORDER;
 }
 
 WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,

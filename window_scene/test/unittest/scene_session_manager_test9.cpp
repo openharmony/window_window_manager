@@ -1172,20 +1172,25 @@ HWTEST_F(SceneSessionManagerTest9, GetLockScreenZorder, Function | SmallTest | L
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
+    constexpr uint32_t LOCK_SCREEN_ZORDER = 2003;
 
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
-    auto ret = ssm_->GetLockScreenZorder();
-    ASSERT_EQ(ret, 0);
-
+    ASSERT_EQ(ssm_->GetLockScreenZorder(), DEFAULT_LOCK_SCREEN_ZORDER);
     Session session(info);
     session.isScreenLockWindow_ = true;
-    ret = ssm_->GetLockScreenZorder();
-    ASSERT_EQ(ret, 0);
+    session.SetZOrder(LOCK_SCREEN_ZORDER);
+    ASSERT_EQ(ssm_->GetLockScreenZorder(), LOCK_SCREEN_ZORDER);
+    session.SetZOrder(0);
+    ASSERT_EQ(ssm_->GetLockScreenZorder(), DEFAULT_LOCK_SCREEN_ZORDER);
+    session.SetZOrder(DEFAULT_LOCK_SCREEN_ZORDER);
+    ASSERT_EQ(ssm_->GetLockScreenZorder(), DEFAULT_LOCK_SCREEN_ZORDER);
+    session.SetZOrder(0DEFAULT_LOCK_SCREEN_ZORDER - 1);
+    ASSERT_EQ(ssm_->GetLockScreenZorder(), DEFAULT_LOCK_SCREEN_ZORDER);
 
     ssm_->pipWindowSurfaceId_ = 0;
     RSSurfaceNodeConfig config;
     session.surfaceNode_ = std::make_shared<RSSurfaceNode>(config, true);
-
     ssm_->SelectSesssionFromMap(0);
     ssm_->NotifyPiPWindowVisibleChange(true);
     ssm_->NotifyPiPWindowVisibleChange(false);
