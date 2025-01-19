@@ -18,6 +18,24 @@
 namespace OHOS {
 namespace Rosen {
 
+WSError FocusGroup::UpdateFocusedSessionId()
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId, persistentId);
+    if (focusedSessionId == persistentId) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "Focus scene not change, id: %{public}d", focusedSessionId);
+        return WSError::WS_DO_NOTHING;
+    }
+    lastFocusedSessionId = focusedSessionId;
+    focusedSessionId = persistentId;
+    return WSError::WS_OK;
+}
+
+WSError FocusGroup::UpdateFocusedAppSessionId()
+{
+    lastFocusedAppSessionId = persistentId;
+    return WSError::WS_OK;
+}
+
 WindowFocusController::WindowFocusController() noexcept
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "constructor");
@@ -109,10 +127,8 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
 
 std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList()
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "in");
-    std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMapCopy = focusGroupMap_;
     std::vector<std::pair<DisplayId, int32_t>> allFocusGroup;
-    for (const auto& elem : focusGroupMapCopy) {
+    for (const auto& elem : focusGroupMap_) {
         auto curFocusGroup = elem.second;
         if (curFocusGroup == nullptr) {
             TLOGE(WmsLogTag::WMS_FOCUS, "focus group is null");

@@ -308,7 +308,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
 
     listenerController_ = std::make_shared<SessionListenerController>();
-    windowFocusController_ = std::make_shared<WindowFocusController>();
+    windowFocusController_ = sptr<WindowFocusController>::MakeSptr();
 }
 
 SceneSessionManager::~SceneSessionManager()
