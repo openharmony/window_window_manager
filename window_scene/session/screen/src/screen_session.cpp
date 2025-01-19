@@ -1054,16 +1054,18 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
-    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
-        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
-        rotation = static_cast<Rotation>(temp);
-    }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN
         && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
+    }
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
+    (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        rotation = static_cast<Rotation>(temp);
+        isVerticalScreen = true;
     }
     switch (rotation) {
         case Rotation::ROTATION_0: {
@@ -1087,7 +1089,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
 
 DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
-    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
+    (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
         uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
         rotation = static_cast<Rotation>(temp);
     }
