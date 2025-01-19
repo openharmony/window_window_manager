@@ -245,6 +245,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetStatusBarAvoidHeight);
     BindNativeFunction(env, exportObj, "cloneWindow", moduleName,
         JsSceneSessionManager::CloneWindow);
+    BindNativeFunction(env, exportObj, "RegisterSingleHandContainerNode", moduleName,
+        JsSceneSessionManager::RegisterSingleHandContainerNode);
     return NapiGetUndefined(env);
 }
 
@@ -634,6 +636,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().RegisterNotifyRootSceneOccupiedAreaChangeFunc(
         [](const sptr<OccupiedAreaChangeInfo>& info) {
         RootScene::staticRootScene_->NotifyOccupiedAreaChangeForRoot(info);
+    });
+    SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIDFunc(
+        [](const std::string& id) {
+        return RootScene::staticRootScene_->GetRSNodeByStringID(id);
     });
 }
 
@@ -1240,6 +1246,13 @@ napi_value JsSceneSessionManager::CloneWindow(napi_env env, napi_callback_info i
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnCloneWindow(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::RegisterSingleHandContainerNode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterSingleHandContainerNode(env, info) : nullptr;
 }
 
 bool JsSceneSessionManager::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -4104,6 +4117,28 @@ napi_value JsSceneSessionManager::OnSetStatusBarAvoidHeight(napi_env env, napi_c
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().SetStatusBarAvoidHeight(height);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info)
+{
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[DEFAULT_ARG_COUNT] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string stringId;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], stringId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to stringId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().RegisterSingleHandContainerNode(stringId);
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
