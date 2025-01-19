@@ -18,7 +18,7 @@
 namespace OHOS {
 namespace Rosen {
 
-WSError FocusGroup::UpdateFocusedSessionId()
+WSError FocusGroup::UpdateFocusedSessionId(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId, persistentId);
     if (focusedSessionId == persistentId) {
@@ -30,7 +30,7 @@ WSError FocusGroup::UpdateFocusedSessionId()
     return WSError::WS_OK;
 }
 
-WSError FocusGroup::UpdateFocusedAppSessionId()
+WSError FocusGroup::UpdateFocusedAppSessionId(int32_t persistentId)
 {
     lastFocusedAppSessionId = persistentId;
     return WSError::WS_OK;
