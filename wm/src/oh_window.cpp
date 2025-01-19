@@ -431,6 +431,6 @@ int32_t OH_WindowManager_GetWindowProperties(
         }
         uicontent->GetAppPaintSize(drawableRect);
         TransformedToWindowManagerRect(drawableRect, windowProperties->drawableRect);
-    }, __func__); 
+    }, __func__);
     return errCode;
 }
