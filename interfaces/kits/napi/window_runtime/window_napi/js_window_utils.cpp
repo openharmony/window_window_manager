@@ -651,7 +651,9 @@ napi_value GetWindowUIInfoAndConvertToJsValue(napi_env env, const WindowUIInfo& 
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "visibilityState",
-                            CreateJsValue(env, static_cast<uint32_t>(windowUIInfo.visibilityState)));
+                            windowUIInfo.visibilityState != WindowVisibilityState::WINDOW_LAYER_STATE_MAX ?
+                            CreateJsValue(env, static_cast<uint32_t>(windowUIInfo.visibilityState)) :
+                            CreateJsUndefined(env));
     return objValue;
 }
 
@@ -660,7 +662,9 @@ napi_value GetWindowDisplayInfoAndConvertToJsValue(napi_env env, const WindowDis
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "displayId",
-                            CreateJsValue(env, static_cast<int64_t>(windowDisplayInfo.displayId)));
+                            windowDisplayInfo.displayId != DISPLAY_ID_INVALID ?
+                            CreateJsValue(env, static_cast<int64_t>(windowDisplayInfo.displayId)) :
+                            CreateJsUndefined(env));
     return objValue;
 }
 
@@ -668,7 +672,10 @@ napi_value GetWindowLayoutInfoAndConvertToJsValue(napi_env env, const WindowLayo
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, windowLayoutInfo.rect));
+    napi_set_named_property(env, objValue, "rect",
+                            !windowLayoutInfo.rect.IsUninitializedRect() ?
+                            GetRectAndConvertToJsValue(env, windowLayoutInfo.rect) :
+                            CreateJsUndefined(env));
     return objValue;
 }
 
@@ -676,10 +683,14 @@ napi_value GetWindowMetaInfoAndConvertToJsValue(napi_env env, const WindowMetaIn
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, windowMetaInfo.windowId));
-    napi_set_named_property(env, objValue, "windowName", CreateJsValue(env, windowMetaInfo.windowName));
-    napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, windowMetaInfo.bundleName));
-    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, windowMetaInfo.abilityName));
+    napi_set_named_property(env, objValue, "windowId", windowMetaInfo.windowId != 0 ?
+                            CreateJsValue(env, windowMetaInfo.windowId) : CreateJsUndefined(env));
+    napi_set_named_property(env, objValue, "windowName", windowMetaInfo.windowName != "" ?
+                            CreateJsValue(env, windowMetaInfo.windowName) : CreateJsUndefined(env));
+    napi_set_named_property(env, objValue, "bundleName", windowMetaInfo.bundleName != "" ?
+                            CreateJsValue(env, windowMetaInfo.bundleName) : CreateJsUndefined(env));
+    napi_set_named_property(env, objValue, "abilityName", windowMetaInfo.abilityName != "" ?
+                            CreateJsValue(env, windowMetaInfo.abilityName) : CreateJsUndefined(env));
     return objValue;
 }
 

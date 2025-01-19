@@ -810,22 +810,35 @@ struct TitleButtonRect {
     }
 };
 
+using WindowInfoFilterOptionType = uint8_t
+
 /**
  * @brief WindowInfo filter Option
  */
-enum class WindowInfoFilterOption : uint8_t {
+enum class WindowInfoFilterOption : WindowInfoFilterOptionType {
     START = 0,
     ALL = START,
     EXCLUDE_SYSTEM = 1, // 确定是否反义
     VISIBLE = 1 << 1,
     FOREGROUND = 1 << 2,
-    END,
+    END = 7,
 };
+
+inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs) {
+    return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionType>(lhs) |
+        static_cast<WindowInfoFilterOptionType>(lhs))
+}
+
+inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option) {
+    return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0
+}
+
+using WindowInfoTypeOptionType = uint8_t
 
 /**
  * @brief WindowInfo Type Option
  */
-enum class WindowInfoTypeOption : uint8_t {
+enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
     START = 0,
     WINDOW_UI_INFO = 1,
     WINDOW_DISPLAY_INFO = 1 << 1,
@@ -834,6 +847,16 @@ enum class WindowInfoTypeOption : uint8_t {
     ALL = -1ULL,
     END = ALL,
 };
+
+inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs) {
+    return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionType>(lhs) |
+        static_cast<WindowInfoTypeOptionType>(lhs))
+}
+
+inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option) {
+    return (static_cast<WindowInfoTypeOptionType>(options) & static_cast<WindowInfoTypeOptionType>(option)) != 0
+}
+
 
 /**
  * @enum WindowVisibilityState

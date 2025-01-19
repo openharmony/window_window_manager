@@ -1213,12 +1213,12 @@ napi_value JsWindowManager::OnListWindowInfo(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    uint32_t windowInfoFilterOptionValue = static_cast<uint32_t>(WindowInfoFilterOption::ALL);
+    uint32_t windowInfoFilterOptionValue = static_cast<WindowInfoFilterOptionType>(WindowInfoFilterOption::ALL);
     if (argc > ARGC_ZERO && !ConvertFromJsValue(env, argv[INDEX_ZERO], windowInfoFilterOptionValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to windowInfoFilterOption");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    uint32_t windowInfoTypeOptionValue = static_cast<uint32_t>(WindowInfoTypeOption::ALL);
+    uint32_t windowInfoTypeOptionValue = static_cast<WindowInfoTypeOptionType>(WindowInfoTypeOption::ALL);
     if (argc > ARGC_ONE && !ConvertFromJsValue(env, argv[INDEX_ONE], windowInfoTypeOptionValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to windowInfoFilterOption");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -1244,7 +1244,7 @@ napi_value JsWindowManager::OnListWindowInfo(napi_env env, napi_callback_info in
             SingletonContainer::Get<WindowManager>().ListWindowInfo(
                 static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue),
                 static_cast<WindowInfoTypeOption>(windowInfoTypeOptionValue),
-                static_cast<uint64_t>(displayId), infos)); // TS侧有uint64对应的类型吗
+                static_cast<DisplayId>(displayId), infos)); // TS侧有uint64对应的类型吗
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
