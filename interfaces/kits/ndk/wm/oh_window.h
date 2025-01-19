@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include "oh_window_comm.h"
 
+namespace {
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -207,3 +208,4 @@ int32_t OH_WindowManager_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
 }
 #endif
 #endif  // OH_WINDOW_H
+} // namespace
