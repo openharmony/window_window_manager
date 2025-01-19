@@ -225,6 +225,7 @@ void HidumpController::DumpLayoutParam(
         << std::setprecision(precision) << session->GetAspectRatio() << "|"
         << std::setprecision(precision) << session->GetFloatingScale() << "|"
         << session->IsDirtyWindow() << "|"
+        << session->IsDragAccessible() << "|"
         << property->GetDragEnabled() << "|"
         << property->GetRaiseEnabled() << "|"
         << std::endl

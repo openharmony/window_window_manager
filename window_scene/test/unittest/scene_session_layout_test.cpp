@@ -39,6 +39,9 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    sptr<SessionStageMocker> mockSessionStage_ = nullptr;
 };
 
 void SceneSessionLayoutTest::SetUpTestCase()
@@ -51,6 +54,7 @@ void SceneSessionLayoutTest::TearDownTestCase()
 
 void SceneSessionLayoutTest::SetUp()
 {
+    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
 }
 
 void SceneSessionLayoutTest::TearDown()
@@ -633,6 +637,83 @@ HWTEST_F(SceneSessionLayoutTest, AdjustRectByAspectRatio, Function | SmallTest |
     ASSERT_EQ(false, sceneSession->AdjustRectByAspectRatio(originalRect));
 }
 
+/**
+ * To test the function call
+ *
+ * @tc.name: ActivateDragBySystem
+ * @tc.desc: ActivateDragBySystem function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, ActivateDragBySystem, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ActivateDragBySystem";
+    info.bundleName_ = "ActivateDragBySystem";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto ret = sceneSession->ActivateDragBySystem(true);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * To test the drag activated settings, and validate the draggable results.
+ * Expect the results:
+ * enableDrag: true, dragActivated: true => true
+ * enableDrag: false, dragActivated: true => false
+ * enableDrag: true, dragActivated: false => false
+ * enableDrag: false, dragActivated: false => false
+ *
+ * @tc.name: CheckDragActivatedSettings
+ * @tc.desc: CheckDragActivatedSettings
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, CheckDragActivatedSettings, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CheckDragActivatedSettings";
+    info.bundleName_ = "CheckDragActivatedSettings";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    sceneSession->ActivateDragBySystem(true);
+    sceneSession->GetSessionProperty()->SetDragEnabled(true);
+    ASSERT_EQ(true, sceneSession->IsDragAccessible());
+
+    sceneSession->GetSessionProperty()->SetDragEnabled(false);
+    ASSERT_EQ(false, sceneSession->IsDragAccessible());
+
+    sceneSession->ActivateDragBySystem(false);
+    sceneSession->GetSessionProperty()->SetDragEnabled(true);
+    ASSERT_EQ(false, sceneSession->IsDragAccessible());
+
+    sceneSession->GetSessionProperty()->SetDragEnabled(false);
+    ASSERT_EQ(false, sceneSession->IsDragAccessible());
+}
+
+/**
+ * @tc.name: NotifySingleHandTransformChange
+ * @tc.desc: NotifySingleHandTransformChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, NotifySingleHandTransformChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySingleHandTransformChange";
+    info.bundleName_ = "NotifySingleHandTransformChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    SingleHandTransform testTransform;
+    sceneSession->state_ = SessionState::STATE_BACKGROUND;
+    sceneSession->NotifySingleHandTransformChange(testTransform);
+
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    mockSessionStage_ = nullptr;
+    sceneSession->sessionStage_ = mockSessionStage_;
+    sceneSession->NotifySingleHandTransformChange(testTransform);
+
+    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = mockSessionStage_;
+    sceneSession->NotifySingleHandTransformChange(testTransform);
+    ASSERT_NE(100, testTransform.posX);
+}
 } // namespace
 } // Rosen
 } // OHOS
