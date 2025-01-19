@@ -371,13 +371,13 @@ int SceneSessionManagerLiteStub::HandleTerminateSessionNew(MessageParcel& data, 
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionToken(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetFocusSessionToken!");
-    sptr<IRemoteObject> token = nullptr;
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
     uint64_t displayId = 0;
     if (!data.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
+    sptr<IRemoteObject> token = nullptr;
     WSError errCode = GetFocusSessionToken(token, displayId);
     reply.WriteRemoteObject(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -386,13 +386,13 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionToken(MessageParcel& data,
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionElement(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetFocusSessionElement!");
-    AppExecFwk::ElementName element;
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
     uint64_t displayId = 0;
     if (!data.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
+    AppExecFwk::ElementName element;
     WSError errCode = GetFocusSessionElement(element, displayId);
     reply.WriteParcelable(&element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
@@ -522,13 +522,13 @@ int SceneSessionManagerLiteStub::HandleMoveSessionsToBackground(MessageParcel& d
 
 int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run");
-    FocusChangeInfo focusInfo;
+    TLOGD("run");
     uint64_t displayId = 0;
     if (!data.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
+    FocusChangeInfo focusInfo;
     GetFocusWindowInfo(focusInfo, displayId);
     reply.WriteParcelable(&focusInfo);
     return ERR_NONE;

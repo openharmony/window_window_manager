@@ -82,11 +82,11 @@ void ScreenSessionManagerClient::RegisterScreenConnectionChangeListener(
     const sptr<IScreenConnectionChangeListener>& listener)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Failed to register screen connection change listener, listener is null");
+        TLOGE(WmsLogTag::DMS, "Failed: listener is null");
         return;
     }
     screenConnectionChangeListener_ = listener;
-    TLOGE(WmsLogTag::DMS, "Success to register screen connection change listener");
+    TLOGI(WmsLogTag::DMS, "Success");
 }
 
 void ScreenSessionManagerClient::NotifyScreenConnect(const sptr<ScreenSession>& screenSession)
