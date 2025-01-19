@@ -154,6 +154,7 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 } // namespace Rosen
 } // namespace OHOS
 
+namespace {
 WindowManager_ErrorCode OH_WindowManager_ShowWindow(int32_t windowId)
 {
     return OHOS::Rosen::ShowWindowInner(windowId);
@@ -434,3 +435,4 @@ int32_t OH_WindowManager_GetWindowProperties(
     }, __func__);
     return errCode;
 }
+} // namespace
