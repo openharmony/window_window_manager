@@ -688,13 +688,18 @@ private:
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
 
-    /*
-     * Window Focus
-     */
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
     void TraverseSessionTreeFromBottomToTop(TraverseFunc func);
+
+    /*
+     * Window Focus
+     */
+    sptr<WindowFocusController> windowFocusController_;
+    FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
+    bool needBlockNotifyFocusStatusUntilForeground_ {false};
+    bool needBlockNotifyUnfocusStatus_ {false};
     WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestSessionFocusImmediately(int32_t persistentId);
@@ -952,14 +957,10 @@ private:
     NotifyStartPiPFailedFunc startPiPFailedFunc_;
 
     SystemSessionConfig systemConfig_;
-    FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;
-    std::shared_ptr<WindowFocusController> windowFocusController_;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};
-    bool needBlockNotifyFocusStatusUntilForeground_ {false};
-    bool needBlockNotifyUnfocusStatus_ {false};
     bool isPrepareTerminateEnable_ {false};
 
     /*
