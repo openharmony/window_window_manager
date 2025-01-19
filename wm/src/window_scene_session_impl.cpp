@@ -411,6 +411,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         hostSession_ = session;
     }
     RecoverSessionListener();
+    RegisterWindowInspectorCallback();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
@@ -490,7 +491,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
         bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
         bool isSysytemWindow = WindowHelper::IsSystemWindow(windowType);
         UpdateWindowSizeLimits();
-        if ((isSubWindow || isDialogWindow || isSysytemWindow) && property_->GetDragEnabled()) {
+        if ((isSubWindow || isDialogWindow || isSysytemWindow) && IsWindowDraggable()) {
             WLOGFD("sync window limits to server side to make size limits work while resizing");
             UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         }
@@ -561,6 +562,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         if (WindowHelper::IsSubWindow(GetType()) && !initRect.IsUninitializedRect()) {
             Resize(initRect.width_, initRect.height_);
         }
+        RegisterWindowInspectorCallback();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
         "id:%{public}d], state:%{public}u, mode:%{public}u",
@@ -676,14 +678,14 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         static_cast<int>(HOTZONE_TOUCH * vpr);
     AreaType dragType = AreaType::UNDEFINED;
     WindowType windowType = property_->GetWindowType();
-    bool isSystemDragEnabledType = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDragEnabledType) {
+    bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
+    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
         dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
-    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled();
-    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !property_->GetDragEnabled();
+    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !IsWindowDraggable();
+    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !IsWindowDraggable();
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
@@ -1173,6 +1175,18 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     NotifyWindowStatusChange(GetWindowMode());
     NotifyDisplayInfoChange(displayInfo);
     return ret;
+}
+
+WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}d", static_cast<uint32_t>(mode));
+    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}d. Use default view mode",
+            static_cast<uint32_t>(mode));
+        mode = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    }
+    property_->SetKeyboardViewMode(mode);
+    return Show();
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
@@ -2662,9 +2676,26 @@ bool WindowSceneSessionImpl::IsStartMoving()
     return isMoving;
 }
 
+bool WindowSceneSessionImpl::CalcWindowShouldMove()
+{
+    WindowType windowType = GetType();
+    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+        if (windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
+            windowSystemConfig_.IsPhoneWindow()) {
+            return true;
+        }
+    }
+
+    if (IsPcOrPadFreeMultiWindowMode()) {
+        return true;
+    }
+    return false;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3713,6 +3744,33 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}d",
+        static_cast<uint32_t>(mode));
+    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "invalid view mode!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (mode == property_->GetKeyboardViewMode()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "The mode is same.");
+        return WMError::WM_DO_NOTHING;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is invalid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard is no shown");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetKeyboardViewMode(mode);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->ChangeKeyboardViewMode(mode));
+}
+
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     WLOGFD("in");
@@ -4032,9 +4090,9 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool
     }
 
     WindowType windowType = GetType();
-    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
+    bool isDraggableSystemWin = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
     if (!WindowHelper::IsMainWindow(windowType) && !WindowHelper::IsSubWindow(windowType) &&
-        windowType != WindowType::WINDOW_TYPE_DIALOG && !isDragEnabledSystemWin) {
+        windowType != WindowType::WINDOW_TYPE_DIALOG && !isDraggableSystemWin) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "type not support. Id:%{public}u, type:%{public}u",
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -4404,7 +4462,7 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
+WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams params)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}u, "
         "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "

@@ -471,6 +471,12 @@ public:
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
 
     /*
+     * Window Layout
+     */
+    SingleHandTransform GetNormalSingleHandTransform() const;
+    void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
+
+    /*
      * Window Property
      */
     WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
@@ -1123,8 +1129,10 @@ private:
      */
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    SingleHandTransform singleHandTransform_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+    bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
 
     /*
      * Window Snapshot

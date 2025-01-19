@@ -139,6 +139,7 @@ private:
     napi_env env_ = nullptr;
     int32_t handleId_ = -1;
     bool isStoppedFromClient_ = false;
+    int32_t firstHandleId_ = -1;
 };
 } // namespace Rosen
 } // namespace OHOS

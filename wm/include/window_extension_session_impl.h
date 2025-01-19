@@ -51,7 +51,7 @@ public:
         const NotifyTransferComponentDataForResultFunc& func) override;
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
-    void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) override;
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
     WindowMode GetWindowMode() const override;
     WMError SetWindowMode(WindowMode mode) override;
 
