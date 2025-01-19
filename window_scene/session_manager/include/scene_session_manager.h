@@ -705,32 +705,32 @@ private:
     WSError RequestSessionFocusImmediately(int32_t persistentId);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
-    WSError RequestFocusBasicCheck(int32_t persistentId, sptr<FocusGroup>& focusGroup);
-    bool CheckLastFocusedAppSessionFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& nextSession);
-    WSError RequestFocusSpecificCheck(DisplayId displayId, sptr<SceneSession>& sceneSession, bool byForeground,
+    WSError RequestFocusBasicCheck(int32_t persistentId, sptr<FocusGroup> focusGroup);
+    bool CheckLastFocusedAppSessionFocus(sptr<SceneSession> focusedSession, sptr<SceneSession> nextSession);
+    WSError RequestFocusSpecificCheck(DisplayId displayId, sptr<SceneSession> sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    bool CheckTopmostWindowFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& sceneSession);
-    bool CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
-    bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
-        sptr<SceneSession>& focusedSession, bool includingAppSession);
-    bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
-        const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
-    bool IsParentSessionVisible(const sptr<SceneSession>& session);
+    bool CheckTopmostWindowFocus(sptr<SceneSession> focusedSession, sptr<SceneSession> sceneSession);
+    bool CheckRequestFocusImmdediately(sptr<SceneSession> sceneSession);
+    bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession> requestSceneSession,
+        sptr<SceneSession> focusedSession, bool includingAppSession);
+    bool CheckClickFocusIsDownThroughFullScreen(sptr<SceneSession> focusedSession,
+        sptr<SceneSession> sceneSession, FocusChangeReason reason);
+    bool IsParentSessionVisible(sptr<SceneSession> session);
     sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
         bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
-    WSError ShiftFocus(DisplayId displayId, sptr<SceneSession>& nextSession,
+    WSError ShiftFocus(DisplayId displayId, sptr<SceneSession> nextSession,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    void UpdateFocusStatus(DisplayId displayId, sptr<SceneSession>& sceneSession, bool isFocused);
-    void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused, sptr<FocusGroup>& focusGroup);
+    void UpdateFocusStatus(DisplayId displayId, sptr<SceneSession> sceneSession, bool isFocused);
+    void NotifyFocusStatus(sptr<SceneSession> sceneSession, bool isFocused, sptr<FocusGroup> focusGroup);
     int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
         const std::string& reason);
-    void NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
-    void NotifyUnFocusedByMission(sptr<SceneSession>& sceneSession);
-    bool MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
+    void NotifyFocusStatusByMission(sptr<SceneSession> prevSession, sptr<SceneSession> currSession);
+    void NotifyUnFocusedByMission(sptr<SceneSession> sceneSession);
+    bool MissionChanged(sptr<SceneSession> prevSession, sptr<SceneSession> currSession);
     std::string GetAllSessionFocusInfo();
-    void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession> sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
