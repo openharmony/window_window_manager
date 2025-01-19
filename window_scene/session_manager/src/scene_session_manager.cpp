@@ -1586,7 +1586,8 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, session] : sceneSessionMap_) {
         if (session && session->IsScreenLockWindow()) {
-            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d", persistentId);
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: found window %{public}d-%{public}d", persistentId,
+                session->GetZOrder());
             return session->GetZOrder() < DEFAULT_LOCK_SCREEN_ZORDER ? DEFAULT_LOCK_SCREEN_ZORDER :
                 session->GetZOrder();
         }
