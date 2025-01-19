@@ -51,6 +51,7 @@ typedef enum {
     WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT = 801,
     /** window id is invaild. */
     INVAILD_WINDOW_ID = 1000,
+
     /** failed. */
     SERVICE_ERROR = 2000,
     /**
