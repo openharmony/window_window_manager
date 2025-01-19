@@ -826,11 +826,11 @@ enum class WindowInfoFilterOption : WindowInfoFilterOptionType {
 
 inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs) {
     return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionType>(lhs) |
-        static_cast<WindowInfoFilterOptionType>(lhs))
+        static_cast<WindowInfoFilterOptionType>(lhs));
 }
 
 inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option) {
-    return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0
+    return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0;
 }
 
 using WindowInfoTypeOptionType = uint8_t
@@ -850,11 +850,11 @@ enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
 
 inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs) {
     return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionType>(lhs) |
-        static_cast<WindowInfoTypeOptionType>(lhs))
+        static_cast<WindowInfoTypeOptionType>(lhs));
 }
 
 inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option) {
-    return (static_cast<WindowInfoTypeOptionType>(options) & static_cast<WindowInfoTypeOptionType>(option)) != 0
+    return (static_cast<WindowInfoTypeOptionType>(options) & static_cast<WindowInfoTypeOptionType>(option)) != 0;
 }
 
 
