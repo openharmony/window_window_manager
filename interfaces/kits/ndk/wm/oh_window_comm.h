@@ -20,7 +20,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif1
 
 /**
  * @brief Enumerates the result types of the wm interface
