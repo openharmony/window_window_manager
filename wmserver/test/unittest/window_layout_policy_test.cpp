@@ -40,7 +40,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 
-struct WindowInfo {
+struct WindowTestInfo {
     Rect winRect_;
     WindowType winType_;
     WindowMode winMode_;
@@ -55,10 +55,10 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    sptr<WindowNode> CreateWindowNode(const WindowInfo& windowInfo);
+    sptr<WindowNode> CreateWindowNode(const WindowTestInfo& WindowTestInfo);
     sptr<DisplayInfo> CreateDisplayInfo(const Rect& displayRect);
 
-    static WindowInfo windowInfo_;
+    static WindowTestInfo windowInfo_;
     static sptr<WindowNodeContainer> container_;
     static DisplayGroupInfo& displayGroupInfo_;
     static sptr<DisplayInfo> defaultDisplayInfo_;
@@ -73,7 +73,7 @@ sptr<DisplayGroupController> WindowLayoutPolicyTest::displayGroupController_ = n
 sptr<WindowLayoutPolicyCascade> WindowLayoutPolicyTest::layoutPolicy_ = nullptr;
 sptr<WindowLayoutPolicyTile> WindowLayoutPolicyTest::layoutPolicyTile_ = nullptr;
 sptr<DisplayInfo> WindowLayoutPolicyTest::defaultDisplayInfo_ = nullptr;
-WindowInfo WindowLayoutPolicyTest::windowInfo_ = {
+WindowTestInfo WindowLayoutPolicyTest::windowInfo_ = {
     .winRect_ = { 0, 0, 0, 0 },
     .winType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
     .winMode_ = WindowMode::WINDOW_MODE_FLOATING,
@@ -126,16 +126,16 @@ void WindowLayoutPolicyTest::TearDown()
     displayGroupInfo_.displayInfosMap_.clear();
 }
 
-sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowInfo& windowInfo)
+sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowTestInfo& WindowTestInfo)
 {
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowType(windowInfo.winType_);
-    property->SetWindowMode(windowInfo.winMode_);
-    property->SetWindowRect(windowInfo.winRect_);
-    property->SetOriginRect(windowInfo.winRect_);
-    property->SetDecorEnable(windowInfo.decorEnable_);
-    property->SetWindowSizeChangeReason(windowInfo.reason_);
-    property->SetDragType(windowInfo.dragType_);
+    property->SetWindowType(WindowTestInfo.winType_);
+    property->SetWindowMode(WindowTestInfo.winMode_);
+    property->SetWindowRect(WindowTestInfo.winRect_);
+    property->SetOriginRect(WindowTestInfo.winRect_);
+    property->SetDecorEnable(WindowTestInfo.decorEnable_);
+    property->SetWindowSizeChangeReason(WindowTestInfo.reason_);
+    property->SetDragType(WindowTestInfo.dragType_);
     property->SetDisplayId(0);
     property->SetWindowId(0);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
