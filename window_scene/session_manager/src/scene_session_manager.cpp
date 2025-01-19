@@ -27,6 +27,7 @@
 #include <hitrace_meter.h>
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
+#include <ui/rs_node.h>
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -6114,6 +6115,26 @@ void SceneSessionManager::NotifySingleHandInfoChange(
         }
         FlushWindowInfoToMMI();
     }, funcName);
+}
+
+void SceneSessionManager::RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func)
+{
+    getRSNodeByStringIDFunc_ = std::move(func);
+}
+
+void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& stringId)
+{
+    if (getRSNodeByStringIDFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "func is nullptr");
+        return;
+    }
+    auto rsNode = getRSNodeByStringIDFunc_(stringId);
+    if (rsNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "node is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
+    rsInterface_.SetWindowContainer(rsNode->GetId(), true);
 }
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
