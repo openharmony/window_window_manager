@@ -30,6 +30,8 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 
+using namespace OHOS::Rosen;
+
 namespace OHOS {
 namespace Rosen {
 namespace {
@@ -173,14 +175,14 @@ int32_t OH_WindowManager_GetWindowAvoidArea(
         TLOGE(WmsLogTag::WMS_IMMS, "avoidArea is null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, type, avoidArea, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -196,14 +198,14 @@ int32_t OH_WindowManager_GetWindowAvoidArea(
 
 int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
 {
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, enabled, enableAnimation, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -225,14 +227,14 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
 
 int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color)
 {
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, color, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -253,14 +255,14 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
 
 int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation)
 {
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, enabled, enableAnimation, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -286,14 +288,14 @@ int32_t OH_WindowManager_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "pixelMap is null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, pixelMap, &errCode, where = __func__]() mutable {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -310,14 +312,14 @@ int32_t OH_WindowManager_SetWindowBackgroundColor(int32_t windowId, const char* 
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "color is null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, color, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -330,14 +332,14 @@ int32_t OH_WindowManager_SetWindowBackgroundColor(int32_t windowId, const char* 
 
 int32_t OH_WindowManager_SetWindowBrightness(int32_t windowId, float brightness)
 {
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, brightness, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -350,14 +352,14 @@ int32_t OH_WindowManager_SetWindowBrightness(int32_t windowId, float brightness)
 
 int32_t OH_WindowManager_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScreenOn)
 {
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, isKeepScreenOn, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -370,14 +372,14 @@ int32_t OH_WindowManager_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScre
 
 int32_t OH_WindowManager_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy)
 {
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, isPrivacy, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
@@ -395,14 +397,14 @@ int32_t OH_WindowManager_GetWindowProperties(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowProperties is null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
-    auto eventHandler = OHOS::Rosen::GetMainEventHandler();
+    auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
     eventHandler->PostSyncTask([windowId, windowProperties, &errCode, where = __func__] {
-        auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+        auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
