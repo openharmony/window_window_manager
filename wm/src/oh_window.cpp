@@ -39,49 +39,6 @@ constexpr bool SHOW_WITH_FOCUS = true;
 std::shared_ptr<OHOS::AppExecFwk::EventHandler> g_eventHandler;
 std::once_flag g_onceFlagForInitEventHandler;
 
-/*
- * Used to map from WMError to WindowManager_ErrorCode.
- */
-const std::unordered_map<WMError, WindowManager_ErrorCode> OH_WINDOW_TO_ERROR_CODE_MAP {
-    { WMError::WM_OK,                           WindowManager_ErrorCode::OK                                          },
-    { WMError::WM_ERROR_INVALID_PARAM,          WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM      },
-    { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT },
-    { WMError::WM_ERROR_INVALID_WINDOW,         WindowManager_ErrorCode::INVAILD_WINDOW_ID                           },
-    { WMError::WM_ERROR_INVALID_CALLING,        WindowManager_ErrorCode::SERVICE_ERROR                               },
-    { WMError::WM_ERROR_NULLPTR,                WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY   },
-    { WMError::WM_ERROR_SYSTEM_ABNORMALLY,      WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY  },
-};
-
-/*
- * Used to map from WindowType to WindowManager_WindowType.
- */
-const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WINDOW_TYPE_MAP {
-    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_APP    },
-    { WindowType::WINDOW_TYPE_DIALOG,              WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_DIALOG },
-    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
-    { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
-};
-
-void TransformedToWindowManagerRect(const Rect& rect, WindowManager_Rect& wmRect)
-{
-    wmRect.posX = rect.posX_;
-    wmRect.posY = rect.posY_;
-    wmRect.width = rect.width_;
-    wmRect.height = rect.height_;
-}
-
-void TransformedToWindowManagerAvoidArea(const AvoidArea& allAvoidArea, WindowManager_AvoidArea* avoidArea)
-{
-    if (avoidArea == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "avoidArea is nullptr");
-        return;
-    }
-    TransformedToWindowManagerRect(allAvoidArea.topRect_, avoidArea->topRect);
-    TransformedToWindowManagerRect(allAvoidArea.leftRect_, avoidArea->leftRect);
-    TransformedToWindowManagerRect(allAvoidArea.rightRect_, avoidArea->rightRect);
-    TransformedToWindowManagerRect(allAvoidArea.bottomRect_, avoidArea->bottomRect);
-}
-
 inline bool IsMainWindow(WindowType type)
 {
     return (type >= WindowType::APP_MAIN_WINDOW_BASE && type < WindowType::APP_MAIN_WINDOW_END);
@@ -155,6 +112,49 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 } // namespace OHOS
 
 namespace {
+/*
+ * Used to map from WMError to WindowManager_ErrorCode.
+ */
+const std::unordered_map<WMError, WindowManager_ErrorCode> OH_WINDOW_TO_ERROR_CODE_MAP {
+    { WMError::WM_OK,                           WindowManager_ErrorCode::OK                                          },
+    { WMError::WM_ERROR_INVALID_PARAM,          WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM      },
+    { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT },
+    { WMError::WM_ERROR_INVALID_WINDOW,         WindowManager_ErrorCode::INVAILD_WINDOW_ID                           },
+    { WMError::WM_ERROR_INVALID_CALLING,        WindowManager_ErrorCode::SERVICE_ERROR                               },
+    { WMError::WM_ERROR_NULLPTR,                WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY   },
+    { WMError::WM_ERROR_SYSTEM_ABNORMALLY,      WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY  },
+};
+
+/*
+ * Used to map from WindowType to WindowManager_WindowType.
+ */
+const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WINDOW_TYPE_MAP {
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_APP    },
+    { WindowType::WINDOW_TYPE_DIALOG,              WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_DIALOG },
+    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
+    { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
+};
+
+void TransformedToWindowManagerRect(const Rect& rect, WindowManager_Rect& wmRect)
+{
+    wmRect.posX = rect.posX_;
+    wmRect.posY = rect.posY_;
+    wmRect.width = rect.width_;
+    wmRect.height = rect.height_;
+}
+
+void TransformedToWindowManagerAvoidArea(const AvoidArea& allAvoidArea, WindowManager_AvoidArea* avoidArea)
+{
+    if (avoidArea == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "avoidArea is nullptr");
+        return;
+    }
+    TransformedToWindowManagerRect(allAvoidArea.topRect_, avoidArea->topRect);
+    TransformedToWindowManagerRect(allAvoidArea.leftRect_, avoidArea->leftRect);
+    TransformedToWindowManagerRect(allAvoidArea.rightRect_, avoidArea->rightRect);
+    TransformedToWindowManagerRect(allAvoidArea.bottomRect_, avoidArea->bottomRect);
+}
+
 WindowManager_ErrorCode OH_WindowManager_ShowWindow(int32_t windowId)
 {
     return OHOS::Rosen::ShowWindowInner(windowId);
