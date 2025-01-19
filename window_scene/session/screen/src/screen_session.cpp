@@ -742,6 +742,16 @@ void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
     property_.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), foldDisplayMode);
 }
 
+void ScreenSession::UpdatePhysicalTouchBounds(bool enable)
+{
+    property_.SetPhysicalTouchBounds(enable);
+}
+
+void ScreenSession::UpdateCurrentOffScreenRendering(bool enable)
+{
+    property_.SetCurrentOffScreenRendering(enable);
+}
+
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
     FoldDisplayMode foldDisplayMode)
 {
@@ -833,6 +843,14 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+}
+
+void ScreenSession::UpdateBounds(RRect bounds)
+{
+    property_.SetBounds(bounds);
+    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f]",
+        property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
+        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight());
 }
 
 void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)

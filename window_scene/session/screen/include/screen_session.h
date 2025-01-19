@@ -181,9 +181,12 @@ public:
     bool GetIsPhysicalMirrorSwitch();
 
     void UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode);
+    void UpdatePhysicalTouchBounds(bool enable);
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
+    void UpdateBounds(RRect bounds);
+    void UpdateCurrentOffScreenRendering(bool enable);
     void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
