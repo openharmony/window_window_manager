@@ -2137,16 +2137,24 @@ void Session::HandlePointDownDialog()
 
 WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
-    if (isExecuteDelayRaise) {
-        return WSError::WS_OK;
-    }
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
-        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
+    bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    bool isPointUp = action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
+    if (isExecuteDelayRaise) {
+        if (raiseEnabled && isPointUp) {
+            RaiseToAppTopForPointDown();
+        }
+        if (!raiseEnabled && parentSession) {
+            parentSession->NotifyClick(!IsScbCoreEnabled());
+        }
+        return WSError::WS_OK;
+    }
     if (raiseEnabled) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
@@ -2191,8 +2199,15 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
+    bool isPointUp = pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
     if (!isExecuteDelayRaise) {
         PresentFoucusIfNeed(pointerAction);
+    } else if (isPointUp) {
+        if (!isFocused_ && GetFocusable()) {
+            FocusChangeReason reason = FocusChangeReason::CLICK;
+            NotifyRequestFocusStatusNotifyManager(true, false, reason);
+        }
+        NotifyClick();
     }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
