@@ -1240,7 +1240,7 @@ struct TitleButtonRect {
     }
 };
 
-using WindowInfoFilterOptionType = uint8_t
+using WindowInfoFilterOptionType = uint8_t;
 
 /**
  * @brief WindowInfo filter Option
@@ -1263,7 +1263,7 @@ inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOptio
     return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0;
 }
 
-using WindowInfoTypeOptionType = uint8_t
+using WindowInfoTypeOptionType = uint8_t;
 
 /**
  * @brief WindowInfo Type Option
