@@ -111,6 +111,16 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 } // namespace Rosen
 } // namespace OHOS
 
+WindowManager_ErrorCode OH_WindowManager_ShowWindow(int32_t windowId)
+{
+    return OHOS::Rosen::ShowWindowInner(windowId);
+}
+
+WindowManager_ErrorCode OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
+{
+    return OHOS::Rosen::IsWindowShownInner(windowId, isShow);
+}
+
 namespace {
 /*
  * Used to map from WMError to WindowManager_ErrorCode.
@@ -154,16 +164,7 @@ void TransformedToWindowManagerAvoidArea(const AvoidArea& allAvoidArea, WindowMa
     TransformedToWindowManagerRect(allAvoidArea.rightRect_, avoidArea->rightRect);
     TransformedToWindowManagerRect(allAvoidArea.bottomRect_, avoidArea->bottomRect);
 }
-
-WindowManager_ErrorCode OH_WindowManager_ShowWindow(int32_t windowId)
-{
-    return OHOS::Rosen::ShowWindowInner(windowId);
-}
-
-WindowManager_ErrorCode OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
-{
-    return OHOS::Rosen::IsWindowShownInner(windowId, isShow);
-}
+} // namespace
 
 int32_t OH_WindowManager_GetWindowAvoidArea(
     int32_t windowId, WindowManager_AvoidAreaType type, WindowManager_AvoidArea* avoidArea)
@@ -435,4 +436,3 @@ int32_t OH_WindowManager_GetWindowProperties(
     }, __func__);
     return errCode;
 }
-} // namespace
