@@ -1143,22 +1143,22 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleListWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
-    uint8_t windowInfoFilterOptionValue = static_cast<uint8_t>(WindowInfoFilterOption::ALL);
+    uint8_t windowInfoFilterOptionValue = static_cast<WindowInfoFilterOptionType>(WindowInfoFilterOption::ALL);
     if (!data.ReadUint8(windowInfoFilterOptionValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
-    if (windowInfoFilterOptionValue > static_cast<uint8_t>(WindowInfoFilterOption::END)) {
+    if (windowInfoFilterOptionValue > static_cast<WindowInfoFilterOptionType>(WindowInfoFilterOption::END)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "bad windowInfoFilterOption value");
         return ERR_INVALID_DATA;
     }
     WindowInfoFilterOption windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue);
-    uint8_t windowInfoTypeOptionValue = static_cast<uint8_t>(WindowInfoTypeOption::ALL);
+    uint8_t windowInfoTypeOptionValue = static_cast<WindowInfoTypeOptionType>(WindowInfoTypeOption::ALL);
     if (!data.ReadUint8(windowInfoTypeOptionValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
-    if (windowInfoTypeOptionValue > static_cast<uint8_t>(WindowInfoTypeOption::END)) {
+    if (windowInfoTypeOptionValue > static_cast<WindowInfoTypeOptionType>(WindowInfoTypeOption::END)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "bad windowInfoTypeOption value");
         return ERR_INVALID_DATA;
     }

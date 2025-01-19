@@ -10473,7 +10473,7 @@ WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFil
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         sceneSessionMapCopy = sceneSessionMap_;
-    } // 有必要复制一个sceneSessionMap_吗
+    }
     auto task = [this, windowInfoFilterOption, windowInfoTypeOption, displayId, sceneSessionMapCopy, &infos]() {
         for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
             if (sceneSession == nullptr) {
@@ -10483,23 +10483,23 @@ WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFil
                 continue;
             }
             auto windowInfo = sptr<WindowInfo>::MakeSptr();
-            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_UI_INFO)) {
+            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
                 windowInfo->windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
             }
-            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
+            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
                 windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
             }
-            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
+            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
             }
-            if (static_cast<uint8_t>(windowInfoTypeOption) & static_cast<uint8_t>(WindowInfoTypeOption::WINDOW_META_INFO)) {   
+            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
                 windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
             }
             infos.emplace_back(windowInfo);
         }
         return WMError::WM_OK;
     };
-    return taskScheduler_->PostSyncTask(task, __func__); // 是否需要同步
+    return taskScheduler_->PostSyncTask(task, __func__);
 }
 
 bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
@@ -10522,20 +10522,20 @@ bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowI
     if (displayId != DISPLAY_ID_INVALID && sceneSession->GetSessionProperty()->GetDisplayId() != displayId) {
         return false;
     }
-    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::EXCLUDE_SYSTEM)) &&
+    if (IsChosenOption(windowInfoFilterOption, WindowInfoFilterOption::EXCLUDE_SYSTEM) &&
         sceneSession->GetSessionInfo().isSystem_) {
         return false;
     }
-    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::VISIBLE)) &&
+    if (IsChosenOption(windowInfoFilterOption, WindowInfoFilterOption::VISIBLE) &&
         (sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
         sceneSession->GetVisibilityState() == WINDOW_LAYER_STATE_MAX)) {
         return false;
     }
-    if ((static_cast<uint8_t>(windowInfoFilterOption) & static_cast<uint8_t>(WindowInfoFilterOption::FOREGROUND)) &&
+    if (IsChosenOption(windowInfoFilterOption, WindowInfoFilterOption::FOREGROUND) &&
         !IsSessionVisibleForeground(sceneSession)) {
         return false;
     }
-    return true; // 用case吗
+    return true;
 }
 
 WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
