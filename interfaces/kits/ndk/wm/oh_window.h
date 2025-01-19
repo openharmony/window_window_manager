@@ -57,5 +57,3 @@ WindowManager_ErrorCode OH_WindowManager_ShowWindow(int32_t windowId);
 }
 #endif
 #endif  // OH_WINDOW_H
-
-1
