@@ -1256,7 +1256,7 @@ enum class WindowInfoFilterOption : WindowInfoFilterOptionType {
 
 inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs) {
     return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionType>(lhs) |
-        static_cast<WindowInfoFilterOptionType>(lhs))
+        static_cast<WindowInfoFilterOptionType>(rhs))
 }
 
 inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option) {
@@ -1280,7 +1280,7 @@ enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
 
 inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs) {
     return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionType>(lhs) |
-        static_cast<WindowInfoTypeOptionType>(lhs))
+        static_cast<WindowInfoTypeOptionType>(rhs))
 }
 
 inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option) {
