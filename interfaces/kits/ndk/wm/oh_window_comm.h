@@ -37,15 +37,15 @@ struct OH_PixelmapNative;
 typedef enum {
     /** succ. */
     OK = 0,
-    /** 
+    /**
      * Param is invaild.
-     * 
+     *
      * @since 16
      */
     WINDOW_MANAGER_ERRORCODE_INVALID_PARAM = 401,
-    /** 
+    /**
      * Device not support.
-     * 
+     *
      * @since 16
      */
     WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT = 801,
@@ -53,15 +53,15 @@ typedef enum {
     INVAILD_WINDOW_ID = 1000,
     /** failed. */
     SERVICE_ERROR = 2000,
-    /** 
+    /**
      * Window state is abnormal.
-     * 
+     *
      * @since 16
      */
     WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY = 1300002,
-    /** 
+    /**
      * Window state is abnormal.
-     * 
+     *
      * @since 16
      */
     WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY = 1300003,
