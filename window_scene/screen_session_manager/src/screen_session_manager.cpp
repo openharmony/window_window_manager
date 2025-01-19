@@ -7336,11 +7336,10 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
 void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
 {
     TLOGI(WmsLogTag::DMS, "enter");
-    bool screenSkipProtectedWindowValue;
+    bool screenSkipProtectedWindowValue = false;
     bool ret = ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(screenSkipProtectedWindowValue);
     if (!ret) {
         TLOGE(WmsLogTag::DMS, "get setting failed, default value false");
-        screenSkipProtectedWindowValue = false;
     }
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
     for (auto sessionIt : screenSessionMap_) {
