@@ -1428,7 +1428,7 @@ HWTEST_F(SceneSessionTest4, GetAvoidAreaBytype, Function | SmallTest | Level2)
     }
     for (int i = 0; i < 1000; i++) {
         avoidArea = sessionVector[i]->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect);
-        ASSERT_EQ(avoidArea.topRect_.poxX_, 0);
+        ASSERT_EQ(avoidArea.topRect_.posX_, 0);
     }
 }
 }
