@@ -42,7 +42,7 @@ void AnomalyDetection::SceneZOrderCheckProcess()
         }
         // repetitive zorder
         if (session->GetZOrder() == curZOrder) {
-            TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, repetitive zorder %{public}d", session->GetZOrder());
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "ZOrderCheck err, zorder %{public}d", session->GetZOrder());
             ReportZOrderException("check repetitive zorder", session);
         }
         curZOrder = session->GetZOrder();
