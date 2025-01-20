@@ -2143,8 +2143,8 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
-    bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
-        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
     bool isPointUp = action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
     if (isExecuteDelayRaise) {
         if (raiseEnabled && isPointUp) {
