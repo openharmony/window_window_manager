@@ -19,12 +19,14 @@
 #include "ffi_remote_data.h"
 #include "window_scene.h"
 #include "window_utils.h"
+#include "window_register_manager.h"
 
 namespace OHOS {
 namespace Rosen {
 class CJWindowStageImpl : public OHOS::FFI::FFIData {
 public:
-    explicit CJWindowStageImpl(const std::shared_ptr<WindowScene>& windowScene): windowScene_(windowScene) {}
+    explicit CJWindowStageImpl(const std::shared_ptr<WindowScene>& windowScene): windowScene_(windowScene),
+        registerManager_(std::make_unique<CjWindowRegisterManager>()) {}
     int32_t GetMainWindow(int64_t& windowId);
     int32_t CreateSubWindow(std::string name, int64_t& windowId);
     RetStruct GetSubWindow();
@@ -32,8 +34,14 @@ public:
     int32_t DisableWindowDecor();
     int32_t SetShowOnLockScreen(bool showOnLockScreen);
     static std::shared_ptr<CJWindowStageImpl> CreateCJWindowStage(std::shared_ptr<WindowScene> windowScene);
+    int32_t SetDefaultDensityEnabled(bool enabled);
+    int32_t OnEvent(int64_t funcId);
+    int32_t OffEvent(int64_t funcId);
+    int32_t CreateSubWindowWithOptions(int64_t& windowId, const std::string& name,
+        const std::string& title, bool decorEnabled, bool isModal);
 private:
     std::weak_ptr<Rosen::WindowScene> windowScene_;
+    std::unique_ptr<CjWindowRegisterManager> registerManager_ = nullptr;
 };
 }
 }

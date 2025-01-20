@@ -566,8 +566,13 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
-        if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        auto usage = property_->GetUIExtensionUsage();
+        if (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::EMBEDDED) {
+            uiContent->SetUIContentType(Ace::UIContentType::UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::MODAL) {
+            uiContent->SetUIContentType(Ace::UIContentType::MODAL_UI_EXTENSION);
         }
         if (initByName) {
             uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
@@ -1354,10 +1359,12 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return isPcOrPadFreeMultiWindowMode;
 }
 
-void WindowExtensionSessionImpl::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
+WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, MessageParcel& reply,
+                                                      [[maybe_unused]] MessageOption& option)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
+    return WSError::WS_OK;
 }
 
 WindowMode WindowExtensionSessionImpl::GetWindowMode() const

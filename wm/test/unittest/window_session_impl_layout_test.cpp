@@ -283,6 +283,29 @@ HWTEST_F(WindowSessionImplLayoutTest, UpdateViewportConfig01, Function | SmallTe
     window->UpdateViewportConfig(rectW, reason, nullptr, displayInfo);
     ASSERT_NE(window, nullptr);
 }
-} // namespace
+
+/**
+ * @tc.name: NotifySingleHandTransformChange_TestUIContent
+ * @tc.desc: NotifySingleHandTransformChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifySingleHandTransformChange_TestUIContent, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifySingleHandTransformChange_TestUIContent start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifySingleHandTransformChange_TestUIContent");
+    option->SetIsUIExtFirstSubWindow(true);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2025);
+    std::string url = "";
+    window->SetUIContentInner(
+        url, nullptr, nullptr, WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
+    SingleHandTransform testTransform;
+    testTransform.posX = 100;
+    window->NotifySingleHandTransformChange(testTransform);
+    ASSERT_EQ(testTransform.posX, window->singleHandTransform_.posX);
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifySingleHandTransformChange_TestUIContent end";
+}
+}
 } // namespace Rosen
 } // namespace OHOS

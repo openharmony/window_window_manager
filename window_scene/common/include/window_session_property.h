@@ -248,6 +248,8 @@ public:
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
+    void SetKeyboardViewMode(KeyboardViewMode mode);
+    KeyboardViewMode GetKeyboardViewMode() const;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -426,6 +428,7 @@ private:
      * Keyboard
      */
     bool isSystemKeyboard_ = false;
+    KeyboardViewMode KeyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
 
     /*
      * Window Immersive

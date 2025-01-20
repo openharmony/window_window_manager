@@ -40,6 +40,7 @@ group("unittest") {
     ":wm_window_impl_test3",
     ":wm_window_impl_test5",
     ":wm_window_input_channel_test",
+    ":wm_window_inspector_test",
     ":wm_window_manager_agent_proxy_test",
     ":wm_window_manager_stub_proxy_test",
     ":wm_window_manager_test",
@@ -329,6 +330,19 @@ ohos_unittest("wm_window_input_channel_test") {
   module_out_path = module_out_path
 
   sources = [ "window_input_channel_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_window_inspector_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_inspector_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
@@ -693,6 +707,26 @@ ohos_unittest("ws_window_prepare_terminate_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("wm_oh_window_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/interfaces/kits/ndk/wm/" ]
+
+  sources = [ "oh_window_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/wm:libwm_ndk",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
   ]
 }
 
