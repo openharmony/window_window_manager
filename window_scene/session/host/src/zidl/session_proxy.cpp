@@ -510,6 +510,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
+    if (!data.WriteString(abilitySessionInfo->specifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write specifiedFlag failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");

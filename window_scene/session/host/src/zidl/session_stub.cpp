@@ -688,6 +688,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
                 static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
         }
     }
+    if (!data.ReadString(abilitySessionInfo->specifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read specifiedFlag failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

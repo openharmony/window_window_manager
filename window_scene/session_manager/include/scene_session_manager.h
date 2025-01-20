@@ -87,6 +87,7 @@ struct SessionIdentityInfo {
     std::string instanceKey_;
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
+    std::string specifiedFlag_;
 };
 
 class SceneSession;
