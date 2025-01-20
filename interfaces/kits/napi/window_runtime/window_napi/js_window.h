@@ -141,6 +141,8 @@ public:
      * Window Property
      */
     static napi_value SetCornerRadius(napi_env env, napi_callback_info info);
+    static napi_value SetWindowCornerRadius(napi_env env, napi_callback_info info);
+    static napi_value GetWindowCornerRadius(napi_env env, napi_callback_info info);
     static napi_value SetShadow(napi_env env, napi_callback_info info);
     static napi_value SetWindowShadowRadius(napi_env env, napi_callback_info info);
     static napi_value SetBlur(napi_env env, napi_callback_info info);
@@ -318,6 +320,8 @@ private:
      * Window Property
      */
     napi_value OnSetCornerRadius(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowCornerRadius(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowCornerRadius(napi_env env, napi_callback_info info);
     napi_value OnSetShadow(napi_env env, napi_callback_info info);
     napi_value OnSetWindowShadowRadius(napi_env env, napi_callback_info info);
     napi_value OnSetBlur(napi_env env, napi_callback_info info);
