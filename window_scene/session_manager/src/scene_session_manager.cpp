@@ -10503,7 +10503,7 @@ WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFil
 }
 
 bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    DisplayId inputDisplayId, const sptr<SceneSession>& sceneSession)
+    DisplayId inputDisplayId, const sptr<SceneSession>& sceneSession) const
 {
     DisplayId displayId = inputDisplayId;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
