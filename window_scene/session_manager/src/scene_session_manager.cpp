@@ -12619,7 +12619,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
-        TLOGE(WmsLogTag::WMS_PC, "verify bundle failed, source name is %{public}s but target name is %{public}s)",
+        TLOGE(WmsLogTag::WMS_PC, "verify bundle failed, source name is %{public}s but target name is %{public}s",
             sourceSession->GetSessionInfo().bundleName_.c_str(), targetSession->GetSessionInfo().bundleName_.c_str());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
