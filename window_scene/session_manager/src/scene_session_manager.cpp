@@ -1365,6 +1365,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionByIdentityInfo(const Sess
         if (sceneSession->GetSessionInfo().bundleName_ != info.bundleName_ ||
             sceneSession->GetSessionInfo().appIndex_ != info.appIndex_ ||
             sceneSession->GetSessionInfo().appInstanceKey_ != info.instanceKey_ ||
+            sceneSession->GetSessionInfo().specifiedFlag_ != info.specifiedFlag_ ||
             sceneSession->GetSessionInfo().windowType_ != info.windowType_) {
             continue;
         }
