@@ -343,6 +343,9 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
     napi_value ModalityTypeInit(napi_env env);
+    napi_value WindowInfoFilterOptionInit(napi_env env);
+    napi_value WindowInfoTypeOptionInit(napi_env env);
+    napi_value WindowVisibilityStateInit(napi_env env);
     napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButtonStyle);
     napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityInfo& windowDensityInfo);
     bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& decorButtonStyle);

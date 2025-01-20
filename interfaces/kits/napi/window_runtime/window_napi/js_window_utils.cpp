@@ -1326,6 +1326,59 @@ napi_value ModalityTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value WindowInfoFilterOptionInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "ALL",
+        CreateJsValue(env, WindowInfoFilterOption::ALL));
+    napi_set_named_property(env, objValue, "EXCLUDE_SYSTEM",
+        CreateJsValue(env, WindowInfoFilterOption::EXCLUDE_SYSTEM));
+    napi_set_named_property(env, objValue, "VISIBLE",
+        CreateJsValue(env, WindowInfoFilterOption::VISIBLE));
+    napi_set_named_property(env, objValue, "FOREGROUND",
+        CreateJsValue(env, WindowInfoFilterOption::FOREGROUND));
+    return objValue;
+}
+
+napi_value WindowInfoTypeOptionInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "WINDOW_UI_INFO",
+        CreateJsValue(env, WindowInfoTypeOption::WINDOW_UI_INFO));
+    napi_set_named_property(env, objValue, "WINDOW_DISPLAY_INFO",
+        CreateJsValue(env, WindowInfoTypeOption::WINDOW_DISPLAY_INFO));
+    napi_set_named_property(env, objValue, "WINDOW_LAYOUT_INFO",
+        CreateJsValue(env, WindowInfoTypeOption::WINDOW_LAYOUT_INFO));
+    napi_set_named_property(env, objValue, "WINDOW_META_INFO",
+        CreateJsValue(env, WindowInfoTypeOption::WINDOW_META_INFO));
+    napi_set_named_property(env, objValue, "ALL",
+        CreateJsValue(env, WindowInfoTypeOption::ALL));
+    return objValue;
+}
+
+napi_value WindowVisibilityStateInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "WINDOW_VISIBILITY_STATE_NO_OCCLUSION",
+        CreateJsValue(env, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
+    napi_set_named_property(env, objValue, "WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION",
+        CreateJsValue(env, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
+    napi_set_named_property(env, objValue, "WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION",
+        CreateJsValue(env, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
+    napi_set_named_property(env, objValue, "WINDOW_LAYER_STATE_MAX",
+        CreateJsValue(env, WindowVisibilityState::WINDOW_LAYER_STATE_MAX));
+    return objValue;
+}
+
 static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     bool isModal = false;

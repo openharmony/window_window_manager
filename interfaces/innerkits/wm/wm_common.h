@@ -1246,18 +1246,11 @@ using WindowInfoFilterOptionType = uint8_t;
  * @brief WindowInfo filter Option
  */
 enum class WindowInfoFilterOption : WindowInfoFilterOptionType {
-    START = 0,
-    ALL = START,
-    EXCLUDE_SYSTEM = 1, // 确定是否反义
+    ALL = 0,
+    EXCLUDE_SYSTEM = 1,
     VISIBLE = 1 << 1,
     FOREGROUND = 1 << 2,
-    END = 7,
 };
-
-inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs) {
-    return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionType>(lhs) |
-        static_cast<WindowInfoFilterOptionType>(rhs));
-}
 
 inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option) {
     return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0;
@@ -1269,19 +1262,12 @@ using WindowInfoTypeOptionType = uint8_t;
  * @brief WindowInfo Type Option
  */
 enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
-    START = 0,
     WINDOW_UI_INFO = 1,
     WINDOW_DISPLAY_INFO = 1 << 1,
     WINDOW_LAYOUT_INFO = 1 << 2,
     WINDOW_META_INFO = 1 << 3,
-    ALL = -1ULL,
-    END = ALL,
+    ALL = ~0,
 };
-
-inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs) {
-    return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionType>(lhs) |
-        static_cast<WindowInfoTypeOptionType>(rhs));
-}
 
 inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option) {
     return (static_cast<WindowInfoTypeOptionType>(options) & static_cast<WindowInfoTypeOptionType>(option)) != 0;
@@ -1293,10 +1279,12 @@ inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption op
  * @brief Visibility state of a window
  */
 enum WindowVisibilityState : uint32_t {
-    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = 0,
+    START = 0,
+    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = START,
     WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
     WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
-    WINDOW_LAYER_STATE_MAX
+    WINDOW_LAYER_STATE_MAX,
+    END,
 };
 
 /**
@@ -1353,8 +1341,10 @@ struct WindowDisplayInfo : public Parcelable {
 struct WindowLayoutInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
-               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+        return parcel.WriteInt32(rect.posX_) &&
+               parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) &&
+               parcel.WriteUint32(rect.height_);
     }
   
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
@@ -1669,10 +1659,8 @@ struct KeyboardLayoutParams : public Parcelable {
 
     static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
     {
-        return parcel.WriteInt32(rect.posX_) &&
-               parcel.WriteInt32(rect.posY_) &&
-               parcel.WriteUint32(rect.width_) &&
-               parcel.WriteUint32(rect.height_);
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
 
     static inline bool ReadParcel(Parcel& parcel, Rect& rect)

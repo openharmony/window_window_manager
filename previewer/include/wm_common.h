@@ -816,18 +816,11 @@ using WindowInfoFilterOptionType = uint8_t;
  * @brief WindowInfo filter Option
  */
 enum class WindowInfoFilterOption : WindowInfoFilterOptionType {
-    START = 0,
-    ALL = START,
-    EXCLUDE_SYSTEM = 1, // 确定是否反义
+    ALL = 0,
+    EXCLUDE_SYSTEM = 1,
     VISIBLE = 1 << 1,
     FOREGROUND = 1 << 2,
-    END = 7,
 };
-
-inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs) {
-    return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionType>(lhs) |
-        static_cast<WindowInfoFilterOptionType>(rhs));
-}
 
 inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option) {
     return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0;
@@ -839,24 +832,16 @@ using WindowInfoTypeOptionType = uint8_t;
  * @brief WindowInfo Type Option
  */
 enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
-    START = 0,
     WINDOW_UI_INFO = 1,
     WINDOW_DISPLAY_INFO = 1 << 1,
     WINDOW_LAYOUT_INFO = 1 << 2,
     WINDOW_META_INFO = 1 << 3,
-    ALL = -1ULL,
-    END = ALL,
+    ALL = ~0,
 };
-
-inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs) {
-    return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionType>(lhs) |
-        static_cast<WindowInfoTypeOptionType>(rhs));
-}
 
 inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option) {
     return (static_cast<WindowInfoTypeOptionType>(options) & static_cast<WindowInfoTypeOptionType>(option)) != 0;
 }
-
 
 /**
  * @enum WindowVisibilityState
