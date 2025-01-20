@@ -443,10 +443,10 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
 {
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "eventHandler null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+        TLOGE(WmsLogTag::WMS_FOCUS, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
     }
-    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
     eventHandler->PostSyncTask([windowId, isFocusable, &errCode, where = __func__] {
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
