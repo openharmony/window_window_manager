@@ -32,12 +32,16 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy" };
+constexpr int32_t MAX_IPC_CAPACITY_FOR_WANT = 216 * 1024;
 
 bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return false;
+    }
+    if (data.GetMaxCapacity() < MAX_IPC_CAPACITY_FOR_WANT) {
+        data.SetMaxCapacity(MAX_IPC_CAPACITY_FOR_WANT);
     }
     if (!data.WriteParcelable(&(abilitySessionInfo->want)) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
