@@ -597,7 +597,7 @@ napi_value JsWindow::SetRaiseByClickEnabled(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::HideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
-    WLOGI("HideNonSystemFloatingWindows");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "HideNonSystemFloatingWindows");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnHideNonSystemFloatingWindows(env, info) : nullptr;
 }
