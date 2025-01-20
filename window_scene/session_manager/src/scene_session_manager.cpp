@@ -4824,7 +4824,7 @@ void SceneSessionManager::NotifyWindowInfoChangeFromSession(int32_t persistentId
     SceneInputManager::GetInstance().NotifyWindowInfoChangeFromSession(sceneSession);
 }
 
-bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
+bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session) const
 {
     if (session == nullptr) {
         return false;

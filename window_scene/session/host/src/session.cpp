@@ -3715,7 +3715,7 @@ void Session::SetMainSessionUIStateDirty(bool dirty)
     }
 }
 
-bool Session::IsScbCoreEnabled()
+bool Session::IsScbCoreEnabled() const
 {
     return isScbCoreEnabled_;
 }
