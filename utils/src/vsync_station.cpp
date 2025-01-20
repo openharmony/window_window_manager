@@ -20,7 +20,7 @@
 #include <hitrace_meter.h>
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_display_node.h>
-#include <ui/rs_ui_display_soloist.h>
+#include <feature/hyper_graphic_manager/rs_ui_display_soloist.h>
 
 #include "window_frame_trace.h"
 #include "window_manager_hilog.h"
