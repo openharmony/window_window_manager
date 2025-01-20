@@ -369,6 +369,7 @@ struct SessionInfo {
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
     int32_t specifiedId = 0;
+    std::string specifiedFlag_ = "";
 
     /*
      * App Use Control
