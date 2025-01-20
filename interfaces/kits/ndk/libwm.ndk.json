@@ -70,5 +70,9 @@
     {
         "first_instroduced":"16",
         "name":"OH_WindowManager_Snapshot"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowTouchable"
     }
 ]
