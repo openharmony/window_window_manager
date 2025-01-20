@@ -159,7 +159,7 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     friend class AnomalyDetection;
     bool IsSessionVisible(const sptr<SceneSession>& session);
-    bool IsSessionVisibleForeground(const sptr<SceneSession>& session);
+    bool IsSessionVisibleForeground(const sptr<SceneSession>& session) const;
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
