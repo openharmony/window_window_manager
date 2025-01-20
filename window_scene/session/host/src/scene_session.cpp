@@ -3107,7 +3107,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
+            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1);
             movedSurfaceNode->SetIsCrossNode(true);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
         }
@@ -3128,8 +3128,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to remove cross parent child");
                 continue;
             }
-            screenSession->GetDisplayNode()->RemoveCrossParentChild(
-                movedSurfaceNode, moveDragController_->GetInitParentNodeId());
+            screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
         }
