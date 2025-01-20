@@ -1135,6 +1135,23 @@ HWTEST_F(SessionProxyTest, SetSessionLabelAndIcon, Function | SmallTest | Level2
 
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->SetSessionLabelAndIcon(label, icon));
 }
+
+/**
+ * @tc.name: SetWindowCornerRadius
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->SetWindowCornerRadius(1.0f);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

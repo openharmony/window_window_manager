@@ -6352,4 +6352,40 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             parentTransX, parentTransY);
     }, __func__);
 }
+
+void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session or onSetWindowCornerRadiusFunc is null");
+            return;
+        }
+        session->onSetWindowCornerRadiusFunc_ = std::move(func);
+        auto property = session->GetSessionProperty();
+        session->onSetWindowCornerRadiusFunc_(property->GetWindowCornerRadius());
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id: %{public}d", where,
+            session->GetPersistentId());
+    }, __func__);
+}
+
+WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), cornerRadius, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+            return;
+        }
+        if (session->onSetWindowCornerRadiusFunc_) {
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id %{public}d radius: %{public}f",
+                where, session->GetPersistentId(), cornerRadius);
+            session->onSetWindowCornerRadiusFunc_(cornerRadius);
+            session->GetSessionProperty()->SetWindowCornerRadius(cornerRadius);
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

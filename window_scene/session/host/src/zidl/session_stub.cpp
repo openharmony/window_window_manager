@@ -238,6 +238,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSessionLabelAndIcon(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE):
             return HandleChangeKeyboardViewMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS):
+            return HandleSetWindowCornerRadius(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1428,6 +1430,18 @@ int SessionStub::HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel
     }
     WSError ret = ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(mode));
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply)
+{
+    float cornerRadius = 0.0f;
+    if (!data.ReadFloat(cornerRadius)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read cornerRadius failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);
+    SetWindowCornerRadius(cornerRadius);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
