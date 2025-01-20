@@ -7418,7 +7418,7 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "%{public}s only system window is valid", where);
+        TLOGE(WmsLogTag::WMS_IMMS, "%{public}s only system window is valid");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     uint32_t avoidAreaOption = 0;
