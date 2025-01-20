@@ -476,7 +476,6 @@ void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
     if (currentState == FoldStatus::EXPAND || currentState == FoldStatus::HALF_FOLD) {
         ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
     } else if (currentState == FoldStatus::FOLDED) {
-        RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
         ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
         PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
     } else {
