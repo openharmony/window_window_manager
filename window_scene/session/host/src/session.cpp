@@ -3140,7 +3140,8 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
 {
     bool isMainFloating =
         GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && WindowHelper::IsMainWindow(GetWindowType());
-    bool isParentFloating = WindowHelper::IsSubWindow(GetWindowType()) && GetParentSession() != nullptr &&
+    bool isParentFloating = SessionHelper::IsNonSecureToUIExtension(GetWindowType()) &&
+        GetParentSession() != nullptr &&
         GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     bool isMidScene = GetIsMidScene();
     bool isPhoneOrPadNotFreeMultiWindow =

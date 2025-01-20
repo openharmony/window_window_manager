@@ -398,7 +398,8 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
         return false;
     }
     bool isMainOrParentFloating = WindowHelper::IsMainWindow(callingSession->GetWindowType()) ||
-        (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
+        (SessionHelper::IsNonSecureToUIExtension(callingSession->GetWindowType()) &&
+         callingSession->GetParentSession() != nullptr &&
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     bool isMidScene = callingSession->GetIsMidScene();
