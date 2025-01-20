@@ -23,6 +23,13 @@ extern "C" {
 #endif
 
 /**
+ * @brief The native pixel map information defined by Image Kit.
+ *
+ * @since 16
+ */
+struct OH_PixelmapNative;
+
+/**
  * @brief Enumerates the result types of the wm interface
  *
  * @since 12
