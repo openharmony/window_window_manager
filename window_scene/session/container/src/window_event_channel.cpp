@@ -94,7 +94,7 @@ WSError WindowEventChannel::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent
 
 WSError WindowEventChannel::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    WLOGFD("WindowEventChannel receive pointer event");
+    TLOGI(WmsLogTag::WMS_EVENT, "id:%{public}d", pointerEvent->GetId());
     PrintPointerEvent(pointerEvent);
     if (SceneBoardJudgement::IsSceneBoardEnabled() && isUIExtension_ &&
         (uiExtensionUsage_ == UIExtensionUsage::MODAL ||
