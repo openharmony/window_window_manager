@@ -61,18 +61,18 @@ WSError SessionProxy::Foreground(
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (property) {
         if (!data.WriteBool(true) || !data.WriteParcelable(property.GetRefPtr())) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Write property failed");
+            TLOGE(WmsLogTag::WMS_LIFE, "Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     } else {
         if (!data.WriteBool(false)) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "Write property failed");
+            TLOGE(WmsLogTag::WMS_LIFE, "Write property failed");
             return WSError::WS_ERROR_IPC_FAILED;
         }
     }
@@ -86,13 +86,13 @@ WSError SessionProxy::Foreground(
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND), data, reply, option);
     if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -277,7 +277,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
     int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT), data, reply, option);
     if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
@@ -1082,7 +1082,7 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
     int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA), data, reply, option);
     if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
         return avoidArea;
     }
     sptr<AvoidArea> area = reply.ReadParcelable<AvoidArea>();
@@ -2070,7 +2070,7 @@ int32_t SessionProxy::GetStatusBarHeight()
     int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT), data, reply, option);
     if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
         return height;
     }
     height = reply.ReadInt32();

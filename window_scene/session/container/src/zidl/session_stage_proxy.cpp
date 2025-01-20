@@ -601,26 +601,26 @@ WSError SessionStageProxy::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteStrongParcelable(avoidArea)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write AvoidArea failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "Write AvoidArea failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write AvoidAreaType failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "Write AvoidAreaType failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int sendCode = remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA), data, reply, option);
     if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
