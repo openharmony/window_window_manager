@@ -40,6 +40,7 @@
 #include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
 #include "window_adapter.h"
+#include "window_inspector.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
 #include "color_parser.h"
@@ -58,7 +59,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_15 = 15;
 
-/**
+/*
  * DFX
  */
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
@@ -302,6 +303,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
 WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
+    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     Destroy(true, false);
 }
 
@@ -1451,7 +1453,13 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
     }
-
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, posX:%{public}d, posY:%{public}d, "
+              "scaleX:%{public}f, scaleY:%{public}f", GetPersistentId(),
+              singleHandTransform_.posX, singleHandTransform_.posY,
+              singleHandTransform_.scaleX, singleHandTransform_.scaleY);
+        uiContent->UpdateSingleHandTransform(singleHandTransform_);
+    }
     WindowType winType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(winType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(winType);
@@ -2305,7 +2313,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     height = uiContent->GetContainerModalTitleHeight();
     if (height == -1) {
         height = 0;
-        TLOGW(WmsLogTag::WMS_DECOR, "Get app window decor height failed");
+        TLOGD(WmsLogTag::WMS_DECOR, "Get app window decor height failed");
         return WMError::WM_OK;
     }
     float vpr = 0.f;
@@ -4546,6 +4554,20 @@ void WindowSessionImpl::NotifyTransformChange(const Transform& transform)
     }
 }
 
+void WindowSessionImpl::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
+{
+    singleHandTransform_ = singleHandTransform;
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, posX:%{public}d, posY:%{public}d, "
+              "scaleX:%{public}f, scaleY:%{public}f", GetPersistentId(),
+              singleHandTransform.posX, singleHandTransform.posY,
+              singleHandTransform.scaleX, singleHandTransform.scaleY);
+        uiContent->UpdateSingleHandTransform(singleHandTransform);
+    } else {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, uiContent is nullptr", GetPersistentId());
+    }
+}
+
 void WindowSessionImpl::SubmitNoInteractionMonitorTask(int32_t eventId,
     const IWindowNoInteractionListenerSptr& listener)
 {
@@ -4822,6 +4844,20 @@ WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::SetDragActivated(bool dragActivated)
+{
+    dragActivated_ = dragActivated;
+    return WSError::WS_OK;
+}
+
+bool WindowSessionImpl::IsWindowDraggable()
+{
+    bool isDragEnabled = GetProperty()->GetDragEnabled();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "PersistentId: %{public}d, dragEnabled: %{public}d, dragActivate: %{public}d",
+        GetPersistentId(), isDragEnabled, dragActivated_.load());
+    return isDragEnabled && dragActivated_.load();
+}
+
 void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)
 {
     targetAPIVersion_ = targetAPIVersion;
@@ -4842,6 +4878,25 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 {
     std::lock_guard<std::recursive_mutex> lock(transformMutex_);
     return layoutTransform_;
+}
+
+void WindowSessionImpl::RegisterWindowInspectorCallback()
+{
+    if (!WindowInspector::GetInstance().IsConnectServerSuccess()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u connect failed", GetWindowId());
+        return;
+    }
+    auto getWMSWindowListCallback = std::make_shared<GetWMSWindowListCallback>([weakThis = wptr(this)] {
+        WindowListInfo windowListInfo;
+        if (auto window = weakThis.promote()) {
+            windowListInfo.windowName = window->GetWindowName();
+            windowListInfo.windowId = window->GetWindowId();
+            windowListInfo.windowType = static_cast<uint32_t>(window->GetType());
+            windowListInfo.windowRect = window->GetRect();
+        }
+        return windowListInfo;
+    });
+    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 } // namespace Rosen
 } // namespace OHOS
