@@ -3774,7 +3774,6 @@ bool Session::IsPcWindow() const
 void Session::GetWindowUIInfoForWindowInfo(WindowUIInfo& windowUIInfo)
 {
     windowUIInfo.visibilityState = GetVisibilityState();
-    return windowUIInfo;
 }
 
 void Session::GetWindowDisplayInfoForWindowInfo(WindowDisplayInfo& windowDisplayInfo)
@@ -3785,7 +3784,6 @@ void Session::GetWindowDisplayInfoForWindowInfo(WindowDisplayInfo& windowDisplay
     } else {
         windowDisplayInfo.displayId = GetSessionProperty()->GetDisplayId() ;
     }
-    return windowDisplayInfo;
 }
 
 void Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInfo)
@@ -3798,7 +3796,6 @@ void Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInf
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
                               sessionGlobalRect.width_, sessionGlobalRect.height_};
-    return windowLayoutInfo;
 }
 
 void Session::GetWindowMetaInfoForWindowInfo(WindowMetaInfo& windowMetaInfo)
@@ -3811,6 +3808,5 @@ void Session::GetWindowMetaInfoForWindowInfo(WindowMetaInfo& windowMetaInfo)
     }
     windowMetaInfo.bundleName = GetSessionInfo().bundleName_;
     windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
-    return windowMetaInfo;
 }
 } // namespace OHOS::Rosen
