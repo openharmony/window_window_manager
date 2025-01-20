@@ -89,7 +89,7 @@ HWTEST_F(SceneSessionManagerTest12, GetResourceManager, Function | SmallTest | L
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
     AppExecFwk::AbilityInfo abilityInfo;
