@@ -125,6 +125,15 @@ public:
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
 
     /**
+     * @brief Notify single hand transform.
+     *
+     * Notify singleHandTransform when single hand mode changed.
+     *
+     * @param singleHandTransform transform to change.
+     */
+    virtual void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) = 0;
+
+    /**
      * @brief Set pip event to client.
      *
      * Set the pip event to client. Such as close, restore, destroy events.
@@ -213,6 +222,8 @@ public:
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
+
+    virtual WSError SetDragActivated(bool dragActivated) = 0;
 
     virtual WSError SetFullScreenWaterfallMode(bool isWaterfallMode) { return WSError::WS_DO_NOTHING; }
     virtual WSError SetSupportEnterWaterfallMode(bool isSupportEnter) { return WSError::WS_DO_NOTHING; }
