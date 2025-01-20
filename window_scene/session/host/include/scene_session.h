@@ -107,6 +107,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
+using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -207,6 +208,7 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
@@ -269,6 +271,7 @@ public:
     /*
      * Window Layout
      */
+    WMError ActivateDragBySystem(bool activateDrag);
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
@@ -614,6 +617,12 @@ public:
     void ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid);
     bool IsKeyboardAvoidAreaActive() const;
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
+
+    /*
+     * Window Property
+    */
+    void SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func);
+    WSError SetWindowCornerRadius(float cornerRadius) override;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -1014,6 +1023,11 @@ private:
      * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
+
+    /*
+     * Window Property
+     */
+    NotifySetWindowCornerRadiusFunc onSetWindowCornerRadiusFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

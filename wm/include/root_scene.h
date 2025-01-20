@@ -36,6 +36,7 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
+class RSNode;
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
@@ -106,6 +107,8 @@ public:
     Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
 
     /*
      * Window Property

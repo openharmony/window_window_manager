@@ -89,6 +89,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_VIEW_MODE_CHANGE_CB,
+    SET_WINDOW_CORNER_RADIUS_CB,
 };
 
 class SceneSession;
@@ -130,6 +131,7 @@ private:
     void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
 
+    static napi_value ActivateDragBySystem(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UpdateNativeVisibility(napi_env env, napi_callback_info info);
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
@@ -203,6 +205,7 @@ private:
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
 
+    napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
@@ -324,6 +327,11 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
 
     /*
+     * Window Property
+    */
+    void ProcessSetWindowCornerRadiusRegister();
+
+    /*
      * PC Window Layout
      */
     void ProcessSetSupportedWindowModesRegister();
@@ -382,6 +390,11 @@ private:
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(const SessionState& state, const KeyboardViewMode& mode);
     void OnKeyboardViewModeChange(const KeyboardViewMode& mode);
+
+    /*
+     * Window Property
+    */
+    void OnSetWindowCornerRadius(float cornerRadius);
 
     /*
      * PC Window Layout
