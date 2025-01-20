@@ -7380,11 +7380,6 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (!WindowHelper::IsSystemWindow(window->GetType())) {
-            TLOGE(WmsLogTag::WMS_IMMS, "only system window is allowed, type: %{public}d", window->GetType());
-            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
-            return;
-        }
         uint32_t option = 0;
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->GetAvoidAreaOption(option));
         if (*errCodePtr != WmErrorCode::WM_OK) {
