@@ -83,7 +83,7 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         session->GetSessionProperty()->SetKeyboardViewMode(property->GetKeyboardViewMode());
         session->UseFocusIdIfCallingSessionIdInvalid();
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
-            "Show keyboard session, id: %{public}d, calling id: %{public}d, viewMode: %{public}d",
+            "Show keyboard session, id: %{public}d, calling id: %{public}d, viewMode: %{public}u",
             session->GetPersistentId(), session->GetCallingSessionId(),
             static_cast<uint32_t>(property->GetKeyboardViewMode()));
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
