@@ -83,6 +83,7 @@ public:
     void SetModeSupportInfo(uint32_t modeSupportInfo);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
+    void SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& keyboardTouchHotAreas);
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
@@ -138,6 +139,7 @@ public:
     const Transform& GetTransform() const;
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    KeyboardTouchHotAreas GetKeyboardTouchHotAreas() const;
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
@@ -205,8 +207,13 @@ public:
     bool GetIsUIExtensionSubWindowFlag() const;
 
 private:
+    void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
+    bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
+    bool MarshallingKeyboardTouchHotAreas(Parcel& parcel) const;
+    static void UnmarshallingTouchHotAreasInner(Parcel& parcel, std::vector<Rect>& touchHotAreas);
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
+    static void UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
@@ -221,6 +228,7 @@ private:
     bool WriteActionUpdateMode(Parcel& parcel);
     bool WriteActionUpdateAnimationFlag(Parcel& parcel);
     bool WriteActionUpdateTouchHotArea(Parcel& parcel);
+    bool WriteActionUpdateKeyboardTouchHotArea(Parcel& parcel);
     bool WriteActionUpdateDecorEnable(Parcel& parcel);
     bool WriteActionUpdateWindowLimits(Parcel& parcel);
     bool WriteActionUpdateDragenabled(Parcel& parcel);
@@ -244,6 +252,7 @@ private:
     void ReadActionUpdateMode(Parcel& parcel);
     void ReadActionUpdateAnimationFlag(Parcel& parcel);
     void ReadActionUpdateTouchHotArea(Parcel& parcel);
+    void ReadActionUpdateKeyboardTouchHotArea(Parcel& parcel);
     void ReadActionUpdateDecorEnable(Parcel& parcel);
     void ReadActionUpdateWindowLimits(Parcel& parcel);
     void ReadActionUpdateDragenabled(Parcel& parcel);
@@ -302,6 +311,7 @@ private:
     bool isFloatingWindowAppType_ = false;
     mutable std::mutex touchHotAreasMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
+    KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;
@@ -318,8 +328,8 @@ private:
     bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
-    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
+    static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
