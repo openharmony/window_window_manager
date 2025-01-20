@@ -685,11 +685,11 @@ napi_value GetWindowMetaInfoAndConvertToJsValue(napi_env env, const WindowMetaIn
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "windowId", windowMetaInfo.windowId != 0 ?
                             CreateJsValue(env, windowMetaInfo.windowId) : CreateJsUndefined(env));
-    napi_set_named_property(env, objValue, "windowName", windowMetaInfo.windowName != "" ?
+    napi_set_named_property(env, objValue, "windowName", windowMetaInfo.windowName.empty() ?
                             CreateJsValue(env, windowMetaInfo.windowName) : CreateJsUndefined(env));
-    napi_set_named_property(env, objValue, "bundleName", windowMetaInfo.bundleName != "" ?
+    napi_set_named_property(env, objValue, "bundleName", windowMetaInfo.bundleName.empty() ?
                             CreateJsValue(env, windowMetaInfo.bundleName) : CreateJsUndefined(env));
-    napi_set_named_property(env, objValue, "abilityName", windowMetaInfo.abilityName != "" ?
+    napi_set_named_property(env, objValue, "abilityName", windowMetaInfo.abilityName.empty() ?
                             CreateJsValue(env, windowMetaInfo.abilityName) : CreateJsUndefined(env));
     return objValue;
 }
