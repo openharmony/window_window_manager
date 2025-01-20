@@ -87,7 +87,7 @@ const std::string SET_SUPPORT_WINDOW_MODES_CB = "setSupportWindowModes";
 const std::string SESSION_LOCK_STATE_CHANGE_CB = "sessionLockStateChange";
 const std::string UPDATE_SESSION_LABEL_AND_ICON_CB = "updateSessionLabelAndIcon";
 const std::string KEYBOARD_STATE_CHANGE_CB = "keyboardStateChange";
-const std::string KEYBOARD_VIEW_MODE_CHANGE_CB = "KeyboardViewModeChange";
+const std::string KEYBOARD_VIEW_MODE_CHANGE_CB = "keyboardViewModeChange";
 const std::string SET_WINDOW_CORNER_RADIUS_CB = "setWindowCornerRadius";
 
 constexpr int ARG_COUNT_3 = 3;
@@ -5956,8 +5956,8 @@ void JsSceneSession::ProcessKeyboardStateChangeRegister()
         TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetKeybaordStateChangeListener(
-        [weakThis = wptr(this), where = __func__](const SessionState& state, const KeyboardViewMode& mode) {
+    session->SetKeyboardStateChangeListener(
+        [weakThis = wptr(this), where = __func__](SessionState state, KeyboardViewMode mode) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s jsSceneSession is null", where);
@@ -5968,7 +5968,7 @@ void JsSceneSession::ProcessKeyboardStateChangeRegister()
     TLOGD(WmsLogTag::WMS_KEYBOARD, "success");
 }
 
-void JsSceneSession::OnKeyboardStateChange(const SessionState& state, const KeyboardViewMode& mode)
+void JsSceneSession::OnKeyboardStateChange(SessionState state, KeyboardViewMode mode)
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
@@ -5976,7 +5976,7 @@ void JsSceneSession::OnKeyboardStateChange(const SessionState& state, const Keyb
         return;
     }
 
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, state: %{public}d, KeyboardViewMode: %{public}d",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, state: %{public}d, KeyboardViewMode: %{public}u",
         session->GetPersistentId(), state, static_cast<uint32_t>(mode));
     auto task = [weakThis = wptr(this), persistentId = persistentId_, state, env = env_, mode] {
         auto jsSceneSession = weakThis.promote();
@@ -5991,11 +5991,12 @@ void JsSceneSession::OnKeyboardStateChange(const SessionState& state, const Keyb
             return;
         }
         napi_value jsKeyboardStateObj = CreateJsValue(env, state);
-        napi_value jskeyboardViewModeObj = CreateJsValue(env, mode);
-        napi_value argv[] = { jsKeyboardStateObj, jskeyboardViewModeObj };
+        napi_value jsKeyboardViewModeObj = CreateJsValue(env, mode);
+        napi_value argv[] = { jsKeyboardStateObj, jsKeyboardViewModeObj };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnKeyboardStateChange, state:" + std::to_string(static_cast<int>(state)));
+    taskScheduler_->PostMainThreadTask(task, "OnKeyboardStateChange, state:" +
+        std::to_string(static_cast<uint32_t>(state)));
 }
 
 void JsSceneSession::ProcessKeyboardViewModeChangeRegister()
@@ -6017,9 +6018,9 @@ void JsSceneSession::ProcessKeyboardViewModeChangeRegister()
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Register success. id: %{public}d", persistentId_);
 }
 
-void JsSceneSession::OnKeyboardViewModeChange(const KeyboardViewMode& mode)
+void JsSceneSession::OnKeyboardViewModeChange(KeyboardViewMode mode)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Change KeyboardViewMode to %{public}d.", static_cast<uint32_t>(mode));
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Change KeyboardViewMode to %{public}u", static_cast<uint32_t>(mode));
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, mode] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -6036,7 +6037,7 @@ void JsSceneSession::OnKeyboardViewModeChange(const KeyboardViewMode& mode)
         napi_value argv[] = {jsKeyboardViewMode};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "OnKeyboardViewModeChange");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::ProcessSetWindowCornerRadiusRegister()
