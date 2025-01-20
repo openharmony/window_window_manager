@@ -537,7 +537,7 @@ public:
     void SetUIStateDirty(bool dirty);
     void SetMainSessionUIStateDirty(bool dirty);
     bool GetUIStateDirty() const;
-    static bool IsScbCoreEnabled() const;
+    static bool IsScbCoreEnabled();
     static void SetScbCoreEnabled(bool enabled);
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
