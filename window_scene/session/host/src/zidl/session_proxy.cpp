@@ -214,8 +214,8 @@ WSError SessionProxy::Disconnect(bool isFromClient, const std::string& identityT
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT),
-        data, reply, option);
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT), data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -1463,8 +1463,8 @@ void SessionProxy::NotifyExtensionDied()
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return;
     }
-    int sendCode = remote->SendRequest(static_cast<uint32_t>(
-        SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED), data, reply, option);
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED), data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return;
@@ -1514,7 +1514,6 @@ void SessionProxy::TriggerBindModalUIExtension()
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRIGGER_BIND_MODAL_UI_EXTENSION), data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
-        return;
     }
 }
 
@@ -1569,8 +1568,8 @@ WSError SessionProxy::TransferAccessibilityEvent(const Accessibility::Accessibil
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(static_cast<uint32_t>(
-        SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT), data, reply, option);
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_REPORT_ACCESSIBILITY_EVENT), data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -2025,31 +2024,6 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return static_cast<WMError>(ret);
 }
 
-int32_t SessionProxy::GetStatusBarHeight()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    int32_t height = 0;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
-        return height;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
-        return height;
-    }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT), data, reply, option);
-    if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
-        return height;
-    }
-    height = reply.ReadInt32();
-    return height;
-}
-
 WSError SessionProxy::SetDialogSessionBackGestureEnabled(bool isEnabled)
 {
     MessageParcel data;
@@ -2093,9 +2067,10 @@ int32_t SessionProxy::GetStatusBarHeight()
         TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return height;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT), data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return height;
     }
     height = reply.ReadInt32();
