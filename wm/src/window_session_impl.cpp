@@ -3482,7 +3482,7 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
     if (lastAvoidAreaMap_[type] != *avoidArea) {
         lastAvoidAreaMap_[type] = *avoidArea;
         NotifyAvoidAreaChange(avoidArea, type);
-        UpdateViewportConfig(GetRect(), WindowSizeChangeReason::UNDEFINED);
+        UpdateViewportConfig(GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
     }
     return WSError::WS_OK;
 }
