@@ -3771,16 +3771,14 @@ bool Session::IsPcWindow() const
     return systemConfig_.IsPcWindow();
 }
 
-WindowUIInfo Session::GetWindowUIInfoForWindowInfo() const
+void Session::GetWindowUIInfoForWindowInfo(WindowUIInfo& windowUIInfo)
 {
-    WindowUIInfo windowUIInfo;
     windowUIInfo.visibilityState = GetVisibilityState();
     return windowUIInfo;
 }
 
-WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
+void Session::GetWindowDisplayInfoForWindowInfo(WindowDisplayInfo& windowDisplayInfo)
 {
-    WindowDisplayInfo windowDisplayInfo;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED) {
         WSRect sessionGlobalRect = GetSessionGlobalRect();
         windowDisplayInfo.displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
@@ -3790,23 +3788,21 @@ WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
     return windowDisplayInfo;
 }
 
-WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
+void Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInfo)
 {
-    WindowLayoutInfo windowLayoutInfo;
     WSRect sessionGlobalRect = GetSessionGlobalRect();
     sessionGlobalRect.width_ *= GetScaleX();
     sessionGlobalRect.height_ *= GetScaleY();
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED) {
-        DisplayId displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
+        TransformGlobalRectToRelativeRect(sessionGlobalRect);
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
                               sessionGlobalRect.width_, sessionGlobalRect.height_};
     return windowLayoutInfo;
 }
 
-WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
+void Session::GetWindowMetaInfoForWindowInfo(WindowMetaInfo& windowMetaInfo)
 {
-    WindowMetaInfo windowMetaInfo;
     windowMetaInfo.windowId = GetWindowId();
     if (GetSessionInfo().isSystem_) {
         windowMetaInfo.windowName = GetSessionInfo().abilityName_;

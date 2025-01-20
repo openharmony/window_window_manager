@@ -10484,16 +10484,16 @@ WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFil
             }
             auto windowInfo = sptr<WindowInfo>::MakeSptr();
             if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
-                windowInfo->windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
+                sceneSession->GetWindowUIInfoForWindowInfo(windowInfo->windowUIInfo);
             }
             if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
-                windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
+                sceneSession->GetWindowDisplayInfoForWindowInfo(windowInfo->windowDisplayInfo);
             }
             if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
-                windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
+                sceneSession->GetWindowLayoutInfoForWindowInfo(windowInfo->windowLayoutInfo);
             }
             if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
-                windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+                sceneSession->GetWindowMetaInfoForWindowInfo(windowInfo->windowMetaInfo);
             }
             infos.emplace_back(windowInfo);
         }
