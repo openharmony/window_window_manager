@@ -419,7 +419,7 @@ public:
     /*
      * UIExtension
      */
-    uint32_t GetLockScreenZorder();
+    uint32_t GetLockScreenZOrder();
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid);
     void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
