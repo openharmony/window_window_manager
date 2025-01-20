@@ -4408,7 +4408,7 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
 napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[INDEX_FOUR] = {nullptr}; 
+    napi_value argv[INDEX_FOUR] = { nullptr }; 
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ONE_PARAMS_SIZE || argc > TWO_PARAMS_SIZE) { // 2: maximum params num
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
