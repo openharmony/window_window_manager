@@ -118,7 +118,7 @@ const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_LAUNCHER_RECENT,
     WindowType::WINDOW_TYPE_LAUNCHER_DOCK
 };
-constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
+constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 4;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 }
@@ -1003,12 +1003,8 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
         uint32_t forceLimitMinWidth = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
         uint32_t forceLimitMinHeight = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
-        if (forceLimitMinWidth < limitMinWidth) {
-            limitMinWidth = forceLimitMinWidth;
-        }
-        if (forceLimitMinHeight < limitMinHeight) {
-            limitMinHeight = forceLimitMinHeight;
-        }
+        limitMinWidth = std::min(forceLimitMinWidth, limitMinWidth);
+        limitMinHeight = std::min(forceLimitMinHeight, limitMinHeight);
         newLimits.minWidth_ = limitMinWidth;
         newLimits.minHeight_ = limitMinHeight;
     }
