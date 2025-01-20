@@ -415,6 +415,20 @@ napi_value JsWindow::SetWindowSystemBarProperties(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnSetWindowSystemBarProperties(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetStatusBarColor(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetStatusBarColor(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetStatusBarProperty(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetStatusBarPropertySync(env, info) : nullptr;
+}
+
 napi_value JsWindow::GetAvoidArea(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
@@ -755,6 +769,20 @@ napi_value JsWindow::SetCornerRadius(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetCornerRadius(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowCornerRadius(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowCornerRadius(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetShadow(napi_env env, napi_callback_info info)
 {
     WLOGI("SetShadow");
@@ -1093,6 +1121,19 @@ static WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarPro
         }
     }
     return WMError::WM_OK;
+}
+
+WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t contentColor)
+{
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_IMMS, "window is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    property.contentColor_ = contentColor;
+    property.settingFlag_ = static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
+        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+    return window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property);
 }
 
 napi_value NapiGetUndefined(napi_env env)
@@ -3149,6 +3190,67 @@ napi_value JsWindow::OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callb
     return objValue;
 }
 
+napi_value JsWindow::OnSetStatusBarColor(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARG_COUNT_ONE || argv[INDEX_ZERO] == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "no enough arguments");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    uint32_t contentColor = 0;
+    if (!ParseColorMetrics(env, argv[INDEX_ZERO], contentColor)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "parse color failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    napi_value lastParam = (argc <= ARG_COUNT_ONE) ? nullptr :
+        (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    TLOGI(WmsLogTag::WMS_IMMS, "target color: %{public}u", contentColor);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, contentColor, task = napiAsyncTask] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "window is null");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        auto errCode = UpdateStatusBarProperty(window, contentColor);
+        if (errCode == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "set status bar property error: %{public}d", errCode);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(errCode),
+                "JsWindow::OnSetStatusBarProperty failed"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+            "JsWindow::OnSetStatusBarProperty failed"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnGetStatusBarPropertySync(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "only main window is allowed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    auto objValue = GetStatusBarPropertyObject(env, windowToken_);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get property failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    }
+    return objValue;
+}
+
 napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "OnEnableLandscapeMultiWindow");
@@ -3599,8 +3701,8 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     std::string color;
-    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], color)) {
-        WLOGFE("Failed to convert parameter to background color");
+    if (errCode == WmErrorCode::WM_OK && !GetWindowBackgroundColorFromJs(env, argv[0], color)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse js color failed");
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
@@ -3608,6 +3710,7 @@ napi_value JsWindow::OnSetWindowBackgroundColorSync(napi_env env, napi_callback_
     }
 
     if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackgroundColor(color));
@@ -5600,6 +5703,88 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
+napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    double radius = 0.0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], radius)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to radius");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    float cornerRadius = static_cast<float>(radius);
+    if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The corner radius is less than zero.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakWindow = wptr(windowToken_), where, env, task = napiAsyncTask, cornerRadius] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowCornerRadius(cornerRadius));
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "Set failed!");
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set failed."));
+        } else {
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success.",
+                window->GetWindowId(), window->GetWindowName().c_str());
+            task->Resolve(env, NapiGetUndefined(env));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > ARG_COUNT_ZERO) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowToken is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    float cornerRadius = 0.0f;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowCornerRadius(cornerRadius));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get failed, cornerRadius: %{public}f.", cornerRadius);
+        return NapiThrowError(env, ret);
+    }
+    napi_value jsCornerRadius = CreateJsValue(env, cornerRadius);
+    if (jsCornerRadius == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "jsCornerRadius is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] Get success, cornerRadius=%{public}f.",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cornerRadius);
+    return jsCornerRadius;
+}
+
 napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
 {
     WmErrorCode ret = WmErrorCode::WM_OK;
@@ -7576,6 +7761,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
         moduleName, JsWindow::GetWindowSystemBarPropertiesSync);
     BindNativeFunction(env, object, "setWindowSystemBarProperties",
         moduleName, JsWindow::SetWindowSystemBarProperties);
+    BindNativeFunction(env, object, "setStatusBarColor", moduleName, JsWindow::SetStatusBarColor);
+    BindNativeFunction(env, object, "getStatusBarProperty", moduleName, JsWindow::GetStatusBarProperty);
     BindNativeFunction(env, object, "getAvoidArea", moduleName, JsWindow::GetAvoidArea);
     BindNativeFunction(env, object, "getWindowAvoidArea", moduleName, JsWindow::GetWindowAvoidAreaSync);
     BindNativeFunction(env, object, "isShowing", moduleName, JsWindow::IsShowing);
@@ -7621,6 +7808,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getTransitionController", moduleName, JsWindow::GetTransitionController);
     BindNativeFunction(env, object, "snapshot", moduleName, JsWindow::Snapshot);
     BindNativeFunction(env, object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
+    BindNativeFunction(env, object, "setWindowCornerRadius", moduleName, JsWindow::SetWindowCornerRadius);
+    BindNativeFunction(env, object, "getWindowCornerRadius", moduleName, JsWindow::GetWindowCornerRadius);
     BindNativeFunction(env, object, "setShadow", moduleName, JsWindow::SetShadow);
     BindNativeFunction(env, object, "setWindowShadowRadius", moduleName, JsWindow::SetWindowShadowRadius);
     BindNativeFunction(env, object, "setBlur", moduleName, JsWindow::SetBlur);

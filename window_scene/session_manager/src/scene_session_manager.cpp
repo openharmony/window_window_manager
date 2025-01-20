@@ -27,6 +27,7 @@
 #include <hitrace_meter.h>
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
+#include <ui/rs_node.h>
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -200,9 +201,11 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
     auto& metadata = abilityInfo->metadata;
     for (const auto& item : metadata) {
         if (item.name == "enable.remove.starting.window") {
+            TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "enable.remove.starting.window=%{public}s", item.value.c_str());
             return item.value == "true";
         }
     }
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "enable.remove.starting.window default false");
     return false;
 }
 
@@ -1604,30 +1607,25 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         pid = sceneSession->GetCallingPid();
-
         if (!IsScreenLocked()) {
-            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
-
         if (IsUserAuthPassed()) {
-            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
             return WMError::WM_OK;
         }
-
         // 1. check window whether can show on main window
         if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not called on lock screen");
             return WMError::WM_OK;
         }
-
         // 2. check permission
         if (!IsUIExtCanShowOnLockScreen(element, callingTokenId, extensionAbilityType)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: no permisson, window id %{public}d, %{public}d", windowId,
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-
         TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
         return WMError::WM_OK;
     };
@@ -1864,6 +1862,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
+        sceneSession->SetSingleHandTransform(singleHandTransform_);
     }
     return sceneSession;
 }
@@ -2773,6 +2772,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
     }
 
+    TLOGI(WmsLogTag::WMS_LIFE, "The corner radius is %{public}f", appWindowSceneConfig_.floatCornerRadius_);
+    property->SetWindowCornerRadius(appWindowSceneConfig_.floatCornerRadius_);
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
                         property->IsFloatingWindowAppType() && shouldHideNonSecureFloatingWindows_.load());
     bool isSystemCalling = SessionPermission::IsSystemCalling();
@@ -2837,6 +2838,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        newSession->GetSessionProperty()->SetWindowCornerRadius(property->GetWindowCornerRadius());
         property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig_, property, token, pid, uid);
@@ -4927,9 +4929,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------" << std::endl;
     oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
-        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]"
-        << std::endl;
-
+        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]" << std::endl;
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
@@ -4967,6 +4967,8 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         count++;
     }
     oss << "Focus window: " << GetFocusedSessionId() << std::endl;
+    oss << "SingleHand: X[" << singleHandTransform_.posX << "] Y[" << singleHandTransform_.posY << "] scale["
+        << singleHandTransform_.scaleX << "]" << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
@@ -6055,6 +6057,84 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
     return sceneSession->UpdateWindowMode(mode);
+}
+
+SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform() const
+{
+    return singleHandTransform_;
+}
+
+void SceneSessionManager::NotifySingleHandInfoChange(
+    float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode)
+{
+    const char* const funcName = __func__;
+    taskScheduler_->PostAsyncTask([this, singleHandScaleX, singleHandScaleY, singleHandMode, funcName] {
+        if (!systemConfig_.IsPhoneWindow()) {
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: only support phone", funcName);
+            return;
+        }
+        int32_t displayWidth = 0;
+        int32_t displayHeight = 0;
+        ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        if (!GetDisplaySizeById(defaultScreenId, displayWidth, displayHeight)) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: get display size failed", funcName);
+            return;
+        }
+        switch (singleHandMode) {
+            case SingleHandMode::MIDDLE:
+                singleHandTransform_.posX = 0;
+                singleHandTransform_.posY = 0;
+                break;
+            case SingleHandMode::LEFT:
+                singleHandTransform_.posX = 0;
+                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                break;
+            case SingleHandMode::RIGHT:
+                singleHandTransform_.posX = displayWidth * (1 - singleHandScaleX);
+                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                break;
+            default:
+                break;
+        }
+        singleHandTransform_.scaleX = singleHandScaleX;
+        singleHandTransform_.scaleY = singleHandScaleY;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& item : sceneSessionMap_) {
+                auto sceneSession = item.second;
+                if (sceneSession == nullptr) {
+                    continue;
+                }
+                if (!IsInDefaultScreen(sceneSession) ||
+                    sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
+                    continue;
+                }
+                sceneSession->SetSingleHandTransform(singleHandTransform_);
+                sceneSession->NotifySingleHandTransformChange(singleHandTransform_);
+            }
+        }
+        FlushWindowInfoToMMI();
+    }, funcName);
+}
+
+void SceneSessionManager::RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func)
+{
+    getRSNodeByStringIDFunc_ = std::move(func);
+}
+
+void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& stringId)
+{
+    if (getRSNodeByStringIDFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "func is nullptr");
+        return;
+    }
+    auto rsNode = getRSNodeByStringIDFunc_(stringId);
+    if (rsNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "node is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
+    rsInterface_.SetWindowContainer(rsNode->GetId(), true);
 }
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
@@ -7888,9 +7968,9 @@ void SceneSessionManager::UpdateCameraWindowStatus(uint32_t accessTokenId, bool 
 
 void SceneSessionManager::StartWindowInfoReportLoop()
 {
-    WLOGFD("in");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "in");
     if (isReportTaskStart_) {
-        WLOGFE("Report is ReportTask Start");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Report is ReportTask Start");
         return;
     }
     auto task = [this] {
@@ -7902,7 +7982,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     int64_t delayTime = 1000 * 60 * 60; // an hour.
     bool ret = eventHandler_->PostTask(task, "wms:WindowInfoReport", delayTime);
     if (!ret) {
-        WLOGFE("failed. task is WindowInfoReport");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "failed. task is WindowInfoReport");
         return;
     }
     isReportTaskStart_ = true;
@@ -11190,6 +11270,19 @@ void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayIn
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
     TLOGI(WmsLogTag::WMS_MAIN, "update display region to w=%{public}d, h=%{public}d", displayWidth, displayHeight);
+}
+
+bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight)
+{
+    auto region = GetDisplayRegion(displayId);
+    if (region == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}llu", displayId);
+        return false;
+    }
+    const SkIRect rect = region->getBounds();
+    displayWidth = rect.fRight;
+    displayHeight = rect.fBottom;
+    return true;
 }
 
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)

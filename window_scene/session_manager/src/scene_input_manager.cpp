@@ -235,7 +235,10 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenRealHeight = screenProperty.GetScreenRealHeight(),
             .screenRealPPI = screenProperty.GetScreenRealPPI(),
             .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
-            .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination)};
+            .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
+            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
+            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY
+        };
         displayInfos.emplace_back(displayInfo);
     }
 }
@@ -438,7 +441,9 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         }
     }
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
-    idListStream << focusedSessionId_;
+    SingleHandTransform transform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
+    idListStream << focusedSessionId_ << "|" << transform.posX << "|" << transform.posY
+        << "|" << transform.scaleX << "|" << transform.scaleY;
     std::string idList = idListStream.str();
     if (lastIdList != idList) {
         windowEventID++;
