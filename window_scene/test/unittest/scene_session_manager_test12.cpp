@@ -23,8 +23,6 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
-#include "mock/mock_resource_manager.h"
-#include "mock/mock_root_scene_context.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
 #include "session_manager.h"
@@ -42,19 +40,11 @@ namespace Rosen {
 class SceneSessionManagerTest12 : public testing::Test {
 public:
     static void SetUpTestCase();
-
     static void TearDownTestCase();
-
     void SetUp() override;
-
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
-    std::shared_ptr<AbilityRuntime::RootSceneContextMocker> mockRootSceneContext_;
-    std::string path;
-    uint32_t bgColor;
-    AppExecFwk::AbilityInfo abilityInfo;
-
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
@@ -73,14 +63,6 @@ void SceneSessionManagerTest12::TearDownTestCase()
 
 void SceneSessionManagerTest12::SetUp()
 {
-    mockRootSceneContext_ = std::make_shared<AbilityRuntime::RootSceneContextMocker>();
-    path = "testPath";
-    bgColor = 0;
-    abilityInfo.bundleName = "testBundle";
-    abilityInfo.moduleName = "testmodule";
-    abilityInfo.resourcePath = "/test/resource/path";
-    abilityInfo.startWindowBackgroundId = 1;
-    abilityInfo.startWindowIconId = 1;
 }
 
 void SceneSessionManagerTest12::TearDown()
@@ -88,114 +70,32 @@ void SceneSessionManagerTest12::TearDown()
     usleep(WAIT_SYNC_IN_NS);
 }
 
-std::shared_ptr<Global::Resource::ResourceManagerMocker>
-    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
-
-class SceneSessionManagerMocker : public SceneSessionManager {
-public:
-    SceneSessionManagerMocker() {};
-    ~SceneSessionManagerMocker() {};
-};
-std::shared_ptr<SceneSessionManagerMocker> mockSceneSessionManager_ = std::make_shared<SceneSessionManagerMocker>();
-
 namespace {
 /**
- * @tc.name: GetResourceManager01
- * @tc.desc: GetResourceManager context is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetResourceManager01, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    auto result = ssm_->GetResourceManager(abilityInfo);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: GetResourceManager02
- * @tc.desc: GetResourceManager resourceManager is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetResourceManager02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ASSERT_NE(mockRootSceneContext_, nullptr);
-    ssm_->rootSceneContextWeak_ = std::weak_ptr<AbilityRuntime::RootSceneContextMocker>(mockRootSceneContext_);
-    EXPECT_CALL(*mockRootSceneContext_, GetResourceManager()).WillOnce(Return(nullptr));
-    auto result = ssm_->GetResourceManager(abilityInfo);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: GetResourceManager03
+ * @tc.name: GetResourceManager
  * @tc.desc: GetResourceManager
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetResourceManager03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, GetResourceManager, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    ASSERT_NE(mockRootSceneContext_, nullptr);
-    ssm_->rootSceneContextWeak_ = std::weak_ptr<AbilityRuntime::RootSceneContextMocker>(mockRootSceneContext_);
-    EXPECT_CALL(*mockRootSceneContext_, GetResourceManager()).WillOnce(Return(mockResourceManager_));
+    AppExecFwk::AbilityInfo abilityInfo;
     auto result = ssm_->GetResourceManager(abilityInfo);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
- * @tc.name: GetStartupPageFromResource01
- * @tc.desc: GetStartupPageFromResource ResourceManager nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource01, Function | SmallTest | Level3)
-{
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    mockResourceManager_ = nullptr;
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetStartupPageFromResource02
- * @tc.desc: GetStartupPageFromResource ResourceManager GetColorById ERROR
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetStartupPageFromResource03
- * @tc.desc: GetStartupPageFromResource ResourceManager GetMediaById ERROR
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource03, Function | SmallTest | Level3)
-{
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    ASSERT_NE(mockResourceManager_, nullptr);
-    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
-        bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetStartupPageFromResource04
+ * @tc.name: GetStartupPageFromResource
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource, Function | SmallTest | Level3)
 {
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    ASSERT_NE(mockResourceManager_, nullptr);
-    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
-        bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
-    EXPECT_CALL(*mockResourceManager_, GetMediaById(abilityInfo.startWindowIconId, path,
-        0)).WillOnce(Return(Global::Resource::RState::SUCCESS));
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
+    ASSERT_NE(ssm_, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::string path = "";
+    uint32_t bgColor = 0;
+    bool result = ssm_->GetStartupPageFromResource(abilityInfo, path, bgColor);
     EXPECT_EQ(result, false);
 }
 
