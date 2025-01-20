@@ -172,6 +172,15 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         case TRANS_ID_ON_CAPTURE_STATUS_CHANGED: {
             return ProcCaptureStatusChanged(data);
         }
+        case TRANS_ID_ON_SCREEN_MODE_CHANGED: {
+            std::vector<sptr<ScreenInfo>> screenInfos;
+            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+                WLOGFE("Read ScreenInfo failed");
+                return -1;
+            }
+            NotifyScreenModeChange(screenInfos);
+            break;
+        }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
