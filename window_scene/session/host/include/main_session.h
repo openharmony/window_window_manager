@@ -32,7 +32,7 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
 
-    /**
+    /*
      * Window Hierarchy
      */
     WSError SetTopmost(bool topmost) override;
@@ -43,7 +43,12 @@ public:
     void SetExitSplitOnBackground(bool isExitSplitOnBackground) override;
     bool IsExitSplitOnBackground() const override;
 
-    /**
+    /*
+     * Window Focus
+     */
+    WSError UpdateFocus(bool isFocused) override;
+
+    /*
      * PC Window
      */
     WSError OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true,
@@ -53,12 +58,33 @@ public:
     bool IsModal() const override;
     bool IsApplicationModal() const override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
+    WSError NotifySupportWindowModesChange(
+        const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+
+    /*
+     * Window LifeCycle
+     */
+    void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
+    void NotifySessionLockStateChange(bool isLockedState) override;
+    void SetSessionLockState(bool isLockedState);
+    bool GetSessionLockState() const;
+    WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
+    void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
     void NotifyClientToUpdateInteractive(bool interactive) override;
     bool isClientInteractive_ = true;
+
+private:
+    /*
+     * Window LifeCycle
+     */
+    WSError SetSessionLabelAndIconInner(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+
+    NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
+    bool isLockedState_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

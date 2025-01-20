@@ -29,7 +29,13 @@ class PcFoldScreenController : public RefBase {
 public:
     PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId);
     ~PcFoldScreenController();
+    void OnConnect();
+    void FoldStatusChangeForFullScreenWaterfallMode(
+        DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void FoldStatusChangeForSupportEnterWaterfallMode(
+        DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     bool IsHalfFolded(DisplayId displayId);
+    bool IsAllowThrowSlip(DisplayId displayId);
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
     void RecordMoveRects(const WSRect& rect);
@@ -44,13 +50,16 @@ public:
     RSAnimationTimingCurve GetThrowSlipTimingCurve();
 
     void UpdateFullScreenWaterfallMode(bool isWaterfallMode);
-    inline bool IsFullScreenWaterfallMode() { return isFullScreenWaterfallMode_; }
+    bool IsFullScreenWaterfallMode() const { return isFullScreenWaterfallMode_; }
     void UpdateRect();
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
     void UnregisterFullScreenWaterfallModeChangeCallback();
+    void UpdateSupportEnterWaterfallMode();
+    void MaskSupportEnterWaterfallMode();
 
 private:
     int32_t GetPersistentId() const;
+    DisplayId GetDisplayId();
     int32_t GetTitleHeight() const;
     WSRectF CalculateMovingVelocity();
 
@@ -66,12 +75,15 @@ private:
 
     std::shared_ptr<FoldScreenStatusChangeCallback> onFoldScreenStatusChangeCallback_;
 
-    /**
+    /*
      * Waterfall Mode
      * accessed on SSM thread
      */
     void ExecuteFullScreenWaterfallModeChangeCallback();
     bool isFullScreenWaterfallMode_ { false };
+    bool lastSupportEnterWaterfallMode_ { false };
+    bool supportEnterWaterfallMode_ { false };
+    bool maskSupportEnterWaterfallMode_ { false };
     std::function<void(bool isWaterfallMode)> fullScreenWaterfallModeChangeCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen

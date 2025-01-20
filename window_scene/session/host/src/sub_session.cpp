@@ -33,18 +33,24 @@ SubSession::SubSession(const SessionInfo& info, const sptr<SpecificSessionCallba
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
     }
     SetMoveDragCallback();
-    TLOGD(WmsLogTag::WMS_LIFE, "Create SubSession");
+    TLOGD(WmsLogTag::WMS_LIFE, "Create");
 }
 
 SubSession::~SubSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "~SubSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
 }
 
 WSError SubSession::Show(sptr<WindowSessionProperty> property)
 {
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    if (property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST) &&
+        GetForceHideState() != ForceHideState::NOT_HIDDEN) {
+        TLOGI(WmsLogTag::WMS_SUB, "UEC force hide, id: %{public}d forceHideState: %{public}d",
+            GetPersistentId(), GetForceHideState());
+        return WSError::WS_ERROR_INVALID_OPERATION;
     }
     PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
@@ -54,8 +60,11 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
         }
         TLOGI(WmsLogTag::WMS_LIFE, "Show session, id: %{public}d", session->GetPersistentId());
 
-        if (session->shouldFollowParentWhenShow_) {
-            session->CheckParentDisplayIdAndMove();
+        auto parentSession = session->GetParentSession();
+        if (parentSession && session->GetShouldFollowParentWhenShow()) {
+            session->CheckAndMoveDisplayIdRecursively(parentSession->GetSessionProperty()->GetDisplayId());
+        } else {
+            TLOGNE(WmsLogTag::WMS_SUB, "session has no parent, id: %{public}d", session->GetPersistentId());
         }
         // use property from client
         auto sessionProperty = session->GetSessionProperty();
@@ -70,24 +79,11 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     return WSError::WS_OK;
 }
 
-void SubSession::CheckParentDisplayIdAndMove()
-{
-    if (auto parentSession = GetParentSession()) {
-        auto parentDisplayId = parentSession->GetSessionProperty()->GetDisplayId();
-        if (parentDisplayId == GetSessionProperty()->GetDisplayId()) {
-            return;
-        }
-        SetScreenId(parentDisplayId);
-        GetSessionProperty()->SetDisplayId(parentDisplayId);
-        SceneSession::NotifySessionRectChange(GetSessionRect(), SizeChangeReason::UNDEFINED, parentDisplayId);
-    }
-}
-
 void SubSession::NotifySessionRectChange(const WSRect& rect, SizeChangeReason reason, DisplayId displayId,
     const RectAnimationConfig& rectAnimationConfig)
 {
     if (reason == SizeChangeReason::DRAG_END) {
-        shouldFollowParentWhenShow_ = false;
+        SetShouldFollowParentWhenShow(false);
     }
     SceneSession::NotifySessionRectChange(rect, reason, displayId, rectAnimationConfig);
 }
@@ -96,7 +92,7 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
     const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
 {
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
-        shouldFollowParentWhenShow_ = false;
+        SetShouldFollowParentWhenShow(false);
     }
     SceneSession::UpdateSessionRectInner(rect, reason, moveConfiguration, rectAnimationConfig);
 }
@@ -119,10 +115,10 @@ WSError SubSession::Hide(bool needSyncHide)
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGE(WmsLogTag::WMS_SUB, "session is null");
+            TLOGNE(WmsLogTag::WMS_SUB, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
+        TLOGNI(WmsLogTag::WMS_LIFE, "Hide session, id: %{public}d", session->GetPersistentId());
         auto ret = session->SetActive(false);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -250,9 +246,9 @@ bool SubSession::IsApplicationModal() const
 
 bool SubSession::IsVisibleForeground() const
 {
-    const auto& mainSession = GetMainSession();
-    if (mainSession && WindowHelper::IsMainWindow(mainSession->GetWindowType())) {
-        return mainSession->IsVisibleForeground() && Session::IsVisibleForeground();
+    const auto& mainOrFloatSession = GetMainOrFloatSession();
+    if (mainOrFloatSession) {
+        return mainOrFloatSession->IsVisibleForeground() && Session::IsVisibleForeground();
     }
     return Session::IsVisibleForeground();
 }

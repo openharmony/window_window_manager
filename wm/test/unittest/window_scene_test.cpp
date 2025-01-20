@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+#include <configuration.h>
 #include <gtest/gtest.h>
-#include "window_scene.h"
 #include "ability_context_impl.h"
 #include "mock_static_call.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
-#include <configuration.h>
+#include "window_scene.h"
 
 #include "window_scene_session_impl.h"
 
@@ -39,13 +39,9 @@ public:
     sptr<WindowScene> scene_ = nullptr;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
-void WindowSceneTest::SetUpTestCase()
-{
-}
+void WindowSceneTest::SetUpTestCase() {}
 
-void WindowSceneTest::TearDownTestCase()
-{
-}
+void WindowSceneTest::TearDownTestCase() {}
 
 void WindowSceneTest::SetUp()
 {
@@ -163,7 +159,7 @@ HWTEST_F(WindowSceneTest, Init06, Function | SmallTest | Level2)
     sptr<IWindowLifeCycle> listener = nullptr;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
-        scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
+              scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
 }
 
 /**
@@ -541,6 +537,6 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

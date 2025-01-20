@@ -225,6 +225,7 @@ void HidumpController::DumpLayoutParam(
         << std::setprecision(precision) << session->GetAspectRatio() << "|"
         << std::setprecision(precision) << session->GetFloatingScale() << "|"
         << session->IsDirtyWindow() << "|"
+        << session->IsDragAccessible() << "|"
         << property->GetDragEnabled() << "|"
         << property->GetRaiseEnabled() << "|"
         << std::endl
@@ -315,6 +316,8 @@ void HidumpController::DumpKeyboardParam(
         << std::setprecision(precision) << property->GetTextFieldHeight() << "|"
         << std::endl
         << "{" << static_cast<uint32_t>(keyboardLayoutParams.gravity_) << "|"
+        << keyboardLayoutParams.landscapeAvoidHeight_ << "|"
+        << keyboardLayoutParams.portraitAvoidHeight_ << "|"
         << "[" << LandscapeKeyboardRect.posX_ << " "
         << LandscapeKeyboardRect.posY_ << " "
         << LandscapeKeyboardRect.width_ << " "

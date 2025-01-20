@@ -1209,7 +1209,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshot, Function | SmallTest
     DmErrorCode* errorCode = nullptr;
     std::function<void()> func = [&]()
     {
-        res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode);
+        res = screenSessionManagerProxy->GetDisplaySnapshot(displayId, errorCode, false);
     };
     func();
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1833,6 +1833,20 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetFoldStatus, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetSuperFoldStatus, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_NE(screenSessionManagerProxy, nullptr);
+    screenSessionManagerProxy->GetSuperFoldStatus();
+}
+
+/**
  * @tc.name: GetCurrentFoldCreaseRegion
  * @tc.desc: GetCurrentFoldCreaseRegion
  * @tc.type: FUNC
@@ -1860,12 +1874,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, Function | SmallTest |
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
     
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
+    std::vector<DisplayId> displayIds;
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds));
+            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
     } else {
         EXPECT_EQ(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds));
+            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
     }
 }
 
@@ -2351,6 +2366,29 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, Function | SmallT
     };
     func();
     ASSERT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: SetScreenSkipProtectedWindow
+ * @tc.desc: SetScreenSkipProtectedWindow test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    const std::vector<ScreenId> screenIds = {1001, 1002};
+    bool isEnable = true;
+    int resultValue = 0;
+    std::function<void()> func = [&]() {
+        screenSessionManagerProxy->SetScreenSkipProtectedWindow(screenIds, isEnable);
+        resultValue = 1;
+    };
+    func();
+    ASSERT_EQ(resultValue, 1);
 }
 }
 }

@@ -16,6 +16,7 @@
 #include "fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
 #include <parameters.h>
 
+#include "screen_session_manager.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "session/screen/include/screen_session.h"
@@ -29,7 +30,8 @@
 
 namespace OHOS::Rosen {
 namespace {
-constexpr uint8_t FOLDING_AXIS_SIZE = 2;
+constexpr uint8_t HALLS_AXIS_SIZE = 2;
+constexpr uint8_t ANGLES_AXIS_SIZE = 3;
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float GRL_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
 constexpr float CLOSE_GRL_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
@@ -40,67 +42,91 @@ constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
 constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
-
+constexpr int32_t HALF_FOLD_VALUE = 3;
+constexpr int32_t REFLEXION_VALUE = 3;
 } // namespace
 
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
 SecondaryDisplaySensorFoldStateManager::~SecondaryDisplaySensorFoldStateManager() {}
 
-void SecondaryDisplaySensorFoldStateManager::HandleAngleChange(const std::vector<float> &angles,
+void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &angles,
     const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
 {
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
+    uint32_t isSecondaryReflexion = static_cast<int32_t>(angles[REFLEXION_VALUE]);
+    if (isSecondaryReflexion) {
+        TLOGW(WmsLogTag::DMS, "SecondaryReflexion:%{public}d", isSecondaryReflexion);
+        auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screen session is null!");
+            return;
+        }
+        ScreenId screenId = screenSession->GetScreenId();
+        ScreenSessionManager::GetInstance().OnSecondaryReflexionChange(screenId, isSecondaryReflexion);
+    }
 }
 
-void SecondaryDisplaySensorFoldStateManager::HandleHallChange(const std::vector<float> &angles,
-    const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy)
-{
-    FoldStatus nextState = GetNextFoldState(angles, halls);
-    HandleSensorChange(nextState, angles, foldScreenPolicy);
-}
-
-FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(std::vector<float> &angles,
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::vector<float> &angles,
     const std::vector<uint16_t> &halls)
 {
     TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
-        FoldScreenStateInternel::TransVec2Str(angles, "angles").c_str(),
-        FoldScreenStateInternel::TransVec2Str(halls, "halls").c_str());
+        FoldScreenStateInternel::TransVec2Str(angles, "angle").c_str(),
+        FoldScreenStateInternel::TransVec2Str(halls, "hall").c_str());
 
     FoldStatus state = FoldStatus::UNKNOWN;
-    if (angles.size() != FOLDING_AXIS_SIZE || halls.size() != FOLDING_AXIS_SIZE) {
-        TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}lu, halls size %{public}lu",
+    bool isPowerOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    if (angles.size() != ANGLES_AXIS_SIZE || halls.size() != HALLS_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "angles or halls size is not right, angles size %{public}zu, halls size %{public}zu",
             angles.size(), halls.size());
         return state;
     }
-
+    if (!isPowerOn) {
+        state = GetFoldStateUnpower(halls);
+        return state;
+    }
     float angleAB = angles[1];
-    int hallAB = halls[1];
+    uint16_t hallAB = halls[1];
     float angleBC = angles[0];
-    int hallBC = halls[0];
+    uint16_t hallBC = halls[0];
 
-    FoldStatus nextStateSecondary = GetNextFoldStateHalf(angleAB, hallAB, mNextStateAB);
+    FoldStatus nextStateSecondary = UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(angleAB,
+        hallAB, mNextStateAB);
     mNextStateAB = nextStateSecondary;
 
-    FoldStatus nextStatePrimary = GetNextFoldStateHalf(angleBC, hallBC, mNextStateBC);
+    FoldStatus nextStatePrimary = UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(angleBC,
+        hallBC, mNextStateBC);
     mNextStateBC = nextStatePrimary;
 
     state = GetGlobalFoldState(nextStatePrimary, nextStateSecondary);
     return state;
 }
 
-void SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDevice(float angle, uint16_t hall)
+FoldStatus SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle,
+    uint16_t hall, FoldStatus state)
 {
     if (hall == HALL_FOLDED_THRESHOLD) {
-        allowUserSensorForLargeFoldDevice = SMALLER_BOUNDARY_FLAG;
+        allowUserSensorForLargeFoldDeviceAB = SMALLER_BOUNDARY_FLAG;
     } else if (angle >= LARGER_BOUNDARY_FOR_GRL_THRESHOLD) {
-        allowUserSensorForLargeFoldDevice = LARGER_BOUNDARY_FLAG;
+        allowUserSensorForLargeFoldDeviceAB = LARGER_BOUNDARY_FLAG;
     }
+    return GetNextFoldStateHalf(angle, hall, state, allowUserSensorForLargeFoldDeviceAB);
 }
 
-FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float angle, int hall, FoldStatus CurrentState)
+FoldStatus SecondaryDisplaySensorFoldStateManager::UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle,
+    uint16_t hall, FoldStatus state)
 {
-    UpdateSwitchScreenBoundaryForLargeFoldDevice(angle, hall);
+    if (hall == HALL_FOLDED_THRESHOLD) {
+        allowUserSensorForLargeFoldDeviceBC = SMALLER_BOUNDARY_FLAG;
+    } else if (angle >= LARGER_BOUNDARY_FOR_GRL_THRESHOLD) {
+        allowUserSensorForLargeFoldDeviceBC = LARGER_BOUNDARY_FLAG;
+    }
+    return GetNextFoldStateHalf(angle, hall, state, allowUserSensorForLargeFoldDeviceBC);
+}
+
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float angle,
+    uint16_t hall, FoldStatus CurrentState, int32_t allowUserSensorForLargeFoldDevice)
+{
     if (std::isless(angle, ANGLE_MIN_VAL)) {
         return CurrentState;
     }
@@ -151,10 +177,30 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState (FoldStatu
     if (mSecondaryFoldState == FoldStatus::UNKNOWN || mSecondaryFoldState == defaultState) {
         return mPrimaryFoldState;
     }
-    int globalFoldState = (int)mPrimaryFoldState + (int)mSecondaryFoldState * 10;
-    FoldStatus globalFoldStatus = static_cast<FoldStatus>(globalFoldState);
-    return globalFoldStatus;
+    int32_t mPrimaryFoldStatus = static_cast<int32_t>(mPrimaryFoldState);
+    int32_t mSecondaryFoldStatus = static_cast<int32_t>(mSecondaryFoldState);
+    if (mSecondaryFoldStatus == HALF_FOLD_VALUE) {
+        mSecondaryFoldStatus --;
+    }
+    int32_t globalFoldStatus = mPrimaryFoldStatus + mSecondaryFoldStatus * 10;
+    FoldStatus globalFoldState = static_cast<FoldStatus>(globalFoldStatus);
+    return globalFoldState;
 }
 
-void SecondaryDisplaySensorFoldStateManager::RegisterApplicationStateObserver() {}
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetFoldStateUnpower(const std::vector<uint16_t> &halls)
+{
+    FoldStatus state = FoldStatus::UNKNOWN;
+    int hall1 = halls[0];
+    int hall2 = halls[1];
+    if (hall2 == HALL_THRESHOLD && hall1 == HALL_THRESHOLD) {
+        state = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    } else if (hall2 == HALL_FOLDED_THRESHOLD && hall1 == HALL_THRESHOLD) {
+        state = FoldStatus::EXPAND;
+    } else if (hall2 == HALL_FOLDED_THRESHOLD && hall1 == HALL_FOLDED_THRESHOLD) {
+        state = FoldStatus::FOLDED;
+    } else if (hall2 == HALL_THRESHOLD && hall1 == HALL_FOLDED_THRESHOLD) {
+        state = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
+    }
+    return state;
+}
 } // namespace OHOS::Rosen

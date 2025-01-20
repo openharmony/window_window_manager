@@ -69,6 +69,10 @@ public:
     {
         return WSError::WS_OK;
     };
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
 
@@ -118,6 +122,15 @@ public:
      */
     virtual void NotifyTransformChange(const Transform& transform) = 0;
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
+
+    /**
+     * @brief Notify single hand transform.
+     *
+     * Notify singleHandTransform when single hand mode changed.
+     *
+     * @param singleHandTransform transform to change.
+     */
+    virtual void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) = 0;
 
     /**
      * @brief Set pip event to client.
@@ -209,7 +222,11 @@ public:
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
 
+    virtual WSError SetDragActivated(bool dragActivated) = 0;
+
     virtual WSError SetFullScreenWaterfallMode(bool isWaterfallMode) { return WSError::WS_DO_NOTHING; }
+    virtual WSError SetSupportEnterWaterfallMode(bool isSupportEnter) { return WSError::WS_DO_NOTHING; }
+    virtual WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

@@ -38,7 +38,7 @@ public:
     ~ScreenSessionDumper() = default;
 
     bool IsNumber(std::string str);
-    void ExcuteDumpCmd();
+    void ExecuteDumpCmd();
     void DumpEventTracker(EventTracker& tracker);
     void DumpFreezedPidList(std::set<int32_t> pidList);
     void DumpMultiUserInfo(std::vector<int32_t> oldScbPids, int32_t userId, int32_t ScbPid);
@@ -58,15 +58,13 @@ private:
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
     void DumpScreenPropertyById(ScreenId id);
-    void ExcuteInjectCmd();
-    void ExcuteInjectCmd2();
-/*
-    hidumper 命令注入隔离
- */
+    void ExecuteInjectCmd();
+    void ExecuteInjectCmd2();
+
     void ShowNotifyFoldStatusChangedInfo();
     void ShowIllegalArgsInfo();
-    void SetMotionSensorvalue(std::string input);
-    void SetRotationLockedvalue(std::string input);
+    void SetMotionSensorValue(std::string input);
+    void SetRotationLockedValue(std::string input);
     void SetEnterOrExitTentMode(std::string input);
     void SetHoverStatusChange(std::string input);
     void SetSuperFoldStatusChange(std::string input);
@@ -76,19 +74,16 @@ private:
     int SetFoldStatusLocked();
     void SetHallAndPostureValue(std::string input);
     void SetHallAndPostureStatus(std::string input);
-
+    void SetSecondaryStatusChange(const std::string &input);
+    bool IsAllCharDigit(const std::string &firstPostureStr);
+    bool GetPostureAndHall(std::vector<std::string> strVec,
+        std::vector<float> &postures, std::vector<uint16_t> &halls);
+    void TriggerSecondarySensor(const std::string &valueStr);
+    void TriggerSecondaryFoldStatus(const std::string &valueStr);
 private:
     int fd_;
     std::vector<std::string> params_;
     std::string dumpInfo_;
-/*
-    依赖的外部定义
-*/
-private:
-    typedef struct EXTHALLData {
-        float flag = 0.0;
-        float hall = 0.0;
-    } ExtHallData;
 };
 } // Rosen
 } // OHOS

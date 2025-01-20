@@ -104,6 +104,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnSuperFoldStatusChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_SECONDARY_REFLEXION_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnSecondaryReflexionChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -306,7 +310,8 @@ int ScreenSessionManagerClientStub::HandleOnHoverStatusChanged(MessageParcel& da
     WLOGD("HandleOnHoverStatusChanged");
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto hoverStatus = data.ReadInt32();
-    OnHoverStatusChanged(screenId, hoverStatus);
+    auto needRotate = data.ReadBool();
+    OnHoverStatusChanged(screenId, hoverStatus, needRotate);
     return ERR_NONE;
 }
 
@@ -327,6 +332,16 @@ int ScreenSessionManagerClientStub::HandleOnSuperFoldStatusChanged(MessageParcel
     WLOGI("super fold status screenId=%{public}" PRIu64", superFoldStatus=%{public}d.",
         screenId, static_cast<uint32_t>(superFoldStatus));
     OnSuperFoldStatusChanged(screenId, superFoldStatus);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnSecondaryReflexionChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto isSecondaryReflexion = static_cast<uint32_t>(data.ReadUint32());
+    WLOGI("secondary reflexion screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
+        screenId, static_cast<uint32_t>(isSecondaryReflexion));
+    OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

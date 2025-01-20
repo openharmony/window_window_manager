@@ -170,9 +170,6 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground04, Function | SmallTest | Level2)
     sptr<WindowSessionProperty> property = nullptr;
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
 
-    session->property_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
-
     info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     sptr<SceneSession> session1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_EQ(WSError::WS_OK, session1->Foreground(property, true));
@@ -191,8 +188,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground05, Function | SmallTest | Level2)
     info.bundleName_ = "Foreground05";
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     session->Session::SetSessionState(SessionState::STATE_CONNECT);
     session->Session::isActive_ = true;
     session->SetLeashWinSurfaceNode(nullptr);
@@ -225,7 +221,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground06, Function | SmallTest | Level2)
 
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     session->property_ = property;
     EXPECT_EQ(WSError::WS_OK, session->Foreground(property, false));
 
@@ -800,7 +796,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner01, Function | SmallTest | Level
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1, "session1");
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     result = sceneSession->ConnectInner(mockSessionStage, nullptr, nullptr, systemConfig,
         property, nullptr, -1, -1);

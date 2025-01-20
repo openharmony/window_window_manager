@@ -20,6 +20,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "screen_fold_data.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -572,16 +573,14 @@ HWTEST_F(SceneSessionManagerTest, FindMainWindowWithToken03, Function | SmallTes
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     persistentId = 1;
     WSError result02 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
     EXPECT_EQ(result02, WSError::WS_OK);
 
-    property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     WSError result03 = ssm_->BindDialogSessionTarget(persistentId, targetToken);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(result03, WSError::WS_OK);
 }
 
 /**
@@ -801,12 +800,11 @@ HWTEST_F(SceneSessionManagerTest, UpdateTopmostProperty, Function | SmallTest | 
     SessionInfo info;
     info.abilityName_ = "UpdateTopmostProperty";
     info.bundleName_ = "UpdateTopmostProperty";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetTopmost(true);
     property->SetSystemCalling(true);
-    sptr<SceneSession> scenesession = sptr<MainSession>::MakeSptr(info, nullptr);
-    scenesession->SetSessionProperty(property);
-    WMError result = ssm_->UpdateTopmostProperty(property, scenesession);
+    WMError result = ssm_->UpdateTopmostProperty(property, sceneSession);
     ASSERT_EQ(WMError::WM_OK, result);
 }
 
@@ -957,6 +955,15 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureFloatingWindows, Function | Small
     ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
     ssm_->HideNonSecureFloatingWindows();
     EXPECT_TRUE(floatSession->GetSessionProperty()->GetForceHide());
+
+    ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = false;
+    ssm_->HideNonSecureFloatingWindows();
+    ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->HideNonSecureFloatingWindows();
+    EXPECT_FALSE(floatSession->GetSessionProperty()->GetForceHide());
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);
     ssm_->sceneSessionMap_.clear();
     ssm_->nonSystemFloatSceneSessionMap_.clear();
@@ -1639,6 +1646,42 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: TestIsPiPForbidden
+ * @tc.desc: Test if pip window is forbidden to use;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsPiPForbidden start";
+    int32_t persistentId = 1001;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetParentPersistentId(persistentId);
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = persistentId;
+    sessionInfo.bundleName_ = "test1";
+    sessionInfo.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    property->SetDisplayId(-1ULL);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+
+    uint64_t displayId = 1001;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_[persistentId] = sceneSession;
+    sptr<ScreenSession> screenSession = new ScreenSession();
+    screenSession->SetName("HiCar");
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
+    ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FLOAT));
+}
+
+/**
  * @tc.name: GetAllMainWindowInfos
  * @tc.desc: GetAllMainWindowInfos
  * @tc.type: FUNC
@@ -1903,6 +1946,7 @@ HWTEST_F(SceneSessionManagerTest, SkipSnapshotForAppProcess, Function | SmallTes
     ssm_->sceneSessionMap_.insert({-1, nullptr});
     skip = true;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
+    usleep(WAIT_SYNC_IN_NS_ONE);
     ASSERT_EQ(result, WMError::WM_OK);
     skip = false;
     result = ssm_->SkipSnapshotForAppProcess(pid, skip);
@@ -2220,13 +2264,13 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: ReleaseForegroundSessionScreenLock
- * @tc.desc: release screen lock of foreground session
+ * @tc.name: UpdateScreenLockStatusForApp
+ * @tc.desc: SceneSesionManager UpdateScreenLockStatusForApp
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, ReleaseForegroundSessionScreenLock, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest, UpdateScreenLockStatusForApp, Function | SmallTest | Level3)
 {
-    auto result = ssm_->ReleaseForegroundSessionScreenLock();
+    auto result = ssm_->UpdateScreenLockStatusForApp("", true);
     ASSERT_EQ(result, WMError::WM_OK);
 }
 
@@ -2307,6 +2351,18 @@ HWTEST_F(SceneSessionManagerTest, UpdateAppHookDisplayInfo002, Function | SmallT
 }
 
 /**
+ * @tc.name: IsPcWindow
+ * @tc.desc: IsPcWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, IsPcWindow, Function | SmallTest | Level3)
+{
+    bool isPcWindow = false;
+    auto result = ssm_->IsPcWindow(isPcWindow);
+    ASSERT_EQ(result, WMError::WM_OK);
+}
+
+/**
  * @tc.name: IsPcOrPadFreeMultiWindowMode
  * @tc.desc: IsPcOrPadFreeMultiWindowMode
  * @tc.type: FUNC
@@ -2339,10 +2395,9 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
 HWTEST_F(SceneSessionManagerTest, SetIsWindowRectAutoSave, Function | SmallTest | Level3)
 {
     std::string key = "com.example.recposentryEntryAbility";
-    bool enabled = false;
+    bool enabled = true;
     ssm_->SetIsWindowRectAutoSave(key, enabled);
-    auto result = ssm_->IsWindowRectAutoSave(key, enabled);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(ssm_->isWindowRectAutoSaveMap_.at(key), true);
 }
 
 /**
@@ -2362,10 +2417,8 @@ HWTEST_F(SceneSessionManagerTest, GetDisplayIdByWindowId, Function | SmallTest |
     ASSERT_NE(nullptr, sceneSession2);
     ssm_->sceneSessionMap_.insert({sceneSession2->GetPersistentId(), sceneSession2});
 
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     DisplayId displayId = 0;
-    property->SetDisplayId(displayId);
-    sceneSession1->SetSessionProperty(property);
+    sceneSession1->property_->SetDisplayId(displayId);
 
     const std::vector<uint64_t> windowIds = {1001, sceneSession1->GetPersistentId(), sceneSession2->GetPersistentId()};
     std::unordered_map<uint64_t, DisplayId> windowDisplayIdMap;

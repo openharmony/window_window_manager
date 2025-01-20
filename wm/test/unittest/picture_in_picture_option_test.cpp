@@ -32,17 +32,13 @@ public:
     void TearDown() override;
 };
 
-void PictureInPictureOptionTest::SetUpTestCase() {
-}
+void PictureInPictureOptionTest::SetUpTestCase() {}
 
-void PictureInPictureOptionTest::TearDownTestCase() {
-}
+void PictureInPictureOptionTest::TearDownTestCase() {}
 
-void PictureInPictureOptionTest::SetUp() {
-}
+void PictureInPictureOptionTest::SetUp() {}
 
-void PictureInPictureOptionTest::TearDown() {
-}
+void PictureInPictureOptionTest::TearDown() {}
 
 namespace {
 
@@ -177,6 +173,18 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetPipContentCallbackRef
+ * @tc.desc: RegisterPipContentListenerWithType/GetPipContentCallbackRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    option->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
+    ASSERT_EQ(option->GetPipContentCallbackRef("nodeUpdate"), nullptr);
+}
+
+/**
  * @tc.name: TypeNodeEnabled
  * @tc.desc: SetTypeNodeEnabled/IsTypeNodeEnabled
  * @tc.type: FUNC
@@ -189,6 +197,6 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeEnabled, Function | SmallTest | Lev
     option->SetTypeNodeEnabled(false);
     ASSERT_TRUE(!option->IsTypeNodeEnabled());
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

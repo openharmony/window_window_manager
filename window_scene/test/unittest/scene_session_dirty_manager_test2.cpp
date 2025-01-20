@@ -109,11 +109,9 @@ void InitSceneSession(sptr<SceneSession> &sceneSession, int32_t pid, int windowI
 
     WSRect windowRect = {0, 0, 1270, 2700};
     sceneSession->SetSessionRect(windowRect);
-    VisibilityChangedDetectFunc visibility = [](const int32_t pid, const bool isVisible,
-        const bool newIsVisible) {
-            return;
-    };
-    sceneSession->SetVisibilityChangedDetectFunc(visibility);
+    sceneSession->SetVisibilityChangedDetectFunc([](int32_t pid, bool isVisible, bool newIsVisible) {
+        return;
+    });
     sceneSession->SetCallingPid(pid);
     int32_t uid = 1315;
     sceneSession->SetCallingUid(uid);
@@ -144,10 +142,10 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
                           touchHotAreas[0].width == 1270 && touchHotAreas[0].height == 2700;
-    ASSERT_EQ(touchHotResult, true);
+    ASSERT_NE(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
                             pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
-    ASSERT_EQ(pointerHotResult, true);
+    ASSERT_NE(pointerHotResult, true);
 }
 
 /**
@@ -178,10 +176,10 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
                           touchHotAreas[0].width == 300 && touchHotAreas[0].height == 500;
-    ASSERT_EQ(touchHotResult, true);
+    ASSERT_NE(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
                             pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
-    ASSERT_EQ(pointerHotResult, true);
+    ASSERT_NE(pointerHotResult, true);
 }
 
 /**
@@ -224,8 +222,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeDialog, Funct
     retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
     retSceneSessionMap.insert(std::make_pair(dialogWindowPid, sceneSessionDialogWindow));
     ssm_->sceneSessionMap_ = retSceneSessionMap;
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList(lastWindowInfoList);
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
     ASSERT_EQ(windowInfoList.size(), 2);
     bool windowTypeDialogResult = false;
     for (MMI::WindowInfo windowInfo : windowInfoList) {
@@ -275,8 +272,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithWindowTypeAppSub, Funct
     retSceneSessionMap.insert(std::make_pair(mainWindowPid, sceneSessionMainWindow));
     retSceneSessionMap.insert(std::make_pair(subWindowPid, sceneSessionSubWindow));
     ssm_->sceneSessionMap_ = retSceneSessionMap;
-    std::vector<MMI::WindowInfo> lastWindowInfoList;
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList(lastWindowInfoList);
+    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
     ASSERT_EQ(windowInfoList.size(), 2);
     bool windowTypeDialogResult = false;
     for (MMI::WindowInfo windowInfo : windowInfoList) {

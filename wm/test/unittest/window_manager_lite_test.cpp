@@ -48,8 +48,8 @@ public:
 
 class TestDrawingContentChangedListener : public IDrawingContentChangedListener {
 public:
-    void OnWindowDrawingContentChanged(
-        const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo) override {};
+    void OnWindowDrawingContentChanged(const std::vector<sptr<WindowDrawingContentInfo>>& windowDrawingInfo) override {
+    };
 };
 
 class TestVisibilityChangedListener : public IVisibilityChangedListener {
@@ -92,21 +92,13 @@ public:
     void TearDown() override;
 };
 
-void WindowManagerLiteTest::SetUpTestCase()
-{
-}
+void WindowManagerLiteTest::SetUpTestCase() {}
 
-void WindowManagerLiteTest::TearDownTestCase()
-{
-}
+void WindowManagerLiteTest::TearDownTestCase() {}
 
-void WindowManagerLiteTest::SetUp()
-{
-}
+void WindowManagerLiteTest::SetUp() {}
 
-void WindowManagerLiteTest::TearDown()
-{
-}
+void WindowManagerLiteTest::TearDown() {}
 
 namespace {
 /**
@@ -153,8 +145,7 @@ HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus01, Function | SmallTest
 HWTEST_F(WindowManagerLiteTest, UpdateCameraWindowStatus02, Function | SmallTest | Level2)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
-    sptr<TestCameraWindowChangedListener> listener = new (std::nothrow) TestCameraWindowChangedListener();
-    ASSERT_TRUE(listener != nullptr);
+    sptr<TestCameraWindowChangedListener> listener = sptr<TestCameraWindowChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterCameraWindowChangedListener(listener));
@@ -180,7 +171,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterCameraWindowChangedListener01, Function 
     windowManager.pImpl_->cameraWindowChangedListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterCameraWindowChangedListener(nullptr));
 
-    sptr<TestCameraWindowChangedListener> listener = new TestCameraWindowChangedListener();
+    sptr<TestCameraWindowChangedListener> listener = sptr<TestCameraWindowChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterCameraWindowChangedListener(listener));
@@ -214,8 +205,8 @@ HWTEST_F(WindowManagerLiteTest, UnregisterCameraWindowChangedListener01, Functio
     // check nullpter
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterCameraWindowChangedListener(nullptr));
 
-    sptr<TestCameraWindowChangedListener> listener1 = new TestCameraWindowChangedListener();
-    sptr<TestCameraWindowChangedListener> listener2 = new TestCameraWindowChangedListener();
+    sptr<TestCameraWindowChangedListener> listener1 = sptr<TestCameraWindowChangedListener>::MakeSptr();
+    sptr<TestCameraWindowChangedListener> listener2 = sptr<TestCameraWindowChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterCameraWindowChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -287,7 +278,7 @@ HWTEST_F(WindowManagerLiteTest, Test04, Function | SmallTest | Level2)
     ASSERT_NE(lite.pImpl_, nullptr);
     lite.pImpl_->NotifyFocused(focusChangeInfo);
     lite.pImpl_->NotifyUnfocused(focusChangeInfo);
-    focusChangeInfo = new FocusChangeInfo();
+    focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
     lite.pImpl_->NotifyFocused(focusChangeInfo);
     lite.pImpl_->NotifyUnfocused(focusChangeInfo);
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
@@ -311,8 +302,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowModeChangedListener02, Function | 
     windowManager.pImpl_->windowModeListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowModeChangedListener(nullptr));
 
-    sptr<TestWindowModeChangedListener> listener = new (std::nothrow) TestWindowModeChangedListener();
-    ASSERT_TRUE(listener != nullptr);
+    sptr<TestWindowModeChangedListener> listener = sptr<TestWindowModeChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowModeChangedListener(listener));
@@ -346,10 +336,8 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowModeChangedListener02, Function 
     // check nullpter
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowModeChangedListener(nullptr));
 
-    sptr<TestWindowModeChangedListener> listener1 = new (std::nothrow) TestWindowModeChangedListener();
-    ASSERT_TRUE(listener1 != nullptr);
-    sptr<TestWindowModeChangedListener> listener2 = new (std::nothrow) TestWindowModeChangedListener();
-    ASSERT_TRUE(listener2 != nullptr);
+    sptr<TestWindowModeChangedListener> listener1 = sptr<TestWindowModeChangedListener>::MakeSptr();
+    sptr<TestWindowModeChangedListener> listener2 = sptr<TestWindowModeChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowModeChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -383,8 +371,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWMSConnectionChangedListener02, Function
     auto& windowManager = WindowManagerLite::GetInstance();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWMSConnectionChangedListener(nullptr));
 
-    sptr<TestWMSConnectionChangedListener> listener = new (std::nothrow) TestWMSConnectionChangedListener();
-    ASSERT_TRUE(listener != nullptr);
+    sptr<TestWMSConnectionChangedListener> listener = sptr<TestWMSConnectionChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWMSConnectionChangedListener(listener));
 
@@ -420,8 +407,9 @@ HWTEST_F(WindowManagerLiteTest, GetMainWindowInfos, Function | SmallTest | Level
 
     int32_t topN = 3;
 
-    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(topNInfoResult),
-        Return(WMError::WM_OK)));
+    EXPECT_CALL(m->Mock(), GetMainWindowInfos(_, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(topNInfoResult), Return(WMError::WM_OK)));
 
     WindowManagerLite::GetInstance().GetMainWindowInfos(topN, topNInfo);
 
@@ -442,7 +430,7 @@ HWTEST_F(WindowManagerLiteTest, TestUpdateFocusChangeInfo, Function | SmallTest 
 {
     sptr<FocusChangeInfo> focusChangeInfo = nullptr;
     WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo, true);
-    sptr<FocusChangeInfo> focusChangeInfo1 = new FocusChangeInfo();
+    sptr<FocusChangeInfo> focusChangeInfo1 = sptr<FocusChangeInfo>::MakeSptr();
     WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo1, true);
     WindowManagerLite::GetInstance().UpdateFocusChangeInfo(focusChangeInfo1, false);
     std::vector<sptr<WindowVisibilityInfo>> infos;
@@ -471,9 +459,9 @@ HWTEST_F(WindowManagerLiteTest, NotifyFocusedWithUn, Function | SmallTest | Leve
     lite.pImpl_->NotifyFocused(focusChangeInfo);
     lite.pImpl_->NotifyUnfocused(focusChangeInfo);
     ASSERT_EQ(focusChangeInfo, nullptr);
-    focusChangeInfo = new (std::nothrow) FocusChangeInfo();
+    focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
     lite.pImpl_->focusChangedListeners_.push_back(nullptr);
-    sptr<TestFocusChangedListener> testFocusChangedListener = new (std::nothrow) TestFocusChangedListener();
+    sptr<TestFocusChangedListener> testFocusChangedListener = sptr<TestFocusChangedListener>::MakeSptr();
     lite.pImpl_->focusChangedListeners_.push_back(testFocusChangedListener);
     lite.pImpl_->NotifyFocused(focusChangeInfo);
     lite.pImpl_->NotifyUnfocused(focusChangeInfo);
@@ -489,8 +477,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowDrawingContentInfoChanged02, Functio
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
-    sptr<TestDrawingContentChangedListener> listener = new (std::nothrow) TestDrawingContentChangedListener();
-    ASSERT_TRUE(listener != nullptr);
+    sptr<TestDrawingContentChangedListener> listener = sptr<TestDrawingContentChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterDrawingContentChangedListener(listener));
@@ -508,8 +495,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowModeChange02, Function | SmallTest |
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
-    sptr<TestWindowModeChangedListener> listener = new (std::nothrow) TestWindowModeChangedListener();
-    ASSERT_TRUE(listener != nullptr);
+    sptr<TestWindowModeChangedListener> listener = sptr<TestWindowModeChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowModeChangedListener(listener));
@@ -526,8 +512,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowVisibilityInfoChanged02, Function | 
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
-    sptr<TestVisibilityChangedListener> listener = new (std::nothrow) TestVisibilityChangedListener();
-    ASSERT_TRUE(listener != nullptr);
+    sptr<TestVisibilityChangedListener> listener = sptr<TestVisibilityChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterVisibilityChangedListener(listener));
@@ -545,10 +530,9 @@ HWTEST_F(WindowManagerLiteTest, NotifyUnfocused01, Function | SmallTest | Level2
 {
     WindowManagerLite lite;
     auto& windowManager = WindowManagerLite::GetInstance();
-    sptr<FocusChangeInfo> focusChangeInfo = new (std::nothrow) FocusChangeInfo();
-    ASSERT_TRUE(focusChangeInfo != nullptr);
+    sptr<FocusChangeInfo> focusChangeInfo = sptr<FocusChangeInfo>::MakeSptr();
 
-    sptr<TestFocusChangedListener> listener = new (std::nothrow) TestFocusChangedListener();
+    sptr<TestFocusChangedListener> listener = sptr<TestFocusChangedListener>::MakeSptr();
     ASSERT_TRUE(listener != nullptr);
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
@@ -582,9 +566,10 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos001, Function | SmallTest |
     infosResult.push_back(info2);
     infosResult.push_back(info3);
 
-    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult),
-        Return(WMError::WM_OK)));
-    
+    EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<0>(infosResult), Return(WMError::WM_OK)));
+
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
     ASSERT_EQ(WMError::WM_OK, errorCode);
     auto it1 = infos.begin();
@@ -612,7 +597,7 @@ HWTEST_F(WindowManagerLiteTest, GetAllMainWindowInfos002, Function | SmallTest |
     infos.push_back(info1);
 
     EXPECT_CALL(m->Mock(), GetAllMainWindowInfos(_)).Times(0).WillOnce(DoAll(Return(WMError::WM_OK)));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().GetAllMainWindowInfos(infos);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM, errorCode);
 }
@@ -628,7 +613,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions001, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds;
 
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(0).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -644,7 +629,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions002, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds = { 1, 2 };
 
     EXPECT_CALL(m->Mock(), ClearMainSessions(_)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -660,7 +645,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions003, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds;
     std::vector<int32_t> clearFailedIds;
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(0).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -676,7 +661,7 @@ HWTEST_F(WindowManagerLiteTest, ClearMainSessions004, Function | SmallTest | Lev
     std::vector<int32_t> persistentIds = { 1, 2 };
     std::vector<int32_t> clearFailedIds;
     EXPECT_CALL(m->Mock(), ClearMainSessions(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
-    
+
     auto errorCode = WindowManagerLite::GetInstance().ClearMainSessions(persistentIds, clearFailedIds);
     ASSERT_EQ(WMError::WM_OK, errorCode);
 }
@@ -741,8 +726,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected01, Function | SmallTest | Lev
 HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, Function | SmallTest | Level2)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
-    sptr<TestWMSConnectionChangedListener> listener = new (std::nothrow) TestWMSConnectionChangedListener();
-    ASSERT_TRUE(listener != nullptr);
+    sptr<TestWMSConnectionChangedListener> listener = sptr<TestWMSConnectionChangedListener>::MakeSptr();
     windowManager.pImpl_->wmsConnectionChangedListener_ = nullptr;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWMSConnectionChangedListener(listener));
@@ -759,7 +743,8 @@ HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected02, Function | SmallTest | Lev
  */
 HWTEST_F(WindowManagerLiteTest, NotifyWMSConnected03, Function | SmallTest | Level2)
 {
-    WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ = new IWMSConnectionChangedListenerSon();
+    WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_ =
+        sptr<IWMSConnectionChangedListenerSon>::MakeSptr();
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSConnected(0, 0);
     EXPECT_NE(WindowManagerLite::GetInstance().pImpl_->wmsConnectionChangedListener_, nullptr);
     WindowManagerLite::GetInstance().pImpl_->NotifyWMSDisconnected(0, 0);
@@ -780,7 +765,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowStyleChangedListener, Function | S
     windowManager.pImpl_->windowStyleListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(nullptr));
 
-    sptr<IWindowStyleChangedListener> listener = new TestWindowStyleChangedListener();
+    sptr<IWindowStyleChangedListener> listener = sptr<TestWindowStyleChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowStyleChangedListener(listener));
@@ -808,13 +793,13 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowStyleChangedListener, Function |
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->windowStyleListenerAgent_;
     auto oldListeners = windowManager.pImpl_->windowStyleListeners_;
-    windowManager.pImpl_->windowStyleListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
+    windowManager.pImpl_->windowStyleListenerAgent_ = sptr<WindowManagerAgentLite>::MakeSptr();
     windowManager.pImpl_->windowStyleListeners_.clear();
     // check nullpter
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowStyleChangedListener(nullptr));
 
-    sptr<TestWindowStyleChangedListener> listener1 = new TestWindowStyleChangedListener();
-    sptr<TestWindowStyleChangedListener> listener2 = new TestWindowStyleChangedListener();
+    sptr<TestWindowStyleChangedListener> listener1 = sptr<TestWindowStyleChangedListener>::MakeSptr();
+    sptr<TestWindowStyleChangedListener> listener2 = sptr<TestWindowStyleChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowStyleChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -857,7 +842,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange01, Function | SmallTest 
 HWTEST_F(WindowManagerLiteTest, NotifyWindowStyleChange02, Function | SmallTest | Level2)
 {
     auto& windowManager = WindowManagerLite::GetInstance();
-    sptr<IWindowStyleChangedListener> listener = new (std::nothrow) TestWindowStyleChangedListener();
+    sptr<IWindowStyleChangedListener> listener = sptr<TestWindowStyleChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowManager.RegisterWindowStyleChangedListener(listener));
@@ -947,7 +932,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, Function | Smal
     windowManager.pImpl_->pipStateChangedListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(nullptr));
 
-    sptr<IPiPStateChangedListener> listener = new TestPiPStateChangedListener();
+    sptr<IPiPStateChangedListener> listener = sptr<IPiPStateChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(listener));
@@ -976,13 +961,13 @@ HWTEST_F(WindowManagerLiteTest, UnregisterPiPStateChangedListener, Function | Sm
     auto& windowManager = WindowManagerLite::GetInstance();
     auto oldWindowManagerAgent = windowManager.pImpl_->pipStateChangedListenerAgent_;
     auto oldListeners = windowManager.pImpl_->pipStateChangedListeners_;
-    windowManager.pImpl_->pipStateChangedListenerAgent_ = new (std::nothrow) WindowManagerAgentLite();
+    windowManager.pImpl_->pipStateChangedListenerAgent_ = sptr<WindowManagerAgentLite>::MakeSptr();
     windowManager.pImpl_->pipStateChangedListeners_.clear();
     // check nullpter
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterPiPStateChangedListener(nullptr));
 
-    sptr<IPiPStateChangedListener> listener1 = new TestPiPStateChangedListener();
-    sptr<IPiPStateChangedListener> listener2 = new TestPiPStateChangedListener();
+    sptr<IPiPStateChangedListener> listener1 = sptr<TestPiPStateChangedListener>::MakeSptr();
+    sptr<IPiPStateChangedListener> listener2 = sptr<TestPiPStateChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterPiPStateChangedListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -1046,8 +1031,9 @@ HWTEST_F(WindowManagerLiteTest, GetCurrentPiPWindowInfo02, Function | SmallTest 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     std::string testBundleName = "test";
     bool testState = true;
-    EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(testBundleName),
-        Return(WMError::WM_OK)));
+    EXPECT_CALL(m->Mock(), GetCurrentPiPWindowInfo(_))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<0>(testBundleName), Return(WMError::WM_OK)));
 
     std::string bundleName;
     auto errorCode = WindowManagerLite::GetInstance().GetCurrentPiPWindowInfo(bundleName);
@@ -1085,7 +1071,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterWindowUpdateListener01, Function | Small
     windowManager.pImpl_->windowUpdateListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowUpdateListener(nullptr));
 
-    sptr<TestWindowUpdateListener> listener = new TestWindowUpdateListener();
+    sptr<TestWindowUpdateListener> listener = sptr<TestWindowUpdateListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterWindowUpdateListener(listener));
@@ -1120,8 +1106,8 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, Function | Sma
     // check nullpter
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.UnregisterWindowUpdateListener(nullptr));
 
-    sptr<TestWindowUpdateListener> listener1 = new TestWindowUpdateListener();
-    sptr<TestWindowUpdateListener> listener2 = new TestWindowUpdateListener();
+    sptr<TestWindowUpdateListener> listener1 = sptr<TestWindowUpdateListener>::MakeSptr();
+    sptr<TestWindowUpdateListener> listener2 = sptr<TestWindowUpdateListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_OK, windowManager.UnregisterWindowUpdateListener(listener1));
 
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
@@ -1144,5 +1130,5 @@ HWTEST_F(WindowManagerLiteTest, UnregisterWindowUpdateListener01, Function | Sma
     windowManager.pImpl_->windowUpdateListenerAgent_ = oldWindowManagerAgent;
     windowManager.pImpl_->windowUpdateListeners_ = oldListeners;
 }
-}
-}
+} // namespace
+} // namespace OHOS::Rosen

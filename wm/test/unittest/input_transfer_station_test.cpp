@@ -16,9 +16,9 @@
 #include <gtest/gtest.h>
 #include "input_manager.h"
 #include "input_transfer_station.h"
-#include "window_impl.h"
 #include "mock_window_adapter.h"
 #include "singleton_mocker.h"
+#include "window_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,13 +35,9 @@ public:
     sptr<WindowImpl> window_;
     std::shared_ptr<MMI::IInputEventConsumer> listener;
 };
-void InputTransferStationTest::SetUpTestCase()
-{
-}
+void InputTransferStationTest::SetUpTestCase() {}
 
-void InputTransferStationTest::TearDownTestCase()
-{
-}
+void InputTransferStationTest::TearDownTestCase() {}
 
 void InputTransferStationTest::SetUp()
 {
@@ -96,7 +92,7 @@ HWTEST_F(InputTransferStationTest, RemoveInputWindow, Function | SmallTest | Lev
 
     InputTransferStation::GetInstance().destroyed_ = false;
     sptr<WindowInputChannel> inputChannel = sptr<WindowInputChannel>::MakeSptr(window_);
-    InputTransferStation::GetInstance().windowInputChannels_.insert({window_->GetWindowId(), inputChannel});
+    InputTransferStation::GetInstance().windowInputChannels_.insert({ window_->GetWindowId(), inputChannel });
     InputTransferStation::GetInstance().RemoveInputWindow(window_->GetWindowId());
     auto iter = InputTransferStation::GetInstance().windowInputChannels_.find(window_->GetWindowId());
     ASSERT_EQ(iter, InputTransferStation::GetInstance().windowInputChannels_.end());
@@ -186,6 +182,6 @@ HWTEST_F(InputTransferStationTest, GetInputChannel, Function | SmallTest | Level
     InputTransferStation::GetInstance().AddInputWindow(window_);
     InputTransferStation::GetInstance().GetInputChannel(0);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

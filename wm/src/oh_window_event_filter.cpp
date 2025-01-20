@@ -18,6 +18,7 @@
 #include "oh_window_comm.h"
 #include "oh_window_event_filter.h"
 #include "key_event.h"
+#include "pointer_event.h"
 #include "window.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -25,15 +26,38 @@
 using namespace OHOS::Rosen;
 
 static const std::unordered_map<int32_t, Input_KeyEventAction> keyEventActionMap = {
-    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_CANCEL, Input_KeyEventAction::KEY_ACTION_CANCEL},
-    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_DOWN, Input_KeyEventAction::KEY_ACTION_DOWN},
-    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_UP, Input_KeyEventAction::KEY_ACTION_UP},
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_CANCEL,    Input_KeyEventAction::KEY_ACTION_CANCEL },
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_DOWN,      Input_KeyEventAction::KEY_ACTION_DOWN   },
+    {OHOS::MMI::KeyEvent::KeyEvent::KEY_ACTION_UP,        Input_KeyEventAction::KEY_ACTION_UP     },
+};
+
+static const std::unordered_map<int32_t, Input_TouchEventAction> touchEventActionMap = {
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL,    Input_TouchEventAction::TOUCH_ACTION_CANCEL },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN,      Input_TouchEventAction::TOUCH_ACTION_DOWN   },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE,      Input_TouchEventAction::TOUCH_ACTION_MOVE   },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_UP,        Input_TouchEventAction::TOUCH_ACTION_UP     },
+};
+
+static const std::unordered_map<int32_t, Input_MouseEventAction> mouseEventActionMap = {
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL,         Input_MouseEventAction::MOUSE_ACTION_CANCEL      },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE,           Input_MouseEventAction::MOUSE_ACTION_MOVE        },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN,    Input_MouseEventAction::MOUSE_ACTION_BUTTON_DOWN },
+    {OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP,      Input_MouseEventAction::MOUSE_ACTION_BUTTON_UP   },
+};
+
+static const std::unordered_map<int32_t, Input_MouseEventButton> mouseEventButtonMap = {
+    {OHOS::MMI::PointerEvent::BUTTON_NONE,             Input_MouseEventButton::MOUSE_BUTTON_NONE    },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_LEFT,       Input_MouseEventButton::MOUSE_BUTTON_LEFT    },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE,     Input_MouseEventButton::MOUSE_BUTTON_MIDDLE  },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_RIGHT,      Input_MouseEventButton::MOUSE_BUTTON_RIGHT   },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD,    Input_MouseEventButton::MOUSE_BUTTON_FORWARD },
+    {OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK,       Input_MouseEventButton::MOUSE_BUTTON_BACK    },
 };
 
 KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
 {
-    std::function<bool(OHOS::MMI::KeyEvent&)> func = [filter](OHOS::MMI::KeyEvent& keyEvent) {
-        Input_KeyEvent *input = OH_Input_CreateKeyEvent();
+    return [filter](const OHOS::MMI::KeyEvent& keyEvent) {
+        Input_KeyEvent* input = OH_Input_CreateKeyEvent();
         OH_Input_SetKeyEventKeyCode(input, keyEvent.GetKeyCode());
         auto iter = keyEventActionMap.find(keyEvent.GetKeyAction());
         if (iter == keyEventActionMap.end()) {
@@ -43,7 +67,6 @@ KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
         OH_Input_SetKeyEventActionTime(input, keyEvent.GetActionTime());
         return filter(input);
     };
-    return func ;
 }
 
 WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId,
@@ -69,5 +92,123 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t 
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
     auto res = mainWindow->ClearKeyEventFilter();
+    return res == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+}
+
+MouseEventFilterFunc convert2MouseEventFilterFunc(OH_NativeWindowManager_MouseEventFilter filter)
+{
+    return [filter](const OHOS::MMI::PointerEvent& event) {
+        Input_MouseEvent* mouseEvent = OH_Input_CreateMouseEvent();
+        if (mouseEvent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "create input mouse event fail");
+            return false;
+        }
+        OHOS::MMI::PointerEvent::PointerItem item;
+        if (!event.GetPointerItem(event.GetPointerId(), item)) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "Can not get pointerItem for the pointer event");
+            OH_Input_DestroyMouseEvent(&mouseEvent);
+            return false;
+        }
+        auto actionIter = mouseEventActionMap.find(event.GetPointerAction());
+        if (actionIter == mouseEventActionMap.end()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "find mouse event action fail");
+            OH_Input_DestroyMouseEvent(&mouseEvent);
+            return false;
+        }
+        OH_Input_SetMouseEventAction(mouseEvent, actionIter->second);
+        auto buttonIter = mouseEventButtonMap.find(event.GetButtonId());
+        if (buttonIter == mouseEventButtonMap.end()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "find mouse event button fail");
+            OH_Input_DestroyMouseEvent(&mouseEvent);
+            return false;
+        }
+        OH_Input_SetMouseEventButton(mouseEvent, buttonIter->second);
+        OH_Input_SetMouseEventDisplayX(mouseEvent, item.GetDisplayX());
+        OH_Input_SetMouseEventDisplayY(mouseEvent, item.GetDisplayY());
+        OH_Input_SetMouseEventActionTime(mouseEvent, event.GetActionTime());
+        bool res = filter(mouseEvent);
+        OH_Input_DestroyMouseEvent(&mouseEvent);
+        return res;
+    };
+}
+
+WindowManager_ErrorCode OH_NativeWindowManager_RegisterMouseEventFilter(int32_t windowId,
+    OH_NativeWindowManager_MouseEventFilter mouseEventFilter)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "register mouseEventCallback, windowId:%{public}d", windowId);
+    auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+    }
+    auto res = window->SetMouseEventFilter(convert2MouseEventFilterFunc(mouseEventFilter));
+    return res == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+}
+
+WindowManager_ErrorCode OH_NativeWindowManager_UnregisterMouseEventFilter(int32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "clear mouseEventCallback, windowId:%{public}d", windowId);
+    auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+    }
+    auto res = window->ClearMouseEventFilter();
+    return res == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+}
+
+TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEventFilter filter)
+{
+    return [filter](const OHOS::MMI::PointerEvent& event) {
+        Input_TouchEvent* touchEvent = OH_Input_CreateTouchEvent();
+        if (touchEvent == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "create input touch event fail");
+            return false;
+        }
+        OHOS::MMI::PointerEvent::PointerItem item;
+        if (!event.GetPointerItem(event.GetPointerId(), item)) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "Can not get pointerItem for the pointer event");
+            OH_Input_DestroyTouchEvent(&touchEvent);
+            return false;
+        }
+        auto actionIter = touchEventActionMap.find(event.GetPointerAction());
+        if (actionIter == touchEventActionMap.end()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "find touch event action fail");
+            OH_Input_DestroyTouchEvent(&touchEvent);
+            return false;
+        }
+        OH_Input_SetTouchEventAction(touchEvent, actionIter->second);
+        OH_Input_SetTouchEventFingerId(touchEvent, event.GetPointerId());
+        OH_Input_SetTouchEventDisplayX(touchEvent, item.GetDisplayX());
+        OH_Input_SetTouchEventDisplayY(touchEvent, item.GetDisplayY());
+        OH_Input_SetTouchEventActionTime(touchEvent, event.GetActionTime());
+        bool res = filter(touchEvent);
+        OH_Input_DestroyTouchEvent(&touchEvent);
+        return res;
+    };
+}
+
+WindowManager_ErrorCode OH_NativeWindowManager_RegisterTouchEventFilter(int32_t windowId,
+    OH_NativeWindowManager_TouchEventFilter touchEventFilter)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "register touchEventCallback, windowId:%{public}d", windowId);
+    auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+    }
+    auto res = window->SetTouchEventFilter(convert2TouchEventFilterFunc(touchEventFilter));
+    return res == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
+}
+
+WindowManager_ErrorCode OH_NativeWindowManager_UnregisterTouchEventFilter(int32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "clear touchEventCallback, windowId:%{public}d", windowId);
+    auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "window is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+    }
+    auto res = window->ClearTouchEventFilter();
     return res == WMError::WM_OK ? WindowManager_ErrorCode::OK : WindowManager_ErrorCode::SERVICE_ERROR;
 }

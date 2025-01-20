@@ -61,6 +61,7 @@ public:
         TRANS_ID_UPDATE_LAYOUT_MODE,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
+        TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
         TRANS_ID_GET_SYSTEM_CONFIG,
@@ -99,7 +100,8 @@ public:
     virtual WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) = 0;
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
-    virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) = 0;
+    virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
+        const Rect& rect = Rect::EMPTY_RECT) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) = 0;
@@ -117,6 +119,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) = 0;
+    virtual WMError GetAllWindowLayoutInfo(DisplayId displayId,
+        std::vector<sptr<WindowLayoutInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
     virtual WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) = 0;
     virtual WMError GetSystemConfig(SystemConfig& systemConfig) = 0;
@@ -244,7 +248,9 @@ public:
     virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) { return WMError::WM_OK; }
-    virtual WMError ReleaseForegroundSessionScreenLock() { return WMError::WM_OK; }
+    virtual WMError UpdateScreenLockStatusForApp(
+        const std::string& bundleName, bool isRelease) { return WMError::WM_OK; }
+    virtual WMError IsPcWindow(bool& isPcWindow) { return WMError::WM_OK; }
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
     virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
@@ -255,6 +261,13 @@ public:
         DragResizeType dragResizeType) { return WMError::WM_OK; }
     virtual WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError NotifyWatchGestureConsumeResult(int32_t keyCode,
+        bool isConsumed) { return WMError::WM_OK; }
+    virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
+    virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
+        int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) { return WMError::WM_OK; }
 };
 }
 }

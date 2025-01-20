@@ -90,6 +90,8 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_PEN = 41,
     STATE_CHANGE_REASON_SHUT_DOWN = 42,
     STATE_CHANGE_REASON_SCREEN_CONNECT = 43,
+    STATE_CHANGE_REASON_HIBERNATE = 45,
+    STATE_CHANGE_REASON_EX_SCREEN_INIT = 46,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -104,6 +106,8 @@ enum class ScreenPowerState : uint32_t {
     POWER_OFF,
     POWER_BUTT,
     INVALID_STATE,
+    POWER_DOZE,
+    POWER_DOZE_SUSPEND,
 };
 
 enum class ScreenPropertyChangeType : uint32_t {
@@ -146,6 +150,7 @@ enum class DisplayEvent : uint32_t {
     SCREEN_LOCK_SUSPEND,
     SCREEN_LOCK_OFF,
     SCREEN_LOCK_FINGERPRINT,
+    SCREEN_LOCK_DOZE_FINISH,
 };
 
 /**
@@ -219,8 +224,8 @@ enum class DisplayPowerEvent : uint32_t {
     DISPLAY_ON,
     DISPLAY_OFF,
     DESKTOP_READY,
-    DOZE,
-    DOZE_SUSPEND,
+    DISPLAY_DOZE,
+    DISPLAY_DOZE_SUSPEND,
     DISPLAY_OFF_CANCELED,
 };
 
@@ -370,6 +375,12 @@ enum class FoldStatus: uint32_t {
     EXPAND = 1,
     FOLDED = 2,
     HALF_FOLD = 3,
+    FOLD_STATE_EXPAND_WITH_SECOND_EXPAND = 11,
+    FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED = 21,
+    FOLD_STATE_FOLDED_WITH_SECOND_EXPAND = 12,
+    FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED = 22,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND = 13,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED = 23,
 };
 
 /**
@@ -405,6 +416,7 @@ enum class FoldDisplayMode: uint32_t {
     MAIN = 2,
     SUB = 3,
     COORDINATION = 4,
+    GLOBAL_FULL = 5,
 };
 
 enum class DisplayType : uint32_t {
@@ -487,6 +499,7 @@ struct ScreenDirectionInfo {
     int32_t notifyRotation_;
     int32_t screenRotation_;
     int32_t rotation_;
+    int32_t phyRotation_;
 };
 
 /**

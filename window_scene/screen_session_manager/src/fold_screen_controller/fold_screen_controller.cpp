@@ -15,12 +15,15 @@
 
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "fold_screen_controller/single_display_fold_policy.h"
+#include "fold_screen_controller/secondary_display_fold_policy.h"
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
 #include "fold_screen_controller/dual_display_fold_policy.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
+#include "fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
+#include "fold_screen_controller/secondary_fold_sensor_manager.h"
 #include "fold_screen_state_internel.h"
 
 #include "window_manager_hilog.h"
@@ -42,6 +45,10 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_POCKET_DEVICE);
         sensorFoldStateManager_ = new SingleDisplaySensorPocketFoldStateManager();
         TLOGI(WmsLogTag::DMS, "fold polocy: SINGLE_DISPLAY_POCKET_DEVICE");
+    } else if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
+        sensorFoldStateManager_ = new SecondaryDisplaySensorFoldStateManager();
+        TLOGI(WmsLogTag::DMS, "fold polocy: SECONDARY_DISPLAY_DEVICE");
     }
 
     if (foldScreenPolicy_ == nullptr) {
@@ -49,6 +56,11 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
         return;
     }
 #ifdef SENSOR_ENABLE
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        SecondaryFoldSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
+        SecondaryFoldSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
+        return;
+    }
     FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
     FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
 #endif
@@ -73,6 +85,10 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
         }
         case DisplayDeviceType::SINGLE_DISPLAY_POCKET_DEVICE:{
             tempPolicy = new SingleDisplayPocketFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
+            break;
+        }
+        case DisplayDeviceType::SECONDARY_DISPLAY_DEVICE:{
+            tempPolicy = new SecondaryDisplayFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
         default: {
@@ -105,8 +121,9 @@ void FoldScreenController::RecoverDisplayMode()
         TLOGI(WmsLogTag::DMS, "current displayMode is correct, skip");
         return;
     }
-    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
-        TLOGI(WmsLogTag::DMS, "not single display fold device, skip");
+    if (!FoldScreenStateInternel::IsSingleDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        TLOGI(WmsLogTag::DMS, "not single display fold (pocket) device, skip");
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}d -> %{public}d", currentDisplayMode, displayMode);
@@ -152,6 +169,15 @@ void FoldScreenController::SetFoldStatus(FoldStatus foldStatus)
         return;
     }
     foldScreenPolicy_->SetFoldStatus(foldStatus);
+}
+
+FoldDisplayMode FoldScreenController::GetModeMatchStatus()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy is null");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    return foldScreenPolicy_->GetModeMatchStatus();
 }
 
 bool FoldScreenController::GetTentMode()
@@ -254,5 +280,24 @@ void FoldScreenController::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32
         return;
     }
     foldScreenPolicy_->AddOrRemoveDisplayNodeToTree(screenId, command);
+}
+
+Drawing::Rect FoldScreenController::GetScreenSnapshotRect()
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        Drawing::Rect snapshotRect = {0, 0, 0, 0};
+        return snapshotRect;
+    }
+    return foldScreenPolicy_->GetScreenSnapshotRect();
+}
+
+void FoldScreenController::SetMainScreenRegion(DMRect& mainScreenRegion)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetMainScreenRegion(mainScreenRegion);
 }
 } // namespace OHOS::Rosen

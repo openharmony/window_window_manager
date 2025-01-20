@@ -35,22 +35,33 @@ constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr int32_t SENSOR_SUCCESS = 0;
 constexpr int32_t POSTURE_INTERVAL = 100000000;
 constexpr uint16_t SENSOR_EVENT_FIRST_DATA = 0;
-constexpr uint16_t SENSOR_EVENT_SECOND_DATA = 1;
 constexpr uint16_t HALL_B_C_COLUMN_ORDER = 1;
 constexpr uint16_t HALL_A_B_COLUMN_ORDER = 4;
 constexpr float ACCURACY_ERROR_FOR_ALTA = 0.0001F;
 constexpr float MINI_NOTIFY_FOLD_ANGLE = 0.5F;
 std::vector<float> oldFoldAngle = {0.0F, 0.0F};
-constexpr size_t SECONDARY_FOLDING_AXIS_SIZE = 2;
+constexpr size_t SECONDARY_POSTURE_SIZE = 3;
+constexpr size_t SECONDARY_HALL_SIZE = 2;
+constexpr uint16_t FIRST_DATA = 0;
+constexpr uint16_t SECOND_DATA = 1;
+constexpr uint16_t THIRD_DATA = 2;
+const int32_t MAIN_STATUS_WIDTH = 0;
+const int32_t FULL_STATUS_WIDTH = 1;
+const int32_t GLOBAL_FULL_STATUS_WIDTH = 2;
+const int32_t SCREEN_HEIGHT = 3;
+const int32_t FULL_STATUS_OFFSET_X = 4;
+const int32_t PARAMS_VECTOR_SIZE = 5;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(SecondaryFoldSensorManager);
 
-void SecondaryFoldSensorManager::RegisterApplicationStateObserver()
+static void SecondarySensorPostureDataCallback(SensorEvent *event)
 {
-    if (sensorFoldStateManager_ == nullptr) {
-        return;
-    }
-    sensorFoldStateManager_->RegisterApplicationStateObserver();
+    SecondaryFoldSensorManager::GetInstance().HandlePostureData(event);
+}
+
+static void SecondarySensorHallDataCallbackExt(SensorEvent *event)
+{
+    SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(event);
 }
 
 void SecondaryFoldSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy)
@@ -61,16 +72,6 @@ void SecondaryFoldSensorManager::SetFoldScreenPolicy(sptr<FoldScreenPolicy> fold
 void SecondaryFoldSensorManager::SetSensorFoldStateManager(sptr<SensorFoldStateManager> sensorFoldStateManager)
 {
     sensorFoldStateManager_ = sensorFoldStateManager;
-}
-
-void SecondaryFoldSensorManager::SecondarySensorPostureDataCallback(SensorEvent *event)
-{
-    OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandlePostureData(event);
-}
-
-void SecondaryFoldSensorManager::SecondarySensorHallDataCallbackExt(SensorEvent *event)
-{
-    OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(event);
 }
 
 void SecondaryFoldSensorManager::RegisterPostureCallback()
@@ -131,40 +132,40 @@ void SecondaryFoldSensorManager::HandlePostureData(const SensorEvent * const eve
 {
     float postureBc = 0.0F;
     float postureAb = 0.0F;
-    float valueAbAnti = 0.0F;
-    if (!GetPostureInner(event, postureBc, postureAb, valueAbAnti)) {
+    float postureAbAnti = 0.0F;
+    if (!GetPostureInner(event, postureBc, postureAb, postureAbAnti)) {
         return;
     }
-    globalAngle[SENSOR_EVENT_FIRST_DATA] = postureBc;
-    globalAngle[SENSOR_EVENT_SECOND_DATA] = postureAb;
+    globalAngle_[FIRST_DATA] = postureBc;
+    globalAngle_[SECOND_DATA] = postureAb;
+    globalAngle_[THIRD_DATA] = postureAbAnti;
     if (IsDataBeyondBoundary()) {
         return;
     }
     TLOGD(WmsLogTag::DMS, "%{public}s, %{public}s",
-        FoldScreenStateInternel::TransVec2Str(globalAngle, "angle").c_str(),
-        FoldScreenStateInternel::TransVec2Str(globalHall, "hall").c_str());
-    sensorFoldStateManager_->HandleAngleChange(globalAngle, globalHall, foldScreenPolicy_);
-    NotifyFoldAngleChanged(globalAngle);
+        FoldScreenStateInternel::TransVec2Str(globalAngle_, "angle").c_str(),
+        FoldScreenStateInternel::TransVec2Str(globalHall_, "hall").c_str());
+    if (sensorFoldStateManager_ == nullptr) {
+        return;
+    }
+    sensorFoldStateManager_->HandleAngleOrHallChange(globalAngle_, globalHall_, foldScreenPolicy_);
+    NotifyFoldAngleChanged(globalAngle_);
 }
 
 void SecondaryFoldSensorManager::NotifyFoldAngleChanged(const std::vector<float> &angles)
 {
-    size_t size = angles.size();
-    std::vector<bool> flags(true, size);
-    for (size_t i = 0; i < size; i++) {
-        if (fabs(angles[i] - oldFoldAngle[i]) < MINI_NOTIFY_FOLD_ANGLE) {
-            flags[i] = false;
-        }
-        oldFoldAngle[i] = angles[i];
-    }
-    bool flag = false;
-    for (bool f : flags) {
-        flag = flag | f;
-    }
-    if (!flag) {
+    if (angles.size() < SECONDARY_HALL_SIZE) {
         return;
     }
-    ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(angles);
+    bool bcFlag = fabs(angles[0] - oldFoldAngle[0]) < MINI_NOTIFY_FOLD_ANGLE;
+    bool abFlag = fabs(angles[1] - oldFoldAngle[1]) < MINI_NOTIFY_FOLD_ANGLE;
+    if (bcFlag && abFlag) {
+        return;
+    }
+    oldFoldAngle[0] = angles[0];
+    oldFoldAngle[1] = angles[1];
+    std::vector<float> notifyAngles = {angles[0], angles[1]};
+    ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(notifyAngles);
 }
 
 void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const event)
@@ -174,36 +175,45 @@ void SecondaryFoldSensorManager::HandleHallDataExt(const SensorEvent * const eve
     if (!GetHallInner(event, hallBc, hallAb)) {
         return;
     }
-    globalHall[SENSOR_EVENT_FIRST_DATA] = hallBc;
-    globalHall[SENSOR_EVENT_SECOND_DATA] = hallAb;
+    globalHall_[FIRST_DATA] = hallBc;
+    globalHall_[SECOND_DATA] = hallAb;
     if (IsDataBeyondBoundary()) {
         return;
     }
     TLOGI(WmsLogTag::DMS, "%{public}s, %{public}s",
-        FoldScreenStateInternel::TransVec2Str(globalAngle, "angle").c_str(),
-        FoldScreenStateInternel::TransVec2Str(globalHall, "hall").c_str());
+        FoldScreenStateInternel::TransVec2Str(globalAngle_, "angle").c_str(),
+        FoldScreenStateInternel::TransVec2Str(globalHall_, "hall").c_str());
     if (!registerPosture_) {
-        globalAngle[SENSOR_EVENT_FIRST_DATA] = ANGLE_MIN_VAL;
-        globalAngle[SENSOR_EVENT_SECOND_DATA] = ANGLE_MIN_VAL;
+        globalAngle_[FIRST_DATA] = ANGLE_MIN_VAL;
+        globalAngle_[SECOND_DATA] = ANGLE_MIN_VAL;
+        globalAngle_[THIRD_DATA] = ANGLE_MIN_VAL;
     }
-    sensorFoldStateManager_->HandleHallChange(globalAngle, globalHall, foldScreenPolicy_);
+    if (sensorFoldStateManager_ == nullptr) {
+        return;
+    }
+    sensorFoldStateManager_->HandleAngleOrHallChange(globalAngle_, globalHall_, foldScreenPolicy_);
     return;
 }
 
 bool SecondaryFoldSensorManager::IsDataBeyondBoundary()
 {
-    if (globalAngle.size() < SECONDARY_FOLDING_AXIS_SIZE || globalHall.size() < SECONDARY_FOLDING_AXIS_SIZE) {
-        TLOGW(WmsLogTag::DMS, "oversize, global angles: %{public}zu, halls size: %{public}zu.",
-            globalAngle.size(), globalHall.size());
+    if (globalAngle_.size() < SECONDARY_POSTURE_SIZE || globalHall_.size() < SECONDARY_HALL_SIZE) {
+        TLOGE(WmsLogTag::DMS, "oversize, global angles: %{public}zu, halls size: %{public}zu.",
+            globalAngle_.size(), globalHall_.size());
         return true;
     }
-    for (size_t i = 0; i < SECONDARY_FOLDING_AXIS_SIZE; i++) {
-        uint16_t hall = globalHall[i];
-        float angle = globalAngle[i];
-        if (hall == USHRT_MAX ||
-            std::isless(angle, ANGLE_MIN_VAL) ||
+    for (size_t i = 0; i < SECONDARY_POSTURE_SIZE - 1; i++) {
+        float angle = globalAngle_[i];
+        if (std::isless(angle, ANGLE_MIN_VAL) ||
             std::isgreater(angle, ANGLE_MAX_VAL + ACCURACY_ERROR_FOR_ALTA)) {
-            TLOGW(WmsLogTag::DMS, "i = %{public}zu, angle = %{public}f, hall = %{public}u", i, angle, hall);
+            TLOGE(WmsLogTag::DMS, "i = %{public}zu, angle = %{public}f", i, angle);
+            return true;
+        }
+    }
+    for (size_t i = 0; i < SECONDARY_HALL_SIZE; i++) {
+        uint16_t hall = globalHall_[i];
+        if (hall != 0 && hall != 1) {
+            TLOGE(WmsLogTag::DMS, "i = %{public}zu, hall = %{public}u", i, hall);
             return true;
         }
     }
@@ -221,15 +231,16 @@ bool SecondaryFoldSensorManager::GetPostureInner(const SensorEvent * const event
         TLOGW(WmsLogTag::DMS, "SensorEvent[0].data is nullptr.");
         return false;
     }
-    if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(PostureData)) {
+    if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(FoldScreenSensorManager::PostureDataSecondary)) {
         TLOGW(WmsLogTag::DMS, "SensorEvent dataLen less than posture data size.");
         return false;
     }
-    PostureData *postureData = reinterpret_cast<PostureData *>(event[SENSOR_EVENT_FIRST_DATA].data);
+    FoldScreenSensorManager::PostureDataSecondary *postureData =
+        reinterpret_cast<FoldScreenSensorManager::PostureDataSecondary *>(event[SENSOR_EVENT_FIRST_DATA].data);
     valueBc = (*postureData).postureBc;
     valueAb = (*postureData).postureAb;
     valueAbAnti = (*postureData).postureAbAnti;
-    TLOGD(WmsLogTag::DMS, "PostureData postureBc: %{public}f, postureAb: %{public}f, postureAbAnti: %{public}f.",
+    TLOGD(WmsLogTag::DMS, "postureBc: %{public}f, postureAb: %{public}f, postureAbAnti: %{public}f.",
         valueBc, valueAb, valueAbAnti);
     return true;
 }
@@ -244,30 +255,76 @@ bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, u
         TLOGW(WmsLogTag::DMS, "SensorEvent[0].data is nullptr.");
         return false;
     }
-    if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(ExtHallData)) {
+    if (event[SENSOR_EVENT_FIRST_DATA].dataLen < sizeof(FoldScreenSensorManager::ExtHallData)) {
         TLOGW(WmsLogTag::DMS, "SensorEvent dataLen less than hall data size.");
         return false;
     }
-    ExtHallData *extHallData = reinterpret_cast<ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
-    uint16_t flag = (uint16_t)(*extHallData).flag;
+    FoldScreenSensorManager::ExtHallData *extHallData =
+        reinterpret_cast<FoldScreenSensorManager::ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
+    uint16_t flag = static_cast<uint16_t>((*extHallData).flag);
     if (!(flag & (1 << HALL_B_C_COLUMN_ORDER)) || !(flag & (1 << HALL_A_B_COLUMN_ORDER))) {
         TLOGW(WmsLogTag::DMS, "not support Extend Hall.");
         return false;
     }
-    valueBc = (uint16_t)(*extHallData).hallBc; // 0: hall closed, 1: hall expaned
-    valueAb = (uint16_t)(*extHallData).hallAb;
-    TLOGI(WmsLogTag::DMS, "HallData hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
+    valueBc = static_cast<uint16_t>((*extHallData).hall); // axis of bc screen. 0: hall closed, 1: hall expaned
+    valueAb = static_cast<uint16_t>((*extHallData).hallAb);
+    TLOGI(WmsLogTag::DMS, "hallBc: %{public}u, hallAb: %{public}u.", valueBc, valueAb);
     return true;
 }
 
-bool SecondaryFoldSensorManager::IsPostureUserCallbackInvalid()
+void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
+{
+    if (foldScreenPolicy_->GetScreenParams().size() != PARAMS_VECTOR_SIZE) {
+        return;
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::FULL) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X],
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = 0,
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        OHOS::Rect rectCur{
+            .x = 0,
+            .y = 0,
+            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
+            .h = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH],
+        };
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
+    isPowerRectExe_ = true;
+}
+
+bool SecondaryFoldSensorManager::IsPostureUserCallbackInvalid() const
 {
     return postureUser.callback == nullptr;
 }
 
-bool SecondaryFoldSensorManager::IsHallUserCallbackInvalid()
+bool SecondaryFoldSensorManager::IsHallUserCallbackInvalid() const
 {
     return hallUser.callback == nullptr;
+}
+
+std::vector<float> SecondaryFoldSensorManager::GetGlobalAngle() const
+{
+    return globalAngle_;
+}
+
+std::vector<uint16_t> SecondaryFoldSensorManager::GetGlobalHall() const
+{
+    return globalHall_;
 }
 } // Rosen
 } // OHOS

@@ -41,6 +41,12 @@ public:
     ErrCode RegisterObserver(const sptr<SettingObserver>& observer);
     ErrCode UnregisterObserver(const sptr<SettingObserver>& observer);
 
+    ErrCode RegisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName);
+    ErrCode UnregisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName);
+    ErrCode GetIntValueMultiUserByTable(const std::string& key, int32_t& value, std::string tableName);
+    ErrCode GetLongValueMultiUserByTable(const std::string& key, int64_t& value, std::string tableName);
+    ErrCode GetStringValueMultiUserByTable(const std::string& key, std::string& value, std::string tableName);
+
 protected:
     ~SettingProvider() override;
 
@@ -55,6 +61,9 @@ private:
     static bool ReleaseDataShareHelper(std::shared_ptr<DataShare::DataShareHelper>& helper);
     static Uri AssembleUri(const std::string& key);
     static Uri AssembleUriMultiUser(const std::string& key);
+
+    static std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelperMultiUserByTable(std::string tableName);
+    static Uri AssembleUriMultiUserByTable(const std::string& key, std::string tableName);
 };
 } // namespace Rosen
 } // namespace OHOS

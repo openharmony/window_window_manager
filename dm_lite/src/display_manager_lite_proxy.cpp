@@ -581,6 +581,29 @@ ScreenPowerState DisplayManagerLiteProxy::GetScreenPower(ScreenId dmsScreenId)
     return static_cast<ScreenPowerState>(reply.ReadUint32());
 }
 
+ScreenPowerState DisplayManagerLiteProxy::GetScreenPower()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("GetScreenPower remote is nullptr");
+        return ScreenPowerState::INVALID_STATE;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ScreenPowerState::INVALID_STATE;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER_AUTO),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SendRequest failed");
+        return ScreenPowerState::INVALID_STATE;
+    }
+    return static_cast<ScreenPowerState>(reply.ReadUint32());
+}
+
 bool DisplayManagerLiteProxy::SetDisplayState(DisplayState state)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -740,6 +763,31 @@ std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds()
     }
     reply.ReadUInt64Vector(&allDisplayIds);
     return allDisplayIds;
+}
+
+DMError DisplayManagerLiteProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("GetAllScreenInfos: remote is nullptr");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("GetAllScreenInfos: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("GetAllScreenInfos: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    static_cast<void>(MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos));
+    return ret;
 }
 
 } // namespace OHOS::Rosen

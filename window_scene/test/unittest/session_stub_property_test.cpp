@@ -39,7 +39,7 @@ void SessionStubPropertyTest::TearDownTestCase() {}
 
 void SessionStubPropertyTest::SetUp()
 {
-    session_ = new (std::nothrow) SessionStubMocker();
+    session_ = sptr<SessionStubMocker>::MakeSptr();
     EXPECT_NE(nullptr, session_);
 
     EXPECT_CALL(*session_, OnRemoteRequest(_, _, _, _)).WillOnce(Invoke(
@@ -70,7 +70,7 @@ HWTEST_F(SessionStubPropertyTest, HandleUpdatePropertyByAction01, Function | Sma
     MessageParcel reply;
     MessageOption option{MessageOption::TF_SYNC};
     data.WriteInterfaceToken(u"OHOS.ISession");
-    data.WriteUint32(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
+    data.WriteUint64(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST));
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SESSION_PROPERTY);
 
     int ret = session_->OnRemoteRequest(code, data, reply, option);

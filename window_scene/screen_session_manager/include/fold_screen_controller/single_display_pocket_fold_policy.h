@@ -46,11 +46,13 @@ private:
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToCoordination();
-    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode);
+    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToMainWhenFoldScreenOn(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToMainWhenFoldScreenOff(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullWhenFoldScreenOn(sptr<ScreenSession> screenSession);
-    void ChangeScreenDisplayModeToFullWhenFoldScreenOff(sptr<ScreenSession> screenSession);
+    void ChangeScreenDisplayModeToFullWhenFoldScreenOff(sptr<ScreenSession> screenSession,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToMainOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModeToFullOnBootAnimation(sptr<ScreenSession> screenSession);
     void ChangeScreenDisplayModePower(ScreenId screenId, ScreenPowerStatus screenPowerStatus);
@@ -59,7 +61,7 @@ private:
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);
     void SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
         ScreenPropertyChangeReason reason);
-    void SetdisplayModeChangeStatus(bool status) override;
+    void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false) override;
     void ChangeOnTentMode(FoldStatus currentState) override;
     void ChangeOffTentMode() override;
     void CloseCoordinationScreen();

@@ -25,6 +25,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 }
 class ScreenSnapshotPickerConnectionTest : public testing::Test {
 public:
@@ -67,7 +68,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension01, F
     ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
     ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
     auto ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, g_isPcDevice);
 }
 
 /**
@@ -152,7 +153,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerConnectExtension06, F
     ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
     ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
     auto ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, g_isPcDevice);
     ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
     EXPECT_EQ(ret, true);
 }
@@ -248,7 +249,7 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotRect, Function | S
     ScreenSnapshotPickerConnection::GetInstance().SetBundleName(bundleName);
     ScreenSnapshotPickerConnection::GetInstance().SetAbilityName(abilityName);
     auto ret = ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerConnectExtension();
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, g_isPcDevice);
     ScreenSnapshotPickerConnection::GetInstance().GetScreenSnapshotInfo(rect, screenId);
     EXPECT_EQ(rect.top, 0);
     EXPECT_EQ(rect.left, 0);
