@@ -186,7 +186,7 @@ WMError WindowAdapter::GetUnreliableWindowInfo(int32_t windowId,
 }
 
 WMError WindowAdapter::ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos)
+    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos) const
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();

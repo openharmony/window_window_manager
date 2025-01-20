@@ -122,7 +122,7 @@ public:
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) = 0;
     virtual WMError ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
         WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId,
-        std::vector<sptr<WindowInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+        std::vector<sptr<WindowInfo>>& infos) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;

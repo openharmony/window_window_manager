@@ -10467,7 +10467,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
 }
 
 WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos)
+    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos) const
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
     {
