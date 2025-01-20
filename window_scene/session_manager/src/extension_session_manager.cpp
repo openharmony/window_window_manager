@@ -37,19 +37,14 @@ ExtensionSessionManager::ExtensionSessionManager()
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
 
-sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sptr<ExtensionSession>& extSession)
+sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession)
 {
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    if (!abilitySessionInfo) {
-        WLOGFE("abilitySessionInfo is nullptr");
-        return nullptr;
-    }
-    auto sessionInfo = extSession->GetSessionInfo();
-    sptr<ISession> iSession(extSession);
-    abilitySessionInfo->sessionToken = iSession->AsObject();
+    const auto& sessionInfo = extensionSession->GetSessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    abilitySessionInfo->sessionToken = sptr<ISession>(extensionSession)->AsObject();
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
     abilitySessionInfo->parentToken = sessionInfo.rootToken_;
-    abilitySessionInfo->persistentId = extSession->GetPersistentId();
+    abilitySessionInfo->persistentId = extensionSession->GetPersistentId();
     abilitySessionInfo->realHostWindowId = sessionInfo.realParentId_;
     abilitySessionInfo->isAsyncModalBinding = sessionInfo.isAsyncModalBinding_;
     abilitySessionInfo->uiExtensionUsage = static_cast<AAFwk::UIExtensionUsage>(sessionInfo.uiExtensionUsage_);
@@ -82,21 +77,23 @@ float ExtensionSessionManager::GetSystemDensity(uint64_t displayId)
 
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
-    auto task = [this, sessionInfo]() {
+    auto task = [this, newSessionInfo = sessionInfo]() mutable -> sptr<ExtensionSession> {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
-        SessionInfo tempSessionInfo = sessionInfo;
-        if (!tempSessionInfo.config_.isDensityFollowHost_) {
-            tempSessionInfo.config_.density_ = GetSystemDensity(tempSessionInfo.config_.displayId_);
+        if (!newSessionInfo.config_.isDensityFollowHost_) {
+            newSessionInfo.config_.density_ = GetSystemDensity(newSessionInfo.config_.displayId_);
         }
-        sptr<ExtensionSession> extensionSession = new ExtensionSession(tempSessionInfo);
+        sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(newSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
-        TLOGI(WmsLogTag::WMS_UIEXT,
+        if (persistentId == INVALID_SESSION_ID) {
+            return nullptr;
+        }
+        TLOGNI(WmsLogTag::WMS_UIEXT,
             "persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, "
             "isDensityFollowHost_: %{public}d, density_: %{public}f",
-            persistentId, tempSessionInfo.bundleName_.c_str(), tempSessionInfo.moduleName_.c_str(),
-            tempSessionInfo.abilityName_.c_str(), tempSessionInfo.config_.isDensityFollowHost_,
-            tempSessionInfo.config_.density_);
+            persistentId, newSessionInfo.bundleName_.c_str(), newSessionInfo.moduleName_.c_str(),
+            newSessionInfo.abilityName_.c_str(), newSessionInfo.config_.isDensityFollowHost_,
+            newSessionInfo.config_.density_);
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
@@ -108,23 +105,21 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
     uint32_t hostWindowId, std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback)]() {
+    auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback), where = __func__]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
-            WLOGFE("session is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Activate session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate session with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionActivation");
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("RequestExtensionSessionActivation Session is invalid! persistentId:%{public}d", persistentId);
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
+                where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (extSessionInfo == nullptr) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
         extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
@@ -160,9 +155,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (!extSessionInfo) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED;
@@ -179,24 +171,23 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
     std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession, callback = std::move(resultCallback)]() {
+    auto task = [this, weakExtSession, callback = std::move(resultCallback),
+                 where = __func__]() NO_THREAD_SAFETY_ANALYSIS {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
-            WLOGFE("session is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Destroy session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Destroy session with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionDestruction");
         extSession->Disconnect();
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("RequestExtensionSessionDestruction Session is invalid! persistentId:%{public}d", persistentId);
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
+                where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (!extSessionInfo) {
-            return WSError::WS_ERROR_NULLPTR;
-        }
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         extensionSessionMap_.erase(persistentId);
         if (callback) {
@@ -228,9 +219,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sp
             return;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
-        if (!extSessionInfo) {
-            return;
-        }
         AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         extensionSessionMap_.erase(persistentId);
     };

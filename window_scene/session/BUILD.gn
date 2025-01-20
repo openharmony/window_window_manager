@@ -16,6 +16,7 @@ import("../../windowmanager_aafwk.gni")
 
 config("session_public_config") {
   include_dirs = [
+    "host/include",
     "${window_base_path}/window_scene",
     "${window_base_path}/window_scene/intention_event/service/anr_manager/include",
     "${window_base_path}/window_scene/intention_event/framework/anr_handler/include",
@@ -62,6 +63,7 @@ ohos_shared_library("scene_session") {
     "host/src/session.cpp",
     "host/src/sub_session.cpp",
     "host/src/system_session.cpp",
+    "host/src/ui_extension/host_data_handler.cpp",
     "host/src/ws_ffrt_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",

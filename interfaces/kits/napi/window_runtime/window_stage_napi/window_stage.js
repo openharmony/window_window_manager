@@ -78,6 +78,10 @@ class WindowStage {
     return this.__window_stage__.setDefaultDensityEnabled(enabled);
   }
 
+  setCustomDensity(density) {
+    return this.__window_stage__.setCustomDensity(density);
+  }
+
   removeStartingWindow() {
     return this.__window_stage__.removeStartingWindow();
   }
@@ -88,6 +92,10 @@ class WindowStage {
 
   isWindowRectAutoSave() {
     return this.__window_stage__.isWindowRectAutoSave();
+  }
+
+  setSupportedWindowModes(supportedWindowModes) {
+    return this.__window_stage__.setSupportedWindowModes(supportedWindowModes);
   }
 }
 

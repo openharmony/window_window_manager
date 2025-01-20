@@ -297,7 +297,7 @@ WindowType WindowImpl::GetType() const
     return property_->GetWindowType();
 }
 
-WindowMode WindowImpl::GetMode() const
+WindowMode WindowImpl::GetWindowMode() const
 {
     return property_->GetWindowMode();
 }
@@ -387,14 +387,14 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
     return curProperties[type];
 }
 
-WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
+WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
 {
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WLOGI("GetAvoidAreaByType Search Type: %{public}u", static_cast<uint32_t>(type));
     uint32_t windowId = property_->GetWindowId();
-    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAvoidAreaByType(windowId, type, avoidArea, rect);
     if (ret != WMError::WM_OK) {
         WLOGFE("GetAvoidAreaByType errCode:%{public}d winId:%{public}u Type is :%{public}u.",
             static_cast<int32_t>(ret), property_->GetWindowId(), static_cast<uint32_t>(type));
@@ -832,7 +832,7 @@ std::shared_ptr<Media::PixelMap> WindowImpl::Snapshot()
         pixelMap = SingletonContainer::Get<WindowAdapter>().GetSnapshot(property_->GetWindowId());
     }
     if (pixelMap != nullptr) {
-        WLOGFD("WMS-Client Save WxH = %{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        WLOGFD("WMS-Client Save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGFE("Failed to get pixelmap, return nullptr!");
     }
@@ -1037,7 +1037,7 @@ WMError WindowImpl::SetFloatingMaximize(bool isEnter)
         return ret;
     }
 
-    if (isEnter && GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (isEnter && GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
         if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
             SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         }
@@ -1192,9 +1192,9 @@ void WindowImpl::UpdateTitleButtonVisibility()
     bool hideSplitButton = !(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     // not support fullscreen in split and floating mode, or not support float in fullscreen mode
     bool hideMaximizeButton = (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
-        (GetMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetMode()))) ||
+        (GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetWindowMode()))) ||
         (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
-        GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+        GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     WLOGD("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
     uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false, false);
 }
@@ -1588,11 +1588,11 @@ bool WindowImpl::NeedToStopShowing()
     }
     // show failed when current mode is not support or window only supports split mode and can show when locked
     bool isShowWhenLocked = GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
-    if (!WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), GetMode()) ||
+    if (!WindowHelper::IsWindowModeSupported(GetWindowModeSupportType(), GetWindowMode()) ||
         WindowHelper::IsOnlySupportSplitAndShowWhenLocked(isShowWhenLocked, GetWindowModeSupportType())) {
         WLOGFE("current mode is not supported, windowId: %{public}u, "
             "windowModeSupportType: %{public}u, winMode: %{public}u",
-            property_->GetWindowId(), GetWindowModeSupportType(), GetMode());
+            property_->GetWindowId(), GetWindowModeSupportType(), GetWindowMode());
         return true;
     }
     return false;
@@ -1667,7 +1667,7 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, __PRETTY_FUNCTION__);
     WLOGFD("Window Show [name:%{public}s, id:%{public}u, mode: %{public}u], reason:%{public}u, "
-        "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetMode(), reason, withAnimation);
+        "withAnimation:%{public}d", name_.c_str(), property_->GetWindowId(), GetWindowMode(), reason, withAnimation);
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1717,6 +1717,11 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     }
     needNotifyFocusLater_ = false;
     return ret;
+}
+
+WMError WindowImpl::ShowKeyboard(KeyboardViewMode mode)
+{
+    return Show();
 }
 
 WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
@@ -1773,7 +1778,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    Rect rect = (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) ?
+    Rect rect = (WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode())) ?
         GetRect() : property_->GetRequestRect();
     Rect moveRect = { x, y, rect.width_, rect.height_ }; // must keep w/h, which may maintain stashed resize info
     property_->SetRequestRect(moveRect);
@@ -1787,7 +1792,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
         }
     }
 
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not moveto, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
@@ -1803,7 +1808,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationC
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    Rect rect = (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) ?
+    Rect rect = (WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode())) ?
         GetRect() : property_->GetRequestRect();
     Rect resizeRect = { rect.posX_, rect.posY_, width, height };
     property_->SetRequestRect(resizeRect);
@@ -1819,7 +1824,7 @@ WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationC
         }
     }
 
-    if (GetMode() != WindowMode::WINDOW_MODE_FLOATING) {
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
         WLOGFE("fullscreen window could not resize, winId: %{public}u", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
@@ -2200,7 +2205,7 @@ WMError WindowImpl::SetImmersiveModeEnabledState(bool enable)
     }
 
     enableImmersiveMode_ = enable;
-    const WindowMode mode = GetMode();
+    const WindowMode mode = GetWindowMode();
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         return SetLayoutFullScreen(enableImmersiveMode_);
     }
@@ -2720,7 +2725,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
     property_->SetWindowRect(rect);
 
     // update originRect when floating window show for the first time.
-    if (!isOriginRectSet_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+    if (!isOriginRectSet_ && WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode())) {
         property_->SetOriginRect(rect);
         isOriginRectSet_ = true;
     }
@@ -2728,7 +2733,7 @@ void WindowImpl::UpdateRect(const struct Rect& rect, bool decoStatus, WindowSize
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_, reason);
     Rect rectToAce = rect;
     // update rectToAce for stretchable window
-    if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+    if (windowSystemConfig_.isStretchable_ && WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode())) {
         if (IsStretchableReason(reason)) {
             rectToAce = property_->GetOriginRect();
         } else {
@@ -2766,7 +2771,7 @@ void WindowImpl::ScheduleUpdateRectTask(const Rect& rectToAce, const Rect& lastO
         }
         window->postTaskDone_ = true;
     };
-    ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetMode());
+    ResSchedReport::GetInstance().RequestPerfIfNeed(reason, GetType(), GetWindowMode());
     if (reason == WindowSizeChangeReason::ROTATION) {
         postTaskDone_ = false;
         handler_->PostTask(task, "wms:UpdateRect");
@@ -2881,7 +2886,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             WLOGD("Transfer key event to uiContent");
             bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
             if (!handled && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
-                GetMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
+                GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
                 property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
                 keyAction == MMI::KeyEvent::KEY_ACTION_DOWN && !escKeyEventTriggered_) {
                 WLOGI("recover from fullscreen cause KEYCODE_ESCAPE");
@@ -2908,7 +2913,7 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
 
 void WindowImpl::HandleModeChangeHotZones(int32_t posX, int32_t posY)
 {
-    if (!WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+    if (!WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode())) {
         return;
     }
 
@@ -3024,7 +3029,7 @@ bool WindowImpl::IsPointInDragHotZone(int32_t startPointPosX, int32_t startPoint
 
 void WindowImpl::StartMove()
 {
-    if (!WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+    if (!WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode())) {
         WLOGE("[StartMove] current window can not be moved, windowId %{public}u", GetWindowId());
         return;
     }
@@ -3176,7 +3181,7 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         WLOGFE("The pointer event is nullptr");
         return;
     }
-    if (windowSystemConfig_.isStretchable_ && GetMode() == WindowMode::WINDOW_MODE_FLOATING) {
+    if (windowSystemConfig_.isStretchable_ && GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         UpdatePointerEventForStretchableWindow(pointerEvent);
     }
     std::shared_ptr<IInputEventConsumer> inputEventConsumer;
@@ -3223,7 +3228,7 @@ void WindowImpl::HandlePointerStyle(const std::shared_ptr<MMI::PointerEvent>& po
     int32_t sourceType = pointerEvent->GetSourceType();
     uint32_t oldStyleID = mouseStyleID_;
     uint32_t newStyleID = 0;
-    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode())) {
+    if (WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode())) {
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
             SingletonContainer::Get<DisplayManager>().GetDisplayById(pointerEvent->GetTargetDisplayId());
         if (display == nullptr || display->GetDisplayInfo() == nullptr) {
@@ -3332,9 +3337,9 @@ void WindowImpl::ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& p
     }
 
     // If point event type is up, should reset start move flag
-    if (WindowHelper::IsMainFloatingWindow(GetType(), GetMode()) || GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE ||
-        (action == MMI::PointerEvent::POINTER_ACTION_UP || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-        action == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
+    if (WindowHelper::IsMainFloatingWindow(GetType(), GetWindowMode()) ||
+        GetType() == WindowType::WINDOW_TYPE_DOCK_SLICE || (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
         ConsumeMoveOrDragEvent(pointerEvent);
     }
 
@@ -3474,7 +3479,7 @@ void WindowImpl::UpdateDecorEnable(bool needNotify)
     WLOGFD("Start");
     if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
         bool enable = windowSystemConfig_.isSystemDecorEnable_ &&
-            WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorWindowModeSupportType_, GetMode());
+            WindowHelper::IsWindowModeSupported(windowSystemConfig_.decorWindowModeSupportType_, GetWindowMode());
         WLOGFD("Decor enable: %{public}d", static_cast<int32_t>(enable));
         property_->SetDecorEnable(enable);
     } else {
@@ -3482,10 +3487,10 @@ void WindowImpl::UpdateDecorEnable(bool needNotify)
     }
     if (needNotify) {
         if (uiContent_ != nullptr) {
-            uiContent_->UpdateWindowMode(GetMode(), property_->GetDecorEnable());
+            uiContent_->UpdateWindowMode(GetWindowMode(), property_->GetDecorEnable());
             WLOGFD("Notify uiContent window mode change end");
         }
-        NotifyModeChange(GetMode(), property_->GetDecorEnable());
+        NotifyModeChange(GetWindowMode(), property_->GetDecorEnable());
     }
 }
 
@@ -4053,10 +4058,10 @@ void WindowImpl::SetDefaultOption()
             break;
         }
         case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
-            property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetTouchable(false);
             property_->SetFocusable(false);
-            property_->SetAlpha(0);
+            SetAlpha(0);
             break;
         }
         default:
@@ -4078,7 +4083,7 @@ bool WindowImpl::IsLayoutFullScreen() const
     if (!IsWindowValid()) {
         return false;
     }
-    auto mode = GetMode();
+    auto mode = GetWindowMode();
     return (mode == WindowMode::WINDOW_MODE_FULLSCREEN && isIgnoreSafeArea_);
 }
 
@@ -4173,7 +4178,7 @@ bool WindowImpl::CheckCameraFloatingWindowMultiCreated(WindowType type)
     }
     uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
     property_->SetAccessTokenId(accessTokenId);
-    TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId = %{private}u", accessTokenId);
+    TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId=%{private}u", accessTokenId);
     return false;
 }
 

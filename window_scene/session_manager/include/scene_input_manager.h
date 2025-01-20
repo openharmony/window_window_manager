@@ -33,14 +33,23 @@ class SceneInputManager : public std::enable_shared_from_this<SceneInputManager>
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneInputManager)
 public:
     void Init();
-    void FlushDisplayInfoToMMI(const bool forceFlush = false);
-    void FlushEmptyInfoToMMI();
+    void FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& windowInfoList,
+        std::vector<std::shared_ptr<Media::PixelMap>>&& pixelMapList, const bool forceFlush = false);
     void NotifyWindowInfoChange(const sptr<SceneSession>& scenenSession, const WindowUpdateType& type);
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
+    void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
+    using FlushWindowInfoCallback = std::function<void()>;
+    void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
+    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
+        GetFullWindowInfoList();
+
+    /*
+     * Multi User
+     */
+    void FlushEmptyInfoToMMI();
     void SetUserBackground(bool userBackground);
     void SetCurrentUserId(int32_t userId);
-    void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
 
 protected:
     SceneInputManager() = default;
@@ -64,8 +73,12 @@ private:
     std::vector<MMI::DisplayInfo> lastDisplayInfos_;
     std::vector<MMI::WindowInfo> lastWindowInfoList_;
     int32_t lastFocusId_ { -1 };
-    int32_t currentUserId_ { -1 };
     int32_t focusedSessionId_ { -1 };
+
+    /*
+     * Multi User
+     */
+    int32_t currentUserId_ = INVALID_USER_ID;
     std::atomic<bool> isUserBackground_ { false };
 };
 }//Rosen

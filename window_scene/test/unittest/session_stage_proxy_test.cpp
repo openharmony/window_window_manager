@@ -36,8 +36,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SessionStageProxy> sessionStage_ = new SessionStageProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
 void SessionStageProxyTest::SetUpTestCase()
@@ -277,7 +277,7 @@ HWTEST_F(SessionStageProxyTest, NotifyTransferComponentDataSync, Function | Smal
  */
 HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTest | Level1)
 {
-    sptr<OccupiedAreaChangeInfo> info = new OccupiedAreaChangeInfo();
+    sptr<OccupiedAreaChangeInfo> info = sptr<OccupiedAreaChangeInfo>::MakeSptr();
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifyOccupiedAreaChangeInfo(info);
 }
@@ -289,7 +289,7 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTe
  */
 HWTEST_F(SessionStageProxyTest, UpdateAvoidArea, Function | SmallTest | Level1)
 {
-    sptr<AvoidArea> avoidArea = new AvoidArea();
+    sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
     ASSERT_TRUE((sessionStage_ != nullptr));
     WSError res = sessionStage_->UpdateAvoidArea(avoidArea, type);
@@ -642,6 +642,46 @@ HWTEST_F(SessionStageProxyTest, SetFullScreenWaterfallMode, Function | SmallTest
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
     WSError res = sessionStage_->SetFullScreenWaterfallMode(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SetSupportEnterWaterfallMode
+ * @tc.desc: test function : SetSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetSupportEnterWaterfallMode, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SetSupportEnterWaterfallMode(false);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SendExtensionData
+ * @tc.desc: test function : SendExtensionData
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SendExtensionData, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    data.WriteInterfaceToken(u"OpenHarmeny");
+    WSError res = sessionStage_->SendExtensionData(data, reply, option);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
+ * @tc.name: SendContainerModalEvent
+ * @tc.desc: test function : SendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SendContainerModalEvent, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    WSError res = sessionStage_->SendContainerModalEvent("name", "value");
     ASSERT_EQ(WSError::WS_OK, res);
 }
 }

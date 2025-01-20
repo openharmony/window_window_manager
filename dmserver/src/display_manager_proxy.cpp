@@ -261,7 +261,8 @@ DMError DisplayManagerProxy::SetOrientation(ScreenId screenId, Orientation orien
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManagerProxy::GetDisplaySnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -1756,7 +1757,8 @@ DMError DisplayManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32_t wid
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     WLOGFI("DisplayManagerProxy::MakeUniqueScreen");
     sptr<IRemoteObject> remote = Remote();
@@ -1787,6 +1789,7 @@ DMError DisplayManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& scree
         WLOGFE("MakeUniqueScreen fail: SendRequest failed");
         return DMError::DM_ERROR_NULLPTR;
     }
+    reply.ReadUInt64Vector(&displayIds);
     return static_cast<DMError>(reply.ReadInt32());
 }
 

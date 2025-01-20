@@ -241,20 +241,46 @@ HWTEST_F(WindowNodeContainerTest, UpdateWindowNode, Function | SmallTest | Level
  */
 HWTEST_F(WindowNodeContainerTest, ShowStartingWindow, Function | SmallTest | Level2)
 {
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
+    sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
-    sptr<WindowTransitionInfo> transitionInfo = new WindowTransitionInfo();
+    sptr<WindowTransitionInfo> transitionInfo = sptr<WindowTransitionInfo>::MakeSptr();
     sptr<WindowNode> node = StartingWindow::CreateWindowNode(transitionInfo, 101); // 101 is windowId
     node->SetWindowRect({0, 0, 100, 100});
     node->currentVisibility_ = true;
     ASSERT_EQ(WMError::WM_OK, container->ShowStartingWindow(node));
-    ASSERT_EQ(WMError::WM_OK, container->AddWindowNodeOnWindowTree(node, nullptr));
+}
+
+/**
+ * @tc.name: ShowStartingWindow02
+ * @tc.desc: show starting window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, ShowStartingWindow02, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+    sptr<WindowTransitionInfo> transitionInfo = sptr<WindowTransitionInfo>::MakeSptr();
+    sptr<WindowNode> node = StartingWindow::CreateWindowNode(transitionInfo, 101); // 101 is windowId
+    node->SetWindowRect({0, 0, 100, 100});
     node->currentVisibility_ = false;
+    ASSERT_EQ(WMError::WM_OK, container->AddWindowNodeOnWindowTree(node, nullptr));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_OPERATION, container->ShowStartingWindow(node));
+}
+
+/**
+ * @tc.name: ShowStartingWindow03
+ * @tc.desc: show starting window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, ShowStartingWindow03, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+    sptr<WindowTransitionInfo> transitionInfo = sptr<WindowTransitionInfo>::MakeSptr();
     WindowType invalidType = static_cast<WindowType>(0);
     sptr<WindowProperty> invalidProperty = CreateWindowProperty(110u, "test1", invalidType,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> invalidNode = new WindowNode(invalidProperty, nullptr, nullptr);
+    sptr<WindowNode> invalidNode = sptr<WindowNode>::MakeSptr(invalidProperty, nullptr, nullptr);
     invalidNode->SetWindowProperty(invalidProperty);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container->AddWindowNodeOnWindowTree(invalidNode, nullptr));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, container->ShowStartingWindow(invalidNode));
@@ -281,33 +307,61 @@ HWTEST_F(WindowNodeContainerTest, IsForbidDockSliceMove, Function | SmallTest | 
  */
 HWTEST_F(WindowNodeContainerTest, GetWindowCountByType01, Function | SmallTest | Level2)
 {
-    sptr<WindowNodeContainer> container = new WindowNodeContainer(defaultDisplay_->GetDisplayInfo(),
+    sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
         defaultDisplay_->GetScreenId());
     ASSERT_EQ(0, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
-    sptr<WindowProperty> property1 = CreateWindowProperty(110u, "test1", WindowType::BELOW_APP_SYSTEM_WINDOW_BASE,
+    sptr<WindowProperty> property = CreateWindowProperty(110u, "test1", WindowType::BELOW_APP_SYSTEM_WINDOW_BASE,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node1 = new WindowNode(property1, nullptr, nullptr);
-    node1->SetWindowProperty(property1);
-    sptr<WindowProperty> property2 = CreateWindowProperty(111u, "test2", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
+    ASSERT_NE(property, nullptr);
+    sptr<WindowNode> node = sptr<WindowNode>::MakeSptr(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
+    container->belowAppWindowNode_->children_.insert(container->belowAppWindowNode_->children_.end(), node);
+    ASSERT_EQ(0, container->GetWindowCountByType(WindowType::WINDOW_TYPE_KEYGUARD));
+    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
+    node->startingWindowShown_ = true;
+    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
+}
+
+/**
+ * @tc.name: GetWindowCountByType02
+ * @tc.desc: get window count
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, GetWindowCountByType02, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+    ASSERT_EQ(0, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
+    sptr<WindowProperty> property = CreateWindowProperty(111u, "test2", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
         WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node2 = new WindowNode(property2, nullptr, nullptr);
-    node2->SetWindowProperty(property2);
-    sptr<WindowProperty> property3 = CreateWindowProperty(112u, "test3", WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE,
-        WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
-    sptr<WindowNode> node3 = new WindowNode(property3, nullptr, nullptr);
-    node3->SetWindowProperty(property3);
-    container->belowAppWindowNode_->children_.insert(container->belowAppWindowNode_->children_.end(), node1);
-    container->appWindowNode_->children_.insert(container->appWindowNode_->children_.end(), node2);
-    container->aboveAppWindowNode_->children_.insert(container->aboveAppWindowNode_->children_.end(), node3);
+    ASSERT_NE(property, nullptr);
+    sptr<WindowNode> node = sptr<WindowNode>::MakeSptr(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
+    container->appWindowNode_->children_.insert(container->appWindowNode_->children_.end(), node);
     ASSERT_EQ(0, container->GetWindowCountByType(WindowType::WINDOW_TYPE_KEYGUARD));
     ASSERT_EQ(1, container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
-    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
-    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE));
-    node1->startingWindowShown_ = true;
-    node2->startingWindowShown_ = true;
-    node3->startingWindowShown_ = true;
+    node->startingWindowShown_ = true;
     ASSERT_EQ(1, container->GetWindowCountByType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW));
-    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
+}
+
+/**
+ * @tc.name: GetWindowCountByType03
+ * @tc.desc: get window count
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowNodeContainerTest, GetWindowCountByType03, Function | SmallTest | Level2)
+{
+    sptr<WindowNodeContainer> container = sptr<WindowNodeContainer>::MakeSptr(defaultDisplay_->GetDisplayInfo(),
+        defaultDisplay_->GetScreenId());
+    ASSERT_EQ(0, container->GetWindowCountByType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE));
+    sptr<WindowProperty> property = CreateWindowProperty(112u, "test3", WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE,
+        WindowMode::WINDOW_MODE_FULLSCREEN, windowRect_);
+    sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
+    node->SetWindowProperty(property);
+    container->aboveAppWindowNode_->children_.insert(container->aboveAppWindowNode_->children_.end(), node);
+    ASSERT_EQ(0, container->GetWindowCountByType(WindowType::WINDOW_TYPE_KEYGUARD));
+    ASSERT_EQ(1, container->GetWindowCountByType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE));
+    node->startingWindowShown_ = true;
     ASSERT_EQ(1, container->GetWindowCountByType(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE));
 }
 

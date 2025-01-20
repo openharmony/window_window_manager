@@ -38,11 +38,8 @@ void SensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldS
 
 void SensorFoldStateManager::HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
-void HandleAngleChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
-    sptr<FoldScreenPolicy> foldScreenPolicy) {}
-
-void HandleHallChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
-    sptr<FoldScreenPolicy> foldScreenPolicy) {}
+void SensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &angles,
+    const std::vector<uint16_t> &halls, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
 void SensorFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
@@ -187,6 +184,7 @@ bool SensorFoldStateManager::IsTentMode()
 
 void SensorFoldStateManager::SetTentMode(bool status)
 {
+    TLOGI(WmsLogTag::DMS, "tent mode changing: %{public}d -> %{public}d", isTentMode_, status);
     isTentMode_ = status;
 }
 } // namespace OHOS::Rosen

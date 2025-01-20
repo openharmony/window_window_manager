@@ -14,7 +14,6 @@
  */
 
 #include "js_pip_controller.h"
-
 #include "js_pip_utils.h"
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
@@ -36,10 +35,12 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 {
     BindNativeFunction(env, object, "startPiP", moduleName, JsPipController::StartPictureInPicture);
     BindNativeFunction(env, object, "stopPiP", moduleName, JsPipController::StopPictureInPicture);
+    BindNativeFunction(env, object, "updateContentNode", moduleName, JsPipController::UpdateContentNode);
     BindNativeFunction(env, object, "updateContentSize", moduleName, JsPipController::UpdateContentSize);
     BindNativeFunction(env, object, "updatePiPControlStatus", moduleName, JsPipController::UpdatePiPControlStatus);
     BindNativeFunction(env, object, "setAutoStartEnabled", moduleName, JsPipController::SetAutoStartEnabled);
     BindNativeFunction(env, object, "setPiPControlEnabled", moduleName, JsPipController::SetPiPControlEnabled);
+    BindNativeFunction(env, object, "getPiPWindowInfo", moduleName, JsPipController::GetPiPWindowInfo);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsPipController::UnregisterCallback);
 }
@@ -90,32 +91,29 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
         TLOGI(WmsLogTag::WMS_PIP, "OnStartPictureInPicture abort");
         return NapiGetUndefined(env);
     }
-    size_t argc = NUMBER_FOUR;
-    napi_value argv[NUMBER_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = nullptr;
-    if (argc > 0) {
-        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
-    }
-    NapiAsyncTask::CompleteCallback complete =
-        [weak = wptr<PictureInPictureController>(this->pipController_)]
-            (napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (weak == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY),
-                    "JsPipController::OnStartPictureInPicture failed."));
-                return;
-            }
-            WMError errCode = weak->StartPictureInPicture(StartPipType::USER_START);
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
-                    "JsPipController::OnStartPictureInPicture failed."));
-                return;
-            }
-            task.Resolve(env, NapiGetUndefined(env));
-        };
+
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::OnStartPictureInPicture", env,
-        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask,
+        weak = wptr<PictureInPictureController>(pipController_)]() {
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY),
+                "JsPipController::OnStartPictureInPicture failed."));
+            return;
+        }
+        WMError errCode = pipController->StartPictureInPicture(StartPipType::USER_START);
+        if (errCode != WMError::WM_OK) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
+                "JsPipController::OnStartPictureInPicture failed."));
+            return;
+        }
+        task->Resolve(env, NapiGetUndefined(env));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
     return result;
 }
 
@@ -128,32 +126,28 @@ napi_value JsPipController::StopPictureInPicture(napi_env env, napi_callback_inf
 napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnStopPictureInPicture is called");
-    size_t argc = NUMBER_FOUR;
-    napi_value argv[NUMBER_FOUR] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    napi_value callback = nullptr;
-    if (argc > 0) {
-        callback = GetType(env, argv[0]) == napi_function ? argv[0] : nullptr; // 1: index of callback
-    }
-    NapiAsyncTask::CompleteCallback complete =
-        [weak = wptr<PictureInPictureController>(this->pipController_)]
-            (napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (weak == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-                    "JsPipController::OnStopPictureInPicture failed."));
-                return;
-            }
-            WMError errCode = weak->StopPictureInPictureFromClient();
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
-                    "JsPipController::OnStopPictureInPicture failed."));
-                return;
-            }
-            task.Resolve(env, NapiGetUndefined(env));
-        };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsPipController::OnStopPictureInPicture", env,
-        CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask,
+        weak = wptr<PictureInPictureController>(pipController_)]() {
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+                "JsPipController::OnStopPictureInPicture failed."));
+            return;
+        }
+        WMError errCode = pipController->StopPictureInPictureFromClient();
+        if (errCode != WMError::WM_OK) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
+                "JsPipController::OnStopPictureInPicture failed."));
+            return;
+        }
+        task->Resolve(env, NapiGetUndefined(env));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
     return result;
 }
 
@@ -175,14 +169,46 @@ napi_value JsPipController::OnSetAutoStartEnabled(napi_env env, napi_callback_in
     }
     bool enable = false;
     if (!ConvertFromJsValue(env, argv[0], enable)) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]Failed to convert parameter to bool");
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to bool");
         return NapiGetUndefined(env);
     }
     if (pipController_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "[NAPI]OnSetAutoStartEnabled error, controller is nullptr");
+        TLOGE(WmsLogTag::WMS_PIP, "error, controller is nullptr");
         return NapiGetUndefined(env);
     }
     pipController_->SetAutoStartEnabled(enable);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsPipController::UpdateContentNode(napi_env env, napi_callback_info info)
+{
+    JsPipController *me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnUpdateContentNode(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentNode is called");
+    size_t argc = NUMBER_FOUR;
+    napi_value argv[NUMBER_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != NUMBER_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid:%{public}zu", argc);
+        return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
+    }
+    napi_value typeNode = argv[0];
+    if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
+        TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
+        return NapiThrowInvalidParam(env, "Invalid typeNode.");
+    }
+    if (pipController_ == nullptr) {
+        std::string errMsg = "OnUpdateNode error, controller is nullptr";
+        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
+        return NapiThrowInvalidParam(env, errMsg);
+    }
+    napi_ref typeNodeRef = nullptr;
+    napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
+    pipController_->UpdateContentNodeRef(typeNodeRef);
     return NapiGetUndefined(env);
 }
 
@@ -299,6 +325,46 @@ napi_value JsPipController::OnSetPiPControlEnabled(napi_env env, napi_callback_i
     pipController_->UpdatePiPControlStatus(controlType, enabled ?
         PiPControlStatus::ENABLED : PiPControlStatus::DISABLED);
     return NapiGetUndefined(env);
+}
+
+napi_value JsPipController::GetPiPWindowInfo(napi_env env, napi_callback_info info)
+{
+    JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnGetPiPWindowInfo(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask,
+        weak = wptr<PictureInPictureController>(pipController_)]() {
+        if (!PictureInPictureManager::IsSupportPiP()) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+                "Capability not supported. Failed to call the API due to limited device capabilities."));
+            return;
+        }
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        const sptr<Window>& pipWindow = pipController->GetPipWindow();
+        if (pipWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to get pip window");
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        task->Resolve(env, CreateJsPiPWindowInfoObject(env, pipWindow));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
+    return result;
 }
 
 napi_value JsPipController::RegisterCallback(napi_env env, napi_callback_info info)

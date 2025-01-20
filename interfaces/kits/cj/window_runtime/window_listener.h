@@ -41,9 +41,12 @@ const std::string DIALOG_DEATH_RECIPIENT_CB = "dialogDeathRecipient";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string WATER_MARK_FLAG_CHANGE_CB = "waterMarkFlagChange";
 const std::string WINDOW_VISIBILITY_CHANGE_CB = "windowVisibilityChange";
-const std::string WINDOW_DISPLAYID_CHANGE_CB = "displayIdChange";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
+const std::string WINDOW_NO_INTERACTION_DETECTED_CB = "noInteractionDetected";
+const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
+const std::string WINDOW_SUB_WINDOW_CLOSE_CB = "subWindowClose";
+const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 
 class CjWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -56,12 +59,15 @@ class CjWindowListener : public IWindowChangeListener,
                          public IDialogDeathRecipientListener,
                          public IWaterMarkFlagChangedListener,
                          public IGestureNavigationEnabledChangedListener,
-                         public IDisplayIdChangeListener,
                          public IWindowVisibilityChangedListener,
                          public IWindowTitleButtonRectChangedListener,
-                         public IWindowStatusChangeListener {
+                         public IWindowStatusChangeListener,
+                         public IWindowRectChangeListener,
+                         public ISubWindowCloseListener,
+                         public IMainWindowCloseListener,
+                         public IWindowNoInteractionListener {
 public:
-    explicit CjWindowListener(int64_t callbackObject);
+    CjWindowListener(int64_t callbackObject, CaseType caseType);
     ~CjWindowListener() override;
     void CallCjMethod(const char* methodName, void* argv, size_t argc);
     void SetMainEventHandler();
@@ -89,10 +95,23 @@ public:
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
+    void SetTimeout(int64_t timeout) override;
+    int64_t GetTimeout() const override;
+    void OnWindowNoInteractionCallback() override;
+    void OnRectChange(Rect rect, WindowSizeChangeReason reason) override;
+    void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void OnSubWindowClose(bool& terminateCloseProcess) override;
+
 private:
+    void LifeCycleCallBack(LifeCycleEventType eventType);
     std::function<void(void*)> cjCallBack_;
     wptr<CjWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
+    CaseType caseType_ = CaseType::CASE_WINDOW;
+    WindowState state_ {WindowState::STATE_INITIAL};
+    Rect currRect_ = {0, 0, 0, 0};
+    int64_t noInteractionTimeout_ = 0;
+    RectChangeReason currentReason_ = RectChangeReason::UNDEFINED;
 };
 }
 }

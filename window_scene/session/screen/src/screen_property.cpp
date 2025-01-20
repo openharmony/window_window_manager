@@ -24,7 +24,16 @@ constexpr float PHONE_SCREEN_DENSITY = 3.5f;
 constexpr float ELSE_SCREEN_DENSITY = 1.5f;
 constexpr float INCH_2_MM = 25.4f;
 constexpr int32_t HALF_VALUE = 2;
+constexpr int32_t TRUNCATE_TWO_DECIMALS = 100;
 constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
+constexpr float SECONDARY_ROTATION_0 = 0.0F;
+constexpr float SECONDARY_ROTATION_90 = 90.0F;
+constexpr float SECONDARY_ROTATION_180 = 180.0F;
+constexpr float SECONDARY_ROTATION_270 = 270.0F;
+constexpr int32_t SECONDARY_MAIN_OFFSETY = -2176;
+constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
+constexpr float EPSILON = 1e-6f;
+constexpr float PPI_TO_DPI = 1.6f;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -518,5 +527,73 @@ void ScreenProperty::SetScreenShape(ScreenShape screenShape)
 ScreenShape ScreenProperty::GetScreenShape() const
 {
     return screenShape_;
+}
+
+RRect ScreenProperty::GetPhysicalTouchBounds()
+{
+    return physicalTouchBounds_;
+}
+
+void ScreenProperty::SetPhysicalTouchBounds(bool isSecondaryDevice)
+{
+    if (!isSecondaryDevice) {
+        physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
+        return;
+    }
+    if (rotation_ == SECONDARY_ROTATION_90 || rotation_ == SECONDARY_ROTATION_270) {
+        physicalTouchBounds_.rect_.width_ = phyBounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = phyBounds_.rect_.height_;
+    } else {
+        physicalTouchBounds_.rect_.width_ = phyBounds_.rect_.height_;
+        physicalTouchBounds_.rect_.height_ = phyBounds_.rect_.width_;
+    }
+}
+
+int32_t ScreenProperty::GetInputOffsetX()
+{
+    return inputOffsetX_;
+}
+
+int32_t ScreenProperty::GetInputOffsetY()
+{
+    return inputOffsetY_;
+}
+
+void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode)
+{
+    inputOffsetY_ = 0;
+    if (!isSecondaryDevice) {
+        return;
+    }
+    if (foldDisplayMode == FoldDisplayMode::FULL) {
+        if (rotation_ == SECONDARY_ROTATION_0 || rotation_ == SECONDARY_ROTATION_90) {
+            inputOffsetY_ = SECONDARY_FULL_OFFSETY;
+        }
+    } else if (foldDisplayMode == FoldDisplayMode::MAIN) {
+        if (rotation_ == SECONDARY_ROTATION_180 || rotation_ == SECONDARY_ROTATION_270) {
+            inputOffsetY_ = SECONDARY_MAIN_OFFSETY;
+        }
+    }
+}
+
+float ScreenProperty::CalculatePPI()
+{
+    int32_t phywidth = GetPhyWidth();
+    int32_t phyHeight = GetPhyHeight();
+    float phyDiagonal = std::sqrt(static_cast<float>(phywidth * phywidth + phyHeight * phyHeight));
+    if (phyDiagonal < EPSILON) {
+        return 0.0f;
+    }
+    RRect bounds = GetBounds();
+    int32_t width = bounds.rect_.GetWidth();
+    int32_t height = bounds.rect_.GetHeight();
+    float ppi = std::sqrt(static_cast<float>(width * width + height * height)) * INCH_2_MM / phyDiagonal;
+    return std::round(ppi * TRUNCATE_TWO_DECIMALS) / TRUNCATE_TWO_DECIMALS;
+}
+
+uint32_t ScreenProperty::CalculateDPI()
+{
+    return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI));
 }
 } // namespace OHOS::Rosen

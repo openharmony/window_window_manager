@@ -46,6 +46,7 @@ public:
     bool IsFoldable();
     FoldStatus GetFoldStatus();
     bool GetTentMode();
+    FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
     void OnTentModeChanged(bool isTentMode);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
@@ -54,6 +55,8 @@ public:
     void SetOnBootAnimation(bool onBootAnimation);
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
+    Drawing::Rect GetScreenSnapshotRect();
+    void SetMainScreenRegion(DMRect& mainScreenRegion);
     /*
      *    Avoid fold to expand process queues public interface
      */

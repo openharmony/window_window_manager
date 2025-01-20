@@ -32,7 +32,7 @@ constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 5;
 SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "Create SystemSession");
+    TLOGD(WmsLogTag::WMS_LIFE, "Create");
     moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
@@ -43,7 +43,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
 
 SystemSession::~SystemSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "~SystemSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
 }
 
 void SystemSession::UpdateCameraWindowStatus(bool isShowing)
@@ -85,7 +85,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             WLOGFW("parent session is null");
             return WSError::WS_ERROR_INVALID_PARENT;
         }
-        if (!parentSession->IsSessionForeground()) {
+        if ((type == WindowType::WINDOW_TYPE_TOAST) && !parentSession->IsSessionForeground()) {
             WLOGFW("parent session is not in foreground");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
@@ -305,7 +305,7 @@ bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::Pointer
     if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
-        WLOGFW("CheckPointerEventDispatch false, Current Session Info: [persistentId: %{public}d, "
+        WLOGFW("false, Current Session Info: [persistentId: %{public}d, "
             "state: %{public}d, action:%{public}d]", GetPersistentId(), GetSessionState(), action);
         return false;
     }

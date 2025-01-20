@@ -32,9 +32,7 @@ public:
     virtual void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void HandleTentChange(bool isTentMode, sptr<FoldScreenPolicy> foldScreenPolicy);
-    void HandleAngleChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
-        sptr<FoldScreenPolicy> foldScreenPolicy);
-    void HandleHallChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
+    virtual void HandleAngleOrHallChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
         sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void RegisterApplicationStateObserver();
     void ClearState(sptr<FoldScreenPolicy> foldScreenPolicy);

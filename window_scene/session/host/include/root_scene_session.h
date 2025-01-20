@@ -30,28 +30,29 @@ public:
     using LoadContentFunc =
         std::function<void(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)>;
     RootSceneSession() : SceneSession({}, nullptr) {}
-    RootSceneSession(const sptr<SpecificSessionCallback>& specificCallback) : SceneSession({}, specificCallback) {}
+    explicit RootSceneSession(const sptr<SpecificSessionCallback>& specificCallback)
+        : SceneSession({}, specificCallback) {}
     virtual ~RootSceneSession() = default;
 
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
-    /**
+    /*
      * Window Layout
      */
     void SetRootSessionRect(const WSRect& rect);
 
-    /**
+    /*
      * Window Immersive
      */
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT) override;
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
 
 private:
     LoadContentFunc loadContentFunc_;
 
-    /**
+    /*
      * Window Immersive
      */
     void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);

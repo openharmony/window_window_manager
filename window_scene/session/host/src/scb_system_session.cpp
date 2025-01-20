@@ -36,6 +36,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+        SetIsUseControlSession(info.isUseControlSession);
     }
     WLOGFD("Create SCBSystemSession");
 }
@@ -114,8 +115,8 @@ void SCBSystemSession::PresentFocusIfPointDown()
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
-        NotifyClick();
     }
+    NotifyClick();
 }
 
 WSError SCBSystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -137,8 +138,8 @@ void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
         if (!isFocused_ && GetFocusable()) {
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
-            NotifyClick();
         }
+        NotifyClick();
     }
 }
 
@@ -228,5 +229,15 @@ void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)
     TLOGI(WmsLogTag::WMS_PIPELINE, "change isNeedSyncGlobalPos from %{public}d to %{public}d",
         isNeedSyncGlobalPos_, needSync);
     isNeedSyncGlobalPos_ = needSync;
+}
+
+bool SCBSystemSession::GetIsUseControlSession() const
+{
+    return isUseControlSession_;
+}
+
+void SCBSystemSession::SetIsUseControlSession(bool isUseControlSession)
+{
+    isUseControlSession_ = isUseControlSession;
 }
 } // namespace OHOS::Rosen

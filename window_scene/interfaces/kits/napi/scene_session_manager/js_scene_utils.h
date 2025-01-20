@@ -160,6 +160,8 @@ bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::stri
 bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
+napi_value CreateSupportWindowModes(napi_env env,
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
@@ -186,6 +188,7 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
 napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
+napi_value KeyboardViewModeInit(napi_env env);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);

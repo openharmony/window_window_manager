@@ -32,6 +32,7 @@ static const std::string SINGLE_POCKET_DISPLAY = "4";
 static const std::string SUPER_FOLD_DISPLAY = "5";
 static const std::string SECONDARY_FOLD_DISPLAY = "6";
 static const std::string DEFAULT_OFFSET = "0";
+static const size_t THIRD_ANGLE = 2;
 }
 class FoldScreenStateInternel {
 public:
@@ -100,6 +101,17 @@ public:
         return GetFoldType() == SECONDARY_FOLD_DISPLAY;
     }
 
+    static bool IsOuterScreen(FoldDisplayMode foldDisplayMode)
+    {
+        if (IsDualDisplayFoldDevice()) {
+            return foldDisplayMode == FoldDisplayMode::SUB;
+        }
+        if (IsSingleDisplayFoldDevice() || IsSingleDisplayPocketFoldDevice()) {
+            return foldDisplayMode == FoldDisplayMode::MAIN;
+        }
+        return false;
+    }
+
     static std::vector<std::string> StringSplit(const std::string& str, char delim)
     {
         std::size_t previous = 0;
@@ -165,6 +177,8 @@ public:
                 strs << "_bc";
             } else if (i == 1) {
                 strs << "_ab";
+            } else if (i == THIRD_ANGLE) {
+                strs << "_ab_anti";
             }
             strs << ": ";
             strs << std::to_string(str) << " ";

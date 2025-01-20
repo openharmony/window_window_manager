@@ -47,9 +47,13 @@ public:
     void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) override {};
     sptr<IRemoteObject> AsObject() override { return nullptr; };
     std::string GetForegroundApp();
+    void RegisterCameraForegroundChanged(std::function<void()> callback);
+    bool IsCameraForeground();
 
 private:
     std::string foregroundBundleName_ {""};
+    std::function<void()> onCameraForegroundChanged_ { nullptr };
+    bool isCameraForeground_ = false;
 };
 class SingleDisplaySensorPocketFoldStateManager : public SensorFoldStateManager {
 public:
@@ -74,6 +78,8 @@ private:
     bool TriggerTentExit(float angle, int hall);
     void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     void ReportTentStatusChange(ReportTentModeStatus tentStatus);
+    float currentAngle = -1.0F;
+    int currentHall = -1;
 };
 } // namespace Rosen
 } // namespace OHOS

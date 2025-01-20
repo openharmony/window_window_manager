@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+
+#include <want.h>
+
 #include "extension_window_impl.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -58,11 +61,37 @@ WMError ExtensionWindowImpl::HidePrivacyContentForHost(bool needHide)
     return windowExtensionSessionImpl_->HidePrivacyContentForHost(needHide);
 }
 
+bool ExtensionWindowImpl::IsPcWindow() const
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    return windowExtensionSessionImpl_->IsPcWindow();
+}
 
 bool ExtensionWindowImpl::IsPcOrPadFreeMultiWindowMode() const
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "in");
     return windowExtensionSessionImpl_->IsPcOrPadFreeMultiWindowMode();
+}
+
+WMError ExtensionWindowImpl::OccupyEvents(int32_t eventFlags)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "events: %{public}d", eventFlags);
+    auto dataHandler = windowExtensionSessionImpl_->GetExtensionDataHandler();
+    if (!dataHandler) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "null dataHandler");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    AAFwk::Want want;
+    want.SetParam("type", std::string("OccupyEvents"));
+    want.SetParam("eventFlags", eventFlags);
+    constexpr int32_t customId = 1001;
+    auto ret = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, customId, want);
+    if (ret != DataHandlerErr::OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "send failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

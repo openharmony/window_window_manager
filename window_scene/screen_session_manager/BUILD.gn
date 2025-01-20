@@ -64,19 +64,6 @@ ohos_shared_library("screen_session_manager") {
     "src/connection/screen_cast_connection.cpp",
     "src/connection/screen_session_ability_connection.cpp",
     "src/connection/screen_snapshot_picker_connection.cpp",
-    "src/fold_screen_controller/dual_display_fold_policy.cpp",
-    "src/fold_screen_controller/fold_screen_controller.cpp",
-    "src/fold_screen_controller/fold_screen_policy.cpp",
-    "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
-    "src/fold_screen_controller/fold_screen_state_machine.cpp",
-    "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
-    "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
-    "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
-    "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
-    "src/fold_screen_controller/single_display_fold_policy.cpp",
-    "src/fold_screen_controller/single_display_pocket_fold_policy.cpp",
-    "src/fold_screen_controller/super_fold_sensor_manager.cpp",
-    "src/fold_screen_controller/super_fold_state_manager.cpp",
     "src/multi_screen_manager.cpp",
     "src/publish/screen_session_publish.cpp",
     "src/screen_cutout_controller.cpp",
@@ -177,6 +164,34 @@ ohos_shared_library("screen_session_manager") {
   if (device_status_enable) {
     external_deps += [ "device_status:devicestatus_client" ]
     defines += [ "DEVICE_STATUS_ENABLE" ]
+  }
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_soc_perf)) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RES_SCHED_ENABLE" ]
+  }
+
+  if (window_manager_fold_ability) {
+    defines += [ "FOLD_ABILITY_ENABLE" ]
+    sources += [
+      "src/fold_screen_controller/dual_display_fold_policy.cpp",
+      "src/fold_screen_controller/fold_screen_controller.cpp",
+      "src/fold_screen_controller/fold_screen_policy.cpp",
+      "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
+      "src/fold_screen_controller/fold_screen_state_machine.cpp",
+      "src/fold_screen_controller/secondary_display_fold_policy.cpp",
+      "src/fold_screen_controller/secondary_fold_sensor_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
+      "src/fold_screen_controller/single_display_fold_policy.cpp",
+      "src/fold_screen_controller/single_display_pocket_fold_policy.cpp",
+      "src/fold_screen_controller/super_fold_sensor_manager.cpp",
+      "src/fold_screen_controller/super_fold_state_manager.cpp",
+    ]
   }
 
   innerapi_tags = [ "platformsdk" ]

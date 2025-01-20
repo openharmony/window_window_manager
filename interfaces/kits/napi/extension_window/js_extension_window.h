@@ -60,9 +60,12 @@ public:
     static napi_value CreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value HidePrivacyContentForHost(napi_env env, napi_callback_info info);
+    static napi_value OccupyEvents(napi_env env, napi_callback_info info);
     
 private:
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
+    napi_value OnRegisterRectChangeCallback(napi_env env, size_t argc, napi_value* argv,
+        const sptr<Window>& windowImpl);
     napi_value OnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnUnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
     napi_value OnHideNonSecureWindows(napi_env env, napi_callback_info info);
@@ -85,6 +88,7 @@ private:
     napi_value OnHidePrivacyContentForHost(napi_env env, napi_callback_info info);
 
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
+    napi_value OnOccupyEvents(napi_env env, napi_callback_info info);
     
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 
@@ -92,6 +96,7 @@ private:
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
+    static inline const std::string RECT_CHANGE = "rectChange";
 };
 }  // namespace Rosen
 }  // namespace OHOS

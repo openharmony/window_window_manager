@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
+#include <hitrace_meter.h>
+#include <hisysevent.h>
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "fold_screen_controller/super_fold_sensor_manager.h"
 #include "window_manager_hilog.h"
 #include "fold_screen_state_internel.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "screen_setting_helper.h"
+#include "parameter.h"
 
 namespace OHOS {
 
@@ -33,84 +37,78 @@ const int32_t TP_TYPE = 12;
 const char* KEYBOARD_ON_CONFIG = "version:3+main";
 const char* KEYBOARD_OFF_CONFIG = "version:3+whole";
 #endif
+static bool isHalfScreen_ = false;
+static bool isHalfScreenSwitchOn_ = false;
+static bool isHalfFolded_ = false;
+static bool isKeyboardOn_ = false;
+const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeFolded()");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isHalfFolded_ = false;
 }
 
 void SuperFoldStateManager::DoAngleChangeHalfFolded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeHalfFolded())");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isHalfFolded_ = true;
+    if (!isHalfScreenSwitchOn_) {
+        TLOGI(WmsLogTag::DMS, "Half Screen Switch is off");
+        return;
+    }
+    if (!ChangeScreenState(true)) {
+        TLOGI(WmsLogTag::DMS, "change to half screen fail!");
+    }
 }
 
 void SuperFoldStateManager::DoAngleChangeExpanded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoAngleChangeExpanded()");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isHalfFolded_ = false;
+    if (isKeyboardOn_) {
+        TLOGI(WmsLogTag::DMS, "Keyboard On, no need to recover");
+        return;
+    }
+    if (!ChangeScreenState(false)) {
+        TLOGI(WmsLogTag::DMS, "recover from half screen fail!");
+    }
 }
 
 void SuperFoldStateManager::DoKeyboardOn(SuperFoldStatusChangeEvents event)
 {
-    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
-        GetDefaultScreenSession();
-    if (meScreenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screen session is null!");
-        return;
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isKeyboardOn_ = true;
+    if (!ChangeScreenState(true)) {
+        TLOGI(WmsLogTag::DMS, "change to half screen fail!");
     }
-    auto screenProperty = meScreenSession->GetScreenProperty();
-    auto screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
-    auto screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
-
-    OHOS::Rect rectCur{
-        .x = 0,
-        .y = 0,
-        .w = static_cast<int>(screenWidth),
-        .h = static_cast<int>(screenHeight),
-    };
-    // SCREEN_ID_FULL = 0
-    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
-    ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(true);
-#ifdef TP_FEATURE_ENABLE
-    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
-        KEYBOARD_ON_CONFIG, TpFeatureConfigType::AFT_TP_FEATURE);
-#endif
-    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
-        screenWidth, screenHeight, static_cast<long>(response));
 }
 
 void SuperFoldStateManager::DoKeyboardOff(SuperFoldStatusChangeEvents event)
 {
-    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
-        GetDefaultScreenSession();
-    if (meScreenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screen session is null!");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isKeyboardOn_ = false;
+    if (isHalfFolded_ && isHalfScreenSwitchOn_) {
+        TLOGI(WmsLogTag::DMS, "screen is folded and switch on, no need to recover");
         return;
     }
-    auto screenProperty = meScreenSession->GetScreenProperty();
-    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
-    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
-    
-    OHOS::Rect rectCur{
-        .x = 0,
-        .y = 0,
-        .w = static_cast<int>(screenWidth),
-        .h = static_cast<int>(screenHeight),
-    };
-    // SCREEN_ID_FULL = 0
-    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
-    ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(false);
-#ifdef TP_FEATURE_ENABLE
-    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
-        KEYBOARD_OFF_CONFIG, TpFeatureConfigType::DEFAULT_TP_FEATURE);
-#endif
-    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
-        screenWidth, screenHeight, static_cast<long>(response));
+    if (!ChangeScreenState(false)) {
+        TLOGI(WmsLogTag::DMS, "recover from half screen fail!");
+    }
 }
 
 void SuperFoldStateManager::DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event)
 {
-    TLOGI(WmsLogTag::DMS, "SuperFoldStateManager::DoFoldedToHalfFolded()");
+    TLOGI(WmsLogTag::DMS, "enter %{public}d", event);
+    isHalfFolded_ = true;
+    if (!isHalfScreenSwitchOn_) {
+        TLOGI(WmsLogTag::DMS, "Half Screen Switch is off");
+        return;
+    }
+    if (!ChangeScreenState(true)) {
+        TLOGI(WmsLogTag::DMS, "change to half screen fail!");
+    }
 }
 
 void SuperFoldStateManager::InitSuperFoldStateManagerMap()
@@ -216,9 +214,13 @@ SuperFoldStateManager::SuperFoldStateManager()
 {
     InitSuperFoldStateManagerMap();
     InitSuperFoldCreaseRegionParams();
+    WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
 }
 
-SuperFoldStateManager::~SuperFoldStateManager() = default;
+SuperFoldStateManager::~SuperFoldStateManager()
+{
+    UnregisterHalfScreenSwitchesObserver();
+}
 
 void SuperFoldStateManager::AddStateManagerMap(SuperFoldStatus curState,
     SuperFoldStatusChangeEvents event,
@@ -250,6 +252,23 @@ FoldStatus SuperFoldStateManager::MatchSuperFoldStatusToFoldStatus(SuperFoldStat
     }
 }
 
+void SuperFoldStateManager::ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus,
+    float postureAngle)
+{
+    TLOGI(WmsLogTag::DMS, "currentStatus: %{public}d, nextStatus: %{public}d, postureAngle: %{public}f",
+        currentStatus, nextStatus, postureAngle);
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "NOTIFY_FOLD_STATE_CHANGE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "CURRENT_FOLD_STATUS", currentStatus,
+        "NEXT_FOLD_STATUS", nextStatus,
+        "SENSOR_POSTURE", postureAngle);
+    if (ret != 0) {
+        TLOGI(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
 void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents event)
 {
     SuperFoldStatus curState = curState_.load();
@@ -264,7 +283,11 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         isTransfer = true;
     }
 
+    float curAngle = SuperFoldSensorManager::GetInstance().GetCurAngle();
+    TLOGD(WmsLogTag::DMS, "curAngle: %{public}f", curAngle);
     if (isTransfer && action) {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleSuperFoldStatusChange");
+        ReportNotifySuperFoldStatusChange(static_cast<int32_t>(curState), static_cast<int32_t>(nextState), curAngle);
         action(event);
         TransferState(nextState);
         HandleDisplayNotify(event);
@@ -275,7 +298,11 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
             return;
         }
         ScreenId screenId = screenSession->GetScreenId();
-        ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_.load());
+        if (isHalfScreen_) {
+            ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, SuperFoldStatus::KEYBOARD);
+        } else {
+            ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, curState_.load());
+        }
         ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(
             MatchSuperFoldStatusToFoldStatus(curState_.load()));
     }
@@ -283,6 +310,9 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
 
 SuperFoldStatus SuperFoldStateManager::GetCurrentStatus()
 {
+    if (isHalfScreen_) {
+        return SuperFoldStatus::KEYBOARD;
+    }
     return curState_.load();
 }
 
@@ -390,6 +420,111 @@ void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> s
         fakeScreenSession->ConvertToDisplayInfo());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+}
+
+void SuperFoldStateManager::BootFinishedCallback(const char *key, const char *value, void *context)
+{
+    if (strcmp(key, BOOTEVENT_BOOT_COMPLETED.c_str()) == 0 && strcmp(value, "true") == 0) {
+        TLOGI(WmsLogTag::DMS, "boot animation finished");
+        auto &that = *reinterpret_cast<SuperFoldStateManager *>(context);
+        that.RegisterHalfScreenSwitchesObserver();
+        that.InitHalfScreen();
+    }
+}
+
+void SuperFoldStateManager::InitHalfScreen()
+{
+    isHalfScreenSwitchOn_ = ScreenSettingHelper::GetHalfScreenSwitchState();
+    SuperFoldStatus curFoldState = ScreenSessionManager::GetInstance().GetSuperFoldStatus();
+    if (curFoldState == SuperFoldStatus::HALF_FOLDED) {
+        isHalfFolded_ = true;
+    }
+    if (isHalfScreenSwitchOn_ && isHalfFolded_) {
+        if (!ChangeScreenState(true)) {
+            TLOGI(WmsLogTag::DMS, "change to half screen fail!");
+        }
+        auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+        ScreenId screenId = screenSession->GetScreenId();
+        ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, SuperFoldStatus::KEYBOARD);
+    }
+}
+
+void SuperFoldStateManager::RegisterHalfScreenSwitchesObserver()
+{
+    TLOGI(WmsLogTag::DMS, "half screen switch register");
+    SettingObserver::UpdateFunc updateFunc =
+        [&](const std::string& key) {this->OnHalfScreenSwitchesStateChanged();};
+    ScreenSettingHelper::RegisterSettingHalfScreenObserver(updateFunc);
+}
+
+void SuperFoldStateManager::UnregisterHalfScreenSwitchesObserver()
+{
+    TLOGI(WmsLogTag::DMS, "half screen switch unregister");
+    ScreenSettingHelper::UnregisterSettingHalfScreenObserver();
+}
+
+void SuperFoldStateManager::OnHalfScreenSwitchesStateChanged()
+{
+    TLOGI(WmsLogTag::DMS, "half screen switch state changed");
+    bool curSwitchState = ScreenSettingHelper::GetHalfScreenSwitchState();
+    if (curSwitchState == isHalfScreenSwitchOn_) {
+        TLOGI(WmsLogTag::DMS, "half screen switch didn't change");
+        return;
+    }
+    isHalfScreenSwitchOn_ = curSwitchState;
+    auto tempState = SuperFoldStatus::KEYBOARD;
+    if ((isHalfScreenSwitchOn_ && isHalfFolded_) || isKeyboardOn_)  {
+        if (!ChangeScreenState(true)) {
+            TLOGI(WmsLogTag::DMS, "change to half screen fail!");
+        }
+    } else {
+        if (!ChangeScreenState(false)) {
+            TLOGI(WmsLogTag::DMS, "recover from half screen fail!");
+        }
+        tempState = curState_;
+    }
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    ScreenId screenId = screenSession->GetScreenId();
+    ScreenSessionManager::GetInstance().OnSuperFoldStatusChange(screenId, tempState);
+}
+
+bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
+{
+    TLOGD(WmsLogTag::DMS, "isHalfScreen_ = %{public}d, toHalf = %{public}d", isHalfScreen_, toHalf);
+    if (isHalfScreen_ == toHalf) {
+        TLOGI(WmsLogTag::DMS, "screen is already in the desired state, no need to change");
+        return false;
+    }
+    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+        GetDefaultScreenSession();
+    if (meScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return false;
+    }
+    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    if (toHalf) {
+        screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
+        screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
+    }
+    OHOS::Rect rectCur{
+        .x = 0,
+        .y = 0,
+        .w = static_cast<int>(screenWidth),
+        .h = static_cast<int>(screenHeight),
+    };
+    // SCREEN_ID_FULL = 0
+    auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    isHalfScreen_ = toHalf;
+#ifdef TP_FEATURE_ENABLE
+    RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
+        toHalf ? KEYBOARD_ON_CONFIG : KEYBOARD_OFF_CONFIG, TpFeatureConfigType::AFT_TP_FEATURE);
+#endif
+    ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(toHalf);
+    TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
+        screenWidth, screenHeight, static_cast<long>(response));
+    return true;
 }
 } // Rosen
 } // OHOS

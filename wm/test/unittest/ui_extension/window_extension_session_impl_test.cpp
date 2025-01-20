@@ -14,20 +14,19 @@
  */
 
 #include <gtest/gtest.h>
-#include "session_proxy.h"
 
+#include <ability_context_impl.h>
+#include <context_impl.h>
 #include <transaction/rs_transaction.h>
-#include "ability_context_impl.h"
-#include "mock_session.h"
-#include "display_info.h"
+
 #include "accessibility_event_info.h"
-#include "window_manager_hilog.h"
-#include "window_impl.h"
-#include "native_engine.h"
-#include "window_extension_session_impl.h"
-#include "mock_uicontent.h"
-#include "context_impl.h"
+#include "display_info.h"
+#include "extension/extension_business_info.h"
+#include "extension_data_handler.h"
 #include "iremote_object_mocker.h"
+#include "mock_session.h"
+#include "mock_uicontent.h"
+#include "window_extension_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -238,6 +237,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfiguration02, Function | Small
     ASSERT_NE(nullptr, window_->uiContent_);
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     window_->UpdateConfiguration(configuration);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -623,6 +623,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusStateEvent02, Function | Sma
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     window_->NotifyFocusStateEvent(true);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -646,6 +647,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyFocusActiveEvent02, Function | Sm
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_NE(nullptr, window_->uiContent_);
     window_->NotifyFocusActiveEvent(true);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -659,6 +661,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent01, Function | Sm
     ASSERT_NE(nullptr, window_->uiContent_);
     bool isConsumed = false;
     window_->NotifyBackpressedEvent(isConsumed);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -672,6 +675,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent02, Function | Sm
     ASSERT_NE(nullptr, window_->uiContent_);
     bool isConsumed = true;
     window_->NotifyBackpressedEvent(isConsumed);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -685,6 +689,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyBackpressedEvent03, Function | Sm
     window_->uiContent_ = nullptr;
     bool isConsumed = true;
     window_->NotifyBackpressedEvent(isConsumed);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -966,6 +971,46 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
     window_->state_ = WindowState::STATE_SHOWN;
     ASSERT_EQ(WMError::WM_OK,
         window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    usleep(WAIT_SYNC_IN_NS);
+
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+}
+
+/**
+ * @tc.name: NapiSetUIContentByName
+ * @tc.desc: NapiSetUIContentByName Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContentByName, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, window_);
+    std::string contentInfo = "NapiSetUIContentByName test";
+    napi_env env = napi_env();
+    napi_value storage = napi_value();
+    sptr<IRemoteObject> token;
+    window_->uiContent_ = nullptr;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    window_->focusState_ = std::nullopt;
+    window_->state_ = WindowState::STATE_HIDDEN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+
+    auto uiContent = std::make_shared<Ace::UIContentMocker>();
+    window_->uiContent_ = uiContent;
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::CONSTRAINED_EMBEDDED);
+    window_->focusState_ = true;
+    window_->state_ = WindowState::STATE_SHOWN;
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContentByName(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1060,6 +1105,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent01, Functi
     ASSERT_NE(nullptr, window_->uiContent_);
     ASSERT_EQ(WSError::WS_OK,
         window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1077,6 +1123,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyAccessibilityHoverEvent02, Functi
     window_->uiContent_ = nullptr;
     ASSERT_EQ(WSError::WS_ERROR_NO_UI_CONTENT_ERROR,
         window_->NotifyAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs));
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1321,6 +1368,7 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateAccessibilityTreeInfo, Function |
 
     window_->accessibilityChildTreeInfo_= std::nullopt;
     window_->UpdateAccessibilityTreeInfo();
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1523,6 +1571,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost01, Function | S
     EXPECT_CALL(*content, UpdateViewportConfig(Field(&Ace::ViewportConfig::density_, densityValue), _, _, _));
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1557,6 +1606,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost02, Function | S
 
     window_->isDensityFollowHost_ = true;
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1578,6 +1628,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost03, Function | S
     EXPECT_CALL(*content, UpdateViewportConfig(_, _, _, _)).Times(0);
 
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1636,6 +1687,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDensityFollowHost05, Function | S
     ASSERT_EQ(window_->NotifyDensityFollowHost(isFollowHost, densityValue), WSError::WS_OK);
     ASSERT_TRUE(window_->isDensityFollowHost_);
     ASSERT_EQ(window_->hostDensityValue_, densityValue);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -1996,6 +2048,7 @@ HWTEST_F(WindowExtensionSessionImplTest, PreNotifyKeyEvent, Function | SmallTest
     window_->focusState_ = true;
     ret = window_->PreNotifyKeyEvent(keyEvent);
     ASSERT_EQ(ret, false);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -2026,6 +2079,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionTimeout, Function | Smal
     window_->hostSession_ = nullptr;
     EXPECT_CALL(*session, NotifyExtensionTimeout).Times(0);
     window_->NotifyExtensionTimeout(WindowExtensionSessionImpl::TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -2147,6 +2201,7 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyDumpInfo, Function | SmallTest | 
     window_->uiContent_ = nullptr;
     ret = window_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -2161,6 +2216,41 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationSyncForAll, Function
     window_->windowExtensionSessionSet_.insert(window_);
     window_->UpdateConfigurationSyncForAll(configuration);
     window_->windowExtensionSessionSet_.erase(window_);
+}
+
+/**
+ * @tc.name: NotifyExtensionDataConsumer01
+ * @tc.desc: Test NotifyExtensionDataConsumer with valid window mode data
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function | SmallTest | Level3)
+{
+    // Prepare and write config
+    MessageParcel data;
+    MessageParcel reply;
+    Extension::DataTransferConfig config;
+    config.subSystemId = SubSystemId::WM_UIEXT;
+    config.customId = static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_MODE);
+    config.needReply = false;
+    config.needSyncSend = true;
+    ASSERT_TRUE(data.WriteParcelable(&config));
+ 
+    // Prepare and write want data
+    AAFwk::Want want;
+    want.SetParam(Extension::WINDOW_MODE_FIELD, static_cast<int32_t>(WindowMode::WINDOW_MODE_FLOATING));
+    ASSERT_TRUE(data.WriteParcelable(&want));
+
+    // Send data
+    MessageOption option;
+    window_->SendExtensionData(data, reply, option);
+
+    // Verify reply contains success code
+    uint32_t replyCode;
+    ASSERT_TRUE(reply.ReadUint32(replyCode));
+    ASSERT_EQ(static_cast<uint32_t>(DataHandlerErr::OK), replyCode);
+ 
+    // Verify window mode was updated
+    ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window_->GetWindowMode());
 }
 }
 } // namespace Rosen

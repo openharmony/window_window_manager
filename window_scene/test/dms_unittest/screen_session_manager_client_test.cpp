@@ -953,6 +953,17 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldStatus, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetSuperFoldStatus, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->GetSuperFoldStatus();
+}
+
+/**
  * @tc.name: GetDefaultScreenId
  * @tc.desc: GetDefaultScreenId test
  * @tc.type: FUNC

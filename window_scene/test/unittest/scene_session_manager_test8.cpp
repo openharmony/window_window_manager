@@ -70,15 +70,14 @@ namespace {
  */
 HWTEST_F(SceneSessionManagerTest8, GetTotalUITreeInfo, Function | SmallTest | Level3)
 {
-    std::string strId = "1234";
     std::string dumpInfo = "dumpInfo";
     ssm_->SetDumpUITreeFunc(nullptr);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(strId, dumpInfo));
-    DumpUITreeFunc func = [](uint64_t, std::string& dumpInfo) {
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
+    DumpUITreeFunc func = [](std::string& dumpInfo) {
         return;
     };
     ssm_->SetDumpUITreeFunc(func);
-    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(strId, dumpInfo));
+    EXPECT_EQ(WSError::WS_OK, ssm_->GetTotalUITreeInfo(dumpInfo));
 }
 
 /**
@@ -277,8 +276,8 @@ HWTEST_F(SceneSessionManagerTest8, NotifyUpdateRectAfterLayout, Function | Small
 HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest | Level3)
 {
     ssm_->remoteExtSessionMap_.clear();
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    sptr<IRemoteObject> token = new IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_NE(nullptr, iRemoteObjectMocker);
     ssm_->DestroyExtensionSession(iRemoteObjectMocker);
     ssm_->remoteExtSessionMap_.emplace(iRemoteObjectMocker, token);
@@ -832,7 +831,6 @@ HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, Function | SmallTest | Lev
     info.abilityName_ = "IsInDefaultScreen";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     auto ret = ssm_->IsInDefaultScreen(sceneSession);
     EXPECT_EQ(false, ret);
 }
@@ -1005,7 +1003,6 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Func
     info.abilityName_ = "UnregisterSpecificSessionCreateListener";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);

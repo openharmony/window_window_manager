@@ -39,21 +39,13 @@ public:
     ~MockWindow() {};
 };
 
-void PictureInPictureManagerTest::SetUpTestCase()
-{
-}
+void PictureInPictureManagerTest::SetUpTestCase() {}
 
-void PictureInPictureManagerTest::TearDownTestCase()
-{
-}
+void PictureInPictureManagerTest::TearDownTestCase() {}
 
-void PictureInPictureManagerTest::SetUp()
-{
-}
+void PictureInPictureManagerTest::SetUp() {}
 
-void PictureInPictureManagerTest::TearDown()
-{
-}
+void PictureInPictureManagerTest::TearDown() {}
 
 namespace {
 
@@ -105,8 +97,7 @@ HWTEST_F(PictureInPictureManagerTest, PipControllerInfo, Function | SmallTest | 
 HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, Function | SmallTest | Level2)
 {
     sptr<PipOption> option = new PipOption();
-    sptr<PictureInPictureController> pipController =
-        new PictureInPictureController(option, nullptr, 100, nullptr);
+    sptr<PictureInPictureController> pipController = new PictureInPictureController(option, nullptr, 100, nullptr);
     PictureInPictureManager::activeController_ = nullptr;
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::RemoveActiveController(pipController);
@@ -461,6 +452,6 @@ HWTEST_F(PictureInPictureManagerTest, DoDestroy, Function | SmallTest | Level2)
     PictureInPictureManager::DoDestroy();
     ASSERT_EQ(pipController->curState_, PiPWindowState::STATE_STOPPED);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

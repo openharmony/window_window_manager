@@ -53,20 +53,6 @@ void ScreenSettingHelperTest::TearDown()
 }
 
 namespace {
-
-    /**
-     * @tc.name: SetSettingDefaultDpi
-     * @tc.desc: SetSettingDefaultDpi
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, SetSettingDefaultDpi, Function | SmallTest | Level3)
-    {
-        uint32_t dpi = 520;
-        std::string key = "default_display_dpi";
-        auto ret = ScreenSettingHelper::SetSettingDefaultDpi(dpi, key);
-        ASSERT_TRUE(ret);
-    }
-
     /**
      * @tc.name: RegisterSettingDpiObserver
      * @tc.desc: RegisterSettingDpiObserver
@@ -117,19 +103,6 @@ namespace {
         std::string key = "test";
         bool ret = ScreenSettingHelper::GetSettingDpi(dpi, key);
         ASSERT_FALSE(ret);
-    }
-
-    /**
-     * @tc.name: GetSettingDpi02
-     * @tc.desc: GetSettingDpi02
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingDpi02, Function | SmallTest | Level3)
-    {
-        uint32_t dpi = 0;
-        std::string key = "user_set_dpi_value";
-        bool ret = ScreenSettingHelper::GetSettingDpi(dpi, key);
-        ASSERT_TRUE(ret);
     }
 
     /**
@@ -420,6 +393,88 @@ namespace {
         std::string key = "test";
         auto ret = screenSettingHelper.GetSettingRelativePositionString(relativePositionStrings, key);
         ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: IsNumber01
+     * @tc.desc: IsNumber01 Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, IsNumber01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "12.34";
+        auto ret = screenSettingHelper.IsNumber(test_str);
+        ASSERT_TRUE(ret);
+    }
+
+    /**
+     * @tc.name: IsNumber02
+     * @tc.desc: IsNumber02 Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, IsNumber02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "test";
+        auto ret = screenSettingHelper.IsNumber(test_str);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: GetDataFromString01
+     * @tc.desc: GetDataFromString Test01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetDataFromString01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        MultiScreenRecoverOption option;
+        std::string test_str = "11 1920 1080";
+        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
+        ASSERT_EQ(ret, 3);
+    }
+
+    /**
+     * @tc.name: GetDataFromString02
+     * @tc.desc: GetDataFromString Test02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetDataFromString02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        MultiScreenRecoverOption option;
+        std::string test_str = "11 1";
+        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
+        ASSERT_EQ(ret, 2);
+    }
+
+    /**
+     * @tc.name: GetDataFromString03
+     * @tc.desc: GetDataFromString Test03
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetDataFromString03, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        MultiScreenRecoverOption option;
+        std::string test_str = "test 1920 1080";
+        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
+        ASSERT_EQ(ret, 0xffffffff);
+    }
+
+    /**
+     * @tc.name: GetDataFromString04
+     * @tc.desc: GetDataFromString Test04
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetDataFromString04, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        MultiScreenRecoverOption option;
+        std::string test_str = "11 test 1080";
+        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
+        ASSERT_EQ(ret, 0xffffffff);
     }
 }
 } // namespace Rosen
