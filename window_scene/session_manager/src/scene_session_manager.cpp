@@ -201,9 +201,11 @@ bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::Abil
     auto& metadata = abilityInfo->metadata;
     for (const auto& item : metadata) {
         if (item.name == "enable.remove.starting.window") {
+            TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "enable.remove.starting.window=%{public}s", item.value.c_str());
             return item.value == "true";
         }
     }
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "enable.remove.starting.window default false");
     return false;
 }
 
@@ -7968,9 +7970,9 @@ void SceneSessionManager::UpdateCameraWindowStatus(uint32_t accessTokenId, bool 
 
 void SceneSessionManager::StartWindowInfoReportLoop()
 {
-    WLOGFD("in");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "in");
     if (isReportTaskStart_) {
-        WLOGFE("Report is ReportTask Start");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Report is ReportTask Start");
         return;
     }
     auto task = [this] {
@@ -7982,7 +7984,7 @@ void SceneSessionManager::StartWindowInfoReportLoop()
     int64_t delayTime = 1000 * 60 * 60; // an hour.
     bool ret = eventHandler_->PostTask(task, "wms:WindowInfoReport", delayTime);
     if (!ret) {
-        WLOGFE("failed. task is WindowInfoReport");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "failed. task is WindowInfoReport");
         return;
     }
     isReportTaskStart_ = true;
