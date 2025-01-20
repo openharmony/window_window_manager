@@ -1841,7 +1841,7 @@ WMError SceneSessionManagerProxy::GetParentMainWindowId(int32_t windowId, int32_
 }
 
 WMError SceneSessionManagerProxy::ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos) const
+    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos)
 {
     MessageParcel data;
     MessageParcel reply;

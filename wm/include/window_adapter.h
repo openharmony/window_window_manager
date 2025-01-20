@@ -73,7 +73,7 @@ public:
     virtual WMError UpdateAvoidAreaListener(uint32_t windowId, bool haveListener);
     virtual void ClearWindowAdapter();
     virtual WMError ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-        WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos) const;
+        WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
     
