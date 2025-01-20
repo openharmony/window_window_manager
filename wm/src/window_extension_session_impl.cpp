@@ -273,6 +273,7 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -296,7 +297,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "in.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -306,7 +307,7 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
 WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataForResultFunc_) {
         reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
         return WSErrorCode::WS_OK;
@@ -1208,6 +1209,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
