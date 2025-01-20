@@ -1607,30 +1607,25 @@ WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
         pid = sceneSession->GetCallingPid();
-
         if (!IsScreenLocked()) {
-            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not in lock screen");
             return WMError::WM_OK;
         }
-
         if (IsUserAuthPassed()) {
-            TLOGND(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
+            TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: auth passed");
             return WMError::WM_OK;
         }
-
         // 1. check window whether can show on main window
         if (!sceneSession->IsShowOnLockScreen(GetLockScreenZorder())) {
             TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: not called on lock screen");
             return WMError::WM_OK;
         }
-
         // 2. check permission
         if (!IsUIExtCanShowOnLockScreen(element, callingTokenId, extensionAbilityType)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "UIExtOnLock: no permisson, window id %{public}d, %{public}d", windowId,
                 callingTokenId);
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
-
         TLOGNI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: IsShowOnLockScreen: The caller permission has granted");
         return WMError::WM_OK;
     };
