@@ -8823,7 +8823,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         needUpdate = false;
         return;
     }
-    sceneSession->UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
+    sceneSession->UpdateSizeChangeReason(SizeChangeReason::AVOID_AREA_CHANGE);
     sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
 }
 
