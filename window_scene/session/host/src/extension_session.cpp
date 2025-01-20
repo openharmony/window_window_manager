@@ -23,7 +23,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
-std::set<int32_t> g_extensionPersistentIdSet;
+std::unordered_set<int32_t> g_extensionPersistentIdSet;
 std::mutex g_extensionPersistentIdMutex;
 constexpr uint32_t EXTENSION_ID_FLAG = 0x40000000;
 constexpr uint32_t PID_LENGTH = 18;
@@ -544,8 +544,11 @@ int32_t ExtensionSession::GetStatusBarHeight()
     return 0;
 }
 
-void ExtensionSession::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
+WSError ExtensionSession::SendExtensionData(MessageParcel& data, MessageParcel& reply,
+                                            [[maybe_unused]] MessageOption& option)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

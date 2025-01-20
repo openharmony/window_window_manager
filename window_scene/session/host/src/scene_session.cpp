@@ -128,6 +128,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (ret != WSError::WS_OK) {
             return ret;
         }
+        session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
         session->NotifyPropertyWhenConnect();
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
@@ -371,6 +372,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
                 where, ret, persistentId);
             return ret;
         }
+        session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
         auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
         if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
@@ -622,6 +624,47 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
+WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
+{
+    sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "fail to get display");
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+
+    DMRect availableArea;
+    DMError ret = display->GetAvailableArea(availableArea);
+    if (ret != DMError::DM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+
+    TLOGD(WmsLogTag::WMS_KEYBOARD,
+          "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
+          availableArea.posX_, availableArea.posY_, availableArea.width_, availableArea.height_);
+    moveDragController_->SetMoveAvailableArea(availableArea);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::InitializeMoveInputBar()
+{
+    auto property = GetSessionProperty();
+    WindowType windowType = property->GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
+        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Start init move input bar param");
+        DisplayId displayId = property->GetDisplayId();
+
+        WSError ret = SetMoveAvailableArea(displayId);
+        if (ret != WSError::WS_OK) {
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "set move availableArea error");
+            return WSError::WS_ERROR_INVALID_OPERATION;
+        }
+        moveDragController_->SetMoveInputBarStartDisplayId(displayId);
+    }
+    return WSError::WS_OK;
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event, where = __func__] {
@@ -637,6 +680,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event)
                 return WSError::WS_OK;
             }
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::StartMove");
+            WSError ret = session->InitializeMoveInputBar();
+            if (ret != WSError::WS_OK) {
+                return ret;
+            }
             session->InitializeCrossMoveDrag();
             session->moveDragController_->InitMoveDragProperty();
             if (session->pcFoldScreenController_) {
@@ -705,6 +752,7 @@ void SceneSession::UpdateWaterfallMode(SessionEvent event)
 
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "the sync session event is: %{public}d", event);
     if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event or end move event, "
             "eventId=%{public}u windowId=%{public}d", event, GetPersistentId());
@@ -1542,6 +1590,17 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
     return WSError::WS_OK;
 }
 
+void SceneSession::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
+{
+    if (!IsSessionForeground() && !IsVisible()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground and not visible!", GetPersistentId());
+        return;
+    }
+    if (sessionStage_ != nullptr) {
+        sessionStage_->NotifySingleHandTransformChange(singleHandTransform);
+    }
+}
+
 void SceneSession::RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
@@ -1811,15 +1870,23 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
+    WindowMode windowMode = Session::GetWindowMode();
+    bool isWindowFloatingOrSplit = windowMode == WindowMode::WINDOW_MODE_FLOATING ||
+                                   windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                                   windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    WindowType windowType = Session::GetWindowType();
+    bool isAvailableSystemWindow = WindowHelper::IsSystemWindow(windowType) &&
+        (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW));
+    bool isAvailableAppSubWindow = WindowHelper::IsSubWindow(windowType) &&
+        (GetSessionProperty()->GetAvoidAreaOption() & static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW));
+    bool isAvailableWindowType = WindowHelper::IsMainWindow(windowType) || isAvailableSystemWindow ||
+                                 isAvailableAppSubWindow;
+    bool isAvailableDevice = systemConfig_.IsPhoneWindow() ||
+                             (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode());
     DisplayId displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if ((Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-         Session::GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-        WindowHelper::IsMainWindow(Session::GetWindowType()) &&
-        (systemConfig_.IsPhoneWindow() ||
-         (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
-        (!screenSession || screenSession->GetName() != "HiCar")) {
+    bool isAvailableScreen = !screenSession || (screenSession->GetName() != "HiCar");
+    if (isWindowFloatingOrSplit && isAvailableWindowType && isAvailableDevice && isAvailableScreen) {
         // mini floating scene no need avoid
         if (LessOrEqual(Session::GetFloatingScale(), MINI_FLOAT_SCALE)) {
             return;
@@ -2370,13 +2437,13 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialog = WindowHelper::IsDialogWindow(windowType);
     bool isMaxModeAvoidSysBar = property->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR;
-    bool isDragEnabledSystemWindow = WindowHelper::IsSystemWindow(windowType) && property->GetDragEnabled() &&
+    bool isDragAccessibleSystemWindow = WindowHelper::IsSystemWindow(windowType) && IsDragAccessible() &&
         !isDialog;
     bool isMovableSystemWindow = WindowHelper::IsSystemWindow(windowType) && !isDialog;
     TLOGD(WmsLogTag::WMS_EVENT, "%{public}s: %{public}d && %{public}d", property->GetWindowName().c_str(),
-        WindowHelper::IsSystemWindow(windowType), property->GetDragEnabled());
+        WindowHelper::IsSystemWindow(windowType), IsDragAccessible());
     if (isMovableWindowType && !isMaxModeAvoidSysBar &&
-        (isMainWindow || isSubWindow || isDialog || isDragEnabledSystemWindow || isMovableSystemWindow)) {
+        (isMainWindow || isSubWindow || isDialog || isDragAccessibleSystemWindow || isMovableSystemWindow)) {
         if (CheckDialogOnForeground() && isPointDown) {
             HandlePointDownDialog();
             pointerEvent->MarkProcessed();
@@ -2387,8 +2454,8 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             TLOGD(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null");
             return Session::TransferPointerEvent(pointerEvent, needNotifyClient, isExecuteDelayRaise);
         }
-        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && property->GetDragEnabled()) ||
-            isDragEnabledSystemWindow) {
+        if ((property->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && IsDragAccessible()) ||
+            isDragAccessibleSystemWindow) {
             if ((systemConfig_.IsPcWindow() || IsFreeMultiWindowMode() ||
                  (property->GetIsPcAppInPad() && !isMainWindow)) &&
                 moveDragController_->ConsumeDragEvent(pointerEvent, winRect_, property, systemConfig_)) {
@@ -2491,8 +2558,15 @@ bool SceneSession::IsMovable()
         TLOGW(WmsLogTag::WMS_LAYOUT, "moveDragController_ is null, id: %{public}d", GetPersistentId());
         return false;
     }
-    if (!(!moveDragController_->GetStartDragFlag() && IsFocused() && IsMovableWindowType() &&
-          moveDragController_->HasPointDown() && moveDragController_->GetMovable())) {
+
+    bool windowIsMovable = !moveDragController_->GetStartDragFlag() && IsMovableWindowType() &&
+                           moveDragController_->HasPointDown() && moveDragController_->GetMovable();
+    auto property = GetSessionProperty();
+    if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR &&
+        property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        windowIsMovable = windowIsMovable && IsFocused();
+    }
+    if (!windowIsMovable) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
             "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, movable: %{public}d",
             GetPersistentId(), moveDragController_->GetStartDragFlag(), IsFocused(), IsMovableWindowType(),
@@ -2849,8 +2923,8 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
     if (MoveUnderInteriaAndNotifyRectChange(rect, reason)) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "set full screen after throw slip");
     }
-    if (moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
-        WindowHelper::IsSystemWindow(GetWindowType())) {
+    if ((moveDragController_->GetMoveDragEndDisplayId() == moveDragController_->GetMoveDragStartDisplayId() ||
+         WindowHelper::IsSystemWindow(GetWindowType())) && !WindowHelper::IsInputWindow(GetWindowType())) {
         NotifySessionRectChange(rect, reason);
     } else {
         NotifySessionRectChange(rect, reason, moveDragController_->GetMoveDragEndDisplayId());
@@ -3033,7 +3107,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
+            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1);
             movedSurfaceNode->SetIsCrossNode(true);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
         }
@@ -3054,8 +3128,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to remove cross parent child");
                 continue;
             }
-            screenSession->GetDisplayNode()->RemoveCrossParentChild(
-                movedSurfaceNode, moveDragController_->GetInitParentNodeId());
+            screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
         }
@@ -3328,17 +3401,17 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 {
     auto property = GetSessionProperty();
     if (!property) {
-        WLOGFE("SetPrivacyMode property is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
         return;
     }
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
-        WLOGFE("surfaceNode_ is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return;
     }
     bool lastPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     if (lastPrivacyMode == isPrivacy) {
-        WLOGFW("privacy mode is not change, do nothing, isPrivacy:%{public}d", isPrivacy);
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "privacy mode does not change, isPrivacy:%{public}d", isPrivacy);
         return;
     }
     property->SetPrivacyMode(isPrivacy);
@@ -5612,6 +5685,25 @@ WMError SceneSession::SetWindowEnableDragBySystem(bool enableDrag)
         session->GetSessionProperty()->SetDragEnabled(enableDrag);
         if (session->sessionStage_) {
             session->sessionStage_->SetEnableDragBySystem(enableDrag);
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
+
+WMError SceneSession::ActivateDragBySystem(bool activateDrag)
+{
+    PostTask([weakThis = wptr(this), activateDrag, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            return;
+        }
+        session->SetDragActivated(activateDrag);
+        session->NotifySessionInfoChange();
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s id: %{public}d, activate drag: %{public}d",
+            where, session->GetPersistentId(), activateDrag);
+        if (session->sessionStage_) {
+            session->sessionStage_->SetDragActivated(activateDrag);
         }
     }, __func__);
     return WMError::WM_OK;

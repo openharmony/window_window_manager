@@ -1477,6 +1477,19 @@ std::optional<bool> Session::GetClientDragEnable() const
     return clientDragEnable_;
 }
 
+void Session::SetDragActivated(bool dragActivated)
+{
+    dragActivated_ = dragActivated;
+}
+
+bool Session::IsDragAccessible() const
+{
+    bool isDragEnabled = GetSessionProperty()->GetDragEnabled();
+    TLOGD(WmsLogTag::WMS_LAYOUT, "PersistentId: %{public}d, dragEnabled: %{public}d, dragActivate: %{public}d",
+        GetPersistentId(), isDragEnabled, dragActivated_);
+    return isDragEnabled && dragActivated_;
+}
+
 bool Session::IsScreenLockWindow() const
 {
     return isScreenLockWindow_;
@@ -2415,6 +2428,7 @@ int32_t Session::GetRotateAnimationDuration()
 void Session::UnregisterSessionChangeListeners()
 {
     sessionStateChangeFunc_ = nullptr;
+    keyboardStateChangeFunc_ = nullptr;
     sessionFocusableChangeFunc_ = nullptr;
     sessionTouchableChangeFunc_ = nullptr;
     clickFunc_ = nullptr;
@@ -2485,7 +2499,10 @@ void Session::NotifySessionStateChange(const SessionState& state)
         }
         TLOGND(WmsLogTag::WMS_LIFE, "NotifySessionStateChange, [state: %{public}u, persistent: %{public}d]",
             static_cast<uint32_t>(state), session->GetPersistentId());
-        if (session->sessionStateChangeFunc_) {
+        if (session->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT &&
+            session->keyboardStateChangeFunc_) {
+            session->keyboardStateChangeFunc_(state, session->GetSessionProperty()->GetKeyboardViewMode());
+        } else if (session->sessionStateChangeFunc_) {
             session->sessionStateChangeFunc_(state);
         } else {
             TLOGNI(WmsLogTag::WMS_LIFE, "sessionStateChangeFunc is null");
@@ -3123,12 +3140,22 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
 {
     bool isMainFloating =
         GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && WindowHelper::IsMainWindow(GetWindowType());
-    bool isParentFloating = WindowHelper::IsSubWindow(GetWindowType()) && GetParentSession() != nullptr &&
+    bool isParentFloating = SessionHelper::IsNonSecureToUIExtension(GetWindowType()) &&
+        GetParentSession() != nullptr &&
         GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     bool isMidScene = GetIsMidScene();
     bool isPhoneOrPadNotFreeMultiWindow =
         systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !systemConfig_.IsFreeMultiWindowMode());
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
+}
+
+void Session::SetKeybaordStateChangeListener(const NotifyKeyboardStateChangeFunc& func)
+{
+    keyboardStateChangeFunc_ = func;
+    if (state_ == SessionState::STATE_DISCONNECT) {
+        return;
+    }
+    NotifySessionStateChange(state_);
 }
 
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
@@ -3719,8 +3746,8 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
         return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    auto scaleValue = (scale < 0.0f || scale < std::numeric_limits<float>::min()) ?
-        snapshotScale_ : scale;
+    auto scaleValue = (!MathHelper::GreatNotEqual(scale, 0.0f) ||
+        !MathHelper::GreatNotEqual(scale, std::numeric_limits<float>::min())) ? snapshotScale_ : scale;
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,

@@ -94,6 +94,7 @@ using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(const SessionState& state, const KeyboardViewMode& mode)>;
 
 class ILifecycleListener {
 public:
@@ -409,6 +410,7 @@ public:
      * Keyboard Window
      */
     bool CheckEmptyKeyboardAvoidAreaIfNeeded() const;
+    void SetKeybaordStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -565,12 +567,14 @@ public:
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
     void ResetDirtyFlags();
+    void SetDragActivated(bool dragActivated);
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
+    bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
 
@@ -779,6 +783,11 @@ protected:
     std::atomic_bool mainUIStateDirty_ = false;
     static bool isScbCoreEnabled_;
 
+    /*
+     * Keyboard Window
+     */
+    NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
+
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
@@ -887,6 +896,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    bool dragActivated_ = true;
     SingleHandTransform singleHandTransform_;
 
     /*

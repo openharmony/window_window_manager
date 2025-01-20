@@ -2438,7 +2438,8 @@ sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
     return reply.ReadStrongParcelable<FoldCreaseRegion>();
 }
 
-DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     WLOGFI("ScreenSessionManagerProxy::MakeUniqueScreen");
     sptr<IRemoteObject> remote = Remote();
@@ -2469,6 +2470,7 @@ DMError ScreenSessionManagerProxy::MakeUniqueScreen(const std::vector<ScreenId>&
         WLOGFE("MakeUniqueScreen fail: SendRequest failed");
         return DMError::DM_ERROR_NULLPTR;
     }
+    reply.ReadUInt64Vector(&displayIds);
     return static_cast<DMError>(reply.ReadInt32());
 }
 
@@ -3557,5 +3559,35 @@ int32_t ScreenSessionManagerProxy::SetScreenOnDelayTime(int32_t delay)
         return 0;
     }
     return reply.ReadInt32();
+}
+
+DMError ScreenSessionManagerProxy::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUInt64Vector(screenIds)) {
+        TLOGE(WmsLogTag::DMS, "Write screenIds failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (!data.WriteBool(isEnable)) {
+        TLOGE(WmsLogTag::DMS, "Write isEnable failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_SCREEN_SKIP_PROTECTED_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
 }
 } // namespace OHOS::Rosen

@@ -101,8 +101,7 @@ private:
     int HandleTransferAccessibilityEvent(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionEventAsync(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyExtensionDetachToDisplay(MessageParcel& data, MessageParcel& reply);
-    int HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply);
-    virtual void NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply) {}
+    int HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     // PictureInPicture
     int HandleNotifyPiPWindowPrepareClose(MessageParcel& data, MessageParcel& reply);
@@ -113,6 +112,9 @@ private:
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
+
+    // Keyboard
+    int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

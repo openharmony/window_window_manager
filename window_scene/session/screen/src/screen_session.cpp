@@ -742,6 +742,16 @@ void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
     property_.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), foldDisplayMode);
 }
 
+void ScreenSession::UpdatePhysicalTouchBounds(bool enable)
+{
+    property_.SetPhysicalTouchBounds(enable);
+}
+
+void ScreenSession::UpdateCurrentOffScreenRendering(bool enable)
+{
+    property_.SetCurrentOffScreenRendering(enable);
+}
+
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
     FoldDisplayMode foldDisplayMode)
 {
@@ -833,6 +843,14 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
+}
+
+void ScreenSession::UpdateBounds(RRect bounds)
+{
+    property_.SetBounds(bounds);
+    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f]",
+        property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
+        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight());
 }
 
 void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
@@ -1054,10 +1072,6 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
-    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
-        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
-        rotation = static_cast<Rotation>(temp);
-    }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN
@@ -1066,6 +1080,12 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        isVerticalScreen = true;
+    }
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
+    (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        rotation = static_cast<Rotation>(temp);
         isVerticalScreen = true;
     }
     switch (rotation) {
@@ -1090,7 +1110,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
 
 DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
-    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
+    (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
         uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
         rotation = static_cast<Rotation>(temp);
     }
@@ -1841,5 +1862,15 @@ int32_t ScreenSession::GetApiVersion()
     }
     lastRequestTime = currentTime;
     return apiVersion;
+}
+
+void ScreenSession::SetShareProtect(bool needShareProtect)
+{
+    needShareProtect_ = needShareProtect;
+}
+
+bool ScreenSession::GetShareProtect()
+{
+    return needShareProtect_;
 }
 } // namespace OHOS::Rosen

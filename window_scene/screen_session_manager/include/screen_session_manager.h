@@ -124,7 +124,7 @@ public:
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
                                ScreenId& screenGroupId) override;
     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds) override;
-    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds) override;
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId) override;
     virtual void RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens) override;
     virtual std::shared_ptr<Media::PixelMap> GetDisplaySnapshot(DisplayId displayId,
@@ -274,6 +274,7 @@ public:
     void OnTentModeChanged(bool isTentMode);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
+    void RegisterSettingscreenSkipProtectedWindowObserver();
 
     void OnConnect(ScreenId screenId) override {}
     void OnDisconnect(ScreenId screenId) override {}
@@ -362,6 +363,8 @@ public:
         DmErrorCode* errorCode) override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
     void MultiScreenChangeOuter(const std::string& outerFlag);
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
+
 protected:
     ScreenSessionManager();
     virtual ~ScreenSessionManager() = default;
@@ -397,6 +400,10 @@ private:
     bool GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
         MultiScreenPositionOptions& mainScreenOption, MultiScreenPositionOptions& secondaryScreenOption);
     void RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession);
+    void SetExtendedScreenFallbackPlan(ScreenId screenId);
+    void NotifyAndSetPhysicalScreenResolution(ScreenId screenId);
+    void AdjustExtendResolution(ScreenId screenId);
+    void RecoverExtendResolution(ScreenId screenId);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
@@ -445,6 +452,7 @@ private:
     bool IsExtendMode();
     void SetScreenCorrection();
     bool IsScreenCasting();
+    void SetScreenSkipProtectedWindowInner();
 
     /**
      * On/Off screen
@@ -504,6 +512,7 @@ private:
     std::recursive_mutex mutex_;
     std::recursive_mutex displayInfoMutex_;
     std::shared_mutex hookInfoMutex_;
+    std::mutex shareProtectMutex_;
 
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
     ScreenIdManager screenIdManager_;
