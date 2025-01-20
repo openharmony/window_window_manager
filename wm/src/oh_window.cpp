@@ -95,7 +95,7 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 {
     if (isShow == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "isShow is null");
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+        return WindowManager_ErrorCode::SERVICE_ERROR;
     }
     auto eventHandler = GetMainEventHandler();
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::OK;
