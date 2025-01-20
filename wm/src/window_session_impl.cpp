@@ -1801,10 +1801,6 @@ WMError WindowSessionImpl::SetAvoidAreaOption(uint32_t avoidAreaOption)
         TLOGE(WmsLogTag::WMS_IMMS, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "window type is not supported, type %{public}d", GetType());
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
     property_->SetAvoidAreaOption(avoidAreaOption);
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d, set option %{public}d",
         GetPersistentId(), avoidAreaOption);
@@ -1817,10 +1813,6 @@ WMError WindowSessionImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption)
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_IMMS, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "window type is not supported, type %{public}d", GetType());
-        return WMError::WM_ERROR_INVALID_CALLING;
     }
     avoidAreaOption = property_->GetAvoidAreaOption();
     return WMError::WM_OK;
