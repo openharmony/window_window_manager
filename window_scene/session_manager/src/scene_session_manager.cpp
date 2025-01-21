@@ -5545,7 +5545,7 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
     return ShiftFocus(DEFAULT_DISPLAY_ID, nextSession, FocusChangeReason::WIND);
 }
 
-WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId, sptr<FocusGroup> focusGroup)
+WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup)
 {
     // basic focus rule
     if (persistentId == INVALID_SESSION_ID) {
@@ -5567,8 +5567,8 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId, sptr<F
  * @note @window.focus
  * When high zOrder System Session unfocus, check if the last focused app window can focus.
  */
-bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
-    sptr<SceneSession> focusedSession, sptr<SceneSession> nextSession)
+bool SceneSessionManager::CheckLastFocusedAppSessionFocus(const sptr<SceneSession>& focusedSession,
+    const sptr<SceneSession>& nextSession)
 {
     if (focusedSession == nullptr || nextSession == nullptr) {
         return false;
@@ -5610,8 +5610,8 @@ bool SceneSessionManager::CheckLastFocusedAppSessionFocus(
  *
  * @return true: traversed downwards, false: not.
  */
-bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession> requestSceneSession,
-    sptr<SceneSession> focusedSession, bool includingAppSession)
+bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(const sptr<SceneSession>& requestSceneSession,
+    const sptr<SceneSession>& focusedSession, bool includingAppSession)
 {
     uint32_t requestSessionZOrder = requestSceneSession->GetZOrder();
     uint32_t focusedSessionZOrder = focusedSession->GetZOrder();
@@ -5637,7 +5637,8 @@ bool SceneSessionManager::CheckFocusIsDownThroughBlockingType(sptr<SceneSession>
     return false;
 }
 
-bool SceneSessionManager::CheckTopmostWindowFocus(sptr<SceneSession> focusedSession, sptr<SceneSession> sceneSession)
+bool SceneSessionManager::CheckTopmostWindowFocus(const sptr<SceneSession>& focusedSession,
+    const sptr<SceneSession>& sceneSession)
 {
     bool isFocusedMainSessionTopmost =
         focusedSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW && focusedSession->IsTopmost();
@@ -5651,7 +5652,7 @@ bool SceneSessionManager::CheckTopmostWindowFocus(sptr<SceneSession> focusedSess
     return false;
 }
 
-bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession> sceneSession)
+bool SceneSessionManager::CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
 {
     if ((sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
          (SessionHelper::IsSubWindow(sceneSession->GetWindowType()) && !sceneSession->IsModal())) &&
@@ -5663,8 +5664,8 @@ bool SceneSessionManager::CheckRequestFocusImmdediately(sptr<SceneSession> scene
     return false;
 }
 
-bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(sptr<SceneSession> focusedSession,
-    sptr<SceneSession> sceneSession, FocusChangeReason reason)
+bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
+    const sptr<SceneSession>& sceneSession, FocusChangeReason reason)
 {
     if (focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_GLOBAL_SEARCH &&
         focusedSession->GetWindowType() != WindowType::WINDOW_TYPE_NEGATIVE_SCREEN) {
@@ -5676,7 +5677,7 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(sptr<SceneSessi
     return sceneSession->GetZOrder() < focusedSession->GetZOrder();
 }
 
-WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, sptr<SceneSession> sceneSession,
+WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, const sptr<SceneSession>& sceneSession,
     bool byForeground,FocusChangeReason reason)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
@@ -5734,7 +5735,7 @@ WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, sptr
     return WSError::WS_OK;
 }
 
-bool SceneSessionManager::IsParentSessionVisible(sptr<SceneSession> session)
+bool SceneSessionManager::IsParentSessionVisible(const sptr<SceneSession>& session)
 {
     if (WindowHelper::IsSubWindow(session->GetWindowType()) ||
         session->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
@@ -5898,7 +5899,8 @@ void SceneSessionManager::SetAbilityManagerCollaboratorRegisteredFunc(
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
-WSError SceneSessionManager::ShiftFocus(DisplayId displayId, sptr<SceneSession> nextSession, FocusChangeReason reason)
+WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession,
+    FocusChangeReason reason)
 {
     // unfocus
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
@@ -5934,7 +5936,8 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, sptr<SceneSession> 
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, sptr<SceneSession> sceneSession, bool isFocused)
+void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession,
+    bool isFocused)
 {
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
@@ -5969,8 +5972,8 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, sptr<SceneSessi
     }
 }
 
-void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession> sceneSession, bool isFocused,
-    sptr<FocusGroup> focusGroup)
+void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
+    const sptr<FocusGroup>& focusGroup)
 {
     auto lastFocusedSessionId = focusGroup->GetLastFocusedSessionId();
     if (sceneSession == nullptr) {
@@ -6027,7 +6030,8 @@ int32_t SceneSessionManager::NotifyRssThawApp(const int32_t uid, const std::stri
     return ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
 }
 
-void SceneSessionManager::NotifyFocusStatusByMission(sptr<SceneSession> prevSession, sptr<SceneSession> currSession)
+void SceneSessionManager::NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession,
+    const sptr<SceneSession>& currSession)
 {
     if (prevSession && !prevSession->GetSessionInfo().isSystem_) {
         TLOGD(WmsLogTag::WMS_FOCUS, "Unfocused, id: %{public}d", prevSession->GetMissionId());
@@ -6039,7 +6043,7 @@ void SceneSessionManager::NotifyFocusStatusByMission(sptr<SceneSession> prevSess
     }
 }
 
-void SceneSessionManager::NotifyUnFocusedByMission(sptr<SceneSession> sceneSession)
+void SceneSessionManager::NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession && !sceneSession->GetSessionInfo().isSystem_) {
         TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", sceneSession->GetMissionId());
@@ -6047,7 +6051,7 @@ void SceneSessionManager::NotifyUnFocusedByMission(sptr<SceneSession> sceneSessi
     }
 }
 
-bool SceneSessionManager::MissionChanged(sptr<SceneSession> prevSession, sptr<SceneSession> currSession)
+bool SceneSessionManager::MissionChanged(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession)
 {
     if (prevSession == nullptr && currSession == nullptr) {
         return false;
@@ -6451,7 +6455,7 @@ void SceneSessionManager::RegisterSessionInfoChangeNotifyManagerFunc(sptr<SceneS
     });
 }
 
-void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession> sceneSession)
+void SceneSessionManager::RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
         WLOGFE("session is nullptr");
