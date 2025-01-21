@@ -695,10 +695,6 @@ private:
     /*
      * Window Focus
      */
-    sptr<WindowFocusController> windowFocusController_;
-    FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
-    bool needBlockNotifyFocusStatusUntilForeground_ {false};
-    bool needBlockNotifyUnfocusStatus_ {false};
     WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestSessionFocusImmediately(int32_t persistentId);
@@ -964,6 +960,14 @@ private:
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
     bool isScreenLocked_ {false};
     bool isPrepareTerminateEnable_ {false};
+
+    /*
+     * Window Focus
+     */
+    sptr<WindowFocusController> windowFocusController_;
+    FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
+    bool needBlockNotifyFocusStatusUntilForeground_ {false};
+    bool needBlockNotifyUnfocusStatus_ {false};
 
     /*
      * DFX
