@@ -22,8 +22,6 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
-#include "mock/mock_resource_manager.h"
-#include "mock/mock_root_scene_context.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
 #include "session_manager.h"
@@ -75,11 +73,6 @@ public:
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
-    std::shared_ptr<AbilityRuntime::RootSceneContextMocker> mockRootSceneContext_;
-    std::string path;
-    uint32_t bgColor;
-    AppExecFwk::AbilityInfo abilityInfo;
-
 private:
 };
 
@@ -97,35 +90,12 @@ void SSMgrSpecificWindowTest::TearDownTestCase()
 
 void SSMgrSpecificWindowTest::SetUp()
 {
-    mockRootSceneContext_ = std::make_shared<AbilityRuntime::RootSceneContextMocker>();
-    path = "testPath";
-    bgColor = 0;
-    abilityInfo.bundleName = "testBundle";
-    abilityInfo.moduleName = "testmodule";
-    abilityInfo.resourcePath = "/test/resource/path";
-    abilityInfo.startWindowBackgroundId = 1;
-    abilityInfo.startWindowIconId = 1;
 }
 
 void SSMgrSpecificWindowTest::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
 }
-
-std::shared_ptr<Global::Resource::ResourceManagerMocker>
-    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
-
-class SceneSessionManagerMocker : public SceneSessionManager {
-public:
-    SceneSessionManagerMocker() {};
-    ~SceneSessionManagerMocker() {};
-
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager(const AppExecFwk::AbilityInfo& abilityInfo)
-    {
-        return mockResourceManager_;
-    };
-};
-std::shared_ptr<SceneSessionManagerMocker> mockSceneSessionManager_ = std::make_shared<SceneSessionManagerMocker>();
 
 namespace {
 /**

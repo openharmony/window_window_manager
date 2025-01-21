@@ -2137,17 +2137,24 @@ void Session::HandlePointDownDialog()
 
 WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
-    if (isExecuteDelayRaise) {
-        return WSError::WS_OK;
-    }
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
-        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (raiseEnabled) {
+    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
+    bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    if (isExecuteDelayRaise) {
+        if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            RaiseToAppTopForPointDown();
+        }
+        if (!raiseEnabled && parentSession) {
+            parentSession->NotifyClick(!IsScbCoreEnabled());
+        }
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled && isPointDown) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
@@ -2193,6 +2200,11 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (!isExecuteDelayRaise) {
         PresentFoucusIfNeed(pointerAction);
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        if (!isFocused_ && GetFocusable()) {
+            NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
+        }
+        NotifyClick();
     }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
@@ -3197,13 +3209,27 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
-void Session::SetKeybaordStateChangeListener(const NotifyKeyboardStateChangeFunc& func)
+void Session::SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func)
 {
-    keyboardStateChangeFunc_ = func;
-    if (state_ == SessionState::STATE_DISCONNECT) {
-        return;
-    }
-    NotifySessionStateChange(state_);
+    PostTask([weakThis = wptr(this), func, where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr || func == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or func is null", where);
+            return;
+        }
+        session->keyboardStateChangeFunc_ = func;
+        auto newState = session->GetSessionState(); // read and write state should in one thread
+        if (newState == SessionState::STATE_ACTIVE) {
+            newState = SessionState::STATE_FOREGROUND;
+        } else if (newState == SessionState::STATE_INACTIVE) {
+            newState = SessionState::STATE_BACKGROUND;
+        } else if (newState == SessionState::STATE_DISCONNECT) {
+            return;
+        }
+        session->NotifySessionStateChange(newState);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s id: %{public}d, state_: %{public}d, newState: %{public}d",
+            where, session->GetPersistentId(), session->GetSessionState(), newState);
+    }, __func__);
 }
 
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,

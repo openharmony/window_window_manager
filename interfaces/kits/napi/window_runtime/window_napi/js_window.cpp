@@ -47,8 +47,9 @@ constexpr int32_t MAX_DECOR_HEIGHT = 112;
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
-constexpr size_t TWO_PARAMS_SIZE = 2;
 constexpr size_t INDEX_THREE = 3;
+constexpr size_t ONE_PARAMS_SIZE = 1;
+constexpr size_t TWO_PARAMS_SIZE = 2;
 constexpr size_t THREE_PARAMS_SIZE = 3;
 constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr size_t ARG_COUNT_ZERO = 0;
@@ -616,7 +617,7 @@ napi_value JsWindow::SetRaiseByClickEnabled(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::HideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
-    WLOGI("HideNonSystemFloatingWindows");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnHideNonSystemFloatingWindows(env, info) : nullptr;
 }
@@ -767,6 +768,20 @@ napi_value JsWindow::SetCornerRadius(napi_env env, napi_callback_info info)
     WLOGI("SetCornerRadius");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetCornerRadius(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowCornerRadius(env, info) : nullptr;
+}
+
+napi_value JsWindow::GetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowCornerRadius(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetShadow(napi_env env, napi_callback_info info)
@@ -4562,58 +4577,53 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
 
 napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
-    WMError errCode = WMError::WM_OK;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+    if (argc < ONE_PARAMS_SIZE || argc > TWO_PARAMS_SIZE) { // 2: maximum params num
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool shouldHide = false;
-    if (errCode == WMError::WM_OK) {
-        napi_value nativeVal = argv[0];
-        if (nativeVal == nullptr) {
-            WLOGFE("Failed to convert parameter to shouldHide");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else {
-            napi_get_value_bool(env, nativeVal, &shouldHide);
-        }
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], shouldHide)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to shouldHide");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, shouldHide, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "window is nullptr."));
-                return;
-            }
-            if (weakWindow->IsFloatingWindowAppType()) {
-                WLOGFE("HideNonSystemFloatingWindows is not allowed since window is app floating window");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-                    "HideNonSystemFloatingWindows is not allowed since window is app window"));
-                return;
-            }
-            if (errCode != WMError::WM_OK) {
-                WLOGFE("Invalidate params");
-                task.Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
-                return;
-            }
-            WMError ret = weakWindow->HideNonSystemFloatingWindows(shouldHide);
-            if (ret == WMError::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Hide non-system floating windows failed"));
-            }
-            WLOGI("Window [%{public}u, %{public}s] hide non-system floating windows end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-        };
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value lastParam = (argc <= ONE_PARAMS_SIZE) ? nullptr :
+        (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::HideNonSystemFloatingWindows",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), shouldHide, env,
+        task = napiAsyncTask, where = __func__] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
+            return;
+        }
+        if (window->IsFloatingWindowAppType()) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is app floating window", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                "HideNonSystemFloatingWindows is not allowed since window is app window"));
+            return;
+        }
+        WMError ret = window->HideNonSystemFloatingWindows(shouldHide);
+        if (ret != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
+                "Hide non-system floating windows failed"));
+            return;
+        }
+        task->Resolve(env, NapiGetUndefined(env));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
+            "%{public}s end. Window [%{public}u, %{public}s]",
+            where, window->GetWindowId(), window->GetWindowName().c_str());
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+    }
     return result;
 }
 
@@ -5701,6 +5711,88 @@ napi_value JsWindow::OnSetCornerRadius(napi_env env, napi_callback_info info)
     TLOGI(WmsLogTag::WMS_SYSTEM, "Window [%{public}u, %{public}s] set success, radius=%{public}f",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), radius);
     return NapiGetUndefined(env);
+}
+
+napi_value JsWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    double radius = 0.0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], radius)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to radius");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    float cornerRadius = static_cast<float>(radius);
+    if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The corner radius is less than zero.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakWindow = wptr(windowToken_), where, env, task = napiAsyncTask, cornerRadius] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowCornerRadius(cornerRadius));
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "Set failed!");
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set failed."));
+        } else {
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] set success.",
+                window->GetWindowId(), window->GetWindowName().c_str());
+            task->Resolve(env, NapiGetUndefined(env));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > ARG_COUNT_ZERO) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WindowToken is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsFloatOrSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+
+    float cornerRadius = 0.0f;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetWindowCornerRadius(cornerRadius));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get failed, cornerRadius: %{public}f.", cornerRadius);
+        return NapiThrowError(env, ret);
+    }
+    napi_value jsCornerRadius = CreateJsValue(env, cornerRadius);
+    if (jsCornerRadius == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "jsCornerRadius is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] Get success, cornerRadius=%{public}f.",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), cornerRadius);
+    return jsCornerRadius;
 }
 
 napi_value JsWindow::OnSetShadow(napi_env env, napi_callback_info info)
@@ -7252,6 +7344,12 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowToken is nullptr.");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > ARG_COUNT_ZERO) {
+        return OnStartMoveWindowWithCoordinate(env, argc, argv);
+    }
     std::shared_ptr<WmErrorCode> err = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     const char* const funcName = __func__;
     NapiAsyncTask::ExecuteCallback execute = [this, weakToken = wptr<Window>(windowToken_), err, funcName] {
@@ -7290,6 +7388,56 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnStartMoving",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "windowToken is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (argc != ARG_COUNT_TWO) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t offsetX;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], offsetX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "failed to convert parameter to offsetX");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t offsetY;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], offsetY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "failed to convert parameter to offsetY");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), offsetX, offsetY,
+                      env, task = napiAsyncTask, where = __func__] {
+        auto window = windowToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WindowType windowType = window->GetType();
+        if (!WindowHelper::IsSystemWindow(windowType) && !WindowHelper::IsAppWindow(windowType)) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s invalid window type:%{public}u", where, windowType);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING));
+            return;
+        }
+        WmErrorCode ret = window->StartMoveWindowWithCoordinate(offsetX, offsetY);
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "move window failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, std::move(asyncTask), napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
@@ -7722,6 +7870,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getTransitionController", moduleName, JsWindow::GetTransitionController);
     BindNativeFunction(env, object, "snapshot", moduleName, JsWindow::Snapshot);
     BindNativeFunction(env, object, "setCornerRadius", moduleName, JsWindow::SetCornerRadius);
+    BindNativeFunction(env, object, "setWindowCornerRadius", moduleName, JsWindow::SetWindowCornerRadius);
+    BindNativeFunction(env, object, "getWindowCornerRadius", moduleName, JsWindow::GetWindowCornerRadius);
     BindNativeFunction(env, object, "setShadow", moduleName, JsWindow::SetShadow);
     BindNativeFunction(env, object, "setWindowShadowRadius", moduleName, JsWindow::SetWindowShadowRadius);
     BindNativeFunction(env, object, "setBlur", moduleName, JsWindow::SetBlur);
