@@ -363,7 +363,8 @@ private:
     /*
      * PC Window
      */
-    bool isExecuteDelayRaise_ = false;
+    
+    bool isExecuteDelayRaise_ = false; // whether in process of delay raise during cross window drag and drop
 
     /*
      * Window Input Event
