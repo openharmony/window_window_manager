@@ -309,6 +309,7 @@ private:
     int32_t GetApiVersion();
     void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
+    std::mutex mirrorScreenRegionMutex_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

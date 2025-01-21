@@ -242,17 +242,20 @@ void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screen
 
 void ScreenSession::SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion)
 {
+    std::lock_guard<std::mutex> lock(mirrorScreenRegionMutex_);
     mirrorScreenRegion_ = std::make_pair(screenId, screenRegion);
 }
 
 std::pair<ScreenId, DMRect> ScreenSession::GetMirrorScreenRegion()
 {
+    std::lock_guard<std::mutex> lock(mirrorScreenRegionMutex_);
     return mirrorScreenRegion_;
 }
 
 void ScreenSession::EnableMirrorScreenRegion()
 {
-    auto& rect = mirrorScreenRegion_.second;
+    const auto& mirrorScreenRegionPair = GetMirrorScreenRegion();
+    const auto& rect = mirrorScreenRegionPair.second;
     ScreenId screenId = INVALID_SCREEN_ID;
     if (isPhysicalMirrorSwitch_) {
         screenId = screenId_;

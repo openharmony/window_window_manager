@@ -347,7 +347,7 @@ void SecondaryDisplayFoldPolicy::SetMainScreenRegion(DMRect& mainScreenRegion)
         mainScreenRegion.height_ = screenParams_[MAIN_STATUS_WIDTH];
     } else if (currentDisplayMode_ == FoldDisplayMode::FULL) {
         mainScreenRegion.posX_ = 0;
-        mainScreenRegion.posY_ = screenParams_[FULL_STATUS_OFFSET_X];
+        mainScreenRegion.posY_ = static_cast<int>(screenParams_[FULL_STATUS_OFFSET_X]);
         mainScreenRegion.width_ = screenParams_[SCREEN_HEIGHT];
         mainScreenRegion.height_ = screenParams_[FULL_STATUS_WIDTH];
     } else if (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
