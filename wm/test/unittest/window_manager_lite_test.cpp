@@ -932,7 +932,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, Function | Smal
     windowManager.pImpl_->pipStateChangedListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(nullptr));
 
-    sptr<IPiPStateChangedListener> listener = sptr<IPiPStateChangedListener>::MakeSptr();
+    sptr<IPiPStateChangedListener> listener = sptr<TestPiPStateChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(listener));
