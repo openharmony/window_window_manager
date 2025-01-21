@@ -388,8 +388,8 @@ private:
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
-    void OnKeyboardStateChange(const SessionState& state, const KeyboardViewMode& mode);
-    void OnKeyboardViewModeChange(const KeyboardViewMode& mode);
+    void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
+    void OnKeyboardViewModeChange(KeyboardViewMode mode);
 
     /*
      * Window Property

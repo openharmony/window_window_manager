@@ -277,33 +277,28 @@ void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
     if (foldScreenPolicy_->GetScreenParams().size() != PARAMS_VECTOR_SIZE) {
         return;
     }
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t width = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT];
+    uint32_t height = 0;
     if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::FULL) {
-        OHOS::Rect rectCur{
-            .x = 0,
-            .y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X],
-            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
-            .h = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH],
-        };
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X];
+        height = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH];
+    } else if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        height = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH];
+    } else if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        height = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH];
+    } else {
+        TLOGW(WmsLogTag::DMS, "displayMode[%{public}u] unknown.", foldScreenPolicy_->currentDisplayMode_);
+        return;
     }
-    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::MAIN) {
-        OHOS::Rect rectCur{
-            .x = 0,
-            .y = 0,
-            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
-            .h = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH],
-        };
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
-    }
-    if (foldScreenPolicy_->currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
-        OHOS::Rect rectCur{
-            .x = 0,
-            .y = 0,
-            .w = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT],
-            .h = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH],
-        };
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
-    }
+    OHOS::Rect rectCur {
+        .x = x,
+        .y = y,
+        .w = width,
+        .h = height,
+    };
+    RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
     isPowerRectExe_ = true;
 }
 

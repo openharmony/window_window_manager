@@ -748,6 +748,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     if (property_->GetCompatibleModeEnableInPad()) {
         HandleEventForCompatibleMode(pointerEvent, pointerItem);
     }
+    lastPointerEvent_ = pointerEvent;
     if (isPointDown) {
         auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
         if (displayInfo == nullptr) {
@@ -1181,9 +1182,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
 
 WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}d", static_cast<uint32_t>(mode));
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}u", static_cast<uint32_t>(mode));
     if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}d. Use default view mode",
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default view mode",
             static_cast<uint32_t>(mode));
         mode = KeyboardViewMode::NON_IMMERSIVE_MODE;
     }
@@ -2722,11 +2723,60 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
     }
 }
 
+WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
+{
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    const auto& windowRect = GetRect();
+    if (offsetX < 0 || offsetX > static_cast<int32_t>(windowRect.width_) ||
+        offsetY < 0 || offsetY > static_cast<int32_t>(windowRect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "offset not in window");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSError errorCode;
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (lastPointerEvent_ != nullptr &&
+        lastPointerEvent_->GetPointerItem(lastPointerEvent_->GetPointerId(), pointerItem)) {
+        int32_t lastDisplayX = pointerItem.GetDisplayX();
+        int32_t lastDisplayY = pointerItem.GetDisplayY();
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
+            " lastDisplayY:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY);
+        errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY);
+    } else {
+        errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    switch (errorCode) {
+        case WSError::WS_ERROR_REPEAT_OPERATION: {
+            return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+        }
+        case WSError::WS_ERROR_NULLPTR: {
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        default: {
+            return WmErrorCode::WM_OK;
+        }
+    }
+}
+
 WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 {
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto hostSession = GetHostSession();
     if (!hostSession) {
@@ -3794,10 +3844,10 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
 
 WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}d",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
         static_cast<uint32_t>(mode));
     if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "invalid view mode!");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (mode == property_->GetKeyboardViewMode()) {
@@ -3809,7 +3859,7 @@ WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ != WindowState::STATE_SHOWN) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard is no shown");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 

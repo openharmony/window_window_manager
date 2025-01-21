@@ -1279,6 +1279,36 @@ HWTEST_F(MoveDragControllerTest, OnChange, Function | SmallTest | Level1)
     moveDragController->OnChange(screenId);
     ASSERT_EQ(moveDragController->moveDragIsInterrupted_, true);
 }
+
+/**
+ * @tc.name: StopMoving
+ * @tc.desc: test function : StopMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, StopMoving, Function | SmallTest | Level1)
+{
+    moveDragController->SetStartMoveFlag(true);
+    moveDragController->StopMoving();
+    ASSERT_EQ(false, moveDragController->GetStartMoveFlag());
+    ASSERT_EQ(false, moveDragController->hasPointDown_);
+}
+
+/**
+ * @tc.name: HandleStartMovingWithCoordinate
+ * @tc.desc: test function : HandleStartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, HandleStartMovingWithCoordinate, Function | SmallTest | Level1)
+{
+    WSRect winRect = { 200, 200, 1000, 1000 };
+    moveDragController->HandleStartMovingWithCoordinate(100, 50, 300, 500, winRect);
+    ASSERT_EQ(300, moveDragController->moveTempProperty_.lastDownPointerPosX_);
+    ASSERT_EQ(500, moveDragController->moveTempProperty_.lastDownPointerPosY_);
+    ASSERT_EQ(300, moveDragController->moveTempProperty_.lastMovePointerPosX_);
+    ASSERT_EQ(500, moveDragController->moveTempProperty_.lastMovePointerPosY_);
+    ASSERT_EQ(100, moveDragController->moveTempProperty_.lastDownPointerWindowX_);
+    ASSERT_EQ(50, moveDragController->moveTempProperty_.lastDownPointerWindowY_);
+}
 }
 }
 }

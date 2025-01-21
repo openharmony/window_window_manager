@@ -375,6 +375,7 @@ private:
     napi_value OnMaximize(napi_env env, napi_callback_info info);
     napi_value OnSetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     napi_value OnRestore(napi_env env, napi_callback_info info);
+    napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

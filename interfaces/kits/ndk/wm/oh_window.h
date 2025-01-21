@@ -217,6 +217,20 @@ int32_t OH_WindowManager_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
  */
 int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable);
 
+/**
+ * @brief Set focusable property of window.
+ *
+ * @param windowId WindowId when window is created.
+ * @param isFocusable Window can be focused or not.
+ * @return Returns the result code.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY} the window manager service works abnormally.
+ * @since 16
+ */
+int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable);
+
 #ifdef __cplusplus
 }
 #endif

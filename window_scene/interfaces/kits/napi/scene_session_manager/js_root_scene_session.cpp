@@ -269,8 +269,8 @@ static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse);
+        "appIndex %{public}d, reuse %{public}d, specifiedFlag %{public}s", info.bundleName_.c_str(),
+        info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_, info.reuse, info.specifiedFlag_.c_str());
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
@@ -341,13 +341,14 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             return nullptr;
         }
 
-        if (info.reuse || info.isAtomicService_) {
+        if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
                     info.sessionAffinity);
             } else {
                 SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_ };
+                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
+                    info.specifiedFlag_ };
                 sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
             }
         }

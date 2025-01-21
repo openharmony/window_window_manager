@@ -254,8 +254,8 @@ private:
     DMRect availableArea_;
 
     RRect physicalTouchBounds_;
-    int32_t inputOffsetX_;
-    int32_t inputOffsetY_;
+    int32_t inputOffsetX_ { 0 };
+    int32_t inputOffsetY_ { 0 };
 
     // OffScreenRender
     bool isCurrentOffScreenRendering_ { false };
