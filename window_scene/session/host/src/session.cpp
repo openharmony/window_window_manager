@@ -2137,17 +2137,24 @@ void Session::HandlePointDownDialog()
 
 WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
-    if (isExecuteDelayRaise) {
-        return WSError::WS_OK;
-    }
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
-        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (raiseEnabled) {
+    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
+    bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    if (isExecuteDelayRaise) {
+        if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            RaiseToAppTopForPointDown();
+        }
+        if (!raiseEnabled && parentSession) {
+            parentSession->NotifyClick(!IsScbCoreEnabled());
+        }
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled && isPointDown) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
@@ -2193,6 +2200,11 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (!isExecuteDelayRaise) {
         PresentFoucusIfNeed(pointerAction);
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        if (!isFocused_ && GetFocusable()) {
+            NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
+        }
+        NotifyClick();
     }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
