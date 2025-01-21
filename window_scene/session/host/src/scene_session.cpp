@@ -3063,17 +3063,21 @@ void SceneSession::ThrowSlipDirectly(const WSRectF& velocity)
             TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s not movable", where);
             return;
         }
-        const bool isFullScreen = session->IsFullScreenMovable();
-        controller->RecordStartMoveRectDirectly(session->GetSessionRect(), isFullScreen, velocity);
-        WSRect rect = session->GetSessionRect();
-        if (!session->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::UNDEFINED)) {
+        bool isFullScreen = session->IsFullScreenMovable();
+        controller->RecordStartMoveRectDirectly(session->GetSessionRect(), velocity, isFullScreen);
+        const WSRect& oriGlobalRect = session->GetSessionGlobalRect();
+        WSRect globalRect = oriGlobalRect;
+        if (!session->MoveUnderInteriaAndNotifyRectChange(globalRect, SizeChangeReason::UNDEFINED)) {
             TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s no throw", where);
             return;
         }
         if (isFullScreen) {
             session->UpdateFullScreenWaterfallMode(false);
         }
-        session->NotifySessionRectChange(rect, SizeChangeReason::UNDEFINED);
+        WSRect rect = session->GetSessionRect();
+        rect.posX_ += globalRect.posX_ - oriGlobalRect.posX_;
+        rect.posY_ += globalRect.posY_ - oriGlobalRect.posY_;
+        session->NotifySessionRectChange(globalRect, SizeChangeReason::UNDEFINED);
     }, __func__);
 }
 

@@ -38,10 +38,11 @@ public:
     bool IsAllowThrowSlip(DisplayId displayId);
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
-    void RecordStartMoveRectDirectly(const WSRect& rect, bool isStartFullScreen, const WSRectF& velocity);
+    void RecordStartMoveRectDirectly(const WSRect& rect, const WSRectF& velocity, bool isStartFullScreen);
     void RecordMoveRects(const WSRect& rect);
     bool ThrowSlip(DisplayId displayId, WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
-    void ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect, int32_t topAvoidHeight, int32_t botAvoidHeight);
+    void ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect,
+        int32_t topAvoidHeight, int32_t botAvoidHeight);
     bool IsThrowSlipDirectly() const;
     bool IsStartFullScreen();
     void ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);

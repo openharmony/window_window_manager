@@ -132,8 +132,8 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
     isStartDirectly_ = false;
 }
 
-void PcFoldScreenController::RecordStartMoveRectDirectly(const WSRect& rect, bool isStartFullScreen,
-    const WSRectF& velocity)
+void PcFoldScreenController::RecordStartMoveRectDirectly(const WSRect& rect, const WSRectF& velocity,
+    bool isStartFullScreen)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "rect: %{public}s, isStartFullScreen: %{public}d, velocity: %{public}s",
         rect.ToString().c_str(), isStartFullScreen, velocity.ToString().c_str());
