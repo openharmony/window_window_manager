@@ -826,7 +826,7 @@ void JsScreenSession::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus
     }
 }
 
-void JsScreenSession::OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion)
+void JsScreenSession::OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
 {
     const std::string callbackType = ON_SECONDARY_REFLEXION_CHANGE_CALLBACK;
     WLOGD("Call js callback: %{public}s.", callbackType.c_str());
@@ -847,7 +847,7 @@ void JsScreenSession::OnSecondaryReflexionChange(ScreenId screenId, uint32_t isS
             return;
         }
         napi_value id = CreateJsValue(env, static_cast<int64_t>(screenId));
-        napi_value status = CreateJsValue(env, static_cast<int32_t>(isSecondaryReflexion));
+        napi_value status = CreateJsValue(env, static_cast<bool>(isSecondaryReflexion));
         napi_value argv[] = { id, status };
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
