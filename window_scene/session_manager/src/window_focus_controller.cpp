@@ -20,19 +20,19 @@ namespace Rosen {
 
 WSError FocusGroup::UpdateFocusedSessionId(int32_t persistentId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId, persistentId);
-    if (focusedSessionId == persistentId) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "Focus scene not change, id: %{public}d", focusedSessionId);
+    TLOGD(WmsLogTag::WMS_FOCUS, "focusedId change: %{public}d -> %{public}d", focusedSessionId_, persistentId);
+    if (focusedSessionId_ == persistentId) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "Focus scene not change, id: %{public}d", focusedSessionId_);
         return WSError::WS_DO_NOTHING;
     }
-    lastFocusedSessionId = focusedSessionId;
-    focusedSessionId = persistentId;
+    lastFocusedSessionId_ = focusedSessionId_;
+    focusedSessionId_ = persistentId;
     return WSError::WS_OK;
 }
 
 WSError FocusGroup::UpdateFocusedAppSessionId(int32_t persistentId)
 {
-    lastFocusedAppSessionId = persistentId;
+    lastFocusedAppSessionId_ = persistentId;
     return WSError::WS_OK;
 }
 

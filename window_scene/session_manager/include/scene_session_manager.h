@@ -732,6 +732,8 @@ private:
     std::string GetAllSessionFocusInfo();
     void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
+    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
@@ -1013,8 +1015,6 @@ private:
     void ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
-    WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token);
 
     void CheckAndNotifyWaterMarkChangedResult();

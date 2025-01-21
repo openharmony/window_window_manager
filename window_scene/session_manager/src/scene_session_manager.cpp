@@ -5211,7 +5211,7 @@ bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId dis
            statusBarDefaultVisibilityPerDisplay_[displayId] : true;
 }
 
-void FocusIDChange(int32_t persistentId, sptr<SceneSession>& sceneSession)
+void FocusIDChange(int32_t persistentId, const sptr<SceneSession>& sceneSession)
 {
     // notify RS
     WLOGFD("current focus session: windowId: %{public}d, windowName: %{public}s, bundleName: %{public}s, "
@@ -6800,7 +6800,7 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
     }
 }
 
-WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
 {
     // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub winodw request focus
     sptr<SceneSession> mainSession = nullptr;
@@ -6841,7 +6841,7 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(sptr<Sc
     return ret;
 }
 
-WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession)
+WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession)
 {
     // focus must on dialog when APP_MAIN_WINDOW or sub winodw request focus
     sptr<SceneSession> mainSession = nullptr;
