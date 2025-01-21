@@ -1405,7 +1405,9 @@ void MoveDragController::OnLostFocus()
 {
     TLOGW(WmsLogTag::WMS_LAYOUT, "window id %{public}d lost focus, should stop MoveDrag isMove: %{public}d,"
         "isDrag: %{public}d", persistentId_, isStartMove_, isStartDrag_);
-    moveDragIsInterrupted_ = true;
+    if (isStartMove_ || isStartDrag_) {
+        moveDragIsInterrupted_ = true;
+    }
 }
 
 std::set<uint64_t> MoveDragController::GetNewAddedDisplayIdsDuringMoveDrag()
