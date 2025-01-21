@@ -292,6 +292,7 @@ WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantPar
 WSErrorCode ExtensionSession::TransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                                         AAFwk::WantParams& reWantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }

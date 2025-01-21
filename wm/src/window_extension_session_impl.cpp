@@ -277,6 +277,7 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height,
 
 WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -345,7 +346,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
 
 void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 {
-    WLOGFD("in");
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->TriggerBindModalUIExtension();
