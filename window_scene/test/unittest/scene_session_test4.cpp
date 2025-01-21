@@ -1424,7 +1424,8 @@ HWTEST_F(SceneSessionTest4, GetAvoidAreaBytype, Function | SmallTest | Level2)
     for (int i = 0; i < 1000; i++) {
         sessionVector.push_back(sptr<SceneSession>::MakeSptr(info, nullptr));
         sessionVector[i]->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-        sessionVector[i]->GetSessionProperty()->SetAvoidAreaOption(1);
+        sessionVector[i]->GetSessionProperty()->SetAvoidAreaOption(
+            static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW));
     }
     for (int i = 0; i < 1000; i++) {
         avoidArea = sessionVector[i]->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect);
