@@ -597,7 +597,7 @@ napi_value JsWindow::SetRaiseByClickEnabled(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::HideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "HideNonSystemFloatingWindows");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnHideNonSystemFloatingWindows(env, info) : nullptr;
 }
@@ -4408,7 +4408,7 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
 napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
-    napi_value argv[INDEX_FOUR] = { nullptr };
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ONE_PARAMS_SIZE || argc > TWO_PARAMS_SIZE) { // 2: maximum params num
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
@@ -4423,33 +4423,32 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    const char* const where = __func__;
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), shouldHide, env,
-        task = napiAsyncTask, where] {
+        task = napiAsyncTask, where = __func__] {
         auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
-                task->Reject(env, JsErrUtils::CreateJsError(env,
-                    WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
-                return;
-            }
-            if (weakWindow->IsFloatingWindowAppType()) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is app floating window", where);
-                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-                    "HideNonSystemFloatingWindows is not allowed since window is app window"));
-                return;
-            }
-            WMError ret = weakWindow->HideNonSystemFloatingWindows(shouldHide);
-            if (ret != WMError::WM_OK) {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
-                task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
-                    "Hide non-system floating windows failed"));
-                return;
-            }
-            task->Resolve(env, NapiGetUndefined(env));
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
-                "%{public}s Window [%{public}u, %{public}s] hide non-system floating windows end",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        if (weakWindow == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
+            return;
+        }
+        if (weakWindow->IsFloatingWindowAppType()) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is app floating window", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                "HideNonSystemFloatingWindows is not allowed since window is app window"));
+            return;
+        }
+        WMError ret = weakWindow->HideNonSystemFloatingWindows(shouldHide);
+        if (ret != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
+                "Hide non-system floating windows failed"));
+            return;
+        }
+        task->Resolve(env, NapiGetUndefined(env));
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
+            "%{public}s end. Window [%{public}u, %{public}s]",
+            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
