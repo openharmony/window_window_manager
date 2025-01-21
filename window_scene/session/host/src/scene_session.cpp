@@ -5912,8 +5912,8 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
     if (specificCallback_ == nullptr) {
         return;
     }
-    // flush avoid areas on (avoid area dirty & rect NOT dirty)
-    if (!IsDirtyWindow() && specificCallback_->onUpdateAvoidArea_) {
+    // flush avoid areas on (avoid area dirty && (normal session rect NOT dirty || avoid session))
+    if ((IsImmersiveType() || !IsDirtyWindow()) && specificCallback_->onUpdateAvoidArea_) {
         specificCallback_->onUpdateAvoidArea_(GetPersistentId());
     }
     if (specificCallback_->onUpdateOccupiedAreaIfNeed_) {
