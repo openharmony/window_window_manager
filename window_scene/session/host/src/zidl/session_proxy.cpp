@@ -32,12 +32,16 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionProxy" };
+constexpr int32_t MAX_IPC_CAPACITY_FOR_WANT = 216 * 1024;
 
 bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
     if (abilitySessionInfo == nullptr) {
         WLOGFE("abilitySessionInfo is null");
         return false;
+    }
+    if (data.GetMaxCapacity() < MAX_IPC_CAPACITY_FOR_WANT) {
+        data.SetMaxCapacity(MAX_IPC_CAPACITY_FOR_WANT);
     }
     if (!data.WriteParcelable(&(abilitySessionInfo->want)) ||
         !data.WriteInt32(abilitySessionInfo->requestCode) ||
@@ -509,6 +513,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         if (!data.WriteUint32(0)) {
             return WSError::WS_ERROR_IPC_FAILED;
         }
+    }
+    if (!data.WriteString(abilitySessionInfo->specifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write specifiedFlag failed");
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2366,5 +2374,45 @@ WSError SessionProxy::SetWindowCornerRadius(float cornerRadius)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+WSError SessionProxy::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+    int32_t pointerPosX, int32_t pointerPosY)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(offsetX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write offsetX failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(offsetY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write offsetY failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(pointerPosX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write pointerPosX failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(pointerPosY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write pointerPosY failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

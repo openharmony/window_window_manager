@@ -88,6 +88,7 @@ struct SessionIdentityInfo {
     std::string instanceKey_;
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
+    std::string specifiedFlag_;
 };
 
 class SceneSession;
@@ -419,7 +420,7 @@ public:
     /*
      * UIExtension
      */
-    uint32_t GetLockScreenZorder();
+    uint32_t GetLockScreenZOrder();
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid);
     void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
