@@ -4698,9 +4698,6 @@ WMError SceneSession::HandleActionUpdateAvoidAreaOption(const sptr<WindowSession
         !SessionHelper::IsSystemWindow(sessionProperty->GetWindowType())) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!Session::IsScbCoreEnabled()) {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     sessionProperty->SetAvoidAreaOption(property->GetAvoidAreaOption());
     return WMError::WM_OK;
 }
