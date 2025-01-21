@@ -30,32 +30,32 @@ namespace OHOS {
 namespace Rosen {
 class FocusGroup : public RefBase {
 public:
-    explicit FocusGroup(DisplayId displayGroupId) : displayGroupId(displayGroupId) {}
+    explicit FocusGroup(DisplayId displayGroupId) : displayGroupId_(displayGroupId) {}
 
-    int32_t GetFocusedSessionId() const { return focusedSessionId; }
-    int32_t GetLastFocusedSessionId() const { return lastFocusedSessionId; }
-    int32_t GetLastFocusedAppSessionId() const { return lastFocusedAppSessionId; }
-    bool GetNeedBlockNotifyFocusStatusUntilForeground() const { return needBlockNotifyFocusStatusUntilForeground; }
-    bool GetNeedBlockNotifyUnfocusStatus() const { return needBlockNotifyUnfocusStatus; }
-    DisplayId GetDisplayGroupId() const { return displayGroupId; }
-    void SetFocusedSessionId(int32_t persistentId) { focusedSessionId = persistentId; }
-    void SetLastFocusedSessionId(int32_t persistentId) { lastFocusedSessionId = persistentId; }
-    void SetLastFocusedAppSessionId(int32_t persistentId) { lastFocusedAppSessionId = persistentId; }
+    int32_t GetFocusedSessionId() const { return focusedSessionId_; }
+    int32_t GetLastFocusedSessionId() const { return lastFocusedSessionId_; }
+    int32_t GetLastFocusedAppSessionId() const { return lastFocusedAppSessionId_; }
+    bool GetNeedBlockNotifyFocusStatusUntilForeground() const { return needBlockNotifyFocusStatusUntilForeground_; }
+    bool GetNeedBlockNotifyUnfocusStatus() const { return needBlockNotifyUnfocusStatus_; }
+    DisplayId GetDisplayGroupId() const { return displayGroupId_; }
+    void SetFocusedSessionId(int32_t persistentId) { focusedSessionId_ = persistentId; }
+    void SetLastFocusedSessionId(int32_t persistentId) { lastFocusedSessionId_ = persistentId; }
+    void SetLastFocusedAppSessionId(int32_t persistentId) { lastFocusedAppSessionId_ = persistentId; }
     void SetNeedBlockNotifyFocusStatusUntilForeground(bool needBlock)
     {
-        needBlockNotifyFocusStatusUntilForeground = needBlock;
+        needBlockNotifyFocusStatusUntilForeground_ = needBlock;
     }
-    void SetNeedBlockNotifyUnfocusStatus(bool needBlock) { needBlockNotifyUnfocusStatus = needBlock; }
+    void SetNeedBlockNotifyUnfocusStatus(bool needBlock) { needBlockNotifyUnfocusStatus_ = needBlock; }
     WSError UpdateFocusedSessionId(int32_t persistentId);
     WSError UpdateFocusedAppSessionId(int32_t persistentId);
 
 private:
-    int32_t focusedSessionId = INVALID_SESSION_ID;
-    int32_t lastFocusedSessionId = INVALID_SESSION_ID;
-    int32_t lastFocusedAppSessionId = INVALID_SESSION_ID;
-    bool needBlockNotifyFocusStatusUntilForeground { false };
-    bool needBlockNotifyUnfocusStatus { false };
-    DisplayId displayGroupId = DISPLAY_ID_INVALID;
+    int32_t focusedSessionId_ = INVALID_SESSION_ID;
+    int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
+    int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    bool needBlockNotifyFocusStatusUntilForeground_ { false };
+    bool needBlockNotifyUnfocusStatus_ { false };
+    DisplayId displayGroupId_ = DISPLAY_ID_INVALID;
 };
 
 class WindowFocusController : public RefBase {
@@ -73,10 +73,10 @@ public:
     WSError UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId);
 
 private:
+    sptr<FocusGroup> GetFocusGroupInner(DisplayId displayId);
+
     std::unordered_map<DisplayId, sptr<FocusGroup>> focusGroupMap_;
     std::unordered_set<DisplayId> virtualScreenDisplayIdSet_;
-    
-    sptr<FocusGroup> GetFocusGroupInner(DisplayId displayId);
 };
 }
 }
