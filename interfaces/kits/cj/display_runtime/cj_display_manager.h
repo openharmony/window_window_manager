@@ -16,6 +16,9 @@
 #ifndef OHOS_CJ_DISPLAY_MANAGER_H
 #define OHOS_CJ_DISPLAY_MANAGER_H
 
+#include <map>
+
+#include "cj_display_listener.h"
 #include "display_utils.h"
 #include "ffi_remote_data.h"
 
@@ -32,9 +35,20 @@ public:
     static uint32_t GetFoldStatus();
     static uint32_t GetFoldDisplayMode();
     static RetStruct GetCurrentFoldCreaseRegion();
+    static bool IsCaptured();
+    static RetStruct GetAllDisplayPhysicalResolution();
+    static bool IfCallbackRegistered(const std::string& type, int64_t callbackId);
+    static int32_t OnUnregisterAllDisplayListenerWithType(const std::string& type);
+    static DMError UnregisterAllDisplayListenerWithType(const std::string& type);
+    static int32_t OnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId);
+    static DMError RegisterDisplayListenerWithType(const std::string& type, int64_t callbackId);
+    static int32_t OnUnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId);
+    static DMError UnRegisterDisplayListenerWithType(const std::string& type, int64_t callbackId);
+    static std::map<std::string, std::map<int64_t, sptr<CJDisplayListener>>> cjCbMap_;
+    static std::mutex mtx_;
 };
 
-}
-}
+} // namespace Rosen
+} // namespace OHOS
 
 #endif // DISPLAY_MANAGER_H

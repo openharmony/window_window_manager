@@ -121,6 +121,13 @@ public:
     void OnDisconnect(ScreenId screenId) override;
     void OnChange(ScreenId screenId) override;
 
+    /*
+     * PC Window Layout
+     */
+    void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
+    void StopMoving();
+
 private:
     struct MoveDragProperty {
         int32_t pointerId_ = -1;

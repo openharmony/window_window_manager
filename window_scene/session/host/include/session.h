@@ -94,7 +94,7 @@ using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
-using NotifyKeyboardStateChangeFunc = std::function<void(const SessionState& state, const KeyboardViewMode& mode)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 
 class ILifecycleListener {
@@ -414,7 +414,7 @@ public:
      * Keyboard Window
      */
     bool CheckEmptyKeyboardAvoidAreaIfNeeded() const;
-    void SetKeybaordStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
+    void SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
 
     bool IsSessionValid() const;
     bool IsActive() const;

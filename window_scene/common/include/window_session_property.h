@@ -211,6 +211,12 @@ public:
     uint32_t GetSubWindowLevel() const;
 
     /*
+     * Window Property
+     */
+    void SetWindowCornerRadius(float cornerRadius);
+    float GetWindowCornerRadius() const;
+
+    /*
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -447,6 +453,12 @@ private:
     bool focusableOnShow_ { true };
     bool touchable_ { true };
     bool isExclusivelyHighlighted_ { true };
+    
+    /*
+     * Window Property
+     */
+    float cornerRadius_ = 0.0f;
+    mutable std::mutex cornerRadiusMutex_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
