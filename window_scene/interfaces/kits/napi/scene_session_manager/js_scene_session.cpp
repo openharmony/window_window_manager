@@ -5891,14 +5891,14 @@ napi_value JsSceneSession::OnThrowSlipDirectly(napi_env env, napi_callback_info 
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    double vx;
+    double vx = 0.0;
     if (!ConvertFromJsValue(env, argv[0], vx)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to vx");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    double vy;
+    double vy = 0.0;
     if (!ConvertFromJsValue(env, argv[ARGC_ONE], vy)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to vy");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
