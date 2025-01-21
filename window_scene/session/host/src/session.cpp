@@ -2202,8 +2202,7 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
         PresentFoucusIfNeed(pointerAction);
     } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
         if (!isFocused_ && GetFocusable()) {
-            FocusChangeReason reason = FocusChangeReason::CLICK;
-            NotifyRequestFocusStatusNotifyManager(true, false, reason);
+            NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
         }
         NotifyClick();
     }
