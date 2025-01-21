@@ -2155,7 +2155,7 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
         }
         return WSError::WS_OK;
     }
-    if (raiseEnabled) {
+    if (raiseEnabled && isPointDown) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
