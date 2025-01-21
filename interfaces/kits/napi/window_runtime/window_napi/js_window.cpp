@@ -48,7 +48,6 @@ constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
 constexpr size_t INDEX_THREE = 3;
-constexpr size_t INDEX_FOUR = 4;
 constexpr size_t ONE_PARAMS_SIZE = 1;
 constexpr size_t TWO_PARAMS_SIZE = 2;
 constexpr size_t THREE_PARAMS_SIZE = 3;
