@@ -78,8 +78,8 @@ public:
     WSRect GetOriginalRect() const;
     void InitMoveDragProperty();
     void SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
-                              int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
-                              const WSRect& winRect);
+                                int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
+                                const WSRect& winRect);
     void SetAspectRatio(float ratio);
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
@@ -109,7 +109,6 @@ public:
     void SetMoveAvailableArea(const DMRect& area);
     void UpdateMoveAvailableArea(DisplayId targetDisplayId);
     void SetCurrentScreenProperty(DisplayId targetDisplayId);
-    void ResetCurrentScreenProperty();
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
     void SetInputBarCrossAttr(MoveDirection mouseMoveDirection, DisplayId targetDisplayId);
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
