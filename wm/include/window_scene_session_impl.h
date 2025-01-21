@@ -364,7 +364,7 @@ private:
      * PC Window
      */
     /* whether in process of delay raise during cross window drag and drop
-     * only used when delay raise is enabled and hit draggable component 
+     * only used when delay raise is enabled and hit draggable component
      */
     bool isExecuteDelayRaise_ = false;
 
