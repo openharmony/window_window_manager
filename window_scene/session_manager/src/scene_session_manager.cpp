@@ -2638,7 +2638,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         TLOGNI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d remove:%{public}d isSaveSnapshot:%{public}d "
             "isForceClean:%{public}d", persistentId, needRemoveSession, isSaveSnapshot, isForceClean);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
-        lastUpdatedAvoidArea_.erase(persistentId);
+        avoidAreaListenerSessionSet_.erase(persistentId);
         DestroyDialogWithMainWindow(sceneSession);
         DestroyToastSession(sceneSession);
         DestroySubSession(sceneSession); // destroy sub session by destruction
@@ -8774,7 +8774,6 @@ WSError SceneSessionManager::UpdateSessionAvoidAreaListener(int32_t persistentId
             avoidAreaListenerSessionSet_.insert(persistentId);
             UpdateAvoidArea(persistentId);
         } else {
-            lastUpdatedAvoidArea_.erase(persistentId);
             avoidAreaListenerSessionSet_.erase(persistentId);
         }
         return WSError::WS_OK;
@@ -8789,8 +8788,8 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
     AvoidArea avoidArea = rootSceneSession_->GetAvoidAreaByType(avoidType);
     rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), avoidType);
 
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+    for (auto persistentId : avoidAreaListenerSessionSet_) {
+        auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
             continue;
         }
