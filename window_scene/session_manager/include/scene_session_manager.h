@@ -27,6 +27,7 @@
 #ifndef SUPPORT_SCREEN
 #define SUPPORT_SCREEN
 #endif
+
 #include "ability_info.h"
 #include "agent_death_recipient.h"
 #include "app_debug_listener_interface.h"
