@@ -339,20 +339,20 @@ HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, Function | SmallTest | Le
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(1);
-    pointerItem.SetPointerX(100);
-    pointerItem.SetPointerY(200);
+    pointerItem.SetDisplayX(100);
+    pointerItem.SetDisplayY(200);
     pointerEvent->AddPointerItem(pointerItem);
     int32_t pointerPosX = 10;
     int32_t pointerPosY = 30;
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
     moveDragController->SetOriginalMoveDragPos(pointerEvent->GetPointerId(),
-        pointerEvent->GetSourceType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY,
-        originalRect);
+        pointerEvent->GetSourceType(), pointerPosX, pointerPosY, pointerWindowX,
+        pointerWindowY, originalRect);
     moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
     
-    ASSERT_EQ(90, moveDragController->moveDragProperty_.targetReect_.posX_);
-    ASSERT_EQ(190, moveDragController->moveDragProperty_.targetReect_.posY_);
+    ASSERT_EQ(90, moveDragController->moveDragProperty_.targetRect_.posX_);
+    ASSERT_EQ(190, moveDragController->moveDragProperty_.targetRect_.posY_);
 }
 
 /**

@@ -602,16 +602,6 @@ void MoveDragController::SetCurrentScreenProperty(DisplayId targetDisplayId)
     screenSizeProperty_.height = currentScreenProperty.GetBounds().rect_.height_;
 }
 
-void MoveDragController::ResetCurrentScreenProperty()
-{
-    screenSizeProperty_.currentDisplayStartX = 0;
-    screenSizeProperty_.currentDisplayStartY = 0;
-    screenSizeProperty_.currentDisplayLeft = 0;
-    screenSizeProperty_.currentDisplayTop = 0;
-    screenSizeProperty_.width = 0;
-    screenSizeProperty_.height = 0;
-}
-
 std::pair<int32_t, int32_t> MoveDragController::CalcUnifiedTranslate(
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
