@@ -89,8 +89,8 @@ WSError SessionProxy::Foreground(
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FOREGROUND),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -121,8 +121,8 @@ WSError SessionProxy::Background(bool isFromClient, const std::string& identityT
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_BACKGROUND),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -214,8 +214,8 @@ WSError SessionProxy::Disconnect(bool isFromClient, const std::string& identityT
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_DISCONNECT),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -274,8 +274,8 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONNECT),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -1079,8 +1079,8 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
         TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return avoidArea;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_AVOID_AREA),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
         return avoidArea;
@@ -1369,8 +1369,8 @@ WSError SessionProxy::TransferAbilityResult(uint32_t resultCode, const AAFwk::Wa
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_ABILITY_RESULT),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -1397,8 +1397,8 @@ WSError SessionProxy::TransferExtensionData(const AAFwk::WantParams& wantParams)
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TRANSFER_EXTENSION_DATA),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
@@ -1421,8 +1421,8 @@ void SessionProxy::NotifySyncOn()
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SYNC_ON),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
     }
@@ -1442,8 +1442,8 @@ void SessionProxy::NotifyAsyncOn()
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_ASYNC_ON), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_ASYNC_ON),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
     }
@@ -1464,8 +1464,8 @@ void SessionProxy::NotifyExtensionDied()
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DIED),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
     }
@@ -1490,8 +1490,8 @@ void SessionProxy::NotifyExtensionTimeout(int32_t errorCode)
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_TIMEOUT),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
     }
@@ -2068,8 +2068,8 @@ int32_t SessionProxy::GetStatusBarHeight()
         TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return height;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT), data, reply, option);
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
         return height;

@@ -123,7 +123,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
-        TLOGI(WmsLogTag::WMS_UIEXT, "Activate ret:%{public}d, persistentId:%{public}d", errorCode, persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate ret:%{public}d, persistentId:%{public}d", errorCode, persistentId);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
             callback(ret);

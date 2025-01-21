@@ -277,7 +277,7 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height,
 
 WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -289,7 +289,7 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -313,7 +313,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -323,7 +323,7 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
 WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataForResultFunc_) {
         reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
         return WSErrorCode::WS_OK;
@@ -346,7 +346,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
 
 void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->TriggerBindModalUIExtension();
