@@ -44,6 +44,8 @@ const float GLOBAL_FULL_STATUS_WIDTH = 3184;
 const float MAIN_STATUS_WIDTH = 1008;
 const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
+constexpr uint32_t SECONDARY_ROTATION_270 = 3;
+constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
 ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -1072,6 +1074,10 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
+    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
+        rotation = static_cast<Rotation>(temp);
+    }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN
@@ -1111,8 +1117,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
 DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
-    (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
-        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
         rotation = static_cast<Rotation>(temp);
     }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
@@ -1742,7 +1748,7 @@ void ScreenSession::SetScreenSnapshotRect(RSSurfaceCaptureConfig& config)
     }
     if (isChanged) {
         TLOGI(WmsLogTag::DMS,
-            "GetScreenSnapshotRect left: %{public}f, top: %{public}f, right: %{public}f, bottom: %{public}f",
+            "left: %{public}f, top: %{public}f, right: %{public}f, bottom: %{public}f",
             snapshotRect.left_, snapshotRect.top_, snapshotRect.right_, snapshotRect.bottom_);
     } else {
         TLOGI(WmsLogTag::DMS, "no need to set screen snapshot rect, use default rect");
