@@ -224,6 +224,9 @@ public:
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
     void RegisterFlushWindowInfoCallback();
     void FlushWindowInfoToMMI(const bool forceFlush = false);
+    void SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession);
+    void BuildCancelPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId,
+                                 int32_t action, int32_t wid);
 
     /*
      * Window Rotate Animation
@@ -963,6 +966,7 @@ private:
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
 
+    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     sptr<AppAnrListener> appAnrListener_;

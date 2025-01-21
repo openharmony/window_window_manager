@@ -6324,6 +6324,41 @@ void SceneSession::MarkAvoidAreaAsDirty()
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
 }
 
+void SceneSession::SetMousePointerDownEventStatus(bool mousePointerDownEventStatus)
+{
+    isMousePointerDownEventStatus_ = mousePointerDownEventStatus;
+}
+
+bool SceneSession::GetMousePointerDownEventStatus() const
+{
+    return isMousePointerDownEventStatus_;
+}
+
+void SceneSession::SetFingerPointerDownStatus(int32_t fingerId)
+{
+    if (fingerPointerDownStatusList_.find(fingerId) != fingerPointerDownStatusList_.end()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "wid:%{public}d fingerId:%{public}d receive twice down event",
+              GetPersistentId(), fingerId);
+    } else {
+        fingerPointerDownStatusList_.insert(fingerId);
+    }
+}
+
+void SceneSession::RemoveFingerPointerDownStatus(int32_t fingerId)
+{
+    if (fingerPointerDownStatusList_.find(fingerId) == fingerPointerDownStatusList_.end()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "wid:%{public}d fingerId:%{public}d receive up without down event",
+              GetPersistentId(), fingerId);
+    } else {
+        fingerPointerDownStatusList_.erase(fingerId);
+    }
+}
+
+std::unordered_set<int32_t> SceneSession::GetFingerPointerDownStatusList() const
+{
+    return fingerPointerDownStatusList_;
+}
+
 void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
