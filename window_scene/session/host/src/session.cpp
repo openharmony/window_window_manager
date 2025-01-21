@@ -2145,9 +2145,8 @@ WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
     bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
-    bool isPointUp = action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
     if (isExecuteDelayRaise) {
-        if (raiseEnabled && isPointUp) {
+        if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
             RaiseToAppTopForPointDown();
         }
         if (!raiseEnabled && parentSession) {
@@ -2199,10 +2198,9 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
         }
     }
-    bool isPointUp = pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
     if (!isExecuteDelayRaise) {
         PresentFoucusIfNeed(pointerAction);
-    } else if (isPointUp) {
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
         if (!isFocused_ && GetFocusable()) {
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
