@@ -428,6 +428,11 @@ public:
      * Window Input Event
      */
     void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
+    void SetMousePointerDownEventStatus(bool mousePointerDownEventStatus);
+    bool GetMousePointerDownEventStatus() const;
+    void SetFingerPointerDownStatus(int32_t fingerId);
+    void RemoveFingerPointerDownStatus(int32_t fingerId);
+    std::unordered_set<int32_t> GetFingerPointerDownStatusList() const;
 
     /*
      * Window Rotation
@@ -987,6 +992,8 @@ private:
      * Window Input Event
      */
     NotifyTouchOutsideFunc onTouchOutside_;
+    bool isMousePointerDownEventStatus_ { false };
+    std::unordered_set<int32_t> fingerPointerDownStatusList_;
 
     /*
      * Window Rotation

@@ -113,6 +113,7 @@ constexpr int SCALE_MAX_WIDTH = 8;
 constexpr int PID_MAX_WIDTH = 8;
 constexpr int PARENT_ID_MAX_WIDTH = 6;
 constexpr int WINDOW_NAME_MAX_LENGTH = 20;
+constexpr int32_t CANCEL_POINTER_ID = 99999999;
 constexpr int32_t STATUS_BAR_AVOID_AREA = 0;
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
@@ -300,6 +301,10 @@ SceneSessionManager& SceneSessionManager::GetInstance()
 SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInstance())
 {
     taskScheduler_ = std::make_shared<TaskScheduler>(SCENE_SESSION_MANAGER_THREAD);
+    if (!mainHandler_) {
+        auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
+        mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
     currentUserId_ = DEFAULT_USERID;
     launcherService_ = sptr<AppExecFwk::LauncherService>::MakeSptr();
     if (!launcherService_->RegisterCallback(new BundleStatusCallback())) {
@@ -2584,6 +2589,59 @@ void SceneSessionManager::DestroyToastSession(const sptr<SceneSession>& sceneSes
     }
 }
 
+void SceneSessionManager::BuildCancelPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                                  int32_t fingerId, int32_t action, int32_t wid)
+{
+    if (pointerEvent == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "pointerEvent is null, wid:%{public}d fingerId:%{public}d action:%{public}d",
+                  wid, fingerId, action);
+        return;
+    }
+    pointerEvent->SetId(CANCEL_POINTER_ID);
+    pointerEvent->SetTargetWindowId(wid);
+    pointerEvent->SetPointerId(fingerId);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    MMI::PointerEvent::PointerItem item;
+    item.SetPointerId(fingerId);
+    pointerEvent->AddPointerItem(item);
+    if (action == MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    } else {
+        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    }
+}
+
+void SceneSessionManager::SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession)
+{
+    auto task = [this, needCancelEventSceneSession = sceneSession] {
+        if (needCancelEventSceneSession == nullptr) {
+            TLOGI(WmsLogTag::WMS_EVENT, "scenesession is nullptr, needn't send cancel event");
+            return;
+        }
+        auto wid = needCancelEventSceneSession->GetPersistentId();
+        if (needCancelEventSceneSession->GetMousePointerDownEventStatus()) {
+            std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+            BuildCancelPointerEvent(pointerEvent, 1, MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN, wid);
+            TLOGI(WmsLogTag::WMS_EVENT, "erasing sceneSession need send mouse cancel. wid:%{public}d", wid);
+            needCancelEventSceneSession->SetMousePointerDownEventStatus(false);
+            needCancelEventSceneSession->SendPointerEventToUI(pointerEvent);
+        }
+        std::unordered_set<int32_t> fingerPointerDownStatusList = needCancelEventSceneSession->GetFingerPointerDownStatusList();
+        if (fingerPointerDownStatusList.empty()) {
+            return;
+        }
+        for (auto fingerId : fingerPointerDownStatusList) {
+            std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+            BuildCancelPointerEvent(pointerEvent, fingerId, MMI::PointerEvent::POINTER_ACTION_DOWN, wid);
+            TLOGI(WmsLogTag::WMS_EVENT, "erasing sceneSession need send touch cancel. wid:%{public}d fingerId:%{public}d",
+                  wid, fingerId);
+            needCancelEventSceneSession->SendPointerEventToUI(pointerEvent);
+            needCancelEventSceneSession->RemoveFingerPointerDownStatus(fingerId);
+        }
+    };
+    mainHandler_->PostTask(std::move(task), "wms:sendCancelBeforeEraseSession", 0, AppExecFwk::EventQueue::Priority::VIP);
+}
+
 void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
@@ -2591,6 +2649,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     EraseSceneSessionAndMarkDirtyLocked(persistentId);
     systemTopSceneSessionMap_.erase(persistentId);
     nonSystemFloatSceneSessionMap_.erase(persistentId);
+    SendCancelEventBeforeEraseSession(sceneSession);
     if (sceneSession && MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
         MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
         MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCount(sceneSession);
