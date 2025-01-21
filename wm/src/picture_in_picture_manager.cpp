@@ -277,9 +277,14 @@ void PictureInPictureManager::AutoStartPipWindow()
                 TLOGE(WmsLogTag::WMS_PIP, "GetNavController info error, %{public}d not registered", handleId);
                 return;
             }
-            auto pipController = autoStartControllerMap_[handleId].promote();
-            if (!pipcontroller) {
-                TLOGE(WmsLogTag::WMS_PIP, "PipController is nullptr");
+            auto wptrPipController = autoStartControllerMap_[handleId];
+            if (!wptrPipController) {
+                TLOGE(WmsLogTag::WMS_PIP, "wptrPipController is nullptr");
+                return;
+            }
+            auto pipController = wptrPipController.promote();
+            if (!pipController) {
+                TLOGE(WmsLogTag::WMS_PIP, "pipController is nullptr");
                 return;
             }
             pipController->StartPictureInPicture(StartPipType::AUTO_START);
