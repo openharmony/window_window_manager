@@ -4425,20 +4425,20 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), shouldHide, env,
         task = napiAsyncTask, where = __func__] {
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
             return;
         }
-        if (weakWindow->IsFloatingWindowAppType()) {
+        if (window->IsFloatingWindowAppType()) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is app floating window", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
                 "HideNonSystemFloatingWindows is not allowed since window is app window"));
             return;
         }
-        WMError ret = weakWindow->HideNonSystemFloatingWindows(shouldHide);
+        WMError ret = window->HideNonSystemFloatingWindows(shouldHide);
         if (ret != WMError::WM_OK) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
@@ -4448,7 +4448,7 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
             "%{public}s end. Window [%{public}u, %{public}s]",
-            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+            where, window->GetWindowId(), window->GetWindowName().c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
