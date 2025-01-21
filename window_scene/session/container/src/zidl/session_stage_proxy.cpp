@@ -1325,8 +1325,8 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params
         TLOGE(WmsLogTag::WMS_UIEXT, "Write params failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO), data, reply, option);
+    int sendCode = remote->SendRequest( static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO),
+        data, reply, option);
     if (sendCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
