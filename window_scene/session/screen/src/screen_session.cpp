@@ -796,6 +796,18 @@ void ScreenSession::SetScreenComponentRotation(int rotation)
 
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+            MAIN_STATUS_WIDTH, SCREEN_HEIGHT)) {
+            foldDisplayMode = FoldDisplayMode::MAIN;
+        } else if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+            FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+            foldDisplayMode = FoldDisplayMode::FULL;
+        } else if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+            GLOBAL_FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+            foldDisplayMode = FoldDisplayMode::GLOBAL_FULL;
+        }
+    }
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -825,10 +837,11 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
             displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
         }
     }
-    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
+    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u,\
+        foldDisplayMode:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
-        rotation, displayOrientation);
+        rotation, displayOrientation, foldDisplayMode);
     ReportNotifyModeChange(displayOrientation);
 }
 
