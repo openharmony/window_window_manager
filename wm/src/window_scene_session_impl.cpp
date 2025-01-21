@@ -756,7 +756,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             pointerEvent->MarkProcessed();
             return;
         }
-        float vpr = GetVirtualPixelRatio(displayInfo);
+        float vpr = WindowSessionImpl::GetVirtualPixelRatio();
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
             pointerEvent->MarkProcessed();
@@ -3320,7 +3320,7 @@ WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
     }
 
     property_->SetWindowCornerRadius(cornerRadius);
-    
+
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
     hostSession->SetWindowCornerRadius(cornerRadius);
