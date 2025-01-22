@@ -1033,6 +1033,22 @@ napi_value CreateJsSessionRecoverInfo(
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
 {
     if (sessionInfo.want != nullptr) {
+        if (sessionInfo.windowSizeLimits.maxWindowWidth > 0) {
+            napi_set_named_property(env, objValue, "maxWindowWidth",
+                CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowWidth));
+        }
+        if (sessionInfo.windowSizeLimits.minWindowWidth > 0) {
+            napi_set_named_property(env, objValue, "minWindowWidth",
+                CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowWidth));
+        }
+        if (sessionInfo.windowSizeLimits.maxWindowHeight > 0) {
+            napi_set_named_property(env, objValue, "maxWindowHeight",
+                CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowHeight));
+        }
+        if (sessionInfo.windowSizeLimits.minWindowHeight > 0) {
+            napi_set_named_property(env, objValue, "minWindowHeight",
+                CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowHeight));
+        }
         napi_set_named_property(env, objValue, "windowTop",
             GetWindowRectIntValue(env,
             sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_TOP, INVALID_VAL)));
