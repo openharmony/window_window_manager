@@ -412,6 +412,15 @@ void ScreenSessionManagerClient::UpdateAvailableArea(ScreenId screenId, DMRect a
     screenSessionManager_->UpdateAvailableArea(screenId, area);
 }
 
+void ScreenSessionManagerClient::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
+}
+
 int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
 {
     if (!screenSessionManager_) {
