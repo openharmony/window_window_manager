@@ -6551,6 +6551,11 @@ void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::
             } else if (agentType ==  DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER) {
                 std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
                 agent->NotifyDisplayChangeInfoChanged(lastDisplayChangeInfo_);
+            } else if (agentType ==  DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER) {
+                auto area = screenSession->GetAvailableArea();
+                auto displayId = screenSession->ConvertToDisplayInfo()->GetDisplayId();
+                std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
+                agent->NotifyAvailableAreaChanged(area, displayId);
             } else {
                 isAgentTypeNotify = false;
                 TLOGI(WmsLogTag::DMS, "Unknown agentType.");
