@@ -106,6 +106,8 @@ void WindowInspector::UnregisterGetWMSWindowListCallback(uint32_t windowId)
 
 void WindowInspector::UnregisterAllCallbacks()
 {
+    setWMSCallbackFunc_ = nullptr;
+    sendWMSMessageFunc_ = nullptr;
     isConnectServerSuccess_ = false;
     std::unique_lock<std::mutex> lock(callbackMutex_);
     getWMSWindowListCallbacks_.clear();
