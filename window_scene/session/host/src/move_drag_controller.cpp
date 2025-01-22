@@ -685,10 +685,10 @@ void MoveDragController::SetOriginalDisplayOffset(int32_t offsetX, int32_t offse
     originalDisplayOffsetY_ = offsetY;
 }
 
-void MoveDragController::SetInputBarCrossAttr(MoveDirection mouseMoveDirection, DisplayId targetDisplayId)
+void MoveDragController::SetInputBarCrossAttr(MoveDirection moveDirection, DisplayId targetDisplayId)
 {
-    if (mouseMoveDirection == MoveDirection::LEFT_TO_RIGHT ||
-        mouseMoveDirection == MoveDirection::RIGHT_TO_LEFT) {
+    if (moveDirection == MoveDirection::LEFT_TO_RIGHT ||
+        moveDirection == MoveDirection::RIGHT_TO_LEFT) {
         UpdateMoveAvailableArea(targetDisplayId);
     }
     moveInputBarStartDisplayId_ = targetDisplayId;
@@ -827,13 +827,13 @@ bool MoveDragController::CalcMoveInputBarRect(const std::shared_ptr<MMI::Pointer
     if (targetDisplayId == moveInputBarStartDisplayId_) {
         CalcMoveForSameDisplay(pointerEvent, moveDragFinalX, moveDragFinalY);
     } else {
-        MoveDirection mouseMoveDirection =
+        MoveDirection moveDirection =
             CalcMoveDirection(moveInputBarStartDisplayId_, pointerEvent->GetTargetDisplayId());
         if (screenSizeProperty_.IsEmpty()) {
             SetCurrentScreenProperty(targetDisplayId);
         }
 
-        switch (mouseMoveDirection) {
+        switch (moveDirection) {
             case MoveDirection::LEFT_TO_RIGHT:
                 HandleLeftToRightCross(
                     targetDisplayId, pointerDisplayX, pointerDisplayY, moveDragFinalX, moveDragFinalY);

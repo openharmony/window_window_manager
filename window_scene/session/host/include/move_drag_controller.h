@@ -110,7 +110,7 @@ public:
     void UpdateMoveAvailableArea(DisplayId targetDisplayId);
     void SetCurrentScreenProperty(DisplayId targetDisplayId);
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
-    void SetInputBarCrossAttr(MoveDirection mouseMoveDirection, DisplayId targetDisplayId);
+    void SetInputBarCrossAttr(MoveDirection moveDirection, DisplayId targetDisplayId);
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
 
     /*
@@ -133,9 +133,9 @@ private:
         int32_t pointerType_ = -1;
         int32_t originalPointerPosX_ = -1;
         int32_t originalPointerPosY_ = -1;
-        // the x coordinate of the active window
+        // the x coordinate of the pointer related to the active window
         int32_t originalPointerWindowX_ = -1;
-        // the y coordinate of the active window
+        // the y coordinate of the pointer related to the active window
         int32_t originalPointerWindowY_ = -1;
         WSRect originalRect_ = { 0, 0, 0, 0 };
         WSRect targetRect_ = { 0, 0, 0, 0 };
