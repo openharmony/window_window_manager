@@ -830,7 +830,8 @@ inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFi
 
 inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option)
 {
-    return (static_cast<WindowInfoFilterOptionDataType>(options) & static_cast<WindowInfoFilterOptionDataType>(option)) != 0;
+    return (static_cast<WindowInfoFilterOptionDataType>(options) &
+        static_cast<WindowInfoFilterOptionDataType>(option)) != 0;
 }
 
 using WindowInfoTypeOptionDataType = uint8_t;
@@ -854,7 +855,8 @@ inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOp
 
 inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option)
 {
-    return (static_cast<WindowInfoTypeOptionDataType>(options) & static_cast<WindowInfoTypeOptionDataType>(option)) != 0;
+    return (static_cast<WindowInfoTypeOptionDataType>(options) &
+        static_cast<WindowInfoTypeOptionDataType>(option)) != 0;
 }
 
 /**
@@ -1036,7 +1038,7 @@ struct WindowInfo : public Parcelable {
  */
 struct WindowInfoOption : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-    { 
+    {
         return parcel.WriteUint32(static_cast<uint32_t>(windowInfoFilterOption)) &&
                parcel.WriteUint32(static_cast<uint32_t>(windowInfoTypeOption)) &&
                parcel.WriteUint64(displayId) &&
