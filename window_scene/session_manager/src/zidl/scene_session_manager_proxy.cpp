@@ -1840,8 +1840,8 @@ WMError SceneSessionManagerProxy::GetParentMainWindowId(int32_t windowId, int32_
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos)
+WMError SceneSessionManagerProxy::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1850,16 +1850,20 @@ WMError SceneSessionManagerProxy::ListWindowInfo(WindowInfoFilterOption windowIn
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint8(static_cast<WindowInfoFilterOptionType>(windowInfoFilterOption))) {
+    if (!data.WriteUint8(static_cast<WindowInfoFilterOptionType>(windowInfoOption.windowInfoFilterOption))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoFilterOption failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint8(static_cast<WindowInfoTypeOptionType>(windowInfoTypeOption))) { // 是否要uint8
+    if (!data.WriteUint8(static_cast<WindowInfoTypeOptionType>(windowInfoOption.windowInfoTypeOption))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoTypeOption failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint64(displayId)) {
+    if (!data.WriteUint64(windowInfoOption.displayId)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(windowInfoOption.windowId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

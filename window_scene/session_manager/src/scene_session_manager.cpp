@@ -10466,33 +10466,32 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
-WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId, std::vector<sptr<WindowInfo>>& infos)
+WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos)
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         sceneSessionMapCopy = sceneSessionMap_;
     }
-    auto task = [this, windowInfoFilterOption, windowInfoTypeOption, displayId, sceneSessionMapCopy, &infos]() {
+    auto task = [this, windowInfoOption, sceneSessionMapCopy, &infos]() {
         for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
             if (sceneSession == nullptr) {
                 continue;
             }
-            if (!FilterForListWindowInfo(windowInfoFilterOption, displayId, sceneSession)) {
+            if (!FilterForListWindowInfo(windowInfoOption, sceneSession)) {
                 continue;
             }
             auto windowInfo = sptr<WindowInfo>::MakeSptr();
-            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
+            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
                 sceneSession->GetWindowUIInfoForWindowInfo(windowInfo->windowUIInfo);
             }
-            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
+            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
                 sceneSession->GetWindowDisplayInfoForWindowInfo(windowInfo->windowDisplayInfo);
             }
-            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
+            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 sceneSession->GetWindowLayoutInfoForWindowInfo(windowInfo->windowLayoutInfo);
             }
-            if (IsChosenOption(windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
+            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
                 sceneSession->GetWindowMetaInfoForWindowInfo(windowInfo->windowMetaInfo);
             }
             infos.emplace_back(windowInfo);
@@ -10502,10 +10501,9 @@ WMError SceneSessionManager::ListWindowInfo(WindowInfoFilterOption windowInfoFil
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
-bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-    DisplayId inputDisplayId, const sptr<SceneSession>& sceneSession) const
+bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& windowInfoOption, const sptr<SceneSession>& sceneSession) const
 {
-    DisplayId displayId = inputDisplayId;
+    DisplayId displayId = windowInfoOption,displayId;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
         sceneSession->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
         if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
@@ -10522,16 +10520,19 @@ bool SceneSessionManager::FilterForListWindowInfo(WindowInfoFilterOption windowI
     if (displayId != DISPLAY_ID_INVALID && sceneSession->GetSessionProperty()->GetDisplayId() != displayId) {
         return false;
     }
-    if (IsChosenOption(windowInfoFilterOption, WindowInfoFilterOption::EXCLUDE_SYSTEM) &&
+    if (windowInfoOption.windowId != 0 && sceneSession->GetWindowId() !=windowInfoOption.windowId) {
+        return false;
+    }
+    if (IsChosenOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::EXCLUDE_SYSTEM) &&
         sceneSession->GetSessionInfo().isSystem_) {
         return false;
     }
-    if (IsChosenOption(windowInfoFilterOption, WindowInfoFilterOption::VISIBLE) &&
+    if (IsChosenOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::VISIBLE) &&
         (sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
         sceneSession->GetVisibilityState() == WINDOW_LAYER_STATE_MAX)) {
         return false;
     }
-    if (IsChosenOption(windowInfoFilterOption, WindowInfoFilterOption::FOREGROUND) &&
+    if (IsChosenOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::FOREGROUND) &&
         !IsSessionVisibleForeground(sceneSession)) {
         return false;
     }

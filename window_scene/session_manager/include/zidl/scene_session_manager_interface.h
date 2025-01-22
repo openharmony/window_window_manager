@@ -250,8 +250,7 @@ public:
     {
         return WMError::WM_OK;
     }
-    WMError ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption,
-        WindowInfoTypeOption windowInfoTypeOption, DisplayId displayId,
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
         std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
