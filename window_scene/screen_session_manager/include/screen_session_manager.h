@@ -30,6 +30,7 @@
 #include "client_agent_container.h"
 #include "session_display_power_controller.h"
 #include "wm_single_instance.h"
+#include "screen_edid_parse.h"
 
 #include "agent_death_recipient.h"
 #include "screen.h"
@@ -413,10 +414,10 @@ private:
     void AddVirtualScreenDeathRecipient(const sptr<IRemoteObject>& displayManagerAgent, ScreenId smsScreenId);
     void SendCastEvent(const bool &isPlugIn);
     void PhyMirrorConnectWakeupScreen();
-    bool IsScreenRestored(sptr<ScreenSession> screenSession);
     bool GetIsCurrentInUseById(ScreenId screenId);
-    bool GetMultiScreenInfo(MultiScreenInfo &info);
-    bool CheckMultiScreenInfo(MultiScreenInfo &info, sptr<ScreenSession> screenSession);
+    void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession);
+    std::string ConvertEdidToString(const struct BaseEdid edidData);
+    bool RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
     int32_t GetCurrentInUseScreenNumber();
     void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
@@ -426,7 +427,6 @@ private:
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
     void RecoverMultiScreenMode();
-    void RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,

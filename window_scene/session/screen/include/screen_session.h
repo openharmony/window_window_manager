@@ -228,6 +228,8 @@ public:
     bool GetIsFakeInUse() const;
     void SetIsBScreenHalf(bool isBScreenHalf);
     bool GetIsBScreenHalf() const;
+    void SetSerialNumber(std::string serialNumber);
+    std::string GetSerialNumber() const;
     ScreenShape GetScreenShape() const;
     void SetValidHeight(uint32_t validHeight);
     void SetValidWidth(uint32_t validWidth);
@@ -309,6 +311,7 @@ private:
     std::vector<uint32_t> hdrFormats_;
     std::vector<uint32_t> colorSpaces_;
     MirrorScreenType mirrorScreenType_ { MirrorScreenType::VIRTUAL_MIRROR };
+    std::string serialNumber_;
     std::pair<ScreenId, DMRect> mirrorScreenRegion_ = std::make_pair(INVALID_SCREEN_ID, DMRect::NONE());
     SetScreenSceneDpiFunc setScreenSceneDpiCallback_ = nullptr;
     DestroyScreenSceneFunc destroyScreenSceneCallback_ = nullptr;
