@@ -140,6 +140,8 @@ namespace {
  */
 HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
 {
+    bool preBackgroundNotifyEnabled = Session::IsBackgroundNotifyEnabled();
+    Session::SetBackgroundNotifyEnabled(true);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
@@ -167,6 +169,28 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     ASSERT_EQ(rect, session_->winRect_);
+    Session::SetBackgroundNotifyEnabled(preBackgroundNotifyEnabled);
+}
+
+/**
+ * @tc.name: UpdateRect_TestForeground
+ * @tc.desc: update rect
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Level2)
+{
+    bool preBackgroundNotifyEnabled = Session::IsBackgroundNotifyEnabled();
+    Session::SetBackgroundNotifyEnabled(false);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session_->sessionStage_ = mockSessionStage;
+
+    WSRect rect = { 0, 0, 100, 100 };
+    session_->UpdateSessionState(SessionState::STATE_ACTIVE);
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    session_->UpdateSessionState(SessionState::STATE_BACKGROUND);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    Session::SetBackgroundNotifyEnabled(preBackgroundNotifyEnabled);
 }
 
 /**
