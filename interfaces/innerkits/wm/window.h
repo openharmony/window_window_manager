@@ -534,7 +534,7 @@ public:
 class IWindowHighlightChangeListener : virtual public RefBase {
 public:
     /**
-     * @brief Notify caller when when highlight status changes.
+     * @brief Notify caller when highlight status changes.
      *
      * @param isHighlight Whether the window is highlighted.
      */

@@ -118,6 +118,7 @@ public:
     RectAnimationConfig GetRectAnimationConfig() const;
     WindowType GetWindowType() const;
     bool GetDragEnabled() const;
+    bool GetTouchable() const;
     bool GetHideNonSystemFloatingWindows() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
@@ -259,7 +260,6 @@ public:
      */
     bool GetFocusable() const;
     bool GetFocusableOnShow() const;
-    bool GetTouchable() const;
     bool GetExclusivelyHighlighted() const;
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
 

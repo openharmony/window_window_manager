@@ -270,13 +270,6 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
-    void UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,
-        bool isProactiveUnfocus);
-    void SetHighlightSessionIds(sptr<SceneSession>& sceneSession);
-    void AddHighlightSessionIds(sptr<SceneSession>& sceneSession);
-    void RemoveHighlightSessionIds(sptr<SceneSession>& sceneSession);
-    std::string GetHighlightIdsStr();
-
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
     WSError RaiseWindowToTop(int32_t persistentId) override;
@@ -738,6 +731,12 @@ private:
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
     void UpdateOccupiedAreaIfNeed(int32_t persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+    void UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,
+        bool isProactiveUnfocus);
+    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession);
+    void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession);
+    void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
+    std::string GetHighlightIdsStr();
 
     /*
      * Window Immersive

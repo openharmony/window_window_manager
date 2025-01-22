@@ -6132,7 +6132,7 @@ void JsSceneSession::ProcessSetHighlightChangeRegister()
     NotifyHighlightChangeFunc func = [weakThis = wptr(this), where = __func__](bool isHighlight) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s jsSceneSession is null", where);
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s: jsSceneSession is null", where);
             return;
         }
         jsSceneSession->NotifyHighlightChange(isHighlight);
@@ -6148,15 +6148,15 @@ void JsSceneSession::ProcessSetHighlightChangeRegister()
 void JsSceneSession::NotifyHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "isHighlight: %{public}d, id: %{public}d", isHighlight, persistentId_);
-    auto task = [weakThis = wptr(this), isHighlight, env = env_, persistentId = persistentId_] {
+    auto task = [weakThis = wptr(this), isHighlight, env = env_, persistentId = persistentId_, where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "jsSceneSession id: %{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_FOCUS, "jsSceneSession id: %{public}d has been destroyed", where, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(HIGHLIGHT_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr", where);
             return;
         }
         napi_value jsIsHighlight = CreateJsValue(env, isHighlight);
