@@ -120,7 +120,7 @@ std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImp
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
 std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
-std::map<int32_t, std::vectorsptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -2607,8 +2607,7 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
 }
 
 template<typename T>
-EnableIfSame<T, IWindowHighlightChangeListener,
-    std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::GetListeners()
+EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowHighlightChangeListener>> highlightChangeListeners;
     for (auto& listener : highlightChangeListeners_[GetPersistentId()]) {

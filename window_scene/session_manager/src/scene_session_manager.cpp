@@ -4984,9 +4984,8 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
 
 WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
 {
-    int32_t screenGroupId = 0;
     std::ostringstream oss;
-    oss << "-------------------------------------ScreenGroup " << screenGroupId
+    oss << "-------------------------------------ScreenGroup 0"
         << "-------------------------------------" << std::endl;
     oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
         << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]" << std::endl;
