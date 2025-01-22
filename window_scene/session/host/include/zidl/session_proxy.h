@@ -128,8 +128,19 @@ public:
      */
     WSError RemoveStartingWindow() override;
 
+    /*
+     * Window Property
+     */
+    WSError SetWindowCornerRadius(float cornerRadius) override;
+
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+
+    /*
+     * PC Window
+     */
+    WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

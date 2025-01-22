@@ -30,5 +30,53 @@
     {
         "first_instroduced":"16",
         "name":"OH_WindowManager_IsWindowShown"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowStatusBarEnabled"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowStatusBarColor"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowNavigationBarEnabled"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_GetWindowAvoidArea"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowBackgroundColor"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowBrightness"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowKeepScreenOn"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowPrivacyMode"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_GetWindowProperties"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_Snapshot"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowTouchable"
+    },
+    {
+        "first_instroduced":"16",
+        "name":"OH_WindowManager_SetWindowFocusable"
     }
 ]

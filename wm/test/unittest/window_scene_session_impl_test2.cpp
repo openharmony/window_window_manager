@@ -1988,6 +1988,96 @@ HWTEST_F(WindowSceneSessionImplTest2, SetWindowShadowRadius, Function | SmallTes
     ret = window->SetWindowShadowRadius(1.0f);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
+
+/**
+ * @tc.name: SetWindowCornerRadius
+ * @tc.desc: SetWindowCornerRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, SetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowCornerRadius");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetWindowCornerRadius(0.0f));
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto ret = window->SetWindowCornerRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ret = window->SetWindowCornerRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ret = window->SetWindowShadowRadius(-1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = window->SetWindowShadowRadius(1.0f);
+    EXPECT_EQ(WMError::WM_OK, ret);
+}
+
+/**
+ * @tc.name: GetWindowCornerRadius
+ * @tc.desc: GetWindowCornerRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, GetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowCornerRadius");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    float cornerRadius = 0.0f;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetWindowCornerRadius(cornerRadius));
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->property_->SetWindowCornerRadius(1.0f);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    auto ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(1.0f, cornerRadius);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(1.0f, cornerRadius);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ret = window->GetWindowCornerRadius(cornerRadius);
+    EXPECT_EQ(1.0f, cornerRadius);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

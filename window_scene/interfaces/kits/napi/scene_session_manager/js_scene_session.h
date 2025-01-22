@@ -89,6 +89,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_VIEW_MODE_CHANGE_CB,
+    SET_WINDOW_CORNER_RADIUS_CB,
 };
 
 class SceneSession;
@@ -326,6 +327,11 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
 
     /*
+     * Window Property
+    */
+    void ProcessSetWindowCornerRadiusRegister();
+
+    /*
      * PC Window Layout
      */
     void ProcessSetSupportedWindowModesRegister();
@@ -382,8 +388,13 @@ private:
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
-    void OnKeyboardStateChange(const SessionState& state, const KeyboardViewMode& mode);
-    void OnKeyboardViewModeChange(const KeyboardViewMode& mode);
+    void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
+    void OnKeyboardViewModeChange(KeyboardViewMode mode);
+
+    /*
+     * Window Property
+    */
+    void OnSetWindowCornerRadius(float cornerRadius);
 
     /*
      * PC Window Layout

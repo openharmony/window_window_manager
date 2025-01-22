@@ -680,6 +680,46 @@ HWTEST_F(SceneSessionTest3, RegisterSupportWindowModesCallback, Function | Small
     sceneSession->RegisterSupportWindowModesCallback(std::move(func1));
     ASSERT_NE(nullptr, sceneSession->onSetSupportedWindowModesFunc_);
 }
+
+/**
+ * @tc.name: SetWindowCornerRadiusCallback
+ * @tc.desc: SetWindowCornerRadiusCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetWindowCornerRadiusCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowCornerRadiusCallback";
+    info.bundleName_ = "SetWindowCornerRadiusCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    NotifySetWindowCornerRadiusFunc func1 = [](float cornerRadius) {
+        return;
+    };
+    sceneSession->SetWindowCornerRadiusCallback(std::move(func1));
+    ASSERT_NE(nullptr, sceneSession->onSetWindowCornerRadiusFunc_);
+}
+
+/**
+ * @tc.name: OnSetWindowCornerRadius
+ * @tc.desc: OnSetWindowCornerRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetWindowCornerRadius";
+    info.bundleName_ = "SetWindowCornerRadius";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    EXPECT_EQ(WSError::WS_OK, session->SetWindowCornerRadius(1.0f));
+
+    NotifySetWindowCornerRadiusFunc func = [](float cornerRadius) {
+        return;
+    };
+    session->onSetWindowCornerRadiusFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->SetWindowCornerRadius(1.0f));
+}
 }
 }
 }

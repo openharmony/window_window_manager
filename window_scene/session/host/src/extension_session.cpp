@@ -23,7 +23,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "ExtensionSession" };
-std::set<int32_t> g_extensionPersistentIdSet;
+std::unordered_set<int32_t> g_extensionPersistentIdSet;
 std::mutex g_extensionPersistentIdMutex;
 constexpr uint32_t EXTENSION_ID_FLAG = 0x40000000;
 constexpr uint32_t PID_LENGTH = 18;
@@ -271,6 +271,7 @@ WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk
 
 WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (extSessionEventCallback_ != nullptr &&
         extSessionEventCallback_->transferExtensionDataFunc_ != nullptr) {
         extSessionEventCallback_->transferExtensionDataFunc_(wantParams);
@@ -280,6 +281,7 @@ WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantPar
 
 WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -290,6 +292,7 @@ WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantPar
 WSErrorCode ExtensionSession::TransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                                         AAFwk::WantParams& reWantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }
