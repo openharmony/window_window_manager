@@ -5033,7 +5033,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     oss << "SingleHand: X[" << singleHandTransform_.posX << "] Y[" << singleHandTransform_.posY << "] scale["
         << singleHandTransform_.scaleX << "]" << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
-    oss << "Highlighted windows: " << GetHighlightIds() << std::endl;
+    oss << "Highlighted windows: " << GetHighlightIdsStr() << std::endl;
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
 }
@@ -5993,7 +5993,7 @@ void SceneSessionManager::SetHighlightSessionIds(sptr<SceneSession>& sceneSessio
     sceneSession->UpdateHighlightStatus(true);
     highlightIds_.clear();
     highlightIds_.insert(sceneSession->GetPersistentId());
-    GetHighlightIds();
+    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds_: %{public}s", GetHighlightIdsStr().c_str());
 }
 
 /** @note @window.focus */
@@ -6005,7 +6005,7 @@ void SceneSessionManager::AddHighlightSessionIds(sptr<SceneSession>& sceneSessio
     }
     sceneSession->UpdateHighlightStatus(true);
     highlightIds_.insert(sceneSession->GetPersistentId());
-    GetHighlightIds();
+    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds_: %{public}s", GetHighlightIdsStr().c_str());
 }
 
 /** @note @window.focus */
@@ -6021,7 +6021,20 @@ void SceneSessionManager::RemoveHighlightSessionIds(sptr<SceneSession>& sceneSes
     } else {
         TLOGE(WmsLogTag::WMS_FOCUS, "not found scene session with id: %{public}d", sceneSession->GetPersistentId());
     }
-    GetHighlightIds();
+    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds_: %{public}s", GetHighlightIdsStr().c_str());
+}
+
+/** @note @window.focus */
+std::string SceneSessionManager::GetHighlightIdsStr()
+{
+    std::ostringstream oss;
+    for(auto it = highlightIds_.begin(); it != highlightIds_.end(); it++){
+        oss << *it;
+        if(std::next(it) != highlightIds_.end()) {
+            oss << ", ";
+        }
+    }
+    return oss.str();
 }
 
 void SceneSessionManager::NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused)
@@ -12736,16 +12749,4 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
         return WSError::WS_OK;
     }, __func__);
 }
-
-std::string SceneSessionManager::GetHighlightIds()
-{
-    std::string highlightIdsStr = "";
-    for (auto persistentId : highlightIds_) {
-        highlightIdsStr += std::to_string(persistentId);
-        highlightIdsStr += ",";
-    }
-    TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds_: %{public}s", highlightIdsStr.c_str());
-    return highlightIdsStr;
-}
-
 } // namespace OHOS::Rosen

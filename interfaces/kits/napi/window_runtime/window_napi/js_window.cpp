@@ -7768,10 +7768,15 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
 napi_value JsWindow::OnIsWindowHighlighted(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
+        TLOGE(WmsLogTag::WMS_FOCUS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    bool isHighlighted = windowToken_->IsWindowHighlighted();
+    bool isHighlighted = false;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsWindowHighlighted(isHighlighted));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "get window highlight failed, ret %{public}d", ret);
+        return NapiThrowError(env, ret);
+    }
     TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted = %{public}u", isHighlighted);
     return CreateJsValue(env, isHighlighted);
 }

@@ -275,7 +275,7 @@ public:
     void SetHighlightSessionIds(sptr<SceneSession>& sceneSession);
     void AddHighlightSessionIds(sptr<SceneSession>& sceneSession);
     void RemoveHighlightSessionIds(sptr<SceneSession>& sceneSession);
-    std::string GetHighlightIds();
+    std::string GetHighlightIdsStr();
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);

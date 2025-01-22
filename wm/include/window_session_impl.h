@@ -349,7 +349,7 @@ public:
      * HightLight Window
      */
     bool GetExclusivelyHighlighted() const;
-    bool IsWindowHighlighted() const override;
+    bool IsWindowHighlighted(bool& highlighted) const override;
     WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) override;
     WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
@@ -570,7 +570,7 @@ private:
     template<typename T>
     EnableIfSame<T, ISwitchFreeMultiWindowListener, std::vector<sptr<ISwitchFreeMultiWindowListener>>> GetListeners();
     template<typename T>
-    EnableIfSame<T, IWindowHighlightChangeListener, sptr<IWindowHighlightChangeListener>> GetListeners();
+    EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -651,7 +651,7 @@ private:
     static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
     static std::map<int32_t, sptr<IMainWindowCloseListener>> mainWindowCloseListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
-    static std::map<int32_t, sptr<IWindowHighlightChangeListener>> highlightChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
