@@ -16,6 +16,7 @@
 #include "fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
 #include <parameters.h>
 
+#include <hisysevent.h>
 #include "screen_session_manager.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
@@ -60,6 +61,8 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
     bool isSecondaryReflexion = static_cast<bool>(angles[REFLEXION_VALUE]);
     if (isSecondaryReflexion) {
         TLOGW(WmsLogTag::DMS, "SecondaryReflexion:%{public}d", isSecondaryReflexion);
+        ReportSecondaryReflexion(static_cast<int32_t>(nextState), static_cast<int32_t>(nextState),
+            isSecondaryReflexion);
         auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
         if (screenSession == nullptr) {
             TLOGE(WmsLogTag::DMS, "screen session is null!");
@@ -205,5 +208,22 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetFoldStateUnpower(const std
         state = FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND;
     }
     return state;
+}
+
+void SecondaryDisplaySensorFoldStateManager::ReportSecondaryReflexion(int32_t currentStatus, int32_t nextStatus,
+    bool isSecondaryReflexion)
+{
+    TLOGW(WmsLogTag::DMS, "ReportSecondaryReflexion currentStatus: %{public}d, isSecondaryReflexion: %{public}d",
+        currentStatus, isSecondaryReflexion);
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "NOTIFY_FOLD_STATE_CHANGE",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "CURRENT_FOLD_STATUS", currentStatus,
+        "NEXT_FOLD_STATUS", nextStatus,
+        "SENSOR_POSTURE", isSecondaryReflexion);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
 }
 } // namespace OHOS::Rosen
