@@ -1563,6 +1563,27 @@ HWTEST_F(WindowManagerTest, ShiftAppWindowPointerEvent, Function | SmallTest | L
     auto ret = WindowManager::GetInstance().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId);
     ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId), ret);
 }
+
+/**
+ * @tc.name: OnWMSConnectionChanged
+ * @tc.desc: check OnWMSConnectionChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, OnWMSConnectionChanged, Function | SmallTest | Level2)
+{
+    int32_t userId = 1;
+    int32_t screenId = 1;
+    int32_t isConnected = 1;
+
+    WMError ret_1 = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret_1);
+    WindowManager::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected);
+
+    isConnected = 0;
+    WMError ret_2 = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret_2);
+    WindowManager::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
