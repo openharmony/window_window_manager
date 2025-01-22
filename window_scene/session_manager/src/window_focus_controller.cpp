@@ -125,7 +125,7 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
     return focusGroup;
 }
 
-std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList()
+std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList() const
 {
     std::vector<std::pair<DisplayId, int32_t>> allFocusGroup;
     for (const auto& elem : focusGroupMap_) {
