@@ -58,7 +58,7 @@ WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayId);
@@ -73,7 +73,7 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     focusGroupMap_.erase(displayId);
@@ -103,7 +103,7 @@ int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return INVALID_SESSION_ID;
     }
     auto focusGroup = GetFocusGroupInner(displayId);
@@ -118,7 +118,7 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return nullptr;
     }
     auto focusGroup = GetFocusGroupInner(displayId);
@@ -143,7 +143,7 @@ WSError WindowFocusController::UpdateFocusedSessionId(DisplayId displayId, int32
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", persistentId: %{public}d", displayId, persistentId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto focusGroup = GetFocusGroupInner(displayId);
@@ -158,7 +158,7 @@ WSError WindowFocusController::UpdateFocusedAppSessionId(DisplayId displayId, in
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", persistentId: %{public}d", displayId, persistentId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto focusGroup = GetFocusGroupInner(displayId);
