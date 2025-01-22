@@ -336,7 +336,11 @@ int SessionStageStub::HandleNotifyTransferComponentData(MessageParcel& data, Mes
 int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called!");
-    bool isHighlight = data.ReadBool();
+    bool isHighlight = false;
+    if (!data.ReadBool(isHighlight)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read isHighlight failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = NotifyHighlightChange(isHighlight);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
