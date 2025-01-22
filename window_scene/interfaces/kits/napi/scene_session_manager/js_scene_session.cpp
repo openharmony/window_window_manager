@@ -6157,7 +6157,7 @@ void JsSceneSession::NotifyHighlightChange(bool isHighlight)
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(HIGHLIGHT_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s: jsCallBack is nullptr", where);
             return;
         }
         napi_value jsIsHighlight = CreateJsValue(env, isHighlight);
