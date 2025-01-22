@@ -1525,6 +1525,44 @@ HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
     auto ret = WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(WMError::WM_OK, ret);
 }
+
+/**
+ * @tc.name: NotifyWMSConnected
+ * @tc.desc: check NotifyWMSConnected
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWMSConnected, Function | SmallTest | Level2)
+{
+    WMError ret = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
+    ASSERT_NE(WMError::WM_OK, ret);
+    WindowManager::GetInstance().pImpl_->NotifyWMSConnected(1, 2);
+}
+
+/**
+ * @tc.name: GetAllWindowLayoutInfo
+ * @tc.desc: check GetAllWindowLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetAllWindowLayoutInfo, Function | SmallTest | Level2)
+{
+    DisplayId displayId = 1;
+    std::vector<sptr<WindowLayoutInfo>> infos;
+    auto ret = WindowManager::GetInstance().GetAllWindowLayoutInfo(displayId, infos);
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos), ret);
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEvent
+ * @tc.desc: check ShiftAppWindowPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, ShiftAppWindowPointerEvent, Function | SmallTest | Level2)
+{
+    int32_t sourceWindowId = 1;
+    int32_t targetWindowId = 1;
+    auto ret = WindowManager::GetInstance().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId);
+    ASSERT_EQ(SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(sourceWindowId, targetWindowId), ret);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
