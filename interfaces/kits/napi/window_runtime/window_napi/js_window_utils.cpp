@@ -544,20 +544,6 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
     return objValue;
 }
 
-napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowInfo>>& infos)
-{
-    napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, infos.size(), &arrayValue);
-    if (arrayValue == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "arrayValue is null");
-        return nullptr;
-    }
-    for (size_t i = 0; i < infos.size(); i++) {
-        napi_set_element(env, arrayValue, i, CreateJsWindowInfoObject(env, infos[i]));
-    }
-    return arrayValue;
-}
-
 napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
@@ -572,7 +558,7 @@ napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<s
     return arrayValue;
 }
 
-napi_value CreateJsWindowVisibilityInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
+napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, infos.size(), &arrayValue);
@@ -585,7 +571,7 @@ napi_value CreateJsWindowVisibilityInfoArrayObject(napi_env env, const std::vect
         auto info = infos[i];
         auto windowType = info->GetWindowType();
         if (windowType >= WindowType::APP_MAIN_WINDOW_BASE && windowType < WindowType::APP_MAIN_WINDOW_END) {
-            napi_set_element(env, arrayValue, index++, CreateJsWindowVisibilityInfoObject(env, info));
+            napi_set_element(env, arrayValue, index++, CreateJsWindowInfoObject(env, info));
         }
     }
     return arrayValue;
@@ -631,78 +617,15 @@ bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButto
     return !emptyParam;
 }
 
-napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowInfo>& windowInfo)
+napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "windowUIInfo",
-                            GetWindowUIInfoAndConvertToJsValue(env, windowInfo->windowUIInfo));
-    napi_set_named_property(env, objValue, "windowDisplayInfo",
-                            GetWindowDisplayInfoAndConvertToJsValue(env, windowInfo->windowDisplayInfo));
-    napi_set_named_property(env, objValue, "windowLayoutInfo",
-                            GetWindowLayoutInfoAndConvertToJsValue(env, windowInfo->windowLayoutInfo));
-    napi_set_named_property(env, objValue, "windowMetaInfo",
-                            GetWindowMetaInfoAndConvertToJsValue(env, windowInfo->windowMetaInfo));
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
     return objValue;
 }
 
-napi_value GetWindowUIInfoAndConvertToJsValue(napi_env env, const WindowUIInfo& windowUIInfo)
-{
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "visibilityState",
-                            windowUIInfo.visibilityState != WindowVisibilityState::WINDOW_LAYER_STATE_MAX ?
-                            CreateJsValue(env, static_cast<uint32_t>(windowUIInfo.visibilityState)) :
-                            CreateJsUndefined(env));
-    return objValue;
-}
-
-napi_value GetWindowDisplayInfoAndConvertToJsValue(napi_env env, const WindowDisplayInfo& windowDisplayInfo)
-{
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "displayId",
-                            windowDisplayInfo.displayId != DISPLAY_ID_INVALID ?
-                            CreateJsValue(env, static_cast<int64_t>(windowDisplayInfo.displayId)) :
-                            CreateJsUndefined(env));
-    return objValue;
-}
-
-napi_value GetWindowLayoutInfoAndConvertToJsValue(napi_env env, const WindowLayoutInfo& windowLayoutInfo)
-{
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "rect",
-                            !windowLayoutInfo.rect.IsUninitializedRect() ?
-                            GetRectAndConvertToJsValue(env, windowLayoutInfo.rect) :
-                            CreateJsUndefined(env));
-    return objValue;
-}
-
-napi_value GetWindowMetaInfoAndConvertToJsValue(napi_env env, const WindowMetaInfo& windowMetaInfo)
-{
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "windowId", windowMetaInfo.windowId != 0 ?
-                            CreateJsValue(env, windowMetaInfo.windowId) : CreateJsUndefined(env));
-    napi_set_named_property(env, objValue, "windowName", windowMetaInfo.windowName.empty() ?
-                            CreateJsValue(env, windowMetaInfo.windowName) : CreateJsUndefined(env));
-    napi_set_named_property(env, objValue, "bundleName", windowMetaInfo.bundleName.empty() ?
-                            CreateJsValue(env, windowMetaInfo.bundleName) : CreateJsUndefined(env));
-    napi_set_named_property(env, objValue, "abilityName", windowMetaInfo.abilityName.empty() ?
-                            CreateJsValue(env, windowMetaInfo.abilityName) : CreateJsUndefined(env));
-    return objValue;
-}
-
-napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& windowLayoutInfo)
-{
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, windowLayoutInfo->rect));
-    return objValue;
-}
-
-napi_value CreateJsWindowVisibilityInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
+napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
 {
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
@@ -1323,59 +1246,6 @@ napi_value ModalityTypeInit(napi_env env)
         CreateJsValue(env, ApiModalityType::WINDOW_MODALITY));
     napi_set_named_property(env, objValue, "APPLICATION_MODALITY",
         CreateJsValue(env, ApiModalityType::APPLICATION_MODALITY));
-    return objValue;
-}
-
-napi_value WindowInfoFilterOptionInit(napi_env env)
-{
-    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-
-    napi_set_named_property(env, objValue, "ALL",
-        CreateJsValue(env, WindowInfoFilterOption::ALL));
-    napi_set_named_property(env, objValue, "EXCLUDE_SYSTEM",
-        CreateJsValue(env, WindowInfoFilterOption::EXCLUDE_SYSTEM));
-    napi_set_named_property(env, objValue, "VISIBLE",
-        CreateJsValue(env, WindowInfoFilterOption::VISIBLE));
-    napi_set_named_property(env, objValue, "FOREGROUND",
-        CreateJsValue(env, WindowInfoFilterOption::FOREGROUND));
-    return objValue;
-}
-
-napi_value WindowInfoTypeOptionInit(napi_env env)
-{
-    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-
-    napi_set_named_property(env, objValue, "WINDOW_UI_INFO",
-        CreateJsValue(env, WindowInfoTypeOption::WINDOW_UI_INFO));
-    napi_set_named_property(env, objValue, "WINDOW_DISPLAY_INFO",
-        CreateJsValue(env, WindowInfoTypeOption::WINDOW_DISPLAY_INFO));
-    napi_set_named_property(env, objValue, "WINDOW_LAYOUT_INFO",
-        CreateJsValue(env, WindowInfoTypeOption::WINDOW_LAYOUT_INFO));
-    napi_set_named_property(env, objValue, "WINDOW_META_INFO",
-        CreateJsValue(env, WindowInfoTypeOption::WINDOW_META_INFO));
-    napi_set_named_property(env, objValue, "ALL",
-        CreateJsValue(env, WindowInfoTypeOption::ALL));
-    return objValue;
-}
-
-napi_value WindowVisibilityStateInit(napi_env env)
-{
-    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-
-    napi_set_named_property(env, objValue, "WINDOW_VISIBILITY_STATE_NO_OCCLUSION",
-        CreateJsValue(env, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION));
-    napi_set_named_property(env, objValue, "WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION",
-        CreateJsValue(env, WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION));
-    napi_set_named_property(env, objValue, "WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION",
-        CreateJsValue(env, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION));
-    napi_set_named_property(env, objValue, "WINDOW_LAYER_STATE_MAX",
-        CreateJsValue(env, WindowVisibilityState::WINDOW_LAYER_STATE_MAX));
     return objValue;
 }
 
