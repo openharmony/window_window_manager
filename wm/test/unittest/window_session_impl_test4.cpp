@@ -2474,10 +2474,13 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, Function | SmallTest | Lev
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->hostSession_ = session;
     window->property_->SetPersistentId(INVALID_SESSION_ID);
-    ASSERT_EQ(window->IsWindowHighlighted(), false);
+    bool isHighlighted = false;
+    window->IsWindowHighlighted(isHighlighted)
+    ASSERT_EQ(isHighlighted, false);
     window->property_->SetPersistentId(1);
     window->isHighlighted_ = true;
-    ASSERT_EQ(window->IsWindowHighlighted(), true);
+    window->IsWindowHighlighted(isHighlighted)
+    ASSERT_EQ(isHighlighted, true);
 }
 
 } // namespace
