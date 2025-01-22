@@ -121,6 +121,13 @@ public:
     ScreenId GetParentId() const;
 
     /**
+     * @brief Get screen serial number.
+     *
+     * @return Screen serial number.
+     */
+    std::string GetSerialNumber() const;
+
+    /**
      * @brief Get screen mode id.
      *
      * @return Screen mode id.

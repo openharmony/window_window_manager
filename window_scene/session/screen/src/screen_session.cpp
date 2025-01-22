@@ -541,6 +541,16 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
+void ScreenSession::SetSerialNumber(std::string serialNumber)
+{
+    serialNumber_ = serialNumber;
+}
+
+std::string ScreenSession::GetSerialNumber() const
+{
+    return serialNumber_;
+}
+
 void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
                                    float translateY)
 {
@@ -1325,6 +1335,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetSourceMode(sourceMode);
     info->SetType(property_.GetScreenType());
     info->SetModeId(activeIdx_);
+    info->SetSerialNumber(serialNumber_);
 
     info->lastParent_ = lastGroupSmsId_;
     info->parent_ = groupSmsId_;
