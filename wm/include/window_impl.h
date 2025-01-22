@@ -163,9 +163,9 @@ public:
     }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
         const Rect& rect = Rect::EMPTY_RECT) override;
-    WMError WindowImpl::SetAvoidAreaOption(uint32_t avoidAreaOption) override
+    WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    WMError WindowImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption) override
+    WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
