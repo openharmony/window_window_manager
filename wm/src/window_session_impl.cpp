@@ -2607,7 +2607,7 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
 }
 
 template<typename T>
-EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>> 
+EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>>
     WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowHighlightChangeListener>> highlightChangeListeners;
