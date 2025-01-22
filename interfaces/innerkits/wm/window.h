@@ -3029,7 +3029,7 @@ public:
      */
     virtual WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
@@ -3040,7 +3040,7 @@ public:
      */
     virtual WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
     /**
@@ -3049,14 +3049,17 @@ public:
      * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) { return WMError::WM_OK; }
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) { 
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     
     /**
      * @brief Get highlight property of window.
      *
-     * @return True means the window is highlighted, false means the window is not highlighted.
+     * @param highlighted True means the window is highlighted, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
      */
-    virtual bool IsWindowHighlighted() const { return false; }
+    virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

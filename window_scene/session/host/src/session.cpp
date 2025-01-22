@@ -2681,7 +2681,7 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
 
 WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS,
+    TLOGD(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d",
         persistentId_, isHighlight_, isHighlight, isNotifyHighlightChange);
     if (isHighlight_ == isHighlight) {

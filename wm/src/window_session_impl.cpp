@@ -120,7 +120,7 @@ std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> WindowSessionImp
 std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowCloseListeners_;
 std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
-std::map<int32_t, sptr<IWindowHighlightChangeListener>> WindowSessionImpl::highlightChangeListeners_;
+std::map<int32_t, std::vectorsptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -1699,24 +1699,26 @@ WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     isHighlighted_ = isHighlight;
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
-    auto highlightChangeListener = GetListeners<IWindowHighlightChangeListener>();
-    if (highlightChangeListener != nullptr) {
-        highlightChangeListener->OnWindowHighlightChange(isHighlight);
-        return WSError::WS_OK;
+    auto highlightChangeListeners = GetListeners<IWindowHighlightChangeListener>();
+    for (auto& listener : highlightChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowHighlightChange(isHighlight);
+        }
     }
-    return WSError::WS_ERROR_NULLPTR;
+    return WSError::WS_OK;
 }
 
 /** @note @window.focus */
-bool WindowSessionImpl::IsWindowHighlighted() const
+WMError WindowSessionImpl::IsWindowHighlighted(bool& highlighted) const
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "session is invalid");
-        return false;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    highlighted = isHighlighted_.load();
     TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isWindowHighlighted: %{public}d",
         GetPersistentId(), isHighlighted_.load());
-    return isHighlighted_;
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::SetFocusable(bool isFocusable)
@@ -2603,41 +2605,30 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
     return WMError::WM_OK;
 }
 
-template <typename T>
-EnableIfSame<T, IWindowHighlightChangeListener, sptr<IWindowHighlightChangeListener>> WindowSessionImpl::GetListeners()
+template<typename T>
+EnableIfSame<T, IWindowHighlightChangeListener,
+    std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::GetListeners()
 {
-    return highlightChangeListeners_[GetPersistentId()];
+    std::vector<sptr<IWindowHighlightChangeListener>> highlightChangeListeners;
+    for (auto& listener : highlightChangeListeners_[GetPersistentId()]) {
+        highlightChangeListeners.push_back(listener);
+    }
+    return highlightChangeListeners;
 }
 
 WMError WindowSessionImpl::RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
 {
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    auto persistentId = GetPersistentId();
-    TLOGD(WmsLogTag::WMS_FOCUS, "Start, id:%{public}d", persistentId);
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "listener is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
+    TLOGD(WmsLogTag::WMS_FOCUS, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
-    highlightChangeListeners_[GetPersistentId()] = listener;
-    return WMError::WM_OK;
+    return RegisterListener(highlightChangeListeners_[GetPersistentId()], listener);
 }
 
 WMError WindowSessionImpl::UnregisterWindowHighlightChangeListeners(
     const sptr<IWindowHighlightChangeListener>& listener)
 {
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
+    TLOGD(WmsLogTag::WMS_FOCUS, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
-    highlightChangeListeners_[GetPersistentId()] = nullptr;
-    return WMError::WM_OK;
+    return UnregisterListener(highlightChangeListeners_[GetPersistentId()], listener);
 }
 
 template<typename T>
