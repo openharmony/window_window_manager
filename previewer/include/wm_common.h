@@ -822,6 +822,11 @@ enum class WindowInfoFilterOption : WindowInfoFilterOptionType {
     FOREGROUND = 1 << 2,
 };
 
+inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs) {
+    return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionType>(lhs) |
+        static_cast<WindowInfoFilterOptionType>(rhs));
+}
+
 inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option) {
     return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0;
 }
@@ -839,6 +844,11 @@ enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
     ALL = ~0,
 };
 
+inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs) {
+    return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionType>(lhs) |
+        static_cast<WindowInfoTypeOptionType>(rhs));
+}
+
 inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option) {
     return (static_cast<WindowInfoTypeOptionType>(options) & static_cast<WindowInfoTypeOptionType>(option)) != 0;
 }
@@ -849,10 +859,12 @@ inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption op
  * @brief Visibility state of a window
  */
 enum WindowVisibilityState : uint32_t {
-    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = 0,
+    START = 0,
+    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = START,
     WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
     WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
-    WINDOW_LAYER_STATE_MAX
+    WINDOW_LAYER_STATE_MAX,
+    END,
 };
 
 /**
@@ -1003,6 +1015,41 @@ struct WindowInfo : public Parcelable {
     WindowDisplayInfo windowDisplayInfo;
     WindowLayoutInfo windowLayoutInfo;
     WindowMetaInfo windowMetaInfo;
+};
+
+/**
+ * @struct WindowInfoOption
+ *
+ * @brief Option of list window info
+ */
+struct WindowInfoOption : public Parcelable {
+    bool Marshalling(Parcel& parcel) const override
+        { return parcel.WriteUint32(static_cast<uint32_t>(windowInfoFilterOption)) &&
+                 parcel.WriteUint32(static_cast<uint32_t>(windowInfoTypeOption)) &&
+                 parcel.WriteUint64(displayId) &&
+                 parcel.WriteInt32(windowId); }
+
+    static WindowInfoOption* Unmarshalling(Parcel& parcel)
+    {
+        WindowInfoOption* windowInfoOption = new WindowInfoOption;
+        uint32_t windowInfoFilterOption;
+        uint32_t windowInfoTypeOption;
+        if (!parcel.ReadUint32(windowInfoFilterOption) ||
+            !parcel.ReadUint32(windowInfoTypeOption) ||
+            !parcel.ReadUint64(windowInfoOption->displayId) ||
+            !parcel.ReadInt32(windowInfoOption->windowId)) {
+            delete WindowInfoOption;
+            return nullptr;
+        }
+        WindowInfoOption->windowInfoFilterOption = static_cast<WindowInfoFilterOptionType>(windowInfoFilterOption);
+        WindowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOptionType>(windowInfoTypeOption);
+        return WindowInfoOption;
+    }
+
+    WindowInfoFilterOption windowInfoFilterOption = WindowInfoFilterOption::ALL;
+    WindowInfoTypeOption windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    DisplayId displayId = DISPLAYID_ID_INVALID;
+    int32_t windowId = 0;
 };
 
 /**

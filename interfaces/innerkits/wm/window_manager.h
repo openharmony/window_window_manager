@@ -733,14 +733,11 @@ public:
     /**
      * @brief List window info.
      *
-     * @param windowInfoFilterOption Filter with layout relation between windows.
-     * @param windowInfoTypeOption Type of Which kind of window info to get.
-     * @param displayId DisplayId of which display to get window infos.
+     * @param windowInfoOption Option for selecting window info.
      * @param infos Window info.
      * @return WM_OK means get success, others means get failed.
      */
-    WMError ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption, WindowInfoTypeOption windowInfoTypeOption,
-                           DisplayId displayId, std::vector<sptr<WindowInfo>>& infos) const;
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
 
     /**
      * @brief Get window layout info.

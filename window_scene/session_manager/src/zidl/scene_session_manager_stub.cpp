@@ -1143,25 +1143,29 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
 
 int SceneSessionManagerStub::HandleListWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
+    WindowInfoOption windowInfoOption;
     uint8_t windowInfoFilterOptionValue = static_cast<WindowInfoFilterOptionType>(WindowInfoFilterOption::ALL);
     if (!data.ReadUint8(windowInfoFilterOptionValue)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowInfoFilterOption");
         return ERR_INVALID_DATA;
     }
-    WindowInfoFilterOption windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue);
+    windowInfoOption.windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue);
     uint8_t windowInfoTypeOptionValue = static_cast<WindowInfoTypeOptionType>(WindowInfoTypeOption::ALL);
     if (!data.ReadUint8(windowInfoTypeOptionValue)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowInfoTypeOption");
+        return ERR_INVALID_DATA;
+    }
+    windowInfoOption.windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOptionValue);
+    if (!data.ReadUint64(windowInfoOption.displayId)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
-    WindowInfoTypeOption windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOptionValue);
-    uint64_t displayId = DISPLAY_ID_INVALID;
-    if (!data.ReadUint64(displayId)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
+    if (!data.ReadInt32(windowInfoOption.windowId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowId");
         return ERR_INVALID_DATA;
     }
     std::vector<sptr<WindowInfo>> infos;
-    WMError errCode = ListWindowInfo(windowInfoFilterOption, windowInfoTypeOption, displayId, infos);
+    WMError errCode = ListWindowInfo(windowInfoOption, infos);
     if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowInfo>(reply, infos)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write window info");
         return ERR_INVALID_DATA;

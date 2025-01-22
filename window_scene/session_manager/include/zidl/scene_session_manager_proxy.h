@@ -101,8 +101,7 @@ public:
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override;
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
     WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
-    WMError ListWindowInfo(WindowInfoFilterOption windowInfoFilterOption, WindowInfoTypeOption windowInfoTypeOption,
-        DisplayId displayId, std::vector<sptr<WindowInfo>>& infos) override;
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
