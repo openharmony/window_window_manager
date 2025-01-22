@@ -490,6 +490,7 @@ void SuperFoldStateManager::OnHalfScreenSwitchesStateChanged()
 
 bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
 {
+    ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(toHalf);
     TLOGD(WmsLogTag::DMS, "isHalfScreen_ = %{public}d, toHalf = %{public}d", isHalfScreen_, toHalf);
     if (isHalfScreen_ == toHalf) {
         TLOGI(WmsLogTag::DMS, "screen is already in the desired state, no need to change");
@@ -502,8 +503,8 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
         return false;
     }
     auto screenProperty = meScreenSession->GetScreenProperty();
-    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
-    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     if (toHalf) {
         screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
         screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
@@ -521,7 +522,6 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE,
         toHalf ? KEYBOARD_ON_CONFIG : KEYBOARD_OFF_CONFIG, TpFeatureConfigType::AFT_TP_FEATURE);
 #endif
-    ScreenSessionManager::GetInstance().NotifyScreenMagneticStateChanged(toHalf);
     TLOGI(WmsLogTag::DMS, "rect [%{public}f , %{public}f], rs response is %{public}ld",
         screenWidth, screenHeight, static_cast<long>(response));
     return true;
