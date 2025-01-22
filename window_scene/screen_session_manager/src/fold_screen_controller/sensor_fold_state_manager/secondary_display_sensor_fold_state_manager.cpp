@@ -16,6 +16,7 @@
 #include "fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
 #include <parameters.h>
 
+#include <hisysevent.h>
 #include "screen_session_manager.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
