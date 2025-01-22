@@ -12532,9 +12532,9 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
     }
     return taskScheduler_->PostSyncTask([sourcePersistentId, targetPersistentId] {
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId, true);
-        TLOGNI(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
+        TLOGND(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
             sourcePersistentId, targetPersistentId, ret);
-        return ret == 0 ? WMError::WM_OK : WMError::WM_ERROR_INVALID_CALLING;
+        return WMError::WM_OK;
     }, __func__);
 }
 
