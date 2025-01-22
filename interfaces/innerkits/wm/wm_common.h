@@ -1255,6 +1255,7 @@ struct WindowLayoutInfo : public Parcelable {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
                parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
+  
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
