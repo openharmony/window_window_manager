@@ -66,7 +66,7 @@ WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
     if (displayId != DEFAULT_DISPLAY_ID) {
         virtualScreenDisplayIdSet_.emplace(displayId);
     }
-    return  WSError::WS_OK;
+    return WSError::WS_OK;
 }
 
 WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
@@ -80,7 +80,7 @@ WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
     if (displayId != DEFAULT_DISPLAY_ID) {
         virtualScreenDisplayIdSet_.erase(displayId);
     }
-    return  WSError::WS_OK;
+    return WSError::WS_OK;
 }
 
 sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
@@ -121,8 +121,7 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
         TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return nullptr;
     }
-    auto focusGroup = GetFocusGroupInner(displayId);
-    return focusGroup;
+    return GetFocusGroupInner(displayId);
 }
 
 std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList() const
