@@ -1492,7 +1492,7 @@ struct WindowInfoOption : public Parcelable {
 
     WindowInfoFilterOption windowInfoFilterOption = WindowInfoFilterOption::ALL;
     WindowInfoTypeOption windowInfoTypeOption = WindowInfoTypeOption::ALL;
-    DisplayId displayId = DISPLAYID_ID_INVALID;
+    DisplayId displayId = DISPLAY_ID_INVALID;
     int32_t windowId = 0;
 };
 
