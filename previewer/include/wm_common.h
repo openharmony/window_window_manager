@@ -1052,7 +1052,7 @@ struct WindowInfoOption : public Parcelable {
             !parcel.ReadUint32(windowInfoTypeOption) ||
             !parcel.ReadUint64(windowInfoOption->displayId) ||
             !parcel.ReadInt32(windowInfoOption->windowId)) {
-            delete WindowInfoOption;
+            delete windowInfoOption;
             return nullptr;
         }
         windowInfoOption->windowInfoFilterOption = static_cast<WindowInfoFilterOptionDataType>(windowInfoFilterOption);
