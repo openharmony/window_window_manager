@@ -906,7 +906,7 @@ struct WindowUIInfo : public Parcelable {
  */
 struct WindowDisplayInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-    { 
+    {
         return parcel.WriteUint64(displayId);
     }
 
@@ -960,7 +960,7 @@ struct WindowLayoutInfo : public Parcelable {
  */
 struct WindowMetaInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-    { 
+    {
         return parcel.WriteInt32(windowId) &&
                parcel.WriteString(windowName) &&
                parcel.WriteString(bundleName) &&
@@ -991,7 +991,7 @@ struct WindowMetaInfo : public Parcelable {
  */
 struct WindowInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-    { 
+    {
         return parcel.WriteUint32(static_cast<uint32_t>(windowUIInfo.visibilityState)) &&
                parcel.WriteUint64(windowDisplayInfo.displayId) &&
                parcel.WriteInt32(windowLayoutInfo.rect.posX_) &&
