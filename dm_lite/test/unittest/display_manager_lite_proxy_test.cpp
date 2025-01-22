@@ -125,15 +125,15 @@ HWTEST_F(DisplayManagerLiteProxyTest, SetFoldDisplayMode, Function | SmallTest |
         SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
 
-    int resultValue = 0;
-    const FoldDisplayMode displayMode {0};
-    std::function<void()> func = [&]()
-    {
-        displayManagerLiteProxy->SetFoldDisplayMode(displayMode);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    auto mode = displayManagerLiteProxy->GetFoldDisplayMode();
+    FoldDisplayMode displayMode = FoldDisplayMode::FULL;
+    displayManagerLiteProxy->SetFoldDisplayMode(displayMode);
+    if (displayManagerLiteProxy->IsFoldable()) {
+        ASSERT_EQ(displayManagerLiteProxy->GetFoldDisplayMode(), displayMode);
+        displayManagerLiteProxy->GetFoldDisplayMode(mode);
+    } else {
+        ASSERT_EQ(displayManagerLiteProxy->GetFoldDisplayMode(), FoldDisplayMode::UNKNOWN);
+    }
 }
 
 /**
@@ -147,15 +147,8 @@ HWTEST_F(DisplayManagerLiteProxyTest, IsFoldable, Function | SmallTest | Level1)
     sptr<IRemoteObject> impl =
         SingletonContainer::Get<DisplayManagerAdapterLite>().displayManagerServiceProxy_->AsObject();
     sptr<DisplayManagerLiteProxy> displayManagerLiteProxy = new DisplayManagerLiteProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        displayManagerLiteProxy->IsFoldable();
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    ASSERT_NE(displayManagerServiceProxy, nullptr);
+    displayManagerLiteProxy->IsFoldable();
 }
 
 /**
