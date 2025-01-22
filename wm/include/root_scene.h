@@ -36,6 +36,7 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
+class RSNode;
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
@@ -60,7 +61,7 @@ public:
      */
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = {0, 0, 0, 0}) override;
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT) override;
     void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
     void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
     WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
@@ -107,6 +108,8 @@ public:
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
+
     /*
      * Window Property
      */
@@ -131,6 +134,7 @@ private:
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::weak_ptr<AbilityRuntime::Context> context_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 
     /*
      * Window Immersive
@@ -140,9 +144,13 @@ private:
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;
     std::unordered_set<sptr<IAvoidAreaChangedListener>, SptrHash<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
+
+    /*
+     * Keyboard Window
+     */
+    mutable std::mutex occupiedAreaMutex_;
     std::unordered_set<sptr<IOccupiedAreaChangeListener>, SptrHash<IOccupiedAreaChangeListener>>
         occupiedAreaChangeListeners_;
-    // Above guarded by mutex_
 };
 } // namespace Rosen
 } // namespace OHOS

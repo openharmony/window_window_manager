@@ -46,7 +46,7 @@ public:
     virtual WMError DestroyWindow(uint32_t windowId);
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidRect,
-        const Rect& rect = {0, 0, 0, 0});
+        const Rect& rect = Rect::EMPTY_RECT);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId);
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
@@ -165,9 +165,13 @@ public:
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
-    void OnUserSwitch();
     bool InitWMSProxy();
     bool InitSSMProxy();
+
+    /*
+     * Multi User
+     */
+    void OnUserSwitch();
 
     /*
      * Window Recover

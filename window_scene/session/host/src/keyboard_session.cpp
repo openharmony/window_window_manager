@@ -16,6 +16,7 @@
 #include "session/host/include/keyboard_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_helper.h"
+#include <ui/rs_surface_node.h>
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -71,12 +72,20 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null, show keyboard failed");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
+        if (session->systemConfig_.IsPcWindow()) {
+            if (auto surfaceNode = session->GetSurfaceNode()) {
+                surfaceNode->SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE);
+            }
+        }
         if (session->GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_SHOW);
         }
+        session->GetSessionProperty()->SetKeyboardViewMode(property->GetKeyboardViewMode());
         session->UseFocusIdIfCallingSessionIdInvalid();
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard session, id: %{public}d, calling session id: %{public}d",
-            session->GetPersistentId(), session->GetCallingSessionId());
+        TLOGNI(WmsLogTag::WMS_KEYBOARD,
+            "Show keyboard session, id: %{public}d, calling id: %{public}d, viewMode: %{public}u",
+            session->GetPersistentId(), session->GetCallingSessionId(),
+            static_cast<uint32_t>(property->GetKeyboardViewMode()));
         session->MoveAndResizeKeyboard(property->GetKeyboardLayoutParams(), property, true);
         return session->SceneSession::Foreground(property);
     }, "Show");
@@ -389,7 +398,8 @@ bool KeyboardSession::CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingS
         return false;
     }
     bool isMainOrParentFloating = WindowHelper::IsMainWindow(callingSession->GetWindowType()) ||
-        (WindowHelper::IsSubWindow(callingSession->GetWindowType()) && callingSession->GetParentSession() != nullptr &&
+        (SessionHelper::IsNonSecureToUIExtension(callingSession->GetWindowType()) &&
+         callingSession->GetParentSession() != nullptr &&
          callingSession->GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
     bool isFreeMultiWindowMode = callingSession->IsFreeMultiWindowMode();
     bool isMidScene = callingSession->GetIsMidScene();
@@ -697,6 +707,23 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
 }
 
+WSError KeyboardSession::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    PostTask([weakThis = wptr(this), mode]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "Session is null, change keyboard view mode failed");
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->GetSessionProperty()->SetKeyboardViewMode(mode);
+        if (session->changeKeyboardViewModeFunc_) {
+            session->changeKeyboardViewModeFunc_(mode);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+    return WSError::WS_OK;
+}
+
 void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info)
 {
     ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
@@ -711,5 +738,18 @@ void KeyboardSession::NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaC
         return;
     }
     keyboardCallback_->onNotifyOccupiedAreaChange(info);
+}
+
+void KeyboardSession::SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func)
+{
+    PostTask([weakThis = wptr(this), func, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or keyboardViewModeChangeFunc is null", where);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        session->changeKeyboardViewModeFunc_ = func;
+        return WSError::WS_OK;
+    }, __func__);
 }
 } // namespace OHOS::Rosen

@@ -61,6 +61,10 @@ public:
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
+
+    /*
+     * Multi User
+     */
     void OnUserSwitch();
     void ReregisterWindowManagerLiteAgent();
 

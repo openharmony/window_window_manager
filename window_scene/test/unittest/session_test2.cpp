@@ -1148,6 +1148,7 @@ HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListene
         const SessionInfo& info, const bool visible) {
         resultValue = 1;
     });
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
 
     SessionInfo info;
@@ -1158,6 +1159,7 @@ HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListene
         const SessionInfo& info, const bool visible) {
         resultValue = 2;
     });
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 2);

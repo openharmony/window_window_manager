@@ -84,6 +84,8 @@ public:
         TRANS_ID_UI_EXTENSION_CREATION_CHECK,
         TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST,
         TRANS_ID_MINIMIZE_MAIN_SESSION,
+        TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO,
+        TRANS_ID_HAS_FLOAT_FOREGROUND,
     };
 
     /*
@@ -162,6 +164,34 @@ public:
      * @permission application requires SA permission or SystemApp permission
      */
     virtual WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) = 0;
+
+    /**
+     * @brief Lock or unlock a session in recent tasks.
+     *
+     * This function lock or unlock the session in recent tasks.
+     * The invoker must be an SA or SystemApp and have the ohos.permission.MANAGE_MISSIONS permission.
+     *
+     * @param AbilityInfoBase abilityInfo of the session that needed to be locked or locked.
+     * @param isLock isLock of the session that needed to be locked or unlocked.
+     * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
+     * @permission application requires ohos.permission.MANAGE_MISSIONS permission and
+     * SA permission or SystemApp permission
+     */
+    virtual WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) = 0;
+
+    /**
+     * @brief Query if there is float type window foreground of an abilityToken
+     *
+     * This function is used to query if there is float type window foreground of an ability
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param abilityToken token of ability
+     * @param hasOrNot result for output
+     */
+    virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

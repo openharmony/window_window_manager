@@ -798,24 +798,6 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange02, Function | SmallTest 
 }
 
 /**
- * @tc.name: SetWindowFlags
- * @tc.desc: SetWindowFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, SetWindowFlags, Function | SmallTest | Level3)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
-    sessionInfo.abilityName_ = "DumpSessionWithId";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sptr<WindowSessionProperty> property = nullptr;
-    sceneSession->property_ = nullptr;
-    ASSERT_NE(nullptr, ssm_);
-    auto ret = ssm_->SetWindowFlags(sceneSession, property);
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
-}
-
-/**
  * @tc.name: ProcessModalTopmostRequestFocusImmdediately
  * @tc.desc: ProcessModalTopmostRequestFocusImmdediately
  * @tc.type: FUNC
@@ -991,25 +973,19 @@ HWTEST_F(SceneSessionManagerTest6, CheckAndNotifyWaterMarkChangedResult, Functio
     sessionInfo.abilityName_ = "DumpSessionWithId";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
-    sceneSession->property_ = nullptr;
-    ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, sceneSession->property_);
     sceneSession->property_->flags_ = 1 << 4;
     sceneSession->isRSVisible_ = true;
     sceneSession->combinedExtWindowFlags_.waterMarkFlag = true;
-    ASSERT_NE(nullptr, ssm_);
     ssm_->CheckAndNotifyWaterMarkChangedResult();
     sceneSession->isRSVisible_ = false;
-    ASSERT_NE(nullptr, ssm_);
     ssm_->CheckAndNotifyWaterMarkChangedResult();
     sceneSession->property_->flags_ = 0;
     sceneSession->isRSVisible_ = false;
-    ASSERT_NE(nullptr, ssm_);
     ssm_->CheckAndNotifyWaterMarkChangedResult();
     sceneSession->isRSVisible_ = true;
-    ASSERT_NE(nullptr, ssm_);
     ssm_->CheckAndNotifyWaterMarkChangedResult();
 }
 
@@ -1145,11 +1121,6 @@ HWTEST_F(SceneSessionManagerTest6, FillWindowInfo04, Function | SmallTest | Leve
     EXPECT_EQ(true, ret);
     EXPECT_EQ(1, infos.size());
     EXPECT_EQ(1, infos[0]->displayId_);
-    sceneSession->property_ = nullptr;
-    ret = ssm_->FillWindowInfo(infos, sceneSession);
-    EXPECT_EQ(true, ret);
-    EXPECT_EQ(2, infos.size());
-    EXPECT_NE(1, infos[1]->displayId_);
 }
 
 /**
@@ -1258,11 +1229,8 @@ HWTEST_F(SceneSessionManagerTest6, UpdatePrivateStateAndNotify, Function | Small
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    sceneSession->property_ = nullptr;
-    ASSERT_NE(nullptr, ssm_);
     ssm_->UpdatePrivateStateAndNotify(1);
     ASSERT_EQ(ssm_->privacyBundleMap_[1].size(), 0);
-    ASSERT_NE(nullptr, ssm_);
     ssm_->UpdatePrivateStateAndNotifyForAllScreens();
 }
 

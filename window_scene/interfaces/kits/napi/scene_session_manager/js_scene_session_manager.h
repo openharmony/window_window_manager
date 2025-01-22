@@ -73,8 +73,6 @@ public:
     static napi_value ProcessBackEvent(napi_env env, napi_callback_info info);
     static napi_value CheckSceneZOrder(napi_env env, napi_callback_info info);
     static napi_value UpdateFocus(napi_env env, napi_callback_info info);
-    static napi_value InitUserInfo(napi_env env, napi_callback_info info);
-    static napi_value GetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     static napi_value SetVmaCacheStatus(napi_env env, napi_callback_info info);
     static napi_value InitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     static napi_value GetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
@@ -84,6 +82,7 @@ public:
     static napi_value PrepareTerminate(napi_env env, napi_callback_info info);
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
+    static napi_value NotifySingleHandInfoChange(napi_env env, napi_callback_info info);
     static napi_value GetRootSceneUIContext(napi_env env, napi_callback_info info);
     static napi_value SendTouchEvent(napi_env env, napi_callback_info info);
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
@@ -98,13 +97,9 @@ public:
     static napi_value GetRssData(napi_env env, napi_callback_info info);
     static napi_value RegisterRssData(napi_env env, napi_callback_info info);
     static napi_value UnregisterRssData(napi_env env, napi_callback_info info);
-    static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
-    static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
-    static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     static napi_value NotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
     static napi_value NotifyStackEmpty(napi_env env, napi_callback_info info);
-    static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info);
@@ -117,7 +112,6 @@ public:
     static napi_value SetAppForceLandscapeConfig(napi_env env, napi_callback_info info);
     static napi_value SwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     static napi_value GetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
-    static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value IsScbCoreEnabled(napi_env env, napi_callback_info info);
     static napi_value RefreshPcZOrder(napi_env env, napi_callback_info info);
     static napi_value GetWindowPid(napi_env env, napi_callback_info info);
@@ -126,6 +120,8 @@ public:
     static napi_value ResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
+    static napi_value CloneWindow(napi_env env, napi_callback_info info);
+    static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -135,6 +131,21 @@ public:
     static napi_value GetLastInstanceKey(napi_env env, napi_callback_info info);
     static napi_value RefreshAppInfo(napi_env env, napi_callback_info info);
     
+    /*
+     * Window Immersive
+     */
+    static napi_value NotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value GetIsLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
+    static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value SetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
+
+    /*
+     * Multi User
+     */
+    static napi_value InitUserInfo(napi_env env, napi_callback_info info);
+    static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
+
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
@@ -154,8 +165,6 @@ private:
     napi_value OnProcessBackEvent(napi_env env, napi_callback_info info);
     napi_value OnCheckSceneZOrder(napi_env env, napi_callback_info info);
     napi_value OnUpdateFocus(napi_env env, napi_callback_info info);
-    napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
-    napi_value OnGetSessionSnapshotFilePath(napi_env env, napi_callback_info info);
     napi_value OnSetVmaCacheStatus(napi_env env, napi_callback_info info);
     napi_value OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info);
     napi_value OnGetAllWindowVisibilityInfos(napi_env env, napi_callback_info info);
@@ -164,6 +173,7 @@ private:
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
+    napi_value OnNotifySingleHandInfoChange(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneUIContext(napi_env env, napi_callback_info info);
     napi_value OnSendTouchEvent(napi_env env, napi_callback_info info);
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
@@ -179,10 +189,6 @@ private:
     napi_value OnUnregisterRssData(napi_env env, napi_callback_info info);
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
     napi_value OnNotifyStackEmpty(napi_env env, napi_callback_info info);
-    napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
-    napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
-    napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
-    napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     napi_value OnGetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
@@ -191,7 +197,6 @@ private:
     napi_value OnGetCustomDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnSwitchFreeMultiWindow(napi_env env, napi_callback_info info);
     napi_value OnGetFreeMultiWindowConfig(napi_env env, napi_callback_info info);
-    napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnNotifyEnterRecentTask(napi_env env, napi_callback_info info);
     napi_value OnUpdateDisplayHookInfo(napi_env env, napi_callback_info info);
     napi_value OnUpdateAppHookDisplayInfo(napi_env env, napi_callback_info info);
@@ -205,6 +210,8 @@ private:
     napi_value OnResetPcFoldScreenArrangeRule(napi_env env, napi_callback_info info);
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
+    napi_value OnCloneWindow(napi_env env, napi_callback_info info);
+    napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -213,6 +220,21 @@ private:
     napi_value OnGetInstanceCount(napi_env env, napi_callback_info info);
     napi_value OnGetLastInstanceKey(napi_env env, napi_callback_info info);
     napi_value OnRefreshAppInfo(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Immersive
+     */
+    napi_value OnNotifyAINavigationBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnGetIsLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
+    napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnSetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
+
+    /*
+     * Multi User
+     */
+    napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
+    napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);

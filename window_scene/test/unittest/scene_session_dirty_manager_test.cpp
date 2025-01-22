@@ -288,15 +288,16 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalNotRotateTransform";
     sessionInfo.moduleName_ = "sessionInfo";
+    SingleHandData testSingleHandData;
     Matrix3f transform;
     Matrix3f testTransform = transform;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    manager_->CalNotRotateTransform(nullptr, transform);
+    manager_->CalNotRotateTransform(nullptr, transform, testSingleHandData);
     ASSERT_EQ(transform, testTransform);
     auto screenId = 0;
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
-    manager_->CalNotRotateTransform(sceneSession, transform);
+    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, testTransform);
     ScreenProperty screenProperty0;
     screenProperty0.SetRotation(0.0f);
@@ -309,19 +310,19 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
     testTransform.SetZero();
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform);
+    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(90.0f);
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform);
+    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(180.0f);
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform);
+    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, testTransform);
     screenProperty0.SetRotation(270.0f);
     ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
-    manager_->CalNotRotateTransform(sceneSession, transform);
+    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, testTransform);
 }
 
@@ -335,6 +336,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Leve
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "CalTransform";
     sessionInfo.moduleName_ = "CalTransform";
+    SingleHandData testSingleHandData;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
     Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
@@ -342,33 +344,33 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Leve
     Vector2f offset = sceneSession->GetSessionGlobalPosition(false);
     Matrix3f transform;
     Matrix3f testTransform = transform;
-    manager_->CalTransform(nullptr, transform);
+    manager_->CalTransform(nullptr, transform, testSingleHandData);
     ASSERT_EQ(transform, testTransform);
     sessionInfo.isRotable_ = true;
-    manager_->CalTransform(sceneSession, transform);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     sessionInfo.isSystem_ = true;
-    manager_->CalTransform(sceneSession, transform);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     sessionInfo.isRotable_ = false;
-    manager_->CalTransform(sceneSession, transform);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     sessionInfo.isRotable_ = true;
     sessionInfo.isSystem_ = false;
-    manager_->CalTransform(sceneSession, transform);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     sessionInfo.isSystem_ = true;
     auto preScreenSessionManager = ScreenSessionManagerClient::GetInstance().screenSessionManager_;
     ScreenSessionManagerClient::GetInstance().screenSessionManager_ = nullptr;
-    manager_->CalTransform(sceneSession, transform);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
     ScreenSessionManagerClient::GetInstance().screenSessionManager_ = preScreenSessionManager;
-    manager_->CalTransform(sceneSession, transform);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
 }
@@ -901,6 +903,73 @@ HWTEST_F(SceneSessionDirtyManagerTest, DumpRect, Function | SmallTest | Level2)
     ASSERT_EQ(ret, checkStr);
 }
 
+/**
+ * To test UpdatePointerAreas with different drag activated settings
+ * To expect pointerChangeAreas changes when dragActivated and dragEnable both are true
+ *
+ * @tc.name: CheckDragActivatedInUpdatePointerAreas
+ * @tc.desc: CheckDragActivatedInUpdatePointerAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CheckDragActivatedInUpdatePointerAreas, Function | SmallTest | Level2)
+{
+    std::vector<int32_t> pointerChangeAreas;
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+
+    sceneSession->property_->SetDragEnabled(true);
+    sceneSession->SetDragActivated(false);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+
+    sceneSession->property_->SetDragEnabled(false);
+    sceneSession->SetDragActivated(true);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+
+    sceneSession->property_->SetDragEnabled(false);
+    sceneSession->SetDragActivated(false);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+
+    sceneSession->property_->SetDragEnabled(true);
+    sceneSession->SetDragActivated(true);
+    float vpr = 1.5f;
+    sceneSession->property_->SetDisplayId(100);
+    int32_t pointerAreaFivePx = static_cast<int32_t>(POINTER_CHANGE_AREA_FIVE * vpr);
+    WindowLimits limits;
+    limits.maxHeight_ = 1;
+    limits.minHeight_ = 0;
+    limits.maxWidth_ = 0;
+    limits.minWidth_ = 0;
+    sceneSession->property_->SetWindowLimits(limits);
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    std::vector<int32_t> compare = {POINTER_CHANGE_AREA_DEFAULT, pointerAreaFivePx,
+        POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT, POINTER_CHANGE_AREA_DEFAULT,
+        pointerAreaFivePx, POINTER_CHANGE_AREA_DEFAULT,  POINTER_CHANGE_AREA_DEFAULT};
+    ASSERT_EQ(compare, pointerChangeAreas);
+}
+
+/**
+ * @tc.name: GetSingleHandData
+ * @tc.desc: get session data in single hand mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetSingleHandData, Function | SmallTest | Level2)
+{
+    SingleHandData testSingleHandData;
+    SessionInfo mainWindowInfo;
+    mainWindowInfo.abilityName_ = "TestMainWithType";
+    mainWindowInfo.bundleName_ = "TestMainWithType";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(mainWindowInfo, nullptr);
+    sceneSession->property_->SetDisplayId(2000);
+    SingleHandData res = manager_->GetSingleHandData(sceneSession);
+    ASSERT_EQ(testSingleHandData.singleHandY, res.singleHandY);
+    sceneSession->property_->SetDisplayId(0);
+    res = manager_->GetSingleHandData(sceneSession);
+    ASSERT_EQ(testSingleHandData.singleHandY, res.singleHandY);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

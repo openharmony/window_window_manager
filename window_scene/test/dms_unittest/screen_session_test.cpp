@@ -38,6 +38,7 @@ public:
     void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override {}
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
+    void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:

@@ -16,6 +16,7 @@
 #include "fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
 #include <parameters.h>
 
+#include "screen_session_manager.h"
 #include "fold_screen_controller/fold_screen_policy.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "session/screen/include/screen_session.h"
@@ -42,6 +43,7 @@ constexpr int32_t SMALLER_BOUNDARY_FLAG = 0;
 constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr int32_t HALF_FOLD_VALUE = 3;
+constexpr int32_t REFLEXION_VALUE = 2;
 } // namespace
 
 SecondaryDisplaySensorFoldStateManager::SecondaryDisplaySensorFoldStateManager() {}
@@ -52,6 +54,20 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
 {
     FoldStatus nextState = GetNextFoldState(angles, halls);
     HandleSensorChange(nextState, angles, foldScreenPolicy);
+    if (angles.size() != ANGLES_AXIS_SIZE) {
+        TLOGE(WmsLogTag::DMS, "angles size is not right, angles size %{public}zu", angles.size());
+    }
+    bool isSecondaryReflexion = static_cast<bool>(angles[REFLEXION_VALUE]);
+    if (isSecondaryReflexion) {
+        TLOGW(WmsLogTag::DMS, "SecondaryReflexion:%{public}d", isSecondaryReflexion);
+        auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screen session is null!");
+            return;
+        }
+        ScreenId screenId = screenSession->GetScreenId();
+        ScreenSessionManager::GetInstance().OnSecondaryReflexionChange(screenId, isSecondaryReflexion);
+    }
 }
 
 FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldState(const std::vector<float> &angles,
@@ -157,7 +173,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float an
     return state;
 }
 
-FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState (FoldStatus mPrimaryFoldState,
+FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState(FoldStatus mPrimaryFoldState,
     FoldStatus mSecondaryFoldState)
 {
     FoldStatus defaultState = FoldStatus::FOLDED;

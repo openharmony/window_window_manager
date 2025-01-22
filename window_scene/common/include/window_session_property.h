@@ -191,6 +191,9 @@ public:
     WindowState GetWindowState() const;
     void SetWindowState(WindowState state);
 
+    uint8_t GetBackgroundAlpha() const;
+    void SetBackgroundAlpha(uint8_t alpha);
+
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
 
@@ -209,6 +212,12 @@ public:
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
+
+    /*
+     * Window Property
+     */
+    void SetWindowCornerRadius(float cornerRadius);
+    float GetWindowCornerRadius() const;
 
     /*
      * UIExtension
@@ -235,8 +244,8 @@ public:
     /*
      * PC Window
      */
-    void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
-    void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
+    void SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void GetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const;
     void SetWindowDelayRaiseEnabled(bool isEnabled);
     bool IsWindowDelayRaiseEnabled() const;
 
@@ -245,6 +254,8 @@ public:
      */
     void SetIsSystemKeyboard(bool isSystemKeyboard);
     bool IsSystemKeyboard() const;
+    void SetKeyboardViewMode(KeyboardViewMode mode);
+    KeyboardViewMode GetKeyboardViewMode() const;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -280,6 +291,7 @@ private:
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
     bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
+    bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -306,6 +318,7 @@ private:
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
     void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
+    void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex windowRectMutex_;
@@ -388,6 +401,7 @@ private:
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
+    uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
 
     /*
      * Sub Window
@@ -413,18 +427,25 @@ private:
      * PC Window
      */
     mutable std::mutex supportWindowModesMutex_;
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
     bool isWindowDelayRaiseEnabled_ = false;
 
     /*
      * Keyboard
      */
     bool isSystemKeyboard_ = false;
+    KeyboardViewMode KeyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
 
     /*
      * Window Immersive
      */
     uint32_t avoidAreaOption_ = 0;
+
+    /*
+     * Window Property
+     */
+    float cornerRadius_ = 0.0f;
+    mutable std::mutex cornerRadiusMutex_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

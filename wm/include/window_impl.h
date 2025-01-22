@@ -123,7 +123,7 @@ public:
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
     virtual WindowType GetType() const override;
-    virtual WindowMode GetMode() const override;
+    virtual WindowMode GetWindowMode() const override;
     virtual float GetAlpha() const override;
     virtual WindowState GetWindowState() const override;
     virtual WMError SetFocusable(bool isFocusable) override;
@@ -162,7 +162,7 @@ public:
         state_ = state;
     }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) override;
+        const Rect& rect = Rect::EMPTY_RECT) override;
     WMError WindowImpl::SetAvoidAreaOption(uint32_t avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     WMError WindowImpl::GetAvoidAreaOption(uint32_t& avoidAreaOption) override
@@ -339,6 +339,11 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+
+    /*
+     * Keyboard
+     */
+    WMError ShowKeyboard(KeyboardViewMode mode) override;
 
 private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
