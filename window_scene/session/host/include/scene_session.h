@@ -96,7 +96,7 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
-using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
+using NotifyPrivacyModeChangeFunc = std::function<void(bool isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
@@ -566,8 +566,6 @@ public:
     void SetPcScenePanel(bool isPcScenePanel) { isPcScenePanel_ = isPcScenePanel; }
     void UpdatePCZOrderAndMarkDirty(const uint32_t zOrder);
 
-    void SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func);
-
     /*
      * Multi Window
      */
@@ -628,6 +626,7 @@ public:
     */
     void SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func);
     WSError SetWindowCornerRadius(float cornerRadius) override;
+    void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -805,6 +804,11 @@ private:
      */
     void UpdateAllModalUIExtensions(const WSRect& globalRect);
 
+    /*
+     * Window Property
+     */
+    void NotifyPrivacyModeChange();
+
 #ifdef DEVICE_STATUS_ENABLE
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
@@ -883,7 +887,6 @@ private:
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
-    void NotifyPrivacyModeChange();
 
     /*
      * PiP Window
@@ -894,7 +897,6 @@ private:
 
     NotifyForceSplitFunc forceSplitFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
-    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
     std::vector<sptr<SceneSession>> subSession_;
@@ -974,9 +976,6 @@ private:
     DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     NotifyWindowMovingFunc notifyWindowMovingFunc_;
 
-    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
-    bool isPrivacyMode_ { false };
-
     /*
      * Gesture Back
      */
@@ -1035,6 +1034,9 @@ private:
      * Window Property
      */
     NotifySetWindowCornerRadiusFunc onSetWindowCornerRadiusFunc_;
+    NotifyPrivacyModeChangeFunc privacyModeChangeNotifyFunc_;
+    // Set true if either sessionProperty privacyMode or combinedExtWindowFlags_ privacyModeFlag is true.
+    bool isPrivacyMode_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

@@ -78,10 +78,10 @@ const std::string DEFAULT_DENSITY_ENABLED_CB = "defaultDensityEnabled";
 const std::string TITLE_DOCK_HOVER_SHOW_CB = "titleAndDockHoverShowChange";
 const std::string RESTORE_MAIN_WINDOW_CB = "restoreMainWindow";
 const std::string NEXT_FRAME_LAYOUT_FINISH_CB = "nextFrameLayoutFinish";
-const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 const std::string MAIN_WINDOW_TOP_MOST_CHANGE_CB = "mainWindowTopmostChange";
 const std::string SET_WINDOW_RECT_AUTO_SAVE_CB = "setWindowRectAutoSave";
 const std::string UPDATE_APP_USE_CONTROL_CB = "updateAppUseControl";
+const std::string PRIVACY_MODE_CHANGE_CB = "privacyModeChange";
 const std::string SESSION_DISPLAY_ID_CHANGE_CB = "sessionDisplayIdChange";
 const std::string SET_SUPPORT_WINDOW_MODES_CB = "setSupportWindowModes";
 const std::string SESSION_LOCK_STATE_CHANGE_CB = "sessionLockStateChange";
@@ -151,10 +151,10 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {NEXT_FRAME_LAYOUT_FINISH_CB,           ListenerFuncType::NEXT_FRAME_LAYOUT_FINISH_CB},
     {PRIVACY_MODE_CHANGE_CB,                ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
     {RESTORE_MAIN_WINDOW_CB,                ListenerFuncType::RESTORE_MAIN_WINDOW_CB},
-    {PRIVACY_MODE_CHANGE_CB,           ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
     {MAIN_WINDOW_TOP_MOST_CHANGE_CB,        ListenerFuncType::MAIN_WINDOW_TOP_MOST_CHANGE_CB},
     {SET_WINDOW_RECT_AUTO_SAVE_CB,          ListenerFuncType::SET_WINDOW_RECT_AUTO_SAVE_CB},
     {UPDATE_APP_USE_CONTROL_CB,             ListenerFuncType::UPDATE_APP_USE_CONTROL_CB},
+    {PRIVACY_MODE_CHANGE_CB,                ListenerFuncType::PRIVACY_MODE_CHANGE_CB},
     {SESSION_DISPLAY_ID_CHANGE_CB,          ListenerFuncType::SESSION_DISPLAY_ID_CHANGE_CB},
     {SET_SUPPORT_WINDOW_MODES_CB,           ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB},
     {WINDOW_MOVING_CB,                      ListenerFuncType::WINDOW_MOVING_CB},
@@ -1794,31 +1794,40 @@ void JsSceneSession::NotifyFrameLayoutFinish()
 
 void JsSceneSession::ProcessPrivacyModeChangeRegister()
 {
-    NotifyPrivacyModeChangeFunc func = [this](bool isPrivacyMode) {
-        this->NotifyPrivacyModeChange(isPrivacyMode);
-    };
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_SCB, "session is nullptr");
         return;
     }
-    session->SetPrivacyModeChangeNotifyFunc(func);
+    session->SetPrivacyModeChangeNotifyFunc([weakThis = wptr(this)](bool isPrivacyMode) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->NotifyPrivacyModeChange(isPrivacyMode);
+    });
 }
 
 void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "isPrivacyMode:%{public}d, id:%{public}d", isPrivacyMode, persistentId_);
-    auto task = [this, isPrivacyMode, env = env_]() {
-        auto jsCallback = this->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
+    auto task = [weakThis = wptr(this), isPrivacyMode, env = env_]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_SCB, "jsSceneSession is null");
+            return;
+        }
+        auto jsCallback = jsSceneSession->GetJSCallback(PRIVACY_MODE_CHANGE_CB);
         if (!jsCallback) {
             TLOGNE(WmsLogTag::WMS_SCB, "jsCallback is nullptr");
             return;
         }
-        napi_value jsSessionPrivacyMode = CreateJsValue(env, isPrivacyMode);
-        napi_value argv[] = { jsSessionPrivacyMode };
+        napi_value jsIsPrivacyModeValue = CreateJsValue(env, isPrivacyMode);
+        napi_value argv[] = { jsIsPrivacyModeValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallback->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    taskScheduler_->PostMainThreadTask(task, "NotifyPrivacyModeChange");
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
