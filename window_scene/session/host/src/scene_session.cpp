@@ -3466,20 +3466,14 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 
 void SceneSession::NotifyPrivacyModeChange()
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGW(WmsLogTag::WMS_SCB, "sessionProperty is null");
-        return;
-    }
-
-    bool curExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
-    bool curPrivacyMode = curExtPrivacyMode || sessionProperty->GetPrivacyMode();
-    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, curExtPrivacyMode:%{public}d, session property privacyMode:%{public}d"
-        ", old privacyMode:%{public}d",
-        GetPersistentId(), curExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
-
-    if (curPrivacyMode != isPrivacyMode_) {
-        isPrivacyMode_ = curPrivacyMode;
+    bool isPrivacyMode = GetSessionProperty()->GetPrivacyMode();
+    bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
+    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
+        "last privacyMode:%{public}d",
+        GetPersistentId(), currExtPrivacyMode, isPrivacyMode, isPrivacyMode_);
+    bool mixedPrivacyMode = currExtPrivacyMode || isPrivacyMode;
+    if (mixedPrivacyMode != isPrivacyMode_) {
+        isPrivacyMode_ = mixedPrivacyMode;
         if (privacyModeChangeNotifyFunc_) {
             privacyModeChangeNotifyFunc_(isPrivacyMode_);
         }
@@ -5446,13 +5440,14 @@ void SceneSession::SetShouldHideNonSecureWindows(bool shouldHide)
 
 void SceneSession::CalculateCombinedExtWindowFlags()
 {
-    // Only correct when each flag is true when active, and once a uiextension is active, the host is active
-    std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
-    combinedExtWindowFlags_.bitData = 0;
-    for (const auto& iter: extWindowFlagsMap_) {
-        combinedExtWindowFlags_.bitData |= iter.second.bitData;
+    {
+        // Only correct when each flag is true when active, and once a uiextension is active, the host is active
+        std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
+        combinedExtWindowFlags_.bitData = 0;
+        for (const auto& iter: extWindowFlagsMap_) {
+            combinedExtWindowFlags_.bitData |= iter.second.bitData;
+        }
     }
-
     NotifyPrivacyModeChange();
 }
 
@@ -5828,9 +5823,16 @@ void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& fun
     notifyVisibleChangeFunc_ = func;
 }
 
-void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func)
+void SceneSession::SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func)
 {
-    privacyModeChangeNotifyFunc_ = func;
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return;
+        }
+        session->privacyModeChangeNotifyFunc_ = std::move(func);
+    }, __func__);
 }
 
 int32_t SceneSession::GetStatusBarHeight()
