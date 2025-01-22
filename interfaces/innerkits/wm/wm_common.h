@@ -1421,7 +1421,7 @@ struct WindowMetaInfo : public Parcelable {
  */
 struct WindowInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-    { 
+    {
         return parcel.WriteUint32(static_cast<uint32_t>(windowUIInfo.visibilityState)) &&
                parcel.WriteUint64(windowDisplayInfo.displayId) &&
                parcel.WriteInt32(windowLayoutInfo.rect.posX_) &&
