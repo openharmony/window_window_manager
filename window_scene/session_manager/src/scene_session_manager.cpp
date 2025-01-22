@@ -4623,6 +4623,10 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
     }
     taskScheduler_->PostSyncTask([this, &focusInfo, displayId] {
         auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
+        if (focusGroup == nullptr) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
         if (auto sceneSession = GetSceneSession(focusGroup->GetFocusedSessionId())) {
             TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             focusInfo.windowId_ = sceneSession->GetWindowId();
@@ -4947,7 +4951,8 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
 void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
 {
     oss << "Focus window: " << std::endl;
-    std::vector<std::pair<DisplayId, int32_t>> allFocusedStateList = windowFocusController_->GetAllFocusedSessionList();
+    std::vector<std::pair<DisplayId, int32_t>>& allFocusedStateList =
+        windowFocusController_->GetAllFocusedSessionList();
     if (allFocusedStateList.size() > 0) {
         for (const auto& focusState : allFocusedStateList) {
             oss << "DisplayId: " << focusState.first << " Focus window: " << focusState.second << std::endl;
@@ -5678,7 +5683,7 @@ bool SceneSessionManager::CheckClickFocusIsDownThroughFullScreen(const sptr<Scen
 }
 
 WSError SceneSessionManager::RequestFocusSpecificCheck(DisplayId displayId, const sptr<SceneSession>& sceneSession,
-    bool byForeground,FocusChangeReason reason)
+    bool byForeground, FocusChangeReason reason)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "FocusChangeReason: %{public}d", reason);
     int32_t persistentId = sceneSession->GetPersistentId();
@@ -5932,7 +5937,7 @@ WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSes
         }
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64
-          ", focusedId: %{public}d, nextId: %{public}d, reason: %{public}d", displayId, focusedId, nextId, reason);
+        ", focusedId: %{public}d, nextId: %{public}d, reason: %{public}d", displayId, focusedId, nextId, reason);
     return WSError::WS_OK;
 }
 
@@ -5975,6 +5980,10 @@ void SceneSessionManager::UpdateFocusStatus(DisplayId displayId, const sptr<Scen
 void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
     const sptr<FocusGroup>& focusGroup)
 {
+    if (focusGroup == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr");
+        return;
+    }
     auto lastFocusedSessionId = focusGroup->GetLastFocusedSessionId();
     if (sceneSession == nullptr) {
         WLOGFE("[WMSComm]session is nullptr");

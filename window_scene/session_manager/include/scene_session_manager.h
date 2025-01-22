@@ -959,21 +959,21 @@ private:
     float snapshotScale_ = 0.5;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
-    bool isScreenLocked_ {false};
-    bool isPrepareTerminateEnable_ {false};
+    bool isScreenLocked_ { false };
+    bool isPrepareTerminateEnable_ { false };
 
     /*
      * Window Focus
      */
     sptr<WindowFocusController> windowFocusController_;
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
-    bool needBlockNotifyFocusStatusUntilForeground_ {false};
-    bool needBlockNotifyUnfocusStatus_ {false};
+    bool needBlockNotifyFocusStatusUntilForeground_ { false };
+    bool needBlockNotifyUnfocusStatus_ { false };
 
     /*
      * DFX
      */
-    bool openDebugTrace_ {false};
+    bool openDebugTrace_ { false };
 
     std::atomic<bool> enableInputEvent_ = true;
     std::vector<int32_t> alivePersistentIds_ = {};
