@@ -1055,9 +1055,9 @@ struct WindowInfoOption : public Parcelable {
             delete WindowInfoOption;
             return nullptr;
         }
-        WindowInfoOption->windowInfoFilterOption = static_cast<WindowInfoFilterOptionDataType>(windowInfoFilterOption);
-        WindowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOptionDataType>(windowInfoTypeOption);
-        return WindowInfoOption;
+        windowInfoOption->windowInfoFilterOption = static_cast<WindowInfoFilterOptionDataType>(windowInfoFilterOption);
+        windowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOptionDataType>(windowInfoTypeOption);
+        return windowInfoOption;
     }
 
     WindowInfoFilterOption windowInfoFilterOption = WindowInfoFilterOption::ALL;
