@@ -2668,7 +2668,7 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
 {
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "windowId: %{public}d property is nullptr", persistentId_);
+        TLOGE(WmsLogTag::WMS_FOCUS, "property is nullptr, windowId: %{public}d", persistentId_);
         return;
     }
     if (isExclusivelyHighlighted == property->GetExclusivelyHighlighted()) {

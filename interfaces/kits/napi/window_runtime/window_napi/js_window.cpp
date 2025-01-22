@@ -7744,7 +7744,7 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
                       task = napiAsyncTask, where = __func__] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
-            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s window is nullptr", where);
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s: window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -7755,7 +7755,7 @@ napi_value JsWindow::OnSetExclusivelyHighlighted(napi_env env, napi_callback_inf
             WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Set exclusively highlighted failed"));
         }
-        TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: end, window [%{public}u, %{public}s]",
+        TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: end, window: [%{public}u, %{public}s]",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
@@ -7774,10 +7774,10 @@ napi_value JsWindow::OnIsWindowHighlighted(napi_env env, napi_callback_info info
     bool isHighlighted = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsWindowHighlighted(isHighlighted));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "get window highlight failed, ret %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_FOCUS, "get window highlight failed, ret: %{public}d", ret);
         return NapiThrowError(env, ret);
     }
-    TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted = %{public}u", isHighlighted);
+    TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted: %{public}u", isHighlighted);
     return CreateJsValue(env, isHighlighted);
 }
 

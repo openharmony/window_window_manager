@@ -1678,7 +1678,7 @@ WMError WindowSessionImpl::SetExclusivelyHighlighted(bool isExclusivelyHighlight
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (property_->GetExclusivelyHighlighted() == isExclusivelyHighlighted) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "hightlight:no nothing");
+        TLOGD(WmsLogTag::WMS_FOCUS, "already exclusivelyHighlighted");
         return WMError::WM_OK;
     }
     property_->SetExclusivelyHighlighted(isExclusivelyHighlighted);
@@ -1689,7 +1689,7 @@ WMError WindowSessionImpl::SetExclusivelyHighlighted(bool isExclusivelyHighlight
 bool WindowSessionImpl::GetExclusivelyHighlighted() const
 {
     bool isExclusivelyHighlighted = property_->GetExclusivelyHighlighted();
-    TLOGD(WmsLogTag::WMS_FOCUS, "WindowID: %{public}d, isExclusivelyHighlighted: %{public}d",
+    TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d",
         property_->GetPersistentId(), isExclusivelyHighlighted);
     return isExclusivelyHighlighted;
 }

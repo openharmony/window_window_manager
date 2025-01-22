@@ -902,7 +902,7 @@ HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange, Function | SmallTest
     MessageParcel reply;
  
     data.WriteBool(false);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
     ASSERT_EQ(0, sessionStageStub_->HandleNotifyHighlightChange(data, reply));
 }
 }
