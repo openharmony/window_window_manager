@@ -270,7 +270,7 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
-    void UpdateHighlightStatus(sptr<SceneSession>& preSceneSession, sptr<SceneSession>& currSceneSession,
+    void UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,
         bool isProactiveUnfocus);
     void SetHighlightSessionIds(sptr<SceneSession>& sceneSession);
     void AddHighlightSessionIds(sptr<SceneSession>& sceneSession);
