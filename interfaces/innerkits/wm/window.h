@@ -3049,7 +3049,8 @@ public:
      * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
      * @return WM_OK means set success, others means set failed.
      */
-    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) { 
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+    {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     

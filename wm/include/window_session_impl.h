@@ -349,7 +349,7 @@ public:
      * HightLight Window
      */
     bool GetExclusivelyHighlighted() const;
-    bool IsWindowHighlighted(bool& highlighted) const override;
+    WMError IsWindowHighlighted(bool& highlighted) const override;
     WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) override;
     WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
