@@ -1850,11 +1850,11 @@ WMError SceneSessionManagerProxy::ListWindowInfo(const WindowInfoOption& windowI
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint8(static_cast<WindowInfoFilterOptionType>(windowInfoOption.windowInfoFilterOption))) {
+    if (!data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoFilterOption failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint8(static_cast<WindowInfoTypeOptionType>(windowInfoOption.windowInfoTypeOption))) {
+    if (!data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoTypeOption failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }

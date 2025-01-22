@@ -1144,13 +1144,13 @@ int SceneSessionManagerStub::HandleShiftAppWindowFocus(MessageParcel& data, Mess
 int SceneSessionManagerStub::HandleListWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
     WindowInfoOption windowInfoOption;
-    uint8_t windowInfoFilterOptionValue = static_cast<WindowInfoFilterOptionType>(WindowInfoFilterOption::ALL);
+    uint8_t windowInfoFilterOptionValue = static_cast<WindowInfoFilterOptionDataType>(WindowInfoFilterOption::ALL);
     if (!data.ReadUint8(windowInfoFilterOptionValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowInfoFilterOption");
         return ERR_INVALID_DATA;
     }
     windowInfoOption.windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOptionValue);
-    uint8_t windowInfoTypeOptionValue = static_cast<WindowInfoTypeOptionType>(WindowInfoTypeOption::ALL);
+    uint8_t windowInfoTypeOptionValue = static_cast<WindowInfoTypeOptionDataType>(WindowInfoTypeOption::ALL);
     if (!data.ReadUint8(windowInfoTypeOptionValue)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read windowInfoTypeOption");
         return ERR_INVALID_DATA;

@@ -810,33 +810,35 @@ struct TitleButtonRect {
     }
 };
 
-using WindowInfoFilterOptionType = uint8_t;
+using WindowInfoFilterOptionDataType = uint8_t;
 
 /**
  * @brief WindowInfo filter Option
  */
-enum class WindowInfoFilterOption : WindowInfoFilterOptionType {
+enum class WindowInfoFilterOption : WindowInfoFilterOptionDataType {
     ALL = 0,
     EXCLUDE_SYSTEM = 1,
     VISIBLE = 1 << 1,
     FOREGROUND = 1 << 2,
 };
 
-inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs) {
-    return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionType>(lhs) |
-        static_cast<WindowInfoFilterOptionType>(rhs));
+inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs)
+{
+    return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionDataType>(lhs) |
+        static_cast<WindowInfoFilterOptionDataType>(rhs));
 }
 
-inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option) {
-    return (static_cast<WindowInfoFilterOptionType>(options) & static_cast<WindowInfoFilterOptionType>(option)) != 0;
+inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option)
+{
+    return (static_cast<WindowInfoFilterOptionDataType>(options) & static_cast<WindowInfoFilterOptionDataType>(option)) != 0;
 }
 
-using WindowInfoTypeOptionType = uint8_t;
+using WindowInfoTypeOptionDataType = uint8_t;
 
 /**
  * @brief WindowInfo Type Option
  */
-enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
+enum class WindowInfoTypeOption : WindowInfoTypeOptionDataType {
     WINDOW_UI_INFO = 1,
     WINDOW_DISPLAY_INFO = 1 << 1,
     WINDOW_LAYOUT_INFO = 1 << 2,
@@ -844,13 +846,15 @@ enum class WindowInfoTypeOption : WindowInfoTypeOptionType {
     ALL = ~0,
 };
 
-inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs) {
-    return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionType>(lhs) |
-        static_cast<WindowInfoTypeOptionType>(rhs));
+inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs)
+{
+    return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionDataType>(lhs) |
+        static_cast<WindowInfoTypeOptionDataType>(rhs));
 }
 
-inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option) {
-    return (static_cast<WindowInfoTypeOptionType>(options) & static_cast<WindowInfoTypeOptionType>(option)) != 0;
+inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option)
+{
+    return (static_cast<WindowInfoTypeOptionDataType>(options) & static_cast<WindowInfoTypeOptionDataType>(option)) != 0;
 }
 
 /**
@@ -874,7 +878,9 @@ enum WindowVisibilityState : uint32_t {
  */
 struct WindowUIInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-        { return parcel.WriteUint32(static_cast<uint32_t>(visibilityState)); }
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(visibilityState));
+    }
 
     static WindowUIInfo* Unmarshalling(Parcel& parcel)
     {
@@ -898,7 +904,9 @@ struct WindowUIInfo : public Parcelable {
  */
 struct WindowDisplayInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-        { return parcel.WriteUint64(displayId); }
+    { 
+        return parcel.WriteUint64(displayId);
+    }
 
     static WindowDisplayInfo* Unmarshalling(Parcel& parcel)
     {
@@ -950,10 +958,12 @@ struct WindowLayoutInfo : public Parcelable {
  */
 struct WindowMetaInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-        { return parcel.WriteInt32(windowId) &&
-                 parcel.WriteString(windowName) &&
-                 parcel.WriteString(bundleName) &&
-                 parcel.WriteString(abilityName); }
+    { 
+        return parcel.WriteInt32(windowId) &&
+               parcel.WriteString(windowName) &&
+               parcel.WriteString(bundleName) &&
+               parcel.WriteString(abilityName);
+    }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo;
@@ -979,16 +989,18 @@ struct WindowMetaInfo : public Parcelable {
  */
 struct WindowInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-        { return parcel.WriteUint32(static_cast<uint32_t>(windowUIInfo.visibilityState)) &&
-                 parcel.WriteUint64(windowDisplayInfo.displayId) &&
-                 parcel.WriteInt32(windowLayoutInfo.rect.posX_) &&
-                 parcel.WriteInt32(windowLayoutInfo.rect.posY_) &&
-                 parcel.WriteUint32(windowLayoutInfo.rect.width_) &&
-                 parcel.WriteUint32(windowLayoutInfo.rect.height_) &&
-                 parcel.WriteInt32(windowMetaInfo.windowId) &&
-                 parcel.WriteString(windowMetaInfo.windowName) &&
-                 parcel.WriteString(windowMetaInfo.bundleName) &&
-                 parcel.WriteString(windowMetaInfo.abilityName); }
+    { 
+        return parcel.WriteUint32(static_cast<uint32_t>(windowUIInfo.visibilityState)) &&
+               parcel.WriteUint64(windowDisplayInfo.displayId) &&
+               parcel.WriteInt32(windowLayoutInfo.rect.posX_) &&
+               parcel.WriteInt32(windowLayoutInfo.rect.posY_) &&
+               parcel.WriteUint32(windowLayoutInfo.rect.width_) &&
+               parcel.WriteUint32(windowLayoutInfo.rect.height_) &&
+               parcel.WriteInt32(windowMetaInfo.windowId) &&
+               parcel.WriteString(windowMetaInfo.windowName) &&
+               parcel.WriteString(windowMetaInfo.bundleName) &&
+               parcel.WriteString(windowMetaInfo.abilityName);
+    }
 
     static WindowInfo* Unmarshalling(Parcel& parcel)
     {
@@ -1024,10 +1036,12 @@ struct WindowInfo : public Parcelable {
  */
 struct WindowInfoOption : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
-        { return parcel.WriteUint32(static_cast<uint32_t>(windowInfoFilterOption)) &&
-                 parcel.WriteUint32(static_cast<uint32_t>(windowInfoTypeOption)) &&
-                 parcel.WriteUint64(displayId) &&
-                 parcel.WriteInt32(windowId); }
+    { 
+        return parcel.WriteUint32(static_cast<uint32_t>(windowInfoFilterOption)) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowInfoTypeOption)) &&
+               parcel.WriteUint64(displayId) &&
+               parcel.WriteInt32(windowId);
+    }
 
     static WindowInfoOption* Unmarshalling(Parcel& parcel)
     {
@@ -1041,8 +1055,8 @@ struct WindowInfoOption : public Parcelable {
             delete WindowInfoOption;
             return nullptr;
         }
-        WindowInfoOption->windowInfoFilterOption = static_cast<WindowInfoFilterOptionType>(windowInfoFilterOption);
-        WindowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOptionType>(windowInfoTypeOption);
+        WindowInfoOption->windowInfoFilterOption = static_cast<WindowInfoFilterOptionDataType>(windowInfoFilterOption);
+        WindowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOptionDataType>(windowInfoTypeOption);
         return WindowInfoOption;
     }
 
