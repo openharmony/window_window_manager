@@ -539,6 +539,8 @@ public:
     bool GetUIStateDirty() const;
     static bool IsScbCoreEnabled();
     static void SetScbCoreEnabled(bool enabled);
+    static bool IsBackgroundNotifyEnabled();
+    static void SetBackgroundNotifyEnabled(bool enabled);
     bool IsVisible() const;
     virtual bool IsNeedSyncScenePanelGlobalPosition() { return true; }
     void SetAppInstanceKey(const std::string& appInstanceKey);
@@ -736,6 +738,7 @@ protected:
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     DisplayId lastUpdatedDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
+    static bool isBackgroundNotifyEnabled_;
 
     /*
      * Window ZOrder
