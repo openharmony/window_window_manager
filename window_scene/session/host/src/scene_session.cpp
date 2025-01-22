@@ -3722,7 +3722,7 @@ bool SceneSession::IsSystemSessionAboveApp() const
 }
 
 /** @note @window.focus */
-bool SceneSession::IsRelated(sptr<SceneSession>& prevSession)
+bool SceneSession::IsRelated(const sptr<SceneSession>& prevSession)
 {
     int32_t currSessionId = GetMainSessionId();
     int32_t prevSessionId = prevSession->GetMainSessionId();

@@ -632,7 +632,7 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
 
 void JsWindowListener::OnWindowHighlightChange(bool isHighlight)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "isHighlight: %d", isHighlight);
+    TLOGD(WmsLogTag::WMS_FOCUS, "isHighlight: %{public}d", isHighlight);
     auto jsCallback = [self = weakRef_, isHighlight, env = env_, where = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {

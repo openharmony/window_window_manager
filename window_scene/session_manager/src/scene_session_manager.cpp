@@ -5943,7 +5943,8 @@ void SceneSessionManager::UpdateFocusStatus(sptr<SceneSession>& sceneSession, bo
 }
 
 /** @note @window.focus */
-void SceneSessionManager::UpdateHighlightStatus(sptr<SceneSession>& preSceneSession, sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus)
+void SceneSessionManager::UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession,
+    const sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus)
 {
     if (preSceneSession == nullptr || currSceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
