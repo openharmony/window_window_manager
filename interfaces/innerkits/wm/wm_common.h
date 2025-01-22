@@ -46,6 +46,8 @@ constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 }
 using DisplayId = uint64_t;
+inline constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
+
 /**
  * @brief Enumerates type of window.
  */
