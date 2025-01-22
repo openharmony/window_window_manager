@@ -6694,6 +6694,12 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
         defaultSize.physicalHeight_ = defaultScreenProperty.GetPhyBounds().rect_.height_;
         allDisplayPhysicalResolution_.emplace_back(defaultSize);
     }
+    for (auto& info : allDisplayPhysicalResolution_) {
+        if (info.foldDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+            info.foldDisplayMode_ = FoldDisplayMode::FULL;
+            break;
+        }
+    }
     return allDisplayPhysicalResolution_;
 }
 
