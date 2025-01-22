@@ -68,7 +68,7 @@ public:
     WSError RemoveFocusGroup(DisplayId displayId);
     int32_t GetFocusedSessionId(DisplayId displayId);
     sptr<FocusGroup> GetFocusGroup(DisplayId displayId = DEFAULT_DISPLAY_ID);
-    std::vector<std::pair<DisplayId, int32_t>> GetAllFocusedSessionList();
+    std::vector<std::pair<DisplayId, int32_t>> GetAllFocusedSessionList() const;
     WSError UpdateFocusedSessionId(DisplayId displayId, int32_t persistentId);
     WSError UpdateFocusedAppSessionId(DisplayId displayId, int32_t persistentId);
 
