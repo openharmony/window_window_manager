@@ -54,6 +54,7 @@ ohos_shared_library("cj_display_ffi") {
       "graphic_2d:2d_graphics_new",
       "hilog:libhilog",
       "hitrace:hitrace_meter",
+      "ipc:ipc_core",
       "napi:ace_napi",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
