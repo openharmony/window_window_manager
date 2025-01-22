@@ -47,6 +47,11 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
+        const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override
+    {
+        return DMError::DM_OK;
+    }
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override
     {
         return DMError::DM_OK;
@@ -158,7 +163,8 @@ public:
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
 
-    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override { return DMError::DM_OK; };
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+        std::vector<DisplayId>& displayIds) override { return DMError::DM_OK; };
 
     virtual void SetClient(const sptr<IScreenSessionManagerClient>& client) {}
     virtual void SwitchUser() {}

@@ -80,6 +80,9 @@ public:
     WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
         const std::vector<AppUseControlInfo>& controlList) override;
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override;
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) override;
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) override;
 };
 } // namespace OHOS::Rosen
 

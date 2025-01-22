@@ -187,6 +187,22 @@ HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
     result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: SetSingleHandTransform
+ * @tc.desc: SetSingleHandTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSingleHandTransform";
+    info.bundleName_ = "SetSingleHandTransform";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    SingleHandTransform transform;
+    session->SetSingleHandTransform(transform);
+    ASSERT_EQ(transform, session->GetSingleHandTransform());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

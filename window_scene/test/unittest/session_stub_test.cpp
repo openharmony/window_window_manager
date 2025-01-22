@@ -399,6 +399,10 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteFloat(1.0f), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -804,6 +808,149 @@ HWTEST_F(SessionStubTest, GetIsMidScene, Function | SmallTest | Level2)
 
     auto result = session_->HandleGetIsMidScene(data, reply);
     ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyFrameLayoutFinish
+ * @tc.desc: sessionStub HandleNotifyFrameLayoutFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleNotifyFrameLayoutFinish(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleChangeSessionVisibilityWithStatusBar
+ * @tc.desc: sessionStub HandleChangeSessionVisibilityWithStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleSyncSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionActivation
+ * @tc.desc: sessionStub HandlePendingSessionActivation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandlePendingSessionActivation, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandlePendingSessionActivation(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetGlobalScaledRect
+ * @tc.desc: sessionStub HandleGetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetGlobalScaledRect, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetGlobalScaledRect(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetAllAvoidAreas
+ * @tc.desc: sessionStub HandleGetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetAllAvoidAreas, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetAllAvoidAreas(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleIsStartMoving
+ * @tc.desc: sessionStub HandleIsStartMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsStartMoving, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleIsStartMoving(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon01
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::shared_ptr<Media::PixelMap> icon = std::make_shared<Media::PixelMap>();
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon02
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon03
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    const uint32_t color[] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    uint32_t len = sizeof(color) / sizeof(color[0]);
+    Media::InitializationOptions opts;
+    opts.size.width = 2;
+    opts.size.height = 3;
+    opts.pixelFormat = Media::PixelFormat::UNKNOWN;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    std::shared_ptr<Media::PixelMap> icon = Media::PixelMap::Create(color, len, 0, opts.size.width, opts);
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
 }
 }
 } // namespace Rosen

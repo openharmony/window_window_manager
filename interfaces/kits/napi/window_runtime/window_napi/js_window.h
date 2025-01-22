@@ -117,6 +117,7 @@ public:
     static napi_value StartMoving(napi_env env, napi_callback_info info);
     static napi_value StopMoving(napi_env env, napi_callback_info info);
     static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
+    static napi_value EnableDrag(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -136,18 +137,20 @@ public:
     static napi_value Translate(napi_env env, napi_callback_info info);
     static napi_value GetTransitionController(napi_env env, napi_callback_info info);
 
-    // window effect
+    /*
+     * Window Property
+     */
     static napi_value SetCornerRadius(napi_env env, napi_callback_info info);
+    static napi_value SetWindowCornerRadius(napi_env env, napi_callback_info info);
+    static napi_value GetWindowCornerRadius(napi_env env, napi_callback_info info);
     static napi_value SetShadow(napi_env env, napi_callback_info info);
+    static napi_value SetWindowShadowRadius(napi_env env, napi_callback_info info);
     static napi_value SetBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlur(napi_env env, napi_callback_info info);
     static napi_value SetBackdropBlurStyle(napi_env env, napi_callback_info info);
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetHandwritingFlag(napi_env env, napi_callback_info info);
     static napi_value SetWindowGrayScale(napi_env env, napi_callback_info info);
-    static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
-    static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
-    static napi_value EnableDrag(napi_env env, napi_callback_info info);
 
     /*
      * Sub Window
@@ -202,11 +205,15 @@ public:
     static napi_value SetSystemBarProperties(napi_env env, napi_callback_info info);
     static napi_value GetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     static napi_value SetWindowSystemBarProperties(napi_env env, napi_callback_info info);
+    static napi_value SetStatusBarColor(napi_env env, napi_callback_info info);
+    static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -309,9 +316,14 @@ private:
     napi_value OnGetTransitionController(napi_env env, napi_callback_info info);
     WmErrorCode CreateTransitionController(napi_env env);
 
-    // window effect
+    /*
+     * Window Property
+     */
     napi_value OnSetCornerRadius(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowCornerRadius(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowCornerRadius(napi_env env, napi_callback_info info);
     napi_value OnSetShadow(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowShadowRadius(napi_env env, napi_callback_info info);
     napi_value OnSetBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlurStyle(napi_env env, napi_callback_info info);
@@ -363,6 +375,7 @@ private:
     napi_value OnMaximize(napi_env env, napi_callback_info info);
     napi_value OnSetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     napi_value OnRestore(napi_env env, napi_callback_info info);
+    napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
@@ -379,6 +392,8 @@ private:
     napi_value OnSetSystemBarProperties(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSystemBarPropertiesSync(napi_env env, napi_callback_info info);
     napi_value OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info);
+    napi_value OnSetStatusBarColor(napi_env env, napi_callback_info info);
+    napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);

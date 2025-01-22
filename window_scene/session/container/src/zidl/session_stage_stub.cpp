@@ -146,6 +146,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowVisibilityChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE):
             return HandleNotifyTransformChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM):
+            return HandleNotifySingleHandTransformChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE):
             return HandleNotifyDialogStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT):
@@ -185,7 +187,11 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SUPPORT_ENTER_WATERFALL_MODE):
             return HandleSetSupportEnterWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
-            return HandleExtensionHostData(data, reply);
+            return HandleExtensionHostData(data, reply, option);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
+            return HandleSendContainerModalEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
+            return HandleSetDragActivated(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -491,6 +497,15 @@ int SessionStageStub::HandleNotifyTransformChange(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifySingleHandTransformChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    SingleHandTransform singleHandTransform;
+    singleHandTransform.Unmarshalling(data);
+    NotifySingleHandTransformChange(singleHandTransform);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyDensityFollowHost(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifyDensityFollowHost");
@@ -651,6 +666,18 @@ int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleSetDragActivated(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    bool dragActivated = true;
+    if (!data.ReadBool(dragActivated)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragActivated failed.");
+        return ERR_INVALID_DATA;
+    }
+    SetDragActivated(dragActivated);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleSetFullScreenWaterfallMode(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -706,10 +733,27 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
-    NotifyExtensionDataConsumer(data, reply);
+    static_cast<void>(SendExtensionData(data, reply, option));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    std::string eventName = data.ReadString();
+    if (eventName.empty()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "event name is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    std::string eventValue = data.ReadString();
+    if (eventValue.empty()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "event value  is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    SendContainerModalEvent(eventName, eventValue);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

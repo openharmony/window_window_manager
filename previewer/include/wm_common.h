@@ -91,6 +91,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_PLACEHOLDER,
     WINDOW_TYPE_DIALOG,
     WINDOW_TYPE_SCREENSHOT,
+    WINDOW_TYPE_INPUT_METHOD_STATUS_BAR,
     WINDOW_TYPE_GLOBAL_SEARCH,
     WINDOW_TYPE_SYSTEM_TOAST,
     WINDOW_TYPE_SYSTEM_FLOAT,
@@ -566,7 +567,11 @@ struct Rect {
         oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
         return oss.str();
     }
+
+    static const Rect EMPTY_RECT;
 };
+
+inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
  * @struct SystemBarProperty
@@ -805,7 +810,7 @@ struct TitleButtonRect {
     }
 };
 
-/*
+/**
  * @struct WindowLayoutInfo
  *
  * @brief Layout info for all windows on the screen.

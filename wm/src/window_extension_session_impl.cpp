@@ -277,6 +277,7 @@ WMError WindowExtensionSessionImpl::Resize(uint32_t width, uint32_t height,
 
 WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -288,6 +289,7 @@ WMError WindowExtensionSessionImpl::TransferAbilityResult(uint32_t resultCode, c
 
 WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFE("Window invalid.");
         return WMError::WM_ERROR_REPEAT_OPERATION;
@@ -311,7 +313,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const Not
 
 WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::WantParams& wantParams)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "in.");
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataFunc_) {
         notifyTransferComponentDataFunc_(wantParams);
     }
@@ -321,7 +323,7 @@ WSError WindowExtensionSessionImpl::NotifyTransferComponentData(const AAFwk::Wan
 WSErrorCode WindowExtensionSessionImpl::NotifyTransferComponentDataSync(
     const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     if (notifyTransferComponentDataForResultFunc_) {
         reWantParams = notifyTransferComponentDataForResultFunc_(wantParams);
         return WSErrorCode::WS_OK;
@@ -344,7 +346,7 @@ void WindowExtensionSessionImpl::RegisterTransferComponentDataForResultListener(
 
 void WindowExtensionSessionImpl::TriggerBindModalUIExtension()
 {
-    WLOGFD("in");
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->TriggerBindModalUIExtension();
@@ -566,8 +568,13 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
-        if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        auto usage = property_->GetUIExtensionUsage();
+        if (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::EMBEDDED) {
+            uiContent->SetUIContentType(Ace::UIContentType::UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::MODAL) {
+            uiContent->SetUIContentType(Ace::UIContentType::MODAL_UI_EXTENSION);
         }
         if (initByName) {
             uiContent->InitializeByName(this, contentInfo, storage, property_->GetParentId());
@@ -1241,6 +1248,7 @@ bool WindowExtensionSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::Ke
             keyEvent->GetId(), keyEvent->GetAgentWindowId());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
@@ -1354,13 +1362,15 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
     return isPcOrPadFreeMultiWindowMode;
 }
 
-void WindowExtensionSessionImpl::NotifyExtensionDataConsumer(MessageParcel& data, MessageParcel& reply)
+WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, MessageParcel& reply,
+                                                      [[maybe_unused]] MessageOption& option)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
     dataHandler_->NotifyDataConsumer(data, reply);
+    return WSError::WS_OK;
 }
 
-WindowMode WindowExtensionSessionImpl::GetMode() const
+WindowMode WindowExtensionSessionImpl::GetWindowMode() const
 {
     return property_->GetWindowMode();
 }
@@ -1371,7 +1381,7 @@ WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
     if (auto uiContet = GetUIContentSharedPtr()) {
         uiContet->NotifyWindowMode(mode);
     }
-    TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetMode());
+    TLOGNI(WmsLogTag::WMS_UIEXT, "windowMode:%{public}u", GetWindowMode());
     return WMError::WM_OK;
 }
 

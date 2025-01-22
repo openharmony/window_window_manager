@@ -928,16 +928,16 @@ JsSessionType GetApiType(WindowType type)
 }
 
 napi_value CreateSupportWindowModes(napi_env env,
-    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, supportWindowModes.size(), &arrayValue);
+    napi_create_array_with_length(env, supportedWindowModes.size(), &arrayValue);
     if (arrayValue == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
         return NapiGetUndefined(env);
     }
     int32_t index = 0;
-    for (const auto supportWindowMode : supportWindowModes) {
+    for (const auto supportWindowMode : supportedWindowModes) {
         napi_set_element(env, arrayValue, index++, CreateJsValue(env, static_cast<int32_t>(supportWindowMode)));
     }
     return arrayValue;
@@ -992,7 +992,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     napi_set_named_property(env, objValue, "isFromIcon", CreateJsValue(env, sessionInfo.isFromIcon_));
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
-        CreateSupportWindowModes(env, sessionInfo.supportWindowModes));
+        CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
     }
@@ -1567,6 +1567,33 @@ napi_value KeyboardGravityInit(napi_env env)
         static_cast<int32_t>(SessionGravity::SESSION_GRAVITY_BOTTOM)));
     napi_set_named_property(env, objValue, "GRAVITY_DEFAULT", CreateJsValue(env,
         static_cast<int32_t>(SessionGravity::SESSION_GRAVITY_DEFAULT)));
+    return objValue;
+}
+
+napi_value KeyboardViewModeInit(napi_env env)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NON_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::NON_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "LIGHT_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::LIGHT_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "DARK_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::DARK_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "VIEW_MODE_END", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::VIEW_MODE_END)));
     return objValue;
 }
 

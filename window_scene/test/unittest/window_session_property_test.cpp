@@ -1381,6 +1381,48 @@ HWTEST_F(WindowSessionPropertyTest, GetAvoidAreaOption, Function | SmallTest | L
     property->SetAvoidAreaOption(avoidAreaOption);
     ASSERT_EQ(2, property->GetAvoidAreaOption());
 }
+
+/**
+ * @tc.name: SetBackgroundAlpha
+ * @tc.desc: SetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 0;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+    backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+}
+
+/**
+ * @tc.name: GetBackgroundAlpha
+ * @tc.desc: GetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(2, property->GetBackgroundAlpha());
+}
+
+/**
+ * @tc.name: SetWindowCornerRadius
+ * @tc.desc: SetWindowCornerRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    float cornerRadius = 1.0f;
+    property->SetWindowCornerRadius(cornerRadius);
+    ASSERT_EQ(cornerRadius, property->GetWindowCornerRadius());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

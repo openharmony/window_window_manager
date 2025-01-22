@@ -59,10 +59,10 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         SecondaryFoldSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
         SecondaryFoldSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
-        return;
+    } else {
+        FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
+        FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
     }
-    FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
-    FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
 #endif
 }
 
@@ -290,5 +290,14 @@ Drawing::Rect FoldScreenController::GetScreenSnapshotRect()
         return snapshotRect;
     }
     return foldScreenPolicy_->GetScreenSnapshotRect();
+}
+
+void FoldScreenController::SetMainScreenRegion(DMRect& mainScreenRegion)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetMainScreenRegion(mainScreenRegion);
 }
 } // namespace OHOS::Rosen

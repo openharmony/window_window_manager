@@ -34,6 +34,7 @@ const int32_t FULL_STATUS_WIDTH = 1;
 const int32_t GLOBAL_FULL_STATUS_WIDTH = 2;
 const int32_t SCREEN_HEIGHT = 3;
 const int32_t FULL_STATUS_OFFSET_X = 4;
+constexpr uint32_t HALF_DIVIDER = 2;
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const char* STATUS_MAIN = "version:3+main";
@@ -46,16 +47,26 @@ SecondaryDisplayFoldPolicy::SecondaryDisplayFoldPolicy(std::recursive_mutex& dis
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler)
     : displayInfoMutex_(displayInfoMutex), screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
-    TLOGI(WmsLogTag::DMS, "SecondaryDisplayFoldPolicy created");
+    InitScreenParams();
     ScreenId screenIdFull = 0;
     int32_t foldCreaseRegionABPosX = 0;
-    int32_t foldCreaseRegionABPosY = 1008;
-    int32_t foldCreaseRegionABPosWidth = 2232;
-    int32_t foldCreaseRegionABPosHeight = 128;
+    int32_t foldCreaseRegionABPosY = screenParams_[MAIN_STATUS_WIDTH]; // 1008
+    int32_t foldCreaseRegionABPosHeight = screenParams_[GLOBAL_FULL_STATUS_WIDTH] - screenParams_[FULL_STATUS_WIDTH]
+        - screenParams_[MAIN_STATUS_WIDTH]; // 128
+    int32_t foldCreaseRegionABPosWidth = screenParams_[SCREEN_HEIGHT];
     int32_t foldCreaseRegionBCPosX = 0;
-    int32_t foldCreaseRegionBCPosY = 2224;
-    int32_t foldCreaseRegionBCPosWidth = 2232;
-    int32_t foldCreaseRegionBCPosHeight = 128;
+    int32_t foldCreaseRegionBCPosY =
+        screenParams_[GLOBAL_FULL_STATUS_WIDTH] -
+        ((screenParams_[FULL_STATUS_WIDTH] / HALF_DIVIDER) - (foldCreaseRegionABPosHeight / HALF_DIVIDER));
+    int32_t foldCreaseRegionBCPosWidth = screenParams_[SCREEN_HEIGHT];
+    int32_t foldCreaseRegionBCPosHeight = foldCreaseRegionABPosHeight;
+    TLOGI(WmsLogTag::DMS, "created, screenIdFull = %{public}" PRIu64", foldCreaseRegionABPosX = %{public}u,\
+        foldCreaseRegionABPosY = %{public}u, foldCreaseRegionABPosHeight = %{public}u,\
+        foldCreaseRegionABPosWidth = %{public}u, foldCreaseRegionBCPosX = %{public}u,\
+        foldCreaseRegionBCPosY = %{public}u, foldCreaseRegionBCPosWidth = %{public}u,\
+        foldCreaseRegionBCPosHeight = %{public}u", screenIdFull, foldCreaseRegionABPosX, foldCreaseRegionABPosY,
+        foldCreaseRegionABPosHeight, foldCreaseRegionABPosWidth, foldCreaseRegionBCPosX, foldCreaseRegionBCPosY,
+        foldCreaseRegionBCPosWidth, foldCreaseRegionBCPosHeight);
     std::vector<DMRect> rect = {
         {
             foldCreaseRegionABPosX, foldCreaseRegionABPosY,
@@ -67,7 +78,6 @@ SecondaryDisplayFoldPolicy::SecondaryDisplayFoldPolicy(std::recursive_mutex& dis
         }
     };
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdFull, rect);
-    InitScreenParams();
 }
 
 void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
@@ -176,9 +186,9 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
     SendPropertyChangeResult(screenSession, SCREEN_ID_FULL, ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND,
         displayMode);
     if (currentDisplayMode_ != displayMode) {
-        if ((currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::FULL)
-            || (currentDisplayMode_ == FoldDisplayMode::FULL && displayMode == FoldDisplayMode::MAIN)
-            || (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::MAIN)) {
+        if ((currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::FULL) ||
+            (currentDisplayMode_ == FoldDisplayMode::FULL && displayMode == FoldDisplayMode::MAIN) ||
+            (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL && displayMode == FoldDisplayMode::MAIN)) {
                 return;
         }
     }
@@ -336,5 +346,25 @@ Drawing::Rect SecondaryDisplayFoldPolicy::GetScreenSnapshotRect()
         snapshotRect.bottom_ = screenParams_[GLOBAL_FULL_STATUS_WIDTH];
     }
     return snapshotRect;
+}
+
+void SecondaryDisplayFoldPolicy::SetMainScreenRegion(DMRect& mainScreenRegion)
+{
+    if (currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        mainScreenRegion.posX_ = 0;
+        mainScreenRegion.posY_ = 0;
+        mainScreenRegion.width_ = screenParams_[SCREEN_HEIGHT];
+        mainScreenRegion.height_ = screenParams_[MAIN_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::FULL) {
+        mainScreenRegion.posX_ = 0;
+        mainScreenRegion.posY_ = screenParams_[FULL_STATUS_OFFSET_X];
+        mainScreenRegion.width_ = screenParams_[SCREEN_HEIGHT];
+        mainScreenRegion.height_ = screenParams_[FULL_STATUS_WIDTH];
+    } else if (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        mainScreenRegion.posX_ = 0;
+        mainScreenRegion.posY_ = 0;
+        mainScreenRegion.width_ = screenParams_[SCREEN_HEIGHT];
+        mainScreenRegion.height_ = screenParams_[GLOBAL_FULL_STATUS_WIDTH];
+    }
 }
 } // namespace OHOS::Rosen

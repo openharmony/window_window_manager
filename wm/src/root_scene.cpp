@@ -21,6 +21,7 @@
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
+#include <ui/rs_node.h>
 #include <viewport_config.h>
 
 #include "ability_context.h"
@@ -78,6 +79,7 @@ RootScene::RootScene()
 
     NodeId nodeId = 0;
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 }
 
 RootScene::~RootScene()
@@ -339,7 +341,7 @@ WMError RootScene::RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaCh
         TLOGE(WmsLogTag::WMS_KEYBOARD, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(occupiedAreaMutex_);
     if (occupiedAreaChangeListeners_.find(listener) == occupiedAreaChangeListeners_.end()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "register success");
         occupiedAreaChangeListeners_.insert(listener);
@@ -354,7 +356,7 @@ WMError RootScene::UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedArea
         return WMError::WM_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "unregister success");
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(occupiedAreaMutex_);
     occupiedAreaChangeListeners_.erase(listener);
     return WMError::WM_OK;
 }
@@ -365,14 +367,37 @@ void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInf
         TLOGI(WmsLogTag::WMS_KEYBOARD, "occupied area info is null");
         return;
     }
+    if (handler_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "handler_ is null, notify occupied area for root failed.");
+        return;
+    }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "occupiedRect: %{public}s, textField PositionY_: %{public}f, Height_: %{public}f",
         info->rect_.ToString().c_str(), info->textFieldPositionY_, info->textFieldHeight_);
-    std::lock_guard<std::mutex> lock(mutex_);
-    for (const auto& listener : occupiedAreaChangeListeners_) {
-        if (listener != nullptr) {
-            listener->OnSizeChange(info);
+    auto task = [weak = wptr(this), info]() {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "window is null");
+            return;
         }
+        std::lock_guard<std::mutex> lock(window->occupiedAreaMutex_);
+        for (const auto& listener : window->occupiedAreaChangeListeners_) {
+            if (listener != nullptr) {
+                listener->OnSizeChange(info);
+            }
+        }
+    };
+    handler_->PostTask(task, __func__);
+}
+
+std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std::string& stringId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
+        return nullptr;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    return uiContent_->GetRSNodeByStringID(stringId);
 }
 } // namespace Rosen
 } // namespace OHOS

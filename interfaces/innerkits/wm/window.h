@@ -698,7 +698,7 @@ public:
      *
      * @return Mode of window.
      */
-    virtual WindowMode GetMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
+    virtual WindowMode GetWindowMode() const { return WindowMode::WINDOW_MODE_UNDEFINED; }
 
     /**
      * @brief Get alpha of window.
@@ -915,7 +915,7 @@ public:
      * @return WMError
      */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
-        const Rect& rect = {0, 0, 0, 0}) { return WMError::WM_OK; }
+        const Rect& rect = Rect::EMPTY_RECT) { return WMError::WM_OK; }
 
     /**
      * @brief Set whether the system or app sub window can obtain area
@@ -1234,12 +1234,36 @@ public:
     virtual WMError SetCornerRadius(float cornerRadius) { return WMError::WM_OK; }
 
     /**
+     * @brief Sets corner radius of window.
+     *
+     * @param cornerRadius Corner radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetWindowCornerRadius(float cornerRadius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get corner radius of window.
+     *
+     * @param cornerRadius Corner radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError GetWindowCornerRadius(float& cornerRadius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set shadow radius of window.
      *
      * @param radius Shadow radius of window
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetShadowRadius(float radius) { return WMError::WM_OK; }
+
+    /**
+     * @brief Set shadow radius of window.
+     *
+     * @param radius Shadow radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set shadow color of window.
@@ -1862,14 +1886,24 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move window. It is called by application.
+     * @brief Start moving window. It is called by application.
      *
      * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Stop move window. It is called by application. Support pc window and pad free multi-window.
+     * @brief Start moving window. It is called by application.
+     *
+     * @param offsetX expected pointer position x-axis offset in window when start moving.
+     * @param offsetY expected pointer position y-axis offset in window when start moving.
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Stop moving window. It is called by application. Support pc window and pad free multi-window.
      *
      * @return Error code of window.
      */
@@ -2542,12 +2576,12 @@ public:
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Set support window modes.
+     * @brief Sets the supported window modes.
      *
-     * @param supportWindowModes Support window modes of the window.
+     * @param supportedWindowModes Supported window modes of the window.
      * @return WM_OK means set success, others means failed.
      */
-    virtual WMError SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2779,7 +2813,7 @@ public:
      * @param params
      * @return WM_OK means set success, others means set failed
      */
-    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) { return WMError::WM_OK; }
 
     /**
      * @brief Set the Dvsync Switch
@@ -2938,6 +2972,39 @@ public:
      * @return True - is mid scene, false - is not mid scene.
      */
     virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get layoutTransform of window uiContent.
+     *
+     * @return UiContent of layoutTransform.
+     */
+    virtual Transform GetLayoutTransform() const
+    {
+        static Transform trans;
+        return trans;
+    }
+
+    /**
+     * @brief Show keyboard window
+     *
+     * @param mode Keyboard will show with special mode.
+     * @return WM_OK means window show success, others means failed.
+     */
+    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Change keyboard view mode
+     *
+     * @param mode Keyboard will update to the special mode.
+     * @return WM_OK means view mode update success, others means failed.
+     */
+    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
