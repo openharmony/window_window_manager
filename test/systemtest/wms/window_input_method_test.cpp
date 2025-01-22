@@ -31,7 +31,7 @@ public:
     void TearDown() override;
 
 private:
-    static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1;
+    static constexpr uint32_t TEST_SLEEP_SECOND = 1;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
@@ -79,21 +79,21 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, Function | MediumTest | Level3)
         return;
     }
     ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(KeyboardViewMode::DARK_IMMERSIVE_MODE));
-    sleep(SPLIT_TEST_SLEEP_S);
+    sleep(TEST_SLEEP_SECOND);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE));
-    sleep(SPLIT_TEST_SLEEP_S);
+    sleep(TEST_SLEEP_SECOND);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
         fullWindow->ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(-1)));
-    sleep(SPLIT_TEST_SLEEP_S);
+    sleep(TEST_SLEEP_SECOND);
 
     ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
-    sleep(SPLIT_TEST_SLEEP_S);
+    sleep(TEST_SLEEP_SECOND);
 
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE));
-    sleep(SPLIT_TEST_SLEEP_S);
+    sleep(TEST_SLEEP_SECOND);
     fullWindow->Destroy();
 }
 } // namespace

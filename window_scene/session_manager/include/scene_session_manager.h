@@ -90,6 +90,7 @@ struct SessionIdentityInfo {
     std::string instanceKey_;
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
+    std::string specifiedFlag_;
 };
 
 class SceneSession;
@@ -231,6 +232,9 @@ public:
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
     void RegisterFlushWindowInfoCallback();
     void FlushWindowInfoToMMI(const bool forceFlush = false);
+    void SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession);
+    void BuildCancelPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId,
+                                 int32_t action, int32_t wid);
 
     /*
      * Window Rotate Animation
@@ -429,7 +433,7 @@ public:
     /*
      * UIExtension
      */
-    uint32_t GetLockScreenZorder();
+    uint32_t GetLockScreenZOrder();
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid);
     void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
@@ -602,12 +606,9 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
-    void GetMainSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions) const;
-    WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex);
-    WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex);
+    void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
+        std::vector<sptr<SceneSession>>& mainSessions) const;
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
 
 protected:
     SceneSessionManager();
@@ -980,6 +981,7 @@ private:
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
 
+    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     sptr<AppAnrListener> appAnrListener_;

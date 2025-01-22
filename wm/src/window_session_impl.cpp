@@ -59,7 +59,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowS
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_15 = 15;
 
-/**
+/*
  * DFX
  */
 const std::string SET_UIEXTENSION_DESTROY_TIMEOUT_LISTENER_TASK_NAME = "SetUIExtDestroyTimeoutListener";
@@ -488,6 +488,7 @@ void WindowSessionImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent
 
 bool WindowSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+    TLOGI(WmsLogTag::WMS_EVENT, "id: %{public}d", keyEvent->GetId());
     if (auto uiContent = GetUIContentSharedPtr()) {
         return uiContent->ProcessKeyEvent(keyEvent, true);
     }
@@ -3829,6 +3830,7 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
             pointerEvent->MarkProcessed();
             return;
         }
+        TLOGI(WmsLogTag::WMS_EVENT, "Start to process pointerEvent, id: %{public}d", pointerEvent->GetId());
         if (!uiContent->ProcessPointerEvent(pointerEvent)) {
             TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "UI content dose not consume");
             pointerEvent->MarkProcessed();
@@ -3972,6 +3974,7 @@ void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyE
 
     if (auto uiContent = GetUIContentSharedPtr()) {
         if (FilterKeyEvent(keyEvent)) return;
+        TLOGI(WmsLogTag::WMS_EVENT, "Start to process keyEvent, id: %{public}d", keyEvent->GetId());
         isConsumed = uiContent->ProcessKeyEvent(keyEvent);
         if (!isConsumed && keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ESCAPE &&
             IsPcOrPadFreeMultiWindowMode() &&

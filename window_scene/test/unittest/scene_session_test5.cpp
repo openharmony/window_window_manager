@@ -1725,6 +1725,50 @@ HWTEST_F(SceneSessionTest5, ActivateKeyboardAvoidArea01, Function | SmallTest | 
     sceneSession->ActivateKeyboardAvoidArea(true, false);
     ASSERT_EQ(true, sceneSession->IsKeyboardAvoidAreaActive());
 }
+
+/**
+ * @tc.name: StartMovingWithCoordinate_01
+ * @tc.desc: StartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_01, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = nullptr;
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate_02
+ * @tc.desc: StartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_02, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_->isStartMove_ = true;
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    EXPECT_EQ(result, WSError::WS_ERROR_REPEAT_OPERATION);
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate_03
+ * @tc.desc: StartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_03, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024, sceneSession->GetWindowType());
+    sceneSession->moveDragController_->isStartMove_ = false;
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    EXPECT_EQ(result, WSError::WS_OK);
+}
 }
 }
 }

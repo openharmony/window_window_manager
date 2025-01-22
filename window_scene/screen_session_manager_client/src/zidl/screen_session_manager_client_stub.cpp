@@ -338,7 +338,7 @@ int ScreenSessionManagerClientStub::HandleOnSuperFoldStatusChanged(MessageParcel
 int ScreenSessionManagerClientStub::HandleOnSecondaryReflexionChanged(MessageParcel& data, MessageParcel& reply)
 {
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
-    auto isSecondaryReflexion = static_cast<uint32_t>(data.ReadUint32());
+    auto isSecondaryReflexion = static_cast<bool>(data.ReadUint32());
     WLOGI("secondary reflexion screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
         screenId, static_cast<uint32_t>(isSecondaryReflexion));
     OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);

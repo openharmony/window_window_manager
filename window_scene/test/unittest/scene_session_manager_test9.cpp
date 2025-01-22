@@ -1169,33 +1169,38 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallT
 }
 
 /**
- * @tc.name: GetLockScreenZorder
- * @tc.desc: GetLockScreenZorder
+ * @tc.name: GetLockScreenZOrder
+ * @tc.desc: GetLockScreenZOrder
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest9, GetLockScreenZorder, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest9, GetLockScreenZOrder, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
-
+    constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
+    constexpr uint32_t LOCK_SCREEN_ZORDER = 2003;
     ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
-    auto ret = ssm_->GetLockScreenZorder();
-    ASSERT_EQ(ret, 0);
+    ASSERT_EQ(ssm_->GetLockScreenZOrder(), DEFAULT_LOCK_SCREEN_ZORDER);
+    ASSERT_EQ(sceneSession->IsScreenLockWindow(), false);
+    ASSERT_EQ(sceneSession->GetZOrder(), 0);
 
-    Session session(info);
-    session.isScreenLockWindow_ = true;
-    ret = ssm_->GetLockScreenZorder();
-    ASSERT_EQ(ret, 0);
-
-    ssm_->pipWindowSurfaceId_ = 0;
-    RSSurfaceNodeConfig config;
-    session.surfaceNode_ = std::make_shared<RSSurfaceNode>(config, true);
-
-    ssm_->SelectSesssionFromMap(0);
-    ssm_->NotifyPiPWindowVisibleChange(true);
-    ssm_->NotifyPiPWindowVisibleChange(false);
+    info.bundleName_ = "SCBScreenLock2";
+    sptr<SceneSession> lockScreenSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(1, lockScreenSession));
+    lockScreenSession->SetZOrder(0);
+    ASSERT_EQ(ssm_->GetLockScreenZOrder(), DEFAULT_LOCK_SCREEN_ZORDER);
+    lockScreenSession->SetZOrder(DEFAULT_LOCK_SCREEN_ZORDER);
+    ASSERT_EQ(ssm_->GetLockScreenZOrder(), DEFAULT_LOCK_SCREEN_ZORDER);
+    lockScreenSession->SetZOrder(DEFAULT_LOCK_SCREEN_ZORDER - 1);
+    ASSERT_EQ(ssm_->GetLockScreenZOrder(), DEFAULT_LOCK_SCREEN_ZORDER);
+    lockScreenSession->SetZOrder(LOCK_SCREEN_ZORDER);
+    ASSERT_EQ(lockScreenSession->IsScreenLockWindow(), true);
+    ASSERT_EQ(lockScreenSession->GetZOrder(), LOCK_SCREEN_ZORDER);
+    ASSERT_EQ(ssm_->sceneSessionMap_.size(), 2);
+    ASSERT_EQ(ssm_->GetLockScreenZOrder(), LOCK_SCREEN_ZORDER);
 }
 
 /**

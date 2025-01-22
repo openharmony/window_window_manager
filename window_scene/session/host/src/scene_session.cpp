@@ -769,7 +769,7 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
                 TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s Repeat operation, window is not moving", where);
                 return WSError::WS_OK;
             }
-            session->moveDragController_->MoveDragInterrupted();
+            session->moveDragController_->StopMoving();
             return WSError::WS_OK;
         }
         if (session->moveDragController_->GetStartMoveFlag()) {
@@ -777,6 +777,34 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
             return WSError::WS_ERROR_REPEAT_OPERATION;
         }
         session->OnSessionEvent(event);
+        return WSError::WS_OK;
+    }, __func__);
+}
+
+WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+    int32_t pointerPosX, int32_t pointerPosY)
+{
+    return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !session->moveDragController_) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: session or moveDragController is null", where);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (session->moveDragController_->GetStartMoveFlag()) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: Repeat operation, window is moving", where);
+            return WSError::WS_ERROR_REPEAT_OPERATION;
+        }
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: offsetX:%{public}d offsetY:%{public}d pointerPosX:%{public}d"
+            " pointerPosY:%{public}d", where, offsetX, offsetY, pointerPosX, pointerPosY);
+        WSRect winRect = {
+            pointerPosX - offsetX,
+            pointerPosY - offsetY,
+            session->winRect_.width_,
+            session->winRect_.height_
+        };
+        session->moveDragController_->HandleStartMovingWithCoordinate(offsetX,
+            offsetY, pointerPosX, pointerPosY, winRect);
+        session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
         return WSError::WS_OK;
     }, __func__);
 }
@@ -2397,7 +2425,7 @@ void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEven
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool needNotifyClient, bool isExecuteDelayRaise)
 {
-    return PostSyncTask([weakThis = wptr(this), pointerEvent, needNotifyClient, isExecuteDelayRaise, where = __func__] {
+    PostTask([weakThis = wptr(this), pointerEvent, needNotifyClient, isExecuteDelayRaise, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::DEFAULT, "%{public}s session is null", where);
@@ -2405,6 +2433,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         return session->TransferPointerEventInner(pointerEvent, needNotifyClient, isExecuteDelayRaise);
     }, __func__);
+    return WSError::WS_OK;
 }
 
 WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -2791,7 +2820,11 @@ void SceneSession::HandleCompatibleModeMoveDrag(WSRect& rect, SizeChangeReason r
     }
     bool isSupportDragInPcCompatibleMode = sessionProperty->GetIsSupportDragInPcCompatibleMode();
     if (reason != SizeChangeReason::DRAG_MOVE) {
-        HandleCompatibleModeDrag(rect, reason, isSupportDragInPcCompatibleMode);
+        if (reason == SizeChangeReason::DRAG_END && !moveDragController_->GetStartDragFlag()) {
+            return;
+        } else {
+            HandleCompatibleModeDrag(rect, reason, isSupportDragInPcCompatibleMode);
+        }
     }
 }
 
@@ -3046,6 +3079,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         HandleCompatibleModeMoveDrag(rect, reason);
     }
     if (IsDragResizeWhenEnd(reason)) {
+        UpdateSizeChangeReason(reason);
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
     }
@@ -3107,7 +3141,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            screenSession->GetDisplayNode()->AddCrossParentChild(movedSurfaceNode, -1);
+            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1);
             movedSurfaceNode->SetIsCrossNode(true);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
         }
@@ -3128,8 +3162,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to remove cross parent child");
                 continue;
             }
-            screenSession->GetDisplayNode()->RemoveCrossParentChild(
-                movedSurfaceNode, moveDragController_->GetInitParentNodeId());
+            screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
         }
@@ -3402,17 +3435,17 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 {
     auto property = GetSessionProperty();
     if (!property) {
-        WLOGFE("SetPrivacyMode property is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
         return;
     }
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
-        WLOGFE("surfaceNode_ is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
         return;
     }
     bool lastPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     if (lastPrivacyMode == isPrivacy) {
-        WLOGFW("privacy mode is not change, do nothing, isPrivacy:%{public}d", isPrivacy);
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "privacy mode does not change, isPrivacy:%{public}d", isPrivacy);
         return;
     }
     property->SetPrivacyMode(isPrivacy);
@@ -4076,6 +4109,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.isPcOrPadEnableActivation_ = session->IsPcOrPadEnableActivation();
     info.canStartAbilityFromBackground_ = abilitySessionInfo->canStartAbilityFromBackground;
     info.isFoundationCall_ = isFoundationCall;
+    info.specifiedFlag_ = abilitySessionInfo->specifiedFlag;
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
         if (!abilitySessionInfo->supportWindowModes.empty()) {
@@ -6291,6 +6325,41 @@ void SceneSession::MarkAvoidAreaAsDirty()
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
 }
 
+void SceneSession::SetMousePointerDownEventStatus(bool mousePointerDownEventStatus)
+{
+    isMousePointerDownEventStatus_ = mousePointerDownEventStatus;
+}
+
+bool SceneSession::GetMousePointerDownEventStatus() const
+{
+    return isMousePointerDownEventStatus_;
+}
+
+void SceneSession::SetFingerPointerDownStatus(int32_t fingerId)
+{
+    if (fingerPointerDownStatusList_.find(fingerId) != fingerPointerDownStatusList_.end()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "wid:%{public}d fingerId:%{public}d receive twice down event",
+              GetPersistentId(), fingerId);
+    } else {
+        fingerPointerDownStatusList_.insert(fingerId);
+    }
+}
+
+void SceneSession::RemoveFingerPointerDownStatus(int32_t fingerId)
+{
+    if (fingerPointerDownStatusList_.find(fingerId) == fingerPointerDownStatusList_.end()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "wid:%{public}d fingerId:%{public}d receive up without down event",
+              GetPersistentId(), fingerId);
+    } else {
+        fingerPointerDownStatusList_.erase(fingerId);
+    }
+}
+
+std::unordered_set<int32_t> SceneSession::GetFingerPointerDownStatusList() const
+{
+    return fingerPointerDownStatusList_;
+}
+
 void SceneSession::SetBehindWindowFilterEnabled(bool enabled)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, enabled: %{public}d", GetPersistentId(), enabled);
@@ -6352,5 +6421,41 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             "parentTransY: %{public}d", where, session->GetPersistentId(), globalRect.ToString().c_str(),
             parentTransX, parentTransY);
     }, __func__);
+}
+
+void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session or onSetWindowCornerRadiusFunc is null");
+            return;
+        }
+        session->onSetWindowCornerRadiusFunc_ = std::move(func);
+        auto property = session->GetSessionProperty();
+        session->onSetWindowCornerRadiusFunc_(property->GetWindowCornerRadius());
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id: %{public}d", where,
+            session->GetPersistentId());
+    }, __func__);
+}
+
+WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), cornerRadius, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+            return;
+        }
+        if (session->onSetWindowCornerRadiusFunc_) {
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s id %{public}d radius: %{public}f",
+                where, session->GetPersistentId(), cornerRadius);
+            session->onSetWindowCornerRadiusFunc_(cornerRadius);
+            session->GetSessionProperty()->SetWindowCornerRadius(cornerRadius);
+        }
+    }, __func__);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

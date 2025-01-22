@@ -58,7 +58,7 @@ WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     sptr<FocusGroup> focusGroup = sptr<FocusGroup>::MakeSptr(displayId);
@@ -66,21 +66,21 @@ WSError WindowFocusController::AddFocusGroup(DisplayId displayId)
     if (displayId != DEFAULT_DISPLAY_ID) {
         virtualScreenDisplayIdSet_.emplace(displayId);
     }
-    return  WSError::WS_OK;
+    return WSError::WS_OK;
 }
 
 WSError WindowFocusController::RemoveFocusGroup(DisplayId displayId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     focusGroupMap_.erase(displayId);
     if (displayId != DEFAULT_DISPLAY_ID) {
         virtualScreenDisplayIdSet_.erase(displayId);
     }
-    return  WSError::WS_OK;
+    return WSError::WS_OK;
 }
 
 sptr<FocusGroup> WindowFocusController::GetFocusGroupInner(DisplayId displayId)
@@ -103,7 +103,7 @@ int32_t WindowFocusController::GetFocusedSessionId(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return INVALID_SESSION_ID;
     }
     auto focusGroup = GetFocusGroupInner(displayId);
@@ -118,11 +118,10 @@ sptr<FocusGroup> WindowFocusController::GetFocusGroup(DisplayId displayId)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return nullptr;
     }
-    auto focusGroup = GetFocusGroupInner(displayId);
-    return focusGroup;
+    return GetFocusGroupInner(displayId);
 }
 
 std::vector<std::pair<DisplayId, int32_t>> WindowFocusController::GetAllFocusedSessionList() const
@@ -143,7 +142,7 @@ WSError WindowFocusController::UpdateFocusedSessionId(DisplayId displayId, int32
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", persistentId: %{public}d", displayId, persistentId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto focusGroup = GetFocusGroupInner(displayId);
@@ -158,7 +157,7 @@ WSError WindowFocusController::UpdateFocusedAppSessionId(DisplayId displayId, in
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64 ", persistentId: %{public}d", displayId, persistentId);
     if (displayId == DISPLAY_ID_INVALID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "displayId id invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "displayId invalid");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     auto focusGroup = GetFocusGroupInner(displayId);

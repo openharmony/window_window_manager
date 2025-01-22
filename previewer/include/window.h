@@ -202,6 +202,8 @@ public:
     virtual WMError RaiseToAppTop() = 0;
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
+    virtual WMError SetWindowCornerRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetWindowCornerRadius(float& radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetShadowRadius(float radius) = 0;
     virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetShadowColor(std::string color) = 0;
@@ -291,6 +293,8 @@ public:
     }
     virtual void StartMove() = 0;
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_OK; }
     virtual WmErrorCode StopMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;

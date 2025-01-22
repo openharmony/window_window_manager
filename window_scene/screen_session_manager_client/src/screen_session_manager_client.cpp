@@ -670,7 +670,7 @@ void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, Sup
     screenSession->SuperFoldStatusChange(screenId, superFoldStatus);
 }
 
-void ScreenSessionManagerClient::OnSecondaryReflexionChanged(ScreenId screenId, uint32_t isSecondaryReflexion)
+void ScreenSessionManagerClient::OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion)
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {

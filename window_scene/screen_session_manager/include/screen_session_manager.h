@@ -332,7 +332,7 @@ public:
 
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
-    void OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion) override;
+    void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
     void SetDefaultScreenId(ScreenId defaultId);
     sptr<IScreenSessionManagerClient> GetClientProxy();
     void NotifyCastWhenScreenConnectChange(bool isConnected);
@@ -400,6 +400,10 @@ private:
     bool GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
         MultiScreenPositionOptions& mainScreenOption, MultiScreenPositionOptions& secondaryScreenOption);
     void RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession);
+    void SetExtendedScreenFallbackPlan(ScreenId screenId);
+    void NotifyAndSetPhysicalScreenResolution(ScreenId screenId);
+    void AdjustExtendResolution(ScreenId screenId);
+    void RecoverExtendResolution(ScreenId screenId);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
