@@ -10503,7 +10503,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
 
 bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& windowInfoOption, const sptr<SceneSession>& sceneSession) const
 {
-    DisplayId displayId = windowInfoOption,displayId;
+    DisplayId displayId = windowInfoOption.displayId;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
         sceneSession->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
         if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
