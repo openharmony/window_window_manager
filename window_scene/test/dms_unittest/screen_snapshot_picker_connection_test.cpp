@@ -215,9 +215,8 @@ HWTEST_F(ScreenSnapshotPickerConnectionTest, GetScreenSnapshotInfo03, Function |
  */
 HWTEST_F(ScreenSnapshotPickerConnectionTest, SnapshotPickerDisconnectExtension01, Function | SmallTest | Level1)
 {
-    std::unique_ptr<ScreenSessionAbilityConnection> abilityConnection_ = nullptr;
     ScreenSnapshotPickerConnection::GetInstance().SnapshotPickerDisconnectExtension();
-    EXPECT_EQ(abilityConnection_, nullptr);
+    EXPECT_EQ(ScreenSnapshotPickerConnection::GetInstance().abilityConnection_, nullptr);
 }
 
 /**
