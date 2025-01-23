@@ -12534,11 +12534,9 @@ WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
     int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(static_cast<uint64_t>(targetDisplayId));
-    float vpr;
+    float vpr = 1.5f; // 1.5f: default virtual pixel ratio
     if (display) {
         vpr = display->GetVirtualPixelRatio();
-    } else {
-        vpr = 1.5f; // 1.5f: default virtual pixel ratio
     }
     int32_t outside = static_cast<int32_t>(HOTZONE_TOUCH * vpr);
     MMI::ShiftWindowParam param;
