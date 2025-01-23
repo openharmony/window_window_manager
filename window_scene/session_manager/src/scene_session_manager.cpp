@@ -3864,7 +3864,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         auto focusGroup = windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
         if (focusGroup == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "focus group is nullptr: %{public}" PRIu64, DEFAULT_DISPLAY_ID);
-            return WSError::WS_ERROR_INVALID_SESSION;
+            return WSError::WS_ERROR_NULLPTR;
         }
         auto focusedSessionId = focusGroup->GetFocusedSessionId();
         auto needBlockNotifyFocusStatusUntilForeground = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
@@ -4679,7 +4679,7 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
         auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
         if (focusGroup == nullptr) {
             TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
-            return WSError::WS_ERROR_NULLPTR;
+            return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (auto sceneSession = GetSceneSession(focusGroup->GetFocusedSessionId())) {
             TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
@@ -5538,7 +5538,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
     if (persistentId == INVALID_SESSION_ID) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "id is invalid");
+        TLOGE(WmsLogTag::WMS_FOCUS, "id is invalid: %{public}d", persistentId);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto sceneSession = GetSceneSession(persistentId);
@@ -5586,7 +5586,7 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
     auto focusGroup = windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, DEFAULT_DISPLAY_ID);
-        return WSError::WS_ERROR_INVALID_SESSION;
+        return WSError::WS_ERROR_NULLPTR;
     }
     auto focusedSession = GetSceneSession(focusGroup->GetFocusedSessionId());
     if (!focusedSession) {
@@ -5613,7 +5613,7 @@ WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId, const 
     }
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr");
-        return WSError::WS_ERROR_INVALID_SESSION;
+        return WSError::WS_ERROR_NULLPTR;
     }
     if (persistentId == focusGroup->GetFocusedSessionId()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "request id has been focused!");
@@ -6888,7 +6888,7 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const s
     auto conditionFunc =  [this, focusedSessionId](const sptr<SceneSession>& iter) {
         return iter && iter->GetPersistentId() == focusedSessionId; 
     };
-    if (std::find_if(topmostVec.begin(), topmostVec.end(), conditionFunc) != topmostVec.end()) {
+    if (std::find_if(topmostVec.begin(), topmostVec.end(), std::move(conditionFunc)) != topmostVec.end()) {
         TLOGD(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId);
         return WSError::WS_OK;
     }
@@ -6924,7 +6924,7 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(const sptr<Sc
     auto conditionFunc =  [this, focusedSessionId](const sptr<Session>& iter) { 
         return iter && iter->GetPersistentId() == focusedSessionId;
     };
-    if (std::find_if(dialogVec.begin(), dialogVec.end(), conditionFunc) != dialogVec.end()) {
+    if (std::find_if(dialogVec.begin(), dialogVec.end(), std::move(conditionFunc)) != dialogVec.end()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "dialog id: %{public}d has been focused!", focusedSessionId);
         return WSError::WS_OK;
     }
