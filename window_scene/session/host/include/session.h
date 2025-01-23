@@ -602,6 +602,7 @@ public:
     WindowDisplayInfo GetWindowDisplayInfoForWindowInfo() const;
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
+    bool IsHalfFoldedOnDefaultDisplayId() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
