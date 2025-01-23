@@ -598,10 +598,10 @@ public:
     /**
      * Window Property
      */
-    void GetWindowUIInfoForWindowInfo(WindowUIInfo& windowUIInfo);
-    void GetWindowDisplayInfoForWindowInfo(WindowDisplayInfo& windowDisplayInfo);
-    void GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInfo);
-    void GetWindowMetaInfoForWindowInfo(WindowMetaInfo& windowMetaInfo);
+    WindowUIInfo GetWindowUIInfoForWindowInfo() const;
+    WindowDisplayInfo GetWindowDisplayInfoForWindowInfo() const;
+    WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
+    WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
