@@ -787,7 +787,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 TLOGE(WmsLogTag::DMS, "Failed to receive windowIdList in stub");
                 break;
             }
-            SetVirtualScreenBlackList(screenId, windowIdList);
+            std::vector<uint64_t> surfaceIdList;
+            if (!data.ReadUInt64Vector(&surfaceIdList)) {
+                TLOGE(WmsLogTag::DMS, "Failed to receive surfaceIdList in stub");
+                break;
+            }
+            SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
             break;
         }
         case DisplayManagerMessage::TRANS_ID_DISABLE_POWEROFF_RENDER_CONTROL: {
