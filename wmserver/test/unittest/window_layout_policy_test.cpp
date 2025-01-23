@@ -55,7 +55,7 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    sptr<WindowNode> CreateWindowNode(const WindowTestInfo& WindowTestInfo);
+    sptr<WindowNode> CreateWindowNode(const WindowTestInfo& windowTestInfo);
     sptr<DisplayInfo> CreateDisplayInfo(const Rect& displayRect);
 
     static WindowTestInfo windowInfo_;
@@ -126,16 +126,16 @@ void WindowLayoutPolicyTest::TearDown()
     displayGroupInfo_.displayInfosMap_.clear();
 }
 
-sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowTestInfo& WindowTestInfo)
+sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowTestInfo& windowTestInfo)
 {
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowType(WindowTestInfo.winType_);
-    property->SetWindowMode(WindowTestInfo.winMode_);
-    property->SetWindowRect(WindowTestInfo.winRect_);
-    property->SetOriginRect(WindowTestInfo.winRect_);
-    property->SetDecorEnable(WindowTestInfo.decorEnable_);
-    property->SetWindowSizeChangeReason(WindowTestInfo.reason_);
-    property->SetDragType(WindowTestInfo.dragType_);
+    property->SetWindowType(windowTestInfo.winType_);
+    property->SetWindowMode(windowTestInfo.winMode_);
+    property->SetWindowRect(windowTestInfo.winRect_);
+    property->SetOriginRect(windowTestInfo.winRect_);
+    property->SetDecorEnable(windowTestInfo.decorEnable_);
+    property->SetWindowSizeChangeReason(windowTestInfo.reason_);
+    property->SetDragType(windowTestInfo.dragType_);
     property->SetDisplayId(0);
     property->SetWindowId(0);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
