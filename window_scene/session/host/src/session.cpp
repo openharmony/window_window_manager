@@ -2691,7 +2691,7 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightC
 
 WSError Session::NotifyHighlightChange(bool isHighlight)
 {
-    if (!IsSessionValid()) {
+    if (IsSystemSession()) {
         TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
             persistentId_, GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
