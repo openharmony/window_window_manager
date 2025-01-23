@@ -489,7 +489,7 @@ void PictureInPictureController::UpdateContentNodeRef(napi_ref nodeRef)
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "option is null");
         SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
-            pipOption_->GetPipTemplate(), FAILED, "option is null");
+            0, FAILED, "option is null");
         return;
     }
     pipOption_->SetTypeNodeRef(nodeRef);
