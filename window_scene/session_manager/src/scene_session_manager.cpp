@@ -10473,9 +10473,9 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    auto task = [this, windowInfoOption, sceneSessionMapCopy, &infos]() {
+    return taskScheduler_->PostSyncTask([this, windowInfoOption, sceneSessionMap_, &infos] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
                 continue;
             }
@@ -10498,8 +10498,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             infos.emplace_back(windowInfo);
         }
         return WMError::WM_OK;
-    };
-    return taskScheduler_->PostSyncTask(task, __func__);
+    }, __func__);
 }
 
 bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& windowInfoOption,
