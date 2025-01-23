@@ -693,7 +693,7 @@ void MoveDragController::SetInputBarCrossAttr(MoveDirection moveDirection, Displ
     }
     moveInputBarStartDisplayId_ = targetDisplayId;
     SetOriginalDisplayOffset(screenSizeProperty_.currentDisplayStartX, screenSizeProperty_.currentDisplayStartY);
-    screenSizeProperty_.ReSet();
+    screenSizeProperty_.Reset();
 }
 
 void MoveDragController::InitializeMoveDragPropertyNotValid(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

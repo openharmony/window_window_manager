@@ -42,7 +42,7 @@ using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool 
 
 const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
 
-enum class MoveDirection: uint32_t {
+enum class MoveDirection : uint32_t {
     UNKNOWN,
     LEFT_TO_RIGHT,
     RIGHT_TO_LEFT,
@@ -176,7 +176,7 @@ private:
                     currentDisplayTop == 0 && width == 0 && height == 0);
         }
 
-        void ReSet()
+        void Reset()
         {
             currentDisplayStartX = 0;
             currentDisplayStartY = 0;
