@@ -118,6 +118,10 @@ enum class ScreenPropertyChangeType : uint32_t {
     ROTATION_END,
     /* Only update screen rotation property info to DMS. */
     ROTATION_UPDATE_PROPERTY_ONLY,
+    /* Only update screen rotation property info not notify. */
+    ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY,
+    /* Undefined. */
+    UNDEFINED,
 };
 
 /**
