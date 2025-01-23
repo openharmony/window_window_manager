@@ -1310,7 +1310,7 @@ enum WindowVisibilityState : uint32_t {
  */
 struct WindowUIInfo : public Parcelable {
     WindowVisibilityState visibilityState = WINDOW_LAYER_STATE_MAX;
-    
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteUint32(static_cast<uint32_t>(visibilityState));
@@ -1388,10 +1388,10 @@ struct WindowLayoutInfo : public Parcelable {
  * @brief Window meta info
  */
 struct WindowMetaInfo : public Parcelable {
-    int32_t windowId = 0;
-    std::string windowName = "";
-    std::string bundleName = "";
-    std::string abilityName = "";
+    int32_t windowId;
+    std::string windowName;
+    std::string bundleName;
+    std::string abilityName;
 
     bool Marshalling(Parcel& parcel) const override
     {

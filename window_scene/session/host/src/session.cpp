@@ -3771,13 +3771,16 @@ bool Session::IsPcWindow() const
     return systemConfig_.IsPcWindow();
 }
 
-void Session::GetWindowUIInfoForWindowInfo(WindowUIInfo& windowUIInfo)
+WindowUIInfo Session::GetWindowUIInfoForWindowInfo() const
 {
+    WindowUIInfo windowUIInfo;
     windowUIInfo.visibilityState = GetVisibilityState();
+    return windowUIInfo;
 }
 
-void Session::GetWindowDisplayInfoForWindowInfo(WindowDisplayInfo& windowDisplayInfo)
+WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
 {
+    WindowDisplayInfo windowDisplayInfo;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
         GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
         WSRect sessionGlobalRect = GetSessionGlobalRect();
@@ -3785,10 +3788,12 @@ void Session::GetWindowDisplayInfoForWindowInfo(WindowDisplayInfo& windowDisplay
     } else {
         windowDisplayInfo.displayId = GetSessionProperty()->GetDisplayId() ;
     }
+    return windowDisplayInfo;
 }
 
-void Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInfo)
+WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInfo) const
 {
+    WindowLayoutInfo windowLayoutInfo;
     WSRect sessionGlobalRect = GetSessionGlobalRect();
     sessionGlobalRect.width_ *= GetScaleX();
     sessionGlobalRect.height_ *= GetScaleY();
@@ -3798,10 +3803,12 @@ void Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInf
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
                               sessionGlobalRect.width_, sessionGlobalRect.height_};
+    return windowLayoutInfo;
 }
 
-void Session::GetWindowMetaInfoForWindowInfo(WindowMetaInfo& windowMetaInfo)
+WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
 {
+    WindowMetaInfo windowMetaInfo;
     windowMetaInfo.windowId = GetWindowId();
     if (GetSessionInfo().isSystem_) {
         windowMetaInfo.windowName = GetSessionInfo().abilityName_;
@@ -3810,5 +3817,6 @@ void Session::GetWindowMetaInfoForWindowInfo(WindowMetaInfo& windowMetaInfo)
     }
     windowMetaInfo.bundleName = GetSessionInfo().bundleName_;
     windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
+    return windowMetaInfo;
 }
 } // namespace OHOS::Rosen

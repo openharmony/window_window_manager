@@ -10488,16 +10488,16 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             }
             auto windowInfo = sptr<WindowInfo>::MakeSptr();
             if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
-                sceneSession->GetWindowUIInfoForWindowInfo(windowInfo->windowUIInfo);
+                windowInfo->windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
             }
             if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
-                sceneSession->GetWindowDisplayInfoForWindowInfo(windowInfo->windowDisplayInfo);
+                windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
             }
             if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
-                sceneSession->GetWindowLayoutInfoForWindowInfo(windowInfo->windowLayoutInfo);
+                windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
             }
             if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
-                sceneSession->GetWindowMetaInfoForWindowInfo(windowInfo->windowMetaInfo);
+                windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
             }
             infos.emplace_back(windowInfo);
         }
@@ -10511,7 +10511,7 @@ bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& window
 {
     DisplayId displayId = windowInfoOption.displayId;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-        sceneSession->  ) {
+        sceneSession->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
         if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
             return false;
         }
