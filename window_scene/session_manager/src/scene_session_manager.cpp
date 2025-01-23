@@ -10471,7 +10471,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
 {
     if (!(SessionPermission::IsSACalling())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
-        return WSError::WS_ERROR_INVALID_PERMISSION;
+        return WMError::WS_ERROR_INVALID_PERMISSION;
     }
     return taskScheduler_->PostSyncTask([this, windowInfoOption, sceneSessionMap_, &infos] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
@@ -10505,7 +10505,7 @@ bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& window
     const sptr<SceneSession>& sceneSession) const
 {
     DisplayId displayId = windowInfoOption.displayId;
-    if (session->IsHalfFoldedOnDefaultDisplayId()) {
+    if (sceneSession->IsHalfFoldedOnDefaultDisplayId()) {
         if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
             return false;
         }
