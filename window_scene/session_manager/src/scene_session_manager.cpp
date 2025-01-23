@@ -12530,7 +12530,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         targetSession->GetSessionProperty()->GetDisplayId());
 }
 
-WMError ShiftAppWindowPointerEventInner(
+WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
     int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(static_cast<uint64_t>(targetDisplayId));
