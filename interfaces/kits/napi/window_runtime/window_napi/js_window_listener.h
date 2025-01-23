@@ -119,7 +119,7 @@ public:
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
     void OnWindowWillClose(sptr<Window> window) override;
-    WmErrorCode CanCancelUnregister(const std::string eventType);
+    WmErrorCode CanCancelUnregister(const std::string& eventType);
 
     /*
      * Window Decor listener

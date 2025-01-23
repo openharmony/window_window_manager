@@ -769,16 +769,16 @@ HWTEST_F(WindowSceneSessionImplTest, Close01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: DirectClose
- * @tc.desc: DirectClose
+ * @tc.name: CloseDirectly
+ * @tc.desc: CloseDirectly
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, DirectClose, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, CloseDirectly, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("DirectClose");
+    option->SetWindowName("CloseDirectly");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    auto res = window->DirectClose();
+    auto res = window->CloseDirectly();
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
 
     window->property_->SetPersistentId(1);
@@ -786,11 +786,11 @@ HWTEST_F(WindowSceneSessionImplTest, DirectClose, Function | SmallTest | Level2)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    res = window->DirectClose();
+    res = window->CloseDirectly();
     ASSERT_EQ(WMError::WM_OK, res);
 
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    res = window->DirectClose();
+    res = window->CloseDirectly();
     ASSERT_EQ(WMError::WM_OK, res);
 }
 

@@ -2607,9 +2607,7 @@ WMError WindowSessionImpl::RegisterWindowWillCloseListeners(const sptr<IWindowWi
         TLOGE(WmsLogTag::WMS_DECOR, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    bool isSubOrDialogWindow = WindowHelper::IsDialogWindow(GetType()) || WindowHelper::IsSubWindow(GetType()) ||
-        WindowHelper::IsSystemSubWindow(GetType());
-    if (!WindowHelper::IsMainWindow(GetType()) && !isSubOrDialogWindow) {
+    if (!WindowHelper::IsAppWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_DECOR, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -2630,9 +2628,7 @@ WMError WindowSessionImpl::UnRegisterWindowWillCloseListeners(const sptr<IWindow
         TLOGE(WmsLogTag::WMS_DECOR, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    bool isSubOrDialogWindow = WindowHelper::IsDialogWindow(GetType()) || WindowHelper::IsSubWindow(GetType()) ||
-        WindowHelper::IsSystemSubWindow(GetType());
-    if (!WindowHelper::IsMainWindow(GetType()) && !isSubOrDialogWindow) {
+    if (!WindowHelper::IsAppWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_DECOR, "window type is not supported");
         return WMError::WM_ERROR_INVALID_CALLING;
     }

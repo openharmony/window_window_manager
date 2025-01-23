@@ -1661,14 +1661,14 @@ HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: DirectClose
- * @tc.desc: DirectClose
+ * @tc.name: CloseDirectly
+ * @tc.desc: CloseDirectly
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, DirectClose, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, CloseDirectly, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    auto ret = window->DirectClose();
+    auto ret = window->CloseDirectly();
     ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
