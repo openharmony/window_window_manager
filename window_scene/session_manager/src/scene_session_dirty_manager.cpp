@@ -473,6 +473,7 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
             .width = extensionInfo.windowRect.width_,
             .height = extensionInfo.windowRect.height_
         };
+        windowInfo.area = windowRect;
         std::vector<MMI::Rect> touchHotAreas;
         MMI::Rect touchRect = {
             .x = 0,
