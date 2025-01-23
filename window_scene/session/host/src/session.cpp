@@ -3796,7 +3796,7 @@ WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
     return windowDisplayInfo;
 }
 
-WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInfo) const
+WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
 {
     WindowLayoutInfo windowLayoutInfo;
     WSRect sessionGlobalRect = GetSessionGlobalRect();
