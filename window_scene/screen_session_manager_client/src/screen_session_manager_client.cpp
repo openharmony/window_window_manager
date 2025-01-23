@@ -624,7 +624,20 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
                       " scaleX=%f, scaleY=%f, pivotX=%f, pivotY=%f, translateX=%f, translateY=%f",
                       id, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
-    session->PropertyChange(session->GetScreenProperty(), ScreenPropertyChangeReason::ACCESS_INFO_CHANGE);
+    displayNode->SetScale(scaleX, scaleY);
+    if (std::fabs(translateX) >= FLT_EPSILON || std::fabs(translateY) >= FLT_EPSILON) {
+        displayNode->SetTranslateX(translateX);
+        displayNode->SetTranslateY(translateY);
+    } else {
+        // should send to scb for processing
+        session->PropertyChange(session->GetScreenProperty(), ScreenPropertyChangeReason::ACCESS_INFO_CHANGE);
+    }
+    auto transactionProxy = RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    } else {
+        TLOGE(WmsLogTag::DMS, "transactionProxy is nullptr");
+    }
 }
 
 void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
