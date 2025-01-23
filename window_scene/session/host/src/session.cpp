@@ -2689,8 +2689,9 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightC
     isHighlight_ = isHighlight;
     if (isNotifyHighlightChange) {
         NotifyHighlightChange(isHighlight);
-        if (highlightChangeFunc_ != nullptr) {
-            highlightChangeFunc_(isHighlight);
+        auto func = highlightChangeFunc_;
+        if (func != nullptr) {
+            func(isHighlight);
         }
     }
     return WSError::WS_OK;
