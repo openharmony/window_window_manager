@@ -6443,6 +6443,35 @@ void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
     NotifyAvailableAreaChanged(area, screenId);
 }
 
+void ScreenSessionManager::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "update super fold available area permission denied!");
+        return;
+    }
+
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get default screen now");
+        return;
+    }
+    if (screenSession->UpdateAvailableArea(bArea)) {
+        NotifyAvailableAreaChanged(bArea, screenId);
+    }
+    if (!screenSession->GetIsFakeInUse()) {
+        TLOGE(WmsLogTag::DMS, "fake screen session is not in use");
+        return;
+    }
+    auto fakeScreenSession = screenSession->GetFakeScreenSession();
+    if (fakeScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get fake screen now");
+        return;
+    }
+    if (fakeScreenSession->UpdateAvailableArea(cArea) && cArea.width_ > 0) {
+        NotifyAvailableAreaChanged(cArea, fakeScreenSession->GetScreenId());
+    }
+}
+
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
 #ifdef FOLD_ABILITY_ENABLE
@@ -6551,6 +6580,11 @@ void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::
             } else if (agentType ==  DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER) {
                 std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
                 agent->NotifyDisplayChangeInfoChanged(lastDisplayChangeInfo_);
+            } else if (agentType ==  DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER) {
+                auto area = screenSession->GetAvailableArea();
+                auto displayId = screenSession->ConvertToDisplayInfo()->GetDisplayId();
+                std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
+                agent->NotifyAvailableAreaChanged(area, displayId);
             } else {
                 isAgentTypeNotify = false;
                 TLOGI(WmsLogTag::DMS, "Unknown agentType.");
@@ -6693,6 +6727,12 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
         defaultSize.physicalWidth_ = defaultScreenProperty.GetPhyBounds().rect_.width_;
         defaultSize.physicalHeight_ = defaultScreenProperty.GetPhyBounds().rect_.height_;
         allDisplayPhysicalResolution_.emplace_back(defaultSize);
+    }
+    for (auto& info : allDisplayPhysicalResolution_) {
+        if (info.foldDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+            info.foldDisplayMode_ = FoldDisplayMode::FULL;
+            break;
+        }
     }
     return allDisplayPhysicalResolution_;
 }
