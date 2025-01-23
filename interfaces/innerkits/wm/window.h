@@ -529,7 +529,7 @@ public:
 /**
  * @class IWindowHighlightChangeListener
  *
- * @brief IWindowHighlightChangeListener is a Listener to observe event when highlight change of window.
+ * @brief IWindowHighlightChangeListener is a listener to observe event when highlight change of window.
  */
 class IWindowHighlightChangeListener : virtual public RefBase {
 public:
