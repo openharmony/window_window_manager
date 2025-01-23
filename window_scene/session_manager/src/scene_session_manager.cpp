@@ -12526,11 +12526,31 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
         TLOGE(WmsLogTag::WMS_PC, "permission denied, not call by the same process");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    return taskScheduler_->PostSyncTask([sourcePersistentId, targetPersistentId] {
-        int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(sourcePersistentId, targetPersistentId, true);
-        TLOGND(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d ret %{public}d",
-            sourcePersistentId, targetPersistentId, ret);
-        return WMError::WM_OK;
+    return ShiftAppWindowPointerEventInner(sourcePersistentId, targetPersistentId,
+        targetSession->GetSessionProperty()->GetDisplayId());
+}
+
+WMError ShiftAppWindowPointerEventInner(
+    int32_t sourceWindowId, int32_t targetWindowId, DispalyId targetDispalyId)
+{
+    auto display = DisplayManager::GetInstance().GetDisplayById(static_cast<uint64_t>(targetDispalyId));
+    float vpr;
+    if (diaplay) {
+        vpr = display->GetVirtualPixelRatio();
+    } else {
+        vpr = 1.5f; // 1.5f: default virtual pixel ratio
+    }
+    int32_t outside = static_cast<int32_t>(HOTZONE_TOUCH * vpr);
+    MMI::ShiftWindowParam param;
+    param.sourceWindowId = sourceWindowId;
+    param.targetWindowId = targetWindowId;
+    param.x = -(outside + outside);
+    param.y = -(outside + outside);
+    return taskScheduler_->PostSyncTask([param] {
+        int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(param, true);
+        TLOGNI(WmsLogTag::WMS_PC, "sourceWindowId %{public}d targetWindowId %{public}d ret %{public}d",
+            param.sourceWindowId, param.targetWindowId, ret);
+        return ret == 0 ? WMError::WM_OK : WMError::WM_ERROR_INVALID_CALLING;
     }, __func__);
 }
 

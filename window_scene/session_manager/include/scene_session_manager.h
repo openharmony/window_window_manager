@@ -331,6 +331,8 @@ public:
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    WMError ShiftAppWindowPointerEventInner(
+        int32_t sourceWindowId, int32_t targetWindowId, DispalyId targetDispalyId);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
