@@ -2308,68 +2308,6 @@ void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPS
     }, __func__);
 }
 
-void SceneSession::HandleStyleEvent(MMI::WindowArea area)
-{
-    static std::pair<int32_t, MMI::WindowArea> preWindowArea =
-        std::make_pair(INVALID_WINDOW_ID, MMI::WindowArea::EXIT);
-    if (preWindowArea.first == Session::GetWindowId() && preWindowArea.second == area) {
-        return;
-    }
-    if (area != MMI::WindowArea::EXIT) {
-        if (Session::SetPointerStyle(area) != WSError::WS_OK) {
-            WLOGFE("Failed to set the cursor style, WSError:%{public}d", Session::SetPointerStyle(area));
-        }
-    }
-    preWindowArea = { Session::GetWindowId(), area };
-}
-
-WSError SceneSession::HandleEnterWinwdowArea(int32_t displayX, int32_t displayY)
-{
-    if (displayX < 0 || displayY < 0) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Illegal parameter, displayX:%{private}d, displayY:%{private}d",
-            displayX, displayY);
-        return WSError::WS_ERROR_INVALID_PARAM;
-    }
-
-    auto windowType = Session::GetWindowType();
-    auto iter = Session::windowAreas_.cend();
-    if (!IsSystemSession() &&
-        Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-        (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
-        iter = Session::windowAreas_.cbegin();
-        for (;iter != Session::windowAreas_.cend(); ++iter) {
-            WSRectF rect = iter->second;
-            if (rect.IsInRegion(displayX, displayY)) {
-                break;
-            }
-        }
-    }
-
-    MMI::WindowArea area = MMI::WindowArea::EXIT;
-    if (iter == Session::windowAreas_.cend()) {
-        bool isInRegion = false;
-        WSRect rect = Session::winRect_;
-        if (Session::GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
-            (windowType == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW || WindowHelper::IsSubWindow(windowType))) {
-            WSRectF rectF = Session::UpdateHotRect(rect);
-            isInRegion = rectF.IsInRegion(displayX, displayY);
-        } else {
-            isInRegion = rect.IsInRegion(displayX, displayY);
-        }
-        if (!isInRegion) {
-            WLOGFE("The wrong event(%{public}d, %{public}d) could not be matched to the region:"
-                "[%{public}d, %{public}d, %{public}d, %{public}d]",
-                displayX, displayY, rect.posX_, rect.posY_, rect.width_, rect.height_);
-            return WSError::WS_ERROR_INVALID_TYPE;
-        }
-        area = MMI::WindowArea::FOCUS_ON_INNER;
-    } else {
-        area = iter->first;
-    }
-    HandleStyleEvent(area);
-    return WSError::WS_OK;
-}
-
 WSError SceneSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
@@ -6484,5 +6422,27 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
         }
     }, __func__);
     return WSError::WS_OK;
+}
+
+void SceneSession::SetColorSpace(ColorSpace colorSpace)
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is invalid");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SetColorSpace value=%{public}u", colorSpace);
+    auto colorGamut = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB;
+    if (colorSpace == ColorSpace::COLOR_SPACE_WIDE_GAMUT) {
+        colorGamut = GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3;
+    }
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction != nullptr) {
+        rsTransaction->Begin();
+        surfaceNode->SetColorSpace(colorGamut);
+    }
+    if (rsTransaction != nullptr) {
+        rsTransaction->Commit();
+    }
 }
 } // namespace OHOS::Rosen
