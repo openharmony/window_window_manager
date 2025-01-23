@@ -12544,8 +12544,8 @@ WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
     MMI::ShiftWindowParam param;
     param.sourceWindowId = sourceWindowId;
     param.targetWindowId = targetWindowId;
-    param.x = -(outside + outside);
-    param.y = -(outside + outside);
+    param.x = -outside * 2; // double outside
+    param.y = -outside * 2; // double outside
     return taskScheduler_->PostSyncTask([param] {
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(param, true);
         TLOGNI(WmsLogTag::WMS_PC, "sourceWindowId %{public}d targetWindowId %{public}d ret %{public}d",
