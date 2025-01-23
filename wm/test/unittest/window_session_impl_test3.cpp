@@ -1110,6 +1110,184 @@ HWTEST_F(WindowSessionImplTest3, ClearTouchEventFilter, Function | SmallTest | L
     WMError res = window->ClearTouchEventFilter();
     ASSERT_EQ(res, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: FilterPointerEvent
+ * @tc.desc: FilterPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, FilterPointerEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("FilterPointerEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    window->touchEventFilter_ = nullptr;
+    auto ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(false, ret);
+
+    window->touchEventFilter_ = [](const MMI::PointerEvent&) { return true; };
+    window->FilterPointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: FilterPointerEvent01
+ * @tc.desc: FilterPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, FilterPointerEvent01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("FilterPointerEvent01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+    window->mouseEventFilter_ = nullptr;
+    auto ret = window->FilterPointerEvent(pointerEvent);
+    ASSERT_EQ(false, ret);
+
+    window->mouseEventFilter_ = [](const MMI::PointerEvent&) { return true; };
+    window->FilterPointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: NotifyPointerEvent
+ * @tc.desc: NotifyPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyPointerEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPointerEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = nullptr;
+    window->NotifyPointerEvent(pointerEvent);
+
+    pointerEvent = MMI::PointerEvent::Create();
+    window->inputEventConsumer_ = std::make_shared<MockInputEventConsumer>();
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    window->NotifyPointerEvent(pointerEvent);
+
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    window->NotifyPointerEvent(pointerEvent);
+
+    window->inputEventConsumer_ = nullptr;
+    window->NotifyPointerEvent(pointerEvent);
+}
+
+/**
+ * @tc.name: SetWindowContainerColor01
+ * @tc.desc: SetWindowContainerColor01
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetWindowContainerColor01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowContainerColor01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    std::string activeColor = "";
+    std::string inactiveColor = "";
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    auto ret = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetIsPcAppInPad(true);
+    window->property_->isDecorEnable_ = true;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window->SetWindowContainerColor(activeColor, inactiveColor);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetAvoidAreaOption01
+ * @tc.desc: SetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetAvoidAreaOption01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetAvoidAreaOption01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    auto ret = window->SetAvoidAreaOption(0);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: GetAvoidAreaOption01
+ * @tc.desc: GetAvoidAreaOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetAvoidAreaOption01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetAvoidAreaOption01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    uint32_t avoidAreaOption = 1;
+    auto ret = window->SetAvoidAreaOption(avoidAreaOption);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+}
+
+/**
+ * @tc.name: SetWindowDelayRaiseEnabled
+ * @tc.desc: SetWindowDelayRaiseEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SetWindowDelayRaiseEnabled, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowDelayRaiseEnabled");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    auto ret = window->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
+    SessionInfo info;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(info);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    ret = window->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ret = window->SetWindowDelayRaiseEnabled(true);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: NotifyWatchFocusActiveChange
+ * @tc.desc: NotifyWatchFocusActiveChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyWatchFocusActiveChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWatchFocusActiveChange");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    window->state_ = WindowState::STATE_DESTROYED;
+    auto ret = window->NotifyWatchFocusActiveChange(true);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->state_ = WindowState::STATE_CREATED;
+    SessionInfo info;
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(info);
+    window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
+    ret = window->SetWindowDelayRaiseEnabled(true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

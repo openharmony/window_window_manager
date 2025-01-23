@@ -68,6 +68,7 @@ class ResourceManager;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
+class RSNode;
 namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
@@ -87,6 +88,7 @@ struct SessionIdentityInfo {
     std::string instanceKey_;
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
+    std::string specifiedFlag_;
 };
 
 class SceneSession;
@@ -132,6 +134,7 @@ using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidAr
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
+using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -221,6 +224,9 @@ public:
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
     void RegisterFlushWindowInfoCallback();
     void FlushWindowInfoToMMI(const bool forceFlush = false);
+    void SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession);
+    void BuildCancelPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId,
+                                 int32_t action, int32_t wid);
 
     /*
      * Window Rotate Animation
@@ -271,9 +277,13 @@ public:
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
 
+    /*
+     * Multi User
+     */
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
     void NotifySwitchingUser(const bool isUserActive);
     int32_t GetCurrentUserId() const;
+
     void StartWindowInfoReportLoop();
 
     void NotifyCompleteFirstFrameDrawing(int32_t persistentId);
@@ -343,6 +353,7 @@ public:
 
     void SetRootSceneProcessBackEventFunc(const RootSceneProcessBackEventFunc& processBackEventFunc);
     void RegisterWindowChanged(const WindowChangedFunc& func);
+    WSError CloneWindow(int32_t fromPersistentId, int32_t toPersistentId);
 
     /*
      * Collaborator
@@ -412,7 +423,7 @@ public:
     /*
      * UIExtension
      */
-    uint32_t GetLockScreenZorder();
+    uint32_t GetLockScreenZOrder();
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid);
     void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
@@ -464,6 +475,14 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
+
+    /*
+     * Window Layout
+     */
+    SingleHandTransform GetNormalSingleHandTransform() const;
+    void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
+    void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
+    void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
      * Window Property
@@ -577,12 +596,9 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
-    void GetMainSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions) const;
-    WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex);
-    WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex);
+    void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
+        std::vector<sptr<SceneSession>>& mainSessions) const;
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
 
 protected:
     SceneSessionManager();
@@ -947,6 +963,7 @@ private:
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
 
+    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     sptr<AppAnrListener> appAnrListener_;
@@ -962,7 +979,9 @@ private:
 
     WindowModeType lastWindowModeType_ { WindowModeType::WINDOW_MODE_OTHER };
 
-    // Multi User
+    /*
+     * Multi User
+     */
     static constexpr int32_t DEFAULT_USERID = -1;
     std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
     bool isUserBackground_ = false; // Only accessed on SSM thread
@@ -1032,6 +1051,7 @@ private:
     uint64_t pipWindowSurfaceId_ = 0;
     bool CheckPiPPriority(const PiPTemplateInfo& pipTemplateInfo);
     bool IsEnablePiPCreate(const sptr<WindowSessionProperty>& property);
+    bool IsPiPForbidden(const sptr<WindowSessionProperty>& property, const WindowType& type);
     bool IsLastPiPWindowVisible(uint64_t surfaceId, WindowVisibilityState lastVisibilityState);
     void NotifyPiPWindowVisibleChange(bool isScreenLocked);
 
@@ -1115,8 +1135,11 @@ private:
      */
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    SingleHandTransform singleHandTransform_;
+    GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+    bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
 
     /*
      * Window Snapshot

@@ -1222,7 +1222,6 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     int32_t id = 0;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
-    CommonTestUtils::GuaranteeFloatWindowPermission("ws_scene_session_manager_test5");
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     property->SetWindowFlags(123);
     WSError res = ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
@@ -1254,6 +1253,32 @@ HWTEST_F(SceneSessionManagerTest5, CreateAndConnectSpecificSession02, Function |
     ASSERT_EQ(WSError::WS_ERROR_NOT_SYSTEM_APP, res);
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);
     ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+}
+
+/**
+ * @tc.name: CheckSubSessionStartedByExtensionAndSetDisplayId
+ * @tc.desc: CheckSubSessionStartedByExtensionAndSetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, CheckUIExtensionAndSetDisplayId01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = ssm_->CreateSpecificSessionCallback();
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, callback);
+    ssm_->sceneSessionMap_.insert({ parentSession->GetPersistentId(), parentSession });
+    sptr<IRemoteObject> token;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
+        WSError::WS_ERROR_NULLPTR);
+    property->SetParentPersistentId(parentSession->GetPersistentId());
+    property->SetIsUIExtFirstSubWindow(true);
+    constexpr DisplayId displayId = 0;
+    parentSession->GetSessionProperty()->SetDisplayId(displayId);
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtensionAndSetDisplayId(token, property, sessionStage),
+        WSError::WS_OK);
+    EXPECT_EQ(property->GetDisplayId(), displayId);
 }
 
 /**

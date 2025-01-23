@@ -64,6 +64,19 @@ struct CWindowProperties {
     uint32_t id;
 };
 
+struct CSubWindowOptions {
+    std::string title;
+    bool decorEnabled;
+    bool isModal;
+};
+
+enum class SpecificSystemBar {
+    STATUS = 0,
+    NAVIGATION = 1,
+    NAVIGATION_INDICATOR = 2
+};
+}
+
 struct WindowRotate {
     double x;
     double y;
@@ -79,12 +92,43 @@ struct CJBarProperties {
     const char* navigationBarColor;
     bool isNavigationBarLightIcon;
     const char* navigationBarContentColor;
+    bool enableStatusBarAnimation;
+    bool enableNavigationBarAnimation;
+
+    ~CJBarProperties()
+    {
+        if (statusBarColor != nullptr) {
+            delete[] statusBarColor;
+        }
+        if (statusBarContentColor != nullptr) {
+            delete[] statusBarContentColor;
+        }
+        if (navigationBarColor != nullptr) {
+            delete[] navigationBarColor;
+        }
+        if (navigationBarContentColor != nullptr) {
+            delete[] navigationBarContentColor;
+        }
+    }
+
+    CJBarProperties(const CJBarProperties&) = delete;
+    CJBarProperties& operator=(const CJBarProperties&) = delete;
 };
-}
+
 
 namespace OHOS {
 namespace Rosen {
 const int32_t WINDOW_SUCCESS = 0;
+
+enum class LifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+    DESTROYED,
+};
 
 enum class ApiWindowType : uint32_t {
     TYPE_BASE,
@@ -110,6 +154,31 @@ enum class ApiWindowType : uint32_t {
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
     TYPE_END
+};
+
+struct CjRectInfo {
+    int32_t left;
+    int32_t top;
+    uint32_t width;
+    uint32_t height;
+};
+
+struct SystemBarRegionTintInfo {
+    uint32_t type;
+    bool isEnable;
+    uint32_t backgroundColor;
+    uint32_t contentColor;
+    CjRectInfo region;
+};
+
+enum class RectChangeReason : uint32_t {
+    UNDEFINED = 0,
+    MAXIMIZE,
+    RECOVER,
+    MOVE,
+    DRAG,
+    DRAG_START,
+    DRAG_END,
 };
 
 const std::map<ApiWindowType, WindowType> CJ_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -175,6 +244,26 @@ const std::map<WindowType, ApiWindowType> CJ_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_SYSTEM_TOAST,        ApiWindowType::TYPE_SYSTEM_TOAST      },
     { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
     { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
+};
+
+const std::map<WindowSizeChangeReason, RectChangeReason> CJ_SIZE_CHANGE_REASON {
+    { WindowSizeChangeReason::UNDEFINED,             RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE,              RectChangeReason::MAXIMIZE   },
+    { WindowSizeChangeReason::RECOVER,               RectChangeReason::RECOVER    },
+    { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
+    { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
+    { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },
+    { WindowSizeChangeReason::HIDE,                  RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::TRANSFORM,             RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::CUSTOM_ANIMATION_SHOW, RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_SPLIT,         RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 }
 }

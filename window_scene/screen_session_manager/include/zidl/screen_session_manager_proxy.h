@@ -157,7 +157,7 @@ public:
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
 
     // unique screen
-    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds) override;
 
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
@@ -167,6 +167,7 @@ public:
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
+    void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
     int32_t SetScreenOnDelayTime(int32_t delay) override;
     uint32_t GetCurvedCompressionArea() override;
@@ -200,6 +201,7 @@ public:
         DmErrorCode* errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

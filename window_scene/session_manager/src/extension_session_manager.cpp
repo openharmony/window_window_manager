@@ -102,26 +102,28 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession,
-    uint32_t hostWindowId, const std::function<void(WSError)>&& resultCallback)
+    uint32_t hostWindowId, std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback)]() {
+    auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback), where = __func__]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
-            WLOGFE("session is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Activate session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate session with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionActivation");
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("RequestExtensionSessionActivation Session is invalid! persistentId:%{public}d", persistentId);
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
+                where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
         extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate ret:%{public}d, persistentId:%{public}d", errorCode, persistentId);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
             callback(ret);
@@ -134,7 +136,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession,
-    const std::function<void(WSError)>&& resultCallback)
+    std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, callback = std::move(resultCallback)]() {
@@ -166,21 +168,23 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession,
-    const std::function<void(WSError)>&& resultCallback)
+    std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession, callback = std::move(resultCallback)]() NO_THREAD_SAFETY_ANALYSIS {
+    auto task = [this, weakExtSession, callback = std::move(resultCallback),
+                 where = __func__]() NO_THREAD_SAFETY_ANALYSIS {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
-            WLOGFE("session is nullptr");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
         auto persistentId = extSession->GetPersistentId();
-        WLOGFI("Destroy session with persistentId: %{public}d", persistentId);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Destroy session with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionDestruction");
         extSession->Disconnect();
         if (extensionSessionMap_.count(persistentId) == 0) {
-            WLOGFE("RequestExtensionSessionDestruction Session is invalid! persistentId:%{public}d", persistentId);
+            TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
+                where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);

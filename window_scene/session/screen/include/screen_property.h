@@ -34,6 +34,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     VIRTUAL_SCREEN_RESIZE,
     RELATIVE_POSITION_CHANGE,
     SUPER_FOLD_STATUS_CHANGE,
+    ACCESS_INFO_CHANGE,
 };
 class ScreenProperty {
 public:
@@ -177,6 +178,7 @@ public:
     void SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode);
 
     float CalculatePPI();
+    uint32_t CalculateDPI();
 
     // OffScreenRender
     void SetCurrentOffScreenRendering(bool enable) { isCurrentOffScreenRendering_ = enable; }
@@ -187,6 +189,9 @@ public:
     uint32_t GetScreenRealHeight() { return screenRealHeight_; }
     void SetScreenRealPPI() { screenRealPPI_ = CalculatePPI(); }
     float GetScreenRealPPI() { return screenRealPPI_; }
+    void SetScreenRealDPI() { screenRealDPI_ = CalculateDPI(); }
+    uint32_t GetScreenRealDPI() { return screenRealDPI_; }
+
 private:
     static inline bool IsVertical(Rotation rotation)
     {
@@ -249,14 +254,15 @@ private:
     DMRect availableArea_;
 
     RRect physicalTouchBounds_;
-    int32_t inputOffsetX_;
-    int32_t inputOffsetY_;
+    int32_t inputOffsetX_ { 0 };
+    int32_t inputOffsetY_ { 0 };
 
     // OffScreenRender
     bool isCurrentOffScreenRendering_ { false };
     uint32_t screenRealWidth_ { UINT32_MAX };
     uint32_t screenRealHeight_ { UINT32_MAX };
     float screenRealPPI_ { 0.0f };
+    uint32_t screenRealDPI_ { 0 };
 };
 } // namespace OHOS::Rosen
 

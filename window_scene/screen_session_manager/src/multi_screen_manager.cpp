@@ -204,7 +204,18 @@ DMError MultiScreenManager::VirtualScreenUniqueSwitch(sptr<ScreenSession> screen
     return DMError::DM_OK;
 }
 
-DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds)
+static void AddUniqueScreenDisplayId(std::vector<DisplayId>& displayIds,
+    std::vector<ScreenId>& screenIds, DMError& switchStatus)
+{
+    if (switchStatus == DMError::DM_OK) {
+        for (auto screenId : screenIds) {
+            displayIds.emplace_back(static_cast<uint64_t>(screenId));
+        }
+    }
+}
+
+DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     DMError switchStatus = DMError::DM_OK;
     std::vector<ScreenId> virtualScreenIds;
@@ -220,10 +231,12 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds)
     if (!virtualScreenIds.empty()) {
         switchStatus = ScreenSessionManager::GetInstance().VirtualScreenUniqueSwitch(virtualScreenIds);
         TLOGW(WmsLogTag::DMS, "virtual screen switch to unique result: %{public}d", switchStatus);
+        AddUniqueScreenDisplayId(displayIds, virtualScreenIds, switchStatus);
     }
     if (!physicalScreenIds.empty()) {
         switchStatus = PhysicalScreenUniqueSwitch(physicalScreenIds);
         TLOGW(WmsLogTag::DMS, "physical screen switch to unique result: %{public}d", switchStatus);
+        AddUniqueScreenDisplayId(displayIds, physicalScreenIds, switchStatus);
     }
     TLOGW(WmsLogTag::DMS, "mirror switch to unique end");
     return switchStatus;

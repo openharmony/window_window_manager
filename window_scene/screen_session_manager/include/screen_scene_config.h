@@ -48,6 +48,8 @@ public:
     static std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalConfig();
     static std::map<FoldDisplayMode, ScrollableParam> GetAllScrollableParam();
     static bool IsSupportCapture();
+    static bool IsSupportOffScreenRendering();
+    static uint32_t GetOffScreenPPIThreshold();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
@@ -63,6 +65,8 @@ private:
     static std::vector<DisplayPhysicalResolution> displayPhysicalResolution_;
     static std::map<FoldDisplayMode, ScrollableParam> scrollableParams_;
     static bool isSupportCapture_;
+    static bool isSupportOffScreenRendering_;
+    static uint32_t offScreenPPIThreshold_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);

@@ -147,12 +147,21 @@ public:
         MultiScreenPositionOptions secondScreenOption);
 
     /**
-    * @brief Make screens as unique-screen.
-    *
-    * @param screenIds Unique screen ids.
-    * @return DM_OK means make unique screen success, others means make unique failed.
-    */
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
     DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds);
+
+    /**
+     * @brief Make screens as unique-screen.
+     *
+     * @param screenIds Unique screen ids.
+     * @param displayIds Unique display ids.
+     * @return DM_OK means make unique screen success, others means make unique failed.
+     */
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds);
 
     /**
      * @brief Stop expand screens.
@@ -401,6 +410,16 @@ public:
      * @return True means set success, false means set failed.
      */
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus);
+
+    /**
+     * @brief Set screen sharing protect
+     *
+     * @param screenIds screen IDs for set the screen sharing protect.
+     * @param isEnable wether to enable the screen sharing protect.
+     * @return DM_OK means set success, others means failed.
+     */
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable);
+
 private:
     ScreenManager();
     ~ScreenManager();

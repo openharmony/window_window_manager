@@ -233,7 +233,15 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUPPORT_WINDOW_MODES):
             return HandleSetSupportedWindowModes(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
-            return HandleExtensionProviderData(data, reply);
+            return HandleExtensionProviderData(data, reply, option);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
+            return HandleSetSessionLabelAndIcon(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE):
+            return HandleChangeKeyboardViewMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS):
+            return HandleSetWindowCornerRadius(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE):
+            return HandleStartMovingWithCoordinate(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -683,6 +691,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
             abilitySessionInfo->supportWindowModes.push_back(
                 static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
         }
+    }
+    if (!data.ReadString(abilitySessionInfo->specifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read specifiedFlag failed.");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -1303,10 +1315,10 @@ int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
-int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
-    NotifyExtensionDataConsumer(data, reply);
+    static_cast<void>(SendExtensionData(data, reply, option));
     return ERR_NONE;
 }
 
@@ -1388,6 +1400,81 @@ int SessionStub::HandleSetSupportedWindowModes(MessageParcel& data, MessageParce
     }
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "size: %{public}u", size);
     NotifySupportWindowModesChange(supportedWindowModes);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply)
+{
+    std::string label;
+    if (!data.ReadString(label)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read label failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
+    if (icon == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read icon failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetSessionLabelAndIcon(label, icon);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t mode = 0;
+    if (!data.ReadUint32(mode)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid data");
+        return ERR_INVALID_DATA;
+    }
+    if (mode >= static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard view mode");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(mode));
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply)
+{
+    float cornerRadius = 0.0f;
+    if (!data.ReadFloat(cornerRadius)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read cornerRadius failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "cornerRadius: %{public}f", cornerRadius);
+    SetWindowCornerRadius(cornerRadius);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t offsetX;
+    if (!data.ReadInt32(offsetX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read offsetX failed!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t offsetY;
+    if (!data.ReadInt32(offsetY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read offsetY failed!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t pointerPosX;
+    if (!data.ReadInt32(pointerPosX)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read pointerPosX failed!");
+        return ERR_INVALID_DATA;
+    }
+    int32_t pointerPosY;
+    if (!data.ReadInt32(pointerPosY)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read pointerPosY failed!");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = StartMovingWithCoordinate(offsetX, offsetY, pointerPosX, pointerPosY);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
