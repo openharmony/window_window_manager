@@ -5494,7 +5494,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
-        return WSError::WS_ERROR_INVALID_SESSION;
+        return WSError::WS_ERROR_NULLPTR;
     }
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId, focusGroup);
     if (basicCheckRet != WSError::WS_OK) {
