@@ -627,7 +627,7 @@ public:
     /*
      * Window Focus
      */
-    bool IsRelated(const sptr<SceneSession>& prevSession);
+    bool IsSameMainSession(const sptr<SceneSession>& prevSession);
     void SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func);
     
     /*

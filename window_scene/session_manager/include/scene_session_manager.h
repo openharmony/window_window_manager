@@ -722,8 +722,8 @@ private:
     sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
         bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
-    WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession,
-        FocusChangeReason reason = FocusChangeReason::DEFAULT, bool isProactiveUnfocus = false);
+    WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession, bool isProactiveUnfocus
+        FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
         const sptr<FocusGroup>& focusGroup);

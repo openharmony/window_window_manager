@@ -693,6 +693,7 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
+    std::mutex highlightChangeFuncMutex_;
     NotifyHighlightChangeFunc highlightChangeFunc_;
 
     /*
@@ -750,8 +751,8 @@ protected:
      * Window Focus
      */
     bool isFocused_ = false;
-    bool blockingFocus_ {false};
-    bool isHighlight_ {false};
+    bool blockingFocus_ { false };
+    bool isHighlight_ { false };
 
     uint32_t uiNodeId_ = 0;
     float aspectRatio_ = 0.0f;

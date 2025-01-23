@@ -3660,7 +3660,7 @@ bool SceneSession::IsSystemSessionAboveApp() const
 }
 
 /** @note @window.focus */
-bool SceneSession::IsRelated(const sptr<SceneSession>& prevSession)
+bool SceneSession::IsSameMainSession(const sptr<SceneSession>& prevSession)
 {
     int32_t currSessionId = GetMainSessionId();
     int32_t prevSessionId = prevSession->GetMainSessionId();
@@ -5795,6 +5795,7 @@ void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeF
 
 void SceneSession::SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func)
 {
+    std::lock_guard lock(highlightChangeFuncMutex_);
     highlightChangeFunc_ = func;
 }
 
