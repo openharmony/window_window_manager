@@ -332,7 +332,7 @@ public:
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     WMError ShiftAppWindowPointerEventInner(
-        int32_t sourceWindowId, int32_t targetWindowId, DispalyId targetDispalyId);
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);

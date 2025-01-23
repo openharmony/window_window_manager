@@ -12531,9 +12531,9 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 }
 
 WMError ShiftAppWindowPointerEventInner(
-    int32_t sourceWindowId, int32_t targetWindowId, DispalyId targetDispalyId)
+    int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId)
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(static_cast<uint64_t>(targetDispalyId));
+    auto display = DisplayManager::GetInstance().GetDisplayById(static_cast<uint64_t>(targetDisplayId));
     float vpr;
     if (diaplay) {
         vpr = display->GetVirtualPixelRatio();
