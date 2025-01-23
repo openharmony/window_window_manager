@@ -1727,11 +1727,11 @@ HWTEST_F(SceneSessionTest5, ActivateKeyboardAvoidArea01, Function | SmallTest | 
 }
 
 /**
- * @tc.name: IsRelated
- * @tc.desc: test IsRelated
+ * @tc.name: IsSameMainSession
+ * @tc.desc: test IsSameMainSession
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, IsRelated, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, IsSameMainSession, Function | SmallTest | Level2)
 {
     SessionInfo info1;
     info1.abilityName_ = "abilityName_test1";
@@ -1743,9 +1743,9 @@ HWTEST_F(SceneSessionTest5, IsRelated, Function | SmallTest | Level2)
     sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
     preSceneSession->persistentId_ = 1;
     currSceneSession->persistentId_ = 1;
-    ASSERT_EQ(true, currSceneSession->IsRelated(preSceneSession));
+    ASSERT_EQ(true, currSceneSession->IsSameMainSession(preSceneSession));
     currSceneSession->persistentId_ = 2;
-    ASSERT_EQ(false, currSceneSession->IsRelated(preSceneSession));
+    ASSERT_EQ(false, currSceneSession->IsSameMainSession(preSceneSession));
  
     sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
@@ -1754,9 +1754,9 @@ HWTEST_F(SceneSessionTest5, IsRelated, Function | SmallTest | Level2)
     currSceneSession->persistentId_ = 1;
     subSession1->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     subSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    ASSERT_EQ(true, subSession1->IsRelated(subSession1));
+    ASSERT_EQ(true, subSession1->IsSameMainSession(subSession1));
     currSceneSession->persistentId_ = 2;
-    ASSERT_EQ(false, subSession1->IsRelated(subSession1));
+    ASSERT_EQ(false, subSession1->IsSameMainSession(subSession1));
 }
  
 /**

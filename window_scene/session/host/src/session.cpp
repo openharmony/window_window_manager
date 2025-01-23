@@ -2681,9 +2681,9 @@ WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightC
     isHighlight_ = isHighlight;
     if (isNotifyHighlightChange) {
         NotifyHighlightChange(isHighlight);
-        auto func = highlightChangeFunc_;
-        if (func != nullptr) {
-            func(isHighlight);
+        std::lock_guard lock(highlightChangeFuncMutex_);
+        if (highlightChangeFunc_ != nullptr) {
+            highlightChangeFunc_(isHighlight);
         }
     }
     return WSError::WS_OK;
@@ -2700,7 +2700,7 @@ WSError Session::NotifyHighlightChange(bool isHighlight)
         TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    sessionStage_ -> NotifyHighlightChange(isHighlight);
+    sessionStage_->NotifyHighlightChange(isHighlight);
     return WSError::WS_OK;
 }
 

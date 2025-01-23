@@ -5477,7 +5477,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     if (!sceneSession->GetSessionInfo().isSystem_ && !IsSessionVisibleForeground(sceneSession)) {
         focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     }
-    ShiftFocus(displayId, sceneSession, reason);
+    ShiftFocus(displayId, sceneSession, false, reason);
     return WSError::WS_OK;
 }
 
@@ -5530,7 +5530,7 @@ WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byFo
     }
     focusGroup->SetNeedBlockNotifyUnfocusStatus(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground());
     focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
-    ShiftFocus(displayId, sceneSession, reason);
+    ShiftFocus(displayId, sceneSession, false, reason);
     return WSError::WS_OK;
 }
 
@@ -5577,7 +5577,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
         return WSError::WS_OK;
     }
 
-    return ShiftFocus(displayId, nextSession, reason, true);
+    return ShiftFocus(displayId, nextSession, true, reason);
 }
 
 WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
@@ -5601,7 +5601,7 @@ WSError SceneSessionManager::RequestAllAppSessionUnfocusInner()
 
     focusGroup->SetNeedBlockNotifyUnfocusStatus(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground());
     focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
-    return ShiftFocus(DEFAULT_DISPLAY_ID, nextSession, FocusChangeReason::WIND, true);
+    return ShiftFocus(DEFAULT_DISPLAY_ID, nextSession, true, FocusChangeReason::WIND);
 }
 
 WSError SceneSessionManager::RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup)
@@ -5959,7 +5959,7 @@ void SceneSessionManager::SetAbilityManagerCollaboratorRegisteredFunc(
 }
 
 WSError SceneSessionManager::ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession,
-    FocusChangeReason reason, bool isProactiveUnfocus)
+    bool isProactiveUnfocus, FocusChangeReason reason)
 {
     // unfocus
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
@@ -6044,8 +6044,7 @@ void SceneSessionManager::UpdateHighlightStatus(const sptr<SceneSession>& preSce
         TLOGD(WmsLogTag::WMS_FOCUS, "proactiveUnfocus");
         RemoveHighlightSessionIds(preSceneSession);
     }
-    auto sessionProperty = currSceneSession->GetSessionProperty();
-    if(sessionProperty->GetExclusivelyHighlighted()) {
+    if(currSceneSession->GetSessionProperty()->GetExclusivelyHighlighted()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "exclusively highlighted");
         SetHighlightSessionIds(currSceneSession);
         return;
@@ -6055,7 +6054,7 @@ void SceneSessionManager::UpdateHighlightStatus(const sptr<SceneSession>& preSce
         AddHighlightSessionIds(currSceneSession);
         return;
     }
-    if(currSceneSession->IsRelated(preSceneSession)) {
+    if(currSceneSession->IsSameMainSession(preSceneSession)) {
         TLOGD(WmsLogTag::WMS_FOCUS, "related highlighted");
         AddHighlightSessionIds(currSceneSession);
         return;

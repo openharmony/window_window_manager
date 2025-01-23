@@ -1704,7 +1704,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
     isHighlighted_ = isHighlight;
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
     auto highlightChangeListeners = GetListeners<IWindowHighlightChangeListener>();
-    for (auto& listener : highlightChangeListeners) {
+    for (const auto& listener : highlightChangeListeners) {
         if (listener != nullptr) {
             listener->OnWindowHighlightChange(isHighlight);
         }

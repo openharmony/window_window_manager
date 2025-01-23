@@ -336,6 +336,7 @@ private:
     mutable std::mutex rectAnimationConfigMutex_;
     RectAnimationConfig rectAnimationConfig_ { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
+    bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };
     bool isSystemCalling_ = { false };
@@ -451,7 +452,6 @@ private:
      */
     bool focusable_ { true };
     bool focusableOnShow_ { true };
-    bool touchable_ { true };
     bool isExclusivelyHighlighted_ { true };
     
     /*
