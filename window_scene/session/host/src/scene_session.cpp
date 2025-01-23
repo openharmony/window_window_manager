@@ -650,8 +650,7 @@ WSError SceneSession::InitializeMoveInputBar()
 {
     auto property = GetSessionProperty();
     WindowType windowType = property->GetWindowType();
-    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR ||
-        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+    if (WindowHelper::IsInputWindow(windowType)) {
         TLOGD(WmsLogTag::WMS_KEYBOARD, "Start init move input bar param");
         DisplayId displayId = property->GetDisplayId();
 

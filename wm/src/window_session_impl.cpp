@@ -86,7 +86,8 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     return contentInfoType;
 }
 
-Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation, uint32_t transformHint)
+Ace::ViewportConfig FillViewportConfig(
+    Rect rect, float density, int32_t orientation, uint32_t transformHint, uint64_t displayId)
 {
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
@@ -94,6 +95,7 @@ Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orienta
     config.SetDensity(density);
     config.SetOrientation(orientation);
     config.SetTransformHint(transformHint);
+    config.SetDisplayId(displayId);
     return config;
 }
 }
@@ -1232,7 +1234,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
-    auto config = FillViewportConfig(rect, density, orientation, transformHint);
+    const auto& config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
