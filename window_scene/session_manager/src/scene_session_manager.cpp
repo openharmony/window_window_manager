@@ -5450,7 +5450,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
-        return WSError::WS_ERROR_INVALID_SESSION;
+        return WSError::WS_ERROR_NULLPTR;
     }
     // base block
     WSError basicCheckRet = RequestFocusBasicCheck(persistentId, focusGroup);
@@ -5544,13 +5544,13 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr: %{public}d", persistentId);
-        return WSError::WS_ERROR_NULLPTR;
+        return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
     if (focusGroup == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
-        return WSError::WS_ERROR_INVALID_SESSION;
+        return WSError::WS_ERROR_NULLPTR;
     }
     auto focusedSession = GetSceneSession(focusGroup->GetFocusedSessionId());
     if (persistentId != focusGroup->GetFocusedSessionId() &&
