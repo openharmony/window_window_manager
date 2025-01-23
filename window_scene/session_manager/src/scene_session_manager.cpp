@@ -10466,7 +10466,8 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
-WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos)
+WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
 {
     if (!(SessionPermission::IsSACalling())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
@@ -10505,11 +10506,12 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
-bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& windowInfoOption, const sptr<SceneSession>& sceneSession) const
+bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& windowInfoOption,
+    const sptr<SceneSession>& sceneSession) const
 {
     DisplayId displayId = windowInfoOption.displayId;
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-        sceneSession->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
+        sceneSession->  ) {
         if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
             return false;
         }
