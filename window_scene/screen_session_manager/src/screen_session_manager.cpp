@@ -1446,7 +1446,7 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
         virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
-    NotifyDisplayStateChange(GetDefaultScreenId(), screenSession->ConvertToDisplayInfo(),
+    NotifyDisplayStateChange(screenId, screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
@@ -5410,36 +5410,42 @@ ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
 
 void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
 {
+    SetFoldDisplayModeInner(displayMode);
+}
+
+DMError ScreenSessionManager::SetFoldDisplayModeInner(const FoldDisplayMode displayMode)
+{
 #ifdef FOLD_ABILITY_ENABLE
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-        return;
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     if (!g_foldScreenFlag) {
-        return;
+        return DMError::DM_ERROR_INVALID_MODE_ID;
     }
     if (foldScreenController_ == nullptr) {
         TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
-        return;
+        return DMError::DM_ERROR_INVALID_MODE_ID;
     }
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
-        return;
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     TLOGI(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d, setmode: %{public}d",
         SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), displayMode);
     if (foldScreenController_->GetTentMode() &&
         (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION)) {
             TLOGW(WmsLogTag::DMS, "in TentMode, SetFoldDisplayMode to %{public}d failed", displayMode);
-            return;
+            return DMError::DM_ERROR_INVALID_MODE_ID;
     } else if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         IsScreenCasting() && displayMode == FoldDisplayMode::COORDINATION) {
         TLOGW(WmsLogTag::DMS, "is phone casting, SetFoldDisplayMode to %{public}d is not allowed", displayMode);
-        return;
+        return DMError::DM_ERROR_INVALID_MODE_ID;
     }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
+    return DMError::DM_OK;
 #endif
 }
 
@@ -5450,8 +5456,7 @@ DMError ScreenSessionManager::SetFoldDisplayModeFromJs(const FoldDisplayMode dis
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    SetFoldDisplayMode(displayMode);
-    return DMError::DM_OK;
+    return SetFoldDisplayModeInner(displayMode);
 }
 
 void ScreenSessionManager::UpdateDisplayScaleState(ScreenId screenId)
