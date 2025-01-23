@@ -7676,15 +7676,20 @@ napi_value JsWindow::OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_inf
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
+        if (!WindowHelper::IsSystemWindow(window->GetType())) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s only system window is valid", where);
+            *errCodePtr = WmErrorCode::WM_ERROR_INVALID_CALLING;
+            return;
+        }
         uint32_t option = 0;
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->GetAvoidAreaOption(option));
         if (*errCodePtr != WmErrorCode::WM_OK) {
             return;
         }
         if (enable) {
-            option = option | static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW);
+            option |= static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW);
         } else {
-            option = option & ~static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW);
+            option &= ~static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW);
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->SetAvoidAreaOption(option));
     };
@@ -7707,6 +7712,10 @@ napi_value JsWindow::OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    if (!WindowHelper::IsSystemWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "only system window is valid");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     uint32_t avoidAreaOption = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetAvoidAreaOption(avoidAreaOption));

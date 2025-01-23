@@ -37,6 +37,7 @@ private:
     FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceAB(float angle, uint16_t hall, FoldStatus state);
     FoldStatus UpdateSwitchScreenBoundaryForLargeFoldDeviceBC(float angle, uint16_t hall, FoldStatus state);
     FoldStatus GetFoldStateUnpower(const std::vector<uint16_t> &halls);
+    void ReportSecondaryReflexion(int32_t currentStatus, int32_t nextStatus, bool isSecondaryReflexion);
     int32_t allowUserSensorForLargeFoldDeviceAB = 0;
     int32_t allowUserSensorForLargeFoldDeviceBC = 0;
     FoldStatus mNextStateAB = FoldStatus::UNKNOWN;
