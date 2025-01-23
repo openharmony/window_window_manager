@@ -10471,9 +10471,9 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
 {
     if (!(SessionPermission::IsSACalling())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
-        return WMError::WS_ERROR_INVALID_PERMISSION;
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    return taskScheduler_->PostSyncTask([this, windowInfoOption, sceneSessionMap_, &infos] {
+    return taskScheduler_->PostSyncTask([this, windowInfoOption, &infos] {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
