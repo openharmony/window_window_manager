@@ -115,7 +115,7 @@ HWTEST_F(WindowManagerLiteTest, GetFocusWindowInfo, Function | SmallTest | Level
     infosResult.uid_ = 11;
     infosResult.displayId_ = 12;
     infosResult.windowId_ = 13;
-    EXPECT_CALL(m->Mock(), GetFocusWindowInfo(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult), Return()));
+    EXPECT_CALL(m->Mock(), GetFocusWindowInfo(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult), Return()));
     WindowManagerLite::GetInstance().GetFocusWindowInfo(infosInput);
     ASSERT_EQ(infosInput.windowId_, infosResult.windowId_);
     ASSERT_EQ(infosInput.uid_, infosResult.uid_);
