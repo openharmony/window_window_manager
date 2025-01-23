@@ -10468,6 +10468,10 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
 
 WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos)
 {
+    if (!(SessionPermission::IsSACalling())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);

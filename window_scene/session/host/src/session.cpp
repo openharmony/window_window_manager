@@ -3778,7 +3778,8 @@ void Session::GetWindowUIInfoForWindowInfo(WindowUIInfo& windowUIInfo)
 
 void Session::GetWindowDisplayInfoForWindowInfo(WindowDisplayInfo& windowDisplayInfo)
 {
-    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED) {
+    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+        GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
         WSRect sessionGlobalRect = GetSessionGlobalRect();
         windowDisplayInfo.displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
     } else {
@@ -3791,7 +3792,8 @@ void Session::GetWindowLayoutInfoForWindowInfo(WindowLayoutInfo& windowLayoutInf
     WSRect sessionGlobalRect = GetSessionGlobalRect();
     sessionGlobalRect.width_ *= GetScaleX();
     sessionGlobalRect.height_ *= GetScaleY();
-    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED) {
+    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+        GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
         TransformGlobalRectToRelativeRect(sessionGlobalRect);
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
