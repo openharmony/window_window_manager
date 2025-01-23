@@ -1877,7 +1877,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError DirectClose() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief start move main window. It is called by ACE when title is moved.

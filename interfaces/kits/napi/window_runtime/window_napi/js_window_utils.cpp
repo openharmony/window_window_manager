@@ -1323,10 +1323,10 @@ napi_value ResolvedCallback(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
         return nullptr;
     }
-    if (asyncCallback->thenCallback_ != nullptr) {
-        asyncCallback->thenCallback_(env, argc, argv);
+    if (asyncCallback->resolvedCallback_ != nullptr) {
+        asyncCallback->resolvedCallback_(env, argc, argv);
     } else {
-        TLOGW(WmsLogTag::WMS_PC, "thenCallback is nullptr");
+        TLOGW(WmsLogTag::WMS_PC, "resolvedCallback is nullptr");
     }
     returnValue = nullptr;
     return nullptr;
@@ -1346,10 +1346,10 @@ napi_value RejectedCallback(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
         return nullptr;
     }
-    if (asyncCallback->catchCallback_ != nullptr) {
-        asyncCallback->catchCallback_(env, argc, argv);
+    if (asyncCallback->rejectedCallback_ != nullptr) {
+        asyncCallback->rejectedCallback_(env, argc, argv);
     } else {
-        TLOGW(WmsLogTag::WMS_PC, "catchCallback is nullptr");
+        TLOGW(WmsLogTag::WMS_PC, "rejectedCallback is nullptr");
     }
     returnValue = nullptr;
     return nullptr;

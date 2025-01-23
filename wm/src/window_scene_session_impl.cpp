@@ -2782,8 +2782,7 @@ WMError WindowSceneSessionImpl::Close()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isSystemSubWindow = WindowHelper::IsSystemSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
-    bool isSubOrDialogWindow = isSubWindow || isSystemSubWindow || isDialogWindow;
-    if (WindowHelper::IsMainWindow(windowType) || isSubOrDialogWindow) {
+    if (WindowHelper::IsMainWindow(windowType) || isSubWindow) {
         WMError res = NotifyWindowWillClose(this);
         if (res == WMError::WM_OK) {
             TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d will close", GetPersistentId());
@@ -2792,7 +2791,7 @@ WMError WindowSceneSessionImpl::Close()
     }
     if (WindowHelper::IsMainWindow(windowType)) {
         return MainWindowCloseInner();
-    } else if (isSubOrDialogWindow) {
+    } else if (isSubWindow || isSystemSubWindow || isDialogWindow) {
         TLOGI(WmsLogTag::WMS_DECOR, "subwindow or dialog");
         bool terminateCloseProcess = false;
         NotifySubWindowClose(terminateCloseProcess);
@@ -2803,7 +2802,7 @@ WMError WindowSceneSessionImpl::Close()
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::DirectClose()
+WMError WindowSceneSessionImpl::CloseDirectly()
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_DECOR, "session is invalid");

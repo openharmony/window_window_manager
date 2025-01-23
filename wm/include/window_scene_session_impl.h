@@ -217,7 +217,7 @@ public:
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
     WMError Close() override;
-    WMError DirectClose() override;
+    WMError CloseDirectly() override;
 
     /*
      * Starting Window

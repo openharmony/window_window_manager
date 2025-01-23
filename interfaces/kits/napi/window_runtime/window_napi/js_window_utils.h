@@ -290,10 +290,10 @@ using AsyncCallbackFunc_ = std::function<void(napi_env env, size_t argc, napi_va
 
 class AsyncCallback : virtual public RefBase {
 public:
-    AsyncCallbackFunc_ thenCallback_ = nullptr;
-    AsyncCallbackFunc_ catchCallback_ = nullptr;
-    explicit AsyncCallback(AsyncCallbackFunc_ thenCallback = nullptr,
-        AsyncCallbackFunc_ catchCallback = nullptr): thenCallback_(thenCallback), catchCallback_(catchCallback) {}
+    AsyncCallbackFunc_ resolvedCallback_ = nullptr;
+    AsyncCallbackFunc_ rejectedCallback_ = nullptr;
+    AsyncCallback(AsyncCallbackFunc_ resolvedCallback, AsyncCallbackFunc_ rejectedCallback)
+        : resolvedCallback_(resolvedCallback), rejectedCallback_(rejectedCallback) {}
 };
 
     /*

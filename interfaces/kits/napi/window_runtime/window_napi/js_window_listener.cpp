@@ -631,7 +631,7 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-WmErrorCode JsWindowListener::CanCancelUnregister(const std::string eventType)
+WmErrorCode JsWindowListener::CanCancelUnregister(const std::string& eventType)
 {
     if (eventType == WINDOW_WILL_CLOSE_CB) {
         if (asyncCloseExecuteCount_.load() != 0) {
@@ -658,13 +658,13 @@ void JsWindowListener::InitAsyncCloseCallback(sptr<Window> window)
             return;
         }
         thisListener->asyncCloseExecuteCount_.fetch_sub(1);
-        bool notClose = false;
-        if (argc != ARG_COUNT_ONE || !ConvertFromJsValue(env, argv[INDEX_ZERO], notClose)) {
-            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s Failed to convert parameter to notClose", where);
+        bool notNeedClose = false;
+        if (argc != ARG_COUNT_ONE || !ConvertFromJsValue(env, argv[INDEX_ZERO], notNeedClose)) {
+            TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s Failed to convert parameter to notNeedClose", where);
         }
-        TLOGD(WmsLogTag::WMS_DECOR, "%{public}s notClose: %{public}d", where, notClose);
-        if (!notClose) {
-            window->DirectClose();
+        TLOGD(WmsLogTag::WMS_DECOR, "%{public}s notNeedClose: %{public}d", where, notNeedClose);
+        if (!notNeedClose) {
+            window->CloseDirectly();
         }
     };
 
@@ -677,7 +677,7 @@ void JsWindowListener::InitAsyncCloseCallback(sptr<Window> window)
             return;
         }
         thisListener->asyncCloseExecuteCount_.fetch_sub(1);
-        window->DirectClose();
+        window->CloseDirectly();
     };
 
     closeAsyncCallback_ = sptr<AsyncCallback>::MakeSptr(thenCallback, catchCallback);
@@ -704,7 +704,7 @@ void JsWindowListener::OnWindowWillClose(sptr<Window> window)
         thisListener->asyncCloseExecuteCount_.fetch_add(1);
         bool isPromiseCallback = CallPromise(env, returnValue, closeAsyncCallback);
         if (!isPromiseCallback) {
-            window->DirectClose();
+            window->CloseDirectly();
         }
     };
 
