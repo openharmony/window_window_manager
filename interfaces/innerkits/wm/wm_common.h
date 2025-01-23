@@ -1309,6 +1309,8 @@ enum WindowVisibilityState : uint32_t {
  * @brief Window UI info
  */
 struct WindowUIInfo : public Parcelable {
+    WindowVisibilityState visibilityState = WINDOW_LAYER_STATE_MAX;
+    
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteUint32(static_cast<uint32_t>(visibilityState));
@@ -1325,8 +1327,6 @@ struct WindowUIInfo : public Parcelable {
         windowUIInfo->visibilityState = static_cast<WindowVisibilityState>(visibilityState);
         return windowUIInfo;
     }
-
-    WindowVisibilityState visibilityState = WINDOW_LAYER_STATE_MAX;
 };
 
 /**
@@ -1335,6 +1335,7 @@ struct WindowUIInfo : public Parcelable {
  * @brief Window display info
  */
 struct WindowDisplayInfo : public Parcelable {
+    DisplayId displayId = DISPLAY_ID_INVALID;
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteUint64(displayId);
@@ -1349,8 +1350,6 @@ struct WindowDisplayInfo : public Parcelable {
         }
         return windowDisplayInfo;
     }
-
-    DisplayId displayId = DISPLAY_ID_INVALID;
 };
 
 /**
@@ -1359,6 +1358,8 @@ struct WindowDisplayInfo : public Parcelable {
  * @brief Layout info for all windows on the screen.
  */
 struct WindowLayoutInfo : public Parcelable {
+    Rect rect = Rect::EMPTY_RECT;
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) &&
@@ -1379,8 +1380,6 @@ struct WindowLayoutInfo : public Parcelable {
         }
         return windowLayoutInfo;
     }
-
-    Rect rect = Rect::EMPTY_RECT;
 };
 
 /**
@@ -1389,6 +1388,11 @@ struct WindowLayoutInfo : public Parcelable {
  * @brief Window meta info
  */
 struct WindowMetaInfo : public Parcelable {
+    int32_t windowId = 0;
+    std::string windowName = "";
+    std::string bundleName = "";
+    std::string abilityName = "";
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(windowId) &&
@@ -1408,10 +1412,6 @@ struct WindowMetaInfo : public Parcelable {
         }
         return windowMetaInfo;
     }
-    int32_t windowId = 0;
-    std::string windowName = "";
-    std::string bundleName = "";
-    std::string abilityName = "";
 };
 
 /**
@@ -1420,6 +1420,11 @@ struct WindowMetaInfo : public Parcelable {
  * @brief Classified window info
  */
 struct WindowInfo : public Parcelable {
+    WindowUIInfo windowUIInfo;
+    WindowDisplayInfo windowDisplayInfo;
+    WindowLayoutInfo windowLayoutInfo;
+    WindowMetaInfo windowMetaInfo;
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteUint32(static_cast<uint32_t>(windowUIInfo.visibilityState)) &&
@@ -1454,11 +1459,6 @@ struct WindowInfo : public Parcelable {
         windowInfo->windowUIInfo.visibilityState = static_cast<WindowVisibilityState>(visibilityState);
         return windowInfo;
     }
-
-    WindowUIInfo windowUIInfo;
-    WindowDisplayInfo windowDisplayInfo;
-    WindowLayoutInfo windowLayoutInfo;
-    WindowMetaInfo windowMetaInfo;
 };
 
 /**
@@ -1467,6 +1467,11 @@ struct WindowInfo : public Parcelable {
  * @brief Option of list window info
  */
 struct WindowInfoOption : public Parcelable {
+    WindowInfoFilterOption windowInfoFilterOption = WindowInfoFilterOption::ALL;
+    WindowInfoTypeOption windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    int32_t windowId = 0;
+
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteUint32(static_cast<uint32_t>(windowInfoFilterOption)) &&
@@ -1491,11 +1496,6 @@ struct WindowInfoOption : public Parcelable {
         windowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOption);
         return windowInfoOption;
     }
-
-    WindowInfoFilterOption windowInfoFilterOption = WindowInfoFilterOption::ALL;
-    WindowInfoTypeOption windowInfoTypeOption = WindowInfoTypeOption::ALL;
-    DisplayId displayId = DISPLAY_ID_INVALID;
-    int32_t windowId = 0;
 };
 
 /**
