@@ -727,7 +727,8 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange, Function | SmallTest | 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->OnSessionStateChange(1, state);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_NE(nullptr, ssm_);
@@ -736,7 +737,7 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange, Function | SmallTest | 
     ASSERT_NE(nullptr, ssm_);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->OnSessionStateChange(1, state);
-    ssm_->focusedSessionId_ = 0;
+    focusGroup->SetFocusedSessionId(0);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
 }
@@ -1530,7 +1531,8 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
-    ssm_->focusedSessionId_ = sceneSession->GetPersistentId();
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(sceneSession->GetPersistentId());
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->ProcessBackEvent();
 
@@ -1642,7 +1644,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | Smal
     info4.persistentId_ = 0;
     info4.isPersistentRecover_ = false;
     ASSERT_EQ(ssm_->GetSceneSessionBySessionInfo(info4), nullptr);
-    
+
     SessionInfo info5;
     info5.persistentId_ = 5;
     info5.isPersistentRecover_ = true;
@@ -1966,7 +1968,6 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession04, Function | SmallTest |
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
     ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
-    
     auto ret3 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret3, BrokerStates::BROKER_UNKOWN);
     ssm_->abilityInfoMap_.erase(list);
@@ -2003,7 +2004,6 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession05, Function | SmallTest |
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
     ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
-    
     auto ret4 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret4, BrokerStates::BROKER_UNKOWN);
     ssm_->abilityInfoMap_.erase(list);
