@@ -591,7 +591,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWatchGestureConsumeResult, Function | 
     ASSERT_EQ(WMError::WM_OK, ret);
     ssm_->onWatchGestureConsumeResultFunc_ = nullptr;
     ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
-    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -607,7 +607,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWatchFocusActiveChange, Function | Sma
     ASSERT_EQ(WMError::WM_OK, ret);
     ssm_->onWatchFocusActiveChangeFunc_ = nullptr;
     ret = ssm_->NotifyWatchFocusActiveChange(isActive);
-    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
