@@ -265,7 +265,7 @@ public:
     /*
      * Window Focus
      */
-    WSError SetFocusedSessionId(int32_t persistentId, DisplayId displayId);
+    WSError SetFocusedSessionId(const int32_t persistentId, const DisplayId displayId);
     int32_t GetFocusedSessionId(DisplayId displayId = DEFAULT_DISPLAY_ID) const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,

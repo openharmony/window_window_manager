@@ -4659,15 +4659,9 @@ WMError SceneSessionManager::SetGestureNavigationEnabled(bool enable)
     return taskScheduler_->PostSyncTask(task, "SetGestureNavigationEnabled");
 }
 
-WSError SceneSessionManager::SetFocusedSessionId(int32_t persistentId, DisplayId displayId)
+WSError SceneSessionManager::SetFocusedSessionId(const int32_t persistentId, const DisplayId displayId)
 {
-    auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-    if (focusedSessionId == persistentId) {
-        WLOGI("Focus scene not change, id: %{public}d", focusedSessionId);
-        return WSError::WS_DO_NOTHING;
-    }
-    windowFocusController_->UpdateFocusedSessionId(displayId, persistentId);
-    return WSError::WS_OK;
+    return windowFocusController_->UpdateFocusedSessionId(displayId, persistentId);
 }
 
 int32_t SceneSessionManager::GetFocusedSessionId(DisplayId displayId) const
@@ -4685,12 +4679,12 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
         auto focusGroup = windowFocusController_->GetFocusGroup(displayId);
         if (focusGroup == nullptr) {
             TLOGE(WmsLogTag::WMS_FOCUS, "focus group is nullptr: %{public}" PRIu64, displayId);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return WSError::WS_ERROR_NULLPTR;
         }
         if (auto sceneSession = GetSceneSession(focusGroup->GetFocusedSessionId())) {
             TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             focusInfo.windowId_ = sceneSession->GetWindowId();
-            focusInfo.displayId_ = static_cast<DisplayId>(focusGroup->GetDisplayGroupId());
+            focusInfo.displayId_ = focusGroup->GetDisplayGroupId();
             focusInfo.pid_ = sceneSession->GetCallingPid();
             focusInfo.uid_ = sceneSession->GetCallingUid();
             focusInfo.windowType_ = sceneSession->GetWindowType();
@@ -6891,10 +6885,11 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const s
     }
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-    if (std::find_if(topmostVec.begin(), topmostVec.end(),
-        [this, focusedSessionId](sptr<SceneSession>& iter) { return iter &&
-        iter->GetPersistentId() == focusedSessionId; }) != topmostVec.end()) {
-        TLOGND(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId);
+    auto conditionFunc =  [this, focusedSessionId](const sptr<SceneSession>& iter) {
+        return iter && iter->GetPersistentId() == focusedSessionId; 
+    };
+    if (std::find_if(topmostVec.begin(), topmostVec.end(), conditionFunc) != topmostVec.end()) {
+        TLOGD(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId);
         return WSError::WS_OK;
     }
     WSError ret = WSError::WS_DO_NOTHING;
@@ -6926,10 +6921,11 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(const sptr<Sc
     std::vector<sptr<Session>> dialogVec = mainSession->GetDialogVector();
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-    if (std::find_if(dialogVec.begin(), dialogVec.end(),
-        [this, focusedSessionId](sptr<Session>& iter) { return iter &&
-        iter->GetPersistentId() == focusedSessionId; }) != dialogVec.end()) {
-        TLOGND(WmsLogTag::WMS_DIALOG, "dialog id: %{public}d has been focused!", focusedSessionId);
+    auto conditionFunc =  [this, focusedSessionId](const sptr<Session>& iter) { 
+        return iter && iter->GetPersistentId() == focusedSessionId;
+    };
+    if (std::find_if(dialogVec.begin(), dialogVec.end(), conditionFunc) != dialogVec.end()) {
+        TLOGD(WmsLogTag::WMS_DIALOG, "dialog id: %{public}d has been focused!", focusedSessionId);
         return WSError::WS_OK;
     }
     WSError ret = WSError::WS_DO_NOTHING;
@@ -9594,7 +9590,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 
 bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenType)
 {
-    if (screenType == ScreenType::VIRTUAL && (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine")) {
+    if (screenType == ScreenType::VIRTUAL && (name == "HiCar" || name == "SuperLauncher" || name == "CeliaView")) {
         return true;
     }
     return false;
