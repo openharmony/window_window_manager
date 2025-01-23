@@ -12535,7 +12535,7 @@ WMError ShiftAppWindowPointerEventInner(
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(static_cast<uint64_t>(targetDisplayId));
     float vpr;
-    if (diaplay) {
+    if (display) {
         vpr = display->GetVirtualPixelRatio();
     } else {
         vpr = 1.5f; // 1.5f: default virtual pixel ratio
