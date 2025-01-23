@@ -324,10 +324,10 @@ struct WindowSizeLimits {
     uint32_t maxWindowHeight = 0;
     uint32_t minWindowHeight = 0;
 
-    bool operator==(const WindowSizeLimits& a) const
+    bool operator==(const WindowSizeLimits& sizeLimits) const
     {
-        return (maxWindowWidth == a.maxWindowWidth && minWindowWidth == a.minWindowWidth &&
-            maxWindowHeight == a.maxWindowHeight && minWindowHeight == a.minWindowHeight);
+        return (maxWindowWidth == sizeLimits.maxWindowWidth && minWindowWidth == sizeLimits.minWindowWidth &&
+            maxWindowHeight == sizeLimits.maxWindowHeight && minWindowHeight == sizeLimits.minWindowHeight);
     }
 };
 
