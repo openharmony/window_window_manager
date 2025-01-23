@@ -2682,8 +2682,7 @@ bool WindowSceneSessionImpl::IsStartMoving()
 bool WindowSceneSessionImpl::CalcWindowShouldMove()
 {
     WindowType windowType = GetType();
-    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
-        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+    if (WindowHelper::IsInputWindow(windowType)) {
         if (windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
             windowSystemConfig_.IsPhoneWindow()) {
             return true;
