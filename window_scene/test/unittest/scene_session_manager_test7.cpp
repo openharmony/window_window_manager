@@ -294,7 +294,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent, Function | SmallTest | Leve
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     auto ret = ssm_->ProcessBackEvent();
     EXPECT_EQ(ret, WSError::WS_OK);
@@ -966,7 +967,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent01, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     auto ret = ssm_->ProcessBackEvent();
@@ -987,7 +989,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent02, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = true;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->rootSceneProcessBackEventFunc_ = nullptr;
@@ -1009,7 +1012,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent03, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = true;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     RootSceneProcessBackEventFunc func = [](){};
@@ -1033,7 +1037,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent04, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = false;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->rootSceneProcessBackEventFunc_ = nullptr;
@@ -1055,7 +1060,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent05, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = false;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     RootSceneProcessBackEventFunc func = [](){};
