@@ -74,7 +74,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
 bool Session::isScbCoreEnabled_ = false;
-bool Session::isBackgroundNotifyEnabled_ = false;
+bool Session::isBackgroundUpdateRectNotifyEnabled_ = false;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -1056,7 +1056,7 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     winRect_ = rect;
-    if (!Session::IsBackgroundNotifyEnabled() && !IsSessionForeground()) {
+    if (!Session::IsBackgroundUpdateRectNotifyEnabled() && !IsSessionForeground()) {
         return WSError::WS_DO_NOTHING;
     }
     if (sessionStage_ != nullptr) {
@@ -3745,15 +3745,15 @@ void Session::SetScbCoreEnabled(bool enabled)
     isScbCoreEnabled_ = enabled;
 }
 
-bool Session::IsBackgroundNotifyEnabled()
+bool Session::IsBackgroundUpdateRectNotifyEnabled()
 {
-    return isBackgroundNotifyEnabled_;
+    return isBackgroundUpdateRectNotifyEnabled_;
 }
 
-void Session::SetBackgroundNotifyEnabled(bool enabled)
+void Session::SetBackgroundUpdateRectNotifyEnabled(const bool enabled)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}d", enabled);
-    isBackgroundNotifyEnabled_ = enabled;
+    isBackgroundUpdateRectNotifyEnabled_ = enabled;
 }
 
 bool Session::IsVisible() const

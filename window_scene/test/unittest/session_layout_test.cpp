@@ -140,8 +140,8 @@ namespace {
  */
 HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
 {
-    bool preBackgroundNotifyEnabled = Session::IsBackgroundNotifyEnabled();
-    Session::SetBackgroundNotifyEnabled(true);
+    bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
+    Session::SetBackgroundUpdateRectNotifyEnabled(true);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
@@ -169,7 +169,7 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     ASSERT_EQ(rect, session_->winRect_);
-    Session::SetBackgroundNotifyEnabled(preBackgroundNotifyEnabled);
+    Session::SetBackgroundUpdateRectNotifyEnabled(preBackgroundUpdateRectNotifyEnabled);
 }
 
 /**
@@ -180,8 +180,8 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
  */
 HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Level2)
 {
-    bool preBackgroundNotifyEnabled = Session::IsBackgroundNotifyEnabled();
-    Session::SetBackgroundNotifyEnabled(false);
+    bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
+    Session::SetBackgroundUpdateRectNotifyEnabled(false);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
 
@@ -190,7 +190,7 @@ HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Le
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     session_->UpdateSessionState(SessionState::STATE_BACKGROUND);
     ASSERT_EQ(WSError::WS_DO_NOTHING, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
-    Session::SetBackgroundNotifyEnabled(preBackgroundNotifyEnabled);
+    Session::SetBackgroundUpdateRectNotifyEnabled(preBackgroundUpdateRectNotifyEnabled);
 }
 
 /**
