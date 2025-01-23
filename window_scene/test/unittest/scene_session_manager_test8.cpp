@@ -831,7 +831,6 @@ HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, Function | SmallTest | Lev
     info.abilityName_ = "IsInDefaultScreen";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     auto ret = ssm_->IsInDefaultScreen(sceneSession);
     EXPECT_EQ(false, ret);
 }
@@ -1004,7 +1003,6 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Func
     info.abilityName_ = "UnregisterSpecificSessionCreateListener";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);

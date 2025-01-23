@@ -46,6 +46,8 @@ constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 }
 using DisplayId = uint64_t;
+inline constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
+
 /**
  * @brief Enumerates type of window.
  */
@@ -708,8 +710,8 @@ private:
 struct SingleHandTransform {
     int32_t posX = 0;
     int32_t posY = 0;
-    float scaleX = 0;
-    float scaleY = 0;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
 
     bool operator==(const SingleHandTransform& right) const
     {
@@ -1550,6 +1552,14 @@ struct KeyboardTouchHotAreas {
     {
         return (landscapePanelHotAreas_.empty() || portraitPanelHotAreas_.empty());
     }
+};
+
+enum class KeyboardViewMode: uint32_t {
+    NON_IMMERSIVE_MODE = 0,
+    IMMERSIVE_MODE,
+    LIGHT_IMMERSIVE_MODE,
+    DARK_IMMERSIVE_MODE,
+    VIEW_MODE_END,
 };
 }
 }

@@ -73,6 +73,8 @@ public:
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;
+    WSError SetSessionLabelAndIcon(const std::string& label,
+        const std::shared_ptr<Media::PixelMap>& icon) override;
 
     /*
      * UIExtension
@@ -87,7 +89,7 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void TriggerBindModalUIExtension() override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
-    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
@@ -102,6 +104,7 @@ public:
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
@@ -125,8 +128,19 @@ public:
      */
     WSError RemoveStartingWindow() override;
 
+    /*
+     * Window Property
+     */
+    WSError SetWindowCornerRadius(float cornerRadius) override;
+
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+
+    /*
+     * PC Window
+     */
+    WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

@@ -135,6 +135,12 @@ enum class StartMethod : int32_t {
     START_CALL
 };
 
+enum class SingleHandMode : int32_t {
+    LEFT = 0,
+    RIGHT,
+    MIDDLE
+};
+
 /**
  * @brief collaborator type.
  */
@@ -369,6 +375,7 @@ struct SessionInfo {
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
     int32_t specifiedId = 0;
+    std::string specifiedFlag_ = "";
 
     /*
      * App Use Control
@@ -710,6 +717,7 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_WIND_RECOVER, // Enter win+D in recover mode
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
+    SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 

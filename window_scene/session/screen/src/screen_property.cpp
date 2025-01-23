@@ -33,6 +33,7 @@ constexpr float SECONDARY_ROTATION_270 = 270.0F;
 constexpr int32_t SECONDARY_MAIN_OFFSETY = -2176;
 constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
 constexpr float EPSILON = 1e-6f;
+constexpr float PPI_TO_DPI = 1.6f;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -589,5 +590,10 @@ float ScreenProperty::CalculatePPI()
     int32_t height = bounds.rect_.GetHeight();
     float ppi = std::sqrt(static_cast<float>(width * width + height * height)) * INCH_2_MM / phyDiagonal;
     return std::round(ppi * TRUNCATE_TWO_DECIMALS) / TRUNCATE_TWO_DECIMALS;
+}
+
+uint32_t ScreenProperty::CalculateDPI()
+{
+    return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI));
 }
 } // namespace OHOS::Rosen

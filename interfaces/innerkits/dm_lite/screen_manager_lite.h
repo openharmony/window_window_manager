@@ -145,6 +145,14 @@ public:
      * @return Power state of screen.
      */
     ScreenPowerState GetScreenPower();
+
+    /**
+     * @brief Get all physical screen ids.
+     *
+     * @param screenIds Store physical screen ids.
+     * @return DM_OK means getting ids success, others means getting ids failed.
+     */
+    DMError GetPhysicalScreenIds(std::vector<uint64_t>& screenIds);
 private:
     ScreenManagerLite();
     ~ScreenManagerLite();

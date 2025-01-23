@@ -405,6 +405,23 @@ ScreenPowerState ScreenManagerLite::GetScreenPower()
     return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower();
 }
 
+DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<uint64_t>& screenIds)
+{
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(screenInfos);
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+
+    for (const auto& screenInfo : screenInfos) {
+        auto id = screenInfo->GetScreenId();
+        if (screenInfo->GetType() == ScreenType::REAL && id != SCREEN_ID_INVALID) {
+            screenIds.push_back(id);
+        }
+    }
+    return DMError::DM_OK;
+}
+
 void ScreenManagerLite::Impl::OnRemoteDied()
 {
     WLOGFD("dms is died");

@@ -66,6 +66,7 @@ public:
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
+    void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea);
     int32_t SetScreenOffDelayTime(int32_t delay);
     int32_t SetScreenOnDelayTime(int32_t delay);
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
@@ -107,6 +108,7 @@ private:
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
+    void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
