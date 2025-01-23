@@ -196,7 +196,8 @@ public:
     {
         return DMError::DM_OK;
     }
-    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) {}
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {}) {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution()
