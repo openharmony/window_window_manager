@@ -857,9 +857,6 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
 static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
     WindowSizeLimits& windowSizeLimits)
 {
-    if (abilityInfo == nullptr) {
-        return;
-    }
     windowSizeLimits.maxWindowWidth = windowSizeLimits.maxWindowWidth > 0 ?
         windowSizeLimits.maxWindowWidth : abilityInfo->maxWindowWidth;
     windowSizeLimits.maxWindowHeight = windowSizeLimits.maxWindowHeight > 0 ?
