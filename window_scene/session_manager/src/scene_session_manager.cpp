@@ -10506,8 +10506,7 @@ bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& window
     const sptr<SceneSession>& sceneSession) const
 {
     DisplayId displayId = windowInfoOption.displayId;
-    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-        sceneSession->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID) {
+    if (session->IsHalfFoldedOnDefaultDisplayId()) {
         if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
             return false;
         }
@@ -10579,9 +10578,7 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session->GetSessionGlobalRect().IsInvalid()) {
                 continue;
             }
-            if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-                session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID &&
-                displayId == DEFAULT_DISPLAY_ID) {
+            if (session->IsHalfFoldedOnDefaultDisplayId() && displayId == DEFAULT_DISPLAY_ID) {
                 if (isVirtualDisplay &&
                     session->GetSessionRect().posY_ + session->GetSessionRect().height_ < GetFoldLowerScreenPosY()) {
                     continue;
