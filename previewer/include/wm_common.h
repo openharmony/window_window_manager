@@ -990,14 +990,21 @@ struct WindowInfo : public Parcelable {
     static WindowInfo* Unmarshalling(Parcel& parcel)
     {
         WindowInfo* windowInfo = new WindowInfo();
-        if (!parcel.ReadParcelable<WindowUIInfo> || !parcel.ReadParcelable<WindowDisplayInfo> ||
-            !parcel.ReadParcelable<WindowLayoutInfo> || !parcel.ReadParcelable<WindowMetaInfo>) {
+        sptr<WindowUIInfo> windowUIInfo = parcel.ReadParcelable<WindowUIInfo>();
+        sptr<WindowDisplayInfo> windowDisplayInfo = parcel.ReadParcelable<WindowDisplayInfo>();
+        sptr<WindowLayoutInfo> windowLayoutInfo = parcel.ReadParcelable<WindowLayoutInfo>();
+        sptr<WindowMetaInfo> windowMetaInfo = parcel.ReadParcelable<WindowMetaInfo>();
+        if (!windowUIInfo || !windowDisplayInfo || !windowLayoutInfo || !windowMetaInfo) {
             delete windowInfo;
             return nullptr;
         }
+        windowInfo->windowUIInfo = *windowUIInfo;
+        windowInfo->windowDisplayInfo = *windowDisplayInfo;
+        windowInfo->windowLayoutInfo = *windowLayoutInfo;
+        windowInfo->windowMetaInfo = *windowMetaInfo;
         return windowInfo;
     }
-};
+}; 
 
 /**
  * @struct WindowInfoOption
