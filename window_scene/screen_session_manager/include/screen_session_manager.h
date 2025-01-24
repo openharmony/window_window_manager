@@ -613,6 +613,7 @@ private:
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
     void SetMultiScreenOuterMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     void RecoveryMultiScreenNormalMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
+    bool IsFakeDisplayExist();
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
