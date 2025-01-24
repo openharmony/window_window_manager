@@ -4049,6 +4049,14 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.specifiedFlag_ = abilitySessionInfo->specifiedFlag;
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
+        int32_t maxWindowWidth = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_RESV_MAX_WINDOW_WIDTH, 0);
+        info.windowSizeLimits.maxWindowWidth = static_cast<std::uint32_t>(maxWindowWidth > 0 ? maxWindowWidth : 0);
+        int32_t minWindowWidth = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_RESV_MIN_WINDOW_WIDTH, 0);
+        info.windowSizeLimits.minWindowWidth = static_cast<std::uint32_t>(minWindowWidth > 0 ? minWindowWidth : 0);
+        int32_t maxWindowHeight = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0);
+        info.windowSizeLimits.maxWindowHeight = static_cast<std::uint32_t>(maxWindowHeight > 0 ? maxWindowHeight : 0);
+        int32_t minWindowHeight = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_RESV_MIN_WINDOW_HEIGHT, 0);
+        info.windowSizeLimits.minWindowHeight = static_cast<std::uint32_t>(minWindowHeight > 0 ? minWindowHeight : 0);
         if (!abilitySessionInfo->supportWindowModes.empty()) {
             info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
@@ -4067,11 +4075,14 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
-        "supportedWindowModes.size:%{public}zu, specifiedId:%{public}d",
+        "supportedWindowModes.size:%{public}zu, specifiedId:%{public}d, "
+        "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
-        info.supportedWindowModes.size(), info.specifiedId);
+        info.supportedWindowModes.size(), info.specifiedId,
+        info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
+        info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight);
     return info;
 }
 

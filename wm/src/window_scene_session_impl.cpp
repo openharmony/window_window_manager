@@ -854,6 +854,19 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
     return isConsumed;
 }
 
+static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
+    WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits.maxWindowWidth = windowSizeLimits.maxWindowWidth > 0 ?
+        windowSizeLimits.maxWindowWidth : abilityInfo->maxWindowWidth;
+    windowSizeLimits.maxWindowHeight = windowSizeLimits.maxWindowHeight > 0 ?
+        windowSizeLimits.maxWindowHeight : abilityInfo->maxWindowHeight;
+    windowSizeLimits.minWindowWidth = windowSizeLimits.minWindowWidth > 0 ?
+        windowSizeLimits.minWindowWidth : abilityInfo->minWindowWidth;
+    windowSizeLimits.minWindowHeight = windowSizeLimits.minWindowHeight > 0 ?
+        windowSizeLimits.minWindowHeight : abilityInfo->minWindowHeight;
+}
+
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -863,9 +876,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     }
     auto abilityInfo = abilityContext->GetAbilityInfo();
     if (abilityInfo != nullptr) {
+        WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
+        GetWindowSizeLimits(abilityInfo, windowSizeLimits);
         property_->SetConfigWindowLimitsVP({
-            abilityInfo->maxWindowWidth, abilityInfo->maxWindowHeight,
-            abilityInfo->minWindowWidth, abilityInfo->minWindowHeight,
+            windowSizeLimits.maxWindowWidth, windowSizeLimits.maxWindowHeight,
+            windowSizeLimits.minWindowWidth, windowSizeLimits.minWindowHeight,
             static_cast<float>(abilityInfo->maxWindowRatio), static_cast<float>(abilityInfo->minWindowRatio)
         });
         UpdateWindowSizeLimits();
