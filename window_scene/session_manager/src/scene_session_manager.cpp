@@ -12533,18 +12533,18 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
     int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId)
 {
-    auto display = DisplayManager::GetInstance().GetDisplayById(static_cast<uint64_t>(targetDisplayId));
-    float vpr = 1.5f; // 1.5f: default virtual pixel ratio
-    if (display) {
-        vpr = display->GetVirtualPixelRatio();
-    }
-    int32_t outside = static_cast<int32_t>(HOTZONE_TOUCH * vpr);
-    MMI::ShiftWindowParam param;
-    param.sourceWindowId = sourceWindowId;
-    param.targetWindowId = targetWindowId;
-    param.x = -outside * 2; // double outside
-    param.y = -outside * 2; // double outside
-    return taskScheduler_->PostSyncTask([param] {
+    return taskScheduler_->PostSyncTask([sourceWindowId, targetWindowId, targetDisplayId] {
+        auto display = DisplayManager::GetInstance().GetDisplayById(targetDisplayId);
+    	float vpr = 1.5f; // 1.5f: default virtual pixel ratio
+    	if (display) {
+        	vpr = display->GetVirtualPixelRatio();
+    	}
+    	int32_t outside = static_cast<int32_t>(HOTZONE_TOUCH * vpr * 2); // double touch hotzone
+    	MMI::ShiftWindowParam param;
+    	param.sourceWindowId = sourceWindowId;
+    	param.targetWindowId = targetWindowId;
+    	param.x = -outside;
+    	param.y = -outside;
         int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(param, true);
         TLOGNI(WmsLogTag::WMS_PC, "sourceWindowId %{public}d targetWindowId %{public}d ret %{public}d",
             param.sourceWindowId, param.targetWindowId, ret);
