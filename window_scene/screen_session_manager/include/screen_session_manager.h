@@ -388,6 +388,8 @@ private:
     void OnHgmRefreshRateChange(uint32_t refreshRate);
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
+    void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
+        RSScreenCapability& screenCapability, ScreenProperty& property);
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);

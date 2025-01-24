@@ -1780,20 +1780,8 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
     auto screenCapability = rsInterface_.GetScreenCapability(screenId);
     HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     TLOGW(WmsLogTag::DMS, "Call RS interface end, create ScreenProperty begin");
-    property.SetRotation(0.0f);
-    property.SetPhyWidth(screenCapability.GetPhyWidth());
-    property.SetPhyHeight(screenCapability.GetPhyHeight());
-    property.SetDpiPhyBounds(screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
-    property.SetPhyBounds(screenBounds);
-    property.SetBounds(screenBounds);
-    property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
-    property.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
-    property.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), GetFoldDisplayMode());
-    property.SetCurrentOffScreenRendering(false);
-    property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
-    property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
-    property.SetScreenRealPPI();
-    property.SetScreenRealDPI();
+    InitScreenProperty(screenId, screenMode, screenCapability, property);
+
     if (isDensityDpiLoad_) {
         if (screenId == SCREEN_ID_MAIN) {
             TLOGW(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
@@ -1820,6 +1808,26 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
 #endif
     property.CalcDefaultDisplayOrientation();
     property.SetScreenShape(ScreenSettingHelper::GetScreenShape(screenId));
+}
+
+void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
+    RSScreenCapability& screenCapability, ScreenProperty& property)
+{
+    auto screenBounds = RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
+    property.SetRotation(0.0f);
+    property.SetPhyWidth(screenCapability.GetPhyWidth());
+    property.SetPhyHeight(screenCapability.GetPhyHeight());
+    property.SetDpiPhyBounds(screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
+    property.SetPhyBounds(screenBounds);
+    property.SetBounds(screenBounds);
+    property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
+    property.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
+    property.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), GetFoldDisplayMode());
+    property.SetCurrentOffScreenRendering(false);
+    property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
+    property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
+    property.SetScreenRealPPI();
+    property.SetScreenRealDPI();
 }
 
 void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session,
