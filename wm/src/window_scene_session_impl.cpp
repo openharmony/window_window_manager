@@ -1102,7 +1102,6 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
             TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is null");
         }
     }
-    uiContent->Foreground();
     uiContent->PreLayout();
 }
 
@@ -1181,7 +1180,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         UpdateSubWindowStateAndNotify(GetPersistentId(), WindowState::STATE_SHOWN);
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
-        NotifyAfterForeground(true, WindowHelper::IsMainWindow(type));
+        NotifyAfterForeground(true, true);
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
