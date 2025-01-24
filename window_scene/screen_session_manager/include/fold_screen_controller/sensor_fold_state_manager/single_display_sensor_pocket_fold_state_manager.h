@@ -48,10 +48,12 @@ public:
     sptr<IRemoteObject> AsObject() override { return nullptr; };
     std::string GetForegroundApp();
     void RegisterCameraForegroundChanged(std::function<void()> callback);
+    bool IsCameraForeground();
 
 private:
     std::string foregroundBundleName_ {""};
     std::function<void()> onCameraForegroundChanged_ { nullptr };
+    bool isCameraForeground_ = false;
 };
 class SingleDisplaySensorPocketFoldStateManager : public SensorFoldStateManager {
 public:
