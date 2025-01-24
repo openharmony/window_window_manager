@@ -826,7 +826,7 @@ inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFi
         static_cast<WindowInfoFilterOptionDataType>(rhs));
 }
 
-inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOption option)
+inline bool IsChosenWindowOption(WindowInfoFilterOption options, WindowInfoFilterOption option)
 {
     return (static_cast<WindowInfoFilterOptionDataType>(options) &
         static_cast<WindowInfoFilterOptionDataType>(option)) != 0;
@@ -849,7 +849,7 @@ inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOp
         static_cast<WindowInfoTypeOptionDataType>(rhs));
 }
 
-inline bool IsChosenOption(WindowInfoTypeOption options, WindowInfoTypeOption option)
+inline bool IsChosenWindowOption(WindowInfoTypeOption options, WindowInfoTypeOption option)
 {
     return (static_cast<WindowInfoTypeOptionDataType>(options) &
         static_cast<WindowInfoTypeOptionDataType>(option)) != 0;
@@ -884,7 +884,7 @@ struct WindowUIInfo : public Parcelable {
 
     static WindowUIInfo* Unmarshalling(Parcel& parcel)
     {
-        WindowUIInfo* windowUIInfo = new WindowUIInfo;
+        WindowUIInfo* windowUIInfo = new WindowUIInfo();
         uint32_t visibilityState = 0;
         if (!parcel.ReadUint32(visibilityState)) {
             delete windowUIInfo;
@@ -909,7 +909,7 @@ struct WindowDisplayInfo : public Parcelable {
 
     static WindowDisplayInfo* Unmarshalling(Parcel& parcel)
     {
-        WindowDisplayInfo* windowDisplayInfo = new WindowDisplayInfo;
+        WindowDisplayInfo* windowDisplayInfo = new WindowDisplayInfo();
         if (!parcel.ReadUint64(windowDisplayInfo->displayId)) {
             delete windowDisplayInfo;
             return nullptr;
@@ -928,19 +928,15 @@ struct WindowLayoutInfo : public Parcelable {
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteInt32(rect.posX_) &&
-               parcel.WriteInt32(rect.posY_) &&
-               parcel.WriteUint32(rect.width_) &&
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
                parcel.WriteUint32(rect.height_);
     }
   
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
     {
-        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
-        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) ||
-            !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
-            !parcel.ReadUint32(windowLayoutInfo->rect.width_) ||
-            !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
             delete windowLayoutInfo;
             return nullptr;
         }
@@ -961,18 +957,14 @@ struct WindowMetaInfo : public Parcelable {
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteInt32(windowId) &&
-               parcel.WriteString(windowName) &&
-               parcel.WriteString(bundleName) &&
+        return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
                parcel.WriteString(abilityName);
     }
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
-        WindowMetaInfo* windowMetaInfo = new WindowMetaInfo;
-        if (!parcel.ReadInt32(windowMetaInfo->windowId) ||
-            !parcel.ReadString(windowMetaInfo->windowName) ||
-            !parcel.ReadString(windowMetaInfo->bundleName) ||
-            !parcel.ReadString(windowMetaInfo->abilityName)) {
+        WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
+        if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)) {
             delete windowMetaInfo;
             return nullptr;
         }
@@ -993,36 +985,20 @@ struct WindowInfo : public Parcelable {
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteUint32(static_cast<uint32_t>(windowUIInfo.visibilityState)) &&
-               parcel.WriteUint64(windowDisplayInfo.displayId) &&
-               parcel.WriteInt32(windowLayoutInfo.rect.posX_) &&
-               parcel.WriteInt32(windowLayoutInfo.rect.posY_) &&
-               parcel.WriteUint32(windowLayoutInfo.rect.width_) &&
-               parcel.WriteUint32(windowLayoutInfo.rect.height_) &&
-               parcel.WriteInt32(windowMetaInfo.windowId) &&
-               parcel.WriteString(windowMetaInfo.windowName) &&
-               parcel.WriteString(windowMetaInfo.bundleName) &&
-               parcel.WriteString(windowMetaInfo.abilityName);
+        return windowUIInfo.Marshalling(parcel) &&
+               windowDisplayInfo.Marshalling(parcel) &&
+               windowLayoutInfo.Marshalling(parcel) &&
+               windowMetaInfo.Marshalling(parcel);
     }
 
     static WindowInfo* Unmarshalling(Parcel& parcel)
     {
-        WindowInfo* windowInfo = new WindowInfo;
-        uint32_t visibilityState = 0;
-        if (!parcel.ReadUint32(visibilityState) ||
-            !parcel.ReadUint64(windowInfo->windowDisplayInfo.displayId) ||
-            !parcel.ReadInt32(windowInfo->windowLayoutInfo.rect.posX_) ||
-            !parcel.ReadInt32(windowInfo->windowLayoutInfo.rect.posY_) ||
-            !parcel.ReadUint32(windowInfo->windowLayoutInfo.rect.width_) ||
-            !parcel.ReadUint32(windowInfo->windowLayoutInfo.rect.height_) ||
-            !parcel.ReadInt32(windowInfo->windowMetaInfo.windowId) ||
-            !parcel.ReadString(windowInfo->windowMetaInfo.windowName) ||
-            !parcel.ReadString(windowInfo->windowMetaInfo.bundleName) ||
-            !parcel.ReadString(windowInfo->windowMetaInfo.abilityName)) {
+        WindowInfo* windowInfo = new WindowInfo();
+        if (!windowInfo->windowUIInfo.Unmarshalling(parcel) || !windowInfo->windowDisplayInfo.Unmarshalling(parcel) ||
+            !windowInfo->windowLayoutInfo.Unmarshalling(parcel) || !windowInfo->windowMetaInfo.Unmarshalling(parcel)) {
             delete windowInfo;
             return nullptr;
         }
-        windowInfo->windowUIInfo.visibilityState = static_cast<WindowVisibilityState>(visibilityState);
         return windowInfo;
     }
 };
@@ -1048,13 +1024,11 @@ struct WindowInfoOption : public Parcelable {
 
     static WindowInfoOption* Unmarshalling(Parcel& parcel)
     {
-        WindowInfoOption* windowInfoOption = new WindowInfoOption;
+        WindowInfoOption* windowInfoOption = new WindowInfoOption();
         uint32_t windowInfoFilterOption;
         uint32_t windowInfoTypeOption;
-        if (!parcel.ReadUint32(windowInfoFilterOption) ||
-            !parcel.ReadUint32(windowInfoTypeOption) ||
-            !parcel.ReadUint64(windowInfoOption->displayId) ||
-            !parcel.ReadInt32(windowInfoOption->windowId)) {
+        if (!parcel.ReadUint32(windowInfoFilterOption) || !parcel.ReadUint32(windowInfoTypeOption) ||
+            !parcel.ReadUint64(windowInfoOption->displayId) || !parcel.ReadInt32(windowInfoOption->windowId)) {
             delete windowInfoOption;
             return nullptr;
         }

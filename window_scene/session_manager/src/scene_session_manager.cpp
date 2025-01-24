@@ -10738,16 +10738,16 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
                 continue;
             }
             auto windowInfo = sptr<WindowInfo>::MakeSptr();
-            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
                 windowInfo->windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
             }
-            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
                 windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
             }
-            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
             }
-            if (IsChosenOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
                 windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
             }
             infos.emplace_back(windowInfo);
@@ -10778,16 +10778,16 @@ bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& window
     if (windowInfoOption.windowId != 0 && sceneSession->GetWindowId() !=windowInfoOption.windowId) {
         return false;
     }
-    if (IsChosenOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::EXCLUDE_SYSTEM) &&
+    if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::EXCLUDE_SYSTEM) &&
         sceneSession->GetSessionInfo().isSystem_) {
         return false;
     }
-    if (IsChosenOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::VISIBLE) &&
+    if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::VISIBLE) &&
         (sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
         sceneSession->GetVisibilityState() == WINDOW_LAYER_STATE_MAX)) {
         return false;
     }
-    if (IsChosenOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::FOREGROUND) &&
+    if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::FOREGROUND) &&
         !IsSessionVisibleForeground(sceneSession)) {
         return false;
     }
