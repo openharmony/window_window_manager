@@ -1856,6 +1856,53 @@ WMError SceneSessionManagerProxy::GetParentMainWindowId(int32_t windowId, int32_
     return static_cast<WMError>(ret);
 }
 
+WMError SceneSessionManagerProxy::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint8(static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoFilterOption failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint8(static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowInfoTypeOption failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(windowInfoOption.displayId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(windowInfoOption.windowId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write windowId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_LIST_WINDOW_INFO), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowInfo>(reply, infos)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read window info failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
 WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
     std::vector<sptr<WindowLayoutInfo>>& infos)
 {
