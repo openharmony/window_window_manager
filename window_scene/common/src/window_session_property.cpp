@@ -616,6 +616,16 @@ void WindowSessionProperty::GetSupportedWindowModes(
     supportedWindowModes = supportedWindowModes_;
 }
 
+void WindowSessionProperty::SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits_ = windowSizeLimits;
+}
+
+WindowSizeLimits WindowSessionProperty::GetWindowSizeLimits() const
+{
+    return windowSizeLimits_;
+}
+
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
 {
     animationFlag_ = animationFlag;
