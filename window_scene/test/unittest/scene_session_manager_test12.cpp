@@ -540,17 +540,21 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDetachCallback, Function | SmallTe
  */
 HWTEST_F(SceneSessionManagerTest12, IsKeyboardForeground, Function | SmallTest | Level3)
 {
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(sceneSessionManager, nullptr);
+    auto sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSessionManager->IsKeyboardForeground();
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
-    sceneSessionManager->IsKeyboardForeground();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSessionManager->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_EQ(true, sceneSessionManager->IsKeyboardForeground());
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
+    ASSERT_EQ(false, sceneSessionManager->IsKeyboardForeground());
+    sceneSessionManager->sceneSessionMap_.clear();
+    ASSERT_EQ(false, sceneSessionManager->IsKeyboardForeground());
 }
 
 /**
