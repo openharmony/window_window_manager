@@ -329,6 +329,8 @@ void SceneSessionManager::Init()
 {
     bool isScbCoreEnabled = system::GetParameter("persist.window.scbcore.enable", "1") == "1";
     Session::SetScbCoreEnabled(isScbCoreEnabled);
+    bool isBackgroundWindowNotifyEnabled = system::GetParameter("persist.window.background.notify.enable", "0") == "1";
+    Session::SetBackgroundUpdateRectNotifyEnabled(isBackgroundWindowNotifyEnabled);
 
     constexpr uint64_t interval = 5 * 1000; // 5 second
     if (HiviewDFX::Watchdog::GetInstance().AddThread(
