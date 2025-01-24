@@ -136,6 +136,9 @@ void SettingProvider::ExecRegisterCb(const sptr<SettingObserver>& observer)
 
 ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper();
@@ -155,6 +158,9 @@ ErrCode SettingProvider::RegisterObserver(const sptr<SettingObserver>& observer)
 
 ErrCode SettingProvider::UnregisterObserver(const sptr<SettingObserver>& observer)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUri(observer->GetKey());
     auto helper = CreateDataShareHelper();
@@ -359,6 +365,9 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
 
 ErrCode SettingProvider::RegisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUriMultiUserByTable(observer->GetKey(), tableName);
     auto helper = CreateDataShareHelperMultiUserByTable(tableName);
@@ -378,6 +387,9 @@ ErrCode SettingProvider::RegisterObserverByTable(const sptr<SettingObserver>& ob
 
 ErrCode SettingProvider::UnregisterObserverByTable(const sptr<SettingObserver>& observer, std::string tableName)
 {
+    if (observer == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto uri = AssembleUriMultiUserByTable(observer->GetKey(), tableName);
     auto helper = CreateDataShareHelperMultiUserByTable(tableName);
@@ -394,23 +406,23 @@ ErrCode SettingProvider::UnregisterObserverByTable(const sptr<SettingObserver>& 
 
 ErrCode SettingProvider::GetIntValueMultiUserByTable(const std::string& key, int32_t& value, std::string tableName)
 {
-    int64_t valueLong;
-    ErrCode ret = GetLongValueMultiUserByTable(key, valueLong, tableName);
+    int64_t result = 0;
+    ErrCode ret = GetLongValueMultiUserByTable(key, result, tableName);
     if (ret != ERR_OK) {
         return ret;
     }
-    value = static_cast<int32_t>(valueLong);
+    value = static_cast<int32_t>(result);
     return ERR_OK;
 }
 
 ErrCode SettingProvider::GetLongValueMultiUserByTable(const std::string& key, int64_t& value, std::string tableName)
 {
-    std::string valueStr;
-    ErrCode ret = GetStringValueMultiUserByTable(key, valueStr, tableName);
+    std::string result = "";
+    ErrCode ret = GetStringValueMultiUserByTable(key, result, tableName);
     if (ret != ERR_OK) {
         return ret;
     }
-    value = static_cast<int64_t>(strtoll(valueStr.c_str(), nullptr, PARAM_NUM_TEN));
+    value = static_cast<int64_t>(strtoll(result.c_str(), nullptr, PARAM_NUM_TEN));
     return ERR_OK;
 }
 
@@ -459,20 +471,20 @@ ErrCode SettingProvider::GetStringValueMultiUserByTable(const std::string& key,
 std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelperMultiUserByTable(
     std::string tableName)
 {
-    std::string uriString = "";
+    std::string address = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
         WLOGFD("current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
-        uriString = SETTING_MULTI_USER_URI + tableName + userIdString +
+        address = SETTING_MULTI_USER_URI + tableName + userIdString +
             SETTING_MULTI_USER_PROXY;
     } else {
         WLOGFE("invalid userId: %{public}d, use default uri", userId);
-        uriString = SETTING_URI_PROXY;
+        address = SETTING_URI_PROXY;
     }
-    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, uriString, SETTINGS_DATA_EXT_URI);
+    auto helper = DataShare::DataShareHelper::Creator(remoteObj_, address, SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
-        WLOGFW("helper is nullptr, uri=%{public}s", uriString.c_str());
+        WLOGFW("helper is nullptr, uri=%{public}s", address.c_str());
         return nullptr;
     }
     return helper;
@@ -480,18 +492,18 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
 
 Uri SettingProvider::AssembleUriMultiUserByTable(const std::string& key, std::string tableName)
 {
-    std::string uriString = "";
+    std::string address = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
         WLOGFD("current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
-        uriString = SETTING_MULTI_USER_URI + tableName + userIdString +
+        address = SETTING_MULTI_USER_URI + tableName + userIdString +
             SETTING_MULTI_USER_PROXY + "&key=" + key;
     } else {
         WLOGFE("invalid userId: %{public}d, use default uri", userId);
-        uriString = SETTING_URI_PROXY + "&key=" + key;
+        address = SETTING_URI_PROXY + "&key=" + key;
     }
-    Uri uri(uriString);
+    Uri uri(address);
     return uri;
 }
 } // namespace Rosen

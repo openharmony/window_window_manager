@@ -21,6 +21,7 @@
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
+#include <ui/rs_node.h>
 #include <viewport_config.h>
 
 #include "ability_context.h"
@@ -127,6 +128,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDensity(density_);
     config.SetOrientation(orientation_);
+    config.SetDisplayId(GetDisplayId());
     uiContent_->UpdateViewportConfig(config, reason);
 }
 
@@ -386,6 +388,17 @@ void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInf
         }
     };
     handler_->PostTask(task, __func__);
+}
+
+std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std::string& stringId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
+        return nullptr;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    return uiContent_->GetRSNodeByStringID(stringId);
 }
 } // namespace Rosen
 } // namespace OHOS

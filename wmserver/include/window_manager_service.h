@@ -152,7 +152,7 @@ public:
     void PostAsyncTask(Task task, const std::string& taskName = "WMSTask", uint32_t delay = 0);
     void SetMaximizeMode(MaximizeMode maximizeMode) override;
     MaximizeMode GetMaximizeMode() override;
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
 
 protected:
     WindowManagerService();
@@ -166,7 +166,7 @@ private:
     void OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
-    WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
+    WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken, DisplayId displayId = DEFAULT_DISPLAY_ID);
     bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
     bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
     void LoadWindowParameter();

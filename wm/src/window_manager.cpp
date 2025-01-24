@@ -1033,9 +1033,9 @@ WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token,
     return WMError::WM_OK;
 }
 
-void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
-    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo);
+    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo, displayId);
 }
 
 void WindowManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const

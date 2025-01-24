@@ -318,6 +318,19 @@ struct SessionViewportConfig {
     uint32_t transform_ = 0;
 };
 
+struct WindowSizeLimits {
+    uint32_t maxWindowWidth = 0;
+    uint32_t minWindowWidth = 0;
+    uint32_t maxWindowHeight = 0;
+    uint32_t minWindowHeight = 0;
+
+    bool operator==(const WindowSizeLimits& sizeLimits) const
+    {
+        return (maxWindowWidth == sizeLimits.maxWindowWidth && minWindowWidth == sizeLimits.minWindowWidth &&
+            maxWindowHeight == sizeLimits.maxWindowHeight && minWindowHeight == sizeLimits.minWindowHeight);
+    }
+};
+
 struct SessionInfo {
     std::string bundleName_ = "";
     std::string moduleName_ = "";
@@ -375,6 +388,7 @@ struct SessionInfo {
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
     int32_t specifiedId = 0;
+    std::string specifiedFlag_ = "";
 
     /*
      * App Use Control
@@ -400,6 +414,7 @@ struct SessionInfo {
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+    WindowSizeLimits windowSizeLimits;
 };
 
 enum class SessionFlag : uint32_t {
