@@ -246,6 +246,8 @@ public:
     void GetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const;
     void SetWindowDelayRaiseEnabled(bool isEnabled);
     bool IsWindowDelayRaiseEnabled() const;
+    void SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits);
+    WindowSizeLimits GetWindowSizeLimits() const;
 
     /*
      * Keyboard
@@ -435,6 +437,7 @@ private:
     mutable std::mutex supportWindowModesMutex_;
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
     bool isWindowDelayRaiseEnabled_ = false;
+    WindowSizeLimits windowSizeLimits_;
 
     /*
      * Keyboard
