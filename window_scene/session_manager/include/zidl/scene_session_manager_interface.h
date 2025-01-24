@@ -96,6 +96,7 @@ public:
         TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
+        TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
@@ -250,6 +251,8 @@ public:
     {
         return WMError::WM_OK;
     }
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override { return WMError::WM_OK; }

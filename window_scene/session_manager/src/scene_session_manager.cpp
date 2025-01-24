@@ -4907,7 +4907,7 @@ void SceneSessionManager::NotifyWindowInfoChangeFromSession(int32_t persistentId
     SceneInputManager::GetInstance().NotifyWindowInfoChangeFromSession(sceneSession);
 }
 
-bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
+bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session) const
 {
     if (session == nullptr) {
         return false;
@@ -4946,7 +4946,7 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     return false;
 }
 
-bool SceneSessionManager::IsSessionVisibleForeground(const sptr<SceneSession>& session)
+bool SceneSessionManager::IsSessionVisibleForeground(const sptr<SceneSession>& session) const
 {
     if (session == nullptr) {
         return false;
@@ -10817,6 +10817,79 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     taskScheduler_->PostAsyncTask(task, __func__);
 }
 
+WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos)
+{
+    if (!(SessionPermission::IsSACalling())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    return taskScheduler_->PostSyncTask([this, windowInfoOption, &infos] {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            if (sceneSession == nullptr) {
+                continue;
+            }
+            if (!FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+                continue;
+            }
+            auto windowInfo = sptr<WindowInfo>::MakeSptr();
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_UI_INFO)) {
+                windowInfo->windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
+            }
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
+                windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
+            }
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
+                windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
+            }
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
+                windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+            }
+            infos.emplace_back(windowInfo);
+        }
+        return WMError::WM_OK;
+    }, __func__);
+}
+
+bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& windowInfoOption,
+    const sptr<SceneSession>& sceneSession) const
+{
+    DisplayId displayId = windowInfoOption.displayId;
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(sceneSession->GetSessionProperty()->GetDisplayId())) {
+        if (displayId == DEFAULT_DISPLAY_ID && sceneSession->GetSessionGlobalRect().posY_ >= GetFoldLowerScreenPosY()) {
+            return false;
+        }
+        if (displayId == VIRTUAL_DISPLAY_ID) {
+            if (sceneSession->GetSessionGlobalRect().posY_ +
+                sceneSession->GetSessionGlobalRect().height_ < GetFoldLowerScreenPosY()) {
+                return false;
+            }
+            displayId = DEFAULT_DISPLAY_ID;
+        }
+    }
+    if (displayId != DISPLAY_ID_INVALID && sceneSession->GetSessionProperty()->GetDisplayId() != displayId) {
+        return false;
+    }
+    if (windowInfoOption.windowId != 0 && sceneSession->GetWindowId() !=windowInfoOption.windowId) {
+        return false;
+    }
+    if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::EXCLUDE_SYSTEM) &&
+        sceneSession->GetSessionInfo().isSystem_) {
+        return false;
+    }
+    if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::VISIBLE) &&
+        (sceneSession->GetVisibilityState() == WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION ||
+        sceneSession->GetVisibilityState() == WINDOW_LAYER_STATE_MAX)) {
+        return false;
+    }
+    if (IsChosenWindowOption(windowInfoOption.windowInfoFilterOption, WindowInfoFilterOption::FOREGROUND) &&
+        !IsSessionVisibleForeground(sceneSession)) {
+        return false;
+    }
+    return true;
+}
+
 WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
     std::vector<sptr<WindowLayoutInfo>>& infos)
 {
@@ -10855,8 +10928,7 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session->GetSessionGlobalRect().IsInvalid()) {
                 continue;
             }
-            if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-                session->GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID &&
+            if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(session->GetSessionProperty()->GetDisplayId()) &&
                 displayId == DEFAULT_DISPLAY_ID) {
                 if (isVirtualDisplay &&
                     session->GetSessionRect().posY_ + session->GetSessionRect().height_ < GetFoldLowerScreenPosY()) {
