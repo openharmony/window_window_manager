@@ -5841,7 +5841,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
             return false;
         }
         if (previousFocusedSessionFound && session->CheckFocusable() &&
-            IsSessionVisibleForeground(session) && IsParentSessionVisible(session)) {
+            session->IsVisible() && IsParentSessionVisible(session)) {
             ret = session;
             return true;
         }
