@@ -27,30 +27,32 @@
 #ifndef SUPPORT_SCREEN
 #define SUPPORT_SCREEN
 #endif
-#include "mission_snapshot.h"
-#include "transaction/rs_interfaces.h"
 
+#include "ability_info.h"
 #include "agent_death_recipient.h"
-#include "common/include/task_scheduler.h"
-#include "future.h"
-#include "interfaces/include/ws_common.h"
-#include "session_listener_controller.h"
-#include "scene_session_converter.h"
-#include "scb_session_handler.h"
-#include "session/host/include/root_scene_session.h"
-#include "session/host/include/keyboard_session.h"
-#include "session_manager/include/zidl/scene_session_manager_stub.h"
-#include "wm_single_instance.h"
-#include "window_scene_config.h"
-#include "display_info.h"
-#include "display_change_info.h"
-#include "display_change_listener.h"
 #include "app_debug_listener_interface.h"
 #include "app_mgr_client.h"
+#include "common/include/task_scheduler.h"
+#include "display_change_info.h"
+#include "display_change_listener.h"
+#include "display_info.h"
+#include "future.h"
 #include "include/core/SkRegion.h"
-#include "ability_info.h"
+#include "interfaces/include/ws_common.h"
+#include "mission_snapshot.h"
+#include "scb_session_handler.h"
+#include "scene_session_converter.h"
 #include "screen_fold_data.h"
+#include "screen_session_manager_client.h"
+#include "session/host/include/keyboard_session.h"
+#include "session/host/include/root_scene_session.h"
+#include "session_listener_controller.h"
+#include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "thread_safety_annotations.h"
+#include "transaction/rs_interfaces.h"
+#include "window_focus_controller.h"
+#include "window_scene_config.h"
+#include "wm_single_instance.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -68,6 +70,7 @@ class ResourceManager;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
+class RSNode;
 namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
@@ -87,6 +90,7 @@ struct SessionIdentityInfo {
     std::string instanceKey_;
     uint32_t windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     bool isAtomicService_ = false;
+    std::string specifiedFlag_;
 };
 
 class SceneSession;
@@ -106,7 +110,7 @@ using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const 
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName,
     GestureBackType type)>;
 using ProcessOutsideDownEventFunc = std::function<void(int32_t x, int32_t y)>;
-using ProcessShiftFocusFunc = std::function<void(int32_t persistentId)>;
+using ProcessShiftFocusFunc = std::function<void(int32_t persistentId, DisplayId displayGroupId)>;
 using NotifySetFocusSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using DumpRootSceneElementInfoFunc = std::function<void(const std::vector<std::string>& params,
     std::vector<std::string>& infos)>;
@@ -132,6 +136,7 @@ using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidAr
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
+using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -152,6 +157,12 @@ public:
      * Fold Screen Status Change Report
      */
     void OnScreenFoldStatusChanged(const std::vector<std::string>& screenFoldInfo) override;
+};
+
+class ScreenConnectionChangeListener : public IScreenConnectionChangeListener {
+public:
+    void OnScreenConnected(const sptr<ScreenSession>& screenSession) override;
+    void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) override;
 };
 
 class SceneSessionManager : public SceneSessionManagerStub {
@@ -221,6 +232,9 @@ public:
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
     void RegisterFlushWindowInfoCallback();
     void FlushWindowInfoToMMI(const bool forceFlush = false);
+    void SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession);
+    void BuildCancelPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId,
+                                 int32_t action, int32_t wid);
 
     /*
      * Window Rotate Animation
@@ -251,8 +265,8 @@ public:
     /*
      * Window Focus
      */
-    WSError SetFocusedSessionId(int32_t persistentId);
-    int32_t GetFocusedSessionId() const;
+    WSError SetFocusedSessionId(const int32_t persistentId, const DisplayId displayId);
+    int32_t GetFocusedSessionId(DisplayId displayId = DEFAULT_DISPLAY_ID) const;
     FocusChangeReason GetFocusChangeReason() const { return focusChangeReason_; }
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
@@ -261,9 +275,11 @@ public:
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
-    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
-    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError AddFocusGroup(DisplayId displayId);
+    WSError RemoveFocusGroup(DisplayId displayId);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -417,7 +433,7 @@ public:
     /*
      * UIExtension
      */
-    uint32_t GetLockScreenZorder();
+    uint32_t GetLockScreenZOrder();
     WMError CheckUIExtensionCreation(int32_t windowId, uint32_t tokenId, const AppExecFwk::ElementName& element,
         AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid);
     void OnNotifyAboveLockScreen(const std::vector<int32_t>& windowIds);
@@ -469,6 +485,14 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
+
+    /*
+     * Window Layout
+     */
+    SingleHandTransform GetNormalSingleHandTransform() const;
+    void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
+    void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
+    void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
      * Window Property
@@ -582,12 +606,9 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
-    void GetMainSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions) const;
-    WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex);
-    WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex);
+    void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
+        std::vector<sptr<SceneSession>>& mainSessions) const;
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
 
 protected:
     SceneSessionManager();
@@ -668,43 +689,49 @@ private:
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
 
-    /*
-     * Window Focus
-     */
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
     void TraverseSessionTreeFromBottomToTop(TraverseFunc func);
+
+    /*
+     * Window Focus
+     */
     WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestSessionFocusImmediately(int32_t persistentId);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
-    WSError RequestFocusBasicCheck(int32_t persistentId);
-    bool CheckLastFocusedAppSessionFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& nextSession);
-    WSError RequestFocusSpecificCheck(sptr<SceneSession>& sceneSession, bool byForeground,
+    WSError RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup);
+    bool CheckLastFocusedAppSessionFocus(const sptr<SceneSession>& focusedSession,
+        const sptr<SceneSession>& nextSession);
+    WSError RequestFocusSpecificCheck(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool byForeground,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    bool CheckTopmostWindowFocus(sptr<SceneSession>& focusedSession, sptr<SceneSession>& sceneSession);
-    bool CheckRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
-    bool CheckFocusIsDownThroughBlockingType(sptr<SceneSession>& requestSceneSession,
-        sptr<SceneSession>& focusedSession, bool includingAppSession);
+    bool CheckTopmostWindowFocus(const sptr<SceneSession>& focusedSession, const sptr<SceneSession>& sceneSession);
+    bool CheckRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    bool CheckFocusIsDownThroughBlockingType(const sptr<SceneSession>& requestSceneSession,
+        const sptr<SceneSession>& focusedSession, bool includingAppSession);
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
     bool IsParentSessionVisible(const sptr<SceneSession>& session);
-    sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
-    sptr<SceneSession> GetTopNearestBlockingFocusSession(uint32_t zOrder, bool includingAppSession);
+    sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
+    sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
+        bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
-    WSError ShiftFocus(sptr<SceneSession>& nextSession, FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    void UpdateFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
-    void NotifyFocusStatus(sptr<SceneSession>& sceneSession, bool isFocused);
-    int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
-        const std::string& reason);
-    void NotifyFocusStatusByMission(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
-    void NotifyUnFocusedByMission(sptr<SceneSession>& sceneSession);
-    bool MissionChanged(sptr<SceneSession>& prevSession, sptr<SceneSession>& currSession);
+    WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused);
+    void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
+        const sptr<FocusGroup>& focusGroup);
+    int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
+    void NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
+    void NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession);
+    bool MissionChanged(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     std::string GetAllSessionFocusInfo();
-    void RegisterRequestFocusStatusNotifyManagerFunc(sptr<SceneSession>& sceneSession);
+    void RegisterRequestFocusStatusNotifyManagerFunc(const sptr<SceneSession>& sceneSession);
     void ProcessUpdateLastFocusedAppId(const std::vector<uint32_t>& zOrderList);
+    WSError ProcessDialogRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
+    WSError ProcessModalTopmostRequestFocusImmdediately(const sptr<SceneSession>& sceneSession);
 
     void RegisterGetStateFromManagerFunc(sptr<SceneSession>& sceneSession);
     void RegisterSessionChangeByActionNotifyManagerFunc(sptr<SceneSession>& sceneSession);
@@ -930,28 +957,31 @@ private:
     NotifyStartPiPFailedFunc startPiPFailedFunc_;
 
     SystemSessionConfig systemConfig_;
-    FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     float snapshotScale_ = 0.5;
-    int32_t focusedSessionId_ = INVALID_SESSION_ID;
-    int32_t lastFocusedSessionId_ = INVALID_SESSION_ID;
-    int32_t lastFocusedAppSessionId_ = INVALID_SESSION_ID;
     int32_t brightnessSessionId_ = INVALID_SESSION_ID;
     float displayBrightness_ = UNDEFINED_BRIGHTNESS;
-    bool isScreenLocked_ {false};
-    bool needBlockNotifyFocusStatusUntilForeground_ {false};
-    bool needBlockNotifyUnfocusStatus_ {false};
-    bool isPrepareTerminateEnable_ {false};
+    bool isScreenLocked_ { false };
+    bool isPrepareTerminateEnable_ { false };
+
+    /*
+     * Window Focus
+     */
+    sptr<WindowFocusController> windowFocusController_;
+    FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
+    bool needBlockNotifyFocusStatusUntilForeground_ { false };
+    bool needBlockNotifyUnfocusStatus_ { false };
 
     /*
      * DFX
      */
-    bool openDebugTrace_ {false};
+    bool openDebugTrace_ { false };
 
     std::atomic<bool> enableInputEvent_ = true;
     std::vector<int32_t> alivePersistentIds_ = {};
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
 
+    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     sptr<AppAnrListener> appAnrListener_;
@@ -992,8 +1022,6 @@ private:
     void ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionForeground(sptr<SceneSession>& sceneSession);
     void ProcessSubSessionBackground(sptr<SceneSession>& sceneSession);
-    WSError ProcessDialogRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
-    WSError ProcessModalTopmostRequestFocusImmdediately(sptr<SceneSession>& sceneSession);
     sptr<SceneSession> FindSessionByToken(const sptr<IRemoteObject>& token);
 
     void CheckAndNotifyWaterMarkChangedResult();
@@ -1123,8 +1151,11 @@ private:
      */
     std::shared_ptr<VsyncCallback> vsyncCallback_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    SingleHandTransform singleHandTransform_;
+    GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+    bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
 
     /*
      * Window Snapshot
@@ -1148,6 +1179,7 @@ private:
     std::shared_ptr<ScbDumpSubscriber> scbDumpSubscriber_;
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
     void DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss);
+    void DumpFocusInfo(std::ostringstream& oss);
     void DumpSessionElementInfo(const sptr<SceneSession>& session,
         const std::vector<std::string>& params, std::string& dumpInfo);
     void DumpAllSessionFocusableInfo(int32_t persistentId);

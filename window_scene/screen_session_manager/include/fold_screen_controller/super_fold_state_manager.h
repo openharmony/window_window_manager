@@ -94,6 +94,13 @@ private:
     void HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession);
     void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
     void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
+
+    static void BootFinishedCallback(const char *key, const char *value, void *context);
+    void InitHalfScreen();
+    void RegisterHalfScreenSwitchesObserver();
+    void UnregisterHalfScreenSwitchesObserver();
+    void OnHalfScreenSwitchesStateChanged();
+    static bool ChangeScreenState(bool toHalf);
 };
 } // Rosen
 } // OHOS

@@ -593,15 +593,15 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
 
 void WindowRoot::DestroyLeakStartingWindow()
 {
-    WLOGFD("DestroyLeakStartingWindow is called");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "called");
     std::vector<uint32_t> destroyIds;
     for (auto& iter : windowNodeMap_) {
         if (iter.second->startingWindowShown_ && !iter.second->GetWindowToken()) {
             destroyIds.push_back(iter.second->GetWindowId());
         }
     }
-    for (auto& id : destroyIds) {
-        WLOGFD("Id:%{public}u", id);
+    for (auto id : destroyIds) {
+        TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "Id:%{public}u", id);
         DestroyWindow(id, false);
     }
 }

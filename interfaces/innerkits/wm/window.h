@@ -71,6 +71,7 @@ using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
+class Window;
 
 /**
  * @class IWindowLifeCycle
@@ -524,6 +525,21 @@ public:
      * @param terminateCloseProcess Whether need to terminate the main window close process.
      */
     virtual void OnMainWindowClose(bool& terminateCloseProcess) {}
+};
+
+/**
+ * @class IWindowWillCloseListener
+ *
+ * @brief IWindowWillCloseListener is used for async preprocessing when the window exits.
+ */
+class IWindowWillCloseListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window closed.
+     *
+     * @param terminateCloseProcess Whether need to terminate the window close process.
+     */
+    virtual void OnWindowWillClose(sptr<Window> window) {}
 };
 
 /**
@@ -1234,6 +1250,22 @@ public:
     virtual WMError SetCornerRadius(float cornerRadius) { return WMError::WM_OK; }
 
     /**
+     * @brief Sets corner radius of window.
+     *
+     * @param cornerRadius Corner radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetWindowCornerRadius(float cornerRadius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get corner radius of window.
+     *
+     * @param cornerRadius Corner radius of window.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError GetWindowCornerRadius(float& cornerRadius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set shadow radius of window.
      *
      * @param radius Shadow radius of window
@@ -1850,11 +1882,18 @@ public:
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief close the main window. It is called by ACE when close button is clicked.
+     * @brief close the window. It is called by ACE when close button is clicked.
      *
      * @return WMError
      */
     virtual WMError Close() { return WMError::WM_OK; }
+
+    /**
+     * @brief close the window. There is no pre-close process.
+     *
+     * @return WMError
+     */
+    virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief start move main window. It is called by ACE when title is moved.
@@ -1870,14 +1909,24 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move window. It is called by application.
+     * @brief Start moving window. It is called by application.
      *
      * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Stop move window. It is called by application. Support pc window and pad free multi-window.
+     * @brief Start moving window. It is called by application.
+     *
+     * @param offsetX expected pointer position x-axis offset in window when start moving.
+     * @param offsetY expected pointer position y-axis offset in window when start moving.
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Stop moving window. It is called by application. Support pc window and pad free multi-window.
      *
      * @return Error code of window.
      */
@@ -2613,6 +2662,24 @@ public:
         const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register window close async process listener.
+     *
+     * @param listener IWindowWillCloseListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window close async process listener.
+     *
+     * @param listener IWindowWillCloseListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnRegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Register switch free multi-window listener.
      *
      * @param listener ISwitchFreeMultiWindowListener.
@@ -2787,7 +2854,7 @@ public:
      * @param params
      * @return WM_OK means set success, others means set failed
      */
-    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WMError::WM_OK; }
+    virtual WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) { return WMError::WM_OK; }
 
     /**
      * @brief Set the Dvsync Switch
@@ -2956,6 +3023,28 @@ public:
     {
         static Transform trans;
         return trans;
+    }
+
+    /**
+     * @brief Show keyboard window
+     *
+     * @param mode Keyboard will show with special mode.
+     * @return WM_OK means window show success, others means failed.
+     */
+    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Change keyboard view mode
+     *
+     * @param mode Keyboard will update to the special mode.
+     * @return WM_OK means view mode update success, others means failed.
+     */
+    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
     }
 };
 }

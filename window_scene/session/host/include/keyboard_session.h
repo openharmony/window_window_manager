@@ -68,6 +68,8 @@ public:
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
     void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
+    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
 
 protected:
     void EnableCallingSessionAvoidArea() override;
@@ -98,6 +100,7 @@ private:
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
+    NotifyKeyboarViewModeChangeFunc changeKeyboardViewModeFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H

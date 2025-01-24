@@ -248,6 +248,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteParcelable(&systemConfig);
     reply.WriteUint32(property->GetSubWindowLevel());
+    reply.WriteFloat(property->GetWindowCornerRadius());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
 }
@@ -420,7 +421,12 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, Mess
 {
     WLOGFD("run HandleGetFocusSessionInfo!");
     FocusChangeInfo focusInfo;
-    GetFocusWindowInfo(focusInfo);
+    uint64_t displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    GetFocusWindowInfo(focusInfo, displayId);
     reply.WriteParcelable(&focusInfo);
     return ERR_NONE;
 }
@@ -660,7 +666,12 @@ int SceneSessionManagerStub::HandleGetFocusSessionToken(MessageParcel& data, Mes
 {
     WLOGFD("run HandleGetFocusSessionToken!");
     sptr<IRemoteObject> token = nullptr;
-    WSError errCode = GetFocusSessionToken(token);
+    uint64_t displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = GetFocusSessionToken(token, displayId);
     reply.WriteRemoteObject(token);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -670,7 +681,12 @@ int SceneSessionManagerStub::HandleGetFocusSessionElement(MessageParcel& data, M
 {
     WLOGFD("run HandleGetFocusSessionElement!");
     AppExecFwk::ElementName element;
-    WSError errCode = GetFocusSessionElement(element);
+    uint64_t displayId = 0;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = GetFocusSessionElement(element, displayId);
     reply.WriteParcelable(&element);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;

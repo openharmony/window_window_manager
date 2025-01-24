@@ -36,6 +36,8 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+const std::string RESOLVED_CALLBACK = "resolvedCallback";
+const std::string REJECTED_CALLBACK = "rejectedCallback";
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -700,6 +702,61 @@ bool GetSystemBarStatus(napi_env env, napi_callback_info info,
     return true;
 }
 
+napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    SystemBarProperty statusBarProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    napi_set_named_property(env, objValue, "contentColor",
+        CreateJsValue(env, GetHexColor(statusBarProperty.contentColor_)));
+    return objValue;
+}
+
+static bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType)
+{
+    napi_valuetype valueType = napi_undefined;
+    if (napi_typeof(env, param, &valueType) != napi_ok) {
+        return false;
+    }
+    return valueType == expectType;
+}
+
+bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue)
+{
+    if (!CheckTypeForNapiValue(env, value, napi_object)) {
+        return false;
+    }
+    napi_value jsToNumeric = nullptr;
+    napi_get_named_property(env, value, "toNumeric", &jsToNumeric);
+    if (!CheckTypeForNapiValue(env, jsToNumeric, napi_function)) {
+        return false;
+    }
+    napi_value jsColor;
+    if (napi_call_function(env, value, jsToNumeric, 0, nullptr, &jsColor) != napi_ok) {
+        return false;
+    }
+    if (!CheckTypeForNapiValue(env, jsColor, napi_number)) {
+        return false;
+    }
+    return napi_get_value_uint32(env, jsColor, &colorValue) == napi_ok;
+}
+
+bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_string) {
+        return ConvertFromJsValue(env, value, colorStr);
+    }
+    uint32_t colorValue = 0;
+    if (ParseColorMetrics(env, value, colorValue)) {
+        colorStr = GetHexColor(colorValue);
+        return true;
+    }
+    return false;
+}
+
 bool ParseAndCheckRect(napi_env env, napi_value jsObject,
     const Rect& windowRect, Rect& touchableRect)
 {
@@ -1294,6 +1351,105 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         return false;
     }
     return ParseModalityParam(env, jsObject, windowOption);
+}
+
+bool CheckPromise(napi_env env, napi_value promiseObj)
+{
+    if (promiseObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj is nullptr");
+        return false;
+    }
+    bool isPromise = false;
+    napi_is_promise(env, promiseObj, &isPromise);
+    return isPromise;
+}
+
+napi_value ResolvedCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    void* returnValue = nullptr;
+    if (napi_get_cb_info(env, info, &argc, argv, nullptr, &returnValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to get returnValue");
+        return nullptr;
+    }
+    auto* asyncCallback = static_cast<AsyncCallback*>(returnValue);
+    if (asyncCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
+        return nullptr;
+    }
+    if (asyncCallback->resolvedCallback_ != nullptr) {
+        asyncCallback->resolvedCallback_(env, argc, argv);
+    } else {
+        TLOGW(WmsLogTag::WMS_PC, "resolvedCallback is nullptr");
+    }
+    returnValue = nullptr;
+    return nullptr;
+}
+
+napi_value RejectedCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    void* returnValue = nullptr;
+    if (napi_get_cb_info(env, info, &argc, argv, nullptr, &returnValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to get returnValue");
+        return nullptr;
+    }
+    auto* asyncCallback = static_cast<AsyncCallback*>(returnValue);
+    if (asyncCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
+        return nullptr;
+    }
+    if (asyncCallback->rejectedCallback_ != nullptr) {
+        asyncCallback->rejectedCallback_(env, argc, argv);
+    } else {
+        TLOGW(WmsLogTag::WMS_PC, "rejectedCallback is nullptr");
+    }
+    returnValue = nullptr;
+    return nullptr;
+}
+
+bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallback)
+{
+    if (!CheckPromise(env, promiseObj)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj not is promise");
+        return false;
+    }
+
+    napi_value promiseThen = nullptr;
+    napi_get_named_property(env, promiseObj, "then", &promiseThen);
+    if (promiseThen == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj then property is nullptr");
+        return false;
+    }
+    if (!NapiIsCallable(env, promiseThen)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseThen not is callable");
+        return false;
+    }
+    napi_value resolvedCallback = nullptr;
+    napi_create_function(env, RESOLVED_CALLBACK.c_str(), RESOLVED_CALLBACK.size(),
+        ResolvedCallback, asyncCallback, &resolvedCallback);
+    napi_value thenArgv[] = { resolvedCallback };
+    napi_call_function(env, promiseObj, promiseThen, ArraySize(thenArgv), thenArgv, nullptr);
+
+    napi_value promiseCatch = nullptr;
+    napi_get_named_property(env, promiseObj, "catch", &promiseCatch);
+    if (promiseCatch == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj catch property is nullptr");
+        return false;
+    }
+    if (!NapiIsCallable(env, promiseCatch)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseCatch not is callable");
+        return false;
+    }
+    napi_value rejectedCallback = nullptr;
+    napi_create_function(env, REJECTED_CALLBACK.c_str(), REJECTED_CALLBACK.size(),
+        RejectedCallback, asyncCallback, &rejectedCallback);
+    napi_value catchArgv[] = { rejectedCallback };
+    napi_call_function(env, promiseObj, promiseCatch, ArraySize(catchArgv), catchArgv, nullptr);
+
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

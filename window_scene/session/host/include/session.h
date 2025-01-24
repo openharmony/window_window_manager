@@ -94,6 +94,7 @@ using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 
 class ILifecycleListener {
 public:
@@ -409,6 +410,7 @@ public:
      * Keyboard Window
      */
     bool CheckEmptyKeyboardAvoidAreaIfNeeded() const;
+    void SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
 
     bool IsSessionValid() const;
     bool IsActive() const;
@@ -488,8 +490,6 @@ public:
         return !this->operator==(session);
     }
 
-    virtual void HandleStyleEvent(MMI::WindowArea area) {};
-    WSError SetPointerStyle(MMI::WindowArea area);
     const char* DumpPointerWindowArea(MMI::WindowArea area) const;
     WSRectF UpdateHotRect(const WSRect& rect);
     WSError RaiseToAppTopForPointDown();
@@ -562,15 +562,19 @@ public:
     /*
      * Window Layout
      */
+    static bool IsBackgroundUpdateRectNotifyEnabled();
+    static void SetBackgroundUpdateRectNotifyEnabled(const bool enabled);
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
     void ResetDirtyFlags();
+    void SetDragActivated(bool dragActivated);
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect);
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
+    bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
 
@@ -644,6 +648,11 @@ protected:
         return ret;
     }
 
+    /*
+     * Window Layout
+     */
+    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
+
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
@@ -716,6 +725,7 @@ protected:
     /*
      * Window Layout
      */
+    static bool isBackgroundUpdateRectNotifyEnabled_;
     RequestVsyncFunc requestNextVsyncFunc_;
     WSRect winRect_;
     WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
@@ -729,7 +739,6 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
-    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     DisplayId lastUpdatedDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
@@ -778,6 +787,11 @@ protected:
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
     static bool isScbCoreEnabled_;
+
+    /*
+     * Keyboard Window
+     */
+    NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
 
 private:
     void HandleDialogForeground();
@@ -887,6 +901,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    bool dragActivated_ = true;
     SingleHandTransform singleHandTransform_;
 
     /*

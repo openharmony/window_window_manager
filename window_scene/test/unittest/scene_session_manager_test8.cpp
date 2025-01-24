@@ -50,7 +50,7 @@ void SceneSessionManagerTest8::TearDownTestCase()
 
 void SceneSessionManagerTest8::SetUp()
 {
-    ssm_ = sptr<SceneSessionManager>::MakeSptr();
+    ssm_ = &SceneSessionManager::GetInstance();
     EXPECT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
 }
@@ -164,7 +164,8 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Leve
 HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
-    ssm_->focusedSessionId_ = 0;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(0);
 
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "PostProcessFocus01";
@@ -180,7 +181,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Le
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
 
-    EXPECT_NE(1, ssm_->focusedSessionId_);
+    EXPECT_NE(1, focusGroup->GetFocusedSessionId());
 }
 
 /**
@@ -556,7 +557,7 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
     ssm_->Init();
     ASSERT_NE(nullptr, ssm_->eventHandler_);
 
-    ssm_->SetFocusedSessionId(2024);
+    ssm_->SetFocusedSessionId(2024, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(2024, ssm_->GetFocusedSessionId());
 
     ret = ssm_->SetBrightness(sceneSession, 3.15f);
@@ -890,7 +891,6 @@ HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, Function | SmallTest 
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->OnSessionStateChange(100, state);
-    
     auto ret = ssm_->UpdateMaximizeMode(1, true);
     EXPECT_EQ(WSError::WS_OK, ret);
     constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;

@@ -19,6 +19,7 @@
 #include "accessibility_event_info.h"
 #include "ws_common.h"
 #include "mock_message_parcel.h"
+#include "pointer_event.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -865,9 +866,7 @@ HWTEST_F(SessionProxyTest, ChangeSessionVisibilityWithStatusBar, Function | Smal
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: ChangeSessionVisibilityWithStatusBar start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     bool visible = true;
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
@@ -891,9 +890,7 @@ HWTEST_F(SessionProxyTest, SyncSessionEvent, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: SyncSessionEvent start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
     WSError res = sProxy->SyncSessionEvent(event);
@@ -910,9 +907,7 @@ HWTEST_F(SessionProxyTest, OnLayoutFullScreenChange, Function | SmallTest | Leve
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: OnLayoutFullScreenChange start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     bool isLayoutFullScreen = true;
     WSError res = sProxy->OnLayoutFullScreenChange(isLayoutFullScreen);
@@ -932,9 +927,7 @@ HWTEST_F(SessionProxyTest, OnDefaultDensityEnabled, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: OnDefaultDensityEnabled start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     bool isDefaultDensityEnabled = true;
     WSError res = sProxy->OnDefaultDensityEnabled(isDefaultDensityEnabled);
@@ -954,9 +947,7 @@ HWTEST_F(SessionProxyTest, NotifyFrameLayoutFinishFromApp, Function | SmallTest 
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyFrameLayoutFinishFromApp start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     bool notifyListener = true;
     WSRect rect = { 200, 200, 200, 200 };
@@ -977,9 +968,7 @@ HWTEST_F(SessionProxyTest, RaiseAppMainWindowToTop, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: RaiseAppMainWindowToTop start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     WSError res = sProxy->RaiseAppMainWindowToTop();
     ASSERT_EQ(res, WSError::WS_OK);
@@ -998,9 +987,7 @@ HWTEST_F(SessionProxyTest, GetAllAvoidAreas, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: GetAllAvoidAreas start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     WSError res = sProxy->GetAllAvoidAreas(avoidAreas);
@@ -1020,9 +1007,7 @@ HWTEST_F(SessionProxyTest, SetLandscapeMultiWindow, Function | SmallTest | Level
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: SetLandscapeMultiWindow start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     bool isLandscapeMultiWindow = true;
     WSError res = sProxy->SetLandscapeMultiWindow(isLandscapeMultiWindow);
@@ -1108,9 +1093,7 @@ HWTEST_F(SessionProxyTest, UpdatePiPRect, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: UpdatePiPRect start";
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    ASSERT_NE(iRemoteObjectMocker, nullptr);
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
-    ASSERT_NE(sProxy, nullptr);
 
     Rect rect = { 200, 200, 200, 200 };
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
@@ -1134,6 +1117,166 @@ HWTEST_F(SessionProxyTest, SetSessionLabelAndIcon, Function | SmallTest | Level2
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
 
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->SetSessionLabelAndIcon(label, icon));
+}
+
+/**
+ * @tc.name: SetWindowCornerRadius
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->SetWindowCornerRadius(1.0f);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetWindowCornerRadius end";
+}
+
+/**
+ * @tc.name: ProcessPointDownSession
+ * @tc.desc: ProcessPointDownSession test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, ProcessPointDownSession, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: ProcessPointDownSession start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    int32_t posX = 50;
+    int32_t posY = 50;
+    WSError res = sProxy->ProcessPointDownSession(posX, posY);
+    ASSERT_EQ(res, WSError::WS_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->ProcessPointDownSession(posX, posY);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: ProcessPointDownSession end";
+}
+
+/**
+ * @tc.name: SendPointEventForMoveDrag
+ * @tc.desc: SendPointEventForMoveDrag test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SendPointEventForMoveDrag, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SendPointEventForMoveDrag start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    bool isExecuteDelayRaise = true;
+    WSError res = sProxy->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
+    ASSERT_EQ(res, WSError::WS_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SendPointEventForMoveDrag end";
+}
+
+/**
+ * @tc.name: IsStartMoving
+ * @tc.desc: IsStartMoving test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, IsStartMoving, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: IsStartMoving start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    bool res = sProxy->IsStartMoving();
+    ASSERT_EQ(res, false);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->IsStartMoving();
+    ASSERT_EQ(res, false);
+    GTEST_LOG_(INFO) << "SessionProxyTest: IsStartMoving end";
+}
+
+/**
+ * @tc.name: UpdateRectChangeListenerRegistered
+ * @tc.desc: UpdateRectChangeListenerRegistered test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateRectChangeListenerRegistered, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateRectChangeListenerRegistered start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    bool isRegister = true;
+    WSError res = sProxy->UpdateRectChangeListenerRegistered(isRegister);
+    ASSERT_EQ(res, WSError::WS_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->UpdateRectChangeListenerRegistered(isRegister);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateRectChangeListenerRegistered end";
+}
+
+/**
+ * @tc.name: SendExtensionData
+ * @tc.desc: SendExtensionData test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SendExtensionData, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SendExtensionData start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    WSError res = sProxy->SendExtensionData(data, reply, option);
+    ASSERT_EQ(res, WSError::WS_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->SendExtensionData(data, reply, option);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SendExtensionData end";
+}
+
+/**
+ * @tc.name: SetGestureBackEnabled
+ * @tc.desc: SetGestureBackEnabled test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, SetGestureBackEnabled, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetGestureBackEnabled start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    bool isEnabled = true;
+    WMError res = sProxy->SetGestureBackEnabled(isEnabled);
+    ASSERT_EQ(res, WMError::WM_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->SetGestureBackEnabled(isEnabled);
+    ASSERT_EQ(res, WMError::WM_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: SetGestureBackEnabled end";
+}
+
+/**
+ * @tc.name: NotifySubModalTypeChange
+ * @tc.desc: NotifySubModalTypeChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifySubModalTypeChange, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySubModalTypeChange start";
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+
+    SubWindowModalType subWindowModalType = SubWindowModalType::TYPE_APPLICATION_MODALITY;
+    WSError res = sProxy->NotifySubModalTypeChange(subWindowModalType);
+    ASSERT_EQ(res, WSError::WS_OK);
+    sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    res = sProxy->NotifySubModalTypeChange(subWindowModalType);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifySubModalTypeChange end";
 }
 } // namespace
 } // namespace Rosen

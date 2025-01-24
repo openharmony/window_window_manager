@@ -25,11 +25,14 @@ namespace Rosen {
 sptr<SettingObserver> ScreenSettingHelper::dpiObserver_;
 sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
+sptr<SettingObserver> ScreenSettingHelper::halfScreenObserver_;
+sptr<SettingObserver> ScreenSettingHelper::screenSkipProtectedWindowObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
 constexpr uint32_t DATA_SIZE_INVALID = 0xffffffff;
 const std::string SCREEN_SHAPE = system::GetParameter("const.window.screen_shape", "0:0");
+const std::string SCREEN_SHARE_PROTECT_TABLE = "USER_SETTINGDATA_SECURE_";
 
 void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc func)
 {
@@ -39,6 +42,9 @@ void ScreenSettingHelper::RegisterSettingDpiObserver(SettingObserver::UpdateFunc
     }
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     dpiObserver_ = provider.CreateObserver(SETTING_DPI_KEY, func);
+    if (dpiObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
     ErrCode ret = provider.RegisterObserver(dpiObserver_);
     if (ret != ERR_OK) {
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
@@ -132,6 +138,9 @@ void ScreenSettingHelper::RegisterSettingCastObserver(SettingObserver::UpdateFun
     }
     SettingProvider& castProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     castObserver_ = castProvider.CreateObserver(SETTING_CAST_KEY, func);
+    if (castObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
     ErrCode ret = castProvider.RegisterObserver(castObserver_);
     if (ret != ERR_OK) {
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
@@ -172,6 +181,9 @@ void ScreenSettingHelper::RegisterSettingRotationObserver(SettingObserver::Updat
     }
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     rotationObserver_ = settingProvider.CreateObserver(SETTING_ROTATION_KEY, func);
+    if (rotationObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
     ErrCode ret = settingProvider.RegisterObserver(rotationObserver_);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
@@ -495,6 +507,94 @@ ScreenShape ScreenSettingHelper::GetScreenShape(ScreenId screenId)
     }
     TLOGI(WmsLogTag::DMS, "Can not find screen shape info. ccm:%{public}s", SCREEN_SHAPE.c_str());
     return ScreenShape::RECTANGLE;
+}
+
+void ScreenSettingHelper::RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func)
+{
+    if (halfScreenObserver_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "setting halfScreen observer is registered");
+        return;
+    }
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    halfScreenObserver_ = halfScreenProvider.CreateObserver(SETTING_HALF_SCREEN_SWITCH_KEY, func);
+    ErrCode ret = halfScreenProvider.RegisterObserver(halfScreenObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "halfScreen failed, ret:%{public}d", ret);
+        halfScreenObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingHalfScreenObserver()
+{
+    if (halfScreenObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "halfScreenObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = halfScreenProvider.UnregisterObserver(halfScreenObserver_);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+    }
+    halfScreenObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetHalfScreenSwitchState(const std::string& key)
+{
+    SettingProvider& halfScreenProvider = SettingProvider::GetInstance(DEVICE_STANDBY_SERVICE_SYSTEM_ABILITY_ID);
+    int dbValue = 0;
+    ErrCode ret = halfScreenProvider.GetIntValue(key, dbValue);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "GetHalfScreenSwitchState failed, ret:%{public}d", ret);
+        return false;
+    }
+    return !dbValue;
+}
+
+void ScreenSettingHelper::RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func)
+{
+    if (screenSkipProtectedWindowObserver_ != nullptr) {
+        TLOGI(WmsLogTag::DMS, "setting rotation observer is registered");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    screenSkipProtectedWindowObserver_ = settingProvider.CreateObserver(SETTING_SCREEN_SHARE_PROTECT_KEY, func);
+    if (screenSkipProtectedWindowObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+    }
+    ErrCode ret = settingProvider.RegisterObserverByTable(screenSkipProtectedWindowObserver_,
+        SCREEN_SHARE_PROTECT_TABLE);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+        screenSkipProtectedWindowObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingscreenSkipProtectedWindowObserver()
+{
+    if (screenSkipProtectedWindowObserver_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "rotationObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.UnregisterObserverByTable(screenSkipProtectedWindowObserver_,
+        SCREEN_SHARE_PROTECT_TABLE);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret:%{public}d", ret);
+    }
+    screenSkipProtectedWindowObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, const std::string& key)
+{
+    int32_t value = 0;
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetIntValueMultiUserByTable(key, value, SCREEN_SHARE_PROTECT_TABLE);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    enable = (value == 1);
+    return true;
 }
 } // namespace Rosen
 } // namespace OHOS

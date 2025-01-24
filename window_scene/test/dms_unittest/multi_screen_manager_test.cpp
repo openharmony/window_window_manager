@@ -55,7 +55,7 @@ public:
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {};
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
-    void OnSecondaryReflexionChanged(ScreenId screenId, uint32_t isSecondaryReflexion) override {};
+    void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };
@@ -659,7 +659,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch12, Function | SmallTe
 HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {};
-    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
+    std::vector<DisplayId> displayIds;
+    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -671,7 +672,8 @@ HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
 HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1001, 1002};
-    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
+    std::vector<DisplayId> displayIds;
+    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
