@@ -625,6 +625,12 @@ public:
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
 
     /*
+     * Window Focus
+     */
+    bool IsSameMainSession(const sptr<SceneSession>& prevSession);
+    void SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func);
+    
+    /*
      * Window Property
     */
     void SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func);
@@ -878,6 +884,8 @@ private:
     WMError HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+    WMError HandleActionUpdateExclusivelyHighlighted(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
