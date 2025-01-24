@@ -634,6 +634,24 @@ void JsWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
+void JsWindowListener::OnWindowHighlightChange(bool isHighlight)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "isHighlight: %{public}d", isHighlight);
+    auto jsCallback = [self = weakRef_, isHighlight, env = env_, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s: this listener or env is nullptr", where);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value argv[] = { CreateJsValue(env, isHighlight) };
+        thisListener->CallJsMethod(WINDOW_HIGHLIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed to send event");
+    }
+}
+
 WmErrorCode JsWindowListener::CanCancelUnregister(const std::string& eventType)
 {
     if (eventType == WINDOW_WILL_CLOSE_CB) {

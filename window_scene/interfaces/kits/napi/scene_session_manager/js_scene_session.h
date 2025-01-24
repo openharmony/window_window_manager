@@ -90,6 +90,7 @@ enum class ListenerFuncType : uint32_t {
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_VIEW_MODE_CHANGE_CB,
     SET_WINDOW_CORNER_RADIUS_CB,
+    HIGHLIGHT_CHANGE_CB,
 };
 
 class SceneSession;
@@ -204,6 +205,7 @@ private:
     static napi_value SetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
+    static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     static napi_value SetColorSpace(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
@@ -274,6 +276,7 @@ private:
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
     napi_value OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
     napi_value OnSendContainerModalEvent(napi_env env, napi_callback_info info);
+    napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     napi_value OnSetColorSpace(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
@@ -327,6 +330,7 @@ private:
     void ProcessUpdateSessionLabelAndIconRegister();
     void ProcessKeyboardStateChangeRegister();
     void ProcessKeyboardViewModeChangeRegister();
+    void ProcessSetHighlightChangeRegister();
 
     /*
      * Window Property
@@ -392,6 +396,7 @@ private:
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
+    void NotifyHighlightChange(bool isHighlight);
 
     /*
      * Window Property

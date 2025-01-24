@@ -2444,6 +2444,100 @@ HWTEST_F(WindowSessionImplTest4, GetLayoutTransform, Function | SmallTest | Leve
     ASSERT_EQ(transform.scaleY_, layoutTransform.scaleY_);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
+
+/**
+ * @tc.name: SetExclusivelyHighlighted
+ * @tc.desc: SetExclusivelyHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetExclusivelyHighlighted, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetExclusivelyHighlighted");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->flags_ = 0;
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_OK);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(false), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetExclusivelyHighlighted
+ * @tc.desc: GetExclusivelyHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetExclusivelyHighlighted, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetExclusivelyHighlighted");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(window->GetExclusivelyHighlighted(), true);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange
+ * @tc.desc: NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyHighlightChange01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
+    bool highlight = false;
+    WSError res = window->NotifyHighlightChange(highlight);
+    EXPECT_EQ(highlight, false);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
+    window->RegisterWindowHighlightChangeListeners(listener);
+    res = window->NotifyHighlightChange(highlight);
+    EXPECT_EQ(highlight, false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    window->UnregisterWindowHighlightChangeListeners(listener);
+}
+
+/**
+ * @tc.name: IsWindowHighlighted
+ * @tc.desc: IsWindowHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWindowHighlighted");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    bool isHighlighted = false;
+    window->IsWindowHighlighted(isHighlighted);
+    ASSERT_EQ(isHighlighted, false);
+    window->property_->SetPersistentId(1);
+    window->isHighlighted_ = true;
+    window->IsWindowHighlighted(isHighlighted);
+    ASSERT_EQ(isHighlighted, true);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

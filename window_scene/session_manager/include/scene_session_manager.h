@@ -689,6 +689,10 @@ private:
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
 
+    /*
+     * Window Focus
+     */
+    std::unordered_set<int32_t> highlightIds_;
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -718,7 +722,7 @@ private:
     sptr<SceneSession> GetTopNearestBlockingFocusSession(DisplayId displayId, uint32_t zOrder,
         bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
-    WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession,
+    WSError ShiftFocus(DisplayId displayId, const sptr<SceneSession>& nextSession, bool isProactiveUnfocus,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void UpdateFocusStatus(DisplayId displayId, const sptr<SceneSession>& sceneSession, bool isFocused);
     void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused,
@@ -746,6 +750,12 @@ private:
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
     void UpdateOccupiedAreaIfNeed(int32_t persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
+    void UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,
+        bool isProactiveUnfocus);
+    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession);
+    void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession);
+    void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
+    std::string GetHighlightIdsStr();
 
     /*
      * Window Immersive

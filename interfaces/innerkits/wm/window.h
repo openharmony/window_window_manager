@@ -541,6 +541,20 @@ public:
      */
     virtual void OnWindowWillClose(sptr<Window> window) {}
 };
+/**
+ * @class IWindowHighlightChangeListener
+ *
+ * @brief IWindowHighlightChangeListener is a listener to observe event when highlight change of window.
+ */
+class IWindowHighlightChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when highlight status changes.
+     *
+     * @param isHighlight Whether the window is highlighted.
+     */
+    virtual void OnWindowHighlightChange(bool isHighlight) {}
+};
 
 /**
  * @class ISwitchFreeMultiWindowListener
@@ -3046,6 +3060,47 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Register window highlight change listener.
+     *
+     * @param listener IWindowHighlightChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister window highlight change listener.
+     *
+     * @param listener IWindowHighlightChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Set whether to enable exclusively highlight.
+     *
+     * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Get highlight property of window.
+     *
+     * @param highlighted True means the window is highlighted, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }
