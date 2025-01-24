@@ -983,17 +983,15 @@ struct WindowInfo : public Parcelable {
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return windowUIInfo.Marshalling(parcel) &&
-               windowDisplayInfo.Marshalling(parcel) &&
-               windowLayoutInfo.Marshalling(parcel) &&
-               windowMetaInfo.Marshalling(parcel);
+        return parcel.WriteParcelable(&windowUIInfo) && parcel.WriteParcelable(&windowDisplayInfo) &&
+               parcel.WriteParcelable(&windowLayoutInfo) && parcel.WriteParcelable(&windowMetaInfo);
     }
 
     static WindowInfo* Unmarshalling(Parcel& parcel)
     {
         WindowInfo* windowInfo = new WindowInfo();
-        if (!windowInfo->windowUIInfo.Unmarshalling(parcel) || !windowInfo->windowDisplayInfo.Unmarshalling(parcel) ||
-            !windowInfo->windowLayoutInfo.Unmarshalling(parcel) || !windowInfo->windowMetaInfo.Unmarshalling(parcel)) {
+        if (!parcel.ReadParcelable<WindowUIInfo> || !parcel.ReadParcelable<WindowDisplayInfo> ||
+            !parcel.ReadParcelable<WindowLayoutInfo> || !parcel.ReadParcelable<WindowMetaInfo>) {
             delete windowInfo;
             return nullptr;
         }
