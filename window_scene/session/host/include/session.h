@@ -562,6 +562,8 @@ public:
     /*
      * Window Layout
      */
+    static bool IsBackgroundUpdateRectNotifyEnabled();
+    static void SetBackgroundUpdateRectNotifyEnabled(const bool enabled);
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
     void ResetDirtyFlags();
@@ -646,6 +648,11 @@ protected:
         return ret;
     }
 
+    /*
+     * Window Layout
+     */
+    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
+
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
@@ -718,6 +725,7 @@ protected:
     /*
      * Window Layout
      */
+    static bool isBackgroundUpdateRectNotifyEnabled_;
     RequestVsyncFunc requestNextVsyncFunc_;
     WSRect winRect_;
     WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
@@ -731,7 +739,6 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
-    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     DisplayId lastUpdatedDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
