@@ -1435,7 +1435,7 @@ struct WindowInfo : public Parcelable {
         windowInfo->windowMetaInfo = *windowMetaInfo;
         return windowInfo;
     }
-}; 
+};
 
 /**
  * @struct WindowInfoOption
