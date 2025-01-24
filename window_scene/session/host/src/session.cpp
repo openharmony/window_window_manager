@@ -3815,7 +3815,7 @@ WindowUIInfo Session::GetWindowUIInfoForWindowInfo() const
 WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
 {
     WindowDisplayInfo windowDisplayInfo;
-    if (PcFoldScreenManager::IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
         WSRect sessionGlobalRect = GetSessionGlobalRect();
         windowDisplayInfo.displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
     } else {
@@ -3830,7 +3830,7 @@ WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
     WSRect sessionGlobalRect = GetSessionGlobalRect();
     sessionGlobalRect.width_ *= GetScaleX();
     sessionGlobalRect.height_ *= GetScaleY();
-    if (PcFoldScreenManager::IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
         TransformGlobalRectToRelativeRect(sessionGlobalRect);
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
