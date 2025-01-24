@@ -38,7 +38,6 @@ public:
     WMError Minimize() override;
     void StartMove() override;
     bool IsStartMoving() override;
-    WMError Close() override;
     WindowMode GetWindowMode() const override;
 
     /*
@@ -220,6 +219,8 @@ public:
     WMError SetWindowTitle(const std::string& title) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
+    WMError Close() override;
+    WMError CloseDirectly() override;
 
     /*
      * Starting Window

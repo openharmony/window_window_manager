@@ -71,6 +71,7 @@ using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
+class Window;
 
 /**
  * @class IWindowLifeCycle
@@ -524,6 +525,21 @@ public:
      * @param terminateCloseProcess Whether need to terminate the main window close process.
      */
     virtual void OnMainWindowClose(bool& terminateCloseProcess) {}
+};
+
+/**
+ * @class IWindowWillCloseListener
+ *
+ * @brief IWindowWillCloseListener is used for async preprocessing when the window exits.
+ */
+class IWindowWillCloseListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window closed.
+     *
+     * @param terminateCloseProcess Whether need to terminate the window close process.
+     */
+    virtual void OnWindowWillClose(sptr<Window> window) {}
 };
 
 /**
@@ -1866,11 +1882,18 @@ public:
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief close the main window. It is called by ACE when close button is clicked.
+     * @brief close the window. It is called by ACE when close button is clicked.
      *
      * @return WMError
      */
     virtual WMError Close() { return WMError::WM_OK; }
+
+    /**
+     * @brief close the window. There is no pre-close process.
+     *
+     * @return WMError
+     */
+    virtual WMError CloseDirectly() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief start move main window. It is called by ACE when title is moved.
@@ -2637,6 +2660,24 @@ public:
      */
     virtual WMError UnregisterMainWindowCloseListeners(
         const sptr<IMainWindowCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register window close async process listener.
+     *
+     * @param listener IWindowWillCloseListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window close async process listener.
+     *
+     * @param listener IWindowWillCloseListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnRegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register switch free multi-window listener.
