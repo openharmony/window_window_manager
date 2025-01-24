@@ -270,7 +270,7 @@ HWTEST_F(WindowSessionImplTest4, GetDecorVisible, Function | SmallTest | Level2)
     bool isVisible = true;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetDecorVisible(isVisible));
     window->property_->SetPersistentId(1);
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetDecorVisible(isVisible))
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetDecorVisible(isVisible));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     ASSERT_EQ(WMError::WM_OK, window->SetDecorVisible(isVisible));
     ASSERT_FALSE(isVisible);
