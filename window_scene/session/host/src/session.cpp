@@ -3778,16 +3778,10 @@ WindowUIInfo Session::GetWindowUIInfoForWindowInfo() const
     return windowUIInfo;
 }
 
-bool Session::IsHalfFoldedOnDefaultDisplayId() const
-{
-    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
-        GetSessionProperty()->GetDisplayId() == DEFAULT_DISPLAY_ID;
-}
-
 WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
 {
     WindowDisplayInfo windowDisplayInfo;
-    if (IsHalfFoldedOnDefaultDisplayId()) {
+    if (PcFoldScreenManager::IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
         WSRect sessionGlobalRect = GetSessionGlobalRect();
         windowDisplayInfo.displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
     } else {
@@ -3802,7 +3796,7 @@ WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
     WSRect sessionGlobalRect = GetSessionGlobalRect();
     sessionGlobalRect.width_ *= GetScaleX();
     sessionGlobalRect.height_ *= GetScaleY();
-    if (IsHalfFoldedOnDefaultDisplayId()) {
+    if (PcFoldScreenManager::IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
         TransformGlobalRectToRelativeRect(sessionGlobalRect);
     }
     windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,

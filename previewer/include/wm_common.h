@@ -25,6 +25,7 @@
 #include <parcel.h>
 #include "dm_common.h"
 #include "securec.h"
+#include "wm_type.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -42,7 +43,6 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
 constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 }
-using DisplayId = uint64_t;
 
 /**
  * @brief Enumerates type of window
@@ -723,8 +723,6 @@ public:
     }
 };
 
-using OnCallback = std::function<void(int64_t, int64_t)>;
-
 /**
  * @struct VsyncCallback
  *
@@ -810,8 +808,6 @@ struct TitleButtonRect {
     }
 };
 
-using WindowInfoFilterOptionDataType = uint8_t;
-
 /**
  * @brief WindowInfo filter Option
  */
@@ -833,8 +829,6 @@ inline bool IsChosenOption(WindowInfoFilterOption options, WindowInfoFilterOptio
     return (static_cast<WindowInfoFilterOptionDataType>(options) &
         static_cast<WindowInfoFilterOptionDataType>(option)) != 0;
 }
-
-using WindowInfoTypeOptionDataType = uint8_t;
 
 /**
  * @brief WindowInfo Type Option
