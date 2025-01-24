@@ -19,6 +19,7 @@
 namespace OHOS {
 namespace Rosen {
     using DisplayId = uint64_t;
+    inline constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
     using OnCallback = std::function<void(int64_t, int64_t)>;
     using WindowInfoFilterOptionDataType = uint8_t;
     using WindowInfoTypeOptionDataType = uint8_t;
