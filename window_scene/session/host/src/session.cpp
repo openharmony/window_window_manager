@@ -51,7 +51,6 @@ constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
-constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 const std::map<SessionState, bool> ATTACH_MAP = {
@@ -74,6 +73,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
 bool Session::isScbCoreEnabled_ = false;
+bool Session::isBackgroundUpdateRectNotifyEnabled_ = false;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -856,14 +856,6 @@ bool Session::IsSessionForeground() const
     return state_ == SessionState::STATE_FOREGROUND || state_ == SessionState::STATE_ACTIVE;
 }
 
-WSError Session::SetPointerStyle(MMI::WindowArea area)
-{
-    WLOGFI("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
-        callingPid_, persistentId_, DumpPointerWindowArea(area));
-    MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
-    return WSError::WS_OK;
-}
-
 WSRectF Session::UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area)
 {
     const float innerBorder = INNER_BORDER_VP * vpr_;
@@ -1055,6 +1047,9 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     winRect_ = rect;
+    if (!Session::IsBackgroundUpdateRectNotifyEnabled() && !IsSessionForeground()) {
+        return WSError::WS_DO_NOTHING;
+    }
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
@@ -1165,6 +1160,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetPersistentId(GetPersistentId());
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
+    property->SetWindowSizeLimits(GetSessionInfo().windowSizeLimits);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
@@ -2137,17 +2133,24 @@ void Session::HandlePointDownDialog()
 
 WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
-    if (isExecuteDelayRaise) {
-        return WSError::WS_OK;
-    }
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
-        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (raiseEnabled) {
+    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
+    bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    if (isExecuteDelayRaise) {
+        if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            RaiseToAppTopForPointDown();
+        }
+        if (!raiseEnabled && parentSession) {
+            parentSession->NotifyClick(!IsScbCoreEnabled());
+        }
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled && isPointDown) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
@@ -2193,6 +2196,11 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (!isExecuteDelayRaise) {
         PresentFoucusIfNeed(pointerAction);
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        if (!isFocused_ && GetFocusable()) {
+            NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
+        }
+        NotifyClick();
     }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
@@ -3140,7 +3148,8 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
 {
     bool isMainFloating =
         GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING && WindowHelper::IsMainWindow(GetWindowType());
-    bool isParentFloating = WindowHelper::IsSubWindow(GetWindowType()) && GetParentSession() != nullptr &&
+    bool isParentFloating = SessionHelper::IsNonSecureToUIExtension(GetWindowType()) &&
+        GetParentSession() != nullptr &&
         GetParentSession()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     bool isMidScene = GetIsMidScene();
     bool isPhoneOrPadNotFreeMultiWindow =
@@ -3148,13 +3157,27 @@ bool Session::CheckEmptyKeyboardAvoidAreaIfNeeded() const
     return (isMainFloating || isParentFloating) && !isMidScene && isPhoneOrPadNotFreeMultiWindow;
 }
 
-void Session::SetKeybaordStateChangeListener(const NotifyKeyboardStateChangeFunc& func)
+void Session::SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func)
 {
-    keyboardStateChangeFunc_ = func;
-    if (state_ == SessionState::STATE_DISCONNECT) {
-        return;
-    }
-    NotifySessionStateChange(state_);
+    PostTask([weakThis = wptr(this), func, where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr || func == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session or func is null", where);
+            return;
+        }
+        session->keyboardStateChangeFunc_ = func;
+        auto newState = session->GetSessionState(); // read and write state should in one thread
+        if (newState == SessionState::STATE_ACTIVE) {
+            newState = SessionState::STATE_FOREGROUND;
+        } else if (newState == SessionState::STATE_INACTIVE) {
+            newState = SessionState::STATE_BACKGROUND;
+        } else if (newState == SessionState::STATE_DISCONNECT) {
+            return;
+        }
+        session->NotifySessionStateChange(newState);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s id: %{public}d, state_: %{public}d, newState: %{public}d",
+            where, session->GetPersistentId(), session->GetSessionState(), newState);
+    }, __func__);
 }
 
 void Session::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
@@ -3724,6 +3747,17 @@ void Session::SetScbCoreEnabled(bool enabled)
 {
     TLOGI(WmsLogTag::WMS_PIPELINE, "%{public}d", enabled);
     isScbCoreEnabled_ = enabled;
+}
+
+bool Session::IsBackgroundUpdateRectNotifyEnabled()
+{
+    return isBackgroundUpdateRectNotifyEnabled_;
+}
+
+void Session::SetBackgroundUpdateRectNotifyEnabled(const bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}d", enabled);
+    isBackgroundUpdateRectNotifyEnabled_ = enabled;
 }
 
 bool Session::IsVisible() const

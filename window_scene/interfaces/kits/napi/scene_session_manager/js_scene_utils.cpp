@@ -1030,9 +1030,30 @@ napi_value CreateJsSessionRecoverInfo(
     return objValue;
 }
 
+static void SetWindowSizeLimits(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
+{
+    if (sessionInfo.windowSizeLimits.maxWindowWidth > 0) {
+        napi_set_named_property(env, objValue, "maxWindowWidth",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowWidth));
+    }
+    if (sessionInfo.windowSizeLimits.minWindowWidth > 0) {
+        napi_set_named_property(env, objValue, "minWindowWidth",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowWidth));
+    }
+    if (sessionInfo.windowSizeLimits.maxWindowHeight > 0) {
+        napi_set_named_property(env, objValue, "maxWindowHeight",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowHeight));
+    }
+    if (sessionInfo.windowSizeLimits.minWindowHeight > 0) {
+        napi_set_named_property(env, objValue, "minWindowHeight",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowHeight));
+    }
+}
+
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
 {
     if (sessionInfo.want != nullptr) {
+        SetWindowSizeLimits(env, sessionInfo, objValue);
         napi_set_named_property(env, objValue, "windowTop",
             GetWindowRectIntValue(env,
             sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_TOP, INVALID_VAL)));
@@ -1572,7 +1593,7 @@ napi_value KeyboardGravityInit(napi_env env)
 
 napi_value KeyboardViewModeInit(napi_env env)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "KeyboardViewModeInit");
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
     if (env == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
         return nullptr;

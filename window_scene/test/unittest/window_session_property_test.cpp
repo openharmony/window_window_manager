@@ -1025,6 +1025,20 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowRect, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetWindowSizeLimits
+ * @tc.desc: GetWindowSizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowSizeLimits, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    WindowSizeLimits windowSizeLimits = { 0, 0, 0, 0 };
+    property->SetWindowSizeLimits(windowSizeLimits);
+    auto result = property->GetWindowSizeLimits();
+    ASSERT_EQ(result, windowSizeLimits);
+}
+
+/**
  * @tc.name: GetRequestRect
  * @tc.desc: GetRequestRect
  * @tc.type: FUNC
@@ -1409,6 +1423,19 @@ HWTEST_F(WindowSessionPropertyTest, GetBackgroundAlpha, Function | SmallTest | L
     uint8_t backgroundAlpha = 2;
     property->SetBackgroundAlpha(backgroundAlpha);
     ASSERT_EQ(2, property->GetBackgroundAlpha());
+}
+
+/**
+ * @tc.name: SetWindowCornerRadius
+ * @tc.desc: SetWindowCornerRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    float cornerRadius = 1.0f;
+    property->SetWindowCornerRadius(cornerRadius);
+    ASSERT_EQ(cornerRadius, property->GetWindowCornerRadius());
 }
 } // namespace
 } // namespace Rosen

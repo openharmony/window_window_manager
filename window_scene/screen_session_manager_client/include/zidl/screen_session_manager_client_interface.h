@@ -63,7 +63,7 @@ public:
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;
     virtual void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
-    virtual void OnSecondaryReflexionChanged(ScreenId screenId, uint32_t isSecondaryReflexion) = 0;
+    virtual void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) = 0;
 
     virtual void OnDisplayStateChanged(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type) = 0;

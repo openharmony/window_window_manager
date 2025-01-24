@@ -518,7 +518,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_FOCUS_WINDOW_INFO: {
             FocusChangeInfo focusInfo;
-            GetFocusWindowInfo(focusInfo);
+            uint64_t displayId = 0;
+            if (!data.ReadUint64(displayId)) {
+                TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+                return ERR_INVALID_DATA;
+            }
+            GetFocusWindowInfo(focusInfo, displayId);
             reply.WriteParcelable(&focusInfo);
             break;
         }

@@ -36,7 +36,7 @@ class WindowAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapterLite);
 public:
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
-    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,

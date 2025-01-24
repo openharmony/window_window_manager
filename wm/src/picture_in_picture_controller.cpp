@@ -489,7 +489,7 @@ void PictureInPictureController::UpdateContentNodeRef(napi_ref nodeRef)
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "option is null");
         SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
-            pipOption_->GetPipTemplate(), FAILED, "option is null");
+            0, FAILED, "option is null");
         return;
     }
     pipOption_->SetTypeNodeRef(nodeRef);
@@ -884,17 +884,17 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
             if (handleId_ == -1) {
                 TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
                 return false;
-            } else if (firstHandleId_ != -1) {
+            }
+            if (firstHandleId_ != -1) {
                 handleId_ = firstHandleId_;
                 navController->SetInPIPMode(handleId_);
                 TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
-                return true;
             } else {
                 TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
                 firstHandleId_ = handleId_;
                 navController->SetInPIPMode(handleId_);
-                return true;
             }
+            return true;
         } else {
             TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
             return false;

@@ -214,11 +214,11 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, Function | SmallTest 
 }
 
 /**
- * @tc.name: SetOriginalWindowPos
- * @tc.desc: test function : SetOriginalWindowPos
+ * @tc.name: SetOriginalMoveDragPos
+ * @tc.desc: test function : SetOriginalMoveDragPos
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, SetOriginalWindowPos, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, SetOriginalMoveDragPos, Function | SmallTest | Level1)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     int32_t pointerId = pointerEvent->GetPointerId();
@@ -228,7 +228,7 @@ HWTEST_F(MoveDragControllerTest, SetOriginalWindowPos, Function | SmallTest | Le
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
     WSRect winRect = { 100, 100, 1000, 1000 };
-    moveDragController->SetOriginalWindowPos(
+    moveDragController->SetOriginalMoveDragPos(
         pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, winRect);
     ASSERT_EQ(moveDragController->moveDragProperty_.pointerId_, pointerId);
     ASSERT_EQ(moveDragController->moveDragProperty_.pointerType_, pointerType);
@@ -315,7 +315,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
     int32_t pointerPosY = 30;
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
-    moveDragController->SetOriginalWindowPos(
+    moveDragController->SetOriginalMoveDragPos(
         pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, originalRect);
     moveDragController->CalcMoveTargetRect(pointerEvent, originalRect);
     ASSERT_EQ(0, res);
@@ -328,33 +328,39 @@ HWTEST_F(MoveDragControllerTest, CalcMoveTargetRect, Function | SmallTest | Leve
  */
 HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, Function | SmallTest | Level1)
 {
-    int32_t res = 0;
     moveDragController->InitMoveDragProperty();
+    moveDragController->SetMoveAvailableArea({0, 75, 3120, 1980});
+    moveDragController->SetMoveInputBarStartDisplayId(1);
+    WSRect originalRect = {10, 20, 336, 146};
+
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-    WSRect originalRect = { 100, 100, 1000, 1000 };
-
-    moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
-    ASSERT_EQ(0, res);
-
-    pointerEvent = MMI::PointerEvent::Create();
-    int32_t pointerId = pointerEvent->GetPointerId();
-    int32_t pointerType = pointerEvent->GetSourceType();
+    pointerEvent->SetTargetDisplayId(1);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetDisplayX(100);
+    pointerItem.SetDisplayY(200);
+    pointerEvent->AddPointerItem(pointerItem);
     int32_t pointerPosX = 10;
     int32_t pointerPosY = 30;
     int32_t pointerWindowX = 10;
     int32_t pointerWindowY = 10;
-    moveDragController->SetOriginalWindowPos(
-        pointerId, pointerType, pointerPosX, pointerPosY, pointerWindowX, pointerWindowY, originalRect);
+    moveDragController->SetOriginalMoveDragPos(pointerEvent->GetPointerId(),
+        pointerEvent->GetSourceType(), pointerPosX, pointerPosY, pointerWindowX,
+        pointerWindowY, originalRect);
     moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
-    ASSERT_EQ(0, res);
+    
+    ASSERT_EQ(90, moveDragController->moveDragProperty_.targetRect_.posX_);
+    ASSERT_EQ(190, moveDragController->moveDragProperty_.targetRect_.posY_);
 }
 
 /**
- * @tc.name: AdjustXYByAvailableArea
- * @tc.desc: test function : AdjustXYByAvailableArea
+ * @tc.name: AdjustTargetPositionByAvailableArea
+ * @tc.desc: test function : AdjustTargetPositionByAvailableArea
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, AdjustXYByAvailableArea, Function | SmallTest | Level1)
+HWTEST_F(MoveDragControllerTest, AdjustTargetPositionByAvailableArea, Function | SmallTest | Level1)
 {
     DMRect moveAvailableArea = {0, 75, 3120, 1980};
     WSRect originalRect = {10, 20, 336, 146};
@@ -365,27 +371,27 @@ HWTEST_F(MoveDragControllerTest, AdjustXYByAvailableArea, Function | SmallTest |
     int32_t y;
 
     x = 50, y = 100;
-    moveDragController->AdjustXYByAvailableArea(x, y);
+    moveDragController->AdjustTargetPositionByAvailableArea(x, y);
     EXPECT_EQ(x, 50);
     EXPECT_EQ(y, 100);
 
     x = -10, y = 100;
-    moveDragController->AdjustXYByAvailableArea(x, y);
+    moveDragController->AdjustTargetPositionByAvailableArea(x, y);
     EXPECT_EQ(x, 0);
     EXPECT_EQ(y, 100);
 
     x = 3200, y = 200;
-    moveDragController->AdjustXYByAvailableArea(x, y);
+    moveDragController->AdjustTargetPositionByAvailableArea(x, y);
     EXPECT_EQ(x, 2784);
     EXPECT_EQ(y, 200);
 
     x = 100, y = 60;
-    moveDragController->AdjustXYByAvailableArea(x, y);
+    moveDragController->AdjustTargetPositionByAvailableArea(x, y);
     EXPECT_EQ(x, 100);
     EXPECT_EQ(y, 75);
 
     x = 100, y = 1980;
-    moveDragController->AdjustXYByAvailableArea(x, y);
+    moveDragController->AdjustTargetPositionByAvailableArea(x, y);
     EXPECT_EQ(x, 100);
     EXPECT_EQ(y, 1909);
 }
@@ -1278,6 +1284,36 @@ HWTEST_F(MoveDragControllerTest, OnChange, Function | SmallTest | Level1)
     ScreenId screenId = 1001;
     moveDragController->OnChange(screenId);
     ASSERT_EQ(moveDragController->moveDragIsInterrupted_, true);
+}
+
+/**
+ * @tc.name: StopMoving
+ * @tc.desc: test function : StopMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, StopMoving, Function | SmallTest | Level1)
+{
+    moveDragController->SetStartMoveFlag(true);
+    moveDragController->StopMoving();
+    ASSERT_EQ(false, moveDragController->GetStartMoveFlag());
+    ASSERT_EQ(false, moveDragController->hasPointDown_);
+}
+
+/**
+ * @tc.name: HandleStartMovingWithCoordinate
+ * @tc.desc: test function : HandleStartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, HandleStartMovingWithCoordinate, Function | SmallTest | Level1)
+{
+    WSRect winRect = { 200, 200, 1000, 1000 };
+    moveDragController->HandleStartMovingWithCoordinate(100, 50, 300, 500, winRect);
+    ASSERT_EQ(300, moveDragController->moveTempProperty_.lastDownPointerPosX_);
+    ASSERT_EQ(500, moveDragController->moveTempProperty_.lastDownPointerPosY_);
+    ASSERT_EQ(300, moveDragController->moveTempProperty_.lastMovePointerPosX_);
+    ASSERT_EQ(500, moveDragController->moveTempProperty_.lastMovePointerPosY_);
+    ASSERT_EQ(100, moveDragController->moveTempProperty_.lastDownPointerWindowX_);
+    ASSERT_EQ(50, moveDragController->moveTempProperty_.lastDownPointerWindowY_);
 }
 }
 }

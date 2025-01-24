@@ -748,6 +748,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     if (property_->GetCompatibleModeEnableInPad()) {
         HandleEventForCompatibleMode(pointerEvent, pointerItem);
     }
+    lastPointerEvent_ = pointerEvent;
     if (isPointDown) {
         auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
         if (displayInfo == nullptr) {
@@ -755,7 +756,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             pointerEvent->MarkProcessed();
             return;
         }
-        float vpr = GetVirtualPixelRatio(displayInfo);
+        float vpr = WindowSessionImpl::GetVirtualPixelRatio();
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
             pointerEvent->MarkProcessed();
@@ -853,6 +854,19 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
     return isConsumed;
 }
 
+static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
+    WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits.maxWindowWidth = windowSizeLimits.maxWindowWidth > 0 ?
+        windowSizeLimits.maxWindowWidth : abilityInfo->maxWindowWidth;
+    windowSizeLimits.maxWindowHeight = windowSizeLimits.maxWindowHeight > 0 ?
+        windowSizeLimits.maxWindowHeight : abilityInfo->maxWindowHeight;
+    windowSizeLimits.minWindowWidth = windowSizeLimits.minWindowWidth > 0 ?
+        windowSizeLimits.minWindowWidth : abilityInfo->minWindowWidth;
+    windowSizeLimits.minWindowHeight = windowSizeLimits.minWindowHeight > 0 ?
+        windowSizeLimits.minWindowHeight : abilityInfo->minWindowHeight;
+}
+
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -862,9 +876,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     }
     auto abilityInfo = abilityContext->GetAbilityInfo();
     if (abilityInfo != nullptr) {
+        WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
+        GetWindowSizeLimits(abilityInfo, windowSizeLimits);
         property_->SetConfigWindowLimitsVP({
-            abilityInfo->maxWindowWidth, abilityInfo->maxWindowHeight,
-            abilityInfo->minWindowWidth, abilityInfo->minWindowHeight,
+            windowSizeLimits.maxWindowWidth, windowSizeLimits.maxWindowHeight,
+            windowSizeLimits.minWindowWidth, windowSizeLimits.minWindowHeight,
             static_cast<float>(abilityInfo->maxWindowRatio), static_cast<float>(abilityInfo->minWindowRatio)
         });
         UpdateWindowSizeLimits();
@@ -983,8 +999,10 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     uint32_t limitMinWidth = systemLimits.minWidth_;
     uint32_t limitMinHeight = systemLimits.minHeight_;
     if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
-        limitMinWidth = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
-        limitMinHeight = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
+        uint32_t forceLimitMinWidth = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
+        uint32_t forceLimitMinHeight = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
+        limitMinWidth = std::min(forceLimitMinWidth, limitMinWidth);
+        limitMinHeight = std::min(forceLimitMinHeight, limitMinHeight);
         newLimits.minWidth_ = limitMinWidth;
         newLimits.minHeight_ = limitMinHeight;
     }
@@ -1179,9 +1197,9 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
 
 WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}d", static_cast<uint32_t>(mode));
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}u", static_cast<uint32_t>(mode));
     if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}d. Use default view mode",
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default view mode",
             static_cast<uint32_t>(mode));
         mode = KeyboardViewMode::NON_IMMERSIVE_MODE;
     }
@@ -2679,8 +2697,7 @@ bool WindowSceneSessionImpl::IsStartMoving()
 bool WindowSceneSessionImpl::CalcWindowShouldMove()
 {
     WindowType windowType = GetType();
-    if (windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
-        windowType == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR) {
+    if (WindowHelper::IsInputWindow(windowType)) {
         if (windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
             windowSystemConfig_.IsPhoneWindow()) {
             return true;
@@ -2720,11 +2737,60 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
     }
 }
 
+WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
+{
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    const auto& windowRect = GetRect();
+    if (offsetX < 0 || offsetX > static_cast<int32_t>(windowRect.width_) ||
+        offsetY < 0 || offsetY > static_cast<int32_t>(windowRect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "offset not in window");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSError errorCode;
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (lastPointerEvent_ != nullptr &&
+        lastPointerEvent_->GetPointerItem(lastPointerEvent_->GetPointerId(), pointerItem)) {
+        int32_t lastDisplayX = pointerItem.GetDisplayX();
+        int32_t lastDisplayY = pointerItem.GetDisplayY();
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
+            " lastDisplayY:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY);
+        errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY);
+    } else {
+        errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    switch (errorCode) {
+        case WSError::WS_ERROR_REPEAT_OPERATION: {
+            return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+        }
+        case WSError::WS_ERROR_NULLPTR: {
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        default: {
+            return WmErrorCode::WM_OK;
+        }
+    }
+}
+
 WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 {
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto hostSession = GetHostSession();
     if (!hostSession) {
@@ -3247,6 +3313,52 @@ WMError WindowSceneSessionImpl::SetCornerRadius(float cornerRadius)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}u corner radius %{public}f.", GetWindowId(), cornerRadius);
+    if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The corner radius is less than zero.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    property_->SetWindowCornerRadius(cornerRadius);
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->SetWindowCornerRadius(cornerRadius);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    cornerRadius = property_->GetWindowCornerRadius();
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetShadowRadius(float radius)
 {
     WMError ret = CheckParmAndPermission();
@@ -3746,10 +3858,10 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
 
 WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}d",
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
         static_cast<uint32_t>(mode));
     if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "invalid view mode!");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     if (mode == property_->GetKeyboardViewMode()) {
@@ -3761,7 +3873,7 @@ WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (state_ != WindowState::STATE_SHOWN) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard is no shown");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 

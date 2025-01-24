@@ -329,7 +329,7 @@ void WindowInnerManager::StartWindowInfoReportLoop()
     int64_t delayTime = 1000 * 60 * 60; // an hour.
     bool ret = eventHandler_->PostTask(task, "wms:WindowInfoReport", delayTime);
     if (!ret) {
-        WLOGFE("post listener callback task failed. the task name is WindowInfoReport");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "post listener callback task failed. the task name is WindowInfoReport");
         return;
     }
     isReportTaskStart_ = true;
