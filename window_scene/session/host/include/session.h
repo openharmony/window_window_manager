@@ -95,6 +95,7 @@ using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t p
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
+using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 
 class ILifecycleListener {
 public:
@@ -398,6 +399,9 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
+    virtual WSError UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange = true);
+    WSError NotifyHighlightChange(bool isHighlight);
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
 
     /*
      * Multi Window
@@ -490,8 +494,6 @@ public:
         return !this->operator==(session);
     }
 
-    virtual void HandleStyleEvent(MMI::WindowArea area) {};
-    WSError SetPointerStyle(MMI::WindowArea area);
     const char* DumpPointerWindowArea(MMI::WindowArea area) const;
     WSRectF UpdateHotRect(const WSRect& rect);
     WSError RaiseToAppTopForPointDown();
@@ -564,6 +566,8 @@ public:
     /*
      * Window Layout
      */
+    static bool IsBackgroundUpdateRectNotifyEnabled();
+    static void SetBackgroundUpdateRectNotifyEnabled(const bool enabled);
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
     void ResetDirtyFlags();
@@ -648,6 +652,11 @@ protected:
         return ret;
     }
 
+    /*
+     * Window Layout
+     */
+    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
+
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
@@ -691,6 +700,8 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
+    std::mutex highlightChangeFuncMutex_;
+    NotifyHighlightChangeFunc highlightChangeFunc_;
 
     /*
      * Window LifeCycle
@@ -720,6 +731,7 @@ protected:
     /*
      * Window Layout
      */
+    static bool isBackgroundUpdateRectNotifyEnabled_;
     RequestVsyncFunc requestNextVsyncFunc_;
     WSRect winRect_;
     WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
@@ -733,7 +745,6 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
-    void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     DisplayId lastUpdatedDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
@@ -747,7 +758,8 @@ protected:
      * Window Focus
      */
     bool isFocused_ = false;
-    bool blockingFocus_ {false};
+    bool blockingFocus_ { false };
+    bool isHighlight_ { false };
 
     uint32_t uiNodeId_ = 0;
     float aspectRatio_ = 0.0f;

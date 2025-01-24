@@ -318,6 +318,9 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
             }
             property->SetSupportedWindowModes(supportedWindowModes);
         }
+        WindowSizeLimits windowSizeLimits = { reply.ReadUint32(), reply.ReadUint32(),
+                                              reply.ReadUint32(), reply.ReadUint32() };
+        property->SetWindowSizeLimits(windowSizeLimits);
         property->SetCompatibleModeInPc(reply.ReadBool());
         property->SetCompatibleWindowSizeInPc(reply.ReadInt32(), reply.ReadInt32(),
                                               reply.ReadInt32(), reply.ReadInt32());

@@ -843,6 +843,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfigInner(const Sessi
     viewportConfig.SetDensity(config.density_);
     viewportConfig.SetOrientation(config.orientation_);
     viewportConfig.SetTransformHint(config.transform_);
+    viewportConfig.SetDisplayId(config.displayId_);
 
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
