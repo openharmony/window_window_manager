@@ -73,6 +73,7 @@ private:
         { WindowType::WINDOW_TYPE_BOOT_ANIMATION,       121 },
         { WindowType::WINDOW_TYPE_FREEZE_DISPLAY,       122 },
         { WindowType::WINDOW_TYPE_SCREEN_CONTROL,       123 },
+        { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,    124 },
     };
 };
 }
