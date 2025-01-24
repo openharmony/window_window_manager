@@ -19,6 +19,7 @@
 
 #include <event_handler.h>
 #include <event_runner.h>
+
 #include "oh_window.h"
 #include "oh_window_comm.h"
 #include "window.h"
@@ -106,12 +107,12 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 } // namespace Rosen
 } // namespace OHOS
 
-WindowManager_ErrorCode OH_WindowManager_ShowWindow(int32_t windowId)
+int32_t OH_WindowManager_ShowWindow(int32_t windowId)
 {
-    return OHOS::Rosen::ShowWindowInner(windowId);
+    return static_cast<int32_t>(OHOS::Rosen::ShowWindowInner(windowId));
 }
-
-WindowManager_ErrorCode OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
+ 
+int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
 {
-    return OHOS::Rosen::IsWindowShownInner(windowId, isShow);
+    return static_cast<int32_t>(OHOS::Rosen::IsWindowShownInner(windowId, isShow));
 }
