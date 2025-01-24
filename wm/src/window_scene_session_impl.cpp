@@ -411,6 +411,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         hostSession_ = session;
     }
     RecoverSessionListener();
+    RegisterWindowInspectorCallback();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
@@ -490,7 +491,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
         bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
         bool isSysytemWindow = WindowHelper::IsSystemWindow(windowType);
         UpdateWindowSizeLimits();
-        if ((isSubWindow || isDialogWindow || isSysytemWindow) && property_->GetDragEnabled()) {
+        if ((isSubWindow || isDialogWindow || isSysytemWindow) && IsWindowDraggable()) {
             WLOGFD("sync window limits to server side to make size limits work while resizing");
             UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         }
@@ -561,6 +562,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         if (WindowHelper::IsSubWindow(GetType()) && !initRect.IsUninitializedRect()) {
             Resize(initRect.width_, initRect.height_);
         }
+        RegisterWindowInspectorCallback();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
         "id:%{public}d], state:%{public}u, mode:%{public}u",
@@ -676,14 +678,14 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         static_cast<int>(HOTZONE_TOUCH * vpr);
     AreaType dragType = AreaType::UNDEFINED;
     WindowType windowType = property_->GetWindowType();
-    bool isSystemDragEnabledType = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDragEnabledType) {
+    bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
+    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
         dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
-    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled();
-    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !property_->GetDragEnabled();
+    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !IsWindowDraggable();
+    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !IsWindowDraggable();
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
@@ -746,6 +748,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     if (property_->GetCompatibleModeEnableInPad()) {
         HandleEventForCompatibleMode(pointerEvent, pointerItem);
     }
+    lastPointerEvent_ = pointerEvent;
     if (isPointDown) {
         auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
         if (displayInfo == nullptr) {
@@ -753,7 +756,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
             pointerEvent->MarkProcessed();
             return;
         }
-        float vpr = GetVirtualPixelRatio(displayInfo);
+        float vpr = WindowSessionImpl::GetVirtualPixelRatio();
         if (MathHelper::NearZero(vpr)) {
             WLOGFW("vpr is zero");
             pointerEvent->MarkProcessed();
@@ -851,6 +854,19 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
     return isConsumed;
 }
 
+static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
+    WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits.maxWindowWidth = windowSizeLimits.maxWindowWidth > 0 ?
+        windowSizeLimits.maxWindowWidth : abilityInfo->maxWindowWidth;
+    windowSizeLimits.maxWindowHeight = windowSizeLimits.maxWindowHeight > 0 ?
+        windowSizeLimits.maxWindowHeight : abilityInfo->maxWindowHeight;
+    windowSizeLimits.minWindowWidth = windowSizeLimits.minWindowWidth > 0 ?
+        windowSizeLimits.minWindowWidth : abilityInfo->minWindowWidth;
+    windowSizeLimits.minWindowHeight = windowSizeLimits.minWindowHeight > 0 ?
+        windowSizeLimits.minWindowHeight : abilityInfo->minWindowHeight;
+}
+
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -860,9 +876,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     }
     auto abilityInfo = abilityContext->GetAbilityInfo();
     if (abilityInfo != nullptr) {
+        WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
+        GetWindowSizeLimits(abilityInfo, windowSizeLimits);
         property_->SetConfigWindowLimitsVP({
-            abilityInfo->maxWindowWidth, abilityInfo->maxWindowHeight,
-            abilityInfo->minWindowWidth, abilityInfo->minWindowHeight,
+            windowSizeLimits.maxWindowWidth, windowSizeLimits.maxWindowHeight,
+            windowSizeLimits.minWindowWidth, windowSizeLimits.minWindowHeight,
             static_cast<float>(abilityInfo->maxWindowRatio), static_cast<float>(abilityInfo->minWindowRatio)
         });
         UpdateWindowSizeLimits();
@@ -981,8 +999,10 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     uint32_t limitMinWidth = systemLimits.minWidth_;
     uint32_t limitMinHeight = systemLimits.minHeight_;
     if (forceLimits_ && windowSystemConfig_.IsPcWindow()) {
-        limitMinWidth = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
-        limitMinHeight = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
+        uint32_t forceLimitMinWidth = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
+        uint32_t forceLimitMinHeight = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
+        limitMinWidth = std::min(forceLimitMinWidth, limitMinWidth);
+        limitMinHeight = std::min(forceLimitMinHeight, limitMinHeight);
         newLimits.minWidth_ = limitMinWidth;
         newLimits.minHeight_ = limitMinHeight;
     }
@@ -1082,8 +1102,6 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
             TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is null");
         }
     }
-    state_ = WindowState::STATE_SHOWN;
-    requestState_ = WindowState::STATE_SHOWN;
     uiContent->Foreground();
     uiContent->PreLayout();
 }
@@ -1175,6 +1193,18 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     NotifyWindowStatusChange(GetWindowMode());
     NotifyDisplayInfoChange(displayInfo);
     return ret;
+}
+
+WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}u", static_cast<uint32_t>(mode));
+    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default view mode",
+            static_cast<uint32_t>(mode));
+        mode = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    }
+    property_->SetKeyboardViewMode(mode);
+    return Show();
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
@@ -2664,9 +2694,25 @@ bool WindowSceneSessionImpl::IsStartMoving()
     return isMoving;
 }
 
+bool WindowSceneSessionImpl::CalcWindowShouldMove()
+{
+    WindowType windowType = GetType();
+    if (WindowHelper::IsInputWindow(windowType)) {
+        if (windowSystemConfig_.IsPcWindow() || windowSystemConfig_.IsPadWindow() ||
+            windowSystemConfig_.IsPhoneWindow()) {
+            return true;
+        }
+    }
+
+    if (IsPcOrPadFreeMultiWindowMode()) {
+        return true;
+    }
+    return false;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!IsPcOrPadFreeMultiWindowMode()) {
+    if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2691,11 +2737,60 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
     }
 }
 
+WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
+{
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    const auto& windowRect = GetRect();
+    if (offsetX < 0 || offsetX > static_cast<int32_t>(windowRect.width_) ||
+        offsetY < 0 || offsetY > static_cast<int32_t>(windowRect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "offset not in window");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSError errorCode;
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (lastPointerEvent_ != nullptr &&
+        lastPointerEvent_->GetPointerItem(lastPointerEvent_->GetPointerId(), pointerItem)) {
+        int32_t lastDisplayX = pointerItem.GetDisplayX();
+        int32_t lastDisplayY = pointerItem.GetDisplayY();
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
+            " lastDisplayY:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY);
+        errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY);
+    } else {
+        errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    switch (errorCode) {
+        case WSError::WS_ERROR_REPEAT_OPERATION: {
+            return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+        }
+        case WSError::WS_ERROR_NULLPTR: {
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        default: {
+            return WmErrorCode::WM_OK;
+        }
+    }
+}
+
 WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 {
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto hostSession = GetHostSession();
     if (!hostSession) {
@@ -2719,6 +2814,8 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
     bool terminateCloseProcess = false;
     WMError res = NotifyMainWindowClose(terminateCloseProcess);
     if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, not close: %{public}d", GetPersistentId(),
+            terminateCloseProcess);
         if (!terminateCloseProcess) {
             hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
         }
@@ -2744,19 +2841,26 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
 
 WMError WindowSceneSessionImpl::Close()
 {
-    WLOGFI("id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isSystemSubWindow = WindowHelper::IsSystemSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    if (WindowHelper::IsMainWindow(windowType) || isSubWindow) {
+        WMError res = NotifyWindowWillClose(this);
+        if (res == WMError::WM_OK) {
+            TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d will close", GetPersistentId());
+            return res;
+        }
+    }
     if (WindowHelper::IsMainWindow(windowType)) {
         return MainWindowCloseInner();
     } else if (isSubWindow || isSystemSubWindow || isDialogWindow) {
-        WLOGFI("Close subwindow or dialog");
+        TLOGI(WmsLogTag::WMS_DECOR, "subwindow or dialog");
         bool terminateCloseProcess = false;
         NotifySubWindowClose(terminateCloseProcess);
         if (!terminateCloseProcess || isDialogWindow) {
@@ -2764,6 +2868,22 @@ WMError WindowSceneSessionImpl::Close()
         }
     }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::CloseDirectly()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d", GetPersistentId());
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto hostSession = GetHostSession();
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        return WMError::WM_OK;
+    }
+    return Destroy(true);
 }
 
 WMError WindowSceneSessionImpl::DisableAppWindowDecor()
@@ -3215,6 +3335,52 @@ WMError WindowSceneSessionImpl::SetCornerRadius(float cornerRadius)
     WLOGFI("Set window %{public}s corner radius %{public}f", GetWindowName().c_str(), cornerRadius);
     surfaceNode_->SetCornerRadius(cornerRadius);
     RSTransaction::FlushImplicitTransaction();
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetWindowCornerRadius(float cornerRadius)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Set id %{public}u corner radius %{public}f.", GetWindowId(), cornerRadius);
+    if (MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "The corner radius is less than zero.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    property_->SetWindowCornerRadius(cornerRadius);
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->SetWindowCornerRadius(cornerRadius);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetWindowCornerRadius(float& cornerRadius)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not PC or Pad, not supported.");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsFloatOrSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is not sub window or float window.");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    cornerRadius = property_->GetWindowCornerRadius();
     return WMError::WM_OK;
 }
 
@@ -3715,6 +3881,33 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
+        static_cast<uint32_t>(mode));
+    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (mode == property_->GetKeyboardViewMode()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "The mode is same.");
+        return WMError::WM_DO_NOTHING;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is invalid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetKeyboardViewMode(mode);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->ChangeKeyboardViewMode(mode));
+}
+
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
 {
     WLOGFD("in");
@@ -4034,9 +4227,9 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool
     }
 
     WindowType windowType = GetType();
-    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
+    bool isDraggableSystemWin = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
     if (!WindowHelper::IsMainWindow(windowType) && !WindowHelper::IsSubWindow(windowType) &&
-        windowType != WindowType::WINDOW_TYPE_DIALOG && !isDragEnabledSystemWin) {
+        windowType != WindowType::WINDOW_TYPE_DIALOG && !isDraggableSystemWin) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "type not support. Id:%{public}u, type:%{public}u",
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -4406,7 +4599,7 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
+WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams params)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}u, "
         "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "

@@ -28,6 +28,7 @@ public:
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError ShowKeyboard(KeyboardViewMode mode) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     WMError NotifyDrawingCompleted() override;
@@ -37,7 +38,6 @@ public:
     WMError Minimize() override;
     void StartMove() override;
     bool IsStartMoving() override;
-    WMError Close() override;
     WindowMode GetWindowMode() const override;
 
     /*
@@ -96,6 +96,7 @@ public:
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
+    WMError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
@@ -129,7 +130,7 @@ public:
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateDisplayId(uint64_t displayId) override;
-    WMError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
 
     /*
      * PC Window
@@ -152,6 +153,7 @@ public:
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WmErrorCode StartMoveWindow() override;
+    WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
 
     /*
@@ -192,16 +194,18 @@ public:
     /*
      * Window Property
      */
-    virtual WMError SetCornerRadius(float cornerRadius) override;
-    virtual WMError SetShadowRadius(float radius) override;
-    virtual WMError SetShadowColor(std::string color) override;
-    virtual WMError SetShadowOffsetX(float offsetX) override;
-    virtual WMError SetShadowOffsetY(float offsetY) override;
-    virtual WMError SetBlur(float radius) override;
-    virtual WMError SetBackdropBlur(float radius) override;
-    virtual WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
-    virtual WMError SetWindowMode(WindowMode mode) override;
-    virtual WMError SetGrayScale(float grayScale) override;
+    WMError SetCornerRadius(float cornerRadius) override;
+    WMError SetWindowCornerRadius(float cornerRadius) override;
+    WMError GetWindowCornerRadius(float& cornerRadius) override;
+    WMError SetShadowRadius(float radius) override;
+    WMError SetShadowColor(std::string color) override;
+    WMError SetShadowOffsetX(float offsetX) override;
+    WMError SetShadowOffsetY(float offsetY) override;
+    WMError SetBlur(float radius) override;
+    WMError SetBackdropBlur(float radius) override;
+    WMError SetBackdropBlurStyle(WindowBlurStyle blurStyle) override;
+    WMError SetWindowMode(WindowMode mode) override;
+    WMError SetGrayScale(float grayScale) override;
     WMError SetWindowShadowRadius(float radius) override;
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
@@ -215,6 +219,8 @@ public:
     WMError SetWindowTitle(const std::string& title) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
+    WMError Close() override;
+    WMError CloseDirectly() override;
 
     /*
      * Starting Window
@@ -301,6 +307,11 @@ private:
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
 
     /*
+     * PC Window Layout
+     */
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+
+    /*
      * Window Immersive
      */
     void UpdateDefaultStatusBarColor();
@@ -354,7 +365,15 @@ private:
     std::atomic<WindowMode> lastWindowModeBeforeWaterfall_ { WindowMode::WINDOW_MODE_UNDEFINED };
 
     /*
+     * Move Drag
+     */
+    bool CalcWindowShouldMove();
+    
+    /*
      * PC Window
+     */
+    /* whether in process of delay raise during cross window drag and drop
+     * only used when delay raise is enabled and hit draggable component
      */
     bool isExecuteDelayRaise_ = false;
 

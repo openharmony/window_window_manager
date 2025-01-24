@@ -408,30 +408,139 @@ HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo05, Function | SmallTest | Lev
 HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    std::string bundleName = "LockSessionByAbilityInfoBundle";
-    std::string moduleName = "LockSessionByAbilityInfoModule";
-    std::string abilityName = "LockSessionByAbilityInfoAbility";
-    int32_t appIndex = 0;
+    AbilityInfoBase abilityInfo;
+    abilityInfo.bundleName = "LockSessionByAbilityInfoBundle";
+    abilityInfo.moduleName = "LockSessionByAbilityInfoModule";
+    abilityInfo.abilityName = "LockSessionByAbilityInfoAbility";
+    abilityInfo.appIndex = 0;
 
-    auto result = ssm_->LockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
+    auto result = ssm_->LockSessionByAbilityInfo(abilityInfo, true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
 
 /**
- * @tc.name: UnlockSessionByAbilityInfo
- * @tc.desc: SceneSesionManager test UnlockSessionByAbilityInfo
+ * @tc.name: NotifyWatchGestureConsumeResult
+ * @tc.desc: SceneSesionManager test NotifyWatchGestureConsumeResult
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest11, UnlockSessionByAbilityInfo, Function | SmallTest | Level1)
+HWTEST_F(SceneSessionManagerTest11, NotifyWatchGestureConsumeResult, Function | SmallTest | Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    std::string bundleName = "UnlockSessionByAbilityInfoBundle";
-    std::string moduleName = "UnlockSessionByAbilityInfoModule";
-    std::string abilityName = "UnlockSessionByAbilityInfoAbility";
-    int32_t appIndex = 0;
+    int32_t keyCode = 0;
+    bool isConsumed = true;
+    ssm_->onWatchGestureConsumeResultFunc_ = [](int32_t keyCode, bool isConsumed) {};
+    auto ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_EQ(ret, WMError::WM_OK);
 
-    auto result = ssm_->UnlockSessionByAbilityInfo(bundleName, moduleName, abilityName, appIndex);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+    ssm_->onWatchGestureConsumeResultFunc_ = nullptr;
+    ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyWatchFocusActiveChange
+ * @tc.desc: SceneSesionManager test NotifyWatchFocusActiveChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, NotifyWatchFocusActiveChange, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    bool isActive = true;
+    ssm_->onWatchFocusActiveChangeFunc_ = [](bool isActive) {};
+    auto ret = ssm_->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ssm_->onWatchFocusActiveChangeFunc_ = nullptr;
+    ret = ssm_->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: DestroyUIServiceExtensionSubWindow
+ * @tc.desc: SceneSesionManager test DestroyUIServiceExtensionSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, DestroyUIServiceExtensionSubWindow, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->DestroyUIServiceExtensionSubWindow(sceneSession);
+    SessionInfo sessionInfo = { "bundleName", "moduleName", "abilityName" };
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->DestroyUIServiceExtensionSubWindow(sceneSession);
+
+    sptr<WindowSessionProperty> property_ = sptr<WindowSessionProperty>::MakeSptr();
+    property_->isUIExtFirstSubWindow_ = true;
+    ASSERT_EQ(property_->isUIExtAnySubWindow_, false);
+    ssm_->DestroyUIServiceExtensionSubWindow(sceneSession);
+}
+
+/**
+ * @tc.name: FilterForGetAllWindowLayoutInfo
+ * @tc.desc: SceneSesionManager test FilterForGetAllWindowLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, FilterForGetAllWindowLayoutInfo, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    DisplayId displayId = 0;
+    bool isVirtualDisplay = true;
+    std::vector<sptr<SceneSession>> filteredSessions{};
+    SessionInfo info;
+    info.bundleName_ = BUNDLE_NAME;
+    info.appInstanceKey_ = "instanceKey";
+    info.isNewAppInstance_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    ssm_->sceneSessionMap_.clear();
+    auto ret = ssm_->sceneSessionMap_.size();
+    ASSERT_EQ(ret, 0);
+    ssm_->FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEvent
+ * @tc.desc: SceneSesionManager test ShiftAppWindowPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, ShiftAppWindowPointerEvent, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t sourcePersistentId = 0;
+    int32_t targetPersistentId = 0;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    auto ret = ssm_->systemConfig_.IsPcWindow();
+    ASSERT_EQ(ret, false);
+
+    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+
+    sourcePersistentId = 1;
+    ssm_->sceneSessionMap_.clear();
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground
+ * @tc.desc: SceneSesionManager test HasFloatingWindowForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, HasFloatingWindowForeground, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> abilityToken = nullptr;
+    bool hasOrNot = true;
+    auto ret = ssm_->HasFloatingWindowForeground(abilityToken, hasOrNot);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 }  // namespace
 }

@@ -27,9 +27,12 @@ class WindowInputMethodTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
-    Utils::TestWindowInfo inputMethodWindowInfo_;
+    void SetUp() override;
+    void TearDown() override;
+
+private:
+    static constexpr uint32_t TEST_SLEEP_SECOND = 1;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void WindowInputMethodTest::SetUpTestCase()
@@ -46,24 +49,53 @@ void WindowInputMethodTest::TearDownTestCase()
 
 void WindowInputMethodTest::SetUp()
 {
-    inputMethodWindowInfo_ = {
-        .name = "",
-        .rect = Utils::customAppRect_,
-        .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = false,
-        .parentLimit = false,
-        .showWhenLocked = true,
-        .parentId = INVALID_WINDOW_ID,
-    };
 }
 
 void WindowInputMethodTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
+/**
+ * @tc.name: ShowKeyboard1
+ * @tc.desc: create window and show keyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInputMethodTest, ShowKeyboard01, Function | MediumTest | Level3)
+{
+    WindowTestUtils::TestWindowInfo windowInfo = {
+        .name = "ShowKeyboard",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .showWhenLocked = true,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(windowInfo);
+    if (fullWindow == nullptr) {
+        return;
+    }
+    ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(KeyboardViewMode::DARK_IMMERSIVE_MODE));
+    sleep(TEST_SLEEP_SECOND);
 
+    ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE));
+    sleep(TEST_SLEEP_SECOND);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
+        fullWindow->ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(-1)));
+    sleep(TEST_SLEEP_SECOND);
+
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    sleep(TEST_SLEEP_SECOND);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE));
+    sleep(TEST_SLEEP_SECOND);
+    fullWindow->Destroy();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

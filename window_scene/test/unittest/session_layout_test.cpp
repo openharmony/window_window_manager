@@ -140,6 +140,8 @@ namespace {
  */
 HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
 {
+    bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
+    Session::SetBackgroundUpdateRectNotifyEnabled(true);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     session_->sessionStage_ = mockSessionStage;
     EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(AtLeast(1)).WillOnce(Return(WSError::WS_OK));
@@ -167,6 +169,28 @@ HWTEST_F(SessionLayoutTest, UpdateRect01, Function | SmallTest | Level2)
     session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
     ASSERT_EQ(rect, session_->winRect_);
+    Session::SetBackgroundUpdateRectNotifyEnabled(preBackgroundUpdateRectNotifyEnabled);
+}
+
+/**
+ * @tc.name: UpdateRect_TestForeground
+ * @tc.desc: update rect
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionLayoutTest, UpdateRect_TestForeground, Function | SmallTest | Level2)
+{
+    bool preBackgroundUpdateRectNotifyEnabled = Session::IsBackgroundUpdateRectNotifyEnabled();
+    Session::SetBackgroundUpdateRectNotifyEnabled(false);
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session_->sessionStage_ = mockSessionStage;
+
+    WSRect rect = { 0, 0, 100, 100 };
+    session_->UpdateSessionState(SessionState::STATE_ACTIVE);
+    ASSERT_EQ(WSError::WS_OK, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    session_->UpdateSessionState(SessionState::STATE_BACKGROUND);
+    ASSERT_EQ(WSError::WS_DO_NOTHING, session_->UpdateRect(rect, SizeChangeReason::UNDEFINED, "SessionLayoutTest"));
+    Session::SetBackgroundUpdateRectNotifyEnabled(preBackgroundUpdateRectNotifyEnabled);
 }
 
 /**
@@ -186,6 +210,22 @@ HWTEST_F(SessionLayoutTest, UpdateSessionRect01, Function | SmallTest | Level2)
 
     result = sceneSession->UpdateSessionRect(rect, SizeChangeReason::RESIZE);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetSingleHandTransform
+ * @tc.desc: SetSingleHandTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionLayoutTest, SetSingleHandTransform, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSingleHandTransform";
+    info.bundleName_ = "SetSingleHandTransform";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    SingleHandTransform transform;
+    session->SetSingleHandTransform(transform);
+    ASSERT_EQ(transform, session->GetSingleHandTransform());
 }
 }
 } // namespace Rosen

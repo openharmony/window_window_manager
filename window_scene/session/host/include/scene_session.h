@@ -19,6 +19,7 @@
 #include <modifier/rs_property.h>
 #include <modifier/rs_property_modifier.h>
 
+#include "display_manager.h"
 #include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/pc_fold_screen_controller.h"
@@ -82,6 +83,7 @@ using ClearDisplayStatusBarTemporarilyFlags = std::function<void()>;
 using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboardLayoutAdjustFunc = std::function<void(const KeyboardLayoutParams& params)>;
+using NotifyKeyboarViewModeChangeFunc = std::function<void(const KeyboardViewMode& mode)>;
 using SessionChangeByActionNotifyManagerFunc = std::function<void(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)>;
 using NotifyLayoutFullScreenChangeFunc = std::function<void(bool isLayoutFullScreen)>;
@@ -105,6 +107,7 @@ using NotifyAvoidAreaChangeCallback = std::function<void(const sptr<AvoidArea>& 
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
+using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -205,6 +208,7 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
@@ -267,6 +271,7 @@ public:
     /*
      * Window Layout
      */
+    WMError ActivateDragBySystem(bool activateDrag);
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
@@ -289,6 +294,7 @@ public:
     void SetLastSafeRect(WSRect rect);
     void SetMovable(bool isMovable);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+    void SetColorSpace(ColorSpace colorSpace);
 
     /*
      * Window Hierarchy
@@ -319,6 +325,8 @@ public:
      */
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
     bool IsLayoutFullScreen() const;
+    WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) override;
 
     /*
      * Window Immersive
@@ -421,6 +429,11 @@ public:
      * Window Input Event
      */
     void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
+    void SetMousePointerDownEventStatus(bool mousePointerDownEventStatus);
+    bool GetMousePointerDownEventStatus() const;
+    void SetFingerPointerDownStatus(int32_t fingerId);
+    void RemoveFingerPointerDownStatus(int32_t fingerId);
+    std::unordered_set<int32_t> GetFingerPointerDownStatusList() const;
 
     /*
      * Window Rotation
@@ -570,6 +583,7 @@ public:
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
+    WSError SetMoveAvailableArea(DisplayId displayId);
 
     /*
      * Window Layout
@@ -608,6 +622,13 @@ public:
     bool IsSystemKeyboard() const;
     void ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid);
     bool IsKeyboardAvoidAreaActive() const;
+    virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
+
+    /*
+     * Window Property
+    */
+    void SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc&& func);
+    WSError SetWindowCornerRadius(float cornerRadius) override;
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
@@ -734,8 +755,6 @@ protected:
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
-    void HandleStyleEvent(MMI::WindowArea area) override;
-    WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
 
     /*
      * Window Immersive
@@ -762,6 +781,7 @@ private:
     void OnMoveDragCallback(SizeChangeReason reason);
     bool IsDragResizeWhenEnd(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
+    WSError InitializeMoveInputBar();
     void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     bool MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason);
@@ -971,6 +991,8 @@ private:
      * Window Input Event
      */
     NotifyTouchOutsideFunc onTouchOutside_;
+    bool isMousePointerDownEventStatus_ { false };
+    std::unordered_set<int32_t> fingerPointerDownStatusList_;
 
     /*
      * Window Rotation
@@ -1007,6 +1029,11 @@ private:
      * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
+
+    /*
+     * Window Property
+     */
+    NotifySetWindowCornerRadiusFunc onSetWindowCornerRadiusFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

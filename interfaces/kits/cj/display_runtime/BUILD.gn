@@ -38,6 +38,7 @@ ohos_shared_library("cj_display_ffi") {
   if (!build_ohos_sdk) {
     sources = [
       "cj_display_impl.cpp",
+      "cj_display_listener.cpp",
       "cj_display_manager.cpp",
       "display_ffi.cpp",
     ]

@@ -129,6 +129,11 @@ public:
     MOCK_METHOD1(OnMainWindowClose, void(bool&));
 };
 
+class MockIWindowWillCloseListener : public IWindowWillCloseListener {
+public:
+    MOCK_METHOD1(OnWindowWillClose, void(sptr<Window> window));
+};
+
 class MockISwitchFreeMultiWindowListener : public ISwitchFreeMultiWindowListener {
 public:
     MOCK_METHOD1(OnSwitchFreeMultiWindow, void(bool));

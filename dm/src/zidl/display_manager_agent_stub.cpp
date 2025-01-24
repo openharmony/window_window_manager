@@ -104,6 +104,15 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             NotifyScreenModeChange(screenInfos);
             break;
         }
+        case TRANS_ID_NOTIFY_ABNORMAL_SCREEN_CONNECT_CHANGED: {
+            ScreenId screenId;
+            if (!data.ReadUint64(screenId)) {
+                WLOGFE("Read screenId failed");
+                return -1;
+            }
+            NotifyAbnormalScreenConnectChange(screenId);
+            break;
+        }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

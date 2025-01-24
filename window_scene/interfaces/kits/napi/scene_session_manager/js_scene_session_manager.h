@@ -82,6 +82,7 @@ public:
     static napi_value PrepareTerminate(napi_env env, napi_callback_info info);
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
+    static napi_value NotifySingleHandInfoChange(napi_env env, napi_callback_info info);
     static napi_value GetRootSceneUIContext(napi_env env, napi_callback_info info);
     static napi_value SendTouchEvent(napi_env env, napi_callback_info info);
     static napi_value AddWindowDragHotArea(napi_env env, napi_callback_info info);
@@ -120,6 +121,7 @@ public:
     static napi_value SetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     static napi_value NotifyAboveLockScreen(napi_env env, napi_callback_info info);
     static napi_value CloneWindow(napi_env env, napi_callback_info info);
+    static napi_value RegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -128,7 +130,7 @@ public:
     static napi_value GetInstanceCount(napi_env env, napi_callback_info info);
     static napi_value GetLastInstanceKey(napi_env env, napi_callback_info info);
     static napi_value RefreshAppInfo(napi_env env, napi_callback_info info);
-    
+
     /*
      * Window Immersive
      */
@@ -171,6 +173,7 @@ private:
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
+    napi_value OnNotifySingleHandInfoChange(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneUIContext(napi_env env, napi_callback_info info);
     napi_value OnSendTouchEvent(napi_env env, napi_callback_info info);
     napi_value OnAddWindowDragHotArea(napi_env env, napi_callback_info info);
@@ -208,6 +211,7 @@ private:
     napi_value OnSetIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnNotifyAboveLockScreen(napi_env env, napi_callback_info info);
     napi_value OnCloneWindow(napi_env env, napi_callback_info info);
+    napi_value OnRegisterSingleHandContainerNode(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -239,7 +243,7 @@ private:
     void OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession, const sptr<SceneSession>& panelSession);
     void OnOutsideDownEvent(int32_t x, int32_t y);
     void OnStartUIAbilityError(const uint32_t errorCode);
-    void OnShiftFocus(int32_t persistentId);
+    void OnShiftFocus(int32_t persistentId, DisplayId displayGroupId);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
     void ProcessCreateSystemSessionRegister();
     void ProcessCreateKeyboardSessionRegister();

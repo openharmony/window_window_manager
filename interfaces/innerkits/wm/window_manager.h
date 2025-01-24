@@ -301,6 +301,61 @@ struct AppUseControlInfo : public Parcelable {
 };
 
 /**
+ * @struct AbilityInfoBase
+ *
+ * @brief ability info.
+ */
+struct AbilityInfoBase : public Parcelable {
+    /**
+     * @brief Marshalling AbilityInfoBase.
+     *
+     * @param parcel Package of AbilityInfoBase.
+     * @return True means marshall success, false means marshall failed.
+     */
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteString(bundleName) &&
+               parcel.WriteString(moduleName) &&
+               parcel.WriteString(abilityName) &&
+               parcel.WriteInt32(appIndex);
+    }
+
+    /**
+     * @brief Unmarshalling AbilityInfoBase.
+     *
+     * @param parcel Package of AbilityInfoBase.
+     * @return AbilityInfoBase object.
+     */
+    static AbilityInfoBase* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new AbilityInfoBase();
+        if (!parcel.ReadString(info->bundleName) ||
+            !parcel.ReadString(info->moduleName) ||
+            !parcel.ReadString(info->abilityName) ||
+            !parcel.ReadInt32(info->appIndex)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    bool IsValid() const
+    {
+        return !bundleName.empty() && !moduleName.empty() && !abilityName.empty() && appIndex >= 0;
+    }
+
+    std::string ToKeyString() const
+    {
+        return bundleName + "_" + moduleName + "_" + abilityName + "_" + std::to_string(appIndex);
+    }
+
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    int32_t appIndex = 0;
+};
+
+/**
  * @class UnreliableWindowInfo
  *
  * @brief Unreliable Window Info.
@@ -760,7 +815,7 @@ public:
      * @param focusInfo Focus window info.
      * @return FocusChangeInfo object about focus window.
      */
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
 
     /**
      * @brief Dump all session info
