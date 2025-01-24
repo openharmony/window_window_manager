@@ -389,10 +389,10 @@ WMError WindowManagerLite::UnregisterVisibilityChangedListener(const sptr<IVisib
     return ret;
 }
 
-void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("In");
-    SingletonContainer::Get<WindowAdapterLite>().GetFocusWindowInfo(focusInfo);
+    SingletonContainer::Get<WindowAdapterLite>().GetFocusWindowInfo(focusInfo, displayId);
 }
 
 void WindowManagerLite::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const

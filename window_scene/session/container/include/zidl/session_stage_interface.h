@@ -86,6 +86,7 @@ public:
      */
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
+    virtual WSError NotifyHighlightChange(bool isHighlight) = 0;
 
     /**
      * @brief Notify client to close the existing pip window.

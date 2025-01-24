@@ -33,6 +33,9 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSession" };
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+// 0: 横扫屏; 1: 竖扫屏. 默认为0
+static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
+static const int32_t SCAN_TYPE_VERTICAL = 1;
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
@@ -747,16 +750,6 @@ void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
     property_.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), foldDisplayMode);
 }
 
-void ScreenSession::UpdatePhysicalTouchBounds(bool enable)
-{
-    property_.SetPhysicalTouchBounds(enable);
-}
-
-void ScreenSession::UpdateCurrentOffScreenRendering(bool enable)
-{
-    property_.SetCurrentOffScreenRendering(enable);
-}
-
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
     FoldDisplayMode foldDisplayMode)
 {
@@ -861,14 +854,6 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
-}
-
-void ScreenSession::UpdateBounds(RRect bounds)
-{
-    property_.SetBounds(bounds);
-    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f]",
-        property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
-        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight());
 }
 
 void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
@@ -1096,6 +1081,9 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
     }
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
+    if (g_screenScanType == SCAN_TYPE_VERTICAL) {
+        isVerticalScreen = false;
+    }
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN
         && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
@@ -1681,6 +1669,13 @@ void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offset
 {
     property_.SetOffsetY(static_cast<int32_t>(offsetY));
     property_.SetBounds(RRect(rect, 0.0f, 0.0f));
+}
+
+void ScreenSession::SetExtendProperty(RRect bounds, bool isPhysicalTouchBounds, bool isCurrentOffScreenRendering)
+{
+    property_.SetBounds(bounds);
+    property_.SetPhysicalTouchBounds(isPhysicalTouchBounds);
+    property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
 }
 
 void ScreenSession::Resize(uint32_t width, uint32_t height)

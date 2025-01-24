@@ -192,6 +192,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
             return HandleSetDragActivated(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE):
+            return HandleNotifyHighlightChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -754,6 +756,19 @@ int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, Message
         return ERR_INVALID_VALUE;
     }
     SendContainerModalEvent(eventName, eventValue);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called!");
+    bool isHighlight = false;
+    if (!data.ReadBool(isHighlight)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read isHighlight failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyHighlightChange(isHighlight);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
