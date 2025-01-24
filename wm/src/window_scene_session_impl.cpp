@@ -854,6 +854,19 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
     return isConsumed;
 }
 
+static void GetWindowSizeLimits(std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo,
+    WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits.maxWindowWidth = windowSizeLimits.maxWindowWidth > 0 ?
+        windowSizeLimits.maxWindowWidth : abilityInfo->maxWindowWidth;
+    windowSizeLimits.maxWindowHeight = windowSizeLimits.maxWindowHeight > 0 ?
+        windowSizeLimits.maxWindowHeight : abilityInfo->maxWindowHeight;
+    windowSizeLimits.minWindowWidth = windowSizeLimits.minWindowWidth > 0 ?
+        windowSizeLimits.minWindowWidth : abilityInfo->minWindowWidth;
+    windowSizeLimits.minWindowHeight = windowSizeLimits.minWindowHeight > 0 ?
+        windowSizeLimits.minWindowHeight : abilityInfo->minWindowHeight;
+}
+
 void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
 {
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
@@ -863,9 +876,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     }
     auto abilityInfo = abilityContext->GetAbilityInfo();
     if (abilityInfo != nullptr) {
+        WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
+        GetWindowSizeLimits(abilityInfo, windowSizeLimits);
         property_->SetConfigWindowLimitsVP({
-            abilityInfo->maxWindowWidth, abilityInfo->maxWindowHeight,
-            abilityInfo->minWindowWidth, abilityInfo->minWindowHeight,
+            windowSizeLimits.maxWindowWidth, windowSizeLimits.maxWindowHeight,
+            windowSizeLimits.minWindowWidth, windowSizeLimits.minWindowHeight,
             static_cast<float>(abilityInfo->maxWindowRatio), static_cast<float>(abilityInfo->minWindowRatio)
         });
         UpdateWindowSizeLimits();
@@ -2799,6 +2814,8 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
     bool terminateCloseProcess = false;
     WMError res = NotifyMainWindowClose(terminateCloseProcess);
     if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, not close: %{public}d", GetPersistentId(),
+            terminateCloseProcess);
         if (!terminateCloseProcess) {
             hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
         }
@@ -2824,19 +2841,26 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
 
 WMError WindowSceneSessionImpl::Close()
 {
-    WLOGFI("id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isSystemSubWindow = WindowHelper::IsSystemSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    if (WindowHelper::IsMainWindow(windowType) || isSubWindow) {
+        WMError res = NotifyWindowWillClose(this);
+        if (res == WMError::WM_OK) {
+            TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d will close", GetPersistentId());
+            return res;
+        }
+    }
     if (WindowHelper::IsMainWindow(windowType)) {
         return MainWindowCloseInner();
     } else if (isSubWindow || isSystemSubWindow || isDialogWindow) {
-        WLOGFI("Close subwindow or dialog");
+        TLOGI(WmsLogTag::WMS_DECOR, "subwindow or dialog");
         bool terminateCloseProcess = false;
         NotifySubWindowClose(terminateCloseProcess);
         if (!terminateCloseProcess || isDialogWindow) {
@@ -2844,6 +2868,22 @@ WMError WindowSceneSessionImpl::Close()
         }
     }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::CloseDirectly()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d", GetPersistentId());
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto hostSession = GetHostSession();
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        return WMError::WM_OK;
+    }
+    return Destroy(true);
 }
 
 WMError WindowSceneSessionImpl::DisableAppWindowDecor()
