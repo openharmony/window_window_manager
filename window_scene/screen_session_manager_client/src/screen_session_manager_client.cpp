@@ -345,7 +345,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
 
     // not need update property to input manager
     if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_END ||
-        screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) {
+        screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY ||
+        screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY) {
         return;
     }
     auto screenSession = GetScreenSession(screenId);

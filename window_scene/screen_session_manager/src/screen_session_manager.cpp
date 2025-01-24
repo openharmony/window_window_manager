@@ -3128,6 +3128,10 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         return;
     }
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"", screenId);
+        return;
+    }
     {
         DmsXcollie dmsXcollie("DMS:UpdateScreenRotationProperty:CacheForRotation", XCOLLIE_TIMEOUT_10S);
         if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_BEGIN) {
@@ -3139,27 +3143,20 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             TLOGI(WmsLogTag::DMS, "DisableCacheForRotation");
             RSInterfaces::GetInstance().DisableCacheForRotation();
             return;
-        } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) {
-            if (screenSession == nullptr) {
-                TLOGE(WmsLogTag::DMS, "fail, cannot find screen "
-                    "%{public}" PRIu64"", screenId);
-                return;
-            }
+        } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY ||
+            screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY) {
             sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
             TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
             {
                 std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
                 screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
             }
-            NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
-            NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+            if (screenPropertyChangeType != ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY) {
+                NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
+                NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
+            }
             return;
         }
-    }
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"",
-            screenId);
-        return;
     }
     {
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
@@ -5433,8 +5430,14 @@ std::string ScreenSessionManager::TransferPropertyChangeTypeToString(ScreenPrope
         case ScreenPropertyChangeType::ROTATION_END:
             screenType = "ROTATION_END";
             break;
-        default:
+        case ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY:
             screenType = "ROTATION_UPDATE_PROPERTY_ONLY";
+            break;
+        case ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY:
+            screenType = "ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY";
+            break;
+        default:
+            screenType = "UNDEFINED";
             break;
     }
     return screenType;
