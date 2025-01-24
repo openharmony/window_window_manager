@@ -2895,6 +2895,42 @@ void ScreenSessionManagerProxy::UpdateAvailableArea(ScreenId screenId, DMRect ar
     }
 }
 
+void ScreenSessionManagerProxy::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("UpdateSuperFoldAvailableArea: remote is null");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteInt32(bArea.posX_) || !data.WriteInt32(bArea.posY_) || !data.WriteUint32(bArea.width_) ||
+        !data.WriteUint32(bArea.height_)) {
+        WLOGFE("Write bArea failed");
+        return;
+    }
+    if (!data.WriteInt32(cArea.posX_) || !data.WriteInt32(cArea.posY_) || !data.WriteUint32(cArea.width_) ||
+        !data.WriteUint32(cArea.height_)) {
+        WLOGFE("Write cArea failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UPDATE_SUPER_FOLD_AVAILABLE_AREA),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 int32_t ScreenSessionManagerProxy::SetScreenOffDelayTime(int32_t delay)
 {
     sptr<IRemoteObject> remote = Remote();

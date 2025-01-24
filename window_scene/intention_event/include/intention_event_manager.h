@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "input_manager.h"
+#include "session/host/include/scene_session.h"
 #include "singleton.h"
 #include "ui_content.h"
 #include "wm_common.h"
@@ -50,6 +51,8 @@ private:
         int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const;
     bool CheckPointerEvent(const std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    void SetPointerEventStatus(
+        int32_t fingerId, int32_t action, int32_t sourceType, const sptr<SceneSession>& sceneSession) const;
     Ace::UIContent* uiContent_ = nullptr;
     std::weak_ptr<AppExecFwk::EventHandler> weakEventConsumer_;
 };

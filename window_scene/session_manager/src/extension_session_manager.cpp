@@ -102,7 +102,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession,
-    uint32_t hostWindowId, const std::function<void(WSError)>&& resultCallback)
+    uint32_t hostWindowId, std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback), where = __func__]() {
@@ -123,6 +123,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "Activate ret:%{public}d, persistentId:%{public}d", errorCode, persistentId);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
             callback(ret);
@@ -135,7 +136,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession,
-    const std::function<void(WSError)>&& resultCallback)
+    std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, callback = std::move(resultCallback)]() {
@@ -167,7 +168,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession,
-    const std::function<void(WSError)>&& resultCallback)
+    std::function<void(WSError)>&& resultCallback)
 {
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, callback = std::move(resultCallback),

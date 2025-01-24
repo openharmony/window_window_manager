@@ -214,6 +214,12 @@ public:
     uint32_t GetSubWindowLevel() const;
 
     /*
+     * Window Property
+     */
+    void SetWindowCornerRadius(float cornerRadius);
+    float GetWindowCornerRadius() const;
+
+    /*
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -242,6 +248,8 @@ public:
     void GetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const;
     void SetWindowDelayRaiseEnabled(bool isEnabled);
     bool IsWindowDelayRaiseEnabled() const;
+    void SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits);
+    WindowSizeLimits GetWindowSizeLimits() const;
 
     /*
      * Keyboard
@@ -423,6 +431,7 @@ private:
     mutable std::mutex supportWindowModesMutex_;
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
     bool isWindowDelayRaiseEnabled_ = false;
+    WindowSizeLimits windowSizeLimits_;
 
     /*
      * Keyboard
@@ -434,6 +443,12 @@ private:
      * Window Immersive
      */
     uint32_t avoidAreaOption_ = 0;
+
+    /*
+     * Window Property
+     */
+    float cornerRadius_ = 0.0f;
+    mutable std::mutex cornerRadiusMutex_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

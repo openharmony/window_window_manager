@@ -694,13 +694,17 @@ MaximizeMode WindowAdapter::GetMaximizeMode()
     return wmsProxy->GetMaximizeMode();
 }
 
-void WindowAdapter::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowAdapter::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->GetFocusWindowInfo(focusInfo);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        wmsProxy->GetFocusWindowInfo(focusInfo, displayId);
+    } else {
+        wmsProxy->GetFocusWindowInfo(focusInfo);
+    }
 }
 
 WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)

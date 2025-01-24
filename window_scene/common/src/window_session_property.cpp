@@ -616,6 +616,16 @@ void WindowSessionProperty::GetSupportedWindowModes(
     supportedWindowModes = supportedWindowModes_;
 }
 
+void WindowSessionProperty::SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits_ = windowSizeLimits;
+}
+
+WindowSizeLimits WindowSessionProperty::GetWindowSizeLimits() const
+{
+    return windowSizeLimits_;
+}
+
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
 {
     animationFlag_ = animationFlag;
@@ -722,6 +732,18 @@ void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMod
 bool WindowSessionProperty::GetIsNeedUpdateWindowMode() const
 {
     return isNeedUpdateWindowMode_;
+}
+
+void WindowSessionProperty::SetWindowCornerRadius(float cornerRadius)
+{
+    std::lock_guard<std::mutex> lock(cornerRadiusMutex_);
+    cornerRadius_ = cornerRadius;
+}
+
+float WindowSessionProperty::GetWindowCornerRadius() const
+{
+    std::lock_guard<std::mutex> lock(cornerRadiusMutex_);
+    return cornerRadius_;
 }
 
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
@@ -1172,7 +1194,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
-        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(KeyboardViewMode_));
+        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(KeyboardViewMode_)) &&
+        parcel.WriteFloat(cornerRadius_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1257,6 +1280,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
     property->SetBackgroundAlpha(parcel.ReadUint8());
     property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
+    property->SetWindowCornerRadius(parcel.ReadFloat());
     return property;
 }
 
@@ -1343,6 +1367,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
     backgroundAlpha_ = property->backgroundAlpha_;
     KeyboardViewMode_ = property->KeyboardViewMode_;
+    cornerRadius_ = property->cornerRadius_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
