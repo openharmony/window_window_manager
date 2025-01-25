@@ -786,9 +786,19 @@ public:
         std::vector<sptr<UnreliableWindowInfo>>& infos) const;
 
     /**
+     * @brief List window info.
+     *
+     * @param windowInfoOption Option for selecting window info.
+     * @param infos Window info.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
+
+    /**
      * @brief Get window layout info.
      *
-     * @param infos window layout infos
+     * @param displayId DisplayId of which display to get window layout infos.
+     * @param infos Window layout infos.
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;

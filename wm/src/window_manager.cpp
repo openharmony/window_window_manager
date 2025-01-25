@@ -1119,6 +1119,20 @@ WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     return ret;
 }
 
+WMError WindowManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos) const
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowInfoOption: %{public}u %{public}u %{public}" PRIu64" %{public}d",
+        static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
+        static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
+        windowInfoOption.displayId, windowInfoOption.windowId);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ListWindowInfo(windowInfoOption, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos);

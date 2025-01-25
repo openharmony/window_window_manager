@@ -74,9 +74,7 @@ group("unittest") {
   }
 
   if (window_manager_feature_multi_screen) {
-    deps += [
-      ":ws_multi_screen_manager_test",
-    ]
+    deps += [ ":ws_multi_screen_manager_test" ]
   }
 }
 

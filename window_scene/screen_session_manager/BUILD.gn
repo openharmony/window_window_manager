@@ -188,6 +188,7 @@ ohos_shared_library("screen_session_manager") {
       "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
       "src/fold_screen_controller/single_display_fold_policy.cpp",
       "src/fold_screen_controller/single_display_pocket_fold_policy.cpp",
+      "src/fold_screen_controller/super_fold_policy.cpp",
       "src/fold_screen_controller/super_fold_sensor_manager.cpp",
       "src/fold_screen_controller/super_fold_state_manager.cpp",
     ]
@@ -226,9 +227,7 @@ ohos_shared_library("screen_session_manager") {
 
   if (window_manager_feature_multi_screen) {
     defines += [ "WM_MULTI_SCREEN_ENABLE" ]
-    source += [
-      "src/multi_screen_manager.cpp"
-    ]
+    sources += [ "src/multi_screen_manager.cpp" ]
     print("window manager screen multi screen ability is enabled.")
   } else {
     print("window manager screen multi screen ability is disabled.")

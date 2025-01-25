@@ -61,6 +61,7 @@ public:
         TRANS_ID_UPDATE_LAYOUT_MODE,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
+        TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
@@ -119,6 +120,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) = 0;
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
