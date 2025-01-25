@@ -80,12 +80,12 @@ HWTEST_F(OHWindowTest, ShowWindow01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     auto ret = OH_WindowManager_ShowWindow(scene_->GetMainWindow()->GetWindowId());
-    EXPECT_EQ(WindowManager_ErrorCode::OK, ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
 }
 
 /**
  * @tc.name: IsWindowShown01
- * @tc.desc: return OK when is window shown
+ * @tc.desc: return OK when window is shown
  * @tc.type: FUNC
  */
 HWTEST_F(OHWindowTest, IsWindowShowing01, Function | SmallTest | Level2)
@@ -94,7 +94,7 @@ HWTEST_F(OHWindowTest, IsWindowShowing01, Function | SmallTest | Level2)
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     bool isShow;
     auto ret = OH_WindowManager_IsWindowShown(scene_->GetMainWindow()->GetWindowId(), &isShow);
-    EXPECT_EQ(WindowManager_ErrorCode::OK, ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
 }
 }
 } // namespace Rosen

@@ -169,8 +169,8 @@ class SceneSessionManager : public SceneSessionManagerStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     friend class AnomalyDetection;
-    bool IsSessionVisible(const sptr<SceneSession>& session);
-    bool IsSessionVisibleForeground(const sptr<SceneSession>& session);
+    bool IsSessionVisible(const sptr<SceneSession>& session) const;
+    bool IsSessionVisibleForeground(const sptr<SceneSession>& session) const;
 
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
@@ -499,6 +499,7 @@ public:
      */
     WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
 
     /*
@@ -828,6 +829,8 @@ private:
     WMError RelockScreenLockForApp(const std::string& bundleName);
     void GetAllSessionsToReleaseScreenLock(
         std::vector<sptr<SceneSession>>& sessionsToReleaseScreenLock, const std::string& bundleName);
+    bool FilterForListWindowInfo(const WindowInfoOption& windowInfoOption,
+        const sptr<SceneSession>& sceneSession) const;
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
