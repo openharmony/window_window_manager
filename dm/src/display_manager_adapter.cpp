@@ -591,6 +591,18 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
 }
 
+sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    WLOGFD("enter, displayId: %{public}" PRIu64" ", displayId);
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("display id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    return displayManagerServiceProxy_->GetVisibleAreaDisplayInfoById(displayId);
+}
+
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 {
     WLOGFD("DisplayManagerAdapter::GetCutoutInfo");

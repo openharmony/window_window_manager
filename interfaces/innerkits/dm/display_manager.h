@@ -211,6 +211,14 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
 
     /**
+     * @brief Get the display object by id.Only for PC.
+     *
+     * @param displayId Id of the target display.
+     * @return Default display object.
+     */
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
+
+    /**
      * @brief Get the display object by corresponding screenId.
      *
      * @param screenId The id of the target screen.
