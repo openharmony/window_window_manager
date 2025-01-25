@@ -56,6 +56,7 @@ public:
 
     sptr<DisplayInfo> GetDefaultDisplayInfo() override;
     sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError SetOrientation(ScreenId screenId, Orientation orientation) override;

@@ -104,6 +104,7 @@ public:
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
 
     sptr<DisplayInfo> ConvertToDisplayInfo();
+    sptr<DisplayInfo> ConvertToRealDisplayInfo();
     sptr<ScreenInfo> ConvertToScreenInfo() const;
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     ScreenSourceMode GetSourceMode() const;
