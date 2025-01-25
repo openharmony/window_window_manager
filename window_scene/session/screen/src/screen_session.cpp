@@ -1242,6 +1242,7 @@ sptr<ScreenInfo> ScreenSession::ConvertToScreenInfo() const
 
 DMError ScreenSession::GetScreenColorGamut(ScreenColorGamut& colorGamut)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenColorGamut(rsId_, colorGamut);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
@@ -1249,11 +1250,13 @@ DMError ScreenSession::GetScreenColorGamut(ScreenColorGamut& colorGamut)
     }
     WLOGI("GetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamut %{public}u",
         rsId_, static_cast<uint32_t>(colorGamut));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenColorGamut(int32_t colorGamutIdx)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     std::vector<ScreenColorGamut> colorGamuts;
     DMError res = GetScreenSupportedColorGamuts(colorGamuts);
     if (res != DMError::DM_OK) {
@@ -1272,11 +1275,13 @@ DMError ScreenSession::SetScreenColorGamut(int32_t colorGamutIdx)
     }
     WLOGI("SetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamutIdx %{public}u",
         rsId_, colorGamutIdx);
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetScreenGamutMap(ScreenGamutMap& gamutMap)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenGamutMap(rsId_, gamutMap);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
@@ -1284,11 +1289,13 @@ DMError ScreenSession::GetScreenGamutMap(ScreenGamutMap& gamutMap)
     }
     WLOGI("GetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
         rsId_, static_cast<uint32_t>(gamutMap));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenGamutMap(ScreenGamutMap gamutMap)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     if (gamutMap > GAMUT_MAP_HDR_EXTENSION) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -1299,6 +1306,7 @@ DMError ScreenSession::SetScreenGamutMap(ScreenGamutMap gamutMap)
     }
     WLOGI("SetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
         rsId_, static_cast<uint32_t>(gamutMap));
+#endif
     return DMError::DM_OK;
 }
 
@@ -1337,6 +1345,7 @@ DMError ScreenSession::SetPixelFormat(GraphicPixelFormat pixelFormat)
 
 DMError ScreenSession::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(rsId_, hdrFormats);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("SCB: ScreenSession::GetSupportedHDRFormats fail! rsId %{public}" PRIu64 ", ret:%{public}d",
@@ -1345,12 +1354,13 @@ DMError ScreenSession::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrF
     }
     WLOGI("SCB: ScreenSession::GetSupportedHDRFormats ok! rsId %{public}" PRIu64 ", size %{public}u",
         rsId_, static_cast<uint32_t>(hdrFormats.size()));
-
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenHDRFormat(rsId_, hdrFormat);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
@@ -1358,11 +1368,13 @@ DMError ScreenSession::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat)
     }
     WLOGI("GetScreenHDRFormat ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
         rsId_, static_cast<uint32_t>(hdrFormat));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     std::vector<ScreenHDRFormat> hdrFormats;
     DMError res = GetSupportedHDRFormats(hdrFormats);
     if (res != DMError::DM_OK) {
@@ -1381,11 +1393,13 @@ DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
     }
     WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}d",
         rsId_, modeIdx);
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
 {
+#ifdef WM_SCREEN_COLOR_SPACE_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorSpaces(rsId_, colorSpaces);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("SCB: ScreenSession::GetSupportedColorSpaces fail! rsId %{public}" PRIu64 ", ret:%{public}d",
@@ -1394,11 +1408,13 @@ DMError ScreenSession::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceT
     }
     WLOGI("SCB: ScreenSession::GetSupportedColorSpaces ok! rsId %{public}" PRIu64 ", size %{public}u",
         rsId_, static_cast<uint32_t>(colorSpaces.size()));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace)
 {
+#ifdef WM_SCREEN_COLOR_SPACE_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenColorSpace(rsId_, colorSpace);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
@@ -1406,11 +1422,13 @@ DMError ScreenSession::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace)
     }
     WLOGI("GetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
         rsId_, static_cast<uint32_t>(colorSpace));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
 {
+#ifdef WM_SCREEN_COLOR_SPACE_ENABLE
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     DMError res = GetSupportedColorSpaces(colorSpaces);
     if (res != DMError::DM_OK) {
@@ -1429,6 +1447,7 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
     }
     WLOGI("SetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
         rsId_, static_cast<uint32_t>(colorSpace));
+#endif
     return DMError::DM_OK;
 }
 
