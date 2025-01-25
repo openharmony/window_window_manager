@@ -64,6 +64,8 @@ napi_value JsScreenUtils::CreateJsScreenProperty(napi_env env, const ScreenPrope
     napi_set_named_property(env, objValue, "isFakeInUse", CreateJsValue(env, screenProperty.GetIsFakeInUse()));
     napi_set_named_property(env, objValue, "accessTranslateX", CreateJsValue(env, screenProperty.GetTranslateX()));
     napi_set_named_property(env, objValue, "accessTranslateY", CreateJsValue(env, screenProperty.GetTranslateY()));
+    napi_set_named_property(env, objValue, "scaleX", CreateJsValue(env, screenProperty.GetScaleX()));
+    napi_set_named_property(env, objValue, "scaleY", CreateJsValue(env, screenProperty.GetScaleY()));
     return objValue;
 }
 

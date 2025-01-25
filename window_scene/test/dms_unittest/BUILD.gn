@@ -19,7 +19,6 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":ws_multi_screen_manager_test",
     ":ws_screen_cutout_controller_test",
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
@@ -71,6 +70,12 @@ group("unittest") {
       ":ws_single_display_sensor_pocket_fold_state_manager_test",
       ":ws_super_fold_sensor_manager_test",
       ":ws_super_fold_state_manager_test",
+    ]
+  }
+
+  if (window_manager_feature_multi_screen) {
+    deps += [
+      ":ws_multi_screen_manager_test",
     ]
   }
 }
@@ -829,6 +834,41 @@ ohos_static_library("ws_unittest_common") {
   if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
     external_deps += [ "sensor:sensor_interface_native" ]
     defines += [ "SENSOR_ENABLE" ]
+  }
+
+  if (window_manager_fold_ability) {
+    defines += [ "FOLD_ABILITY_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_active_mode) {
+    defines += [ "WM_SCREEN_ACTIVE_MODE_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_gamut) {
+    defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_hdr_format) {
+    defines += [ "WM_SCREEN_HDR_FORMAT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_space) {
+    defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_screen) {
+    defines += [ "WM_MULTI_SCREEN_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_screen_frame_ctl) {
+    defines += [ "WM_MULTI_SCREEN_CTL_ABILITY_ENABLE" ]
+  }
+  if (window_manager_feature_cam_mode) {
+    defines += [ "WM_CAM_MODE_ABILITY_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_usr) {
+    defines += [ "WM_MULTI_USR_ABILITY_ENABLE" ]
   }
 
   part_name = "window_manager"
