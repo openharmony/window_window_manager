@@ -6582,9 +6582,26 @@ DMError ScreenSessionManager::GetAvailableArea(DisplayId displayId, DMRect& area
         TLOGE(WmsLogTag::DMS, "can not get displayInfo.");
         return DMError::DM_ERROR_NULLPTR;
     }
-    auto screenSession = GetScreenSession(displayInfo->GetScreenId());
+    sptr<ScreenSession> screenSession;
+    if (displayId == DISPLAY_ID_FAKE) {
+        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            return DMError::DM_ERROR_NULLPTR;
+        }
+        ScreenId internalScreenId = GetInternalScreenId();
+        sptr<ScreenSession> internalScreenSession = GetScreenSession(internalScreenId);
+        if (internalScreenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "internal session is nullptr.");
+            return DMError::DM_ERROR_NULLPTR;
+        }
+        if (!internalScreenSession->GetScreenProperty().GetIsFakeInUse()) {
+            return DMError::DM_ERROR_NULLPTR;
+        }
+        screenSession = internalScreenSession->GetFakeScreenSession();
+    } else {
+        screenSession = GetScreenSession(displayInfo->GetScreenId());
+    }
     if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "can not get default screen now");
+        TLOGE(WmsLogTag::DMS, "can not get screen now");
         return DMError::DM_ERROR_NULLPTR;
     }
     area = screenSession->GetAvailableArea();
