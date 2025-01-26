@@ -624,12 +624,11 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
-int32_t SceneSession::CaclAvoidAreaForStatusBar()
+int32_t SceneSession::CalcAvoidAreaForStatusBar()
 {
     int32_t height = 0;
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr ||
-        GetSessionProperty() == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback or session property is null");
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback is null");
         return height;
     }
     const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
@@ -659,7 +658,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     }
 
     if ((systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) && !systemConfig_.IsFreeMultiWindowMode()) {
-        int32_t statusBarHeight = CaclAvoidAreaForStatusBar();
+        int32_t statusBarHeight = CalcAvoidAreaForStatusBar();
         if (statusBarHeight > availableArea.posY_) {
             availableArea.posY_ = statusBarHeight;
         }
@@ -671,7 +670,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
             return WSError::WS_ERROR_INVALID_DISPLAY;
         }
         uint32_t currentScreenHeight = currentScreenSession->GetScreenProperty().GetBounds().rect_.height_;
-        availableArea.height_ = currentScreenHeight - availableArea.posY_;
+        availableArea.height_ = currentScreenHeight - static_cast<uint32_t>(availableArea.posY_);
     }
 
     TLOGD(WmsLogTag::WMS_KEYBOARD,
