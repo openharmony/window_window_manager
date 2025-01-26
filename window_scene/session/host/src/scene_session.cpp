@@ -624,6 +624,24 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
+int32_t SceneSession::CalcAvoidAreaForStatusBar()
+{
+    int32_t height = 0;
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback is null");
+        return height;
+    }
+    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
+        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    for (auto& statusBar : statusBarVector) {
+        if (statusBar != nullptr && statusBar->IsVisible() && statusBar->GetSessionRect().height_ > height) {
+            height = statusBar->GetSessionRect().height_;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "height: %{public}d", height);
+    return height;
+}
+
 WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
 {
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -637,6 +655,22 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get available area, ret: %{public}d", ret);
         return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+
+    if ((systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) && !systemConfig_.IsFreeMultiWindowMode()) {
+        int32_t statusBarHeight = CalcAvoidAreaForStatusBar();
+        if (statusBarHeight > availableArea.posY_) {
+            availableArea.posY_ = statusBarHeight;
+        }
+
+        sptr<ScreenSession> currentScreenSession =
+            ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
+        if (currentScreenSession == nullptr) {
+            TLOGW(WmsLogTag::WMS_KEYBOARD, "Screen session is null");
+            return WSError::WS_ERROR_INVALID_DISPLAY;
+        }
+        uint32_t currentScreenHeight = currentScreenSession->GetScreenProperty().GetBounds().rect_.height_;
+        availableArea.height_ = currentScreenHeight - static_cast<uint32_t>(availableArea.posY_);
     }
 
     TLOGD(WmsLogTag::WMS_KEYBOARD,
