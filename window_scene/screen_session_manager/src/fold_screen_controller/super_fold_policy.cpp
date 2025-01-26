@@ -58,4 +58,32 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     return snapshotRect;
 }
+
+DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
+{
+    auto defaultInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(DEFAULT_DISPLAY_ID);
+    auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
+    DMRect recordRect = {0, 0, 0, 0};
+    if (defaultInfo == nullptr) {
+        return recordRect;
+    }
+    if (displayId == DISPLAY_ID_FAKE) {
+        if (fakeInfo != nullptr) {
+            recordRect = {0, defaultInfo->GetHeight(), defaultInfo->GetWidth(),
+                fakeInfo->GetHeight()};
+        }
+    } else {
+        recordRect = {0, 0, defaultInfo->GetWidth(), defaultInfo->GetHeight()};
+    }
+    std::ostringstream oss;
+    oss << "snapshot displayId: " << static_cast<uint32_t>(displayId)
+        << " left: 0"
+        << " top:" << recordRect.posY_
+        << " right:" << recordRect.width_
+        << " bottom:" << recordRect.height_;
+
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    return recordRect;
+}
+
 } // namespace OHOS::Rosen
