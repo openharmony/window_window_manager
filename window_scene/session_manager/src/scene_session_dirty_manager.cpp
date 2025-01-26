@@ -704,10 +704,11 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
         return singleHandData;
     }
     const SingleHandTransform& transform = sceneSession->GetSingleHandTransform();
+    auto screenProperty = screenPropertyIter->second;
     singleHandData.scaleX = transform.scaleX;
     singleHandData.scaleY = transform.scaleY;
-    singleHandData.width = screenPropertyIter->second.GetBounds().rect_.GetWidth();
-    singleHandData.height = screenPropertyIter->second.GetBounds().rect_.GetHeight();
+    singleHandData.width = screenProperty.GetBounds().rect_.GetWidth();
+    singleHandData.height = screenProperty.GetBounds().rect_.GetHeight();
     singleHandData.singleHandX = transform.posX;
     singleHandData.singleHandY = transform.posY;
     singleHandData.pivotX = (0 == transform.posX) ? 0.0f : singleHandData.width;

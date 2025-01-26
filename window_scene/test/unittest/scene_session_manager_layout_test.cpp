@@ -31,8 +31,8 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
-const float SINGLE_HAND_SCALE = 0.75f;
-const float SINGLE_HAND_DEFAULT_SCALE = 1.0f;
+constexpr float SINGLE_HAND_SCALE = 0.75f;
+constexpr float SINGLE_HAND_DEFAULT_SCALE = 1.0f;
 }
 class SceneSessionManagerLayoutTest : public testing::Test {
 public:
