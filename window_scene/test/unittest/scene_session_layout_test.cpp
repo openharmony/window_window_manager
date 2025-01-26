@@ -724,7 +724,6 @@ HWTEST_F(SceneSessionLayoutTest, GetSessionGlobalRectWithSingleHandScale, Functi
 {
     SessionInfo info;
     info.abilityName_ = "GetSessionGlobalRectWithSingleHandScale";
-
     info.bundleName_ = "GetSessionGlobalRectWithSingleHandScale";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
