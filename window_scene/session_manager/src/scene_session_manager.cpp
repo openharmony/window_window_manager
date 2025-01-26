@@ -8441,7 +8441,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     }
     info->uiNodeId_ = sceneSession->GetUINodeId();
     WSRect wsRect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
-    info->windowRect_ = {wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
+    info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
     info->type_ = sceneSession->GetWindowType();

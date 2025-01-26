@@ -736,8 +736,8 @@ HWTEST_F(SceneSessionLayoutTest, GetSessionGlobalRectWithSingleHandScale, Functi
 
     testTransform.posX = 10;
     testTransform.posY = 10;
-    testTransform.scaleX = 0.75;
-    testTransform.scaleY = 0.75;
+    testTransform.scaleX = 0.75f;
+    testTransform.scaleY = 0.75f;
     sceneSession->SetSingleHandTransform(testTransform);
     ASSERT_NE(sceneSession->GetSessionGlobalRect().posX_,
               sceneSession->GetSessionGlobalRectWithSingleHandScale().posX_);

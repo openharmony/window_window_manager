@@ -698,20 +698,20 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
     auto sessionProperty = sceneSession->GetSessionProperty();
     auto displayId = sessionProperty->GetDisplayId();
     const std::map<ScreenId, ScreenProperty>& screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     auto screenPropertyIter = screensProperties.find(displayId);
     if (screenPropertyIter == screensProperties.end()) {
         return singleHandData;
     }
     const SingleHandTransform& transform = sceneSession->GetSingleHandTransform();
-    auto screenProperty = screenPropertyIter->second;
+    const auto& screenProperty = screenPropertyIter->second;
     singleHandData.scaleX = transform.scaleX;
     singleHandData.scaleY = transform.scaleY;
     singleHandData.width = screenProperty.GetBounds().rect_.GetWidth();
     singleHandData.height = screenProperty.GetBounds().rect_.GetHeight();
     singleHandData.singleHandX = transform.posX;
     singleHandData.singleHandY = transform.posY;
-    singleHandData.pivotX = (0 == transform.posX) ? 0.0f : singleHandData.width;
+    singleHandData.pivotX = (transform.posX == 0) ? 0.0f : singleHandData.width;
     return singleHandData;
 }
 
