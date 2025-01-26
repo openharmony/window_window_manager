@@ -1025,12 +1025,12 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
         .postureAbAnti = postures[DUMPER_PARAM_INDEX_TWO],
     };
     SensorEvent hallEvent = {
-        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
         .data = reinterpret_cast<uint8_t *>(&hallData),
+        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
     };
     SensorEvent postureEvent = {
-        .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
         .data = reinterpret_cast<uint8_t *>(&postureData),
+        .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
     };
     TLOGI(WmsLogTag::DMS, "mock secondary sensor: %{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(postures, "angle").c_str(),
