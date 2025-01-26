@@ -232,7 +232,7 @@ public:
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
-    void ResetSnapshotCache();
+    void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true);
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);

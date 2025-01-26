@@ -47,7 +47,7 @@
 #include "session/host/include/keyboard_session.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_listener_controller.h"
-#include "session_manager/include/lru.h"
+#include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "thread_safety_annotations.h"
 #include "transaction/rs_interfaces.h"

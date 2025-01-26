@@ -15,6 +15,7 @@
 
 #ifndef OHOS_ROSEN_LRUCACHE_H
 #define OHOS_ROSEN_LRUCACHE_H
+
 #include <list>
 #include <unordered_map>
 
@@ -23,13 +24,13 @@ class LRUCache {
 public:
     LRUCache(int32_t capacity) : capacity_(capacity) {}
 
-    bool get(int32_t key);
-    int32_t put(int32_t key);
+    bool Check(int32_t key);
+    int32_t Put(int32_t key);
 
 private:
     int32_t capacity_;
-    std::list<int32_t> cacheList;
-    std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap;
+    std::list<int32_t> cacheList_;
+    std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_LRUCACHE_H
