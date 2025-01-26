@@ -29,6 +29,7 @@ public:
     bool IsFakeDisplayExist();
     bool IsNeedSetSnapshotRect(DisplayId displayId);
     Drawing::Rect GetSnapshotRect(DisplayId displayId);
+    DMRect GetRecordRect(DisplayId displayId);
 };
 }
 #endif // OHOS_ROSEN_WINDOW_SUPER_FOLD_POLICY_H
