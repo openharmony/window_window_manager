@@ -13,30 +13,30 @@
  * limitations under the License.
  */
 
-#include "lru.h"
+#include "window_manager_lru.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-bool LRUCache::get(int32_t key)
+bool LRUCache::Check(int32_t key)
 {
-    if (cacheMap.find(key) == cacheMap.end()) {
+    if (cacheMap_.find(key) == cacheMap_.end()) {
         return false;
     }
-    cacheList.splice(cacheList.begin(), cacheList, cacheMap[key]);
+    cacheList_.splice(cacheList_.begin(), cacheList_, cacheMap_[key]);
     return true;
 }
 
-int32_t LRUCache::put(int32_t key)
+int32_t LRUCache::Put(int32_t key)
 {
     int32_t lastKey = -1;
-    if (!get(key)) {
-        if (cacheList.size() >= capacity_) {
-            lastKey = cacheList.back();
-            cacheMap.erase(lastKey);
-            cacheList.pop_back();
+    if (!Check(key)) {
+        if (cacheList_.size() >= capacity_) {
+            lastKey = cacheList_.back();
+            cacheMap_.erase(lastKey);
+            cacheList_.pop_back();
         }
-        cacheList.push_front(key);
-        cacheMap[key] = cacheList.begin();
+        cacheList_.push_front(key);
+        cacheMap_[key] = cacheList_.begin();
     }
     return lastKey;
 }

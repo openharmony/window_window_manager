@@ -66,7 +66,6 @@ ohos_shared_library("scene_session_manager") {
     "src/distributed_client.cpp",
     "src/extension_session_manager.cpp",
     "src/hidump_controller.cpp",
-    "src/lru.cpp",
     "src/publish/scb_dump_subscriber.cpp",
     "src/scb_session_handler.cpp",
     "src/scene_input_manager.cpp",
@@ -79,6 +78,7 @@ ohos_shared_library("scene_session_manager") {
     "src/session_manager_agent_controller.cpp",
     "src/window_focus_controller.cpp",
     "src/window_scene_config.cpp",
+    "src/window_manager_lru.cpp",
     "src/zidl/scene_session_manager_lite_stub.cpp",
     "src/zidl/scene_session_manager_stub.cpp",
   ]

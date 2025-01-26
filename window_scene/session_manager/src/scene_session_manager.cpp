@@ -2451,24 +2451,23 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
 
 void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    int32_t removeFromCacheSessionId = snapshotLRUCache_->put(persistentId);
+    TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    int32_t removeFromCacheSessionId = snapshotLRUCache_->Put(persistentId);
     if (removeFromCacheSessionId != -1) {
         auto removeSceneSession = GetSceneSession(removeFromCacheSessionId);
         if (removeSceneSession) {
             removeSceneSession->ResetSnapshot();
-        }
-        else {
-            TLOGI(WmsLogTag::WMS_PATTERN, "removeSceneSession:%{public}d nullptr", removeFromCacheSessionId);
+        } else {
+            TLOGW(WmsLogTag::WMS_PATTERN, "removeSceneSession:%{public}d nullptr", removeFromCacheSessionId);
         }
     }
 }
 
 void SceneSessionManager::GetSnapshotFromCache(int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    if (!snapshotLRUCache_->get(persistentId)) {
-        TLOGI(WmsLogTag::WMS_PATTERN, "session not in cache");
+    TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    if (!snapshotLRUCache_->Check(persistentId)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
     }
 }
 
@@ -2494,8 +2493,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         }
 
         if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            !(sceneSession->GetSystemConfig().IsPcWindow() || sceneSession->GetSystemConfig().freeMultiWindowEnable_))
-        {
+            !sceneSession->GetSystemConfig().IsPcWindow() && !sceneSession->GetSystemConfig().freeMultiWindowEnable_) {
             PutSnapshotToCache(persistentId);
         }
 
