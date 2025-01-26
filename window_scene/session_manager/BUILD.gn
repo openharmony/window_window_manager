@@ -73,6 +73,7 @@ ohos_shared_library("scene_session_manager") {
     "src/scene_system_ability_listener.cpp",
     "src/session_listener_controller.cpp",
     "src/session_manager_agent_controller.cpp",
+    "src/window_manager_lru.cpp",
     "src/window_scene_config.cpp",
     "src/zidl/scene_session_manager_lite_stub.cpp",
     "src/zidl/scene_session_manager_stub.cpp",

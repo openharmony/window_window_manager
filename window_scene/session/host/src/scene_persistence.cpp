@@ -141,7 +141,6 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
         // If the current num is equals to the latest num, it is the last saveSnapshot task
         if (savingSnapshotSum == scenePersistence->savingSnapshotSum_.load()) {
             resetSnapshotCallback();
-            scenePersistence->isSavingSnapshot_.store(false);
         }
         TLOGNI(WmsLogTag::WMS_PATTERN, "Save snapshot end, packed size %{public}" PRIu64, packedSize);
     };
@@ -151,6 +150,11 @@ void ScenePersistence::SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixe
 bool ScenePersistence::IsSavingSnapshot()
 {
     return isSavingSnapshot_.load();
+}
+
+void ScenePersistence::ResetSnapshotCache()
+{
+    isSavingSnapshot_.store(false);
 }
 
 void ScenePersistence::RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId)

@@ -32,6 +32,7 @@
 #include "scb_session_handler.h"
 #include "session/host/include/root_scene_session.h"
 #include "session/host/include/keyboard_session.h"
+#include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "wm_single_instance.h"
 #include "window_scene_config.h"
@@ -480,6 +481,8 @@ public:
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
+    void GetSnapshotFromCache(int32_t persistentId);
+    void PutSnapshotToCache(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -918,6 +921,7 @@ private:
     std::mutex nextFlushCompletedMutex_;
 
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+    std::shared_ptr<LRUCache> snapshotLRUCache_;
 
     /*
      * Screen Manager
