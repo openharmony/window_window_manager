@@ -130,7 +130,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
-constexpr uint32_t SNAPSHOT_CACHE_CAPACITY = 3;
+constexpr int32_t SNAPSHOT_CACHE_CAPACITY = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -2449,10 +2449,10 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
     return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
 }
 
-void SceneSessionManager::PutSnapshotToCache(uint32_t persistentId)
+void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    uint32_t removeFromCacheSessionId = snapshotLRUCache_->put(persistentId);
+    int32_t removeFromCacheSessionId = snapshotLRUCache_->put(persistentId);
     if (removeFromCacheSessionId != -1) {
         auto removeSceneSession = GetSceneSession(removeFromCacheSessionId);
         if (removeSceneSession) {
@@ -2464,7 +2464,7 @@ void SceneSessionManager::PutSnapshotToCache(uint32_t persistentId)
     }
 }
 
-void SceneSessionManager::GetSnapshotFromCache(uint32_t persistentId)
+void SceneSessionManager::GetSnapshotFromCache(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
     if (!snapshotLRUCache_->get(persistentId)) {
@@ -2494,7 +2494,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         }
 
         if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            !(sceneSession->GetSystemConfig().uiType_ == "pc" || sceneSession->GetSystemConfig().freeMultiWindowEnable_))
+            !(sceneSession->GetSystemConfig().IsPcWindow() || sceneSession->GetSystemConfig().freeMultiWindowEnable_))
         {
             PutSnapshotToCache(persistentId);
         }

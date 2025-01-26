@@ -611,8 +611,8 @@ public:
     void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         std::vector<sptr<SceneSession>>& mainSessions) const;
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
-    void GetSnapshotFromCache(uint32_t persistentId);
-    void PutSnapshotToCache(uint32_t persistentId);
+    void GetSnapshotFromCache(int32_t persistentId);
+    void PutSnapshotToCache(int32_t persistentId);
 
 protected:
     SceneSessionManager();
