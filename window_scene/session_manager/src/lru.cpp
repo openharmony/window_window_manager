@@ -17,18 +17,18 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-bool LRUCache::get(uint32_t key)
+bool LRUCache::get(int32_t key)
 {
-    if(cacheMap.find(key) == cacheMap.end()) {
+    if (cacheMap.find(key) == cacheMap.end()) {
         return false;
     }
     cacheList.splice(cacheList.begin(), cacheList, cacheMap[key]);
     return true;
 }
 
-uint32_t LRUCache::put(uint32_t key)
+int32_t LRUCache::put(int32_t key)
 {
-    uint32_t lastKey = -1;
+    int32_t lastKey = -1;
     if (!get(key)) {
         if (cacheList.size() >= capacity_) {
             lastKey = cacheList.back();

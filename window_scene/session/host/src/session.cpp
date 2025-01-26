@@ -2373,7 +2373,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
         }
         std::function<void()> func = [weakThis]() {
             auto session = weakThis.promote();
-            if (session && (session->GetSystemConfig().uiType_ == "pc" ||
+            if (session && (session->GetSystemConfig().IsPcWindow() ||
                 session->GetSystemConfig().freeMultiWindowEnable_)) {
                 session->ResetSnapshot();
             }
