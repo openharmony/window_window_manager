@@ -2126,7 +2126,7 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
 
 WMError WindowSessionImpl::GetDecorVisible(bool& isVisible)
 {
-    TLOGD(WmsLogTag::WMS_DECOR, "in");
+    TLOGD(WmsLogTag::WMS_DECOR, "%{public}u in", GetWindowId());
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -2136,7 +2136,6 @@ WMError WindowSessionImpl::GetDecorVisible(bool& isVisible)
         return WMError::WM_ERROR_NULLPTR;
     }
     isVisible = uiContent->GetContainerModalTitleVisible();
-    TLOGD(WmsLogTag::WMS_DECOR, "end");
     return WMError::WM_OK;
 }
 
