@@ -38,6 +38,7 @@ public:
     std::vector<uint32_t> GetScreenParams() override;
     Drawing::Rect GetScreenSnapshotRect() override;
     void SetMainScreenRegion(DMRect& mainScreenRegion) override;
+    void SetSecondaryDisplayModeChangeStatus(bool status) override;
 private:
     void ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
         FoldDisplayMode displayMode);

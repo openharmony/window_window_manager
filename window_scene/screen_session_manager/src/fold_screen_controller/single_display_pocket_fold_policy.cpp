@@ -109,11 +109,14 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         }
     }
     ReportFoldDisplayModeChange(displayMode);
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        lastDisplayMode_ = displayMode;
+    }
     ChangeScreenDisplayModeProc(screenSession, displayMode, reason);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
-        lastDisplayMode_ = displayMode;
     }
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
@@ -476,7 +479,6 @@ void SingleDisplayPocketFoldPolicy::ChangeOnTentMode(FoldStatus currentState)
     if (currentState == FoldStatus::EXPAND || currentState == FoldStatus::HALF_FOLD) {
         ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
     } else if (currentState == FoldStatus::FOLDED) {
-        RSInterfaces::GetInstance().SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
         ChangeScreenDisplayMode(FoldDisplayMode::MAIN);
         PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
     } else {

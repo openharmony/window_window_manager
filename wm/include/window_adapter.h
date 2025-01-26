@@ -75,6 +75,7 @@ public:
 
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
@@ -94,7 +95,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets);
     virtual void SetMaximizeMode(MaximizeMode maximizeMode);
     virtual MaximizeMode GetMaximizeMode();
-    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
     virtual WMError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener);
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);

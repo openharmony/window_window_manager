@@ -33,8 +33,8 @@ public:
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
-    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
-    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
@@ -62,8 +62,7 @@ public:
     WSError MoveSessionsToBackground(const std::vector<int32_t>& sessionIds, std::vector<int32_t>& result) override;
     WSError ClearSession(int32_t persistentId) override;
     WSError ClearAllSessions() override;
- 
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -90,13 +89,9 @@ public:
     WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
         const std::vector<AppUseControlInfo>& controlList) override;
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override;
-    WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex) override;
-    WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex) override;
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) override;
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override;
-        
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);

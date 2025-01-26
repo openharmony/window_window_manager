@@ -44,6 +44,8 @@ public:
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     SuperFoldStatus GetScreenFoldStatus() const;
     bool IsHalfFolded(DisplayId displayId) const;
+    bool IsHalfFoldedOnMainDisplay(DisplayId displayId) const;
+    
     void UpdateSystemKeyboardStatus(bool hasSystemKeyboard);
     bool HasSystemKeyboard() const;
 

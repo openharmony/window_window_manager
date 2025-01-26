@@ -345,7 +345,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate1, Function | SmallTest | Level3)
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 1;
     bool ret1 = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
     ASSERT_TRUE(ret1);
@@ -376,7 +376,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate2, Function | SmallTest | Level3)
     displayInfos.emplace_back(displayinfo);
     MMI::WindowInfo windowinfo;
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -442,7 +442,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate3, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -498,7 +498,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate4, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -551,7 +551,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate5, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -603,7 +603,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate6, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -659,7 +659,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate7, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
