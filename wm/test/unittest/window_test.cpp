@@ -2483,7 +2483,7 @@ HWTEST_F(WindowTest, Test01, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, prop));
     bool isVisble = false;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorVisible(true));
-    Assert_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorVisible(isVisble));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorVisible(isVisble));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowTitleMoveEnabled(true));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleButtonVisible(true, true, true, true));
     auto var = 5;
