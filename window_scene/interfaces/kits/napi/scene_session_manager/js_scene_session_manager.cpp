@@ -643,6 +643,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         [](const std::string& id) {
         return RootScene::staticRootScene_->GetRSNodeByStringID(id);
     });
+    SceneSessionManager::GetInstance().RegisterSetTopWindowBoundaryByIDFunc(
+        [](const std::string& id) {
+        RootScene::staticRootScene_->SetTopWindowBoundaryByID(id);
+    });
 }
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
