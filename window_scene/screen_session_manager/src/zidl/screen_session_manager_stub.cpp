@@ -823,6 +823,21 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             UpdateAvailableArea(screenId, area);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SUPER_FOLD_AVAILABLE_AREA: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t bPosX = data.ReadInt32();
+            int32_t bPosY = data.ReadInt32();
+            uint32_t bWidth = data.ReadUint32();
+            uint32_t bHeight = data.ReadUint32();
+            DMRect bArea = {bPosX, bPosY, bWidth, bHeight};
+            int32_t cPosX = data.ReadInt32();
+            int32_t cPosY = data.ReadInt32();
+            uint32_t cWidth = data.ReadUint32();
+            uint32_t cHeight = data.ReadUint32();
+            DMRect cArea = {cPosX, cPosY, cWidth, cHeight};
+            UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME: {
             int32_t delay = data.ReadInt32();
             int32_t ret = SetScreenOffDelayTime(delay);

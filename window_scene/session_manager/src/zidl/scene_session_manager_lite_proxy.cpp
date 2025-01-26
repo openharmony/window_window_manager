@@ -452,7 +452,7 @@ WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::Sess
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& token)
+WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::GetFocusSessionToken");
     MessageParcel data;
@@ -462,7 +462,10 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& 
         WLOGFE("Write interfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -480,7 +483,7 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionToken(sptr<IRemoteObject>& 
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::ElementName& element)
+WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::GetFocusSessionElement");
     MessageParcel data;
@@ -488,6 +491,10 @@ WSError SceneSessionManagerLiteProxy::GetFocusSessionElement(AppExecFwk::Element
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         WLOGFE("Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -760,7 +767,7 @@ WSError SceneSessionManagerLiteProxy::ClearAllSessions()
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("get focus Winow info lite proxy");
     MessageParcel data;
@@ -770,7 +777,10 @@ void SceneSessionManagerLiteProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -981,7 +991,6 @@ WMError SceneSessionManagerLiteProxy::GetWindowModeType(WindowModeType& windowMo
         WLOGFE("WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
- 
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> remote = Remote();
@@ -1472,8 +1481,7 @@ WMError SceneSessionManagerLiteProxy::MinimizeMainSession(
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerLiteProxy::LockSessionByAbilityInfo(
-    const std::string& bundleName, const std::string& moduleName, const std::string& abilityName, int32_t appIndex)
+WMError SceneSessionManagerLiteProxy::LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
@@ -1483,20 +1491,24 @@ WMError SceneSessionManagerLiteProxy::LockSessionByAbilityInfo(
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(bundleName)) {
+    if (!data.WriteString(abilityInfo.bundleName)) {
         TLOGE(WmsLogTag::WMS_LIFE, "write bundleName failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(moduleName)) {
+    if (!data.WriteString(abilityInfo.moduleName)) {
         TLOGE(WmsLogTag::WMS_LIFE, "write moduleName failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(abilityName)) {
+    if (!data.WriteString(abilityInfo.abilityName)) {
         TLOGE(WmsLogTag::WMS_LIFE, "write abilityName failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(appIndex)) {
+    if (!data.WriteInt32(abilityInfo.appIndex)) {
         TLOGE(WmsLogTag::WMS_LIFE, "write appIndex failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isLock)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write isLock failed.");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -1506,52 +1518,6 @@ WMError SceneSessionManagerLiteProxy::LockSessionByAbilityInfo(
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(ret);
-}
-
-WMError SceneSessionManagerLiteProxy::UnlockSessionByAbilityInfo(
-    const std::string& bundleName, const std::string& moduleName, const std::string& abilityName, int32_t appIndex)
-{
-    TLOGD(WmsLogTag::WMS_LIFE, "in");
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteString(bundleName)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write bundleName failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteString(moduleName)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write moduleName failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteString(abilityName)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write abilityName failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteInt32(appIndex)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write appIndex failed.");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNLOCK_SESSION_BY_ABILITY_INFO),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

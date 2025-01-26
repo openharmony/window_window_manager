@@ -51,7 +51,7 @@ public:
     WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError SetGestureNavigationEnabled(bool enable) override;
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
     WSError SetSessionIcon(const sptr<IRemoteObject>& token, const std::shared_ptr<Media::PixelMap>& icon) override;
     WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) override;
@@ -62,8 +62,8 @@ public:
         bool shouldBackToCaller = true) override;
     WMError GetSessionSnapshotById(int32_t persistentId, SessionSnapshot& snapshot) override;
     WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap) override;
-    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
-    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
 
     WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
@@ -101,6 +101,7 @@ public:
     WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override;
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
     WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;

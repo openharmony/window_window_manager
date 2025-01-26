@@ -42,7 +42,7 @@ using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool 
 
 const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
 
-enum class MouseMoveDirection: uint32_t {
+enum class MoveDirection : uint32_t {
     UNKNOWN,
     LEFT_TO_RIGHT,
     RIGHT_TO_LEFT,
@@ -77,9 +77,9 @@ public:
     void SetTargetRect(const WSRect& rect);
     WSRect GetOriginalRect() const;
     void InitMoveDragProperty();
-    void SetOriginalWindowPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
-                              int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
-                              const WSRect& winRect);
+    void SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
+                                int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
+                                const WSRect& winRect);
     void SetAspectRatio(float ratio);
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
@@ -109,9 +109,8 @@ public:
     void SetMoveAvailableArea(const DMRect& area);
     void UpdateMoveAvailableArea(DisplayId targetDisplayId);
     void SetCurrentScreenProperty(DisplayId targetDisplayId);
-    void ResetCurrentScreenProperty();
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
-    void SetInputBarCrossAttr(MouseMoveDirection mouseMoveDirection, DisplayId targetDisplayId);
+    void SetInputBarCrossAttr(MoveDirection moveDirection, DisplayId targetDisplayId);
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
 
     /*
@@ -121,13 +120,22 @@ public:
     void OnDisconnect(ScreenId screenId) override;
     void OnChange(ScreenId screenId) override;
 
+    /*
+     * PC Window Layout
+     */
+    void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
+    void StopMoving();
+
 private:
     struct MoveDragProperty {
         int32_t pointerId_ = -1;
         int32_t pointerType_ = -1;
         int32_t originalPointerPosX_ = -1;
         int32_t originalPointerPosY_ = -1;
+        // the x coordinate of the pointer related to the active window
         int32_t originalPointerWindowX_ = -1;
+        // the y coordinate of the pointer related to the active window
         int32_t originalPointerWindowY_ = -1;
         WSRect originalRect_ = { 0, 0, 0, 0 };
         WSRect targetRect_ = { 0, 0, 0, 0 };
@@ -155,17 +163,27 @@ private:
     };
 
     struct ScreenSizeProperty {
-        uint32_t currentDisplayStartX_ = 0;
-        uint32_t currentDisplayStartY_ = 0;
-        int32_t currentDisplayX_ = 0;
-        int32_t currentDisplayY_ = 0;
-        int32_t width_ = 0;
-        int32_t height_ = 0;
+        uint32_t currentDisplayStartX = 0;
+        uint32_t currentDisplayStartY = 0;
+        int32_t currentDisplayLeft = 0;
+        int32_t currentDisplayTop = 0;
+        int32_t width = 0;
+        int32_t height = 0;
 
         bool IsEmpty() const
         {
-            return (currentDisplayStartX_ == 0 && currentDisplayStartY_ == 0 && currentDisplayX_ == 0 &&
-                    currentDisplayY_ == 0 && width_ == 0 && height_ == 0);
+            return (currentDisplayStartX == 0 && currentDisplayStartY == 0 && currentDisplayLeft == 0 &&
+                    currentDisplayTop == 0 && width == 0 && height == 0);
+        }
+
+        void Reset()
+        {
+            currentDisplayStartX = 0;
+            currentDisplayStartY = 0;
+            currentDisplayLeft = 0;
+            currentDisplayTop = 0;
+            width = 0;
+            height = 0;
         }
 
         std::string ToString() const
@@ -174,12 +192,12 @@ private:
                 return "empty";
             }
             
-            std::stringstream ss;
-            ss << "currentDisplayStartX_: " << currentDisplayStartX_ << ","
-               << "currentDisplayStartY_: " << currentDisplayStartY_ << ","
-               << "currentDisplayX_: " << currentDisplayX_ << ","
-               << "currentDisplayY_: " << currentDisplayY_ << ","
-               << "width_: " << width_ << "," << "height_: " << height_;
+            std::ostringstream ss;
+            ss << "currentDisplayStartX: " << currentDisplayStartX << ","
+               << "currentDisplayStartY: " << currentDisplayStartY << ","
+               << "currentDisplayLeft: " << currentDisplayLeft << ","
+               << "currentDisplayTop: " << currentDisplayTop << ","
+               << "width: " << width << "," << "height: " << height;
             return ss.str();
         }
     };
@@ -191,8 +209,8 @@ private:
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     bool CalcMoveInputBarRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
-    void AdjustXYByAvailableArea(int32_t& x, int32_t& y);
-    MouseMoveDirection CalcMouseMoveDirection(DisplayId lastDisplayId, DisplayId currentDisplayId);
+    void AdjustTargetPositionByAvailableArea(int32_t& moveDragFinalX, int32_t& moveDragFinalY);
+    MoveDirection CalcMoveDirection(DisplayId lastDisplayId, DisplayId currentDisplayId);
 
     void InitializeMoveDragPropertyNotValid(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
                                             const WSRect& originalRect);

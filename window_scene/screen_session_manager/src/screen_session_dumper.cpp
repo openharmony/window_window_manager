@@ -994,8 +994,8 @@ bool ScreenSessionDumper::GetPostureAndHall(std::vector<std::string> strVec,
             if (!IsAllCharDigit(firstPostureStr) || !IsAllCharDigit(secondPostureStr)) {
                 return false;
             }
-            halls.emplace_back(std::stoi(firstPostureStr));
-            halls.emplace_back(std::stoi(secondPostureStr));
+            halls.emplace_back(static_cast<uint16_t>(std::stoi(firstPostureStr)));
+            halls.emplace_back(static_cast<uint16_t>(std::stoi(secondPostureStr)));
         } else {
             TLOGW(WmsLogTag::DMS, "sensor command error");
             return false;
@@ -1025,12 +1025,12 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
         .postureAbAnti = postures[DUMPER_PARAM_INDEX_TWO],
     };
     SensorEvent hallEvent = {
-        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
         .data = reinterpret_cast<uint8_t *>(&hallData),
+        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
     };
     SensorEvent postureEvent = {
-        .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
         .data = reinterpret_cast<uint8_t *>(&postureData),
+        .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
     };
     TLOGI(WmsLogTag::DMS, "mock secondary sensor: %{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(postures, "angle").c_str(),
@@ -1053,7 +1053,7 @@ void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr
             return;
         }
     }
-    uint32_t foldStatus = std::stoi(foldStatusStr);
+    uint32_t foldStatus = static_cast<uint32_t>(std::stoi(foldStatusStr));
     switch (foldStatus) {
         case static_cast<uint32_t>(FoldStatus::EXPAND) :
         case static_cast<uint32_t>(FoldStatus::FOLDED) :

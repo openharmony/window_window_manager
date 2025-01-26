@@ -202,6 +202,8 @@ public:
     virtual WMError RaiseToAppTop() = 0;
     virtual WMError SetSnapshotSkip(bool isSkip) = 0;
     virtual WMError SetCornerRadius(float cornerRadius) = 0;
+    virtual WMError SetWindowCornerRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetWindowCornerRadius(float& radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetShadowRadius(float radius) = 0;
     virtual WMError SetWindowShadowRadius(float radius) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetShadowColor(std::string color) = 0;
@@ -291,6 +293,8 @@ public:
     }
     virtual void StartMove() = 0;
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_OK; }
     virtual WmErrorCode StopMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WMError Close() = 0;
     virtual void SetNeedRemoveWindowInputChannel(bool needRemoveWindowInputChannel) = 0;
@@ -471,6 +475,25 @@ public:
      * @return True means window delay raise is enabled
      */
     virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
+     * @brief Set whether to enable exclusively highlight.
+     *
+     * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Get highlight property of window.
+     *
+     * @param highlighted True means the window is highlighted, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

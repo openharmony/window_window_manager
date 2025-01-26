@@ -85,7 +85,6 @@ public:
         TRANS_ID_NOTIFY_APP_USE_CONTROL_LIST,
         TRANS_ID_MINIMIZE_MAIN_SESSION,
         TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO,
-        TRANS_ID_UNLOCK_SESSION_BY_ABILITY_INFO,
         TRANS_ID_HAS_FLOAT_FOREGROUND,
     };
 
@@ -115,10 +114,10 @@ public:
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
-    
     virtual WSError IsValidSessionIds(const std::vector<int32_t>& sessionIds, std::vector<bool>& results) = 0;
-    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
-    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
+    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
+    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element,
+        DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
     virtual WSError GetSessionSnapshot(const std::string& deviceId, int32_t persistentId,
                                        SessionSnapshot& snapshot, bool isLowResolution) = 0;
     virtual WSError LockSession(int32_t sessionId) = 0;
@@ -167,36 +166,18 @@ public:
     virtual WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) = 0;
 
     /**
-     * @brief Lock a session in recent tasks.
+     * @brief Lock or unlock a session in recent tasks.
      *
-     * This function locks the session in recent tasks.
-     * The invoker must be an SA or SystemApp and have the related permission.
+     * This function lock or unlock the session in recent tasks.
+     * The invoker must be an SA or SystemApp and have the ohos.permission.MANAGE_MISSIONS permission.
      *
-     * @param bundleName bundle name of the session that needed to be locked.
-     * @param moduleName moduel name of the session that needed to be locked.
-     * @param abilityName ability name of the session that needed to be locked.
-     * @param appIndex appIndex of the session that needed to be locked.
+     * @param AbilityInfoBase abilityInfo of the session that needed to be locked or locked.
+     * @param isLock isLock of the session that needed to be locked or unlocked.
      * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
-     * @permission application requires SA permission or SystemApp permission
+     * @permission application requires ohos.permission.MANAGE_MISSIONS permission and
+     * SA permission or SystemApp permission
      */
-    virtual WMError LockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex) = 0;
-
-    /**
-     * @brief Unlock the session in recent tasks.
-     *
-     * This function unlocks the session in recent tasks.
-     * The invoker must be an SA or SystemApp and have the related permission.
-     *
-     * @param bundleName bundle name of the session that needed to be unlocked.
-     * @param moduleName moduel name of the session that needed to be unlocked.
-     * @param abilityName ability name of the session that needed to be unlocked.
-     * @param appIndex appIndex of the session that needed to be unlocked.
-     * @return Successful call returns WMError: WS-OK, otherwise it indicates failure
-     * @permission application requires SA permission or SystemApp permission
-     */
-    virtual WMError UnlockSessionByAbilityInfo(const std::string& bundleName, const std::string& moduleName,
-        const std::string& abilityName, int32_t appIndex) = 0;
+    virtual WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) = 0;
 
     /**
      * @brief Query if there is float type window foreground of an abilityToken

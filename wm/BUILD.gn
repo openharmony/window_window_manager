@@ -256,6 +256,7 @@ ohos_shared_library("libwm") {
     "ability_runtime:ability_manager",
     "ability_runtime:app_context",
     "ability_runtime:app_manager",
+    "ability_runtime:runtime",
     "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "ace_engine:ace_xcomponent_controller",
@@ -433,9 +434,12 @@ ohos_shared_library("libwm_ndk") {
   innerapi_tags = [ "ndk" ]
 
   external_deps = [
+    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:pixelmap",
     "input:libmmi-client",
     "input:oh_input_manager",
     "ipc:ipc_core",

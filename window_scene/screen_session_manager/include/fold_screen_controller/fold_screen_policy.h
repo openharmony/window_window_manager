@@ -26,6 +26,7 @@
 namespace OHOS::Rosen {
 const uint32_t FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM = 1;
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
+constexpr uint32_t SECONDARY_FOLD_TO_EXPAND_TASK_NUM = 2;
 
 enum class DisplayModeChangeReason : uint32_t {
     DEFAULT = 0,
@@ -75,6 +76,7 @@ public:
      */
     bool GetModeChangeRunningStatus();
     virtual void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false){};
+    virtual void SetSecondaryDisplayModeChangeStatus(bool status){};
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
     virtual std::vector<uint32_t> GetScreenParams() { return screenParams_; };
@@ -84,6 +86,7 @@ protected:
      *    Avoid fold to expand process queues private variable
      */
     std::atomic<int> pengdingTask_{FOLD_TO_EXPAND_TASK_NUM};
+    std::atomic<int> secondaryPengdingTask_{SECONDARY_FOLD_TO_EXPAND_TASK_NUM};
     std::atomic<bool> displayModeChangeRunning_ = false;
     std::atomic<FoldDisplayMode> lastCachedisplayMode_ = FoldDisplayMode::UNKNOWN;
     std::chrono::steady_clock::time_point startTimePoint_ = std::chrono::steady_clock::now();

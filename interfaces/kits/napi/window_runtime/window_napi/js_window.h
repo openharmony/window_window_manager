@@ -118,6 +118,8 @@ public:
     static napi_value StopMoving(napi_env env, napi_callback_info info);
     static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
+    static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
+    static napi_value IsWindowHighlighted(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -141,6 +143,8 @@ public:
      * Window Property
      */
     static napi_value SetCornerRadius(napi_env env, napi_callback_info info);
+    static napi_value SetWindowCornerRadius(napi_env env, napi_callback_info info);
+    static napi_value GetWindowCornerRadius(napi_env env, napi_callback_info info);
     static napi_value SetShadow(napi_env env, napi_callback_info info);
     static napi_value SetWindowShadowRadius(napi_env env, napi_callback_info info);
     static napi_value SetBlur(napi_env env, napi_callback_info info);
@@ -266,6 +270,8 @@ private:
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
+    napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
+    napi_value OnIsWindowHighlighted(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -318,6 +324,8 @@ private:
      * Window Property
      */
     napi_value OnSetCornerRadius(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowCornerRadius(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowCornerRadius(napi_env env, napi_callback_info info);
     napi_value OnSetShadow(napi_env env, napi_callback_info info);
     napi_value OnSetWindowShadowRadius(napi_env env, napi_callback_info info);
     napi_value OnSetBlur(napi_env env, napi_callback_info info);
@@ -371,6 +379,7 @@ private:
     napi_value OnMaximize(napi_env env, napi_callback_info info);
     napi_value OnSetTitleAndDockHoverShown(napi_env env, napi_callback_info info);
     napi_value OnRestore(napi_env env, napi_callback_info info);
+    napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
