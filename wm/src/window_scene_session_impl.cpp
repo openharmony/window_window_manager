@@ -241,7 +241,7 @@ bool WindowSceneSessionImpl::IsPcOrPadCapabilityEnabled() const
         return windowSystemConfig_.uiType_ == UI_TYPE_PC;
     }
     bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
-    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
+    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow || WindowHelper::IsSystemWindow(GetType())) {
         return WindowSessionImpl::IsPcOrPadCapabilityEnabled();
     }
     sptr<WindowSessionImpl> parentWindow = nullptr;
@@ -261,7 +261,7 @@ bool WindowSceneSessionImpl::IsPcOrPadFreeMultiWindowMode() const
         return windowSystemConfig_.uiType_ == UI_TYPE_PC;
     }
     bool isUiExtSubWindow = WindowHelper::IsSubWindow(GetType()) && property_->GetExtensionFlag();
-    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow) {
+    if (WindowHelper::IsMainWindow(GetType()) || isUiExtSubWindow || WindowHelper::IsSystemWindow(GetType())) {
         return IsFreeMultiWindowMode();
     }
     sptr<WindowSessionImpl> parentWindow = nullptr;
