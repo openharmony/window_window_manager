@@ -47,6 +47,7 @@
 #include "session/host/include/keyboard_session.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_listener_controller.h"
+#include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "thread_safety_annotations.h"
 #include "transaction/rs_interfaces.h"
@@ -610,6 +611,8 @@ public:
     void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         std::vector<sptr<SceneSession>>& mainSessions) const;
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
+    void GetSnapshotFromCache(int32_t persistentId);
+    void PutSnapshotToCache(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -1180,6 +1183,7 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
+    std::shared_ptr<LRUCache> snapshotLRUCache_;
 
     /*
      * Window Watermark
