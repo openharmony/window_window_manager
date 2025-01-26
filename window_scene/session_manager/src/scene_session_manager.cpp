@@ -128,6 +128,7 @@ constexpr char SMALL_FOLD_PRODUCT_TYPE = '2';
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
+constexpr uint32_t SNAPSHOT_CACHE_CAPACITY = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -334,6 +335,7 @@ void SceneSessionManager::Init()
     LoadWindowParameter();
     InitPrepareTerminateConfig();
 
+    snapshotLRUCache_ = std::make_shared<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(sptr<DisplayChangeListener>::MakeSptr());
 
     // create handler for inner command at server
@@ -2439,6 +2441,29 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
     return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
 }
 
+void SceneSessionManager::PutSnapshotToCache(uint32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    uint32_t removeFromCacheSessionId = snapshotLRUCache_->put(persistentId);
+    if (removeFromCacheSessionId != -1) {
+        auto removeSceneSession = GetSceneSession(removeFromCacheSessionId);
+        if (removeSceneSession) {
+            removeSceneSession->ResetSnapshot();
+        }
+        else {
+            TLOGI(WmsLogTag::WMS_PATTERN, "removeSceneSession:%{public}d nullptr", removeFromCacheSessionId);
+        }
+    }
+}
+
+void SceneSessionManager::GetSnapshotFromCache(uint32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    if (!snapshotLRUCache_->get(persistentId)) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "session not in cache");
+    }
+}
+
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
     const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
 {
@@ -2458,6 +2483,12 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (isToDesktop) {
             sceneSession->EditSessionInfo().callerToken_ = nullptr;
             sceneSession->EditSessionInfo().callingTokenId_ = 0;
+        }
+
+        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+            !(sceneSession->GetSystemConfig().uiType_ == "pc" || sceneSession->GetSystemConfig().freeMultiWindowEnable_))
+        {
+            PutSnapshotToCache(persistentId);
         }
 
         sceneSession->BackgroundTask(isSaveSnapshot);
