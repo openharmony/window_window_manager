@@ -333,6 +333,54 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     return displayInfo;
 }
 
+sptr<DisplayInfo> ScreenSession::ConvertToRealDisplayInfo()
+{
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    if (displayInfo == nullptr) {
+        return displayInfo;
+    }
+    RRect bounds = property_.GetBounds();
+    RRect phyBounds = property_.GetPhyBounds();
+    displayInfo->name_ = name_;
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
+    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
+    displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
+    displayInfo->SetScreenId(screenId_);
+    displayInfo->SetDisplayId(screenId_);
+    displayInfo->SetRefreshRate(property_.GetRefreshRate());
+    displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
+    displayInfo->SetDensityInCurResolution(property_.GetDensityInCurResolution());
+    displayInfo->SetDefaultVirtualPixelRatio(property_.GetDefaultDensity());
+    displayInfo->SetXDpi(property_.GetXDpi());
+    displayInfo->SetYDpi(property_.GetYDpi());
+    displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);
+    int32_t apiVersion = GetApiVersion();
+    if (apiVersion >= 14 || apiVersion == 0) { // 14 is API version
+        displayInfo->SetRotation(property_.GetDeviceRotation());
+        displayInfo->SetDisplayOrientation(property_.GetDeviceOrientation());
+    } else {
+        displayInfo->SetRotation(property_.GetScreenRotation());
+        displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
+    }
+    displayInfo->SetOrientation(property_.GetOrientation());
+    displayInfo->SetOffsetX(property_.GetOffsetX());
+    displayInfo->SetOffsetY(property_.GetOffsetY());
+    displayInfo->SetHdrFormats(hdrFormats_);
+    displayInfo->SetColorSpaces(colorSpaces_);
+    displayInfo->SetDisplayState(property_.GetDisplayState());
+    displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
+    displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
+    displayInfo->SetAvailableHeight(property_.GetAvailableArea().height_);
+    displayInfo->SetScaleX(property_.GetScaleX());
+    displayInfo->SetScaleY(property_.GetScaleY());
+    displayInfo->SetPivotX(property_.GetPivotX());
+    displayInfo->SetPivotY(property_.GetPivotY());
+    displayInfo->SetTranslateX(property_.GetTranslateX());
+    displayInfo->SetTranslateY(property_.GetTranslateY());
+    return displayInfo;
+}
+
 DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts)
 {
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorGamuts(rsId_, colorGamuts);

@@ -76,6 +76,7 @@ public:
     virtual void NotifyDisplayEvent(DisplayEvent event);
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
     virtual DMError AddSurfaceNodeToDisplay(DisplayId displayId, std::shared_ptr<class RSSurfaceNode>& surfaceNode);
