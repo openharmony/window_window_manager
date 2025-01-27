@@ -208,7 +208,6 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
