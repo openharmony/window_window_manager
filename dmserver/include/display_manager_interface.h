@@ -38,6 +38,7 @@ public:
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
+    virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
