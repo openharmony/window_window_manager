@@ -1433,7 +1433,7 @@ HWTEST_F(SceneSessionTest, InitializeMoveInputBar, Function | SmallTest | Level2
     info.bundleName_ = "InitializeMoveInputBar";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     auto property = sceneSession->GetSessionProperty();
-    perperty->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
     property->SetDisplayId(1);
 
     auto result = sceneSession->InitializeMoveInputBar();
