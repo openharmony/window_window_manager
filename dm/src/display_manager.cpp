@@ -118,6 +118,7 @@ private:
     void Clear();
     std::string GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo);
 
+    std::atomic<bool> needUpdateDisplayFromDMS_ = false;
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId primaryDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
@@ -626,7 +627,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
         if (displayId != DISPLAY_ID_INVALID && lastRequestIter != displayUptateTimeMap_.end()) {
             auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestIter->second)
                 .count();
-            if (interval < getDisplayIntervalUs_) {
+            if (interval < getDisplayIntervalUs_ && !needUpdateDisplayFromDMS_) {
                 auto iter = displayMap_.find(displayId);
                 if (iter != displayMap_.end()) {
                     WLOGFW("update display from cache, Id: %{public}" PRIu64" ", displayId);
@@ -649,7 +650,8 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
         displayUptateTimeMap_.erase(displayId);
         return nullptr;
     }
-
+    
+    needUpdateDisplayFromDMS_ = false;
     displayUptateTimeMap_[displayId] = currentTime;
     return displayMap_[displayId];
 }
@@ -1836,7 +1838,7 @@ void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState 
 void DisplayManager::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(info);
+    needUpdateDisplayFromDMS_ = true;
 }
 
 void DisplayManager::Impl::NotifyDisplayDestroy(DisplayId displayId)
@@ -1849,7 +1851,7 @@ void DisplayManager::Impl::NotifyDisplayDestroy(DisplayId displayId)
 void DisplayManager::Impl::NotifyDisplayChange(sptr<DisplayInfo> displayInfo)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(displayInfo);
+    needUpdateDisplayFromDMS_ = true;
 }
 
 bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo)
