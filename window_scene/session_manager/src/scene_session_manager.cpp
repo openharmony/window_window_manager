@@ -1878,6 +1878,10 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetSingleHandTransform(singleHandTransform_);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, displayId: %{public}" PRIu64,
             sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, displayId: %{public}" PRIu64,
+            sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, displayId: %{public}" PRIu64,
+            sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
     }
     return sceneSession;
 }
@@ -2065,11 +2069,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_) &&
                 MultiInstanceManager::GetInstance().IsMultiInstance(sceneSession->GetSessionInfo().bundleName_)) {
                 MultiInstanceManager::GetInstance().IncreaseInstanceKeyRefCount(sceneSession);
-            }
-        }
-        PerformRegisterInRequestSceneSession(sceneSession);
-        NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, type: %{public}d, instanceKey: %{public}s, "
+               "displayId: %{public}" PRIu64, where, sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
+               sceneSession->GetAppInstanceKey().c_str(), sceneSession->GetSessionProperty()->GetDisplayId());
+               "displayId: %{public}" PRIu64, where, sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
+               sceneSession->GetAppInstanceKey().c_str(), sceneSession->GetSessionProperty()->GetDisplayId());
                "displayId: %{public}" PRIu64, where, sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
                sceneSession->GetAppInstanceKey().c_str(), sceneSession->GetSessionProperty()->GetDisplayId());
         return sceneSession;
@@ -2085,10 +2089,6 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     if (sessionInfo.screenId_ != SCREEN_ID_INVALID) {
         currDisplayId = sessionInfo.screenId_;
     } else if (callerSession) {
-        currDisplayId = callerSession->GetSessionProperty()->GetDisplayId();
-    }
-    sceneSession->GetSessionProperty()->SetDisplayId(currDisplayId);
-    sceneSession->SetScreenId(currDisplayId);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "synchronous screenId with displayid %{public}" PRIu64, currDisplayId);
     sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
     sceneSession->RegisterIsScreenLockedCallback([this] { return IsScreenLocked(); });
@@ -10282,14 +10282,13 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
         WLOGFE("session is nullptr");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
-    if (screenId == DISPLAY_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, invalid screenId", sceneSession->GetPersistentId());
-    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, screenId: %{public}" PRIu64,
+        sceneSession->GetPersistentId(), screenId);
     auto fromScreenId = sceneSession->GetSessionInfo().screenId_;
     sceneSession->SetScreenId(screenId);
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
     WLOGFD("Session move display %{public}" PRIu64 " from %{public}" PRIu64, screenId, fromScreenId);
-      (sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
+    NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();
     return WSError::WS_OK;
