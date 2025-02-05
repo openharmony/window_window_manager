@@ -17,6 +17,7 @@
 #define WINDOW_INSPECTOR_H
 
 #include <mutex>
+#include <optional>
 
 #include "wm_common.h"
 #include "wm_single_instance.h"
@@ -28,20 +29,20 @@ struct WindowListInfo {
     uint32_t windowType;
     Rect windowRect;
 };
+
 using SendWMSMessageFunc = void (*)(const std::string& message);
 using SetWMSCallbackFunc = void (*)(const std::function<void(const char*)>& wmsCallback);
-using GetWMSWindowListCallback = std::function<WindowListInfo()>;
+using GetWMSWindowListCallback = std::function<std::optional<WindowListInfo>()>;
 
-class WindowInspector : public RefBase {
+class WindowInspector {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
-    bool IsConnectServerSuccess() const;
-    void RegisterGetWMSWindowListCallback(uint32_t windowId, std::shared_ptr<GetWMSWindowListCallback>&& func);
+    void RegisterGetWMSWindowListCallback(uint32_t windowId, GetWMSWindowListCallback&& func);
     void UnregisterGetWMSWindowListCallback(uint32_t windowId);
 
 protected:
     WindowInspector();
-    virtual ~WindowInspector();
+    virtual ~WindowInspector() = default;
 
 private:
     bool isConnectServerSuccess_ = false;
@@ -50,15 +51,14 @@ private:
     SetWMSCallbackFunc setWMSCallbackFunc_ = nullptr;
 
     std::mutex callbackMutex_;
-    std::unordered_map<uint32_t, std::shared_ptr<GetWMSWindowListCallback>> getWMSWindowListCallbacks_;
+    std::unordered_map<uint32_t, GetWMSWindowListCallback> getWMSWindowListCallbacks_;
     // Above guarded by callbackMutex_
 
     void ConnectServer();
+    bool IsConnectServerSuccess() const;
     void CloseConnectFromServer();
-    void UnregisterAllCallbacks();
     bool ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr);
-    void CreateArkUIInspectorJson(const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr);
-    void SendMessageToIDE(std::string& jsonStr);
+    void SendMessageToIDE(const std::string& jsonStr);
 };
 } // namespace OHOS::Rosen
 
