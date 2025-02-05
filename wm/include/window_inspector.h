@@ -34,7 +34,7 @@ using SendWMSMessageFunc = void (*)(const std::string& message);
 using SetWMSCallbackFunc = void (*)(const std::function<void(const char*)>& wmsCallback);
 using GetWMSWindowListCallback = std::function<std::optional<WindowListInfo>()>;
 
-class WindowInspector : public {
+class WindowInspector {
 WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
 public:
     void RegisterGetWMSWindowListCallback(uint32_t windowId, GetWMSWindowListCallback&& func);

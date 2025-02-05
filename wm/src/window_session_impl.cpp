@@ -4947,7 +4947,7 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 
 void WindowSessionImpl::RegisterWindowInspectorCallback()
 {
-    auto getWMSWindowListCallback = [weakThis = wptr(this)] -> std::optional<WindowListInfo> {
+    auto getWMSWindowListCallback = [weakThis = wptr(this)]() -> std::optional<WindowListInfo> {
         if (auto window = weakThis.promote()) {
             return std::make_optional<WindowListInfo>({ window->GetWindowName(), window->GetWindowId(),
                                                        static_cast<uint32_t>(window->GetType()), window->GetRect() });
