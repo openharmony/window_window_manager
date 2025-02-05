@@ -4514,13 +4514,11 @@ void WindowSceneSessionImpl::NotifyKeyboardPanelInfoChange(const KeyboardPanelIn
 
 WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
 {
-    if (displayId == DISPLAY_ID_INVALID) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, invalid displayId", GetPersistentId());
-    }
     bool displayIdChanged = property_->GetDisplayId() != displayId;
     property_->SetDisplayId(displayId);
     NotifyDisplayInfoChange();
     if (displayIdChanged) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
         NotifyDisplayIdChange(displayId);
     }
     return WSError::WS_OK;
