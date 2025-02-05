@@ -63,7 +63,9 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
 {
     WLOGFI("RegisterRsScreenConnectionChangeListener");
     auto res = rsInterface_.SetScreenChangeCallback(
-        [this](ScreenId rsScreenId, ScreenEvent screenEvent) { OnRsScreenConnectionChange(rsScreenId, screenEvent); });
+        [this](ScreenId rsScreenId, ScreenEvent screenEvent, ScreenChangeReason reason) {
+            OnRsScreenConnectionChange(rsScreenId, screenEvent);
+        });
     if (res != StatusCode::SUCCESS) {
         auto task = [this] {
             RegisterRsScreenConnectionChangeListener();

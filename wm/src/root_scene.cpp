@@ -128,6 +128,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDensity(density_);
     config.SetOrientation(orientation_);
+    config.SetDisplayId(GetDisplayId());
     uiContent_->UpdateViewportConfig(config, reason);
 }
 

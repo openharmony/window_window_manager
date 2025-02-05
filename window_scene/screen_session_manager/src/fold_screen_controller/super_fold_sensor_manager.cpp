@@ -135,20 +135,22 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
 
 void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
 {
-    SuperFoldStatusChangeEvents events;
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::UNDEFINED;
     if (std::isgreaterequal(foldAngle, ANGLE_FLAT_THRESHOLD)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Expanded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Expanded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
     } else if (std::isless(foldAngle, ANGLE_HALF_FOLD_THRESHOLD) &&
         std::isgreater(foldAngle, ANGLE_MIN_VAL)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Half Folded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Half Folded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
     } else if (std::islessequal(foldAngle, ANGLE_MIN_VAL)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
     } else {
-        TLOGI(WmsLogTag::DMS, "Angle Don't Change!");
-        return;
+        if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::UNKNOWN) {
+            events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
+        }
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is in BufferArea");
     }
     // notify
     std::vector<float> foldAngles;

@@ -540,17 +540,21 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDetachCallback, Function | SmallTe
  */
 HWTEST_F(SceneSessionManagerTest12, IsKeyboardForeground, Function | SmallTest | Level3)
 {
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(sceneSessionManager, nullptr);
+    auto sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSessionManager->IsKeyboardForeground();
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
-    sceneSessionManager->IsKeyboardForeground();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSessionManager->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_EQ(true, sceneSessionManager->IsKeyboardForeground());
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
+    ASSERT_EQ(false, sceneSessionManager->IsKeyboardForeground());
+    sceneSessionManager->sceneSessionMap_.clear();
+    ASSERT_EQ(false, sceneSessionManager->IsKeyboardForeground());
 }
 
 /**
@@ -591,7 +595,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWatchGestureConsumeResult, Function | 
     ASSERT_EQ(WMError::WM_OK, ret);
     ssm_->onWatchGestureConsumeResultFunc_ = nullptr;
     ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
-    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -607,7 +611,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWatchFocusActiveChange, Function | Sma
     ASSERT_EQ(WMError::WM_OK, ret);
     ssm_->onWatchFocusActiveChangeFunc_ = nullptr;
     ret = ssm_->NotifyWatchFocusActiveChange(isActive);
-    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1303,6 +1307,146 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, Function | Sm
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(hasFloatWindowForeground, false);
 }
+
+/**
+ * @tc.name: UpdateHighlightStatus
+ * @tc.desc: UpdateHighlightStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+ 
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    SessionInfo info2;
+    info2.abilityName_ = "abilityName_test2";
+    info2.bundleName_ = "bundleName_test2";
+ 
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
+ 
+    preSceneSession->property_ = property1;
+    currSceneSession->property_ = property2;
+    preSceneSession->property_->SetPersistentId(1);
+    currSceneSession->property_->SetPersistentId(2);
+ 
+    sptr<SceneSession> nullSceneSession1;
+    sptr<SceneSession> nullSceneSession2;
+ 
+    ssm_->UpdateHighlightStatus(nullSceneSession1, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(preSceneSession, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, true);
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    currSceneSession->property_->isExclusivelyHighlighted_ = false;
+    info1.isSystem_ = true;
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    info1.isSystem_ = false;
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    preSceneSession->property_->SetPersistentId(2);
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+}
+ 
+/**
+ * @tc.name: SetHighlightSessionIds
+ * @tc.desc: SetHighlightSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetHighlightSessionIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    currSceneSession->property_ = property;
+    currSceneSession->property_->SetPersistentId(1);
+    currSceneSession->persistentId_ = 1;
+    ssm_->highlightIds_.clear();
+    ssm_->SetHighlightSessionIds(currSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+}
+ 
+/**
+ * @tc.name: AddHighlightSessionIds
+ * @tc.desc: AddHighlightSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, AddHighlightSessionIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+ 
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    SessionInfo info2;
+    info2.abilityName_ = "abilityName_test2";
+    info2.bundleName_ = "bundleName_test2";
+ 
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
+ 
+    preSceneSession->property_->SetPersistentId(1);
+    currSceneSession->property_->SetPersistentId(2);
+    preSceneSession->persistentId_ = 1;
+    currSceneSession->persistentId_ = 2;
+    preSceneSession->property_ = property1;
+    currSceneSession->property_ = property2;
+    ssm_->AddHighlightSessionIds(currSceneSession);
+    ssm_->AddHighlightSessionIds(preSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+    ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
+}
+ 
+/**
+ * @tc.name: RemoveHighlightSessionIds
+ * @tc.desc: RemoveHighlightSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveHighlightSessionIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+ 
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    SessionInfo info2;
+    info2.abilityName_ = "abilityName_test2";
+    info2.bundleName_ = "bundleName_test2";
+ 
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
+ 
+    preSceneSession->property_->SetPersistentId(1);
+    currSceneSession->property_->SetPersistentId(2);
+ 
+    preSceneSession->persistentId_ = 1;
+    currSceneSession->persistentId_ = 2;
+ 
+    preSceneSession->property_ = property1;
+    currSceneSession->property_ = property2;
+    ssm_->AddHighlightSessionIds(currSceneSession);
+    ssm_->AddHighlightSessionIds(preSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+    ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
+    ssm_->RemoveHighlightSessionIds(currSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(2) == 0, true);
+    ssm_->RemoveHighlightSessionIds(preSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 0, true);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
