@@ -1074,6 +1074,9 @@ WSError WindowSessionImpl::UpdateOrientation()
 
 WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
 {
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, invalid displayId", GetPersistentId());
+    }
     property_->SetDisplayId(displayId);
     return WSError::WS_OK;
 }
