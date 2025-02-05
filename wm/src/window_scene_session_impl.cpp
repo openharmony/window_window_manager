@@ -564,8 +564,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         RegisterWindowInspectorCallback();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
-        "id:%{public}d], state:%{public}u, mode:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode());
+        "id:%{public}d], state:%{public}u, mode:%{public}u, displayId: %{public}" PRIu64,
+        property_->GetWindowName().c_str(), property_->GetPersistentId(),
+        state_, GetWindowMode(), property_->GetDisplayId());
     return ret;
 }
 
@@ -4513,6 +4514,9 @@ void WindowSceneSessionImpl::NotifyKeyboardPanelInfoChange(const KeyboardPanelIn
 
 WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
 {
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, invalid displayId", GetPersistentId());
+    }
     bool displayIdChanged = property_->GetDisplayId() != displayId;
     property_->SetDisplayId(displayId);
     NotifyDisplayInfoChange();
