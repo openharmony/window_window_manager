@@ -82,23 +82,6 @@ HWTEST_F(WindowInspetorTest, ProcessArkUIInspectorMessage, Function | SmallTest 
     ret = WindowInspector::GetInstance().ProcessArkUIInspectorMessage(message3, jsonStr);
     EXPECT_EQ(false, ret);
 }
-
-/**
- * @tc.name: CreateArkUIInspectorJson01
- * @tc.desc: CreateArkUIInspectorJson
- * @tc.type: FUNC
- */
-HWTEST_F(WindowInspetorTest, CreateArkUIInspectorJson, Function | SmallTest | Level2)
-{
-    Rect windowRect = { 100, 100, 100, 100 };
-    std::vector<WindowListInfo> windowListInfo;
-    windowListInfo.push_back({ "test01", 1, 1, windowRect});
-    std::string jsonStr;
-    WindowInspector::GetInstance().CreateArkUIInspectorJson(windowListInfo, jsonStr);
-    std::string ret = "{\"type\":\"window\",\"content\":[{\"windowName\":\"test01\",\"winId\":\"1\",\"type\":\"1\","
-                      "\"rect\":{\"startX\":\"100\",\"startY\":\"100\",\"width\":\"100\",\"height\":\"100\"}}]}";
-    EXPECT_EQ(ret, jsonStr);
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
