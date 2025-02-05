@@ -2538,6 +2538,45 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, Function | SmallTest | Lev
     ASSERT_EQ(isHighlighted, true);
 }
 
+/**
+ * @tc.name: NotifyWindowCrossAxisChange
+ * @tc.desc: NotifyWindowCrossAxisChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyWindowCrossAxisChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWindowCrossAxisChange");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<MockIWindowCrossAxisListener> crossListener = sptr<MockIWindowCrossAxisListener>::MakeSptr();
+    WindowSessionImpl::windowCrossAxisListeners_[window->property_->persistentId_].push_back(crossListener);
+    EXPECT_CALL(*crossListener, OnCrossAxisChange(CrossAxisState::STATE_CROSS)).Times(1);
+    window->NotifyWindowCrossAxisChange(CrossAxisState::STATE_CROSS);
+    EXPECT_EQ(window->isCrossAxis_.load(), CrossAxisState::STATE_CROSS);
+}
+
+/**
+ * @tc.name: GetCrossAxisState
+ * @tc.desc: GetCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetCrossAxisState, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetCrossAxisState");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->isCrossAxis_ =  CrossAxisState::STATE_CROSS;
+    EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
+    window->isCrossAxis_ =  CrossAxisState::STATE_INVALID;
+    window->hostSession_ = nullptr;
+    EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_INVALID);
+    auto mockHostSession = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = mockHostSession;
+    window->property_->persistentId_ = 1234;
+    EXPECT_CALL(*mockHostSession, GetCrossAxisState(_))
+        .WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
+    EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

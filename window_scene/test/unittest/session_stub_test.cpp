@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <ipc_types.h>
 #include <pointer_event.h>
 #include "iremote_object_mocker.h"
@@ -951,6 +952,24 @@ HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon03, Function | SmallTest |
 
     auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
     ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetCrossAxisState
+ * @tc.desc: HandleGetCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetCrossAxisState, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    EXPECT_CALL(*session, GetCrossAxisState(_)).
+        WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
+    session->HandleGetCrossAxisState(data, reply);
+    uint32_t state = 0;
+    reply.ReadUint32(state);
+    ASSERT_EQ(state, static_cast<uint32_t>(CrossAxisState::STATE_CROSS));
 }
 }
 } // namespace Rosen

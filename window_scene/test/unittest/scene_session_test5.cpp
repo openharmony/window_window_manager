@@ -1861,6 +1861,76 @@ HWTEST_F(SceneSessionTest5, SetColorSpace, Function | SmallTest | Level2)
     session->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
     EXPECT_NE(nullptr, session->GetSurfaceNode());
 }
+
+/**
+ * @tc.name: UpdateCrossAxisOfLayout
+ * @tc.desc: UpdateCrossAxisOfLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateCrossAxisOfLayout, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    WSRect rect;
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    sceneSession->SceneSession::UpdateCrossAxisOfLayout(rect);
+}
+
+/**
+ * @tc.name: UpdateCrossAxis
+ * @tc.desc: UpdateCrossAxis
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateCrossAxis, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->sessionStage_ = sessionStageMocker;
+    // always have ovelap with axis
+    sceneSession->isCrossAxisOfLayout_ = true;
+    // not fold screen
+    PcFoldScreenManager::GetInstance().displayId_ = SCREEN_ID_INVALID;
+    EXPECT_CALL(*sessionStageMocker, NotifyWindowCrossAxisChange(_)).Times(0);
+    sceneSession->UpdateCrossAxis();
+    // fold screen, but fold status unknown
+    PcFoldScreenManager::GetInstance().displayId_ = 0;
+    sceneSession->GetSessionProperty()->displayId_ = 0;
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::UNKNOWN;
+    sceneSession->isCrossAxis_ = 100;
+    EXPECT_CALL(*sessionStageMocker, NotifyWindowCrossAxisChange(CrossAxisState::STATE_INVALID)).Times(1);
+    sceneSession->UpdateCrossAxis();
+    // state: half folded
+    sceneSession->isCrossAxis_ = 100;
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
+    EXPECT_CALL(*sessionStageMocker, NotifyWindowCrossAxisChange(CrossAxisState::STATE_CROSS)).Times(1);
+    sceneSession->UpdateCrossAxis();
+    // state: other
+    sceneSession->isCrossAxis_ = 100;
+    PcFoldScreenManager::GetInstance().screenFoldStatus_ = SuperFoldStatus::EXPANDED;
+    EXPECT_CALL(*sessionStageMocker, NotifyWindowCrossAxisChange(CrossAxisState::STATE_NO_CROSS)).Times(1);
+    sceneSession->UpdateCrossAxis();
+    // sessionStage is nullptr
+    sceneSession->isCrossAxis_ = 100;
+    sceneSession->sessionStage_ = nullptr;
+    EXPECT_CALL(*sessionStageMocker, NotifyWindowCrossAxisChange(_)).Times(0);
+    sceneSession->UpdateCrossAxis();
+}
+
+/**
+ * @tc.name: GetCrossAxisState
+ * @tc.desc: GetCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, GetCrossAxisState, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sceneSession->isCrossAxis_ = 1;
+    CrossAxisState state = CrossAxisState::STATE_INVALID;
+    sceneSession->GetCrossAxisState(state);
+    EXPECT_EQ(state, CrossAxisState::STATE_CROSS);
+}
 }
 }
 }
