@@ -278,7 +278,7 @@ public:
     }
 };
 
-static bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
         !avoidArea.rightRect_.IsUninitializedRect()) {
@@ -8786,7 +8786,7 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
     AvoidAreaType avoidType = (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) ?
         AvoidAreaType::TYPE_KEYBOARD : AvoidAreaType::TYPE_SYSTEM;
     AvoidArea avoidArea = rootSceneSession_->GetAvoidAreaByType(avoidType);
-    rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), avoidType);
+    rootSceneSession_->UpdateAvoidArea(sptr<AvoidArea>::MakeSptr(avoidArea), avoidType);
 
     for (auto persistentId : avoidAreaListenerSessionSet_) {
         auto sceneSession = GetSceneSession(persistentId);
@@ -8794,7 +8794,7 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
             continue;
         }
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(avoidType);
-        sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidType);
+        sceneSession->UpdateAvoidArea(sptr<AvoidArea>::MakeSptr(avoidArea), avoidType);
     }
 }
 
@@ -8837,7 +8837,8 @@ void SceneSessionManager::UpdateRootSceneSessionAvoidArea(int32_t persistentId, 
                 rootSceneSession_->GetSessionRect().height_)) {
             continue;
         }
-        rootSceneSession_->UpdateAvoidArea(new AvoidArea(avoidArea), static_cast<AvoidAreaType>(avoidAreaType));
+        rootSceneSession_->UpdateAvoidArea(
+            sptr<AvoidArea>::MakeSptr(avoidArea), static_cast<AvoidAreaType>(avoidAreaType));
     }
     needUpdate = true;
 }
@@ -8996,7 +8997,7 @@ void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentI
         persistentId, isLastFrameLayoutFinished);
     if (isLastFrameLayoutFinished) {
         sceneSession->UpdateAvoidArea(
-            new AvoidArea(sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
+            sptr<AvoidArea>::MakeSptr(sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
             AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
     } else {
         sceneSession->MarkAvoidAreaAsDirty();
