@@ -4947,19 +4947,13 @@ Transform WindowSessionImpl::GetLayoutTransform() const
 
 void WindowSessionImpl::RegisterWindowInspectorCallback()
 {
-    if (!WindowInspector::GetInstance().IsConnectServerSuccess()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u connect failed", GetWindowId());
-        return;
-    }
     auto getWMSWindowListCallback = std::make_shared<GetWMSWindowListCallback>([weakThis = wptr(this)] {
-        WindowListInfo windowListInfo;
         if (auto window = weakThis.promote()) {
-            windowListInfo.windowName = window->GetWindowName();
-            windowListInfo.windowId = window->GetWindowId();
-            windowListInfo.windowType = static_cast<uint32_t>(window->GetType());
-            windowListInfo.windowRect = window->GetRect();
+            return std::make_optional<WindowListInfo>( {window->GetWindowName(), window->GetWindowId(),
+                                                       static_cast<uint32_t>(window->GetType()), window->GetRect() });
+        } else {
+            return std::nullopt;
         }
-        return windowListInfo;
     });
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }

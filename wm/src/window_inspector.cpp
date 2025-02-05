@@ -12,172 +12,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <dlfcn.h>
 
-#include "nlohmann/json.hpp"
+#ifndef WINDOW_INSPECTOR_H
+#define WINDOW_INSPECTOR_H
 
-#include "window_inspector.h"
-#include "window_manager_hilog.h"
+#include <mutex>
+#include <optional>
+
+#include "wm_common.h"
+#include "wm_single_instance.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr char ARK_CONNECT_LIB_PATH[] = "libark_connect_inspector.z.so";
-constexpr char SET_WMS_CALLBACK[] = "SetWMSCallback";
-constexpr char SEND_WMS_MESSAGE[] = "SendMessage";
-const std::string METHOD_NAME = "WMS.windowList";
-const std::string COMMAND_NAME = "getCurrentProcessWindowList";
-} // namespace
+struct WindowListInfo {
+    std::string windowName;
+    uint32_t windowId;
+    uint32_t windowType;
+    Rect windowRect;
+};
 
-WindowInspector& WindowInspector::GetInstance()
-{
-    static WindowInspector instance;
-    return instance;
-}
+using SendWMSMessageFunc = void (*)(const std::string& message);
+using SetWMSCallbackFunc = void (*)(const std::function<void(const char*)>& wmsCallback);
+using GetWMSWindowListCallback = std::function<std::optional<WindowListInfo>()>;
 
-WindowInspector::WindowInspector()
-{
-    ConnectServer();
-}
+class WindowInspector : public {
+WM_DECLARE_SINGLE_INSTANCE_BASE(WindowInspector);
+public:
+    void RegisterGetWMSWindowListCallback(uint32_t windowId, GetWMSWindowListCallback&& func);
+    void UnregisterGetWMSWindowListCallback(uint32_t windowId);
 
-WindowInspector::~WindowInspector()
-{
-    UnregisterAllCallbacks();
-}
+protected:
+    WindowInspector();
+    virtual ~WindowInspector() = default;
 
-void WindowInspector::ConnectServer()
-{
-    handlerConnectServerSo_ = dlopen(ARK_CONNECT_LIB_PATH, RTLD_NOW);
-    if (handlerConnectServerSo_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "can't open %{public}s", ARK_CONNECT_LIB_PATH);
-        return;
-    }
-    setWMSCallbackFunc_ = reinterpret_cast<SetWMSCallbackFunc>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
-    sendWMSMessageFunc_ = reinterpret_cast<SendWMSMessageFunc>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
-    if (setWMSCallbackFunc_ == nullptr || sendWMSMessageFunc_ == nullptr) {
-        CloseConnectFromServer();
-        setWMSCallbackFunc_ = nullptr;
-        sendWMSMessageFunc_ = nullptr;
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load failed: %{public}s", dlerror());
-        return;
-    }
-    setWMSCallbackFunc_([this](const char* message) {
-        std::string jsonWindowListInfoStr;
-        if (ProcessArkUIInspectorMessage(message, jsonWindowListInfoStr)) {
-            SendMessageToIDE(jsonWindowListInfoStr);
-        }
-    });
-    isConnectServerSuccess_ = true;
-    CloseConnectFromServer();
-}
+private:
+    bool isConnectServerSuccess_ = false;
+    void* handlerConnectServerSo_ = nullptr;
+    SendWMSMessageFunc sendWMSMessageFunc_ = nullptr;
+    SetWMSCallbackFunc setWMSCallbackFunc_ = nullptr;
 
-void WindowInspector::CloseConnectFromServer()
-{
-    dlclose(handlerConnectServerSo_);
-    handlerConnectServerSo_ = nullptr;
-}
+    std::mutex callbackMutex_;
+    std::unordered_map<uint32_t, GetWMSWindowListCallback> getWMSWindowListCallbacks_;
+    // Above guarded by callbackMutex_
 
-bool WindowInspector::IsConnectServerSuccess() const
-{
-    return isConnectServerSuccess_;
-}
+    void ConnectServer();
+    bool IsConnectServerSuccess() const;
+    void CloseConnectFromServer();
+    bool ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr);
+    void SendMessageToIDE(const std::string& jsonStr);
+};
+} // namespace OHOS::Rosen
 
-void WindowInspector::RegisterGetWMSWindowListCallback(
-    uint32_t windowId, std::shared_ptr<GetWMSWindowListCallback>&& func)
-{
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    auto [_, result] = getWMSWindowListCallbacks_.insert_or_assign(windowId, func);
-    if (result) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered");
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", windowId);
-}
-
-void WindowInspector::UnregisterGetWMSWindowListCallback(uint32_t windowId)
-{
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    auto iter = getWMSWindowListCallbacks_.find(windowId);
-    if (iter == getWMSWindowListCallbacks_.end()) {
-        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u callback not registered", windowId);
-        return;
-    }
-    getWMSWindowListCallbacks_.erase(iter);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u", windowId);
-}
-
-void WindowInspector::UnregisterAllCallbacks()
-{
-    setWMSCallbackFunc_ = nullptr;
-    sendWMSMessageFunc_ = nullptr;
-    isConnectServerSuccess_ = false;
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    getWMSWindowListCallbacks_.clear();
-}
-
-bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr)
-{
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "receive callback");
-    nlohmann::json jsonMessage = nlohmann::json::parse(message, nullptr, false);
-    if (!jsonMessage.contains("method") || jsonMessage["method"].get<std::string>() != METHOD_NAME) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
-        return false;
-    }
-    if (!jsonMessage.contains("params") || !jsonMessage["params"].contains("command") ||
-        jsonMessage["params"]["command"].get<std::string>() != COMMAND_NAME) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received params.command err");
-        return false;
-    }
-    std::vector<WindowListInfo> windowListInfoVec;
-    {
-        std::unique_lock<std::mutex> lock(callbackMutex_);
-        for (auto iter = getWMSWindowListCallbacks_.begin(); iter != getWMSWindowListCallbacks_.end();) {
-            auto callback = iter->second;
-            if (callback == nullptr) {
-                iter = getWMSWindowListCallbacks_.erase(iter);
-                continue;
-            }
-            auto windowListInfo = (*callback)();
-            windowListInfoVec.push_back(std::move(windowListInfo));
-            iter++;
-        }
-    }
-    if (windowListInfoVec.empty()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "has no window");
-        return false;
-    }
-    CreateArkUIInspectorJson(windowListInfoVec, jsonStr);
-    return true;
-}
-
-void WindowInspector::CreateArkUIInspectorJson(
-    const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr)
-{
-    nlohmann::ordered_json jsonWindowListInfo;
-    jsonWindowListInfo["type"] = "window";
-    jsonWindowListInfo["content"] = nlohmann::json::array();
-    for (const auto& info : windowListInfo) {
-        nlohmann::ordered_json jsonInfo;
-        jsonInfo["windowName"] = info.windowName;
-        jsonInfo["winId"] = std::to_string(info.windowId);
-        jsonInfo["type"] = std::to_string(info.windowType);
-        nlohmann::ordered_json jsonRectInfo;
-        jsonRectInfo["startX"] = std::to_string(info.windowRect.posX_);
-        jsonRectInfo["startY"] = std::to_string(info.windowRect.posY_);
-        jsonRectInfo["width"] = std::to_string(info.windowRect.width_);
-        jsonRectInfo["height"] = std::to_string(info.windowRect.height_);
-        jsonInfo["rect"] = jsonRectInfo;
-
-        jsonWindowListInfo["content"].push_back(std::move(jsonInfo));
-    }
-    jsonStr = jsonWindowListInfo.dump();
-}
-
-void WindowInspector::SendMessageToIDE(std::string& jsonStr)
-{
-    if (sendWMSMessageFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendMessage is null");
-        return;
-    }
-    sendWMSMessageFunc_(jsonStr);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", jsonStr.c_str());
-}
-} // namespace Rosen::OHOS
+#endif // WINDOW_INSPECTOR_H

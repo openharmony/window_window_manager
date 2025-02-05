@@ -29,6 +29,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 };
+
 void WindowInspetorTest::SetUpTestCase() {}
 
 void WindowInspetorTest::TearDownTestCase() {}
