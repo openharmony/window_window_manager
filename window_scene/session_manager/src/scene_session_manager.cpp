@@ -6396,6 +6396,11 @@ void SceneSessionManager::RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFun
     getRSNodeByStringIDFunc_ = std::move(func);
 }
 
+void SceneSessionManager::RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func)
+{
+    setTopWindowBoundaryByIDFunc_ = std::move(func);
+}
+
 void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& stringId)
 {
     if (getRSNodeByStringIDFunc_ == nullptr) {
@@ -6408,6 +6413,7 @@ void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& str
         return;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
+    setTopWindowBoundaryByIDFunc_(stringId);
     rsInterface_.SetWindowContainer(rsNode->GetId(), true);
 }
 
