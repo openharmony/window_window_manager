@@ -81,8 +81,8 @@ void WindowInspector::ConnectServer()
     }
     setWMSCallbackFunc_([this](const char* message) {
         std::string jsonWindowListInfo;
-        if (ProcessArkUIInspectorMessage(message, jsonWindowListInfoStr)) {
-            SendMessageToIDE(jsonWindowListInfoStr);
+        if (ProcessArkUIInspectorMessage(message, jsonWindowListInfo)) {
+            SendMessageToIDE(jsonWindowListInfo);
         }
     });
     isConnectServerSuccess_ = true;
@@ -122,7 +122,7 @@ void WindowInspector::UnregisterGetWMSWindowListCallback(uint32_t windowId)
     if (result == 0) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u callback not registered", windowId);
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u", windowId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", windowId);
 }
 
 bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr)
@@ -146,7 +146,6 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
             if (windowListInfo.has_value()) {
                 windowListInfoVec.push_back(std::move(windowListInfo.value()));
             }
-            iter++;
         }
     }
     if (windowListInfoVec.empty()) {
