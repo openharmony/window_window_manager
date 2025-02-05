@@ -411,7 +411,6 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
         hostSession_ = session;
     }
     RecoverSessionListener();
-    RegisterWindowInspectorCallback();
     TLOGI(WmsLogTag::WMS_RECOVER,
         "over, windowName=%{public}s, persistentId=%{public}d",
         GetWindowName().c_str(), GetPersistentId());
