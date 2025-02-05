@@ -439,7 +439,7 @@ int32_t OH_WindowManager_GetWindowProperties(
         auto uicontent = window->GetUIContent();
         if (uicontent == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s uicontent is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
             return;
         }
         uicontent->GetAppPaintSize(drawableRect);
