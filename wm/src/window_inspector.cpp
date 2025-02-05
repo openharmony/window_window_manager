@@ -103,7 +103,6 @@ bool WindowInspector::IsConnectServerSuccess() const
 void WindowInspector::RegisterGetWMSWindowListCallback(
     uint32_t windowId, GetWMSWindowListCallback&& func)
 {
-
     if (!IsConnectServerSuccess()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u connect failed", windowId);
         return;
