@@ -291,7 +291,8 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
 
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override;
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {}) override;
 
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;

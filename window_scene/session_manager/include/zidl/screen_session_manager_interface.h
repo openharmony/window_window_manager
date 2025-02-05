@@ -181,7 +181,8 @@ public:
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override { return DMError::DM_OK; }
-    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList) override {}
+    virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {}) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
 
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
