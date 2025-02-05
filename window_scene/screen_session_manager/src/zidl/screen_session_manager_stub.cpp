@@ -156,6 +156,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(info);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            auto info = GetVisibleAreaDisplayInfoById(displayId);
+            reply.WriteParcelable(info);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN: {
             ScreenId screenId = data.ReadUint64();
             auto info = GetDisplayInfoByScreen(screenId);

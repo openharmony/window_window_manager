@@ -1248,6 +1248,53 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
     return nullptr;
 }
 
+sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64" ", displayId);
+    DmsXcollie dmsXcollie("DMS:GetVisibleAreaDisplayInfoById", XCOLLIE_TIMEOUT_10S);
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGI(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64 "",
+                sessionIt.first);
+            continue;
+        }
+        sptr<DisplayInfo> displayInfo = screenSession->ConvertToRealDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
+            continue;
+        }
+        if (displayId != displayInfo->GetDisplayId()) {
+            continue;
+        }
+        TLOGD(WmsLogTag::DMS, "success");
+        displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
+        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            return displayInfo;
+        }
+        SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+        RRect bounds = screenSession->GetScreenProperty().GetBounds();
+        auto screenWdith = bounds.rect_.GetWidth();
+        auto screenHeight = bounds.rect_.GetHeight();
+        if (status == SuperFoldStatus::KEYBOARD) {
+            if (screenWdith > screenHeight) {
+                auto temp = screenWdith;
+                screenWdith = screenHeight;
+                screenHeight = temp;
+            }
+            displayInfo->SetWidth(screenWdith);
+            displayInfo->SetHeight(screenHeight / HALF_SCREEN_PARAM);
+        } else {
+            displayInfo->SetWidth(screenWdith);
+            displayInfo->SetHeight(screenHeight);
+        }
+        return displayInfo;
+    }
+    TLOGE(WmsLogTag::DMS, "GetVisibleAreaDisplayInfoById failed. displayId: %{public}" PRIu64" ", displayId);
+    return nullptr;
+}
+
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId)
 {
     TLOGD(WmsLogTag::DMS, "enter, screenId: %{public}" PRIu64"", screenId);
@@ -2473,6 +2520,10 @@ int32_t ScreenSessionManager::SetScreenOnDelayTime(int32_t delay)
 
 void ScreenSessionManager::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set camera status permission denied!");
+        return;
+    }
     if ((cameraStatus_ == cameraStatus) && (cameraPosition_ == cameraPosition)) {
         return;  // no need to update
     }
