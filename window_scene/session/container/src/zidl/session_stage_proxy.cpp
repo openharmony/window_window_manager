@@ -1561,27 +1561,27 @@ WSError SessionStageProxy::NotifyHighlightChange(bool isHighlight)
     return static_cast<WSError>(ret);
 }
 
-void SessionStageProxy::NotifyWindowCrossAxisChange(CrossAxisState isCrossAxis)
+void SessionStageProxy::NotifyWindowCrossAxisChange(CrossAxisState state)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_ASYNC_WAKEUP_LATER);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(isCrossAxis))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Write params failed");
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write params failed");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CROSS_AXIS),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
         return;
     }
 }

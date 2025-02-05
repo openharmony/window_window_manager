@@ -21,6 +21,7 @@
 #include "accessibility_event_info.h"
 #include "color_parser.h"
 #include "mock_session.h"
+#include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
@@ -2552,7 +2553,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowCrossAxisChange, Function | SmallTe
     WindowSessionImpl::windowCrossAxisListeners_[window->property_->persistentId_].push_back(crossListener);
     EXPECT_CALL(*crossListener, OnCrossAxisChange(CrossAxisState::STATE_CROSS)).Times(1);
     window->NotifyWindowCrossAxisChange(CrossAxisState::STATE_CROSS);
-    EXPECT_EQ(window->isCrossAxis_.load(), CrossAxisState::STATE_CROSS);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
 }
 
 /**
@@ -2565,9 +2566,9 @@ HWTEST_F(WindowSessionImplTest4, GetCrossAxisState, Function | SmallTest | Level
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetCrossAxisState");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->isCrossAxis_ =  CrossAxisState::STATE_CROSS;
+    window->crossAxisState_ =  CrossAxisState::STATE_CROSS;
     EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
-    window->isCrossAxis_ =  CrossAxisState::STATE_INVALID;
+    window->crossAxisState_ =  CrossAxisState::STATE_INVALID;
     window->hostSession_ = nullptr;
     EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_INVALID);
     auto mockHostSession = sptr<SessionStubMocker>::MakeSptr();

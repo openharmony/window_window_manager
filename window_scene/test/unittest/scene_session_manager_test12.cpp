@@ -24,8 +24,6 @@
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
-#include "mock/mock_resource_manager.h"
-#include "mock/mock_root_scene_context.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
 #include "session_manager.h"

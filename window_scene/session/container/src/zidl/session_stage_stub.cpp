@@ -774,19 +774,19 @@ int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyWindowCrossAxisChange(MessageParcel &data, MessageParcel &reply)
+int SessionStageStub::HandleNotifyWindowCrossAxisChange(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    uint32_t isCrossAxis = 0;
-    if (!data.ReadUint32(isCrossAxis)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read isCrossAxis failed.");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    uint32_t state = 0;
+    if (!data.ReadUint32(state)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read cross axis state failed.");
         return ERR_INVALID_DATA;
     }
-    if (isCrossAxis >= static_cast<uint32_t>(CrossAxisState::STATE_END)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "invalid cross axis state.");
+    if (state >= static_cast<uint32_t>(CrossAxisState::STATE_END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid cross axis state.");
         return ERR_INVALID_DATA;
     }
-    NotifyWindowCrossAxisChange(static_cast<CrossAxisState>(isCrossAxis));
+    NotifyWindowCrossAxisChange(static_cast<CrossAxisState>(state));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

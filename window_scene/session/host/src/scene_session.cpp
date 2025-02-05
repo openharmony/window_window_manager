@@ -1639,7 +1639,7 @@ void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
 
 void SceneSession::UpdateCrossAxis()
 {
-    CrossAxisState isCrossAxis = CrossAxisState::STATE_INVALID;
+    CrossAxisState crossAxisState = CrossAxisState::STATE_INVALID;
     if (PcFoldScreenManager::GetInstance().GetDisplayId() == SCREEN_ID_INVALID ||
         PcFoldScreenManager::GetInstance().GetDisplayId() != GetSessionProperty()->GetDisplayId()) {
         return;
@@ -1647,22 +1647,22 @@ void SceneSession::UpdateCrossAxis()
     if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() != SuperFoldStatus::UNKNOWN) {
         if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
             isCrossAxisOfLayout_) {
-            isCrossAxis = CrossAxisState::STATE_CROSS;
+            crossAxisState = CrossAxisState::STATE_CROSS;
         } else {
-            isCrossAxis = CrossAxisState::STATE_NO_CROSS;
+            crossAxisState = CrossAxisState::STATE_NO_CROSS;
         }
     }
-    if (isCrossAxis_ != static_cast<uint32_t>(isCrossAxis) && sessionStage_ != nullptr) {
-        isCrossAxis_ = static_cast<uint32_t>(isCrossAxis);
-        sessionStage_->NotifyWindowCrossAxisChange(isCrossAxis);
+    if (crossAxisState_ != static_cast<uint32_t>(crossAxisState) && sessionStage_ != nullptr) {
+        crossAxisState_ = static_cast<uint32_t>(crossAxisState);
+        sessionStage_->NotifyWindowCrossAxisChange(crossAxisState);
     } else if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr, id: %{public}d", GetPersistentId());
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is nullptr, id: %{public}d", GetPersistentId());
     }
 }
 
 WSError SceneSession::GetCrossAxisState(CrossAxisState& state)
 {
-    state = static_cast<CrossAxisState>(isCrossAxis_.load());
+    state = static_cast<CrossAxisState>(crossAxisState_.load());
     return WSError::WS_OK;
 }
 

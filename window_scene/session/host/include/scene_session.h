@@ -1031,7 +1031,7 @@ private:
         behindWindowFilterEnabledModifier_; // Only accessed on main thread
     bool isDragEnd_ = false;
     std::atomic<bool> isCrossAxisOfLayout_ = false;
-    std::atomic<uint32_t> isCrossAxis_ = 0;
+    std::atomic<uint32_t> crossAxisState_ = 0;
 
     /*
      * Window Immersive

@@ -2852,22 +2852,22 @@ template<typename T>
 EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowCrossAxisListener>> windowCrossAxisListeners;
-    for (auto& listener : windowCrossAxisListeners_[GetPersistentId()]) {
+    for (const auto& listener : windowCrossAxisListeners_[GetPersistentId()]) {
         windowCrossAxisListeners.push_back(listener);
     }
     return windowCrossAxisListeners;
 }
 
-void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState isCrossAxis)
+void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isCrossAxis %{public}d", GetPersistentId(),
-        static_cast<uint32_t>(isCrossAxis));
-    isCrossAxis_ = isCrossAxis;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, cross axis state %{public}d", GetPersistentId(),
+        static_cast<uint32_t>(state));
+    crossAxisState_ = state;
     std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
     auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
-    for (auto& listener : windowCrossAxisListeners) {
+    for (const auto& listener : windowCrossAxisListeners) {
         if (listener != nullptr) {
-            listener->OnCrossAxisChange(isCrossAxis);
+            listener->OnCrossAxisChange(state);
         }
     }
 }
@@ -3090,8 +3090,8 @@ WMError WindowSessionImpl::GetIsMidScene(bool& isMidScene)
 
 CrossAxisState WindowSessionImpl::GetCrossAxisState()
 {
-    if (isCrossAxis_ != CrossAxisState::STATE_INVALID) {
-        return isCrossAxis_;
+    if (crossAxisState_ != CrossAxisState::STATE_INVALID) {
+        return crossAxisState_;
     }
     if (IsWindowSessionInvalid()) {
         return CrossAxisState::STATE_INVALID;
@@ -3102,7 +3102,8 @@ CrossAxisState WindowSessionImpl::GetCrossAxisState()
     if (hostSession->GetCrossAxisState(state) != WSError::WS_OK) {
         return CrossAxisState::STATE_INVALID;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "state is %{public}d", static_cast<uint32_t>(state));
+    TLOGI(WmsLogTag::WMS_LAYOUT, "window id is %{public}d, state is %{public}d",GetPersistentId(),
+        static_cast<uint32_t>(state));
     return state;
 }
 
