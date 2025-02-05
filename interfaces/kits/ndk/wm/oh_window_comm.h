@@ -59,13 +59,13 @@ typedef enum {
      *
      * @since 16
      */
-    WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY = 1300002,
+    WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL = 1300002,
     /**
      * Window state is abnormal.
      *
      * @since 16
      */
-    WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY = 1300003,
+    WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL = 1300003,
 } WindowManager_ErrorCode;
 
 /**
