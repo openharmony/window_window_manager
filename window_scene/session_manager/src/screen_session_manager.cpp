@@ -5551,29 +5551,46 @@ DeviceScreenConfig ScreenSessionManager::GetDeviceScreenConfig()
     return deviceScreenConfig_;
 }
 
-void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+void ScreenSessionManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied!");
         return;
     }
     TLOGI(WmsLogTag::DMS, "Enter, screenId: %{public}" PRIu64, screenId);
-    if (windowIdList.empty()) {
-        TLOGE(WmsLogTag::DMS, "WindowIdList is empty");
-        return;
-    }
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
         TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return;
+    }
+    if (windowIdList.empty()) {
+        TLOGI(WmsLogTag::DMS, "WindowIdList is empty");
+        rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceIdList);
         return;
     }
     if (!clientProxy_) {
         TLOGE(WmsLogTag::DMS, "clientProxy_ is nullptr");
         return;
     }
-    std::vector<uint64_t> surfaceNodeIds;
-    clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIds, true);
-    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIds);
+    std::vector<uint64_t> surfaceNodeIdsToRS;
+    clientProxy_->OnGetSurfaceNodeIdsFromMissionIdsChanged(windowIdList, surfaceNodeIdsToRS, true);
+    if (!surfaceIdList.empty()) {
+        for (auto surfaceId : surfaceIdList) {
+            auto it = std::find(surfaceNodeIdsToRS.begin(), surfaceNodeIdsToRS.end(), surfaceId);
+            if (it != surfaceNodeIdsToRS.end()) {
+                continue;
+            }
+            surfaceNodeIdsToRS.push_back(surfaceId);
+        }
+    }
+    std::ostringstream oss;
+    oss << "surfaceNodeIdsToRS: ";
+    for (auto val : surfaceNodeIdsToRS) {
+        oss << val << " ";
+    }
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    rsInterface_.SetVirtualScreenBlackList(rsScreenId, surfaceNodeIdsToRS);
 }
 
 void ScreenSessionManager::DisablePowerOffRenderControl(ScreenId screenId)
