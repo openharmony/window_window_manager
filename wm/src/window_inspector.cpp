@@ -143,7 +143,7 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
     {
         std::unique_lock<std::mutex> lock(callbackMutex_);
         for (auto& [_, func] : getWMSWindowListCallbacks_) {
-            auto windowListInfo = (*func)();
+            auto windowListInfo = func();
             if (windowListInfo.has_value()) {
                 windowListInfoVec.push_back(std::move(windowListInfo.value()));
             }
