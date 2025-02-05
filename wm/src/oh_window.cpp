@@ -208,7 +208,7 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         if (window->IsPcWindow()) {
@@ -240,7 +240,7 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         if (window->IsPcWindow()) {
@@ -271,7 +271,7 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         if (window->IsPcWindow()) {
@@ -307,7 +307,7 @@ int32_t OH_WindowManager_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         *pixelMap = OH_PixelmapNative(window->Snapshot());
@@ -331,7 +331,7 @@ int32_t OH_WindowManager_SetWindowBackgroundColor(int32_t windowId, const char* 
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetBackgroundColor(std::string(color)));
@@ -351,7 +351,7 @@ int32_t OH_WindowManager_SetWindowBrightness(int32_t windowId, float brightness)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetBrightness(brightness));
@@ -371,7 +371,7 @@ int32_t OH_WindowManager_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScre
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetKeepScreenOn(isKeepScreenOn));
@@ -391,7 +391,7 @@ int32_t OH_WindowManager_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetPrivacyMode(isPrivacy));
@@ -416,7 +416,7 @@ int32_t OH_WindowManager_GetWindowProperties(
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::IWINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         if (OH_WINDOW_TO_WINDOW_TYPE_MAP.count(window->GetType()) != 0) {
