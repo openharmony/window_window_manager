@@ -171,9 +171,9 @@ public:
     /**
      * @brief Notify caller when window cross screen axis state changed.
      *
-     * @param isCrossAxis is window across screen axis.
+     * @param state is window across screen axis.
      */
-    virtual void OnCrossAxisChange(CrossAxisState isCrossAxis) {}
+    virtual void OnCrossAxisChange(CrossAxisState state) {}
 };
 
 /**
@@ -3115,7 +3115,7 @@ public:
     /**
      * @brief Get cross screen axis state.
      *
-     * @return The cross screen axis state to the Window.
+     * @return The cross screen axis state of the Window.
      */
     virtual CrossAxisState GetCrossAxisState() { return CrossAxisState::STATE_INVALID; }
 

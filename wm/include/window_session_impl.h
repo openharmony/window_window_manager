@@ -174,7 +174,7 @@ public:
                                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
-    void NotifyWindowCrossAxisChange(CrossAxisState isCrossAxis) override;
+    void NotifyWindowCrossAxisChange(CrossAxisState state) override;
 
     WMError RegisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
@@ -693,7 +693,7 @@ private:
     int16_t rotationAnimationCount_ { 0 };
     Transform layoutTransform_;
     SingleHandTransform singleHandTransform_;
-    std::atomic<CrossAxisState> isCrossAxis_;
+    std::atomic<CrossAxisState> crossAxisState_;
     
     /*
      * Window Decor
