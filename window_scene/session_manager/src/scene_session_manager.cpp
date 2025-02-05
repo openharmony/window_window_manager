@@ -2081,6 +2081,14 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     const sptr<WindowSessionProperty>& property)
 {
     auto callerSession = GetSceneSession(sessionInfo.callerPersistentId_);
+    DisplayId currDisplayId = DISPLAY_ID_INVALID;
+    if (sessionInfo.screenId_ != SCREEN_ID_INVALID) {
+        currDisplayId = sessionInfo.screenId_;
+    } else if (callerSession) {
+        currDisplayId = callerSession->GetSessionProperty()->GetDisplayId();
+    }
+    sceneSession->GetSessionProperty()->SetDisplayId(currDisplayId);
+    sceneSession->SetScreenId(currDisplayId);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "synchronous screenId with displayid %{public}" PRIu64, currDisplayId);
     sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
     sceneSession->RegisterIsScreenLockedCallback([this] { return IsScreenLocked(); });
@@ -10274,13 +10282,14 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
         WLOGFE("session is nullptr");
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
+    auto fromScreenId = sceneSession->GetSessionInfo().screenId_;
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, screenId: %{public}" PRIu64,
         sceneSession->GetPersistentId(), screenId);
     sceneSession->SetScreenId(screenId);
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
     WLOGFD("Session move display %{public}" PRIu64 " from %{public}" PRIu64, screenId, fromScreenId);
     NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
-    NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
+    sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();
     return WSError::WS_OK;
 }
