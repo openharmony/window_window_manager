@@ -390,6 +390,10 @@ void SceneSessionManager::Init()
     InitVsyncStation();
     UpdateDarkColorModeToRS();
     CreateRootSceneSession();
+    std::shared_ptr<FoldScreenStatusChangeCallback> callback = std::make_shared<FoldScreenStatusChangeCallback>(
+        std::bind(&SceneSessionManager::UpdateSessionCrossAxisState, this, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3));
+    PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, callback);
 }
 
 void SceneSessionManager::RegisterFlushWindowInfoCallback()
@@ -449,6 +453,19 @@ void SceneSessionManager::InitScheduleUtils()
     };
     taskScheduler_->PostAsyncTask(task, "changeQosTask");
 #endif
+}
+
+void SceneSessionManager::UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status,
+    SuperFoldStatus prevStatus)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr");
+            continue;
+        }
+        sceneSession->UpdateCrossAxis();
+    }
 }
 
 void SceneSessionManager::RegisterAppListener()

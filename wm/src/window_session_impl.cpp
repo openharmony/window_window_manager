@@ -103,6 +103,7 @@ Ace::ViewportConfig FillViewportConfig(
 std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::lifecycleListeners_;
 std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> WindowSessionImpl::displayMoveListeners_;
 std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> WindowSessionImpl::windowChangeListeners_;
+std::map<int32_t, std::vector<sptr<IWindowCrossAxisListener>>> WindowSessionImpl::windowCrossAxisListeners_;
 std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImpl::avoidAreaChangeListeners_;
 std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::dialogDeathRecipientListeners_;
 std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::dialogTargetTouchListener_;
@@ -126,6 +127,7 @@ std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessi
 std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::windowCrossAxisListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::dialogDeathRecipientListenerMutex_;
 std::recursive_mutex WindowSessionImpl::dialogTargetTouchListenerMutex_;
@@ -2170,6 +2172,20 @@ WMError WindowSessionImpl::UnregisterWindowChangeListener(const sptr<IWindowChan
     return UnregisterListener(windowChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+{
+    WLOGFD("in");
+    std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
+    return RegisterListener(windowCrossAxisListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+{
+    WLOGFD("in");
+    std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
+    return UnregisterListener(windowCrossAxisListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener)
 {
     WLOGFD("in");
@@ -2833,6 +2849,30 @@ EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>>
 }
 
 template<typename T>
+EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowCrossAxisListener>> windowCrossAxisListeners;
+    for (const auto& listener : windowCrossAxisListeners_[GetPersistentId()]) {
+        windowCrossAxisListeners.push_back(listener);
+    }
+    return windowCrossAxisListeners;
+}
+
+void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, cross axis state %{public}d", GetPersistentId(),
+        static_cast<uint32_t>(state));
+    crossAxisState_ = state;
+    std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
+    auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
+    for (const auto& listener : windowCrossAxisListeners) {
+        if (listener != nullptr) {
+            listener->OnCrossAxisChange(state);
+        }
+    }
+}
+
+template<typename T>
 EnableIfSame<T, IOccupiedAreaChangeListener,
     std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::GetListeners()
 {
@@ -2969,6 +3009,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
         std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
         ClearUselessListeners(highlightChangeListeners_, persistentId);
     }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(windowCrossAxisListenerMutex_);
+        ClearUselessListeners(windowCrossAxisListeners_, persistentId);
+    }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
 }
@@ -3042,6 +3086,25 @@ WMError WindowSessionImpl::GetIsMidScene(bool& isMidScene)
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     hostSession->GetIsMidScene(isMidScene);
     return WMError::WM_OK;
+}
+
+CrossAxisState WindowSessionImpl::GetCrossAxisState()
+{
+    if (crossAxisState_ != CrossAxisState::STATE_INVALID) {
+        return crossAxisState_;
+    }
+    if (IsWindowSessionInvalid()) {
+        return CrossAxisState::STATE_INVALID;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, CrossAxisState::STATE_INVALID);
+    CrossAxisState state = CrossAxisState::STATE_INVALID;
+    if (hostSession->GetCrossAxisState(state) != WSError::WS_OK) {
+        return CrossAxisState::STATE_INVALID;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "window id is %{public}d, state is %{public}d", GetPersistentId(),
+        static_cast<uint32_t>(state));
+    return state;
 }
 
 WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName, const std::string& eventValue)
