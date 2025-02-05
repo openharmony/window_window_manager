@@ -1335,6 +1335,39 @@ DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId,
     return ret;
 }
 
+DMError ScreenSessionManagerProxy::MakeMirrorForRecord(ScreenId mainScreenId,
+    std::vector<ScreenId> mirrorScreenIds, ScreenId& screenGroupId)
+{
+    WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: ENTER");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    bool res = data.WriteUint64(static_cast<uint64_t>(mainScreenId)) &&
+        data.WriteUInt64Vector(mirrorScreenIds);
+    if (!res) {
+        WLOGFE("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: data write failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_FOR_RECORD),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW("SCB: ScreenSessionManagerProxy::MakeMirror: create mirror fail: SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    screenGroupId = static_cast<ScreenId>(reply.ReadUint64());
+    return ret;
+}
+
 DMError ScreenSessionManagerProxy::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
                                               DMRect mainScreenRegion, ScreenId& screenGroupId)
 {
@@ -1726,6 +1759,39 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
         WLOGFW("DisplayManagerProxy::GetDisplayInfoById SendRequest nullptr.");
+        return nullptr;
+    }
+    return info;
+}
+
+sptr<DisplayInfo> ScreenSessionManagerProxy::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW(": remote is nullptr");
+        return nullptr;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE(": WriteInterfaceToken failed");
+        return nullptr;
+    }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFW(": WriteUint64 displayId failed");
+        return nullptr;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID),
+        data, reply, option) != ERR_NONE) {
+        WLOGFW(": SendRequest failed");
+        return nullptr;
+    }
+
+    sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
+    if (info == nullptr) {
+        WLOGFW(": SendRequest nullptr.");
         return nullptr;
     }
     return info;

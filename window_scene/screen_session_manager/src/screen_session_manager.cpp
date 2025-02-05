@@ -1270,6 +1270,53 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
     return nullptr;
 }
 
+sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64" ", displayId);
+    DmsXcollie dmsXcollie("DMS:GetVisibleAreaDisplayInfoById", XCOLLIE_TIMEOUT_10S);
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGI(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64 "",
+                sessionIt.first);
+            continue;
+        }
+        sptr<DisplayInfo> displayInfo = screenSession->ConvertToRealDisplayInfo();
+        if (displayInfo == nullptr) {
+            TLOGI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
+            continue;
+        }
+        if (displayId != displayInfo->GetDisplayId()) {
+            continue;
+        }
+        TLOGD(WmsLogTag::DMS, "success");
+        displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
+        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            return displayInfo;
+        }
+        SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
+        RRect bounds = screenSession->GetScreenProperty().GetBounds();
+        auto screenWdith = bounds.rect_.GetWidth();
+        auto screenHeight = bounds.rect_.GetHeight();
+        if (status == SuperFoldStatus::KEYBOARD) {
+            if (screenWdith > screenHeight) {
+                auto temp = screenWdith;
+                screenWdith = screenHeight;
+                screenHeight = temp;
+            }
+            displayInfo->SetWidth(screenWdith);
+            displayInfo->SetHeight(screenHeight / HALF_SCREEN_PARAM);
+        } else {
+            displayInfo->SetWidth(screenWdith);
+            displayInfo->SetHeight(screenHeight);
+        }
+        return displayInfo;
+    }
+    TLOGE(WmsLogTag::DMS, "GetVisibleAreaDisplayInfoById failed. displayId: %{public}" PRIu64" ", displayId);
+    return nullptr;
+}
+
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoByScreen(ScreenId screenId)
 {
     TLOGD(WmsLogTag::DMS, "enter, screenId: %{public}" PRIu64"", screenId);
@@ -2526,6 +2573,11 @@ int32_t ScreenSessionManager::SetScreenOnDelayTime(int32_t delay)
 void ScreenSessionManager::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
 {
 #ifdef WM_CAM_MODE_ABILITY_ENABLE
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set camera status permission denied!");
+        return;
+    }
+
     if ((cameraStatus_ == cameraStatus) && (cameraPosition_ == cameraPosition)) {
         return;  // no need to update
     }
@@ -4025,6 +4077,27 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
 {
     return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
 }
+
+DMError ScreenSessionManager::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+    ScreenId& screenGroupId)
+{
+    TLOGW(WmsLogTag::DMS, "start");
+    ScreenId realScreenId = mainScreenId;
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && mainScreenId == DISPLAY_ID_FAKE) {
+        if (!SuperFoldPolicy::GetInstance().IsFakeDisplayExist()) {
+            TLOGE(WmsLogTag::DMS, "fake display is not exist!");
+            return DMError::DM_ERROR_INVALID_PARAM;
+        }
+        realScreenId = 0;
+    }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        SuperFoldPolicy::GetInstance().IsNeedSetSnapshotRect(mainScreenId)) {
+        DMRect mainScreenRect = SuperFoldPolicy::GetInstance().GetRecordRect(mainScreenId);
+        return DoMakeMirror(realScreenId, mirrorScreenIds, mainScreenRect, screenGroupId);
+    }
+    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
+}
+
 
 DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
                                          DMRect mainScreenRegion, ScreenId& screenGroupId)

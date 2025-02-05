@@ -70,7 +70,7 @@ WindowManager_ErrorCode ShowWindowInner(int32_t windowId)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is null, windowId:%{public}d", windowId);
-            ret = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY;
             return;
         }
         if (IsMainWindowAndNotShown(window->GetType(), window->GetWindowState())) {
@@ -84,7 +84,7 @@ WindowManager_ErrorCode ShowWindowInner(int32_t windowId)
         if (window->Show(NORMAL_STATE_CHANGE, SHOW_WITH_NO_ANIMATION, SHOW_WITH_FOCUS) == WMError::WM_OK) {
             ret = WindowManager_ErrorCode::OK;
         } else {
-            ret = WindowManager_ErrorCode::SERVICE_ERROR;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), ret);
@@ -96,7 +96,7 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 {
     if (isShow == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "isShow is null");
-        return WindowManager_ErrorCode::SERVICE_ERROR;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::OK;
@@ -104,7 +104,7 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is null, windowId:%{public}d", windowId);
-            ret = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY;
             return;
         }
         *isShow = window->GetWindowState() == WindowState::STATE_SHOWN;

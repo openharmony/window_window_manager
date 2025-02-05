@@ -209,6 +209,7 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
+    WSRect GetSessionGlobalRectWithSingleHandScale();
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
@@ -583,6 +584,7 @@ public:
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
+    int32_t CalcAvoidAreaForStatusBar();
     WSError SetMoveAvailableArea(DisplayId displayId);
 
     /*

@@ -130,6 +130,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
+constexpr int32_t SNAPSHOT_CACHE_CAPACITY = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -345,6 +346,7 @@ void SceneSessionManager::Init()
     LoadWindowParameter();
     InitPrepareTerminateConfig();
 
+    snapshotLRUCache_ = std::make_shared<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(sptr<DisplayChangeListener>::MakeSptr());
     ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionChangeListener(
         sptr<ScreenConnectionChangeListener>::MakeSptr());
@@ -2447,6 +2449,28 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
     return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
 }
 
+void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    int32_t removeFromCacheSessionId = snapshotLRUCache_->Put(persistentId);
+    if (removeFromCacheSessionId != -1) {
+        auto removeSceneSession = GetSceneSession(removeFromCacheSessionId);
+        if (removeSceneSession) {
+            removeSceneSession->ResetSnapshot();
+        } else {
+            TLOGW(WmsLogTag::WMS_PATTERN, "removeSceneSession:%{public}d nullptr", removeFromCacheSessionId);
+        }
+    }
+}
+
+void SceneSessionManager::GetSnapshotFromCache(int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    if (!snapshotLRUCache_->Check(persistentId)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
+    }
+}
+
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
     const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
 {
@@ -2466,6 +2490,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (isToDesktop) {
             sceneSession->EditSessionInfo().callerToken_ = nullptr;
             sceneSession->EditSessionInfo().callingTokenId_ = 0;
+        }
+
+        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+            !sceneSession->GetSystemConfig().IsPcWindow() && !sceneSession->GetSystemConfig().freeMultiWindowEnable_) {
+            PutSnapshotToCache(persistentId);
         }
 
         sceneSession->BackgroundTask(isSaveSnapshot);
@@ -6333,11 +6362,14 @@ void SceneSessionManager::NotifySingleHandInfoChange(
                 break;
             case SingleHandMode::LEFT:
                 singleHandTransform_.posX = 0;
-                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                singleHandTransform_.posY =
+                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
                 break;
             case SingleHandMode::RIGHT:
-                singleHandTransform_.posX = displayWidth * (1 - singleHandScaleX);
-                singleHandTransform_.posY = displayHeight * (1 - singleHandScaleY);
+                singleHandTransform_.posX =
+                    static_cast<int32_t>(static_cast<float>(displayWidth) * (1 - singleHandScaleX));
+                singleHandTransform_.posY =
+                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
                 break;
             default:
                 break;
@@ -6346,12 +6378,8 @@ void SceneSessionManager::NotifySingleHandInfoChange(
         singleHandTransform_.scaleY = singleHandScaleY;
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-            for (const auto& item : sceneSessionMap_) {
-                auto sceneSession = item.second;
-                if (sceneSession == nullptr) {
-                    continue;
-                }
-                if (!IsInDefaultScreen(sceneSession) ||
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession == nullptr || !IsInDefaultScreen(sceneSession) ||
                     sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
                     continue;
                 }
@@ -8441,8 +8469,8 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
     }
     info->uiNodeId_ = sceneSession->GetUINodeId();
-    WSRect wsrect = sceneSession->GetSessionGlobalRect(); // only accessability and mmi need global
-    info->windowRect_ = {wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
+    WSRect wsRect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
+    info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
     info->type_ = sceneSession->GetWindowType();
@@ -11678,10 +11706,10 @@ bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displ
 {
     auto region = GetDisplayRegion(displayId);
     if (region == nullptr) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}llu", displayId);
+        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}" PRIu64, displayId);
         return false;
     }
-    const SkIRect rect = region->getBounds();
+    const SkIRect& rect = region->getBounds();
     displayWidth = rect.fRight;
     displayHeight = rect.fBottom;
     return true;
