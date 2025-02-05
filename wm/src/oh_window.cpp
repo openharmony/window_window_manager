@@ -70,7 +70,7 @@ WindowManager_ErrorCode ShowWindowInner(int32_t windowId)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is null, windowId:%{public}d", windowId);
-            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         if (IsMainWindowAndNotShown(window->GetType(), window->GetWindowState())) {
@@ -84,7 +84,7 @@ WindowManager_ErrorCode ShowWindowInner(int32_t windowId)
         if (window->Show(NORMAL_STATE_CHANGE, SHOW_WITH_NO_ANIMATION, SHOW_WITH_FOCUS) == WMError::WM_OK) {
             ret = WindowManager_ErrorCode::OK;
         } else {
-            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), ret);
@@ -104,7 +104,7 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is null, windowId:%{public}d", windowId);
-            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         *isShow = window->GetWindowState() == WindowState::STATE_SHOWN;
@@ -454,14 +454,14 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "eventHandler null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::SERVICE_ERROR;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
-    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     eventHandler->PostSyncTask([windowId, touchable, &errCode, where = __func__] {
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetTouchable(touchable));
@@ -474,14 +474,14 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "eventHandler is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
-    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     eventHandler->PostSyncTask([windowId, isFocusable, &errCode, where = __func__] {
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
