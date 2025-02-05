@@ -35,6 +35,7 @@ public:
     virtual void HandleAngleOrHallChange(const std::vector<float> &angles, const std::vector<uint16_t> &halls,
         sptr<FoldScreenPolicy> foldScreenPolicy);
     virtual void RegisterApplicationStateObserver();
+    virtual bool IsCameraMode();
     void ClearState(sptr<FoldScreenPolicy> foldScreenPolicy);
     bool IsTentMode();
 

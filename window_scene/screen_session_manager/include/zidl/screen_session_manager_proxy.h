@@ -151,6 +151,7 @@ public:
 
     bool IsFoldable() override;
     bool IsCaptured() override;
+    bool IsOrientationNeedChanged() override;
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;

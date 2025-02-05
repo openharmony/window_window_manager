@@ -358,7 +358,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->SetPhysicalRotation(directionInfo.phyRotation_);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
-        foldDisplayMode);
+        foldDisplayMode, screenSessionManager_->IsOrientationNeedChanged());
     screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
 }
 
