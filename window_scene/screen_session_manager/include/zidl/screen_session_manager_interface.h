@@ -35,6 +35,7 @@ public:
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override { return nullptr; }
+    virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }

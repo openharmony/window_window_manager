@@ -52,6 +52,7 @@ public:
     sptr<Display> GetDefaultDisplaySync();
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     bool IsFoldable();
@@ -678,6 +679,18 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     return displayMap_[displayId];
 }
 
+sptr<DisplayInfo> DisplayManager::Impl::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    WLOGFD("start, displayId: %{public}" PRIu64" ", displayId);
+    sptr<DisplayInfo> displayInfo =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetVisibleAreaDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFW("display null id : %{public}" PRIu64" ", displayId);
+        return nullptr;
+    }
+    return displayInfo;
+}
+
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
     if (g_dmIsDestroyed) {
@@ -686,6 +699,16 @@ sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return pImpl_->GetDisplayById(displayId);
+}
+
+sptr<DisplayInfo> DisplayManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    if (g_dmIsDestroyed) {
+        WLOGFI("DM has been destructed");
+        return nullptr;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return pImpl_->GetVisibleAreaDisplayInfoById(displayId);
 }
 
 sptr<Display> DisplayManager::GetDisplayByScreen(ScreenId screenId)

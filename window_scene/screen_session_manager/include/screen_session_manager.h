@@ -134,6 +134,7 @@ public:
         DmErrorCode* errorCode, bool isUseDma) override;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     std::vector<DisplayId> GetAllDisplayIds() override;
     virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;

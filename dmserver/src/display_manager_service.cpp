@@ -209,6 +209,16 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
     return display->ConvertToDisplayInfo();
 }
 
+sptr<DisplayInfo> DisplayManagerService::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
+    if (display == nullptr) {
+        WLOGFE("fail to get displayInfo by id: invalid display");
+        return nullptr;
+    }
+    return display->ConvertToDisplayInfo();
+}
+
 sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenId)
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(screenId);

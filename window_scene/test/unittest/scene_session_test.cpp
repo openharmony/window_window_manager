@@ -1414,7 +1414,6 @@ HWTEST_F(SceneSessionTest, CalcAvoidAreaForStatusBar, Function | SmallTest | Lev
     SessionInfo info;
     info.abilityName_ = "CalcAvoidAreaForStatusBar";
     info.bundleName_ = "CalcAvoidAreaForStatusBar";
-    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     int32_t result = sceneSession->CalcAvoidAreaForStatusBar();
 
