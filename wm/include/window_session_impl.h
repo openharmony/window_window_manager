@@ -276,20 +276,29 @@ public:
     WMError SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& icon) override;
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
 
-    WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
-    virtual WMError RegisterWindowTitleButtonRectChangeListener(
+    /*
+     * Window Decor listener
+     */
+    WMError RegisterWindowTitleButtonRectChangeListener(
         const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
-    virtual WMError UnregisterWindowTitleButtonRectChangeListener(
+    WMError UnregisterWindowTitleButtonRectChangeListener(
         const sptr<IWindowTitleButtonRectChangedListener>& listener) override;
     void NotifyWindowTitleButtonRectChange(TitleButtonRect titleButtonRect);
+    WMError RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
+    WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
+    void NotifySubWindowClose(bool& terminateCloseProcess);
+    WMError RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
+    WMError UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
+    WMError NotifyMainWindowClose(bool& terminateCloseProcess);
+    WMError RegisterWindowWillCloseListeners(const sptr<IWindowWillCloseListener>& listener) override;
+    WMError UnRegisterWindowWillCloseListeners(const sptr<IWindowWillCloseListener>& listener) override;
+    WMError NotifyWindowWillClose(sptr<Window> window);
+
+    WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void RecoverSessionListener();
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
-    WMError RegisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
-    WMError UnregisterSubWindowCloseListeners(const sptr<ISubWindowCloseListener>& listener) override;
-    WMError RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
-    WMError UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(Rect& rect) const override;
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
@@ -345,6 +354,16 @@ public:
     void RegisterWatchFocusActiveChangeCallback();
     void NotifyConsumeResultToFloatWindow(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed);
 
+    /*
+     * HightLight Window
+     */
+    bool GetExclusivelyHighlighted() const;
+    WMError IsWindowHighlighted(bool& highlighted) const override;
+    WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted) override;
+    WMError RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
+    WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
+    WSError NotifyHighlightChange(bool isHighlight) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -378,8 +397,6 @@ protected:
         const sptr<DisplayInfo>& info = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void NotifySizeChange(Rect rect, WindowSizeChangeReason reason);
-    void NotifySubWindowClose(bool& terminateCloseProcess);
-    WMError NotifyMainWindowClose(bool& terminateCloseProcess);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
@@ -438,6 +455,7 @@ protected:
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
+    std::atomic_bool isHighlighted_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -542,9 +560,6 @@ private:
     EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> GetListeners();
-    template<typename T>
-    EnableIfSame<T, IWindowTitleButtonRectChangedListener,
-        std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
     template<typename T> void ClearUselessListeners(std::map<int32_t, T>& listeners, int32_t persistentId);
     template<typename T> void ClearUselessListeners(std::unordered_map<int32_t, T>& listeners, int32_t persistentId);
     RSSurfaceNode::SharedPtr CreateSurfaceNode(const std::string& name, WindowType type);
@@ -553,16 +568,27 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
-    EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> GetListeners();
-    template<typename T>
-    EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> GetListeners();
-    template<typename T>
     EnableIfSame<T, ISwitchFreeMultiWindowListener, std::vector<sptr<ISwitchFreeMultiWindowListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
     void NotifyAfterPaused();
+
+    /*
+     * Window Decor listener
+     */
+    template<typename T>
+    EnableIfSame<T, IWindowTitleButtonRectChangedListener,
+        std::vector<sptr<IWindowTitleButtonRectChangedListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, ISubWindowCloseListener, sptr<ISubWindowCloseListener>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowWillCloseListener, std::vector<sptr<IWindowWillCloseListener>>> GetListeners();
 
     WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
@@ -609,12 +635,10 @@ private:
     static std::recursive_mutex windowVisibilityChangeListenerMutex_;
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
-    static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
-    static std::mutex subWindowCloseListenersMutex_;
-    static std::mutex mainWindowCloseListenersMutex_;
     static std::mutex switchFreeMultiWindowListenerMutex_;
+    static std::mutex highlightChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWindowLifeCycle>>> lifecycleListeners_;
     static std::map<int32_t, std::vector<sptr<IDisplayMoveListener>>> displayMoveListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowChangeListener>>> windowChangeListeners_;
@@ -631,12 +655,9 @@ private:
     static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
-    static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
-        windowTitleButtonRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
-    static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
-    static std::map<int32_t, sptr<IMainWindowCloseListener>> mainWindowCloseListeners_;
     static std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> switchFreeMultiWindowListeners_;
+    static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
@@ -670,6 +691,19 @@ private:
      */
     DecorButtonStyle decorButtonStyle_;
     int32_t decorHeight_ = 0;
+
+    /*
+     * Window Decor listener
+     */
+    static std::recursive_mutex windowTitleButtonRectChangeListenerMutex_;
+    static std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
+        windowTitleButtonRectChangeListeners_;
+    static std::mutex subWindowCloseListenersMutex_;
+    static std::map<int32_t, sptr<ISubWindowCloseListener>> subWindowCloseListeners_;
+    static std::mutex mainWindowCloseListenersMutex_;
+    static std::map<int32_t, sptr<IMainWindowCloseListener>> mainWindowCloseListeners_;
+    static std::mutex windowWillCloseListenersMutex_;
+    static std::unordered_map<int32_t, std::vector<sptr<IWindowWillCloseListener>>> windowWillCloseListeners_;
 
     /*
      * Multi Window

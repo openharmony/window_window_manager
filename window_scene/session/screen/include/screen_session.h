@@ -53,7 +53,7 @@ public:
     virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) = 0;
     virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
     virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
-    virtual void OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion) = 0;
+    virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -104,6 +104,7 @@ public:
     void UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener);
 
     sptr<DisplayInfo> ConvertToDisplayInfo();
+    sptr<DisplayInfo> ConvertToRealDisplayInfo();
     sptr<ScreenInfo> ConvertToScreenInfo() const;
     sptr<SupportedScreenModes> GetActiveScreenMode() const;
     ScreenSourceMode GetSourceMode() const;
@@ -172,6 +173,7 @@ public:
     bool HasPrivateSessionForeground() const;
     void SetPrivateSessionForeground(bool hasPrivate);
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
+    void SetExtendProperty(RRect bounds, bool isPhysicalTouchBounds, bool isCurrentOffScreenRendering);
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
     bool IsScreenRotationLocked();
@@ -179,14 +181,10 @@ public:
     bool IsTouchEnabled();
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
-
     void UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode);
-    void UpdatePhysicalTouchBounds(bool enable);
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode);
-    void UpdateBounds(RRect bounds);
-    void UpdateCurrentOffScreenRendering(bool enable);
     void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
     ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
@@ -276,7 +274,7 @@ public:
     std::pair<ScreenId, DMRect> GetMirrorScreenRegion();
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName);
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
-    void SecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion);
+    void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
 
 private:
@@ -309,6 +307,7 @@ private:
     int32_t GetApiVersion();
     void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
+    std::mutex mirrorScreenRegionMutex_;
 };
 
 class ScreenSessionGroup : public ScreenSession {

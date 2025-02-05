@@ -209,6 +209,7 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
+    WSRect GetSessionGlobalRectWithSingleHandScale();
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
@@ -294,6 +295,7 @@ public:
     void SetLastSafeRect(WSRect rect);
     void SetMovable(bool isMovable);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+    void SetColorSpace(ColorSpace colorSpace);
 
     /*
      * Window Hierarchy
@@ -428,6 +430,11 @@ public:
      * Window Input Event
      */
     void RegisterTouchOutsideCallback(NotifyTouchOutsideFunc&& callback);
+    void SetMousePointerDownEventStatus(bool mousePointerDownEventStatus);
+    bool GetMousePointerDownEventStatus() const;
+    void SetFingerPointerDownStatus(int32_t fingerId);
+    void RemoveFingerPointerDownStatus(int32_t fingerId);
+    std::unordered_set<int32_t> GetFingerPointerDownStatusList() const;
 
     /*
      * Window Rotation
@@ -577,6 +584,7 @@ public:
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
+    int32_t CalcAvoidAreaForStatusBar();
     WSError SetMoveAvailableArea(DisplayId displayId);
 
     /*
@@ -618,6 +626,12 @@ public:
     bool IsKeyboardAvoidAreaActive() const;
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
 
+    /*
+     * Window Focus
+     */
+    bool IsSameMainSession(const sptr<SceneSession>& prevSession);
+    void SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func);
+    
     /*
      * Window Property
     */
@@ -749,8 +763,6 @@ protected:
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
-    void HandleStyleEvent(MMI::WindowArea area) override;
-    WSError HandleEnterWinwdowArea(int32_t windowX, int32_t windowY);
 
     /*
      * Window Immersive
@@ -874,6 +886,8 @@ private:
     WMError HandleActionUpdateAvoidAreaOption(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleBackgroundAlpha(const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action);
+    WMError HandleActionUpdateExclusivelyHighlighted(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
     void HandleSpecificSystemBarProperty(WindowType type, const sptr<WindowSessionProperty>& property);
     void SetWindowFlags(const sptr<WindowSessionProperty>& property);
     void NotifySessionChangeByActionNotifyManager(const sptr<WindowSessionProperty>& property,
@@ -987,6 +1001,8 @@ private:
      * Window Input Event
      */
     NotifyTouchOutsideFunc onTouchOutside_;
+    bool isMousePointerDownEventStatus_ { false };
+    std::unordered_set<int32_t> fingerPointerDownStatusList_;
 
     /*
      * Window Rotation

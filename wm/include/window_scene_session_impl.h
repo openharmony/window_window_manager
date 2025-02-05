@@ -38,7 +38,6 @@ public:
     WMError Minimize() override;
     void StartMove() override;
     bool IsStartMoving() override;
-    WMError Close() override;
     WindowMode GetWindowMode() const override;
 
     /*
@@ -220,6 +219,8 @@ public:
     WMError SetWindowTitle(const std::string& title) override;
     WMError DisableAppWindowDecor() override;
     bool IsDecorEnable() const override;
+    WMError Close() override;
+    WMError CloseDirectly() override;
 
     /*
      * Starting Window
@@ -370,6 +371,9 @@ private:
     
     /*
      * PC Window
+     */
+    /* whether in process of delay raise during cross window drag and drop
+     * only used when delay raise is enabled and hit draggable component
      */
     bool isExecuteDelayRaise_ = false;
 

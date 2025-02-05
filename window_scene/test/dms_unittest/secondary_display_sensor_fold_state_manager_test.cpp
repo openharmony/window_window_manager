@@ -131,7 +131,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Fun
     hall = 1;
     auto result3 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result3), 3);
-    
+
     angel = 130.0F - 0.1;
     hall = 0;
     auto result4 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
@@ -175,7 +175,7 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Fun
     angel = 70.0F + 0.1;
     auto result3 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result3), 3);
-    
+
     angel = 130.0F - 0.1;
     auto result4 = manager.GetNextFoldStateHalf(angel, hall, state, allowUserSensorForLargeFoldDevice);
     EXPECT_EQ(static_cast<int>(result4), 3);

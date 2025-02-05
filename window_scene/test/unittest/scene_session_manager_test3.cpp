@@ -1319,10 +1319,10 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | L
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, INVALID_SESSION_ID);
     int32_t persistentId = INVALID_SESSION_ID;
-    WSError result01 = ssm_->SetFocusedSessionId(persistentId);
+    WSError result01 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
     persistentId = 10086;
-    WSError result02 = ssm_->SetFocusedSessionId(persistentId);
+    WSError result02 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result02, WSError::WS_OK);
     ASSERT_EQ(ssm_->GetFocusedSessionId(), 10086);
 }
@@ -1386,10 +1386,10 @@ HWTEST_F(SceneSessionManagerTest3, NotifyRequestFocusStatusNotifyManager, Functi
 HWTEST_F(SceneSessionManagerTest3, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
 {
     uint32_t zOrder = 9999;
-    sptr<SceneSession> session = ssm_->GetTopNearestBlockingFocusSession(zOrder, true);
+    sptr<SceneSession> session = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, zOrder, true);
     EXPECT_EQ(session, nullptr);
 
-    session = ssm_->GetTopNearestBlockingFocusSession(zOrder, false);
+    session = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, zOrder, false);
     EXPECT_EQ(session, nullptr);
 }
 
@@ -1421,16 +1421,29 @@ HWTEST_F(SceneSessionManagerTest3, ShiftAppWindowFocus, Function | SmallTest | L
 {
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, 10086);
-    int32_t sourcePersistentId = INVALID_SESSION_ID;
-    int32_t targetPersistentId = INVALID_SESSION_ID;
+    int32_t sourcePersistentId = 1;
+    int32_t targetPersistentId = 10086;
     WSError result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION);
+    SessionInfo info;
+    info.abilityName_ = "ShiftAppWindowFocus";
+    info.bundleName_ = "ShiftAppWindowFocus";
+    auto sourceSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sourceSceneSession->persistentId_ = 1;
+    sourceSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sourceSceneSession));
+    result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION);
+
+    auto targetSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    targetSceneSession->persistentId_ = 10086;
+    targetSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(10086, targetSceneSession));
+    result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_OPERATION);
-    targetPersistentId = 1;
+    sourcePersistentId = 10086;
     WSError result02 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_OPERATION);
-    sourcePersistentId = 1;
-    WSError result03 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(result02, WSError::WS_DO_NOTHING);
 }
 
 /**

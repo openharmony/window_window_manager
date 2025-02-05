@@ -89,6 +89,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyScreenLockEvent);
     BindNativeFunction(env, exportObj, "updateAvailableArea", moduleName,
         JsScreenSessionManager::UpdateAvailableArea);
+    BindNativeFunction(env, exportObj, "updateSuperFoldAvailableArea", moduleName,
+        JsScreenSessionManager::UpdateSuperFoldAvailableArea);
     BindNativeFunction(env, exportObj, "setScreenOffDelayTime", moduleName,
         JsScreenSessionManager::SetScreenOffDelayTime);
     BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
@@ -176,6 +178,13 @@ napi_value JsScreenSessionManager::UpdateAvailableArea(napi_env env, napi_callba
     WLOGD("[NAPI]UpdateAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateAvailableArea(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::UpdateSuperFoldAvailableArea(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]UpdateSuperFoldAvailableArea");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateSuperFoldAvailableArea(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetScreenOffDelayTime(napi_env env, napi_callback_info info)
@@ -476,7 +485,7 @@ napi_value JsScreenSessionManager::OnUpdateScreenRotationProperty(napi_env env,
     ScreenPropertyChangeType type = ScreenPropertyChangeType::UNSPECIFIED;
     if (argc > ARGC_THREE) {
         if (!ConvertFromJsValue(env, argv[ARGC_THREE], type) || type < ScreenPropertyChangeType::UNSPECIFIED ||
-            type > ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY) { // 3: the 4rd argv
+            type >= ScreenPropertyChangeType::UNDEFINED) {
             TLOGE(WmsLogTag::DMS, "[NAPI]screenPropertyChangeType is invalid");
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                 "Input parameter is missing or invalid"));
@@ -573,6 +582,47 @@ napi_value JsScreenSessionManager::OnUpdateAvailableArea(napi_env env, const nap
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().UpdateAvailableArea(screenId, area);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnUpdateSuperFoldAvailableArea(napi_env env, const napi_callback_info info)
+{
+    WLOGFD("[NAPI]OnUpdateSuperFoldAvailableArea");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    DMRect bArea;
+    napi_value bNativeObj = argv[1];
+    if (bNativeObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect,the param is null");
+        return NapiGetUndefined(env);
+    } else if (!ConvertDMRectFromJs(env, bNativeObj, bArea)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect");
+        return NapiGetUndefined(env);
+    }
+    DMRect cArea;
+    napi_value cNativeObj = argv[2];
+    if (cNativeObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect,the param is null");
+        return NapiGetUndefined(env);
+    } else if (!ConvertDMRectFromJs(env, cNativeObj, cArea)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect");
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
     return NapiGetUndefined(env);
 }
 

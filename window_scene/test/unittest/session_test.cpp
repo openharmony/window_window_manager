@@ -1624,6 +1624,53 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId03, Function | Small
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 1000);
 }
+
+/**
+ * @tc.name: SetExclusivelyHighlighted
+ * @tc.desc: SetExclusivelyHighlighted Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetExclusivelyHighlighted, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetExclusivelyHighlighted(false);
+    bool isExclusivelyHighlighted = session_->GetSessionProperty()->GetExclusivelyHighlighted();
+    ASSERT_EQ(isExclusivelyHighlighted, false);
+    session_->SetExclusivelyHighlighted(true);
+    isExclusivelyHighlighted = session_->GetSessionProperty()->GetExclusivelyHighlighted();
+    ASSERT_EQ(isExclusivelyHighlighted, true);
+}
+ 
+/**
+ * @tc.name: UpdateHighlightStatus
+ * @tc.desc: UpdateHighlightStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateHighlightStatus, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    EXPECT_EQ(session_->UpdateHighlightStatus(false, false), WSError::WS_DO_NOTHING);
+ 
+    EXPECT_EQ(session_->UpdateHighlightStatus(true, false), WSError::WS_OK);
+    session_->isHighlight_ = false;
+    EXPECT_EQ(session_->UpdateHighlightStatus(true, true), WSError::WS_OK);
+}
+ 
+/**
+ * @tc.name: NotifyHighlightChange
+ * @tc.desc: NotifyHighlightChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyHighlightChange, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_INVALID_SESSION);
+    session_->sessionStage_ = mockSessionStage_;
+    session_->state_ = SessionState::STATE_CONNECT;
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_OK);
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_NULLPTR);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

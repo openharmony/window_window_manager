@@ -51,7 +51,6 @@ constexpr uint32_t MAX_LIFE_CYCLE_TASK_IN_QUEUE = 15;
 constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
-constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 const std::map<SessionState, bool> ATTACH_MAP = {
@@ -74,6 +73,7 @@ const std::map<SessionState, bool> DETACH_MAP = {
 
 std::shared_ptr<AppExecFwk::EventHandler> Session::mainHandler_;
 bool Session::isScbCoreEnabled_ = false;
+bool Session::isBackgroundUpdateRectNotifyEnabled_ = false;
 
 Session::Session(const SessionInfo& info) : sessionInfo_(info)
 {
@@ -856,14 +856,6 @@ bool Session::IsSessionForeground() const
     return state_ == SessionState::STATE_FOREGROUND || state_ == SessionState::STATE_ACTIVE;
 }
 
-WSError Session::SetPointerStyle(MMI::WindowArea area)
-{
-    WLOGFI("Information to be set: pid:%{public}d, windowId:%{public}d, MMI::WindowArea:%{public}s",
-        callingPid_, persistentId_, DumpPointerWindowArea(area));
-    MMI::InputManager::GetInstance()->SetWindowPointerStyle(area, callingPid_, persistentId_);
-    return WSError::WS_OK;
-}
-
 WSRectF Session::UpdateTopBottomArea(const WSRectF& rect, MMI::WindowArea area)
 {
     const float innerBorder = INNER_BORDER_VP * vpr_;
@@ -990,7 +982,7 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     return WSError::WS_OK;
 }
 
-DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect)
+DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
@@ -1055,6 +1047,9 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     winRect_ = rect;
+    if (!Session::IsBackgroundUpdateRectNotifyEnabled() && !IsSessionForeground()) {
+        return WSError::WS_DO_NOTHING;
+    }
     if (sessionStage_ != nullptr) {
         int32_t rotateAnimationDuration = GetRotateAnimationDuration();
         SceneAnimationConfig config { .rsTransaction_ = rsTransaction, .animationDuration_ = rotateAnimationDuration };
@@ -1165,6 +1160,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetPersistentId(GetPersistentId());
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
+    property->SetWindowSizeLimits(GetSessionInfo().windowSizeLimits);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
@@ -2137,17 +2133,24 @@ void Session::HandlePointDownDialog()
 
 WSError Session::HandleSubWindowClick(int32_t action, bool isExecuteDelayRaise)
 {
-    if (isExecuteDelayRaise) {
-        return WSError::WS_OK;
-    }
     auto parentSession = GetParentSession();
     if (parentSession && parentSession->CheckDialogOnForeground()) {
         TLOGD(WmsLogTag::WMS_DIALOG, "Its main window has dialog on foreground, id: %{public}d", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled() &&
-        (action == MMI::PointerEvent::POINTER_ACTION_DOWN || action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-    if (raiseEnabled) {
+    bool raiseEnabled = GetSessionProperty()->GetRaiseEnabled();
+    bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+        action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    if (isExecuteDelayRaise) {
+        if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+            RaiseToAppTopForPointDown();
+        }
+        if (!raiseEnabled && parentSession) {
+            parentSession->NotifyClick(!IsScbCoreEnabled());
+        }
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled && isPointDown) {
         RaiseToAppTopForPointDown();
     } else if (parentSession) {
         // sub window is forbidden to raise to top after click, but its parent should raise
@@ -2193,6 +2196,11 @@ WSError Session::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
     if (!isExecuteDelayRaise) {
         PresentFoucusIfNeed(pointerAction);
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
+        if (!isFocused_ && GetFocusable()) {
+            NotifyRequestFocusStatusNotifyManager(true, false, FocusChangeReason::CLICK);
+        }
+        NotifyClick();
     }
     if (!windowEventChannel_) {
         if (!IsSystemSession()) {
@@ -2332,6 +2340,14 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     return nullptr;
 }
 
+void Session::ResetSnapshot()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "reset snapshot id: %{public}d", persistentId_);
+    std::lock_guard lock(snapshotMutex_);
+    snapshot_ = nullptr;
+    scenePersistence_->ResetSnapshotCache();
+}
+
 void Session::SaveSnapshot(bool useFfrt, bool needPersist)
 {
     if (scenePersistence_ == nullptr) {
@@ -2356,10 +2372,10 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             return;
         }
         std::function<void()> func = [weakThis]() {
-            if (auto session = weakThis.promote()) {
-                TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
-                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
-                session->snapshot_ = nullptr;
+            auto session = weakThis.promote();
+            if (session && (session->GetSystemConfig().IsPcWindow() ||
+                session->GetSystemConfig().freeMultiWindowEnable_)) {
+                session->ResetSnapshot();
             }
         };
         session->scenePersistence_->SaveSnapshot(pixelMap, func);
@@ -2649,6 +2665,55 @@ WSError Session::RequestFocus(bool isFocused)
     }
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     NotifyRequestFocusStatusNotifyManager(isFocused, false, reason);
+    return WSError::WS_OK;
+}
+
+void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "property is nullptr, windowId: %{public}d", persistentId_);
+        return;
+    }
+    if (isExclusivelyHighlighted == property->GetExclusivelyHighlighted()) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d", persistentId_,
+        isExclusivelyHighlighted);
+    property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
+}
+
+WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS,
+        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d",
+        persistentId_, isHighlight_, isHighlight, isNotifyHighlightChange);
+    if (isHighlight_ == isHighlight) {
+        return WSError::WS_DO_NOTHING;
+    }
+    isHighlight_ = isHighlight;
+    if (isNotifyHighlightChange) {
+        NotifyHighlightChange(isHighlight);
+        std::lock_guard lock(highlightChangeFuncMutex_);
+        if (highlightChangeFunc_ != nullptr) {
+            highlightChangeFunc_(isHighlight);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError Session::NotifyHighlightChange(bool isHighlight)
+{
+    if (IsSystemSession()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+            persistentId_, GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyHighlightChange(isHighlight);
     return WSError::WS_OK;
 }
 
@@ -3741,6 +3806,17 @@ void Session::SetScbCoreEnabled(bool enabled)
     isScbCoreEnabled_ = enabled;
 }
 
+bool Session::IsBackgroundUpdateRectNotifyEnabled()
+{
+    return isBackgroundUpdateRectNotifyEnabled_;
+}
+
+void Session::SetBackgroundUpdateRectNotifyEnabled(const bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}d", enabled);
+    isBackgroundUpdateRectNotifyEnabled_ = enabled;
+}
+
 bool Session::IsVisible() const
 {
     return isVisible_;
@@ -3784,5 +3860,52 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
 bool Session::IsPcWindow() const
 {
     return systemConfig_.IsPcWindow();
+}
+
+WindowUIInfo Session::GetWindowUIInfoForWindowInfo() const
+{
+    WindowUIInfo windowUIInfo;
+    windowUIInfo.visibilityState = GetVisibilityState();
+    return windowUIInfo;
+}
+
+WindowDisplayInfo Session::GetWindowDisplayInfoForWindowInfo() const
+{
+    WindowDisplayInfo windowDisplayInfo;
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
+        WSRect sessionGlobalRect = GetSessionGlobalRect();
+        windowDisplayInfo.displayId = TransformGlobalRectToRelativeRect(sessionGlobalRect);
+    } else {
+        windowDisplayInfo.displayId = GetSessionProperty()->GetDisplayId() ;
+    }
+    return windowDisplayInfo;
+}
+
+WindowLayoutInfo Session::GetWindowLayoutInfoForWindowInfo() const
+{
+    WindowLayoutInfo windowLayoutInfo;
+    WSRect sessionGlobalRect = GetSessionGlobalRect();
+    sessionGlobalRect.width_ *= GetScaleX();
+    sessionGlobalRect.height_ *= GetScaleY();
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(GetSessionProperty()->GetDisplayId())) {
+        TransformGlobalRectToRelativeRect(sessionGlobalRect);
+    }
+    windowLayoutInfo.rect = { sessionGlobalRect.posX_, sessionGlobalRect.posY_,
+                              sessionGlobalRect.width_, sessionGlobalRect.height_};
+    return windowLayoutInfo;
+}
+
+WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
+{
+    WindowMetaInfo windowMetaInfo;
+    windowMetaInfo.windowId = GetWindowId();
+    if (GetSessionInfo().isSystem_) {
+        windowMetaInfo.windowName = GetSessionInfo().abilityName_;
+    } else {
+        windowMetaInfo.windowName = GetSessionProperty()->GetWindowName();
+    }
+    windowMetaInfo.bundleName = GetSessionInfo().bundleName_;
+    windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
+    return windowMetaInfo;
 }
 } // namespace OHOS::Rosen

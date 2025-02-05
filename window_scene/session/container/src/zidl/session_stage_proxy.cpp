@@ -301,9 +301,11 @@ WSError SessionStageProxy::UpdateSessionViewportConfig(const SessionViewportConf
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SESSION_VIEWPORT_CONFIG),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SESSION_VIEWPORT_CONFIG),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
@@ -484,24 +486,26 @@ WSError SessionStageProxy::NotifyTransferComponentData(const AAFwk::WantParams& 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (!data.WriteParcelable(&wantParams)) {
-        WLOGFE("wantParams write failed.");
+        TLOGE(WmsLogTag::WMS_UIEXT, "wantParams write failed.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -515,18 +519,18 @@ WSErrorCode SessionStageProxy::NotifyTransferComponentDataSync(const AAFwk::Want
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "WriteInterfaceToken failed");
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }
 
     if (!data.WriteParcelable(&wantParams)) {
-        WLOGFE("wantParams write failed.");
+        TLOGE(WmsLogTag::WMS_UIEXT, "wantParams write failed.");
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }
 
@@ -534,13 +538,13 @@ WSErrorCode SessionStageProxy::NotifyTransferComponentDataSync(const AAFwk::Want
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFER_COMPONENT_DATA_SYNC),
         data, reply, option);
     if (sendCode != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return static_cast<WSErrorCode>(sendCode);
     }
 
     std::shared_ptr<AAFwk::WantParams> readWantParams(reply.ReadParcelable<AAFwk::WantParams>());
     if (readWantParams == nullptr) {
-        WLOGFE("readWantParams is nullptr");
+        TLOGE(WmsLogTag::WMS_UIEXT, "readWantParams is nullptr");
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }
 
@@ -597,25 +601,26 @@ WSError SessionStageProxy::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteStrongParcelable(avoidArea)) {
-        WLOGFE("Write AvoidArea failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "Write AvoidArea failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
-        WLOGFE("Write AvoidAreaType failed");
+        TLOGE(WmsLogTag::WMS_IMMS, "Write AvoidAreaType failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_AVOID_AREA), data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
@@ -1004,9 +1009,10 @@ WSError SessionStageProxy::NotifyDensityFollowHost(bool isFollowHost, float dens
         TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_FOLLOW_HOST), data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -1319,9 +1325,10 @@ WSError SessionStageProxy::NotifyDumpInfo(const std::vector<std::string>& params
         TLOGE(WmsLogTag::WMS_UIEXT, "Write params failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -1522,5 +1529,35 @@ WSError SessionStageProxy::SendContainerModalEvent(const std::string& eventName,
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::NotifyHighlightChange(bool isHighlight)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteBool(isHighlight)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write isHighlight failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen
