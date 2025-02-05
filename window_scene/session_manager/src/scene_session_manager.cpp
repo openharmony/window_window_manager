@@ -2090,6 +2090,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     sceneSession->GetSessionProperty()->SetDisplayId(currDisplayId);
     sceneSession->SetScreenId(currDisplayId);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "synchronous screenId with displayid %{public}" PRIu64, currDisplayId);
+    
     sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
     sceneSession->RegisterIsScreenLockedCallback([this] { return IsScreenLocked(); });
     if (sessionInfo.isSystem_) {
