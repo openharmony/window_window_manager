@@ -198,6 +198,16 @@ enum class WindowBlurStyle : uint32_t {
 };
 
 /**
+ * @brief Enumerates cross axis state of window.
+ */
+enum class CrossAxisState : uint32_t {
+    STATE_INVALID = 0,
+    STATE_CROSS,
+    STATE_NO_CROSS,
+    STATE_END,
+};
+
+/**
  * @brief Enumerates state of window.
  */
 enum class WindowState : uint32_t {
