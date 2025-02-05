@@ -1633,7 +1633,9 @@ WSError SceneSession::UpdateSessionRect(
 
 void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
 {
-    isCrossAxisOfLayout_ = rect.IsOverlap(std::get<2>(PcFoldScreenManager::GetInstance().GetDisplayRects()));
+    const int FOLD_CREASE_TYPE = 2;
+    isCrossAxisOfLayout_ = rect.IsOverlap(std::get<FOLD_CREASE_TYPE>(
+        PcFoldScreenManager::GetInstance().GetDisplayRects()));
     UpdateCrossAxis();
 }
 

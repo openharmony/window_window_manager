@@ -3102,7 +3102,7 @@ CrossAxisState WindowSessionImpl::GetCrossAxisState()
     if (hostSession->GetCrossAxisState(state) != WSError::WS_OK) {
         return CrossAxisState::STATE_INVALID;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "window id is %{public}d, state is %{public}d",GetPersistentId(),
+    TLOGI(WmsLogTag::WMS_LAYOUT, "window id is %{public}d, state is %{public}d", GetPersistentId(),
         static_cast<uint32_t>(state));
     return state;
 }
