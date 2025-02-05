@@ -43,6 +43,8 @@ void SensorFoldStateManager::HandleAngleOrHallChange(const std::vector<float> &a
 
 void SensorFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) {}
 
+bool SensorFoldStateManager::IsCameraMode() { return false; }
+
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angle,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {

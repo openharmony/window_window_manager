@@ -1167,7 +1167,7 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
                 Rotation targetRotation = screenSession->ConvertIntToRotation(static_cast<int32_t>(info.rotation_));
                 displayInfo->SetRotation(targetRotation);
                 DisplayOrientation targetOrientation = screenSession->CalcDisplayOrientation(targetRotation,
-                    FoldDisplayMode::UNKNOWN);
+                    FoldDisplayMode::UNKNOWN, IsOrientationNeedChanged());
                 TLOGI(WmsLogTag::DMS, "tR: %{public}u, tO: %{public}u", targetRotation, targetOrientation);
                 displayInfo->SetDisplayOrientation(targetOrientation);
             } else {
@@ -3158,7 +3158,7 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float sc
     }
     screenSession->SetPhysicalRotation(phyRotation);
     screenSession->SetScreenComponentRotation(screenComponentRotation);
-    screenSession->UpdateRotationOrientation(rotation, GetFoldDisplayMode());
+    screenSession->UpdateRotationOrientation(rotation, GetFoldDisplayMode(), IsOrientationNeedChanged());
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",
         screenId, rotation, screenComponentRotation);
 }
@@ -3197,7 +3197,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
             TLOGI(WmsLogTag::DMS, "Update Screen Rotation Property Only");
             {
                 std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-                screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode());
+                screenSession->UpdatePropertyOnly(bounds, rotation, GetFoldDisplayMode(), IsOrientationNeedChanged());
             }
             if (screenPropertyChangeType != ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY) {
                 NotifyDisplayChanged(displayInfo, DisplayChangeEvent::UPDATE_ROTATION);
@@ -3208,7 +3208,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
     }
     {
         std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
-        screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
+        screenSession->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode(), IsOrientationNeedChanged());
     }
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
     NotifyAndPublishEvent(displayInfo, screenId, screenSession);
@@ -5984,6 +5984,18 @@ bool ScreenSessionManager::GetTentMode()
 #endif
 }
 
+bool ScreenSessionManager::GetCameraMode()
+{
+    if (!g_foldScreenFlag) {
+        return false;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
+        return false;
+    }
+    return foldScreenController_->GetCameraMode();
+}
+
 sptr<FoldCreaseRegion> ScreenSessionManager::GetCurrentFoldCreaseRegion()
 {
 #ifdef FOLD_ABILITY_ENABLE
@@ -7661,5 +7673,18 @@ void ScreenSessionManager::SetScreenSkipProtectedWindowInner()
             rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, requiredSkipWindow);
         }
     }
+}
+
+bool ScreenSessionManager::IsOrientationNeedChanged()
+{
+    if (GetFoldDisplayMode() == FoldDisplayMode::GLOBAL_FULL) {
+        return true;
+    }
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        GetFoldDisplayMode() == FoldDisplayMode::MAIN &&
+        !GetTentMode() && !GetCameraMode()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Rosen

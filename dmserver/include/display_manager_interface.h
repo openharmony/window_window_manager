@@ -183,6 +183,7 @@ public:
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) = 0;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual bool IsOrientationNeedChanged() {return false;}
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
 
