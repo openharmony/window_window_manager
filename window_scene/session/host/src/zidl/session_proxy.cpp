@@ -2427,4 +2427,27 @@ WSError SessionProxy::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
+WSError SessionProxy::GetCrossAxisState(CrossAxisState& state)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_CROSS_AXIS_STATE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = 0;
+    if (!reply.ReadUint32(ret)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    state = static_cast<CrossAxisState>(ret);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

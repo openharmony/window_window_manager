@@ -1219,6 +1219,9 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     WSError ret = WSError::WS_OK;
+    if (reason_ == SizeChangeReason::DRAG_END) {
+        UpdateCrossAxisOfLayout(winRect_);
+    }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
         GetPersistentId(), winRect_.posX_, winRect_.posY_, winRect_.width_, winRect_.height_, reason_);
@@ -1590,6 +1593,7 @@ WSError SceneSession::UpdateSessionRect(
         return WSError::WS_DO_NOTHING;
     }
     WSRect newRect = rect;
+    UpdateCrossAxisOfLayout(rect);
     UpdateSessionRectPosYFromClient(newRect);
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
@@ -1624,6 +1628,41 @@ WSError SceneSession::UpdateSessionRect(
         session->UpdateSessionRectInner(newRect, reason, moveConfiguration, rectAnimationConfig);
         return WSError::WS_OK;
     }, __func__ + GetRectInfo(rect));
+    return WSError::WS_OK;
+}
+
+void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
+{
+    isCrossAxisOfLayout_ = rect.IsOverlap(std::get<2>(PcFoldScreenManager::GetInstance().GetDisplayRects()));
+    UpdateCrossAxis();
+}
+
+void SceneSession::UpdateCrossAxis()
+{
+    CrossAxisState isCrossAxis = CrossAxisState::STATE_INVALID;
+    if (PcFoldScreenManager::GetInstance().GetDisplayId() == SCREEN_ID_INVALID ||
+        PcFoldScreenManager::GetInstance().GetDisplayId() != GetSessionProperty()->GetDisplayId()) {
+        return;
+    }
+    if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() != SuperFoldStatus::UNKNOWN) {
+        if (PcFoldScreenManager::GetInstance().GetScreenFoldStatus() == SuperFoldStatus::HALF_FOLDED &&
+            isCrossAxisOfLayout_) {
+            isCrossAxis = CrossAxisState::STATE_CROSS;
+        } else {
+            isCrossAxis = CrossAxisState::STATE_NO_CROSS;
+        }
+    }
+    if (isCrossAxis_ != static_cast<uint32_t>(isCrossAxis) && sessionStage_ != nullptr) {
+        isCrossAxis_ = static_cast<uint32_t>(isCrossAxis);
+        sessionStage_->NotifyWindowCrossAxisChange(isCrossAxis);
+    } else if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr, id: %{public}d", GetPersistentId());
+    }
+}
+
+WSError SceneSession::GetCrossAxisState(CrossAxisState& state)
+{
+    state = static_cast<CrossAxisState>(isCrossAxis_.load());
     return WSError::WS_OK;
 }
 
