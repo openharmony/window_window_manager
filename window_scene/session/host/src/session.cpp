@@ -2340,6 +2340,14 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     return nullptr;
 }
 
+void Session::ResetSnapshot()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "reset snapshot id: %{public}d", persistentId_);
+    std::lock_guard lock(snapshotMutex_);
+    snapshot_ = nullptr;
+    scenePersistence_->ResetSnapshotCache();
+}
+
 void Session::SaveSnapshot(bool useFfrt, bool needPersist)
 {
     if (scenePersistence_ == nullptr) {
@@ -2364,10 +2372,10 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             return;
         }
         std::function<void()> func = [weakThis]() {
-            if (auto session = weakThis.promote()) {
-                TLOGNI(WmsLogTag::WMS_MAIN, "reset snapshot id: %{public}d", session->GetPersistentId());
-                std::lock_guard<std::mutex> lock(session->snapshotMutex_);
-                session->snapshot_ = nullptr;
+            auto session = weakThis.promote();
+            if (session && (session->GetSystemConfig().IsPcWindow() ||
+                session->GetSystemConfig().freeMultiWindowEnable_)) {
+                session->ResetSnapshot();
             }
         };
         session->scenePersistence_->SaveSnapshot(pixelMap, func);

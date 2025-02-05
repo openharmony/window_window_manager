@@ -156,6 +156,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(info);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            auto info = GetVisibleAreaDisplayInfoById(displayId);
+            reply.WriteParcelable(info);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN: {
             ScreenId screenId = data.ReadUint64();
             auto info = GetDisplayInfoByScreen(screenId);
@@ -283,6 +289,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
             DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_FOR_RECORD: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<ScreenId> mirrorScreenId;
+            if (!data.ReadUInt64Vector(&mirrorScreenId)) {
+                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                break;
+            }
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeMirrorForRecord(mainScreenId, mirrorScreenId, screenGroupId);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;

@@ -825,11 +825,11 @@ HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, Function | SmallTest | 
 }
 
 /**
- * @tc.name: HandleChangeSessionVisibilityWithStatusBar
- * @tc.desc: sessionStub HandleChangeSessionVisibilityWithStatusBar
+ * @tc.name: HandleSyncSessionEvent
+ * @tc.desc: sessionStub HandleSyncSessionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleChangeSessionVisibilityWithStatusBar, Function | SmallTest | Level2)
+HWTEST_F(SessionStubTest, HandleSyncSessionEvent, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;

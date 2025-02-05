@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SUPER_FOLD_POLICY_H
-#define OHOS_ROSEN_WINDOW_SUPER_FOLD_POLICY_H
+#ifndef OHOS_ROSEN_LRUCACHE_H
+#define OHOS_ROSEN_LRUCACHE_H
 
-#include "transaction/rs_interfaces.h"
-#include "dm_common.h"
-#include "screen_session_manager.h"
+#include <list>
+#include <unordered_map>
 
 namespace OHOS::Rosen {
-class SuperFoldPolicy {
-WM_DECLARE_SINGLE_INSTANCE_BASE(SuperFoldPolicy);
+class LRUCache {
 public:
-    SuperFoldPolicy() = default;
-    ~SuperFoldPolicy() = default;
-    bool IsFakeDisplayExist();
-    bool IsNeedSetSnapshotRect(DisplayId displayId);
-    Drawing::Rect GetSnapshotRect(DisplayId displayId);
-    DMRect GetRecordRect(DisplayId displayId);
+    LRUCache(int32_t capacity) : capacity_(capacity) {}
+
+    bool Check(int32_t key);
+    int32_t Put(int32_t key);
+
+private:
+    int32_t capacity_;
+    std::list<int32_t> cacheList_;
+    std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
 };
-}
-#endif // OHOS_ROSEN_WINDOW_SUPER_FOLD_POLICY_H
+} // namespace OHOS::Rosen
+#endif // OHOS_ROSEN_LRUCACHE_H

@@ -260,7 +260,11 @@ bool FoldScreenController::GetModeChangeRunningStatus()
 
 void FoldScreenController::SetdisplayModeChangeStatus(bool status)
 {
-    foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenPolicy_->SetSecondaryDisplayModeChangeStatus(status);
+    } else {
+        foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    }
 }
 
 bool FoldScreenController::GetdisplayModeRunningStatus()

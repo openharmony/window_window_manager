@@ -408,13 +408,6 @@ void MoveDragController::UpdateGravityWhenDrag(const std::shared_ptr<MMI::Pointe
         }
         return;
     }
-    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP ||
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-        surfaceNode->SetFrameGravity(Gravity::TOP_LEFT);
-        RSTransaction::FlushImplicitTransaction();
-        WLOGFI("recover gravity to TOP_LEFT");
-    }
 }
 
 void MoveDragController::CalcDragTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
