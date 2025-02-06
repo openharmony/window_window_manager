@@ -1876,7 +1876,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
         sceneSession->SetSingleHandTransform(singleHandTransform_);
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WinId: %{public}d, displayId: %{public}" PRIu64,
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
             sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
     }
     return sceneSession;
@@ -2089,7 +2089,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
     sceneSession->GetSessionProperty()->SetDisplayId(currDisplayId);
     sceneSession->SetScreenId(currDisplayId);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "synchronous screenId with displayid %{public}" PRIu64, currDisplayId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "synchronous screenId with displayId %{public}" PRIu64, currDisplayId);
 
     sceneSession->SetEventHandler(taskScheduler_->GetEventHandler(), eventHandler_);
     sceneSession->RegisterIsScreenLockedCallback([this] { return IsScreenLocked(); });
@@ -10284,11 +10284,10 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     auto fromScreenId = sceneSession->GetSessionInfo().screenId_;
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, screenId: %{public}" PRIu64,
-        sceneSession->GetPersistentId(), screenId);
     sceneSession->SetScreenId(screenId);
     sceneSession->GetSessionProperty()->SetDisplayId(screenId);
-    WLOGFD("Session move display %{public}" PRIu64 " from %{public}" PRIu64, screenId, fromScreenId);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
+        sceneSession->GetPersistentId(), screenId, fromScreenId);
     NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();
