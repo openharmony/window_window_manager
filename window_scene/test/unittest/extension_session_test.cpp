@@ -773,7 +773,7 @@ HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
  */
 HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1)
 {
-    MockFunction<AvoidArea(AvoidAreaType type)> mockNotifyGetAvoidAreaByTypeFunc;
+    MockFunction<AvoidArea(AvoidAreaType type, int32_t apiVersion)> mockNotifyGetAvoidAreaByTypeFunc;
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = mockNotifyGetAvoidAreaByTypeFunc.AsStdFunction();
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     AvoidAreaType typeSystem = AvoidAreaType::TYPE_SYSTEM;
@@ -783,7 +783,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
     AvoidAreaType typeNavigationIndicator = AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     AvoidArea expectedAvoidArea;
     expectedAvoidArea.topRect_ = {10, 20, 30, 40};
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
     auto res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, expectedAvoidArea);
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -797,7 +797,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
 
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(0);
     res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, AvoidArea());
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -811,7 +811,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(0);
     res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, AvoidArea());
     res = extensionSession_->GetAvoidAreaByType(typeCutout);

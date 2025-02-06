@@ -32,6 +32,7 @@
 #include "singleton_container.h"
 #include "ui_extension/provider_data_handler.h"
 #include "window_adapter.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -910,13 +911,21 @@ WMError WindowExtensionSessionImpl::UnregisterOccupiedAreaChangeListener(
     return WMError::WM_OK;
 }
 
-WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
+WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
+    const Rect& rect, int32_t apiVersion)
 {
-    WLOGFI("type %{public}d", type);
+    if (apiVersion == INVALID_API_VERSION) {
+        uint32_t version = 0;
+        if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+            version = context_->GetApplicationInfo()->apiTargetVersion;
+        }
+        apiVersion = static_cast<int32_t>(version) % 1000;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d api %{public}d", type, apiVersion);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
-    avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect);
+    avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect, apiVersion);
     return WMError::WM_OK;
 }
 

@@ -1062,7 +1062,7 @@ WSError SessionProxy::OnNeedAvoid(bool status)
     return static_cast<WSError>(ret);
 }
 
-AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
+AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1081,6 +1081,11 @@ AvoidArea SessionProxy::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
         TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
         return avoidArea;
     }
+    if (!data.WriteInt32(apiVersion)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write api version error");
+        return avoidArea;
+    }
+
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "remote is null");

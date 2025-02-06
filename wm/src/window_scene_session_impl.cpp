@@ -1928,8 +1928,26 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
     return static_cast<WMError>(ret);
 }
 
-WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
+WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
+    const Rect& rect, int32_t apiVersion)
 {
+    if (apiVersion != INVALID_API_VERSION && apiVersion < 16 &&
+        WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d UI Extension of win %{public}d api version not supported",
+            type, GetWindowId());
+        return WMError::WM_OK;
+    }
+    if (apiVersion == INVALID_API_VERSION) {
+        uint32_t version = 0;
+        if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
+            version = context_->GetApplicationInfo()->apiTargetVersion;
+        }
+        apiVersion = static_cast<int32_t>(version) % 1000;
+        if (apiVersion < 16 && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api version not supported",
+                GetWindowId(), type);
+        }
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -1938,7 +1956,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     WSRect sessionRect = {
         rect.posX_, rect.posY_, static_cast<int32_t>(rect.width_), static_cast<int32_t>(rect.height_)
     };
-    avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect);
+    avoidArea = hostSession->GetAvoidAreaByType(type, sessionRect, apiVersion);
     getAvoidAreaCnt_++;
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}d times %{public}u area %{public}s",
           GetWindowId(), GetWindowName().c_str(), type, getAvoidAreaCnt_.load(), avoidArea.ToString().c_str());
