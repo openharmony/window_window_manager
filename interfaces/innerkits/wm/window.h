@@ -3140,6 +3140,20 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Get custom extension param.
+     *
+     * @param want the want to store param.
+     */
+    virtual void GetExtensionConfig(AAFwk::WantParams& want) {}
+ 
+    /**
+     * @brief Get custom extension param.
+     *
+     * @param want the want to update param.
+     */
+    virtual void UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want) {}
 };
 }
 }

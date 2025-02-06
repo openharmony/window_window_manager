@@ -2863,6 +2863,12 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
     TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, cross axis state %{public}d", GetPersistentId(),
         static_cast<uint32_t>(state));
     crossAxisState_ = state;
+    AAFwk::Want want;
+    want.setParam(Extension::CROSS_AXIS_FIELD, static_cast<uint32_t>(state));
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
+            want, SubSystemId::WM_UIEXT);
+    }
     std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
     auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
     for (const auto& listener : windowCrossAxisListeners) {
@@ -5021,6 +5027,28 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
         }
     };
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
+}
+
+void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want)
+{
+    want.setParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<uint32_t>(crossAxisState_)));
+}
+
+void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
+{
+    if (want == nullptr)
+    {
+        TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
+        return;
+    }
+    auto wantParam = want->GetParam();
+    auto configParam = wantParam.GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+    auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
+    if (state < static_cast<int32_t>(CrossAxisState::STATE_INVALID) ||
+        state > static_cast<int32_t>(CrossAxisState::STATE_END)) {
+        crossAxisState_ = static_cast<CrossAxisState>(state);
+    }
+    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
 }
 } // namespace Rosen
 } // namespace OHOS
