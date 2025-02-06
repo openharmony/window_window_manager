@@ -38,32 +38,38 @@ typedef enum {
     /** succ. */
     OK = 0,
     /**
-     * Param is invaild.
+     * @error No permission
      *
      * @since 16
+     */
+    WINDOW_MANAGER_ERRORCODE_NO_PERMISSION = 201,
+    /**
+     * @error Param is invaild.
+     *
+     * @since 15
      */
     WINDOW_MANAGER_ERRORCODE_INVALID_PARAM = 401,
     /**
-     * Device not support.
+     * @error Device not support.
      *
-     * @since 16
+     * @since 15
      */
-    WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT = 801,
+    WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED = 801,
     /** window id is invaild. */
     INVAILD_WINDOW_ID = 1000,
 
     /** failed. */
     SERVICE_ERROR = 2000,
     /**
-     * Window state is abnormal.
+     * @error Window state is abnormal.
      *
-     * @since 16
+     * @since 15
      */
     WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL = 1300002,
     /**
-     * Window state is abnormal.
+     * @error Window state is abnormal.
      *
-     * @since 16
+     * @since 15
      */
     WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL = 1300003,
 } WindowManager_ErrorCode;
@@ -71,7 +77,7 @@ typedef enum {
 /**
  * @brief Enumerates the avoid area types.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
     /** System. */
@@ -105,7 +111,7 @@ typedef enum {
 /**
  * @brief Defines the window rect data structure.
  *
- * @since 16
+ * @since 15
  */
 typedef struct {
     /** X-axis of the window. */
@@ -155,7 +161,7 @@ typedef struct {
 /**
  * @brief Defines the avoid area data structure.
  *
- * @since 16
+ * @since 15
  */
 typedef struct {
     /** Top rect of the avoid area. */
