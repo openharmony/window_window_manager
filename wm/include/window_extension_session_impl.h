@@ -148,7 +148,7 @@ private:
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
-    void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason,
+    void UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     WMError GetSystemViewportConfig(SessionViewportConfig& config);
     void UpdateSystemViewportConfig();

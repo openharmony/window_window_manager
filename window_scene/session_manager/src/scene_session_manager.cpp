@@ -1865,8 +1865,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetIsLastFrameLayoutFinishedFunc([this](bool& isLayoutFinished) {
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
-        sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](const AvoidArea& avoidArea, int32_t sessionBottom)
-        {
+        sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](const AvoidArea& avoidArea, int32_t sessionBottom) {
             return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_, avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](WSRect& barArea) {
