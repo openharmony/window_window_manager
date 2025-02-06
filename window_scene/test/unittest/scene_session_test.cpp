@@ -1538,26 +1538,26 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTe
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     WSRect rect = {0, 0, 0, 0};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 0);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     rect = {0, 100, 0, 0};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 100);
 
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    sceneSession->lastUpdatedDisplayId_ = 0;
+    sceneSession->clientDisplayId_ = 0;
     rect = {0, 100, 100, 100};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 100);
-    sceneSession->lastUpdatedDisplayId_ = 999;
+    sceneSession->clientDisplayId_ = 999;
     rect = {0, 100, 100, 100};
     auto rect2 = rect;
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, rect2.posY_ + defaultDisplayRect.height_ + foldCreaseRect.height_ / 2);
 }
 

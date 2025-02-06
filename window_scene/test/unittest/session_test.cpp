@@ -206,22 +206,22 @@ HWTEST_F(WindowSessionTest, UpdateClientDisplayId01, Function | SmallTest | Leve
 {
     ASSERT_NE(session_, nullptr);
     session_->sessionStage_ = nullptr;
-    session_->lastUpdatedDisplayId_ = 0;
+    session_->clientDisplayId_ = 0;
     DisplayId updatedDisplayId = 0;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 10;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_ERROR_NULLPTR);
-    EXPECT_NE(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    EXPECT_NE(updatedDisplayId, session_->clientDisplayId_);
 
     ASSERT_NE(mockSessionStage_, nullptr);
     session_->sessionStage_ = mockSessionStage_;
     updatedDisplayId = 0;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 100;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
 }
 
 /**

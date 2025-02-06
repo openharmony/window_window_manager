@@ -66,6 +66,7 @@ const std::string DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
+constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 
@@ -1550,7 +1551,14 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         DisplayId displayId = GetSessionProperty() != nullptr ? GetSessionProperty()->GetDisplayId() :
             DISPLAY_ID_INVALID;
         TLOGI(WmsLogTag::WMS_LAYOUT, "Get displayId: %{public}" PRIu64, displayId);
-        NotifySessionRectChange(newRequestRect, newReason, displayId, rectAnimationConfig);
+        auto notifyRect = newRequestRect;
+        if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
+            if (clientDisplayId_ == VIRTUAL_DISPLAY_ID) {
+                newReason == SizeChangeReason::UNDEFINED;
+            }
+            notifyRect = rect;
+        }
+        NotifySessionRectChange(notifyRect, newReason, displayId, rectAnimationConfig);
     } else {
         if (!Session::IsScbCoreEnabled()) {
             SetSessionRect(rect);
@@ -1563,14 +1571,29 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         newWinRect.ToString().c_str());
 }
 
-void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
+void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId configDisplayId, WSRect& rect)
 {
     if (!PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64,
+            GetPersistentId(), GetScreenId());
         return;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, lastUpdatedDisplayId_: %{public}" PRIu64,
-        GetPersistentId(), lastUpdatedDisplayId_);
-    if (lastUpdatedDisplayId_ != VIRTUAL_DISPLAY_ID) {
+    if (reason != SizeChangeReason::RESIZE) {
+        configDisplayId_ = configDisplayId;
+    }
+    if (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(configDisplayId_)) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, configDisplayId: %{public}" PRIu64,
+            GetPersistentId(), configDisplayId_);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, input: %{public}s, screenId: %{public}" PRIu64,
+        ", clientDisplayId: %{public}" PRIu64 ", configDisplayId: %{public}" PRIu64,
+        GetPersistentId(), rect.ToString().c_str(), GetScreenId(), clientDisplayId_, configDisplayId_);
+    if (configDisplayId == DISPLAY_ID_INVALID) {
+        if (clientDisplayId_ != VIRTUAL_DISPLAY_ID) {
+            return;
+        }
+    } else if (configDisplayId != VIRTUAL_DISPLAY_ID) {
         return;
     }
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
@@ -1578,7 +1601,7 @@ void SceneSession::UpdateSessionRectPosYFromClient(WSRect& rect)
     auto lowerScreenPosY =
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
     rect.posY_ += lowerScreenPosY;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, lowerScreenPosY: %{public}d, output: %{public}s",
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lowerScreenPosY: %{public}d, output: %{public}s",
         GetPersistentId(), lowerScreenPosY, rect.ToString().c_str());
 }
 
@@ -1594,7 +1617,7 @@ WSError SceneSession::UpdateSessionRect(
     }
     WSRect newRect = rect;
     UpdateCrossAxisOfLayout(rect);
-    UpdateSessionRectPosYFromClient(newRect);
+    UpdateSessionRectPosYFromClient(reason, moveConfiguration.displayId, newRect);
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
          (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()))) {
