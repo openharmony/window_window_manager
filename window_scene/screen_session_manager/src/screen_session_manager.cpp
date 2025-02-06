@@ -864,8 +864,10 @@ bool ScreenSessionManager::GetIsCurrentInUseById(ScreenId screenId)
     return true;
 }
 
-bool ScreenSessionManager::GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
-    MultiScreenPositionOptions& mainScreenOption, MultiScreenPositionOptions& secondaryScreenOption)
+bool ScreenSessionManager::GetMultiScreenInfo(
+    MultiScreenMode& multiScreenMode,
+    MultiScreenPositionOptions& mainScreenOption,
+    MultiScreenPositionOptions& secondaryScreenOption)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     std::map<ScreenId, uint32_t> screenMode;
