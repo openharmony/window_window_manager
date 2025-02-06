@@ -5049,6 +5049,7 @@ void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
         crossAxisState_ = static_cast<CrossAxisState>(state);
     }
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
+    TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
 }
 } // namespace Rosen
 } // namespace OHOS
