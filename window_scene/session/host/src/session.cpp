@@ -3927,7 +3927,7 @@ DisplayId Session::GetClientDisplayId() const
     return clientDisplayId_;
 }
 
-DisplayId Session::SetClientDisplayId(DisplayId displayid)
+void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
 }
