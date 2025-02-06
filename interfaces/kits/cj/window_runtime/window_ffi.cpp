@@ -1102,7 +1102,7 @@ int32_t FfiOHOSGetWindowStatus(int64_t id, int32_t* errCode)
     if (instance == nullptr) {
         return WM_ERROR_STATE_ABNORMALLY;
     }
-    uint32_t ret = instance->GetWindowStatus(*errCode);
+    int32_t ret = instance->GetWindowStatus(*errCode);
     TLOGI(WmsLogTag::WMS_PC, "GetWindowStatus success");
     return ret;
 }
@@ -1114,7 +1114,7 @@ int32_t FfiOHOSMaximize(int64_t id, int32_t presentation)
     if (instance == nullptr) {
         return WM_ERROR_STATE_ABNORMALLY;
     }
-    uint32_t ret = instance->Maximize(presentation);
+    int32_t ret = instance->Maximize(presentation);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Maximize success");
     return ret;
 }
