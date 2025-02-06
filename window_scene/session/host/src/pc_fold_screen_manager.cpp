@@ -224,6 +224,8 @@ bool PcFoldScreenManager::NeedDoThrowSlip(const WSRect& rect, const WSRectF& vel
     // velocity check
     const WSRect& backtracingRect = CalculateThrowBacktracingRect(rect, velocity);
     if (!CheckVelocityOrientation(backtracingRect, velocity)) {
+        TLOGD(WmsLogTag::WMS_LAYOUT_PC, "orientation check failed, rect: %{public}s, velocity: %{public}s",
+            backtracingRect.ToString().c_str(), velocity.ToString().c_str());
         return false;
     }
 
