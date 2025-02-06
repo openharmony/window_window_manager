@@ -156,6 +156,7 @@ public:
 
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
+    bool IsOrientationNeedChanged() override {return false;};
     bool IsFoldable() override { return false; };
     bool IsCaptured() override { return false; };
 
