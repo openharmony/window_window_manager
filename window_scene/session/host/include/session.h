@@ -582,7 +582,7 @@ public:
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
-    void SetClientDisplayId(DisplayId displayId) const;
+    void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
     DisplayId GetParentClientDisplayId();
 

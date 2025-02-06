@@ -1138,7 +1138,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) && clientDisplayId_ == VIRTUAL_DISPLAY_ID) {
         property->SetDisplayId(clientDisplayId_);
     }
     return WSError::WS_OK;
@@ -3927,7 +3927,7 @@ DisplayId Session::GetClientDisplayId() const
     return clientDisplayId_;
 }
 
-DisplayId Session::SetClientDisplayId(DisplayId displayid) const
+DisplayId Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
 }
