@@ -1076,6 +1076,7 @@ WSError WindowSessionImpl::UpdateOrientation()
 
 WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
     property_->SetDisplayId(displayId);
     return WSError::WS_OK;
 }

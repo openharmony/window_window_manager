@@ -564,8 +564,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         RegisterWindowInspectorCallback();
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
-        "id:%{public}d], state:%{public}u, mode:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetWindowMode());
+        "id:%{public}d], state:%{public}u, mode:%{public}u, displayId:%{public}" PRIu64,
+        property_->GetWindowName().c_str(), property_->GetPersistentId(),
+        state_, GetWindowMode(), property_->GetDisplayId());
     return ret;
 }
 
@@ -4517,6 +4518,7 @@ WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
     property_->SetDisplayId(displayId);
     NotifyDisplayInfoChange();
     if (displayIdChanged) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
         NotifyDisplayIdChange(displayId);
     }
     return WSError::WS_OK;
