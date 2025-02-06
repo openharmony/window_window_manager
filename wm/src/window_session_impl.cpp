@@ -5044,8 +5044,8 @@ void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
     auto wantParam = want->GetParam();
     auto configParam = wantParam.GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
     auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (state < static_cast<int32_t>(CrossAxisState::STATE_INVALID) ||
-        state > static_cast<int32_t>(CrossAxisState::STATE_END)) {
+    if (state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) ||
+        state <= static_cast<int32_t>(CrossAxisState::STATE_END)) {
         crossAxisState_ = static_cast<CrossAxisState>(state);
     }
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
