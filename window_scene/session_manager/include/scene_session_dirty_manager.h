@@ -34,13 +34,13 @@ std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
 
 struct SingleHandData {
-    float scaleX = 1;
-    float scaleY = 1;
-    float width = 0;
-    float height = 0;
-    float singleHandX = 0;
-    float singleHandY = 0;
-    float pivotX = 0;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    float width = 0.f;
+    float height = 0.f;
+    float singleHandX = 0.f;
+    float singleHandY = 0.f;
+    float pivotX = 0.f;
 };
 
 class SceneSessionDirtyManager {

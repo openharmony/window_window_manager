@@ -25,6 +25,7 @@
 
 #include <event_handler.h>
 #include <event_runner.h>
+
 #include "oh_window_comm.h"
 #include "window.h"
 #include "window_manager_hilog.h"
@@ -69,7 +70,7 @@ WindowManager_ErrorCode ShowWindowInner(int32_t windowId)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is null, windowId:%{public}d", windowId);
-            ret = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY;
             return;
         }
         if (IsMainWindowAndNotShown(window->GetType(), window->GetWindowState())) {
@@ -83,7 +84,7 @@ WindowManager_ErrorCode ShowWindowInner(int32_t windowId)
         if (window->Show(NORMAL_STATE_CHANGE, SHOW_WITH_NO_ANIMATION, SHOW_WITH_FOCUS) == WMError::WM_OK) {
             ret = WindowManager_ErrorCode::OK;
         } else {
-            ret = WindowManager_ErrorCode::SERVICE_ERROR;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "Window [%{public}u, %{public}s] show with ret=%{public}d",
             window->GetWindowId(), window->GetWindowName().c_str(), ret);
@@ -95,7 +96,7 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 {
     if (isShow == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "isShow is null");
-        return WindowManager_ErrorCode::SERVICE_ERROR;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::OK;
@@ -103,7 +104,7 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "window is null, windowId:%{public}d", windowId);
-            ret = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            ret = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMALLY;
             return;
         }
         *isShow = window->GetWindowState() == WindowState::STATE_SHOWN;
@@ -113,14 +114,14 @@ WindowManager_ErrorCode IsWindowShownInner(int32_t windowId, bool* isShow)
 } // namespace Rosen
 } // namespace OHOS
 
-WindowManager_ErrorCode OH_WindowManager_ShowWindow(int32_t windowId)
+int32_t OH_WindowManager_ShowWindow(int32_t windowId)
 {
-    return OHOS::Rosen::ShowWindowInner(windowId);
+    return static_cast<int32_t>(OHOS::Rosen::ShowWindowInner(windowId));
 }
 
-WindowManager_ErrorCode OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
+int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
 {
-    return OHOS::Rosen::IsWindowShownInner(windowId, isShow);
+    return static_cast<int32_t>(OHOS::Rosen::IsWindowShownInner(windowId, isShow));
 }
 
 namespace {
@@ -435,6 +436,46 @@ int32_t OH_WindowManager_GetWindowProperties(
         }
         uicontent->GetAppPaintSize(drawableRect);
         TransformedToWindowManagerRect(drawableRect, windowProperties->drawableRect);
+    }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
+{
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::SERVICE_ERROR;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::SERVICE_ERROR;
+    eventHandler->PostSyncTask([windowId, touchable, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetTouchable(touchable));
+    }, __func__);
+    return errCode;
+}
+    
+int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
+{
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMALLY;
+    eventHandler->PostSyncTask([windowId, isFocusable, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::INVAILD_WINDOW_ID;
+            return;
+        }
+        errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
     }, __func__);
     return errCode;
 }

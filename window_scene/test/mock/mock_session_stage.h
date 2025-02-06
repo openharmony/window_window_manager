@@ -74,7 +74,9 @@ public:
     MOCK_METHOD1(SetSplitButtonVisible, WSError(bool isVisible));
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
     MOCK_METHOD2(SendContainerModalEvent, WSError(const std::string& eventName, const std::string& eventValue));
+    MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
+    MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
 };
 } // namespace Rosen
 } // namespace OHOS

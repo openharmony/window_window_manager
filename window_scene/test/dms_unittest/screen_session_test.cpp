@@ -38,7 +38,7 @@ public:
     void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override {}
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
-    void OnSecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion) override {}
+    void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:
@@ -450,6 +450,39 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
     foldDisplayMode = FoldDisplayMode::MAIN;
     screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
     GTEST_LOG_(INFO) << "UpdateToInputManager end";
+}
+
+/**
+ * @tc.name: OptimizeSecondaryDisplayMode
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN;
+    RRect bounds;
+    bounds.rect_.width_ = 1008;
+    bounds.rect_.height_ = 2232;
+    screenSession->OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
+    EXPECT_EQ(foldDisplayMode, FoldDisplayMode::MAIN);
+
+    bounds.rect_.width_ = 2048;
+    screenSession->OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
+    EXPECT_EQ(foldDisplayMode, FoldDisplayMode::FULL);
+
+    bounds.rect_.width_ = 3184;
+    screenSession->OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
+    EXPECT_EQ(foldDisplayMode, FoldDisplayMode::GLOBAL_FULL);
+
+    GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode end";
 }
 
 /**

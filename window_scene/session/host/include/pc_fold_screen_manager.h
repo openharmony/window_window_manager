@@ -44,6 +44,8 @@ public:
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     SuperFoldStatus GetScreenFoldStatus() const;
     bool IsHalfFolded(DisplayId displayId) const;
+    bool IsHalfFoldedOnMainDisplay(DisplayId displayId) const;
+    
     void UpdateSystemKeyboardStatus(bool hasSystemKeyboard);
     bool HasSystemKeyboard() const;
 
@@ -84,6 +86,7 @@ public:
     void RegisterFoldScreenStatusChangeCallback(int32_t persistentId,
         const std::weak_ptr<FoldScreenStatusChangeCallback>& func);
     void UnregisterFoldScreenStatusChangeCallback(int32_t persistentId);
+    DisplayId GetDisplayId() const { return displayId_; }
 
 private:
     void SetDisplayInfo(DisplayId displayId, SuperFoldStatus status);

@@ -59,10 +59,10 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         SecondaryFoldSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
         SecondaryFoldSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
-        return;
+    } else {
+        FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
+        FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
     }
-    FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
-    FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
 #endif
 }
 
@@ -260,7 +260,11 @@ bool FoldScreenController::GetModeChangeRunningStatus()
 
 void FoldScreenController::SetdisplayModeChangeStatus(bool status)
 {
-    foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenPolicy_->SetSecondaryDisplayModeChangeStatus(status);
+    } else {
+        foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    }
 }
 
 bool FoldScreenController::GetdisplayModeRunningStatus()

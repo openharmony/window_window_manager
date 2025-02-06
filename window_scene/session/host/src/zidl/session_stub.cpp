@@ -242,6 +242,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowCornerRadius(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_START_MOVING_WITH_COORDINATE):
             return HandleStartMovingWithCoordinate(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_CROSS_AXIS_STATE):
+            return HandleGetCrossAxisState(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -406,6 +408,11 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         } else {
             reply.WriteUint32(0);
         }
+        WindowSizeLimits windowSizeLimits = property->GetWindowSizeLimits();
+        reply.WriteUint32(windowSizeLimits.maxWindowWidth);
+        reply.WriteUint32(windowSizeLimits.minWindowWidth);
+        reply.WriteUint32(windowSizeLimits.maxWindowHeight);
+        reply.WriteUint32(windowSizeLimits.minWindowHeight);
         reply.WriteBool(property->GetCompatibleModeInPc());
         reply.WriteInt32(property->GetCompatibleInPcPortraitWidth());
         reply.WriteInt32(property->GetCompatibleInPcPortraitHeight());
@@ -691,6 +698,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
             abilitySessionInfo->supportWindowModes.push_back(
                 static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
         }
+    }
+    if (!data.ReadString(abilitySessionInfo->specifiedFlag)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read specifiedFlag failed.");
+        return ERR_INVALID_DATA;
     }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
@@ -1471,6 +1482,17 @@ int SessionStub::HandleStartMovingWithCoordinate(MessageParcel& data, MessagePar
     }
     WSError errCode = StartMovingWithCoordinate(offsetX, offsetY, pointerPosX, pointerPosY);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetCrossAxisState(MessageParcel& data, MessageParcel& reply)
+{
+    CrossAxisState state = CrossAxisState::STATE_INVALID;
+    GetCrossAxisState(state);
+    if (!reply.WriteUint32(static_cast<uint32_t>(state))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

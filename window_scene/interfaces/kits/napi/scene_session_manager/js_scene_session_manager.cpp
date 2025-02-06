@@ -449,16 +449,18 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
     taskScheduler_->PostMainThreadTask(task, info);
 }
 
-void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
+void JsSceneSessionManager::OnShiftFocus(int32_t persistentId, DisplayId displayGroupId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_FOCUS, "persistentId: %{public}d, displayGroupId: %{public}" PRIu64,
+          persistentId, displayGroupId);
 
-    auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_]() {
+    auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_, displayGroupId]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, persistentId)};
+        napi_value argv[] = { CreateJsValue(env, persistentId),
+                              CreateJsValue(env, static_cast<int64_t>(displayGroupId)) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
@@ -570,9 +572,9 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 
 void JsSceneSessionManager::ProcessShiftFocus()
 {
-    ProcessShiftFocusFunc func = [this](int32_t persistentId) {
+    ProcessShiftFocusFunc func = [this](int32_t persistentId, DisplayId displayGroupId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
-        this->OnShiftFocus(persistentId);
+        this->OnShiftFocus(persistentId, displayGroupId);
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
@@ -640,6 +642,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIDFunc(
         [](const std::string& id) {
         return RootScene::staticRootScene_->GetRSNodeByStringID(id);
+    });
+    SceneSessionManager::GetInstance().RegisterSetTopWindowBoundaryByIDFunc(
+        [](const std::string& id) {
+        RootScene::staticRootScene_->SetTopWindowBoundaryByID(id);
     });
 }
 
@@ -2573,7 +2579,7 @@ napi_value JsSceneSessionManager::OnNotifySingleHandInfoChange(napi_env env, nap
         singleHandMode = SingleHandMode::RIGHT;
     }
     SceneSessionManager::GetInstance().NotifySingleHandInfoChange(
-        singleHandScaleX, singleHandScaleY, singleHandMode);
+        static_cast<float>(singleHandScaleX), static_cast<float>(singleHandScaleY), singleHandMode);
     return NapiGetUndefined(env);
 }
 

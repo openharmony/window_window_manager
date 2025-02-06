@@ -362,6 +362,7 @@ public:
      */
     virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) { return WSError::WS_OK; }
+    virtual WSError GetCrossAxisState(CrossAxisState& state) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 

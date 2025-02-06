@@ -672,6 +672,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, napi_env e
         }
         float virtualPixelRatio = display->GetVirtualPixelRatio();
         config.SetDensity(virtualPixelRatio);
+        config.SetDisplayId(GetDisplayId());
         auto displayInfo = display->GetDisplayInfo();
         if (displayInfo != nullptr) {
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
@@ -3462,6 +3463,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
+    config.SetDisplayId(GetDisplayId());
     if (display) {
         config.SetDensity(display->GetVirtualPixelRatio());
         auto displayInfo = display->GetDisplayInfo();

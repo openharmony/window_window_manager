@@ -33,6 +33,9 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSession" };
 static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
+// 0: 横扫屏; 1: 竖扫屏. 默认为0
+static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
+static const int32_t SCAN_TYPE_VERTICAL = 1;
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
 const unsigned int XCOLLIE_TIMEOUT_5S = 5;
@@ -44,6 +47,8 @@ const float GLOBAL_FULL_STATUS_WIDTH = 3184;
 const float MAIN_STATUS_WIDTH = 1008;
 const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
+constexpr uint32_t SECONDARY_ROTATION_270 = 3;
+constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
 ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 }
 
@@ -203,7 +208,6 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
         WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
     }
-    RSTransaction::FlushImplicitTransaction();
 }
 
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
@@ -242,17 +246,20 @@ void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screen
 
 void ScreenSession::SetMirrorScreenRegion(ScreenId screenId, DMRect screenRegion)
 {
+    std::lock_guard<std::mutex> lock(mirrorScreenRegionMutex_);
     mirrorScreenRegion_ = std::make_pair(screenId, screenRegion);
 }
 
 std::pair<ScreenId, DMRect> ScreenSession::GetMirrorScreenRegion()
 {
+    std::lock_guard<std::mutex> lock(mirrorScreenRegionMutex_);
     return mirrorScreenRegion_;
 }
 
 void ScreenSession::EnableMirrorScreenRegion()
 {
-    auto& rect = mirrorScreenRegion_.second;
+    const auto& mirrorScreenRegionPair = GetMirrorScreenRegion();
+    const auto& rect = mirrorScreenRegionPair.second;
     ScreenId screenId = INVALID_SCREEN_ID;
     if (isPhysicalMirrorSwitch_) {
         screenId = screenId_;
@@ -323,6 +330,54 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
+    return displayInfo;
+}
+
+sptr<DisplayInfo> ScreenSession::ConvertToRealDisplayInfo()
+{
+    sptr<DisplayInfo> displayInfo = new(std::nothrow) DisplayInfo();
+    if (displayInfo == nullptr) {
+        return displayInfo;
+    }
+    RRect bounds = property_.GetBounds();
+    RRect phyBounds = property_.GetPhyBounds();
+    displayInfo->name_ = name_;
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
+    displayInfo->SetHeight(bounds.rect_.GetHeight());
+    displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
+    displayInfo->SetPhysicalHeight(phyBounds.rect_.GetHeight());
+    displayInfo->SetScreenId(screenId_);
+    displayInfo->SetDisplayId(screenId_);
+    displayInfo->SetRefreshRate(property_.GetRefreshRate());
+    displayInfo->SetVirtualPixelRatio(property_.GetVirtualPixelRatio());
+    displayInfo->SetDensityInCurResolution(property_.GetDensityInCurResolution());
+    displayInfo->SetDefaultVirtualPixelRatio(property_.GetDefaultDensity());
+    displayInfo->SetXDpi(property_.GetXDpi());
+    displayInfo->SetYDpi(property_.GetYDpi());
+    displayInfo->SetDpi(property_.GetVirtualPixelRatio() * DOT_PER_INCH);
+    int32_t apiVersion = GetApiVersion();
+    if (apiVersion >= 14 || apiVersion == 0) { // 14 is API version
+        displayInfo->SetRotation(property_.GetDeviceRotation());
+        displayInfo->SetDisplayOrientation(property_.GetDeviceOrientation());
+    } else {
+        displayInfo->SetRotation(property_.GetScreenRotation());
+        displayInfo->SetDisplayOrientation(property_.GetDisplayOrientation());
+    }
+    displayInfo->SetOrientation(property_.GetOrientation());
+    displayInfo->SetOffsetX(property_.GetOffsetX());
+    displayInfo->SetOffsetY(property_.GetOffsetY());
+    displayInfo->SetHdrFormats(hdrFormats_);
+    displayInfo->SetColorSpaces(colorSpaces_);
+    displayInfo->SetDisplayState(property_.GetDisplayState());
+    displayInfo->SetDefaultDeviceRotationOffset(property_.GetDefaultDeviceRotationOffset());
+    displayInfo->SetAvailableWidth(property_.GetAvailableArea().width_);
+    displayInfo->SetAvailableHeight(property_.GetAvailableArea().height_);
+    displayInfo->SetScaleX(property_.GetScaleX());
+    displayInfo->SetScaleY(property_.GetScaleY());
+    displayInfo->SetPivotX(property_.GetPivotX());
+    displayInfo->SetPivotY(property_.GetPivotY());
+    displayInfo->SetTranslateX(property_.GetTranslateX());
+    displayInfo->SetTranslateY(property_.GetTranslateY());
     return displayInfo;
 }
 
@@ -494,6 +549,7 @@ ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& 
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
+    OptimizeSecondaryDisplayMode(updatedProperty.GetBounds(), foldDisplayMode);
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     return property_;
 }
@@ -742,19 +798,10 @@ void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
     property_.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), foldDisplayMode);
 }
 
-void ScreenSession::UpdatePhysicalTouchBounds(bool enable)
-{
-    property_.SetPhysicalTouchBounds(enable);
-}
-
-void ScreenSession::UpdateCurrentOffScreenRendering(bool enable)
-{
-    property_.SetCurrentOffScreenRendering(enable);
-}
-
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
     FoldDisplayMode foldDisplayMode)
 {
+    OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     bool needUpdateToInputManager = false;
     if (foldDisplayMode == FoldDisplayMode::FULL &&
         property_.GetBounds() == bounds && property_.GetRotation() != static_cast<float>(rotation)) {
@@ -792,8 +839,26 @@ void ScreenSession::SetScreenComponentRotation(int rotation)
     WLOGFI("screenComponentRotation :%{public}f ", property_.GetScreenComponentRotation());
 }
 
+void ScreenSession::OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+        MAIN_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        foldDisplayMode = FoldDisplayMode::MAIN;
+    } else if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+        FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        foldDisplayMode = FoldDisplayMode::FULL;
+    } else if (IsWidthHeightMatch(bounds.rect_.GetWidth(), bounds.rect_.GetHeight(),
+        GLOBAL_FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        foldDisplayMode = FoldDisplayMode::GLOBAL_FULL;
+    }
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
+    OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -823,15 +888,17 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
             displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
         }
     }
-    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
+    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u,\
+        foldDisplayMode:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
-        rotation, displayOrientation);
+        rotation, displayOrientation, foldDisplayMode);
     ReportNotifyModeChange(displayOrientation);
 }
 
 void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
+    OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
     property_.SetBounds(bounds);
@@ -843,14 +910,6 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
-}
-
-void ScreenSession::UpdateBounds(RRect bounds)
-{
-    property_.SetBounds(bounds);
-    WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f]",
-        property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
-        property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight());
 }
 
 void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
@@ -1074,6 +1133,9 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
 {
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
+    if (g_screenScanType == SCAN_TYPE_VERTICAL) {
+        isVerticalScreen = false;
+    }
     if (foldDisplayMode != FoldDisplayMode::UNKNOWN
         && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
@@ -1083,8 +1145,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
         isVerticalScreen = true;
     }
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
-    (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
-        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
         rotation = static_cast<Rotation>(temp);
         isVerticalScreen = true;
     }
@@ -1111,8 +1173,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
 DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
 {
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
-    (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
-        uint32_t temp = (static_cast<uint32_t>(rotation) + 3) % 4;
+        (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+        uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
         rotation = static_cast<Rotation>(temp);
     }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
@@ -1661,6 +1723,13 @@ void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offset
     property_.SetBounds(RRect(rect, 0.0f, 0.0f));
 }
 
+void ScreenSession::SetExtendProperty(RRect bounds, bool isPhysicalTouchBounds, bool isCurrentOffScreenRendering)
+{
+    property_.SetBounds(bounds);
+    property_.SetPhysicalTouchBounds(isPhysicalTouchBounds);
+    property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
+}
+
 void ScreenSession::Resize(uint32_t width, uint32_t height)
 {
     sptr<SupportedScreenModes> screenMode = GetActiveScreenMode();
@@ -1742,7 +1811,7 @@ void ScreenSession::SetScreenSnapshotRect(RSSurfaceCaptureConfig& config)
     }
     if (isChanged) {
         TLOGI(WmsLogTag::DMS,
-            "GetScreenSnapshotRect left: %{public}f, top: %{public}f, right: %{public}f, bottom: %{public}f",
+            "left: %{public}f, top: %{public}f, right: %{public}f, bottom: %{public}f",
             snapshotRect.left_, snapshotRect.top_, snapshotRect.right_, snapshotRect.bottom_);
     } else {
         TLOGI(WmsLogTag::DMS, "no need to set screen snapshot rect, use default rect");
@@ -1820,7 +1889,7 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
     }
 }
 
-void ScreenSession::SecondaryReflexionChange(ScreenId screenId, uint32_t isSecondaryReflexion)
+void ScreenSession::SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
 {
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");

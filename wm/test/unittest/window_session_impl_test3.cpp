@@ -446,6 +446,70 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | 
 }
 
 /**
+ * @tc.name: RegisterWindowWillCloseListeners
+ * @tc.desc: RegisterWindowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowWillCloseListeners start";
+    window_ = GetTestWindowImpl("RegisterWindowWillCloseListeners");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
+    auto ret = window_->RegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->RegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = window_->RegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ret = window_->RegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterWindowWillCloseListeners end";
+}
+
+/**
+ * @tc.name: UnRegisterWindowWillCloseListeners
+ * @tc.desc: UnRegisterWindowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UnRegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnRegisterWindowWillCloseListeners start";
+    window_ = GetTestWindowImpl("UnRegisterWindowWillCloseListeners");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(INVALID_SESSION_ID);
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
+    auto ret = window_->UnRegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->UnRegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    ret = window_->UnRegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
+
+    window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ret = window_->UnRegisterWindowWillCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UnRegisterWindowWillCloseListeners end";
+}
+
+/**
  * @tc.name: RegisterSwitchFreeMultiWindowListener
  * @tc.desc: RegisterSwitchFreeMultiWindowListener
  * @tc.type: FUNC
