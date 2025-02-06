@@ -981,6 +981,11 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowStatusChangeListener(listener5);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    sptr<IWindowCrossAxisListener> listener6 = nullptr;
+    res = window->RegisterWindowCrossAxisListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowCrossAxisListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }

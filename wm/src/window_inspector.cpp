@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "window_inspector.h"
+
 #include <dlfcn.h>
 
 #include "nlohmann/json.hpp"
 
-#include "window_inspector.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -26,6 +27,29 @@ constexpr char SET_WMS_CALLBACK[] = "SetWMSCallback";
 constexpr char SEND_WMS_MESSAGE[] = "SendMessage";
 const std::string METHOD_NAME = "WMS.windowList";
 const std::string COMMAND_NAME = "getCurrentProcessWindowList";
+
+void CreateArkUIInspectorJson(
+    const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr)
+{
+    nlohmann::ordered_json jsonWindowListInfo;
+    jsonWindowListInfo["type"] = "window";
+    jsonWindowListInfo["content"] = nlohmann::json::array();
+    for (const auto& info : windowListInfo) {
+        nlohmann::ordered_json jsonWindowInfo;
+        jsonWindowInfo["windowName"] = info.windowName;
+        jsonWindowInfo["winId"] = std::to_string(info.windowId);
+        jsonWindowInfo["type"] = std::to_string(info.windowType);
+        nlohmann::ordered_json jsonRectInfo;
+        jsonRectInfo["startX"] = std::to_string(info.windowRect.posX_);
+        jsonRectInfo["startY"] = std::to_string(info.windowRect.posY_);
+        jsonRectInfo["width"] = std::to_string(info.windowRect.width_);
+        jsonRectInfo["height"] = std::to_string(info.windowRect.height_);
+        jsonWindowInfo["rect"] = jsonRectInfo;
+
+        jsonWindowListInfo["content"].push_back(std::move(jsonWindowInfo));
+    }
+    jsonStr = jsonWindowListInfo.dump();
+}
 } // namespace
 
 WindowInspector& WindowInspector::GetInstance()
@@ -37,11 +61,6 @@ WindowInspector& WindowInspector::GetInstance()
 WindowInspector::WindowInspector()
 {
     ConnectServer();
-}
-
-WindowInspector::~WindowInspector()
-{
-    UnregisterAllCallbacks();
 }
 
 void WindowInspector::ConnectServer()
@@ -61,9 +80,9 @@ void WindowInspector::ConnectServer()
         return;
     }
     setWMSCallbackFunc_([this](const char* message) {
-        std::string jsonWindowListInfoStr;
-        if (ProcessArkUIInspectorMessage(message, jsonWindowListInfoStr)) {
-            SendMessageToIDE(jsonWindowListInfoStr);
+        std::string jsonWindowListInfo;
+        if (ProcessArkUIInspectorMessage(message, jsonWindowListInfo)) {
+            SendMessageToIDE(jsonWindowListInfo);
         }
     });
     isConnectServerSuccess_ = true;
@@ -82,10 +101,14 @@ bool WindowInspector::IsConnectServerSuccess() const
 }
 
 void WindowInspector::RegisterGetWMSWindowListCallback(
-    uint32_t windowId, std::shared_ptr<GetWMSWindowListCallback>&& func)
+    uint32_t windowId, GetWMSWindowListCallback&& func)
 {
+    if (!IsConnectServerSuccess()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u connect failed", windowId);
+        return;
+    }
     std::unique_lock<std::mutex> lock(callbackMutex_);
-    auto [_, result] = getWMSWindowListCallbacks_.insert_or_assign(windowId, func);
+    auto [_, result] = getWMSWindowListCallbacks_.insert_or_assign(windowId, std::move(func));
     if (result) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "callback has registered");
     }
@@ -95,22 +118,11 @@ void WindowInspector::RegisterGetWMSWindowListCallback(
 void WindowInspector::UnregisterGetWMSWindowListCallback(uint32_t windowId)
 {
     std::unique_lock<std::mutex> lock(callbackMutex_);
-    auto iter = getWMSWindowListCallbacks_.find(windowId);
-    if (iter == getWMSWindowListCallbacks_.end()) {
+    auto result = getWMSWindowListCallbacks_.erase(windowId);
+    if (result == 0) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u callback not registered", windowId);
-        return;
     }
-    getWMSWindowListCallbacks_.erase(iter);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}u", windowId);
-}
-
-void WindowInspector::UnregisterAllCallbacks()
-{
-    setWMSCallbackFunc_ = nullptr;
-    sendWMSMessageFunc_ = nullptr;
-    isConnectServerSuccess_ = false;
-    std::unique_lock<std::mutex> lock(callbackMutex_);
-    getWMSWindowListCallbacks_.clear();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", windowId);
 }
 
 bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr)
@@ -129,15 +141,10 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
     std::vector<WindowListInfo> windowListInfoVec;
     {
         std::unique_lock<std::mutex> lock(callbackMutex_);
-        for (auto iter = getWMSWindowListCallbacks_.begin(); iter != getWMSWindowListCallbacks_.end();) {
-            auto callback = iter->second;
-            if (callback == nullptr) {
-                iter = getWMSWindowListCallbacks_.erase(iter);
-                continue;
+        for (auto& [_, func] : getWMSWindowListCallbacks_) {
+            if (auto windowListInfo = func()) {
+                windowListInfoVec.push_back(std::move(windowListInfo.value()));
             }
-            auto windowListInfo = (*callback)();
-            windowListInfoVec.push_back(std::move(windowListInfo));
-            iter++;
         }
     }
     if (windowListInfoVec.empty()) {
@@ -148,35 +155,8 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
     return true;
 }
 
-void WindowInspector::CreateArkUIInspectorJson(
-    const std::vector<WindowListInfo>& windowListInfo, std::string& jsonStr)
+void WindowInspector::SendMessageToIDE(const std::string& jsonStr)
 {
-    nlohmann::ordered_json jsonWindowListInfo;
-    jsonWindowListInfo["type"] = "window";
-    jsonWindowListInfo["content"] = nlohmann::json::array();
-    for (const auto& info : windowListInfo) {
-        nlohmann::ordered_json jsonInfo;
-        jsonInfo["windowName"] = info.windowName;
-        jsonInfo["winId"] = std::to_string(info.windowId);
-        jsonInfo["type"] = std::to_string(info.windowType);
-        nlohmann::ordered_json jsonRectInfo;
-        jsonRectInfo["startX"] = std::to_string(info.windowRect.posX_);
-        jsonRectInfo["startY"] = std::to_string(info.windowRect.posY_);
-        jsonRectInfo["width"] = std::to_string(info.windowRect.width_);
-        jsonRectInfo["height"] = std::to_string(info.windowRect.height_);
-        jsonInfo["rect"] = jsonRectInfo;
-
-        jsonWindowListInfo["content"].push_back(std::move(jsonInfo));
-    }
-    jsonStr = jsonWindowListInfo.dump();
-}
-
-void WindowInspector::SendMessageToIDE(std::string& jsonStr)
-{
-    if (sendWMSMessageFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendMessage is null");
-        return;
-    }
     sendWMSMessageFunc_(jsonStr);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s", jsonStr.c_str());
 }

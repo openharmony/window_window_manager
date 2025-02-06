@@ -138,6 +138,11 @@ class MockISwitchFreeMultiWindowListener : public ISwitchFreeMultiWindowListener
 public:
     MOCK_METHOD1(OnSwitchFreeMultiWindow, void(bool));
 };
+
+class MockIWindowCrossAxisListener : public IWindowCrossAxisListener {
+public:
+    MOCK_METHOD1(OnCrossAxisChange, void(CrossAxisState));
+};
 } // Rosen
 } // OHOS
 

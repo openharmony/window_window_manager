@@ -2520,6 +2520,10 @@ int32_t ScreenSessionManager::SetScreenOnDelayTime(int32_t delay)
 
 void ScreenSessionManager::SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "set camera status permission denied!");
+        return;
+    }
     if ((cameraStatus_ == cameraStatus) && (cameraPosition_ == cameraPosition)) {
         return;  // no need to update
     }

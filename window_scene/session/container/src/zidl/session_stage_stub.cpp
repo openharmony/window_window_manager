@@ -194,6 +194,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDragActivated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE):
             return HandleNotifyHighlightChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CROSS_AXIS):
+            return HandleNotifyWindowCrossAxisChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -769,6 +771,22 @@ int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessagePa
     }
     WSError errCode = NotifyHighlightChange(isHighlight);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyWindowCrossAxisChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    uint32_t state = 0;
+    if (!data.ReadUint32(state)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read cross axis state failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (state >= static_cast<uint32_t>(CrossAxisState::STATE_END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid cross axis state.");
+        return ERR_INVALID_DATA;
+    }
+    NotifyWindowCrossAxisChange(static_cast<CrossAxisState>(state));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

@@ -86,6 +86,7 @@ public:
     void RegisterFoldScreenStatusChangeCallback(int32_t persistentId,
         const std::weak_ptr<FoldScreenStatusChangeCallback>& func);
     void UnregisterFoldScreenStatusChangeCallback(int32_t persistentId);
+    DisplayId GetDisplayId() const { return displayId_; }
 
 private:
     void SetDisplayInfo(DisplayId displayId, SuperFoldStatus status);

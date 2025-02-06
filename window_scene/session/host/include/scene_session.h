@@ -599,6 +599,8 @@ public:
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
     void SetBehindWindowFilterEnabled(bool enabled); // Only accessed on main thread
+    WSError GetCrossAxisState(CrossAxisState& state) override;
+    virtual void UpdateCrossAxis();
 
     /*
      * Gesture Back
@@ -1022,11 +1024,14 @@ private:
         const std::pair<RSAnimationTimingProtocol, RSAnimationTimingCurve>& animationParam,
         const WSRect& rect, const std::function<void()>& finishCallback = nullptr, bool isGlobal = false);
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
+    virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
         behindWindowFilterEnabledModifier_; // Only accessed on main thread
     bool isDragEnd_ = false;
+    std::atomic<bool> isCrossAxisOfLayout_ = false;
+    std::atomic<uint32_t> crossAxisState_ = 0;
 
     /*
      * Window Immersive
