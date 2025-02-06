@@ -482,10 +482,10 @@ public:
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
 
-    /**
+    /*
      * Window Pattern
      */
-    void CheckSnapshotFromCache(int32_t persistentId);
+    void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
 
 protected:

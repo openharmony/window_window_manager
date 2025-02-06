@@ -28,7 +28,7 @@ public:
     int32_t Put(int32_t key);
 
 private:
-    const int32_t capacity_;
+    const std::size_t capacity_;
     std::list<int32_t> cacheList_;
     std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
 };

@@ -300,7 +300,6 @@ void SceneSessionManager::Init()
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(listener);
     InitPrepareTerminateConfig();
-
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
@@ -2295,13 +2294,12 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
 void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    int32_t removeFromCacheSessionId = snapshotLRUCache_->Put(persistentId);
-    if (removeFromCacheSessionId != -1) {
-        auto removeSceneSession = GetSceneSession(removeFromCacheSessionId);
-        if (removeSceneSession) {
-            removeSceneSession->ResetSnapshot();
+    if (int32_t removedCacheId = snapshotLRUCache_->Put(persistentId);
+        removedCacheId != -1) {
+        if (auto removedCacheSession = GetSceneSession(removedCacheId)) {
+            removedCacheSession->ResetSnapshot();
         } else {
-            TLOGW(WmsLogTag::WMS_PATTERN, "removeSceneSession:%{public}d nullptr", removeFromCacheSessionId);
+            TLOGW(WmsLogTag::WMS_PATTERN, "removedCacheSession:%{public}d nullptr", removedCacheId);
         }
     }
 }
@@ -2309,9 +2307,11 @@ void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    if (!snapshotLRUCache_->Visit(persistentId)) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
-    }
+    taskScheduler_->PostAsyncTask([this, persistentId](){
+        if (!snapshotLRUCache_->Visit(persistentId)) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
+        }
+    }, __func__);
 }
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
@@ -2338,7 +2338,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             scnSession->SetSessionInfo(info);
         }
 
-        if (scnSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        if (WindowHelper::IsMainWindow(scnSession->GetWindowType()) &&
             systemConfig_.uiType_ != UI_TYPE_PC && !systemConfig_.freeMultiWindowEnable_) {
             PutSnapshotToCache(persistentId);
         }

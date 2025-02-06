@@ -31,8 +31,8 @@ int32_t LRUCache::Put(int32_t key)
     if (!Visit(key)) {
         if (cacheList_.size() >= capacity_) {
             lastRemovedKey = cacheList_.back();
-            cacheMap_.erase(lastRemovedKey);
             cacheList_.pop_back();
+            cacheMap_.erase(lastRemovedKey);
         }
         cacheList_.push_front(key);
         cacheMap_[key] = cacheList_.begin();
