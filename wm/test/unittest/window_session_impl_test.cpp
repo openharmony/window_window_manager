@@ -16,6 +16,8 @@
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <int_wrapper.h>
+#include <want_params_wrapper.h>
 
 #include "ability_context_impl.h"
 #include "accessibility_event_info.h"

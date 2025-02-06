@@ -25,7 +25,6 @@
 #endif
 
 #include "display_info.h"
-#include "extension/extension_business_info.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_permission.h"
@@ -1389,7 +1388,7 @@ WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
 WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     auto state = data.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (state == static_cast<int32_t>(crossAxisState_))
+    if (state == static_cast<int32_t>(crossAxisState_.load()))
     {
         return;
     }
@@ -1410,7 +1409,7 @@ WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, s
 
 CrossAxisState WindowExtensionSessionImpl::GetCrossAxisState()
 {
-    return crossAxisState_;
+    return crossAxisState_.load();
 }
 
 void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
