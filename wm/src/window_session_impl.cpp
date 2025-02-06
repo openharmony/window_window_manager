@@ -32,9 +32,9 @@
 
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
-#include "extension/extension_business_info.h"
 #include "display_info.h"
 #include "display_manager.h"
+#include "extension/extension_business_info.h"
 #include "hitrace_meter.h"
 #include "session_permission.h"
 #include "key_event.h"
