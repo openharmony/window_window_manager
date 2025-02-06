@@ -33,14 +33,12 @@
 
 #include "intention_event_manager.h"
 #include "window_manager_hilog.h"
-#include "sys_cap_util.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
-constexpr int32_t API_VERSION_16 = 16;
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
@@ -260,7 +258,7 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (apiVersion != INVALID_API_VERSION && apiVersion < 16) {
+    if (apiVersion != INVALID_API_VERSION && apiVersion < API_VERSION_SIXTEEN) {
         TLOGI(WmsLogTag::WMS_IMMS, "api version not supported");
         return WMError::WM_DO_NOTHING;
     }
@@ -290,10 +288,6 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
-        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
-        return WMError::WM_DO_NOTHING;
-    }
     bool firstInserted = false;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -314,10 +308,6 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
-    }
-    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
-        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
-        return WMError::WM_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success");
     std::lock_guard<std::mutex> lock(mutex_);

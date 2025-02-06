@@ -46,6 +46,7 @@ constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
 constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
 constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
 constexpr int32_t INVALID_API_VERSION = -1;
+constexpr int32_t API_VERSION_SIXTEEN = 16;
 }
 
 /**
