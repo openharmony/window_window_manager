@@ -21,7 +21,7 @@
  * @syscap SystemCapability.Window.SessionManager
  * @library libnative_window_manager.so
  * @kit ArkUI
- * @since 16
+ * @since 15
  */
 #ifndef OH_WINDOW_H
 #define OH_WINDOW_H
@@ -46,7 +46,7 @@ extern "C" {
  *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
- * @since 16
+ * @since 15
  */
 int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
 
@@ -61,7 +61,7 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
  *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
- * @since 16
+ * @since 15
  */
 int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color);
 
@@ -78,7 +78,7 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
  *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
- * @since 16
+ * @since 15
  */
 int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool enabled, bool enableAnimation);
 
@@ -94,7 +94,7 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
- * @since 16
+ * @since 15
  */
 int32_t OH_WindowManager_GetWindowAvoidArea(
     int32_t windowId, WindowManager_AvoidAreaType type, WindowManager_AvoidArea* avoidArea);
@@ -109,7 +109,7 @@ int32_t OH_WindowManager_GetWindowAvoidArea(
  *         {@link OK} the function call is successful.
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
- * @since 16
+ * @since 15
  */
 int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow);
 
@@ -122,7 +122,7 @@ int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow);
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
- * @since 16
+ * @since 15
  */
 int32_t OH_WindowManager_ShowWindow(int32_t windowId);
 
@@ -170,13 +170,15 @@ int32_t OH_WindowManager_SetWindowKeepScreenOn(int32_t windowId, bool isKeepScre
 /**
  * @brief Sets whether is private mode or not.
  *
+ * @permission {@code ohos.permission.PRIVACY_WINDOW}
  * @param windowId WindowId when window is created.
  * @param isPrivacy In private mode if true, or not if false.
- * @return Return the result code.
+ * @return Returns the result code.
  *         {@link OK} the function call is successful.
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_NO_PERMISSION} permission verification failed.
  * @since 16
  */
 int32_t OH_WindowManager_SetWindowPrivacyMode(int32_t windowId, bool isPrivacy);
