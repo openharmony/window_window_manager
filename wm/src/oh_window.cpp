@@ -129,13 +129,14 @@ namespace {
  * Used to map from WMError to WindowManager_ErrorCode.
  */
 const std::unordered_map<WMError, WindowManager_ErrorCode> OH_WINDOW_TO_ERROR_CODE_MAP {
-    { WMError::WM_OK,                           WindowManager_ErrorCode::OK                                          },
-    { WMError::WM_ERROR_INVALID_PARAM,          WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM      },
-    { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT },
-    { WMError::WM_ERROR_INVALID_WINDOW,         WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL   },
-    { WMError::WM_ERROR_INVALID_CALLING,        WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL  },
-    { WMError::WM_ERROR_NULLPTR,                WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL  },
-    { WMError::WM_ERROR_SYSTEM_ABNORMALLY,      WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL  },
+    { WMError::WM_OK,                          WindowManager_ErrorCode::OK                                            },
+    { WMError::WM_ERROR_INVALID_PARAM,         WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM        },
+    { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,    WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED },
+    { WMError::WM_ERROR_INVALID_WINDOW,        WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL       },
+    { WMError::WM_ERROR_INVALID_CALLING,       WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
+    
+    { WMError::WM_ERROR_NULLPTR,               WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
+    { WMError::WM_ERROR_SYSTEM_ABNORMALLY,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
 };
 
 /*
@@ -214,7 +215,7 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
         }
         if (window->IsPcWindow()) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -246,7 +247,7 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
         }
         if (window->IsPcWindow()) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -277,7 +278,7 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
         }
         if (window->IsPcWindow()) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORT;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
