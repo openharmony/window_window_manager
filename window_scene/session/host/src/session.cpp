@@ -1024,7 +1024,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     }
     auto clientDisplayId = DEFAULT_DISPLAY_ID;
     if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
-        GetParentClientDisplayId();
+        clientDisplayId = GetParentClientDisplayId();
     }
     WSRect lastRect = rect;
     auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect, clientDisplayId);
