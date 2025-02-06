@@ -618,6 +618,7 @@ public:
     bool IsMissionHighlighted();
     void MaskSupportEnterWaterfallMode();
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
+    void ThrowSlipDirectly(const WSRectF& velocity);
 
     /*
      * Keyboard

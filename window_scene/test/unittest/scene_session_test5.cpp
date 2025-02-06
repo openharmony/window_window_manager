@@ -1524,7 +1524,7 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | Smal
     usleep(10000);
     rect = rect1;
     controller->RecordMoveRects(rect);
-    EXPECT_FALSE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
+    EXPECT_TRUE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
 
     // throw full screen
     usleep(100000);
@@ -1534,6 +1534,24 @@ HWTEST_F(SceneSessionTest5, MoveUnderInteriaAndNotifyRectChange, Function | Smal
     rect = rect1;
     controller->RecordMoveRects(rect);
     EXPECT_TRUE(mainSession->MoveUnderInteriaAndNotifyRectChange(rect, SizeChangeReason::DRAG_END));
+}
+
+/**
+ * @tc.name: ThrowSlipDirectly
+ * @tc.desc: ThrowSlipDirectly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, ThrowSlipDirectly, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "ThrowSlipDirectly";
+    info.bundleName_ = "ThrowSlipDirectly";
+    info.screenId_ = 0;
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    WSRect rect = { 100, 100, 400, 400 };
+    mainSession->winRect_ = rect;
+    mainSession->ThrowSlipDirectly(WSRectF { 0.0f, 0.0f, 0.0f, 0.0f });
+    EXPECT_EQ(mainSession->winRect_, rect);
 }
 
 /**

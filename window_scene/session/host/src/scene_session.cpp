@@ -2926,7 +2926,8 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
     isThrowSlipToFullScreen_.store(false);
-    if (pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId())) {
+    if (pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
+        (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
                 pcFoldScreenController_->GetMovingTimingCurve());
@@ -2934,9 +2935,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
         } else {
             SetSurfaceBounds(globalRect, isGlobal, needFlush);
         }
-        if (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END) {
-            pcFoldScreenController_->RecordMoveRects(rect);
-        }
+        pcFoldScreenController_->RecordMoveRects(rect);
     } else {
         SetSurfaceBounds(globalRect, isGlobal, needFlush);
     }
@@ -2999,7 +2998,7 @@ void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
 
 /**
  * move with init velocity
- * @return true: rect change notified when move
+ * @return true: successfully throw slip
  */
 bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeReason reason)
 {
@@ -3018,6 +3017,10 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     if (needSetFullScreen) {
         // maximize end rect and notify last rect
         pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
+        if (pcFoldScreenController_->IsThrowSlipDirectly()) {
+            pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
+                rect, GetSessionRequestRect(), GetStatusBarHeight(), GetDockHeight());
+        }
         finishCallback = [weakThis = wptr(this), rect, where = __func__] {
             auto session = weakThis.promote();
             if (session == nullptr) {
@@ -3042,7 +3045,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
     OnThrowSlipAnimationStateChange(true);
     rect = endRect;
-    return needSetFullScreen;
+    return true;
 }
 
 void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
@@ -3078,6 +3081,44 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
         session->onSessionEvent_(
             static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE_WITHOUT_ANIMATION),
             SessionEventParam {rect.posX_, rect.posY_, rect.width_, rect.height_});
+    }, __func__);
+}
+
+void SceneSession::ThrowSlipDirectly(const WSRectF& velocity)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), velocity, where] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
+            return;
+        }
+        auto controller = session->pcFoldScreenController_;
+        TLOGNI(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session: %{public}d, velocity: %{public}s",
+            where, session->GetPersistentId(), velocity.ToString().c_str());
+        if (!(controller && controller->IsAllowThrowSlip(session->GetScreenId()))) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s not allow throw slip", where);
+            return;
+        }
+        if (!session->IsMovableWindowType()) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s not movable", where);
+            return;
+        }
+        bool isFullScreen = session->IsFullScreenMovable();
+        controller->RecordStartMoveRectDirectly(session->GetSessionRect(), velocity, isFullScreen);
+        const WSRect& oriGlobalRect = session->GetSessionGlobalRect();
+        WSRect globalRect = oriGlobalRect;
+        if (!session->MoveUnderInteriaAndNotifyRectChange(globalRect, SizeChangeReason::UNDEFINED)) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s no throw", where);
+            return;
+        }
+        if (isFullScreen) {
+            session->UpdateFullScreenWaterfallMode(false);
+        }
+        WSRect rect = session->GetSessionRect();
+        rect.posX_ += globalRect.posX_ - oriGlobalRect.posX_;
+        rect.posY_ += globalRect.posY_ - oriGlobalRect.posY_;
+        session->NotifySessionRectChange(globalRect, SizeChangeReason::UNDEFINED);
     }, __func__);
 }
 
