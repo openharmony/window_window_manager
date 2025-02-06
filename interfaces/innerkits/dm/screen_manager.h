@@ -113,6 +113,17 @@ public:
      */
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
 
+     /**
+     * @brief Make screens as mirror-screen
+     *
+     * @param mainScreenId Main screen id.
+     * @param mirrorScreenId Mirror screen ids.
+     * @param screenGroupId Screen group id.
+     * @return DM_OK means make mirror success, others means make mirror failed.
+     */
+    DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+        ScreenId& screenGroupId);
+
     /**
      * @brief Make screen as mirror-screen for region of main screen.
      *

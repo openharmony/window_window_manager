@@ -64,6 +64,11 @@ public:
         return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST));
     }
 
+    static inline bool IsModalWindow(uint32_t windowFlags)
+    {
+        return windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    }
+
     static inline bool IsDialogWindow(WindowType type)
     {
         return type == WindowType::WINDOW_TYPE_DIALOG;

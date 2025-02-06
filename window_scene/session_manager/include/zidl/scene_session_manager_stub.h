@@ -87,6 +87,7 @@ private:
     int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
+    int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);

@@ -981,6 +981,11 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowStatusChangeListener(listener5);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    sptr<IWindowCrossAxisListener> listener6 = nullptr;
+    res = window->RegisterWindowCrossAxisListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowCrossAxisListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
@@ -1098,6 +1103,34 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
+}
+
+/**
+ * @tc.name: RegisterListener04
+ * @tc.desc: RegisterListener and UnregisterListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RegisterListener04, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener04 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterListener04");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
+    sptr<IWindowWillCloseListener> listener14 = nullptr;
+    WMError res = window->RegisterWindowWillCloseListeners(listener14);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnRegisterWindowWillCloseListeners(listener14);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener04 end";
 }
 
 /**

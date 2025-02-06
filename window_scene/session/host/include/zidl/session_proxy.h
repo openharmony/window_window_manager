@@ -135,6 +135,7 @@ public:
 
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WSError GetCrossAxisState(CrossAxisState& state) override;
 
     /*
      * PC Window

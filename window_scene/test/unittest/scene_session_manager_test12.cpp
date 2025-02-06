@@ -23,8 +23,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
-#include "mock/mock_resource_manager.h"
-#include "mock/mock_root_scene_context.h"
+#include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
 #include "session_manager.h"
@@ -42,19 +41,11 @@ namespace Rosen {
 class SceneSessionManagerTest12 : public testing::Test {
 public:
     static void SetUpTestCase();
-
     static void TearDownTestCase();
-
     void SetUp() override;
-
     void TearDown() override;
 
     static sptr<SceneSessionManager> ssm_;
-    std::shared_ptr<AbilityRuntime::RootSceneContextMocker> mockRootSceneContext_;
-    std::string path;
-    uint32_t bgColor;
-    AppExecFwk::AbilityInfo abilityInfo;
-
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
@@ -73,14 +64,6 @@ void SceneSessionManagerTest12::TearDownTestCase()
 
 void SceneSessionManagerTest12::SetUp()
 {
-    mockRootSceneContext_ = std::make_shared<AbilityRuntime::RootSceneContextMocker>();
-    path = "testPath";
-    bgColor = 0;
-    abilityInfo.bundleName = "testBundle";
-    abilityInfo.moduleName = "testmodule";
-    abilityInfo.resourcePath = "/test/resource/path";
-    abilityInfo.startWindowBackgroundId = 1;
-    abilityInfo.startWindowIconId = 1;
 }
 
 void SceneSessionManagerTest12::TearDown()
@@ -88,114 +71,32 @@ void SceneSessionManagerTest12::TearDown()
     usleep(WAIT_SYNC_IN_NS);
 }
 
-std::shared_ptr<Global::Resource::ResourceManagerMocker>
-    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
-
-class SceneSessionManagerMocker : public SceneSessionManager {
-public:
-    SceneSessionManagerMocker() {};
-    ~SceneSessionManagerMocker() {};
-};
-std::shared_ptr<SceneSessionManagerMocker> mockSceneSessionManager_ = std::make_shared<SceneSessionManagerMocker>();
-
 namespace {
 /**
- * @tc.name: GetResourceManager01
- * @tc.desc: GetResourceManager context is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetResourceManager01, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    auto result = ssm_->GetResourceManager(abilityInfo);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: GetResourceManager02
- * @tc.desc: GetResourceManager resourceManager is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetResourceManager02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ASSERT_NE(mockRootSceneContext_, nullptr);
-    ssm_->rootSceneContextWeak_ = std::weak_ptr<AbilityRuntime::RootSceneContextMocker>(mockRootSceneContext_);
-    EXPECT_CALL(*mockRootSceneContext_, GetResourceManager()).WillOnce(Return(nullptr));
-    auto result = ssm_->GetResourceManager(abilityInfo);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
- * @tc.name: GetResourceManager03
+ * @tc.name: GetResourceManager
  * @tc.desc: GetResourceManager
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetResourceManager03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, GetResourceManager, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    ASSERT_NE(mockRootSceneContext_, nullptr);
-    ssm_->rootSceneContextWeak_ = std::weak_ptr<AbilityRuntime::RootSceneContextMocker>(mockRootSceneContext_);
-    EXPECT_CALL(*mockRootSceneContext_, GetResourceManager()).WillOnce(Return(mockResourceManager_));
+    AppExecFwk::AbilityInfo abilityInfo;
     auto result = ssm_->GetResourceManager(abilityInfo);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
- * @tc.name: GetStartupPageFromResource01
- * @tc.desc: GetStartupPageFromResource ResourceManager nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource01, Function | SmallTest | Level3)
-{
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    mockResourceManager_ = nullptr;
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    mockResourceManager_ = std::make_shared<Global::Resource::ResourceManagerMocker>();
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetStartupPageFromResource02
- * @tc.desc: GetStartupPageFromResource ResourceManager GetColorById ERROR
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource02, Function | SmallTest | Level3)
-{
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetStartupPageFromResource03
- * @tc.desc: GetStartupPageFromResource ResourceManager GetMediaById ERROR
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource03, Function | SmallTest | Level3)
-{
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    ASSERT_NE(mockResourceManager_, nullptr);
-    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
-        bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: GetStartupPageFromResource04
+ * @tc.name: GetStartupPageFromResource
  * @tc.desc: GetStartupPageFromResource
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest12, GetStartupPageFromResource, Function | SmallTest | Level3)
 {
-    ASSERT_NE(mockSceneSessionManager_, nullptr);
-    ASSERT_NE(mockResourceManager_, nullptr);
-    EXPECT_CALL(*mockResourceManager_, GetColorById(abilityInfo.startWindowBackgroundId,
-        bgColor)).WillOnce(Return(Global::Resource::RState::SUCCESS));
-    EXPECT_CALL(*mockResourceManager_, GetMediaById(abilityInfo.startWindowIconId, path,
-        0)).WillOnce(Return(Global::Resource::RState::SUCCESS));
-    bool result = mockSceneSessionManager_->GetStartupPageFromResource(abilityInfo, path, bgColor);
+    ASSERT_NE(ssm_, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::string path = "";
+    uint32_t bgColor = 0;
+    bool result = ssm_->GetStartupPageFromResource(abilityInfo, path, bgColor);
     EXPECT_EQ(result, false);
 }
 
@@ -640,17 +541,21 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDetachCallback, Function | SmallTe
  */
 HWTEST_F(SceneSessionManagerTest12, IsKeyboardForeground, Function | SmallTest | Level3)
 {
-    SceneSessionManager* sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
-    ASSERT_NE(sceneSessionManager, nullptr);
+    auto sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSessionManager->IsKeyboardForeground();
-    property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
-    sceneSessionManager->IsKeyboardForeground();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSessionManager->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    ASSERT_EQ(true, sceneSessionManager->IsKeyboardForeground());
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW);
+    ASSERT_EQ(false, sceneSessionManager->IsKeyboardForeground());
+    sceneSessionManager->sceneSessionMap_.clear();
+    ASSERT_EQ(false, sceneSessionManager->IsKeyboardForeground());
 }
 
 /**
@@ -691,7 +596,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWatchGestureConsumeResult, Function | 
     ASSERT_EQ(WMError::WM_OK, ret);
     ssm_->onWatchGestureConsumeResultFunc_ = nullptr;
     ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
-    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -707,7 +612,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWatchFocusActiveChange, Function | Sma
     ASSERT_EQ(WMError::WM_OK, ret);
     ssm_->onWatchFocusActiveChangeFunc_ = nullptr;
     ret = ssm_->NotifyWatchFocusActiveChange(isActive);
-    ASSERT_NE(ret, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
@@ -1402,6 +1307,162 @@ HWTEST_F(SceneSessionManagerTest12, HasFloatingWindowForeground06, Function | Sm
     WMError result = ssm_->HasFloatingWindowForeground(token2, hasFloatWindowForeground);
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(hasFloatWindowForeground, false);
+}
+
+/**
+ * @tc.name: UpdateHighlightStatus
+ * @tc.desc: UpdateHighlightStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+ 
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    SessionInfo info2;
+    info2.abilityName_ = "abilityName_test2";
+    info2.bundleName_ = "bundleName_test2";
+ 
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
+ 
+    preSceneSession->property_ = property1;
+    currSceneSession->property_ = property2;
+    preSceneSession->property_->SetPersistentId(1);
+    currSceneSession->property_->SetPersistentId(2);
+ 
+    sptr<SceneSession> nullSceneSession1;
+    sptr<SceneSession> nullSceneSession2;
+ 
+    ssm_->UpdateHighlightStatus(nullSceneSession1, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(preSceneSession, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, true);
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    currSceneSession->property_->isExclusivelyHighlighted_ = false;
+    info1.isSystem_ = true;
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    info1.isSystem_ = false;
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    preSceneSession->property_->SetPersistentId(2);
+    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+}
+ 
+/**
+ * @tc.name: SetHighlightSessionIds
+ * @tc.desc: SetHighlightSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetHighlightSessionIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    currSceneSession->property_ = property;
+    currSceneSession->property_->SetPersistentId(1);
+    currSceneSession->persistentId_ = 1;
+    ssm_->highlightIds_.clear();
+    ssm_->SetHighlightSessionIds(currSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+}
+ 
+/**
+ * @tc.name: AddHighlightSessionIds
+ * @tc.desc: AddHighlightSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, AddHighlightSessionIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+ 
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    SessionInfo info2;
+    info2.abilityName_ = "abilityName_test2";
+    info2.bundleName_ = "bundleName_test2";
+ 
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
+ 
+    preSceneSession->property_->SetPersistentId(1);
+    currSceneSession->property_->SetPersistentId(2);
+    preSceneSession->persistentId_ = 1;
+    currSceneSession->persistentId_ = 2;
+    preSceneSession->property_ = property1;
+    currSceneSession->property_ = property2;
+    ssm_->AddHighlightSessionIds(currSceneSession);
+    ssm_->AddHighlightSessionIds(preSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+    ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
+}
+ 
+/**
+ * @tc.name: RemoveHighlightSessionIds
+ * @tc.desc: RemoveHighlightSessionIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveHighlightSessionIds, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<WindowSessionProperty> property1 = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property2 = sptr<WindowSessionProperty>::MakeSptr();
+ 
+    SessionInfo info1;
+    info1.abilityName_ = "abilityName_test1";
+    info1.bundleName_ = "bundleName_test1";
+ 
+    SessionInfo info2;
+    info2.abilityName_ = "abilityName_test2";
+    info2.bundleName_ = "bundleName_test2";
+ 
+    sptr<SceneSession> preSceneSession = sptr<SceneSession>::MakeSptr(info1, nullptr);
+    sptr<SceneSession> currSceneSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
+ 
+    preSceneSession->property_->SetPersistentId(1);
+    currSceneSession->property_->SetPersistentId(2);
+ 
+    preSceneSession->persistentId_ = 1;
+    currSceneSession->persistentId_ = 2;
+ 
+    preSceneSession->property_ = property1;
+    currSceneSession->property_ = property2;
+    ssm_->AddHighlightSessionIds(currSceneSession);
+    ssm_->AddHighlightSessionIds(preSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
+    ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
+    ssm_->RemoveHighlightSessionIds(currSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(2) == 0, true);
+    ssm_->RemoveHighlightSessionIds(preSceneSession);
+    ASSERT_EQ(ssm_->highlightIds_.count(1) == 0, true);
+}
+
+/**
+ * @tc.name: UpdateSessionCrossAxisState
+ * @tc.desc: test function : UpdateSessionCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionCrossAxisState, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    ssm_->UpdateSessionCrossAxisState(10, SuperFoldStatus::EXPANDED, SuperFoldStatus::FOLDED);
 }
 }
 } // namespace Rosen

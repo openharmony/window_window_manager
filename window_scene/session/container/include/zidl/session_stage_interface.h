@@ -86,6 +86,7 @@ public:
      */
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
+    virtual WSError NotifyHighlightChange(bool isHighlight) = 0;
 
     /**
      * @brief Notify client to close the existing pip window.
@@ -227,6 +228,7 @@ public:
     virtual WSError SetFullScreenWaterfallMode(bool isWaterfallMode) { return WSError::WS_DO_NOTHING; }
     virtual WSError SetSupportEnterWaterfallMode(bool isSupportEnter) { return WSError::WS_DO_NOTHING; }
     virtual WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) = 0;
+    virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
