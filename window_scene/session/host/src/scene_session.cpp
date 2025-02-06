@@ -66,7 +66,6 @@ const std::string DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
-constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 
@@ -1553,9 +1552,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         TLOGI(WmsLogTag::WMS_LAYOUT, "Get displayId: %{public}" PRIu64, displayId);
         auto notifyRect = newRequestRect;
         if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId())) {
-            if (clientDisplayId_ == VIRTUAL_DISPLAY_ID) {
-                newReason == SizeChangeReason::UNDEFINED;
-            }
+            newReason = SizeChangeReason::UNDEFINED;
             notifyRect = rect;
         }
         NotifySessionRectChange(notifyRect, newReason, displayId, rectAnimationConfig);
@@ -1586,14 +1583,14 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             GetPersistentId(), configDisplayId_);
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, input: %{public}s, screenId: %{public}" PRIu64,
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, input: %{public}s, screenId: %{public}" PRIu64
         ", clientDisplayId: %{public}" PRIu64 ", configDisplayId: %{public}" PRIu64,
         GetPersistentId(), rect.ToString().c_str(), GetScreenId(), clientDisplayId_, configDisplayId_);
-    if (configDisplayId == DISPLAY_ID_INVALID) {
+    if (configDisplayId_ == DISPLAY_ID_INVALID) {
         if (clientDisplayId_ != VIRTUAL_DISPLAY_ID) {
             return;
         }
-    } else if (configDisplayId != VIRTUAL_DISPLAY_ID) {
+    } else if (configDisplayId_ != VIRTUAL_DISPLAY_ID) {
         return;
     }
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
