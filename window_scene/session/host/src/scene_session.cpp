@@ -2845,11 +2845,6 @@ void SceneSession::HandleCompatibleModeDrag(WSRect& rect, SizeChangeReason reaso
     } else if (isSupportDragInPcCompatibleMode) {
         rect.width_ = (windowWidth < windowHeight) ? compatibleInPcPortraitWidth : compatibleInPcLandscapeWidth;
         rect.height_ = (windowWidth < windowHeight) ? compatibleInPcPortraitHeight : compatibleInPcLandscapeHeight;
-        rect.posX_ = windowRect.posX_;
-        rect.posY_ = windowRect.posY_;
-    } else {
-        rect.posX_ = windowRect.posX_;
-        rect.posY_ = windowRect.posY_;
     }
 }
 
