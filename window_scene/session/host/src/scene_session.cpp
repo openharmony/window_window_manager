@@ -240,14 +240,15 @@ void SceneSession::AddExtensionTokenInfo(const UIExtensionTokenInfo& tokenInfo)
 void SceneSession::RemoveExtensionTokenInfo(const sptr<IRemoteObject>& abilityToken)
 {
     auto persistentId = GetPersistentId();
-    extensionTokenInfos_.erase(std::remove_if(
+    auto itr = std::remove_if(
         extensionTokenInfos_.begin(), extensionTokenInfos_.end(),
         [&abilityToken, persistentId, where = __func__](const auto& tokenInfo) {
             TLOGNI(WmsLogTag::WMS_UIEXT,
                 "%{public}s UIExtOnLock: need remove, token: %{public}u, persistentId: %{public}d",
                 where, tokenInfo.callingTokenId, persistentId);
             return tokenInfo.abilityToken == abilityToken;
-        }), extensionTokenInfos_.end());
+        });
+    extensionTokenInfos_.erase(itr, extensionTokenInfos_.end());
 }
 
 void SceneSession::OnNotifyAboveLockScreen()
