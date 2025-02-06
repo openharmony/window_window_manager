@@ -230,7 +230,7 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
-    
+
     /**
      * @brief Set privacy image.
      *
