@@ -30,6 +30,7 @@
 #include "perform_reporter.h"
 #include "session_permission.h"
 #include "singleton_container.h"
+#include "sys_cap_util.h"
 #include "ui_extension/provider_data_handler.h"
 #include "window_adapter.h"
 #include "window_helper.h"
@@ -915,11 +916,8 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
     const Rect& rect, int32_t apiVersion)
 {
     if (apiVersion == INVALID_API_VERSION) {
-        uint32_t version = 0;
-        if (context_ != nullptr && context_->GetApplicationInfo() != nullptr) {
-            version = context_->GetApplicationInfo()->apiTargetVersion;
-        }
-        apiVersion = static_cast<int32_t>(version) % 1000;
+        apiVersion = apiVersion == INVALID_API_VERSION ?
+            static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d api %{public}d", type, apiVersion);
     auto hostSession = GetHostSession();
