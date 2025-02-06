@@ -223,6 +223,7 @@ HWTEST_F(WindowSceneSessionImplTest3, PerformBack, Function | SmallTest | Level2
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
+    ASSERT_NE(nullptr, abilityContext_);
     windowSceneSessionImpl->context_ = abilityContext_;
     windowSceneSessionImpl->PerformBack();
     windowSceneSessionImpl->context_ = nullptr;
@@ -281,6 +282,7 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateSubWindowState, Function | SmallTest
     option->SetWindowName("UpdateSubWindowState");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     WindowType type = WindowType::APP_SUB_WINDOW_BASE;
+    ASSERT_NE(nullptr, windowSceneSessionImpl);
 
     windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
     windowSceneSessionImpl->UpdateSubWindowState(type);
@@ -667,6 +669,7 @@ HWTEST_F(WindowSceneSessionImplTest3, IsValidSystemWindowType, Function | SmallT
 HWTEST_F(WindowSceneSessionImplTest3, UpdateFloatingWindowSizeBySizeLimits, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
     option->SetWindowName("UpdateFloatingWindowSizeBySizeLimits");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
