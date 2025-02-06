@@ -994,7 +994,7 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect, DisplayId cli
         clientDisplayId = VIRTUAL_DISPLAY_ID;
         rect.posY_ -= lowerScreenPosY;
     }
-    return updatedDisplayId;
+    return clientDisplayId;
 }
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
