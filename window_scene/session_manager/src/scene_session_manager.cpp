@@ -66,6 +66,7 @@
 #include "anomaly_detection.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "common/include/fold_screen_state_internel.h"
 
 #include "hidump_controller.h"
@@ -2874,6 +2875,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
 
+    auto parentSessionClientDisplayId = 0;
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
@@ -2882,6 +2884,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
+        property->SetDisplayId(parentProperty->GetDisplayId());
+        parentSessionClientDisplayId = parentSession->GetClientDisplayId();
     }
 
     TLOGI(WmsLogTag::WMS_LIFE, "The corner radius is %{public}f", appWindowSceneConfig_.floatCornerRadius_);
@@ -2921,8 +2925,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    auto task = [this, sessionStage, eventChannel, surfaceNode, property,
-                 &persistentId, &session, &systemConfig, token, pid, uid, isSystemCalling]() {
+    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, &systemConfig, token,
+                 pid, uid, isSystemCalling, parentSessionClientDisplayId]() {
         if (property == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "property is nullptr");
             return WSError::WS_ERROR_NULLPTR;
@@ -2950,6 +2954,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        newSession->SetClientDisplayId(parentSessionClientDisplayId);
         newSession->GetSessionProperty()->SetWindowCornerRadius(property->GetWindowCornerRadius());
         property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(

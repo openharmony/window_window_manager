@@ -577,11 +577,14 @@ public:
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
-    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect) const;
+    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect, DisplayId clientDisplayId = 0) const;
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
+    void SetClientDisplayId(DisplayId displayId) const;
+    DisplayId GetClientDisplayId() const;
+    DisplayId GetParentClientDisplayId();
 
     /*
      * Screen Lock
@@ -754,7 +757,8 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
-    DisplayId lastUpdatedDisplayId_ = 0;
+    DisplayId clientDisplayId_ = 0;
+    DisplayId configDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /*
