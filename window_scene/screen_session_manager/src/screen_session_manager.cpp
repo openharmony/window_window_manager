@@ -1900,14 +1900,14 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
     }
     if (screenWidth > FOUR_K_WIDTH) {
         float scale = static_cast<float>(FOUR_K_WIDTH) / screenWidth;
-        uint32_t screenAdjustHeight = static_cast<int>(std::round(screenHeight * scale));
+        uint32_t screenAdjustHeight = static_cast<uint32_t>(std::round(screenHeight * scale));
         auto screenBounds = RRect({ 0, 0, FOUR_K_WIDTH, screenAdjustHeight }, 0.0f, 0.0f);
         session->SetExtendProperty(screenBounds, false, false);
         session->SetAvailableArea({0, 0, FOUR_K_WIDTH, screenAdjustHeight});
         TLOGD(WmsLogTag::DMS, "screenWidth > 4K, screenId:%{public}" PRIu64"", screenId);
     } else if (screenWidth < EXTEND_WIDTH && screenPPI < offScreenPPIThreshold) {
         float scale = static_cast<float>(EXTEND_WIDTH) / screenWidth;
-        uint32_t screenAdjustHeight = static_cast<int>(std::round(screenHeight * scale));
+        uint32_t screenAdjustHeight = static_cast<uint32_t>(std::round(screenHeight * scale));
         auto screenBounds = RRect({ 0, 0, EXTEND_WIDTH, screenAdjustHeight }, 0.0f, 0.0f);
         session->SetExtendProperty(screenBounds, false, true);
         session->SetAvailableArea({0, 0, FOUR_K_WIDTH, screenAdjustHeight});
