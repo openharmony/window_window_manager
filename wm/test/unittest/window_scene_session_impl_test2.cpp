@@ -932,6 +932,8 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionForeground, Function | SmallT
     option->SetWindowName("NotifySessionForeground");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
     uint32_t reason = 1;
     bool withAnimation = true;
     windowSceneSession->NotifySessionForeground(reason, withAnimation);
@@ -948,6 +950,8 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionBackground, Function | SmallT
     option->SetWindowName("NotifySessionBackground");
     option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, windowSceneSession);
+
     uint32_t reason = 1;
     bool withAnimation = true;
     bool isFromInnerkits = true;

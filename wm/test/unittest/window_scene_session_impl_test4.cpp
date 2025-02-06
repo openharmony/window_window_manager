@@ -437,6 +437,7 @@ HWTEST_F(WindowSceneSessionImplTest4, ConsumePointerEventInner, Function | Small
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->SetPointerAction(10);
     windowSceneSessionImpl->ConsumePointerEventInner(pointerEvent, pointerItem);
@@ -462,6 +463,7 @@ HWTEST_F(WindowSceneSessionImplTest4, HandleEventForCompatibleMode, Function | S
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    ASSERT_NE(nullptr, pointerEvent);
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->SetPointerAction(2);
     windowSceneSessionImpl->HandleEventForCompatibleMode(pointerEvent, pointerItem);
