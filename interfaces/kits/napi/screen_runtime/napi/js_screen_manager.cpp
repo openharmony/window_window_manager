@@ -1155,24 +1155,24 @@ napi_value OnSetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
         WLOGFE("JsScreenManager::OnSetScreenPrivacyMaskImage failed, Invalidate params.");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
-    NapiAsyncTask::CompleteCallback complete = [screenId, privacyMaskImg](napi_env env, NapiAsyncTask& task,
-        int32_t status) {
+    napi_value lastParam = nullptr;
+    lastParam = (argc >= ARGC_THREE && GetType(env, argv[ARGC_THREE - 1]) ==
+        napi_function) ? argv[ARGC_THREE - 1] : argv[ARGC_TWO - 1];
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [screenId, privacyMaskImg, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnSetScreenPrivacyMaskImage");
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg));
         if (res != DmErrorCode::DM_OK) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(res), "SetScreenPrivacyMaskImage failed."));
-            WLOGFE("JSScreenManager::SetScreenPrivacyMaskImage failed.");
-            return;
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(res), "OnSetScreenPrivacyMaskImage failed."));
+            WLOGFE("OnSetScreenPrivacyMaskImage failed.");
         } else {
-            task.Resolve(env, NapiGetUndefined(env));
-            WLOGFI("JSScreenManager::SetScreenPrivacyMaskImage success.");
+            task->Resolve(env, NapiGetUndefined(env));
         }
+        delete task;
     };
-    napi_value lastParam = (privacyMaskImg != nullptr && argc >= ARGC_THREE && GetType(env, argv[ARGC_THREE - 1]) ==
-        napi_function) ? argv[ARGC_THREE - 1] : argv[ARGC_TWO - 1];
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JSScreenManager::SetScreenPrivacyMaskImage", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
     return result;
 }
 
