@@ -23,6 +23,7 @@
 #include <ipc_skeleton.h>
 #include <hisysevent.h>
 #include <parameters.h>
+#include <int_wrapper.h>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -31,6 +32,7 @@
 
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
+#include "extension/extension_business_info.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
@@ -5031,7 +5033,7 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
 
 void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want)
 {
-    want.setParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<uint32_t>(crossAxisState_)));
+    want.setParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<uint32_t>(crossAxisState_.load())));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)

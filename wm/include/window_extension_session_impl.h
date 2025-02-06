@@ -22,6 +22,7 @@
 
 #include "accessibility_element_info.h"
 #include "extension_data_handler.h"
+#include "extension/extension_business_info.h"
 
 namespace OHOS {
 namespace Rosen {
