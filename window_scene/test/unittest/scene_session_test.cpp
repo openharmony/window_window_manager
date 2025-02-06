@@ -1405,6 +1405,41 @@ HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: CalcAvoidAreaForStatusBar
+ * @tc.desc: CalcAvoidAreaForStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CalcAvoidAreaForStatusBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalcAvoidAreaForStatusBar";
+    info.bundleName_ = "CalcAvoidAreaForStatusBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int32_t result = sceneSession->CalcAvoidAreaForStatusBar();
+
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: InitializeMoveInputBar
+ * @tc.desc: InitializeMoveInputBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, InitializeMoveInputBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "InitializeMoveInputBar";
+    info.bundleName_ = "InitializeMoveInputBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto property = sceneSession->GetSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    property->SetDisplayId(1);
+
+    auto result = sceneSession->InitializeMoveInputBar();
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: OnSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC
