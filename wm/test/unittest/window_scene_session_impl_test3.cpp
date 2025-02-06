@@ -167,6 +167,7 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateTitleInTargetPos, Function | SmallTe
     EXPECT_EQ(WSError::WS_OK, ret);
 
     windowSceneSessionImpl->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    ASSERT_NE(nullptr, windowSceneSessionImpl->uiContent_);
     ret = windowSceneSessionImpl->UpdateTitleInTargetPos(true, 0);
     EXPECT_EQ(WSError::WS_OK, ret);
     ret = windowSceneSessionImpl->UpdateTitleInTargetPos(false, 0);
@@ -197,6 +198,7 @@ HWTEST_F(WindowSceneSessionImplTest3, CheckParmAndPermission01, Function | Small
     ret = windowSceneSessionImpl->SetCornerRadius(1.0f);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     auto surfaceNode_mocker = CreateRSSurfaceNode();
+    ASSERT_NE(nullptr, surfaceNode_mocker);
     windowSceneSessionImpl->surfaceNode_ = surfaceNode_mocker;
     ret = windowSceneSessionImpl->CheckParmAndPermission();
     EXPECT_EQ(WMError::WM_OK, ret);
