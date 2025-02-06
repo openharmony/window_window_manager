@@ -38,13 +38,13 @@ typedef enum {
     /** succ. */
     OK = 0,
     /**
-     * @error No permission
+     * @error No permission.
      *
      * @since 16
      */
     WINDOW_MANAGER_ERRORCODE_NO_PERMISSION = 201,
     /**
-     * @error Param is invaild.
+     * @error Param is invalid.
      *
      * @since 15
      */
@@ -57,7 +57,6 @@ typedef enum {
     WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED = 801,
     /** window id is invaild. */
     INVAILD_WINDOW_ID = 1000,
-
     /** failed. */
     SERVICE_ERROR = 2000,
     /**
@@ -67,7 +66,7 @@ typedef enum {
      */
     WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL = 1300002,
     /**
-     * @error Window state is abnormal.
+     * @error Window manager service works abnormally.
      *
      * @since 15
      */
