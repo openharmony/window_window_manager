@@ -481,7 +481,11 @@ public:
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
-    void GetSnapshotFromCache(int32_t persistentId);
+
+    /**
+     * Window Pattern
+     */
+    void CheckSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
 
 protected:
@@ -921,7 +925,6 @@ private:
     std::mutex nextFlushCompletedMutex_;
 
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
-    std::shared_ptr<LRUCache> snapshotLRUCache_;
 
     /*
      * Screen Manager
@@ -964,6 +967,11 @@ private:
      * Window Lifecycle
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
+
+    /*
+     * Window Pattern
+     */
+    std::unique_ptr<LRUCache> snapshotLRUCache_;
 };
 } // namespace OHOS::Rosen
 

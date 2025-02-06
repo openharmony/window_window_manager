@@ -2170,7 +2170,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float s
 
 void Session::ResetSnapshot()
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "reset snapshot id: %{public}d", persistentId_);
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
     snapshot_ = nullptr;
     scenePersistence_->ResetSnapshotCache();
@@ -2198,8 +2198,9 @@ void Session::SaveSnapshot(bool useFfrt)
         }
         std::function<void()> func = [weakThis]() {
             auto session = weakThis.promote();
-            if (session && (session->GetSystemConfig().uiType_ == UI_TYPE_PC ||
-                session->GetSystemConfig().freeMultiWindowEnable_)) {
+            if (session &&
+                (session->GetSystemConfig().uiType_ == UI_TYPE_PC ||
+                 session->GetSystemConfig().freeMultiWindowEnable_)) {
                 session->ResetSnapshot();
             }
         };
