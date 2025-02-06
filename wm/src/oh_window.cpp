@@ -134,9 +134,9 @@ const std::unordered_map<WMError, WindowManager_ErrorCode> OH_WINDOW_TO_ERROR_CO
     { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,    WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED },
     { WMError::WM_ERROR_INVALID_WINDOW,        WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL       },
     { WMError::WM_ERROR_INVALID_CALLING,       WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
-    
     { WMError::WM_ERROR_NULLPTR,               WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
     { WMError::WM_ERROR_SYSTEM_ABNORMALLY,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
+    { WMError::WM_ERROR_INVALID_PERMISSION,    WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_NO_PERMISSION        },
 };
 
 /*
@@ -220,9 +220,8 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.enable_ = enabled;
-        property.settingFlag_ =
-            static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
-            static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
+        property.settingFlag_ = static_cast<SystemBarSettingFlag>(
+            static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
         property.enableAnimation_ = enableAnimation;
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
@@ -252,9 +251,8 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.contentColor_ = color;
-        property.settingFlag_ =
-            static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
-            static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+        property.settingFlag_ = static_cast<SystemBarSettingFlag>(
+            static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
     }, __func__);
@@ -283,9 +281,8 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
         property.enable_ = enabled;
-        property.settingFlag_ =
-            static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
-            static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
+        property.settingFlag_ = static_cast<SystemBarSettingFlag>(
+            static_cast<uint32_t>(property.settingFlag_) | static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
         property.enableAnimation_ = enableAnimation;
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(
             window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_BAR, property));
@@ -469,7 +466,7 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
     }, __func__);
     return errCode;
 }
-    
+
 int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
 {
     auto eventHandler = GetMainEventHandler();
