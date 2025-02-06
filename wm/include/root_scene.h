@@ -108,7 +108,11 @@ public:
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
+    /*
+     * Window Layout
+     */
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
+    void SetTopWindowBoundaryByID(const std::string& stringId);
 
     /*
      * Window Property

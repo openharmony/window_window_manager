@@ -1278,6 +1278,22 @@ HWTEST_F(SessionProxyTest, NotifySubModalTypeChange, Function | SmallTest | Leve
     ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifySubModalTypeChange end";
 }
+
+/**
+ * @tc.name: SetWindowCornerRadius
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetCrossAxisState, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    CrossAxisState state = CrossAxisState::STATE_CROSS;
+    WSError res = sProxy->GetCrossAxisState(state);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

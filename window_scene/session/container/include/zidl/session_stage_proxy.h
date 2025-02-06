@@ -86,6 +86,7 @@ public:
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
+    void NotifyWindowCrossAxisChange(CrossAxisState state) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

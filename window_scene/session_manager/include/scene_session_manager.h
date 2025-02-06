@@ -138,6 +138,7 @@ using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, 
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
+using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -203,6 +204,7 @@ public:
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
+    void RegisterSessionFoldStateChangeListener();
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
     /*
@@ -493,6 +495,7 @@ public:
     SingleHandTransform GetNormalSingleHandTransform() const;
     void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
     void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
+    void RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func);
     void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
@@ -1169,9 +1172,11 @@ private:
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     SingleHandTransform singleHandTransform_;
     GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
+    SetTopWindowBoundaryByIDFunc setTopWindowBoundaryByIDFunc_;
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
+    void UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
 
     /*
      * Window Snapshot
