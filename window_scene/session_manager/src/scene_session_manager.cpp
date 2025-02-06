@@ -121,7 +121,7 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
-constexpr uint32_t SNAPSHOT_CACHE_CAPACITY = 3;
+constexpr std::size_t SNAPSHOT_CACHE_CAPACITY = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -274,6 +274,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
         WLOGFE("Failed to register bundle status callback.");
     }
     ScbDumpSubscriber::Subscribe(g_scbSubscriber);
+    snapshotLRUCache_ = std::make_unique<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
 }
 
 SceneSessionManager::~SceneSessionManager()
@@ -299,8 +300,6 @@ void SceneSessionManager::Init()
     sptr<IDisplayChangeListener> listener = new DisplayChangeListener();
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(listener);
     InitPrepareTerminateConfig();
-
-    snapshotLRUCache_ = std::make_shared<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
 
     // create handler for inner command at server
     eventLoop_ = AppExecFwk::EventRunner::Create(WINDOW_INFO_REPORT_THREAD);
@@ -2307,10 +2306,10 @@ void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
     }
 }
 
-void SceneSessionManager::GetSnapshotFromCache(int32_t persistentId)
+void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    if (!snapshotLRUCache_->Check(persistentId)) {
+    if (!snapshotLRUCache_->Visit(persistentId)) {
         TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
     }
 }

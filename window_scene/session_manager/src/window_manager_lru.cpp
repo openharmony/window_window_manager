@@ -14,30 +14,29 @@
  */
 
 #include "window_manager_lru.h"
-#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-bool LRUCache::Check(int32_t key)
+bool LRUCache::Visit(int32_t key)
 {
-    if (cacheMap_.find(key) == cacheMap_.end()) {
-        return false;
+    if (auto it = cacheMap_.find(key); it != cacheMap_.end()) {
+        cacheList_.splice(cacheList_.begin(), cacheList_, it->second);
+        return true;
     }
-    cacheList_.splice(cacheList_.begin(), cacheList_, cacheMap_[key]);
-    return true;
+    return false;
 }
 
 int32_t LRUCache::Put(int32_t key)
 {
-    int32_t lastKey = -1;
-    if (!Check(key)) {
+    int32_t lastRemovedKey = -1;
+    if (!Visit(key)) {
         if (cacheList_.size() >= capacity_) {
-            lastKey = cacheList_.back();
-            cacheMap_.erase(lastKey);
+            lastRemovedKey = cacheList_.back();
+            cacheMap_.erase(lastRemovedKey);
             cacheList_.pop_back();
         }
         cacheList_.push_front(key);
         cacheMap_[key] = cacheList_.begin();
     }
-    return lastKey;
+    return lastRemovedKey;
 }
 } // namespace OHOS::Rosen
