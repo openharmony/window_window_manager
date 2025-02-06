@@ -256,6 +256,7 @@ public:
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
     bool GetTentMode();
+    bool GetCameraMode();
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
     void SetScreenPowerForFold(ScreenPowerStatus status);
@@ -352,6 +353,8 @@ public:
         uint32_t& actualRefreshRate) override;
 
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
+
+    bool IsOrientationNeedChanged() override;
     /*
      * multi user
      */

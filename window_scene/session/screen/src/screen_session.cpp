@@ -47,6 +47,7 @@ const float GLOBAL_FULL_STATUS_WIDTH = 3184;
 const float MAIN_STATUS_WIDTH = 1008;
 const float FULL_STATUS_OFFSET_X = 1136;
 const float SCREEN_HEIGHT = 2232;
+constexpr uint32_t SECONDARY_ROTATION_90 = 1;
 constexpr uint32_t SECONDARY_ROTATION_270 = 3;
 constexpr uint32_t SECONDARY_ROTATION_MOD = 4;
 ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
@@ -799,7 +800,7 @@ void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
 }
 
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
-    FoldDisplayMode foldDisplayMode)
+    FoldDisplayMode foldDisplayMode, bool isChanged)
 {
     OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     bool needUpdateToInputManager = false;
@@ -808,14 +809,14 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
         needUpdateToInputManager = true;
     }
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode, isChanged);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation, foldDisplayMode);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation, foldDisplayMode, isChanged);
     property_.UpdateDeviceRotation(targetDeviceRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     if (needUpdateToInputManager && updateToInputManagerCallback_ != nullptr
@@ -856,11 +857,12 @@ void ScreenSession::OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDispla
     }
 }
 
-void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
+    FoldDisplayMode foldDisplayMode, bool isChanged)
 {
     OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode, isChanged);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
@@ -896,11 +898,11 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     ReportNotifyModeChange(displayOrientation);
 }
 
-void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged)
 {
     OptimizeSecondaryDisplayMode(bounds, foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode);
+    DisplayOrientation displayOrientation = CalcDisplayOrientation(targetRotation, foldDisplayMode, isChanged);
     property_.SetBounds(bounds);
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
@@ -912,10 +914,10 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         rotation, displayOrientation);
 }
 
-void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
-    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation, foldDisplayMode);
+    DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation, foldDisplayMode, isChanged);
     property_.UpdateDeviceRotation(targetRotation);
     property_.SetDeviceOrientation(deviceOrientation);
     WLOGFI("rotation:%{public}d, orientation:%{public}u", rotation, deviceOrientation);
@@ -1129,7 +1131,8 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
     }
 }
 
-DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
+DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
+    FoldDisplayMode foldDisplayMode, bool IsOrientationNeedChanged) const
 {
     // vertical: phone(Plugin screen); horizontal: pad & external screen
     bool isVerticalScreen = property_.GetPhyWidth() < property_.GetPhyHeight();
@@ -1141,13 +1144,14 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
         WLOGD("foldDisplay is verticalScreen when width is greater than height");
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
-    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        isVerticalScreen = true;
-    }
-    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
-        (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
-        uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
-        rotation = static_cast<Rotation>(temp);
+    if (IsOrientationNeedChanged) {
+        if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+            uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_90) % SECONDARY_ROTATION_MOD;
+            rotation = static_cast<Rotation>(temp);
+        } else {
+            uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
+            rotation = static_cast<Rotation>(temp);
+        }
         isVerticalScreen = true;
     }
     switch (rotation) {
@@ -1170,12 +1174,17 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation, Fold
     }
 }
 
-DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode) const
+DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation,
+    FoldDisplayMode foldDisplayMode, bool IsOrientationNeedChanged) const
 {
-    if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
-        (foldDisplayMode == FoldDisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
-        uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
-        rotation = static_cast<Rotation>(temp);
+    if (IsOrientationNeedChanged) {
+        if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+            uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_90) % SECONDARY_ROTATION_MOD;
+            rotation = static_cast<Rotation>(temp);
+        } else {
+            uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
+            rotation = static_cast<Rotation>(temp);
+        }
     }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
     switch (rotation) {

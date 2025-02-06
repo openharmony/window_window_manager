@@ -991,6 +991,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcSetScreenSkipProtectedWindow(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_IS_ORIENTATION_NEED_CHANGE: {
+            reply.WriteBool(IsOrientationNeedChanged());
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
