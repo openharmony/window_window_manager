@@ -752,7 +752,7 @@ HWTEST_F(WindowImplTest2, GetAvoidAreaByType, Function | SmallTest | Level3)
     EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
     EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
-    EXPECT_CALL(m->Mock(), GetAvoidAreaByType(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_CALL(m->Mock(), GetAvoidAreaByType(_, _, _, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     AvoidArea avoidarea;
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->GetAvoidAreaByType(AvoidAreaType::TYPE_CUTOUT, avoidarea));
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
