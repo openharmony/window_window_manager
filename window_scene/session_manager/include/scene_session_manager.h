@@ -432,7 +432,7 @@ public:
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
 
-    /*
+    /**
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
@@ -685,7 +685,12 @@ private:
     void RegisterSecSurfaceInfoListener();
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
 
- 
+    /**
+     * Window Property
+     */
+    void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+        std::vector<sptr<SceneSession>>& filteredSessions);
+    bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
 
     /**
      * PiP Window
