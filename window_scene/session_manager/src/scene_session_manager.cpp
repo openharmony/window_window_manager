@@ -2307,7 +2307,7 @@ void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    taskScheduler_->PostAsyncTask([this, persistentId](){
+    taskScheduler_->PostAsyncTask([this, persistentId]() {
         if (!snapshotLRUCache_->Visit(persistentId)) {
             TLOGND(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
         }
