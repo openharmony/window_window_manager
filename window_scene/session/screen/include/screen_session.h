@@ -254,6 +254,7 @@ public:
     // notify scb
     void SensorRotationChange(Rotation sensorRotation);
     void SensorRotationChange(float sensorRotation);
+    float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
