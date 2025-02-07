@@ -765,6 +765,12 @@ private:
     std::string GetHighlightIdsStr();
 
     /*
+     * PC Window
+     */
+    WMError ShiftAppWindowPointerEventInner(
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
+
+    /*
      * Window Immersive
      */
     bool UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
