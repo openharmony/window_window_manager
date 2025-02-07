@@ -2055,18 +2055,18 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, Function | SmallTest | Level
     option->SetWindowName("GetExtensionConfig");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->crossAxisState_ = CrossAxisState::STATE_CROSS;
-    AAFwk::Want want;
+    AAFwk::WantParams want;
     window->GetExtensionConfig(want);
-    EXPECT_EQ(want.getIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_CROSS));
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_CROSS));
     window->crossAxisState_ = CrossAxisState::STATE_INVALID;
     window->GetExtensionConfig(want);
-    EXPECT_EQ(want.getIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_INVALID));
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_INVALID));
     window->crossAxisState_ = CrossAxisState::STATE_NO_CROSS;
     window->GetExtensionConfig(want);
-    EXPECT_EQ(want.getIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_NO_CROSS));
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_NO_CROSS));
     window->crossAxisState_ = CrossAxisState::STATE_END;
     window->GetExtensionConfig(want);
-    EXPECT_EQ(want.getIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_END));
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_END));
 }
 
 /**
@@ -2084,25 +2084,30 @@ HWTEST_F(WindowSessionImplTest, UpdateExtensionConfig, Function | SmallTest | Le
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_, CrossAxisState::STATE_INVALID);
 
-    AAFwk::WantParams wantParam;
-    wantParam.setParam(Extension::CROSS_AXIS_FIELD,
+    AAFwk::WantParams configParam;
+    AAFwk::WantParams wantParam(want->GetParams());
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
         AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_CROSS)));
-    want->GetParams().SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamsWrapper::Box(wantParam))
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam))
+    want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_, CrossAxisState::STATE_CROSS);
-    wantParam.setParam(Extension::CROSS_AXIS_FIELD,
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
         AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_INVALID)));
-    want->GetParams().SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamsWrapper::Box(wantParam))
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam))
+    want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_, CrossAxisState::STATE_INVALID);
-    wantParam.setParam(Extension::CROSS_AXIS_FIELD,
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
         AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_NO_CROSS)));
-    want->GetParams().SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamsWrapper::Box(wantParam))
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam))
+    want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_, CrossAxisState::STATE_NO_CROSS);
-    wantParam.setParam(Extension::CROSS_AXIS_FIELD,
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
         AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_END)));
-    want->GetParams().SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamsWrapper::Box(wantParam))
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam))
+    want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_, CrossAxisState::STATE_END);
 }
