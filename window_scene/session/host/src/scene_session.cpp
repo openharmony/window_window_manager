@@ -1578,8 +1578,8 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
-    if ((configDisplayId_ != DISPLAY_ID_INVALID) &&
-        (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(configDisplayId_))) {
+    if (configDisplayId_ != DISPLAY_ID_INVALID &&
+        !PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(configDisplayId_)) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, configDisplayId: %{public}" PRIu64,
             GetPersistentId(), configDisplayId_);
         return;

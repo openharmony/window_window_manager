@@ -1010,8 +1010,8 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         TLOGD(WmsLogTag::WMS_LAYOUT, "Error status");
         return;
     }
-    if ((GetScreenId() != DISPLAY_ID_INVALID) &&
-        (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId()))) {
+    if (GetScreenId() != DISPLAY_ID_INVALID &&
+        !PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId())) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 " not need",
             GetPersistentId(), GetScreenId());
         return;
@@ -3942,7 +3942,6 @@ void Session::UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId)
         updatedDisplayId = parentSession->GetClientDisplayId();
     } else if (GetClientDisplayId() == VIRTUAL_DISPLAY_ID) {
         TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, no parentSession, but init virtual display", GetPersistentId());
-        clientDisplayId_ = DEFAULT_DISPLAY_ID;
         updatedDisplayId = VIRTUAL_DISPLAY_ID;
     }
 }
