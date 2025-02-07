@@ -708,6 +708,11 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     }
 }
 
+float ScreenSession::GetValidSensorRotation()
+{
+    return currentValidSensorRotation_;
+}
+
 void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
     HoverStatusChange(hoverStatus, needRotate);
