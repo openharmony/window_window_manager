@@ -3222,8 +3222,9 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse);
+        "appIndex %{public}d, reuse %{public}d, specifiedId %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(),
+        info.abilityName_.c_str(), info.appIndex_, info.reuse, info.specifiedId);
     auto sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
@@ -3260,8 +3261,9 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 
 void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> sessionInfo)
 {
+    const char* const where = __func__;
     napi_env& env_ref = env_;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env_ref] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env_ref, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "PendingSessionActivationInner jsSceneSession id:%{public}d has been destroyed",
@@ -3283,8 +3285,9 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]PendingSessionActivationInner task success, id:%{public}d",
-            sessionInfo->persistentId_);
+        TLOGNI(WmsLogTag::WMS_LIFE, "[NAPI]%{public}s task success, "
+            "id:%{public}d, specifiedId:%{public}d",
+            where, sessionInfo->persistentId_, sessionInfo->specifiedId);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
