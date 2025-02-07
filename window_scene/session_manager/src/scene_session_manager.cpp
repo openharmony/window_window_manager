@@ -10739,15 +10739,10 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
 WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "from id: %{public}d to id: %{public}d", sourcePersistentId, targetPersistentId);
-    sptr<SceneSession> sourceSession = nullptr;
-    WSError ret = GetAppMainSceneSession(sourceSession, sourcePersistentId);
-    if (ret != WSError::WS_OK) {
-        return ret;
-    }
-    sptr<SceneSession> targetSession = nullptr;
-    ret = GetAppMainSceneSession(targetSession, targetPersistentId);
-    if (ret != WSError::WS_OK) {
-        return ret;
+    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
+    if (sourceSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr, id: %{public}d", sourcePersistentId);
+        return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto displayId = sourceSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = GetFocusedSessionId(displayId);
@@ -10759,7 +10754,15 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         TLOGE(WmsLogTag::WMS_FOCUS, "target session has been focused, focusedSessionId: %{public}d", focusedSessionId);
         return WSError::WS_DO_NOTHING;
     }
-
+    WSError ret = GetAppMainSceneSession(sourceSession, sourcePersistentId);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    sptr<SceneSession> targetSession = nullptr;
+    ret = GetAppMainSceneSession(targetSession, targetPersistentId);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
     if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
         TLOGE(WmsLogTag::WMS_FOCUS, "verify bundle failed, source name is %{public}s but target name is %{public}s)",
             sourceSession->GetSessionInfo().bundleName_.c_str(), targetSession->GetSessionInfo().bundleName_.c_str());
