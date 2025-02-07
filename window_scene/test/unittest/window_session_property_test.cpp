@@ -1123,6 +1123,35 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
     EXPECT_NE(property, nullptr);;
     ASSERT_EQ(1, property->GetSubWindowLevel());
 }
+
+/**
+ * @tc.name: SetBackgroundAlpha
+ * @tc.desc: SetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 0;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+    backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(backgroundAlpha, property->GetBackgroundAlpha());
+}
+
+/**
+ * @tc.name: GetBackgroundAlpha
+ * @tc.desc: GetBackgroundAlpha Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetBackgroundAlpha, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    uint8_t backgroundAlpha = 2;
+    property->SetBackgroundAlpha(backgroundAlpha);
+    ASSERT_EQ(2, property->GetBackgroundAlpha());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -1859,7 +1859,7 @@ WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
         TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(action))) {
+    if (!data.WriteUint64(static_cast<uint64_t>(action))) {
         TLOGE(WmsLogTag::DEFAULT, "Write PropertyChangeAction failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
