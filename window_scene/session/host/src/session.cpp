@@ -1028,7 +1028,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     WSRect lastRect = rect;
     auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
     if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
-        updateDisplayIdByParentSession(updatedDisplayId);
+        UpdateDisplayIdByParentSession(updatedDisplayId);
     }
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
