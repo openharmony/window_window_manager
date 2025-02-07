@@ -68,6 +68,7 @@ constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
+constexpr int32_t API_VERSION_16 = 16;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
