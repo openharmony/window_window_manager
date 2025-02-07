@@ -162,7 +162,7 @@ public:
         state_ = state;
     }
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
-        int32_t apiVersion = INVALID_API_VERSION) override;
+        int32_t apiVersion = API_VERSION_INVALID) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override
