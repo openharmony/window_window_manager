@@ -456,6 +456,26 @@ bool ScreenSession::GetIsPcUse()
     return isPcUse_;
 }
 
+void ScreenSession::SetValidHeight(uint32_t validHeight)
+{
+    property_.SetValidHeight(validHeight);
+}
+ 
+void ScreenSession::SetValidWidth(uint32_t validWidth)
+{
+    property_.SetValidWidth(validWidth);
+}
+ 
+int32_t ScreenSession::GetValidHeight() const
+{
+    return property_.GetValidHeight();
+}
+ 
+int32_t ScreenSession::GetValidWidth() const
+{
+    return property_.GetValidWidth();
+}
+
 void ScreenSession::SetIsBScreenHalf(bool isBScreenHalf)
 {
     isBScreenHalf_ = isBScreenHalf;
@@ -872,6 +892,8 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    property_.SetValidHeight(bounds.rect_.GetHeight());
+    property_.SetValidWidth(bounds.rect_.GetWidth());
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     {
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
@@ -912,6 +934,8 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
+    property_.SetValidHeight(bounds.rect_.GetHeight());
+    property_.SetValidWidth(bounds.rect_.GetWidth());
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
