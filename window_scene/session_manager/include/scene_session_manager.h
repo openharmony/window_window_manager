@@ -614,7 +614,11 @@ public:
     void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         std::vector<sptr<SceneSession>>& mainSessions) const;
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
-    void GetSnapshotFromCache(int32_t persistentId);
+
+    /*
+     * Window Pattern
+     */
+    void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
 
 protected:
@@ -1188,7 +1192,6 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
-    std::shared_ptr<LRUCache> snapshotLRUCache_;
 
     /*
      * Window Watermark
@@ -1291,6 +1294,11 @@ private:
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
+
+    /*
+     * Window Pattern
+     */
+    std::unique_ptr<LRUCache> snapshotLRUCache_;
 };
 } // namespace OHOS::Rosen
 
