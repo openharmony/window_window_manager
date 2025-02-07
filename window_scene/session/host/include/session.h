@@ -584,7 +584,7 @@ public:
     SingleHandTransform GetSingleHandTransform() const;
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
-    DisplayId GetParentClientDisplayId();
+    void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
 
     /*
      * Screen Lock

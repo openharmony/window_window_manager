@@ -1578,19 +1578,20 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
-    if (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(configDisplayId_)) {
+    if ((configDisplayId_ != DISPLAY_ID_INVALID) &&
+        (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(configDisplayId_))) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, configDisplayId: %{public}" PRIu64,
             GetPersistentId(), configDisplayId_);
         return;
     }
+    auto clientDisplayId = clientDisplayId_;
+    if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
+        updateDisplayIdByParentSession(clientDisplayId);
+    }
     TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, input: %{public}s, screenId: %{public}" PRIu64
         ", clientDisplayId: %{public}" PRIu64 ", configDisplayId: %{public}" PRIu64,
-        GetPersistentId(), rect.ToString().c_str(), GetScreenId(), clientDisplayId_, configDisplayId_);
-    if (configDisplayId_ == DISPLAY_ID_INVALID) {
-        if (clientDisplayId_ != VIRTUAL_DISPLAY_ID) {
-            return;
-        }
-    } else if (configDisplayId_ != VIRTUAL_DISPLAY_ID) {
+        GetPersistentId(), rect.ToString().c_str(), GetScreenId(), clientDisplayId, configDisplayId_);
+    if (configDisplayId_ != VIRTUAL_DISPLAY_ID && clientDisplayId != VIRTUAL_DISPLAY_ID) {
         return;
     }
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =

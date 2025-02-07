@@ -982,7 +982,6 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
     return WSError::WS_OK;
 }
 
-
 DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
@@ -1013,7 +1012,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     }
     if ((GetScreenId() != DISPLAY_ID_INVALID) &&
         (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId()))) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 "not need",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 " not need",
             GetPersistentId(), GetScreenId());
         return;
     }
@@ -1029,7 +1028,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     WSRect lastRect = rect;
     auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
     if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
-        updatedDisplayId = GetParentClientDisplayId();
+        updateDisplayIdByParentSession(updatedDisplayId);
     }
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
@@ -3935,9 +3934,8 @@ void Session::SetClientDisplayId(DisplayId displayid)
     clientDisplayId_ = displayid;
 }
 
-DisplayId Session::GetParentClientDisplayId()
+void Session::UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId)
 {
-    DisplayId updatedDisplayId = DEFAULT_DISPLAY_ID;
     if (auto parentSession = GetParentSession()) {
         TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, parentWinId: %{public}d, parentClientDisplay: %{public}" PRIu64,
             GetPersistentId(), parentSession->GetPersistentId(), parentSession->GetClientDisplayId());
@@ -3947,6 +3945,5 @@ DisplayId Session::GetParentClientDisplayId()
         clientDisplayId_ = DEFAULT_DISPLAY_ID;
         updatedDisplayId = VIRTUAL_DISPLAY_ID;
     }
-    return updatedDisplayId;
 }
 } // namespace OHOS::Rosen
