@@ -193,6 +193,26 @@ void ScreenProperty::SetDensityInCurResolution(float densityInCurResolution)
     densityInCurResolution_ = densityInCurResolution;
 }
 
+void ScreenProperty::SetValidHeight(uint32_t validHeight)
+{
+    validHeight_ = validHeight;
+}
+ 
+int32_t ScreenProperty::GetValidHeight() const
+{
+    return validHeight_;
+}
+ 
+void ScreenProperty::SetValidWidth(uint32_t validWidth)
+{
+    validWidth_ = validWidth;
+}
+ 
+int32_t ScreenProperty::GetValidWidth() const
+{
+    return validWidth_;
+}
+
 void ScreenProperty::SetPhyWidth(uint32_t phyWidth)
 {
     phyWidth_ = phyWidth;

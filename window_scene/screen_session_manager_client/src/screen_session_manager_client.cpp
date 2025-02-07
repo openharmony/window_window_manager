@@ -360,6 +360,8 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode, screenSessionManager_->IsOrientationNeedChanged());
     screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
+    screenSession->SetValidHeight(bounds.rect_.GetHeight());
+    screenSession->SetValidWidth(bounds.rect_.GetWidth());
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)

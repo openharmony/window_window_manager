@@ -146,6 +146,12 @@ public:
     void SetStartY(uint32_t startY);
     uint32_t GetStartY() const;
 
+    void SetValidHeight(uint32_t validHeight);
+    int32_t GetValidHeight() const;
+ 
+    void SetValidWidth(uint32_t validWidth);
+    int32_t GetValidWidth() const;
+
     void SetStartPosition(uint32_t startX, uint32_t startY);
 
     void SetScreenType(ScreenType type);
@@ -243,6 +249,9 @@ private:
 
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
+
+    uint32_t validWidth_ { UINT32_MAX };
+    uint32_t validHeight_ { UINT32_MAX };
 
     ScreenShape screenShape_ { ScreenShape::RECTANGLE };
 
