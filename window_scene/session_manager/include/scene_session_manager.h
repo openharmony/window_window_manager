@@ -455,6 +455,7 @@ public:
      * Window Property
      */
     WMError ReleaseForegroundSessionScreenLock() override;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
 
     /*
      * PiP Window
@@ -683,6 +684,13 @@ private:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
+
+    /**
+     * Window Property
+     */
+    void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+        std::vector<sptr<SceneSession>>& filteredSessions);
+    bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
 
     /**
      * PiP Window

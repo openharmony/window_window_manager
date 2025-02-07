@@ -541,6 +541,20 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
     return objValue;
 }
 
+napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        napi_set_element(env, arrayValue, i, CreateJsWindowLayoutInfoObject(env, infos[i]));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
@@ -560,6 +574,14 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
         }
     }
     return arrayValue;
+}
+
+napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
+    return objValue;
 }
 
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
