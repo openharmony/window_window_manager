@@ -206,6 +206,8 @@ public:
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
+    void GetExtensionConfig(AAFwk::WantParams& want) override;
+    void UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
     virtual Orientation GetRequestedOrientation() override;
