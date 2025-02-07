@@ -92,7 +92,7 @@ public:
         const std::string& identityToken = "") override;
 
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
-        int32_t apiVersion = INVALID_API_VERSION) override;
+        int32_t apiVersion = API_VERSION_INVALID) override;
     int32_t GetStatusBarHeight() override;
 
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;

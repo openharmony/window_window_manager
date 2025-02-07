@@ -908,7 +908,7 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
         TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
         return ERR_INVALID_DATA;
     }
-    int32_t apiVersion = INVALID_API_VERSION;
+    int32_t apiVersion = API_VERSION_INVALID;
     if (!data.ReadInt32(apiVersion)) {
         TLOGE(WmsLogTag::WMS_IMMS, "read api version error");
         return ERR_INVALID_DATA;

@@ -1932,19 +1932,12 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
 WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea,
     const Rect& rect, int32_t apiVersion)
 {
-    if (apiVersion != INVALID_API_VERSION && apiVersion < API_VERSION_SIXTEEN &&
-        WindowHelper::IsSystemWindow(property_->GetWindowType())) {
-        TLOGI(WmsLogTag::WMS_IMMS, "type %{public}d UI Extension of win %{public}d api version not supported",
-            type, GetWindowId());
+    apiVersion = apiVersion == API_VERSION_INVALID ?
+        static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
+    if (apiVersion < API_VERSION_16 && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api version not supported",
+            GetWindowId(), type);
         return WMError::WM_OK;
-    }
-    if (apiVersion == INVALID_API_VERSION) {
-        apiVersion = apiVersion == INVALID_API_VERSION ?
-            static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
-        if (apiVersion < API_VERSION_SIXTEEN && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api version not supported",
-                GetWindowId(), type);
-        }
     }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;

@@ -534,7 +534,7 @@ public:
     WSError SwitchFreeMultiWindow(bool enable);
 
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type,
-        int32_t apiVersion = INVALID_API_VERSION) { return true; }
+        int32_t apiVersion = API_VERSION_INVALID) { return true; }
 
     virtual bool IsVisibleForeground() const;
     void SetIsStarting(bool isStarting);
