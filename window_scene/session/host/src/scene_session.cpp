@@ -1586,7 +1586,7 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     }
     auto clientDisplayId = clientDisplayId_;
     if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
-        updateDisplayIdByParentSession(clientDisplayId);
+        UpdateDisplayIdByParentSession(clientDisplayId);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, input: %{public}s, screenId: %{public}" PRIu64
         ", clientDisplayId: %{public}" PRIu64 ", configDisplayId: %{public}" PRIu64,
