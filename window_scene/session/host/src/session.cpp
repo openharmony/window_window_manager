@@ -1032,7 +1032,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     }
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
-    TLOGI(WmsLogTag::WMS_LAYOUT,"CalculatedRect: winId: %{public}d, input: %{public}s, output: %{public}s,"
+    TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: winId: %{public}d, input: %{public}s, output: %{public}s,"
         " result: %{public}d, clientDisplayId: %{public}" PRIu64, GetPersistentId(), lastRect.ToString().c_str(),
         rect.ToString().c_str(), ret, updatedDisplayId);
 }

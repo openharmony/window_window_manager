@@ -2873,7 +2873,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto InitClientDisplayId = DEFAULT_DISPLAY_ID;
+    auto initClientDisplayId = DEFAULT_DISPLAY_ID;
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
@@ -2884,12 +2884,12 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
         if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
             property->SetDisplayId(DEFAULT_DISPLAY_ID);
-            InitClientDisplayId = parentSession->GetClientDisplayId();
+            initClientDisplayId = parentSession->GetClientDisplayId();
         } 
     }
     if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
         property->SetDisplayId(DEFAULT_DISPLAY_ID);
-        InitClientDisplayId = VIRTUAL_DISPLAY_ID;
+        initClientDisplayId = VIRTUAL_DISPLAY_ID;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "The corner radius is %{public}f", appWindowSceneConfig_.floatCornerRadius_);
     property->SetWindowCornerRadius(appWindowSceneConfig_.floatCornerRadius_);
@@ -2929,7 +2929,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, &systemConfig, token,
-                 pid, uid, isSystemCalling, InitClientDisplayId]() {
+                 pid, uid, isSystemCalling, initClientDisplayId]() {
         if (property == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "property is nullptr");
             return WSError::WS_ERROR_NULLPTR;
@@ -2957,7 +2957,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
-        newSession->SetClientDisplayId(InitClientDisplayId);
+        newSession->SetClientDisplayId(initClientDisplayId);
         newSession->GetSessionProperty()->SetWindowCornerRadius(property->GetWindowCornerRadius());
         property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
