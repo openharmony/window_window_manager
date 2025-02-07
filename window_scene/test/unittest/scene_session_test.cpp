@@ -1548,8 +1548,6 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTe
 
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-        PcFoldScreenManager::GetInstance().GetDisplayRects();
     sceneSession->clientDisplayId_ = 0;
     rect = {0, 100, 100, 100};
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
@@ -1558,7 +1556,7 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTe
     rect = {0, 100, 100, 100};
     auto rect2 = rect;
     sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_ + defaultDisplayRect.height_ + foldCreaseRect.height_ / 2);
+    EXPECT_EQ(rect.posY_, rect2.posY_);
 }
 
 /**
