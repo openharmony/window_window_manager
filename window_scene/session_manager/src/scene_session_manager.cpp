@@ -121,6 +121,7 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
+constexpr std::size_t SNAPSHOT_CACHE_CAPACITY = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -273,6 +274,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
         WLOGFE("Failed to register bundle status callback.");
     }
     ScbDumpSubscriber::Subscribe(g_scbSubscriber);
+    snapshotLRUCache_ = std::make_unique<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
 }
 
 SceneSessionManager::~SceneSessionManager()
@@ -2289,6 +2291,29 @@ void SceneSessionManager::NotifyCollaboratorAfterStart(sptr<SceneSession>& scnSe
     }
 }
 
+void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    if (int32_t removedCacheId = snapshotLRUCache_->Put(persistentId);
+        removedCacheId != -1) {
+        if (auto removedCacheSession = GetSceneSession(removedCacheId)) {
+            removedCacheSession->ResetSnapshot();
+        } else {
+            TLOGW(WmsLogTag::WMS_PATTERN, "removedCacheSession:%{public}d nullptr", removedCacheId);
+        }
+    }
+}
+
+void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    taskScheduler_->PostAsyncTask([this, persistentId]() {
+        if (!snapshotLRUCache_->Visit(persistentId)) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
+        }
+    }, __func__);
+}
+
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
     const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
 {
@@ -2311,6 +2336,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             info.callerToken_ = nullptr;
             info.callingTokenId_ = 0;
             scnSession->SetSessionInfo(info);
+        }
+
+        if (WindowHelper::IsMainWindow(scnSession->GetWindowType()) &&
+            systemConfig_.uiType_ != UI_TYPE_PC && !systemConfig_.freeMultiWindowEnable_) {
+            PutSnapshotToCache(persistentId);
         }
 
         scnSession->BackgroundTask(isSaveSnapshot);
