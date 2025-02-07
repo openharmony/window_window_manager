@@ -852,8 +852,7 @@ bool ScreenSessionManager::GetIsCurrentInUseById(ScreenId screenId)
     return true;
 }
 
-bool ScreenSessionManager::GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
-    MultiScreenPositionOptions& mainScreenOption, MultiScreenPositionOptions& secondaryScreenOption)
+bool ScreenSessionManager::GetMultiScreenInfo(MultiScreenInfo &info)
 {
     std::map<ScreenId, uint32_t> screenMode;
     bool getMode = ScreenSettingHelper::GetSettingScreenModeMap(screenMode);
@@ -861,8 +860,8 @@ bool ScreenSessionManager::GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
         TLOGE(WmsLogTag::DMS, "get last screen mode failed");
         return false;
     }
-    std::map<ScreenId, std::pair<uint32_t, uint32_t>> relativePosition;
-    bool getPosition = ScreenSettingHelper::GetSettingRelativePositionMap(relativePosition);
+    std::map<ScreenId, std::pair<uint32_t, uint32_t>> position;
+    bool getPosition = ScreenSettingHelper::GetSettingRelativePositionMap(position);
     if (!getPosition) {
         TLOGE(WmsLogTag::DMS, "get relative position failed");
         return false;
@@ -875,26 +874,26 @@ bool ScreenSessionManager::GetMultiScreenInfo(MultiScreenMode& multiScreenMode,
             continue;
         }
         if (mode == SCREEN_MAIN_IN_DATA) {
-            if (relativePosition.find(screenId) == relativePosition.end()) {
-                TLOGE(WmsLogTag::DMS, "relativePosition not found, screenId: %{public}" PRIu64 "", screenId);
+            if (position.find(screenId) == position.end()) {
+                TLOGE(WmsLogTag::DMS, "position not found, screenId: %{public}" PRIu64 "", screenId);
                 continue;
             }
-            mainScreenOption = {screenId, relativePosition[screenId].first, relativePosition[screenId].second};
+            info.mainScreenOption = {screenId, position[screenId].first, position[screenId].second};
             getMain = true;
         } else {
             if (mode == SCREEN_MIRROR_IN_DATA) {
-                multiScreenMode = MultiScreenMode::SCREEN_MIRROR;
+                info.multiScreenMode = MultiScreenMode::SCREEN_MIRROR;
             } else if (mode == SCREEN_EXTEND_IN_DATA) {
-                multiScreenMode = MultiScreenMode::SCREEN_EXTEND;
+                info.multiScreenMode = MultiScreenMode::SCREEN_EXTEND;
             } else {
                 TLOGE(WmsLogTag::DMS, "screen mode error!");
                 continue;
             }
-            if (relativePosition.find(screenId) == relativePosition.end()) {
-                TLOGE(WmsLogTag::DMS, "relativePosition not found, screenId: %{public}" PRIu64 "", screenId);
+            if (position.find(screenId) == position.end()) {
+                TLOGE(WmsLogTag::DMS, "position not found, screenId: %{public}" PRIu64 "", screenId);
                 continue;
             }
-            secondaryScreenOption = {screenId, relativePosition[screenId].first, relativePosition[screenId].second};
+            info.secondaryScreenOption = {screenId, position[screenId].first, position[screenId].second};
             getSecondary = true;
         }
     }
@@ -938,41 +937,30 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
     }
 }
 
-void ScreenSessionManager::RecoverMultiScreenInfoFromData(sptr<ScreenSession> screenSession)
+bool ScreenSessionManager::CheckMultiScreenInfo(MultiScreenInfo &info, sptr<ScreenSession> screenSession)
 {
     bool isRestored = IsScreenRestored(screenSession);
     if (!isRestored) {
         TLOGE(WmsLogTag::DMS, "no restored screen found");
         SetMultiScreenDefaultRelativePosition();
-        return;
+        return false;
     }
-    MultiScreenMode multiScreenMode;
-    MultiScreenPositionOptions mainScreenOption;
-    MultiScreenPositionOptions secondaryScreenOption;
-    mainScreenOption.screenId_ = SCREEN_ID_INVALID;
-    secondaryScreenOption.screenId_ = SCREEN_ID_INVALID;
-    bool getInfo = GetMultiScreenInfo(multiScreenMode, mainScreenOption, secondaryScreenOption);
+    bool getInfo = GetMultiScreenInfo(info);
     if (!getInfo) {
         TLOGE(WmsLogTag::DMS, "get option failed");
-        return;
+        return false;
     }
-    if (mainScreenOption.screenId_ == secondaryScreenOption.screenId_) {
+    if (info.mainScreenOption.screenId_ == info.secondaryScreenOption.screenId_) {
         TLOGE(WmsLogTag::DMS, "screenId error");
-        return;
+        return false;
     }
-    if (mainScreenOption.screenId_ != screenSession->GetScreenId() &&
-        secondaryScreenOption.screenId_ != screenSession->GetScreenId()) {
+    if (info.mainScreenOption.screenId_ != screenSession->GetScreenId() &&
+        info.secondaryScreenOption.screenId_ != screenSession->GetScreenId()) {
         TLOGE(WmsLogTag::DMS, "no current screenId");
-        return;
+        return false;
     }
     TLOGW(WmsLogTag::DMS, "read param success");
-    SetMultiScreenMode(mainScreenOption.screenId_, secondaryScreenOption.screenId_, multiScreenMode);
-    if (multiScreenMode == MultiScreenMode::SCREEN_EXTEND) {
-        auto ret = SetMultiScreenRelativePosition(mainScreenOption, secondaryScreenOption);
-        if (ret != DMError::DM_OK) {
-            SetMultiScreenDefaultRelativePosition();
-        }
-    }
+    return true;
 }
 
 void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSession,
@@ -996,7 +984,6 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     }
 #endif
     if (clientProxy_ && (!phyMirrorEnable || g_isPcDevice)) {
-        TLOGW(WmsLogTag::DMS, "screen connect and notify to scb.");
         if (g_outerOnly == ONLY_OUTER_SCREEN_VALUE) {
             if (screenId != SCREEN_ID_FULL) {
                 defaultScreenId_ = screenId;
@@ -1005,13 +992,15 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
                     screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
                 CallRsSetScreenPowerStatusSync(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
             }
-        } else {
-            clientProxy_->OnScreenConnectionChanged(screenId, screenEvent,
-                screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
         }
     }
+    if (clientProxy_ && !g_isPcDevice && !phyMirrorEnable) {
+        TLOGW(WmsLogTag::DMS, "screen connect and notify to scb.");
+        clientProxy_->OnScreenConnectionChanged(screenId, screenEvent,
+            screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
+    }
     if (clientProxy_ && g_isPcDevice) {
-        RecoverMultiScreenInfoFromData(screenSession);
+        RecoverRestoredMultiScreenMode(screenSession);
         SetExtendedScreenFallbackPlan(screenId);
     }
     if (phyMirrorEnable) {
@@ -6418,9 +6407,32 @@ void ScreenSessionManager::RecoverMultiScreenMode()
         if (iter.second->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
             !iter.second->GetIsInternal() && iter.second->GetIsCurrentInUse()) {
             TLOGW(WmsLogTag::DMS, "found external screen, screenId: %{public}" PRIu64, iter.first);
-            RecoverMultiScreenInfoFromData(iter.second);
-            break;
+            RecoverRestoredMultiScreenMode(iter.second);
         }
+    }
+}
+
+void ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession)
+{
+    MultiScreenInfo info;
+    bool restored = CheckMultiScreenInfo(info, screenSession);
+    if (!restored) {
+        TLOGW(WmsLogTag::DMS, "no info, use default mode");
+        clientProxy_->OnScreenConnectionChanged(screenSession->GetScreenId(), ScreenEvent::CONNECTED,
+            screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
+        return;
+    }
+    if (info.multiScreenMode == MultiScreenMode::SCREEN_MIRROR) {
+        SetMultiScreenMode(info.mainScreenOption.screenId_, info.secondaryScreenOption.screenId_,
+            info.multiScreenMode);
+        TLOGW(WmsLogTag::DMS, "mirror, return befor OnScreenConnectionChanged");
+        return;
+    }
+    clientProxy_->OnScreenConnectionChanged(screenSession->GetScreenId(), ScreenEvent::CONNECTED,
+        screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
+    auto ret = SetMultiScreenRelativePosition(info.mainScreenOption, info.secondaryScreenOption);
+    if (ret != DMError::DM_OK) {
+        SetMultiScreenDefaultRelativePosition();
     }
 }
 
@@ -6510,6 +6522,10 @@ void ScreenSessionManager::SetClientInner()
         }
         if (g_isPcDevice && g_outerOnly == ONLY_OUTER_SCREEN_VALUE && !iter.second->GetIsExtend()) {
             defaultScreenId_ = iter.first;
+        }
+        if (g_isPcDevice && iter.second->GetScreenCombination() != ScreenCombination::SCREEN_MAIN) {
+            TLOGI(WmsLogTag::DMS, "PC device, return before OnScreenConnectionChanged");
+            continue;
         }
         clientProxy_->OnScreenConnectionChanged(iter.first, ScreenEvent::CONNECTED,
             iter.second->GetRSScreenId(), iter.second->GetName(), iter.second->GetIsExtend());
