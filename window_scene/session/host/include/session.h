@@ -577,7 +577,7 @@ public:
     std::optional<bool> GetClientDragEnable() const;
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
-    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect, DisplayId clientDisplayId = 0) const;
+    DisplayId TransformGlobalRectToRelativeRect(WSRect& rect) const;
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);

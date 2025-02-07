@@ -983,18 +983,21 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
 }
 
 
-DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect, DisplayId clientDisplayId) const
+DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     int32_t lowerScreenPosY =
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
     TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    DisplayId updatedDisplayId = DEFAULT_DISPLAY_ID;
     if (rect.posY_ >= lowerScreenPosY) {
-        clientDisplayId = VIRTUAL_DISPLAY_ID;
+        if (WindowHelper::IsMainWindow(GetWindowType())) {
+            updatedDisplayId = VIRTUAL_DISPLAY_ID;
+        }
         rect.posY_ -= lowerScreenPosY;
     }
-    return clientDisplayId;
+    return updatedDisplayId;
 }
 
 void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
@@ -1008,8 +1011,9 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         TLOGD(WmsLogTag::WMS_LAYOUT, "Error status");
         return;
     }
-    if (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId())) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 "not need",
+    if ((GetScreenId() != DISPLAY_ID_INVALID) &&
+        (!PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId()))) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 "not need",
             GetPersistentId(), GetScreenId());
         return;
     }
@@ -1022,12 +1026,11 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
             GetPersistentId(), ret);
         return;
     }
-    auto clientDisplayId = DEFAULT_DISPLAY_ID;
-    if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
-        clientDisplayId = GetParentClientDisplayId();
-    }
     WSRect lastRect = rect;
-    auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect, clientDisplayId);
+    auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
+    if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
+        updatedDisplayId = GetParentClientDisplayId();
+    }
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
     TLOGI(WmsLogTag::WMS_LAYOUT,"CalculatedRect: winId: %{public}d, input: %{public}s, output: %{public}s,"
