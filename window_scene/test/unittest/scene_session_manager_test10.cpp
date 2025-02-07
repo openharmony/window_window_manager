@@ -559,7 +559,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, Function | SmallTes
  * @tc.desc: test return by zOrder
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, FilterForGetAllWindowLayoutInfo01, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
@@ -594,7 +594,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function 
  * @tc.desc: test system window
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, FilterForGetAllWindowLayoutInfo02, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
@@ -640,7 +640,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo02, Function 
  * @tc.desc: test VisibilityState
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, FilterForGetAllWindowLayoutInfo03, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
@@ -683,7 +683,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo03, Function 
  * @tc.desc: session is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, FilterForGetAllWindowLayoutInfo04, Function | SmallTest | Level3)
 {
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
@@ -699,7 +699,7 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo04, Function 
  * @tc.desc: not System
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded01, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, IsGetWindowLayoutInfoNeeded01, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = false;
@@ -712,7 +712,7 @@ HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded01, Function | Sm
  * @tc.desc: is System, not in whitelist
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded02, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, IsGetWindowLayoutInfoNeeded02, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = true;
@@ -726,7 +726,7 @@ HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded02, Function | Sm
  * @tc.desc: is System, in whitelist
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, IsGetWindowLayoutInfoNeeded03, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest10, IsGetWindowLayoutInfoNeeded03, Function | SmallTest | Level3)
 {
     SessionInfo sessionInfo;
     sessionInfo.isSystem_ = true;
