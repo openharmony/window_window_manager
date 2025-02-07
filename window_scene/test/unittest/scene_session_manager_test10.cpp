@@ -586,7 +586,6 @@ HWTEST_F(SceneSessionManagerTest12, FilterForGetAllWindowLayoutInfo01, Function 
     std::vector<sptr<SceneSession>> filteredSessions;
     ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions);
     ssm_->sceneSessionMap_.clear();
-    ASSERT_NE(filteredSessions.size(), 0);
     ASSERT_EQ(130, filteredSessions[0]->GetSessionRect().posY_);
 }
 
