@@ -3711,9 +3711,9 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d, specifiedId %{public}d, specifiedFlag %{public}s, requestId %{public}d",
-        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
-        info.reuse, info.specifiedId, info.specifiedFlag_.c_str(), info.requestId);
+        "appIndex %{public}d, reuse %{public}d, requestId %{public}d, specifiedFlag %{public}s",
+        info.bundleName_.c_str(), info.moduleName_.c_str(),
+        info.abilityName_.c_str(), info.appIndex_, info.reuse, info.requestId, info.specifiedFlag_.c_str());
     auto sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
