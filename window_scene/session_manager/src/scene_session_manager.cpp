@@ -9989,7 +9989,7 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
     std::vector<sptr<WindowLayoutInfo>>& infos)
 {
     auto task = [this, displayId, &infos]() mutable {
-        bool isVirtualDisplay = false;
+        constexpr bool isVirtualDisplay = false;
         std::vector<sptr<SceneSession>> filteredSessions;
         FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
         for (const auto& session : filteredSessions) {
