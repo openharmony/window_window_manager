@@ -1401,7 +1401,7 @@ WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, s
     crossAxisState_ = crossAxisState;
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
-            data, SubSystemId::WM_UIEXT);
+            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
     return WMError::WM_OK;

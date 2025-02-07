@@ -2869,7 +2869,7 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
     want.setParam(Extension::CROSS_AXIS_FIELD, static_cast<uint32_t>(state));
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
-            want, SubSystemId::WM_UIEXT);
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
     std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
     auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
