@@ -16,6 +16,8 @@
 #include "window_scene_config.h"
 
 #include "config_policy_utils.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
