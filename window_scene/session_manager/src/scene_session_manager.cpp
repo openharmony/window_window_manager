@@ -5055,6 +5055,8 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
 
 void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
 {
+    auto defaultFocusedSessionId = windowFocusController_->GetFocusedSessionId(DEFAULT_DISPLAY_ID);
+    oss << "Focus window: " << defaultFocusedSessionId << std::endl;
     std::vector<std::pair<DisplayId, int32_t>> allFocusedSessionList =
         windowFocusController_->GetAllFocusedSessionList();
     oss << "All Focus window: " << std::endl;
@@ -5108,13 +5110,11 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         DumpSessionInfo(session, oss);
         count++;
     }
-    auto defaultFocusedSessionId = windowFocusController_->GetFocusedSessionId(DEFAULT_DISPLAY_ID);
-    oss << "Focus window: " << defaultFocusedSessionId << std::endl;
+    DumpFocusInfo(oss);
     oss << "SingleHand: X[" << singleHandTransform_.posX << "] Y[" << singleHandTransform_.posY << "] scale["
         << singleHandTransform_.scaleX << "]" << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
     oss << "Highlighted windows: " << GetHighlightIdsStr() << std::endl;
-    DumpFocusInfo(oss);
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
 }
