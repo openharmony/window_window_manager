@@ -320,6 +320,8 @@ void SceneInputManager::NotifyWindowInfoChangeFromSession(const sptr<SceneSessio
 {
     if (sceneSessionDirty_) {
         sceneSessionDirty_->NotifyWindowInfoChange(sceneSesion, WindowUpdateType::WINDOW_UPDATE_PROPERTY);
+    } else {
+        TLOGD(WmsLogTag::WMS_EVENT, "sceneSessionDirty is nullptr");
     }
 }
 
