@@ -1417,7 +1417,7 @@ void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
                                      std::optional<AAFwk::Want>& reply) {
         return static_cast<int32_t>(func(std::move(data), reply));
     }
-    dataConsumers_.emplace(static_cast<uint32_t>(code), std::move(windowModeConsumer));
+    dataConsumers_.emplace(static_cast<uint32_t>(code), std::move(consumer));
 }
 
 void WindowExtensionSessionImpl::RegisterDataConsumer()
