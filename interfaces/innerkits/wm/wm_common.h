@@ -1176,6 +1176,12 @@ struct PiPTemplateInfo {
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
 };
 
+struct PiPWindowSize {
+    uint32_t width;
+    uint32_t height;
+    double scale;
+};
+
 /**
  * @struct VsyncCallback
  *
