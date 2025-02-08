@@ -1184,6 +1184,28 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateConfigurationSyncForAll, Function | 
     windowSceneSessionImpl->UpdateConfigurationSyncForAll(configuration);
     ASSERT_EQ(WMError::WM_OK, windowSession->Destroy(true));
 }
+
+/**
+ * @tc.name: IsSystemDensityChanged01
+ * @tc.desc: IsSystemDensityChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("IsSystemDensityChanged01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    auto displayInfo = sptr<DisplayInfo>::MakeSptr();
+    displayInfo->SetVirtualPixelRatio(1.5f);
+    auto ret = window->IsSystemDensityChanged(displayInfo);
+    ASSERT_EQ(true, ret);
+
+    ret = window->IsSystemDensityChanged(displayInfo);
+    ASSERT_EQ(false, ret);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
