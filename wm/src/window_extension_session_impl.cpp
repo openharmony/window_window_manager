@@ -1396,8 +1396,7 @@ WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, s
         TLOGE(WmsLogTag::WMS_UIEXT, "invalid CrossAxisState:%{public}d", state);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    auto crossAxisState = static_cast<CrossAxisState>(state);
-    crossAxisState_ = crossAxisState;
+    crossAxisState_ = static_cast<CrossAxisState>(state);;
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
             data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
