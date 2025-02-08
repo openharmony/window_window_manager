@@ -809,7 +809,7 @@ HWTEST_F(SceneSessionTest5, SetWindowEnableDragBySystem, Function | SmallTest | 
  * @tc.desc: ActivateDragBySystem function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, ActivateDragBySystem, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, ActivateDragBySystem, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "ActivateDragBySystem";
@@ -831,7 +831,7 @@ HWTEST_F(SceneSessionLayoutTest, ActivateDragBySystem, Function | SmallTest | Le
  * @tc.desc: CheckDragActivatedSettings
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLayoutTest, CheckDragActivatedSettings, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, CheckDragActivatedSettings, Function | SmallTest | Level2)
 {
     SessionInfo info;
     info.abilityName_ = "CheckDragActivatedSettings";

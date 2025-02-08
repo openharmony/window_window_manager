@@ -812,8 +812,8 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
-    SingleHandTransform singleHandTransform_;
     bool dragActivated_ = true;
+    SingleHandTransform singleHandTransform_;
 
     /*
      * Screen Lock
