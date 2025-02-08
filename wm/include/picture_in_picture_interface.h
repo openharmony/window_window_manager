@@ -54,6 +54,16 @@ class IPiPControlObserver : virtual public RefBase {
 public:
     virtual void OnControlEvent(PiPControlType controlType, PiPControlStatus status) {}
 };
+
+/**
+ * @class IPiPControlObserver
+ *
+ * @brief Pip control observer.
+ */
+class IPiPWindowSize : virtual public RefBase {
+public:
+    virtual void OnPipSizeChange(const PiPWindowSize& size) {}
+};
 } // namespace Rosen
 } // namespace OHOS
 #endif //OHOS_PICTURE_IN_PICTURE_INTERFACE_H
