@@ -2260,9 +2260,9 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function
  */
 HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, Function | SmallTest | Level3)
 {
-    window->RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
+    window_->RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
         std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
-        window, std::placeholders::_1, std::placeholders::_2));
+        window_, std::placeholders::_1, std::placeholders::_2));
     ASSERT_NE(nullptr,
         window_->dataConsumers_[static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE)]);
 }
@@ -2277,8 +2277,8 @@ HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | Smal
     AAFwk::Want wamt;
     AAFwk::Want reply;
     want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<int32_t>(CrossAxisState::STATE_END));
-    ASSERT_EQ(WMError::WM_OK, window->OnCrossAxisStateChange(std::move(wamt), reply));
-    ASSERT_EQ(CrossAxisState::STATE_END, window->crossAxisState_.load());
+    ASSERT_EQ(WMError::WM_OK, window_->OnCrossAxisStateChange(std::move(wamt), reply));
+    ASSERT_EQ(CrossAxisState::STATE_END, window_->crossAxisState_.load());
 }
 }
 } // namespace Rosen
