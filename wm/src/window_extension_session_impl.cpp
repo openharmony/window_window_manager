@@ -1438,7 +1438,7 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
                            std::move(windowModeConsumer));
     RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
         std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
-        this, std::placeholders::_1, std::placeholders::_2))
+        this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
                                                   std::optional<AAFwk::Want>& reply) -> int32_t {
