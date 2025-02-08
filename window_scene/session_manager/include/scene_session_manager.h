@@ -841,6 +841,7 @@ private:
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
+    DisplayId updateSubWindowAndSystemWindowDisplayId(const sptr<WindowSessionProperty>& property);
 
     /*
      * Window Rotate Animation
