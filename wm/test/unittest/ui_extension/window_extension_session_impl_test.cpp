@@ -2262,7 +2262,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, Function | SmallTest 
 {
     window->RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
         std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
-        window, std::placeholders::_1,, std::placeholders::_2))
+        window, std::placeholders::_1, std::placeholders::_2))
     ASSERT_NE(nullptr,
         window_->dataConsumers_[static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE)]);
 }
@@ -2279,7 +2279,6 @@ HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | Smal
     want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<int32_t>(CrossAxisState::STATE_END));
     ASSERT_EQ(WMError::WM_OK, window->OnCrossAxisStateChange(std::move(wamt), reply));
     ASSERT_EQ(CrossAxisState::STATE_END, window->crossAxisState_);
-    
 }
 }
 } // namespace Rosen

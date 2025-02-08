@@ -1388,8 +1388,7 @@ WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
 WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     auto state = data.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (state == static_cast<int32_t>(crossAxisState_.load()))
-    {
+    if (state == static_cast<int32_t>(crossAxisState_.load())) {
         return WMError::WM_OK;
     }
     if (state < static_cast<int32_t>(CrossAxisState::STATE_INVALID) ||
