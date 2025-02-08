@@ -582,6 +582,9 @@ public:
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
+    void SetClientDisplayId(DisplayId displayId);
+    DisplayId GetClientDisplayId() const;
+    void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
 
     /*
      * Screen Lock
@@ -754,7 +757,8 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
-    DisplayId lastUpdatedDisplayId_ = 0;
+    DisplayId clientDisplayId_ = 0; // Window displayId on the client
+    DisplayId configDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /*

@@ -2876,7 +2876,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
@@ -2886,7 +2885,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
     }
-
+    auto initClientDisplayId = UpdateSpecificSessionClientDisplayId(property);
     TLOGI(WmsLogTag::WMS_LIFE, "The corner radius is %{public}f", appWindowSceneConfig_.floatCornerRadius_);
     property->SetWindowCornerRadius(appWindowSceneConfig_.floatCornerRadius_);
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
@@ -2924,8 +2923,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     // Get pid and uid before posting task.
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
-    auto task = [this, sessionStage, eventChannel, surfaceNode, property,
-                 &persistentId, &session, &systemConfig, token, pid, uid, isSystemCalling]() {
+    auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, &systemConfig, token,
+                 pid, uid, isSystemCalling, initClientDisplayId]() {
         if (property == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "property is nullptr");
             return WSError::WS_ERROR_NULLPTR;
@@ -2953,6 +2952,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        newSession->SetClientDisplayId(initClientDisplayId);
         newSession->GetSessionProperty()->SetWindowCornerRadius(property->GetWindowCornerRadius());
         property->SetSystemCalling(isSystemCalling);
         auto errCode = newSession->ConnectInner(
@@ -13071,5 +13071,23 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
         TLOGNI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
         return WSError::WS_OK;
     }, __func__);
+}
+
+DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property)
+{
+    auto initClientDisplayId = DEFAULT_DISPLAY_ID;
+    //  SubWindow
+    if (auto parentSession = GetSceneSession(property->GetParentPersistentId())) {
+        if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+            property->SetDisplayId(DEFAULT_DISPLAY_ID);
+            initClientDisplayId = parentSession->GetClientDisplayId();
+        }
+    }
+    // SystemWindow
+    if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+        property->SetDisplayId(DEFAULT_DISPLAY_ID);
+        initClientDisplayId = VIRTUAL_DISPLAY_ID;
+    }
+    return initClientDisplayId;
 }
 } // namespace OHOS::Rosen
