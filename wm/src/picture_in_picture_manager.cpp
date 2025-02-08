@@ -257,7 +257,7 @@ void PictureInPictureManager::AutoStartPipWindow()
         return;
     }
     auto autoStartController = autoStartController_.promote();
-    if (!autoStartController) {
+    if (autoStartController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "autoStartController is null");
         return;
     }
@@ -283,7 +283,7 @@ void PictureInPictureManager::AutoStartPipWindow()
                 return;
             }
             auto wptrPipController = autoStartControllerMap_[handleId];
-            if (!wptrPipController) {
+            if (wptrPipController == nullptr) {
                 TLOGE(WmsLogTag::WMS_PIP, "wptrPipController is nullptr");
                 return;
             }
