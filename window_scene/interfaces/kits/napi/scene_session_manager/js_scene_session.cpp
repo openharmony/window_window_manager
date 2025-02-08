@@ -3711,9 +3711,9 @@ sptr<SceneSession> JsSceneSession::GenSceneSession(SessionInfo& info)
 void JsSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d, specifiedId %{public}d, specifiedFlag %{public}s",
+        "appIndex %{public}d, reuse %{public}d, requestId %{public}d, specifiedFlag %{public}s",
         info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse, info.specifiedId, info.specifiedFlag_.c_str());
+        info.abilityName_.c_str(), info.appIndex_, info.reuse, info.requestId, info.specifiedFlag_.c_str());
     auto sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "GenSceneSession failed");
@@ -3789,8 +3789,8 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
         }
         napi_value argv[] = {jsSessionInfo};
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s task success, "
-            "id:%{public}d, specifiedId:%{public}d",
-            where, sessionInfo->persistentId_, sessionInfo->specifiedId);
+            "id:%{public}d, requestId:%{public}d",
+            where, sessionInfo->persistentId_, sessionInfo->requestId);
         napi_call_function(env, NapiGetUndefined(env),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
