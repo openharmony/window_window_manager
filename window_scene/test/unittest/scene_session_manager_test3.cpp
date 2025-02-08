@@ -1433,7 +1433,7 @@ HWTEST_F(SceneSessionManagerTest3, ShiftAppWindowFocus, Function | SmallTest | L
     sourceSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sourceSceneSession));
     result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_OPERATION);
 
     auto targetSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     targetSceneSession->persistentId_ = 10086;
