@@ -1485,8 +1485,8 @@ HWTEST_F(WindowSessionImplTest, SetAPPWindowIcon, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
     Media::InitializationOptions opts;
-    opts.size.width = 200;  // 200： test width
-    opts.size.height = 300; // 300： test height
+    opts.size.width = 200;  // 200锛� test width
+    opts.size.height = 300; // 300锛� test height
     opts.pixelFormat = Media::PixelFormat::ARGB_8888;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     std::unique_ptr<Media::PixelMap> pixelMapPtr = Media::PixelMap::Create(opts);
@@ -2088,25 +2088,25 @@ HWTEST_F(WindowSessionImplTest, UpdateExtensionConfig, Function | SmallTest | Le
     AAFwk::WantParams configParam;
     AAFwk::WantParams wantParam(want->GetParams());
     configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_CROSS)));
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_CROSS)));
     wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
     configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_INVALID)));
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_INVALID)));
     wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_INVALID);
     configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_NO_CROSS)));
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_NO_CROSS)));
     wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
     configParam.SetParam(Extension::CROSS_AXIS_FIELD,
-        AAFwk::Integer::Box(static_cast<uint32_t>(CrossAxisState::STATE_END)));
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_END)));
     wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
