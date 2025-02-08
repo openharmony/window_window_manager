@@ -5055,9 +5055,11 @@ void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std
 
 void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
 {
-    oss << "Focus window: " << std::endl;
+    auto defaultFocusedSessionId = windowFocusController_->GetFocusedSessionId(DEFAULT_DISPLAY_ID);
+    oss << "Focus window: " << defaultFocusedSessionId << std::endl;
     std::vector<std::pair<DisplayId, int32_t>> allFocusedSessionList =
         windowFocusController_->GetAllFocusedSessionList();
+    oss << "All Focus window: " << std::endl;
     if (allFocusedSessionList.size() > 0) {
         for (const auto& focusState : allFocusedSessionList) {
             oss << "DisplayId: " << focusState.first << " Focus window: " << focusState.second << std::endl;
