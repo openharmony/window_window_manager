@@ -1006,7 +1006,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "skip update UIExtension: %{public}d, rect: %{public}s",
             GetPersistentId(), rect.ToString().c_str());
-        return;        
+        return;
     }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
