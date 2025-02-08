@@ -511,7 +511,7 @@ protected:
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     WMError GetVirtualPixelRatio(float& vpr);
     mutable std::recursive_mutex transformMutex_;
-    std::atomic<CrossAxisState> crossAxisState_;
+    std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
 
     /*
      * Window Immersive
