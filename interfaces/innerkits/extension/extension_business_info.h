@@ -21,7 +21,7 @@
 namespace OHOS::Rosen::Extension {
 constexpr const char* const WINDOW_MODE_FIELD = "windowMode";
 constexpr const char* const CROSS_AXIS_FIELD = "crossAxis";
-constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.param";
+constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
 
 enum class Businesscode : uint8_t {
     SYNC_HOST_WINDOW_MODE = 0,  // Synchronize the host's window mode
