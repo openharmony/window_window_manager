@@ -544,6 +544,35 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, ChangeOffTentMode, Function | SmallT
     FoldDisplayMode displayMode = policy.GetModeMatchStatus();
     EXPECT_EQ(policy.lastCachedisplayMode_, displayMode);
 }
+
+/**
+ * @tc.name: ChangeScreenDisplayModeInner
+ * @tc.desc: test function : ChangeScreenDisplayModeInner
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SingleDisplayFoldPolicyTest, ChangeScreenDisplayModeInner, Function | SmallTest | Level3)
+ {
+     std::recursive_mutex displayInfoMutex;
+     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+     SingleDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+     
+     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+     DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
+     policy.ChangeScreenDisplayModeInner(displayMode, reason);
+     EXPECT_FALSE(policy.onBootAnimation_);
+ 
+     displayMode = FoldDisplayMode::MAIN;
+     policy.ChangeScreenDisplayModeInner(displayMode, reason);
+     EXPECT_FALSE(policy.onBootAnimation_);
+ 
+     displayMode = FoldDisplayMode::FULL;
+     policy.ChangeScreenDisplayModeInner(displayMode, reason);
+     EXPECT_FALSE(policy.onBootAnimation_);
+ 
+     displayMode = FoldDisplayMode::SUB;
+     policy.ChangeScreenDisplayModeInner(displayMode, reason);
+     EXPECT_FALSE(policy.onBootAnimation_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
