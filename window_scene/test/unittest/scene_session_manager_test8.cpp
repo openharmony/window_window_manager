@@ -769,7 +769,7 @@ HWTEST_F(SceneSessionManagerTest8, GetAppMainSceneSession, Function | SmallTest 
     sceneSession->property_ = property;
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    auto ret = ssm_->GetAppMainSceneSession(sceneSession, 1);
+    auto ret = ssm_->GetAppMainSceneSession(1, sceneSession);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
 }
 

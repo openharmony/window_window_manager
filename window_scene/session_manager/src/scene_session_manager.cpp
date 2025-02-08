@@ -10754,12 +10754,12 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         TLOGE(WmsLogTag::WMS_FOCUS, "target session has been focused, focusedSessionId: %{public}d", focusedSessionId);
         return WSError::WS_DO_NOTHING;
     }
-    WSError ret = GetAppMainSceneSession(sourceSession, sourcePersistentId);
+    WSError ret = GetAppMainSceneSession(sourcePersistentId, sourceSession);
     if (ret != WSError::WS_OK) {
         return ret;
     }
     sptr<SceneSession> targetSession = nullptr;
-    ret = GetAppMainSceneSession(targetSession, targetPersistentId);
+    ret = GetAppMainSceneSession(targetPersistentId, targetSession);
     if (ret != WSError::WS_OK) {
         return ret;
     }
@@ -10781,7 +10781,7 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
     return RequestSessionFocus(targetPersistentId, false, reason);
 }
 
-WSError SceneSessionManager::GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId)
+WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession)
 {
     sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
