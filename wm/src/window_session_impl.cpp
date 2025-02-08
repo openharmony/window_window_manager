@@ -2866,7 +2866,7 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
         static_cast<uint32_t>(state));
     crossAxisState_ = state;
     AAFwk::Want want;
-    want.setParam(Extension::CROSS_AXIS_FIELD, static_cast<uint32_t>(state));
+    want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<uint32_t>(state));
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
             want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
@@ -5033,7 +5033,7 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
 
 void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want)
 {
-    want.setParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<uint32_t>(crossAxisState_.load())));
+    want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<uint32_t>(crossAxisState_.load())));
 }
 
 void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
