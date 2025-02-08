@@ -1707,6 +1707,11 @@ WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     isHighlighted_ = isHighlight;
+    if (isHighlighted_) {
+        CALL_UI_CONTENT(ActiveWindow);
+    } else {
+        CALL_UI_CONTENT(UnActiveWindow);
+    }
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
     auto highlightChangeListeners = GetListeners<IWindowHighlightChangeListener>();
     for (const auto& listener : highlightChangeListeners) {
