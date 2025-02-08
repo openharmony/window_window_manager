@@ -229,6 +229,7 @@ public:
     void SetIsBScreenHalf(bool isBScreenHalf);
     bool GetIsBScreenHalf() const;
     ScreenShape GetScreenShape() const;
+    float GetSensorRotation() const;
 
     bool isPrimary_ { false };
     bool isInternal_ { false };

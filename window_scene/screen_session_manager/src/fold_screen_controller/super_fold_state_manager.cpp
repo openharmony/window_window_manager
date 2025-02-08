@@ -367,6 +367,12 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
 {
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetIsBScreenHalf(true);
+    auto screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.GetWidth();
+    auto screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.GetHeight();
+    if (screenWidth > screenHeight) {
+        TLOGW(WmsLogTag::DMS, "not vertical, swap width and height");
+        screenSession->UpdatePropertyByResolution(screenHeight, screenWidth);
+    }
     ScreenSessionManager::GetInstance().NotifyDisplayChanged(
         screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::SUPER_FOLD_RESOLUTION_CHANGED);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
