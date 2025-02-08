@@ -189,27 +189,48 @@ napi_value JsPipController::UpdateContentNode(napi_env env, napi_callback_info i
 napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentNode is called");
+    WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = NUMBER_FOUR;
     napi_value argv[NUMBER_FOUR] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_ONE) {
         TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid:%{public}zu", argc);
-        return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     napi_value typeNode = argv[0];
-    if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
+    if (GetType(env, typeNode) == napi_null || GetType(env, typeNode) == napi_undefined) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
-        return NapiThrowInvalidParam(env, "Invalid typeNode.");
-    }
-    if (pipController_ == nullptr) {
-        std::string errMsg = "OnUpdateNode error, controller is nullptr";
-        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
-        return NapiThrowInvalidParam(env, errMsg);
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     napi_ref typeNodeRef = nullptr;
     napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
-    pipController_->UpdateContentNodeRef(typeNodeRef);
-    return NapiGetUndefined(env);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask, typeNodeRef, errCode,
+            weak = wptr<PictureInPictureController>(pipController_)]() {
+        if (errCode != WmErrorCode::WM_OK) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), "Invalidate params."));
+            return;
+        }
+        if (!PictureInPictureManager::IsSupportPiP()) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+                "Capability not supported. Failed to call the API due to limited device capabilities."));
+            return;
+        }
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        pipController->UpdateContentNodeRef(typeNodeRef);
+        task->Resolve(env, NapiGetUndefined(env));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
+    return result;
 }
 
 napi_value JsPipController::UpdateContentSize(napi_env env, napi_callback_info info)
