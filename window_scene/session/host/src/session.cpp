@@ -1005,6 +1005,11 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         TLOGI(WmsLogTag::WMS_LAYOUT, "skip update SystemKeyboard: %{public}d", GetPersistentId());
         return;
     }
+    if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "skip update UIExtension: %{public}d, rect: %{public}s",
+            GetPersistentId(), rect.ToString().c_str());
+        return;
+    }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Error status");
