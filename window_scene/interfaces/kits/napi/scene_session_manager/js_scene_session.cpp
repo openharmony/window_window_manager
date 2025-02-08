@@ -5335,10 +5335,6 @@ napi_value JsSceneSession::OnSetSnapshotSkip(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id: %{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, permission denied!", persistentId_);
-        return NapiGetUndefined(env);
-    }
     session->SetSnapshotSkip(isSkip);
     return NapiGetUndefined(env);
 }
