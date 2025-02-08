@@ -2873,7 +2873,6 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto initClientDisplayId = DEFAULT_DISPLAY_ID;
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
@@ -2882,15 +2881,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
-        if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
-            property->SetDisplayId(DEFAULT_DISPLAY_ID);
-            initClientDisplayId = parentSession->GetClientDisplayId();
-        } 
     }
-    if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
-        property->SetDisplayId(DEFAULT_DISPLAY_ID);
-        initClientDisplayId = VIRTUAL_DISPLAY_ID;
-    }
+    auto initClientDisplayId = updateSubWindowAndSystemWindowDisplayId(property);
     TLOGI(WmsLogTag::WMS_LIFE, "The corner radius is %{public}f", appWindowSceneConfig_.floatCornerRadius_);
     property->SetWindowCornerRadius(appWindowSceneConfig_.floatCornerRadius_);
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
@@ -13052,5 +13044,23 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
         TLOGNI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
         return WSError::WS_OK;
     }, __func__);
+}
+
+DisplayId SceneSessionManager::updateSubWindowAndSystemWindowDisplayId(const sptr<WindowSessionProperty>& property)
+{
+    auto initClientDisplayId = DEFAULT_DISPLAY_ID;
+    //  SubWindow
+    if (auto parentSession = GetSceneSession(property->GetParentPersistentId())) {
+        if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+            property->SetDisplayId(DEFAULT_DISPLAY_ID);
+            initClientDisplayId = parentSession->GetClientDisplayId();
+        }
+    }
+    // SystemWindow
+    if (property->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+        property->SetDisplayId(DEFAULT_DISPLAY_ID);
+        initClientDisplayId = VIRTUAL_DISPLAY_ID;
+    }
+    return initClientDisplayId;
 }
 } // namespace OHOS::Rosen
