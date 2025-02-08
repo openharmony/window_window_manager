@@ -1126,7 +1126,7 @@ private:
     void ClearSpecificSessionRemoteObjectMap(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
 
-    WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
+    WSError GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession);
     void CalculateCombinedExtWindowFlags();
     void UpdateSpecialExtWindowFlags(int32_t persistentId, ExtensionWindowFlags flags, ExtensionWindowFlags actions);
     void HideNonSecureFloatingWindows();

@@ -9743,7 +9743,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 
 bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenType)
 {
-    if (screenType == ScreenType::VIRTUAL && (name == "HiCar" || name == "SuperLauncher" || name == "CeliaView")) {
+    if (screenType == ScreenType::VIRTUAL && (name == "HiCar" || name == "CeliaView")) {
         return true;
     }
     return false;
@@ -10741,15 +10741,10 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
 WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "from id: %{public}d to id: %{public}d", sourcePersistentId, targetPersistentId);
-    sptr<SceneSession> sourceSession = nullptr;
-    WSError ret = GetAppMainSceneSession(sourceSession, sourcePersistentId);
-    if (ret != WSError::WS_OK) {
-        return ret;
-    }
-    sptr<SceneSession> targetSession = nullptr;
-    ret = GetAppMainSceneSession(targetSession, targetPersistentId);
-    if (ret != WSError::WS_OK) {
-        return ret;
+    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
+    if (sourceSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr, id: %{public}d", sourcePersistentId);
+        return WSError::WS_ERROR_INVALID_SESSION;
     }
     auto displayId = sourceSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = GetFocusedSessionId(displayId);
@@ -10761,7 +10756,15 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
         TLOGE(WmsLogTag::WMS_FOCUS, "target session has been focused, focusedSessionId: %{public}d", focusedSessionId);
         return WSError::WS_DO_NOTHING;
     }
-
+    WSError ret = GetAppMainSceneSession(sourcePersistentId, sourceSession);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+    sptr<SceneSession> targetSession = nullptr;
+    ret = GetAppMainSceneSession(targetPersistentId, targetSession);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
     if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
         TLOGE(WmsLogTag::WMS_FOCUS, "verify bundle failed, source name is %{public}s but target name is %{public}s)",
             sourceSession->GetSessionInfo().bundleName_.c_str(), targetSession->GetSessionInfo().bundleName_.c_str());
@@ -10780,7 +10783,7 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
     return RequestSessionFocus(targetPersistentId, false, reason);
 }
 
-WSError SceneSessionManager::GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId)
+WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession)
 {
     sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
