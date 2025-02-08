@@ -3149,7 +3149,7 @@ public:
     virtual void GetExtensionConfig(AAFwk::WantParams& want) {}
  
     /**
-     * @brief Get custom extension param.
+     * @brief Update custom extension param.
      *
      * @param want the want to update param.
      */
