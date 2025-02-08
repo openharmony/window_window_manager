@@ -5042,10 +5042,10 @@ void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
         TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
         return;
     }
-    auto wantParam = want->GetParam();
+    auto wantParam = want->GetParams();
     auto configParam = wantParam.GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
     auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) ||
+    if (state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
         state <= static_cast<int32_t>(CrossAxisState::STATE_END)) {
         crossAxisState_ = static_cast<CrossAxisState>(state);
     }
