@@ -3014,26 +3014,22 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
     }
 }
 
-void SceneSession::SetSnapshotSkip(bool isSkip)
+WMError SceneSession::SetSnapshotSkip(bool isSkip)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, permission denied!", GetPersistentId());
-        return;
-    }
     auto property = GetSessionProperty();
     if (!property) {
         TLOGE(WmsLogTag::DEFAULT, "property is null");
-        return;
+        return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
     if (!surfaceNode_) {
         TLOGE(WmsLogTag::DEFAULT, "surfaceNode_ is null");
-        return;
+        return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
     bool lastSnapshotSkip = property->GetSnapshotSkip();
     if (lastSnapshotSkip == isSkip) {
         TLOGW(WmsLogTag::DEFAULT, "Snapshot skip does not change, do nothing, isSkip: %{public}d, "
             "id: %{public}d", isSkip, GetPersistentId());
-        return;
+        return WMError::WM_OK;
     }
     property->SetSnapshotSkip(isSkip);
     auto rsTransaction = RSTransactionProxy::GetInstance();
@@ -3048,6 +3044,7 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
+    return WMError::WM_OK;
 }
 
 void SceneSession::SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo)
@@ -3977,8 +3974,7 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
     const sptr<SceneSession>& sceneSession, WSPropertyChangeAction action)
 {
-    sceneSession->SetSnapshotSkip(property->GetSnapshotSkip());
-    return WMError::WM_OK;
+    return sceneSession->SetSnapshotSkip(property->GetSnapshotSkip());
 }
 
 WMError SceneSession::HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,

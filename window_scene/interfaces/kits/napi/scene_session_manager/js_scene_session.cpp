@@ -5333,9 +5333,16 @@ napi_value JsSceneSession::OnSetSnapshotSkip(napi_env env, napi_callback_info in
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id: %{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                                      "Session is nullptr"));
         return NapiGetUndefined(env);
     }
-    session->SetSnapshotSkip(isSkip);
+    if (session->SetSnapshotSkip(isSkip) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "set snapshotSkip failed, id: %{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+                                      "Set failed"));
+        return NapiGetUndefined(env);
+    }
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
