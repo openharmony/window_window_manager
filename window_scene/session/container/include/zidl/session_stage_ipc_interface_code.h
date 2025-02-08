@@ -62,6 +62,7 @@ enum class SessionStageInterfaceCode {
 
     TRANS_ID_NOTIFY_COMPATIBLE_MODE_ENABLE,
     TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM,
+    TRANS_ID_SET_DRAG_ACTIVATED,
 };
 }   // namespace Rosen
 }   // namespace OHOS

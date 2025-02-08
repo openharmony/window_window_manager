@@ -502,8 +502,10 @@ public:
      */
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
+    void SetDragActivated(bool dragActivated);
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
+    bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
 
@@ -811,6 +813,7 @@ private:
      */
     std::optional<bool> clientDragEnable_;
     SingleHandTransform singleHandTransform_;
+    bool dragActivated_ = true;
 
     /*
      * Screen Lock
