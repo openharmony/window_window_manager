@@ -2275,9 +2275,9 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, Function | SmallTest 
 HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | SmallTest | Level3)
 {
     AAFwk::Want want;
-    AAFwk::Want reply;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
     want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<int32_t>(CrossAxisState::STATE_END));
-    ASSERT_EQ(WMError::WM_OK, window_->OnCrossAxisStateChange(std::move(wamt), reply));
+    ASSERT_EQ(WMError::WM_OK, window_->OnCrossAxisStateChange(std::move(want), reply));
     ASSERT_EQ(CrossAxisState::STATE_END, window_->crossAxisState_.load());
 }
 }
