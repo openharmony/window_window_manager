@@ -2882,7 +2882,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
     }
-    auto initClientDisplayId = updateSubWindowAndSystemWindowDisplayId(property);
+    auto initClientDisplayId = UpdateSpecificSessionClientDisplayId(property);
     TLOGI(WmsLogTag::WMS_LIFE, "The corner radius is %{public}f", appWindowSceneConfig_.floatCornerRadius_);
     property->SetWindowCornerRadius(appWindowSceneConfig_.floatCornerRadius_);
     bool shouldBlock = (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT &&
@@ -13046,7 +13046,7 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
     }, __func__);
 }
 
-DisplayId SceneSessionManager::updateSubWindowAndSystemWindowDisplayId(const sptr<WindowSessionProperty>& property)
+DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property)
 {
     auto initClientDisplayId = DEFAULT_DISPLAY_ID;
     //  SubWindow
