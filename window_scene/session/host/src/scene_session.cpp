@@ -3558,27 +3558,27 @@ void SceneSession::NotifyPrivacyModeChange()
     }
 }
 
-void SceneSession::SetSnapshotSkip(bool isSkip)
+WMError SceneSession::SetSnapshotSkip(bool isSkip)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, permission denied!", GetPersistentId());
-        return;
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     auto property = GetSessionProperty();
     if (!property) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
-        return;
+        return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
-        return;
+        return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
     bool lastSnapshotSkip = property->GetSnapshotSkip();
     if (lastSnapshotSkip == isSkip) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Snapshot skip does not change, do nothing, isSkip: %{public}d, "
             "id: %{public}d", isSkip, GetPersistentId());
-        return;
+        return WMError::WM_OK;
     }
     property->SetSnapshotSkip(isSkip);
     auto rsTransaction = RSTransactionProxy::GetInstance();
@@ -3593,6 +3593,7 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
+    return WMError::WM_OK;
 }
 
 void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
@@ -4709,8 +4710,7 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    SetSnapshotSkip(property->GetSnapshotSkip());
-    return WMError::WM_OK;
+    return SetSnapshotSkip(property->GetSnapshotSkip());
 }
 
 WMError SceneSession::HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,
