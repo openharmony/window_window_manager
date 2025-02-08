@@ -1415,7 +1415,7 @@ void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
     const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func)
 {
     auto consumer = [this, func](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
-                                     std::optional<AAFwk::Want>& reply) -> int32_t {
+                                     std::optional<AAFwk::Want>& reply) {
         return static_cast<int32_t>(func(std::move(data), reply));
     }
     dataConsumers_.emplace(static_cast<uint32_t>(code), std::move(windowModeConsumer));
