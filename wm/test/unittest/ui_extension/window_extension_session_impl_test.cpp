@@ -2262,7 +2262,7 @@ HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, Function | SmallTest 
 {
     window->RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
         std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
-        window, std::placeholders::_1, std::placeholders::_2))
+        window, std::placeholders::_1, std::placeholders::_2));
     ASSERT_NE(nullptr,
         window_->dataConsumers_[static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE)]);
 }
