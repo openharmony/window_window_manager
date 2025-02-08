@@ -5038,8 +5038,7 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want)
 
 void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
 {
-    if (want == nullptr)
-    {
+    if (want == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
         return;
     }
