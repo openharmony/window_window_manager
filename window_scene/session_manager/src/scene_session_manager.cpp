@@ -130,7 +130,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
-constexpr int32_t SNAPSHOT_CACHE_CAPACITY = 3;
+constexpr std::size_t SNAPSHOT_CACHE_CAPACITY = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -316,6 +316,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
         [this](const sptr<IRemoteObject>& remoteObject) { this->ClearAllCollaboratorSessions(); });
 
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
+    snapshotLRUCache_ = std::make_unique<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
 
     listenerController_ = std::make_shared<SessionListenerController>();
     windowFocusController_ = sptr<WindowFocusController>::MakeSptr();
@@ -346,7 +347,6 @@ void SceneSessionManager::Init()
     LoadWindowParameter();
     InitPrepareTerminateConfig();
 
-    snapshotLRUCache_ = std::make_shared<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
     ScreenSessionManagerClient::GetInstance().RegisterDisplayChangeListener(sptr<DisplayChangeListener>::MakeSptr());
     ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionChangeListener(
         sptr<ScreenConnectionChangeListener>::MakeSptr());
@@ -2470,24 +2470,26 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
 void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    int32_t removeFromCacheSessionId = snapshotLRUCache_->Put(persistentId);
-    if (removeFromCacheSessionId != -1) {
-        auto removeSceneSession = GetSceneSession(removeFromCacheSessionId);
-        if (removeSceneSession) {
-            removeSceneSession->ResetSnapshot();
+    if (int32_t removedCacheId = snapshotLRUCache_->Put(persistentId);
+        removedCacheId != -1) {
+        if (auto removedCacheSession = GetSceneSession(removedCacheId)) {
+            removedCacheSession->ResetSnapshot();
         } else {
-            TLOGW(WmsLogTag::WMS_PATTERN, "removeSceneSession:%{public}d nullptr", removeFromCacheSessionId);
+            TLOGW(WmsLogTag::WMS_PATTERN, "removedCacheSession:%{public}d nullptr", removedCacheId);
         }
     }
 }
 
-void SceneSessionManager::GetSnapshotFromCache(int32_t persistentId)
+void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    if (!snapshotLRUCache_->Check(persistentId)) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
-    }
+    taskScheduler_->PostAsyncTask([this, persistentId](){
+        if (!snapshotLRUCache_->Visit(persistentId)) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
+        }
+    }, __func__);
 }
+
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
     const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
@@ -2510,8 +2512,8 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             sceneSession->EditSessionInfo().callingTokenId_ = 0;
         }
 
-        if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
-            !sceneSession->GetSystemConfig().IsPcWindow() && !sceneSession->GetSystemConfig().freeMultiWindowEnable_) {
+        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
+            systemConfig_.IsPcWindow() && !systemConfig_.freeMultiWindowEnable_) {
             PutSnapshotToCache(persistentId);
         }
 
