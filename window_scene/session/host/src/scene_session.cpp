@@ -3016,6 +3016,10 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 
 void SceneSession::SetSnapshotSkip(bool isSkip)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, permission denied!", GetPersistentId());
+        return;
+    }
     auto property = GetSessionProperty();
     if (!property) {
         TLOGE(WmsLogTag::DEFAULT, "property is null");
