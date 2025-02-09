@@ -160,6 +160,12 @@ ohos_unittest("ws_screen_session_manager_lite_test") {
 ohos_unittest("ws_multi_screen_manager_test") {
   module_out_path = module_out_path
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   sources = [ "multi_screen_manager_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
@@ -266,6 +272,12 @@ ohos_unittest("ws_screen_property_test") {
 
 ohos_unittest("ws_screen_cutout_controller_test") {
   module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
 
   sources = [ "screen_cutout_controller_test.cpp" ]
 
@@ -401,6 +413,12 @@ ohos_unittest("ws_screen_session_manager_proxy_ut_test") {
 
 ohos_unittest("ws_screen_session_manager_test") {
   module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
 
   sources = [ "screen_session_manager_test.cpp" ]
 
@@ -728,6 +746,7 @@ if (window_manager_fold_ability) {
 config("ws_unittest_common_public_config") {
   include_dirs = [
     "${window_base_path}/test/common/mock",
+    "${window_base_path}/test/common/utils/include",
 
     # for WMError Code
     "${window_base_path}/dm/include",
@@ -809,6 +828,7 @@ ohos_static_library("ws_unittest_common") {
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
+    "../../../test/common/utils:libtestutil",
   ]
 
   external_deps = [

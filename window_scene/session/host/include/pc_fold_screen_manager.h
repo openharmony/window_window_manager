@@ -45,6 +45,7 @@ public:
     SuperFoldStatus GetScreenFoldStatus() const;
     bool IsHalfFolded(DisplayId displayId) const;
     bool IsHalfFoldedOnMainDisplay(DisplayId displayId) const;
+    bool IsHalfFoldedDisplayId(DisplayId displayId) const;
     
     void UpdateSystemKeyboardStatus(bool hasSystemKeyboard);
     bool HasSystemKeyboard() const;

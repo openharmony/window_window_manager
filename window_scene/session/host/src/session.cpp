@@ -298,7 +298,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.callerPersistentId_ = info.callerPersistentId_;
     sessionInfo_.callingTokenId_ = info.callingTokenId_;
     sessionInfo_.uiAbilityId_ = info.uiAbilityId_;
-    sessionInfo_.specifiedId = info.specifiedId;
+    sessionInfo_.requestId = info.requestId;
     sessionInfo_.startSetting = info.startSetting;
     sessionInfo_.continueSessionId_ = info.continueSessionId_;
     sessionInfo_.isAtomicService_ = info.isAtomicService_;
@@ -968,7 +968,7 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 
 WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
-    if (displayId == lastUpdatedDisplayId_) {
+    if (displayId == clientDisplayId_) {
         return WSError::WS_DO_NOTHING;
     }
     if (sessionStage_ == nullptr) {
@@ -976,8 +976,8 @@ WSError Session::UpdateClientDisplayId(DisplayId displayId)
         return WSError::WS_ERROR_NULLPTR;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d move display %{public}" PRIu64 " from %{public}" PRIu64,
-          GetPersistentId(), displayId, lastUpdatedDisplayId_);
-    lastUpdatedDisplayId_ = displayId;
+          GetPersistentId(), displayId, clientDisplayId_);
+    clientDisplayId_ = displayId;
     sessionStage_->UpdateDisplayId(displayId);
     return WSError::WS_OK;
 }
@@ -989,9 +989,11 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
     int32_t lowerScreenPosY =
         defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
     TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
-    DisplayId updatedDisplayId = GetScreenId();
+    DisplayId updatedDisplayId = DEFAULT_DISPLAY_ID;
     if (rect.posY_ >= lowerScreenPosY) {
-        updatedDisplayId = VIRTUAL_DISPLAY_ID;
+        if (WindowHelper::IsMainWindow(GetWindowType())) {
+            updatedDisplayId = VIRTUAL_DISPLAY_ID;
+        }
         rect.posY_ -= lowerScreenPosY;
     }
     return updatedDisplayId;
@@ -1003,9 +1005,20 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         TLOGI(WmsLogTag::WMS_LAYOUT, "skip update SystemKeyboard: %{public}d", GetPersistentId());
         return;
     }
+    if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "skip update UIExtension: %{public}d, rect: %{public}s",
+            GetPersistentId(), rect.ToString().c_str());
+        return;
+    }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Error status");
+        return;
+    }
+    if (GetScreenId() != DISPLAY_ID_INVALID &&
+        !PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId())) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 " not need",
+            GetPersistentId(), GetScreenId());
         return;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "lastStatus: %{public}d, curStatus: %{public}d",
@@ -1013,16 +1026,20 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     if (currScreenFoldStatus == SuperFoldStatus::EXPANDED) {
         lastScreenFoldStatus_ = currScreenFoldStatus;
         auto ret = UpdateClientDisplayId(DEFAULT_DISPLAY_ID);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "JustUpdateId: windowId: %{public}d, result: %{public}d",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "JustUpdateId: winId: %{public}d, result: %{public}d",
             GetPersistentId(), ret);
         return;
     }
     WSRect lastRect = rect;
     auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
+    if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
+        UpdateDisplayIdByParentSession(updatedDisplayId);
+    }
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: windowId: %{public}d, input: %{public}s, output: %{public}s,"
-        " result: %{public}d", GetPersistentId(), lastRect.ToString().c_str(), rect.ToString().c_str(), ret);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: winId: %{public}d, input: %{public}s, output: %{public}s,"
+        " result: %{public}d, clientDisplayId: %{public}" PRIu64, GetPersistentId(), lastRect.ToString().c_str(),
+        rect.ToString().c_str(), ret, updatedDisplayId);
 }
 
 void Session::SetSingleHandTransform(const SingleHandTransform& transform)
@@ -1128,6 +1145,9 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) && clientDisplayId_ == VIRTUAL_DISPLAY_ID) {
+        property->SetDisplayId(clientDisplayId_);
+    }
     return WSError::WS_OK;
 }
 
@@ -2342,7 +2362,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
 
 void Session::ResetSnapshot()
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "reset snapshot id: %{public}d", persistentId_);
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
     snapshot_ = nullptr;
     scenePersistence_->ResetSnapshotCache();
@@ -2373,8 +2393,9 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
         }
         std::function<void()> func = [weakThis]() {
             auto session = weakThis.promote();
-            if (session && (session->GetSystemConfig().IsPcWindow() ||
-                session->GetSystemConfig().freeMultiWindowEnable_)) {
+            if (session &&
+                (session->GetSystemConfig().IsPcWindow() ||
+                 session->GetSystemConfig().freeMultiWindowEnable_)) {
                 session->ResetSnapshot();
             }
         };
@@ -3678,6 +3699,8 @@ void Session::NotifySessionInfoChange()
 {
     if (sessionInfoChangeNotifyManagerFunc_) {
         sessionInfoChangeNotifyManagerFunc_(GetPersistentId());
+    } else {
+        TLOGD(WmsLogTag::WMS_EVENT, "sessionInfoChangeNotifyManagerFunc is nullptr");
     }
 }
 
@@ -3907,5 +3930,27 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     windowMetaInfo.bundleName = GetSessionInfo().bundleName_;
     windowMetaInfo.abilityName = GetSessionInfo().abilityName_;
     return windowMetaInfo;
+}
+
+DisplayId Session::GetClientDisplayId() const
+{
+    return clientDisplayId_;
+}
+
+void Session::SetClientDisplayId(DisplayId displayid)
+{
+    clientDisplayId_ = displayid;
+}
+
+void Session::UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId)
+{
+    if (auto parentSession = GetParentSession()) {
+        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, parentWinId: %{public}d, parentClientDisplay: %{public}" PRIu64,
+            GetPersistentId(), parentSession->GetPersistentId(), parentSession->GetClientDisplayId());
+        updatedDisplayId = parentSession->GetClientDisplayId();
+    } else if (GetClientDisplayId() == VIRTUAL_DISPLAY_ID) {
+        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, no parentSession, but init virtual display", GetPersistentId());
+        updatedDisplayId = VIRTUAL_DISPLAY_ID;
+    }
 }
 } // namespace OHOS::Rosen

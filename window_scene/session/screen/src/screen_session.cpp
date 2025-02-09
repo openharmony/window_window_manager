@@ -1980,4 +1980,9 @@ bool ScreenSession::GetShareProtect()
 {
     return needShareProtect_;
 }
+
+float ScreenSession::GetSensorRotation() const
+{
+    return currentSensorRotation_;
+}
 } // namespace OHOS::Rosen

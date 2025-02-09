@@ -22,13 +22,13 @@
 namespace OHOS::Rosen {
 class LRUCache {
 public:
-    LRUCache(int32_t capacity) : capacity_(capacity) {}
+    LRUCache(std::size_t capacity) : capacity_(capacity) {}
 
-    bool Check(int32_t key);
+    bool Visit(int32_t key);
     int32_t Put(int32_t key);
 
 private:
-    int32_t capacity_;
+    const std::size_t capacity_;
     std::list<int32_t> cacheList_;
     std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
 };

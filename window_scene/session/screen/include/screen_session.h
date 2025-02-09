@@ -233,6 +233,7 @@ public:
     void SetValidWidth(uint32_t validWidth);
     int32_t GetValidHeight() const;
     int32_t GetValidWidth() const;
+    float GetSensorRotation() const;
 
     bool isPrimary_ { false };
     bool isInternal_ { false };
