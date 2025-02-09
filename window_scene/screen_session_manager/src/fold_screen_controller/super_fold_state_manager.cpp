@@ -433,9 +433,9 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
 void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession)
 {
     auto screeBounds = screenSession->GetScreenProperty().GetBounds();
-    screenSession->SetValidHeight(screeBounds.rect_.GetHeight());
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetIsBScreenHalf(true);
+    screenSession->SetValidHeight(screeBounds.rect_.GetHeight());
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     ScreenSessionManager::GetInstance().NotifyDisplayCreate(
         fakeScreenSession->ConvertToDisplayInfo());
