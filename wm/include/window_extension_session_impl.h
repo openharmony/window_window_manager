@@ -22,6 +22,7 @@
 
 #include "accessibility_element_info.h"
 #include "extension_data_handler.h"
+#include "extension/extension_business_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -131,6 +132,7 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    CrossAxisState GetCrossAxisState() override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -159,6 +161,9 @@ private:
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
     void RegisterDataConsumer();
+    void RegisterConsumer(Extension::Businesscode code,
+        const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
+    WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init

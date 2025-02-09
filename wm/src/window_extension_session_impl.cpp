@@ -25,7 +25,6 @@
 #endif
 
 #include "display_info.h"
-#include "extension/extension_business_info.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_permission.h"
@@ -1386,6 +1385,41 @@ WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
     return WMError::WM_OK;
 }
 
+WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    auto state = data.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
+    if (state == static_cast<int32_t>(crossAxisState_.load())) {
+        return WMError::WM_OK;
+    }
+    if (state < static_cast<int32_t>(CrossAxisState::STATE_INVALID) ||
+        state > static_cast<int32_t>(CrossAxisState::STATE_END)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "invalid CrossAxisState:%{public}d", state);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    crossAxisState_ = static_cast<CrossAxisState>(state);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
+            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
+    return WMError::WM_OK;
+}
+
+CrossAxisState WindowExtensionSessionImpl::GetCrossAxisState()
+{
+    return crossAxisState_.load();
+}
+
+void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
+    const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func)
+{
+    auto consumer = [this, func](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+                                     std::optional<AAFwk::Want>& reply) {
+        return static_cast<int32_t>(func(std::move(data), reply));
+    };
+    dataConsumers_.emplace(static_cast<uint32_t>(code), std::move(consumer));
+}
+
 void WindowExtensionSessionImpl::RegisterDataConsumer()
 {
     auto windowModeConsumer = [this](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
@@ -1402,6 +1436,9 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
     };
     dataConsumers_.emplace(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_MODE),
                            std::move(windowModeConsumer));
+    RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
+        std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
+        this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
                                                   std::optional<AAFwk::Want>& reply) -> int32_t {

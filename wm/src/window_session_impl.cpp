@@ -23,6 +23,7 @@
 #include <ipc_skeleton.h>
 #include <hisysevent.h>
 #include <parameters.h>
+#include <int_wrapper.h>
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
@@ -33,6 +34,7 @@
 #include "common/include/fold_screen_state_internel.h"
 #include "display_info.h"
 #include "display_manager.h"
+#include "extension/extension_business_info.h"
 #include "hitrace_meter.h"
 #include "session_permission.h"
 #include "key_event.h"
@@ -2869,6 +2871,12 @@ void WindowSessionImpl::NotifyWindowCrossAxisChange(CrossAxisState state)
     TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, cross axis state %{public}d", GetPersistentId(),
         static_cast<uint32_t>(state));
     crossAxisState_ = state;
+    AAFwk::Want want;
+    want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<int32_t>(state));
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
     std::lock_guard<std::recursive_mutex> lockListener(windowTitleButtonRectChangeListenerMutex_);
     auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
     for (const auto& listener : windowCrossAxisListeners) {
@@ -5037,6 +5045,28 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
         }
     };
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
+}
+
+void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want)
+{
+    want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
+}
+
+void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
+{
+    if (want == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
+        return;
+    }
+    auto wantParam = want->GetParams();
+    auto configParam = wantParam.GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+    auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
+    if (state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
+        state <= static_cast<int32_t>(CrossAxisState::STATE_END)) {
+        crossAxisState_ = static_cast<CrossAxisState>(state);
+    }
+    want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
+    TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
 }
 } // namespace Rosen
 } // namespace OHOS
