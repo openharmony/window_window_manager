@@ -334,7 +334,7 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayInfos, Function | SmallTest | Le
         sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     ASSERT_EQ(ret + 1, displayInfos.size());
-    ASSERT_EQ(1608, displayInfos[0].validHeight());
+    ASSERT_EQ(1608, displayInfos[0].validHeight);
 }
 
 /**
