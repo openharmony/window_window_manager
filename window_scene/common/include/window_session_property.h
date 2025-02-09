@@ -213,6 +213,8 @@ public:
     bool GetIsUIExtensionSubWindowFlag() const;
     void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
     bool GetIsUIExtensionAbilityProcess() const;
+    void SetIsConstrained(bool isConstrained);
+    bool GetIsConstrained() const;
 
     /**
      * PC Window
@@ -372,6 +374,7 @@ private:
     bool isUIExtensionSubWindowFlag_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isConstrained_ = false;
 
     /**
      * PC Window

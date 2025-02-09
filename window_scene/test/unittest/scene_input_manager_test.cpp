@@ -729,6 +729,27 @@ HWTEST_F(SceneInputManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: UpdateConstrainedUIExtInfo
+ * @tc.desc: UpdateConstrainedUIExtInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UpdateConstrainedUIExtInfo, Function | SmallTest | Level3)
+{
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> testMap;
+    auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
+    ASSERT_NE(oldDirty, nullptr);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
+    SceneInputManager::GetInstance().UpdateConstrainedUIExtInfo(testMap);
+
+    SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
+    std::vector<SecSurfaceInfo> surfaceInfoList;
+    SecSurfaceInfo secSurfaceInfo;
+    surfaceInfoList.emplace_back(secSurfaceInfo);
+    testMap[0] = surfaceInfoList;
+    SceneInputManager::GetInstance().UpdateConstrainedUIExtInfo(testMap);
+}
+
+/**
  * @tc.name: UpdateDisplayAndWindowInfo
  * @tc.desc: UpdateDisplayAndWindowInfo
  * @tc.type: FUNC

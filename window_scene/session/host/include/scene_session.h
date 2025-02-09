@@ -94,6 +94,8 @@ using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
+using GetConstrainedExtWindowInfoFunc =
+    std::function<std::optional<ExtensionWindowEventInfo>(const sptr<SceneSession>& sceneSession)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
@@ -521,6 +523,7 @@ public:
     bool IsImmersiveType() const;
     bool SetFrameGravity(Gravity gravity);
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
+    static void RegisterGetConstrainedExtWindowInfo(GetConstrainedExtWindowInfoFunc&& callback);
 
     /*
      * Gesture Back
@@ -628,6 +631,11 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, bool> appUseControlMap_;
+
+    /*
+     * UIExtension
+     */
+    static GetConstrainedExtWindowInfoFunc onGetConstrainedExtWindowInfoFunc_;
 
     /*
      * PC Window

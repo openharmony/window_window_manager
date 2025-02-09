@@ -206,9 +206,9 @@ public:
         return WMError::WM_OK;
     }
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) {}
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrained = false) {}
     virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token) {}
+        const sptr<IRemoteObject>& token, bool isConstrained = false) {}
     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) {}
     virtual void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) {}
     virtual WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
