@@ -141,8 +141,8 @@ protected:
 private:
     void InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed,
         std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
-    void AddExtensionWindowStageToSCB();
-    void RemoveExtensionWindowStageFromSCB();
+    void AddExtensionWindowStageToSCB(bool isConstrained = false);
+    void RemoveExtensionWindowStageFromSCB(bool isConstrained = false);
     void CheckAndAddExtWindowFlags();
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);

@@ -383,6 +383,16 @@ bool WindowOption::GetIsDensityFollowHost() const
     return isDensityFollowHost_;
 }
 
+void WindowOption::SetIsConstrained(bool isConstrained)
+{
+    isConstrained_ = isConstrained;
+}
+
+bool WindowOption::GetIsConstrained() const
+{
+    return isConstrained_;
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

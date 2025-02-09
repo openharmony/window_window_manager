@@ -105,7 +105,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     if (context_) {
         abilityToken_ = context_->GetToken();
     }
-    AddExtensionWindowStageToSCB();
+    AddExtensionWindowStageToSCB(property_->GetIsConstrained());
     WMError ret = Connect();
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "name:%{public}s %{public}d connect fail. ret:%{public}d",
@@ -132,7 +132,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     return WMError::WM_OK;
 }
 
-void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
+void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB(bool isConstrained)
 {
     if (!abilityToken_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
@@ -144,10 +144,10 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
     }
 
     SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(sptr<ISessionStage>(this), abilityToken_,
-        surfaceNode_->GetId());
+        surfaceNode_->GetId(), isConstrained);
 }
 
-void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB()
+void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB(bool isConstrained)
 {
     if (!abilityToken_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
@@ -155,7 +155,7 @@ void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB()
     }
 
     SingletonContainer::Get<WindowAdapter>().RemoveExtensionWindowStageFromSCB(sptr<ISessionStage>(this),
-        abilityToken_);
+        abilityToken_, isConstrained);
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -239,7 +239,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     ClearVsyncStation();
     SetUIContentComplete();
     SetUIExtensionDestroyComplete();
-    RemoveExtensionWindowStageFromSCB();
+    RemoveExtensionWindowStageFromSCB(property_->GetIsConstrained());
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed success, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }
