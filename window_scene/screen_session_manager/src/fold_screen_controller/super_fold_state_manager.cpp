@@ -410,6 +410,7 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
     int32_t validheight = GetCurrentValidHeight(screenSession);
     if (screeBounds.rect_.GetWidth() < screeBounds.rect_.GetHeight()) {
         screenSession->SetValidHeight(validheight);
+        screenSession->SetValidWidth(screeBounds.rect_.GetWidth());
     } else {
         screenSession->SetValidWidth(screeBounds.rect_.GetHeight());
         screenSession->SetValidHeight(validheight);
