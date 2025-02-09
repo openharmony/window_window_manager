@@ -32,6 +32,7 @@ struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
+inline constexpr int32_t MATRIX3_SIZE { 9 };
 
 struct SingleHandData {
     float scaleX = 1.0f;
@@ -66,6 +67,8 @@ public:
     void RegisterFlushWindowInfoCallback(const FlushWindowInfoCallback &&callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
+    void UpdateConstrainedUIExtInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& constrainedUIExtInfoMap);
+    bool GetLastConstrainedUIExtInfo(const sptr<SceneSession>& sceneSession, SecSurfaceInfo& constrainedUIExtInfo);
 
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
@@ -90,6 +93,8 @@ private:
         MMI::WindowInfo& windowInfo) const;
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
         const sptr<SceneSession>& sceneSession, const ExtensionWindowEventInfo& extensionInfo);
+    void GetModalUIExtensionInfo(std::vector<MMI::WindowInfo>& windowInfoList,
+        const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowInfo);
     std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
         const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const;
     MMI::WindowInfo GetSecComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
@@ -105,10 +110,12 @@ private:
         std::vector<int32_t>& pointerChangeAreas) const;
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
+    mutable std::shared_mutex constrainedUIExtInfoMutex_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };
     std::atomic_bool hasPostTask_ { false };
     std::map<uint64_t, std::vector<SecSurfaceInfo>> secSurfaceInfoMap_;
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> constrainedUIExtInfoMap_;
 };
 } //namespace OHOS::Rosen
 

@@ -353,6 +353,16 @@ bool WindowOption::GetWindowTopmost() const
     return isTopmost_;
 }
 
+void WindowOption::SetIsConstrained(bool isConstrained)
+{
+    isConstrained_ = isConstrained;
+}
+
+bool WindowOption::GetIsConstrained() const
+{
+    return isConstrained_;
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

@@ -172,6 +172,9 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneInputManager)
 
+using GetConstrainedExtWindowInfoFunc =
+    std::function<std::optional<ExtensionWindowEventInfo>(const sptr<SceneSession>& sceneSession)>;
+
 void SceneInputManager::Init()
 {
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
@@ -181,6 +184,10 @@ void SceneInputManager::Init()
         FlushDisplayInfoToMMI();
     };
     sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
+    SceneSession::RegisterGetConstrainedExtWindowInfo(
+        [](const sptr<SceneSession>& sceneSession) -> std::optional<ExtensionWindowEventInfo> {
+            return SceneInputManager::GetInstance().GetConstrainedExtWindowInfo(sceneSession);
+        });
 }
 
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
@@ -539,6 +546,37 @@ void SceneInputManager::UpdateSecSurfaceInfo(const std::map<uint64_t, std::vecto
         return;
     }
     sceneSessionDirty_->UpdateSecSurfaceInfo(secSurfaceInfoMap);
+}
+
+void SceneInputManager::UpdateConstrainedUIExtInfo(
+    const std::map<uint64_t, std::vector<SecSurfaceInfo>>& constrainedUIExtInfoMap)
+{
+    if (sceneSessionDirty_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        return;
+    }
+    sceneSessionDirty_->UpdateConstrainedUIExtInfo(constrainedUIExtInfoMap);
+}
+
+std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedExtWindowInfo(
+    const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return std::nullopt;
+    }
+    if (sceneSessionDirty_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        return std::nullopt;
+    }
+    SecSurfaceInfo constrainedUIExtInfo;
+    if (!sceneSessionDirty_->GetLastConstrainedUIExtInfo(sceneSession, constrainedUIExtInfo)) {
+        return std::nullopt;
+    }
+    return std::make_optional<ExtensionWindowEventInfo>(ExtensionWindowEventInfo {
+        .persistentId = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(constrainedUIExtInfo.uiExtensionNodeId),
+        .pid = constrainedUIExtInfo.uiExtensionPid,
+        .isConstrained = true });
 }
 }
 } // namespace OHOS::Rosen
