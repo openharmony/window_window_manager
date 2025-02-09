@@ -892,7 +892,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    if (isBScreenHalf_ && !property_.GetIsFakeInUse()) {
+    if (!isBScreenHalf_ || property_.GetIsFakeInUse()) {
         property_.SetValidHeight(bounds.rect_.GetHeight());
         property_.SetValidWidth(bounds.rect_.GetWidth());
     }
@@ -936,7 +936,7 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    if (isBScreenHalf_ && !property_.GetIsFakeInUse()) {
+    if (!isBScreenHalf_ || property_.GetIsFakeInUse()) {
         property_.SetValidHeight(bounds.rect_.GetHeight());
         property_.SetValidWidth(bounds.rect_.GetWidth());
     }
