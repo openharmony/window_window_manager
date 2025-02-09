@@ -22,6 +22,8 @@
 #include <sstream>
 #include <string>
 
+#include "securec.h"
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
