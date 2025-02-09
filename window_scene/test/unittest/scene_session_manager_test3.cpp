@@ -18,6 +18,8 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -1433,7 +1435,7 @@ HWTEST_F(SceneSessionManagerTest3, ShiftAppWindowFocus, Function | SmallTest | L
     sourceSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sourceSceneSession));
     result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_OPERATION);
 
     auto targetSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     targetSceneSession->persistentId_ = 10086;

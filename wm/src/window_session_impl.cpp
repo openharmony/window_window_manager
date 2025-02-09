@@ -726,9 +726,9 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     property_->SetRequestRect(wmRect);
 
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s, preRect:%{public}s, reason:%{public}u, hasRSTransaction:%{public}d"
-        ", duration:%{public}d, [name:%{public}s, id:%{public}d]", rect.ToString().c_str(), preRect.ToString().c_str(),
-        wmReason, config.rsTransaction_ != nullptr, config.animationDuration_,
-        GetWindowName().c_str(), GetPersistentId());
+        ", duration:%{public}d, [name:%{public}s, id:%{public}d], clientDisplayId: %{public}" PRIu64,
+        rect.ToString().c_str(), preRect.ToString().c_str(), wmReason, config.rsTransaction_ != nullptr,
+        config.animationDuration_, GetWindowName().c_str(), GetPersistentId(), property_->GetDisplayId());
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WindowSessionImpl::UpdateRect id: %d [%d, %d, %u, %u] reason: %u hasRSTransaction: %u", GetPersistentId(),
         wmRect.posX_, wmRect.posY_, wmRect.width_, wmRect.height_, wmReason, config.rsTransaction_ != nullptr);
@@ -1707,6 +1707,11 @@ WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     isHighlighted_ = isHighlight;
+    if (isHighlighted_) {
+        CALL_UI_CONTENT(ActiveWindow);
+    } else {
+        CALL_UI_CONTENT(UnActiveWindow);
+    }
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
     auto highlightChangeListeners = GetListeners<IWindowHighlightChangeListener>();
     for (const auto& listener : highlightChangeListeners) {
@@ -3735,6 +3740,16 @@ WSError WindowSessionImpl::SetPiPControlEvent(WsPiPControlType controlType, WsPi
             static_cast<PiPControlStatus>(status));
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_SetPiPControlEvent");
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}u, height: %{public}u scale: %{public}f", width, height, scale);
+    auto task = [width, height, scale]() {
+        PictureInPictureManager::PipSizeChange(width, height, scale);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyPipWindowSizeChange");
     return WSError::WS_OK;
 }
 

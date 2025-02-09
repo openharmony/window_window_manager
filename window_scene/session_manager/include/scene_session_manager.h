@@ -614,7 +614,11 @@ public:
     void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         std::vector<sptr<SceneSession>>& mainSessions) const;
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
-    void GetSnapshotFromCache(int32_t persistentId);
+
+    /*
+     * Window Pattern
+     */
+    void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
 
 protected:
@@ -765,6 +769,12 @@ private:
     std::string GetHighlightIdsStr();
 
     /*
+     * PC Window
+     */
+    WMError ShiftAppWindowPointerEventInner(
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
+
+    /*
      * Window Immersive
      */
     bool UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
@@ -841,6 +851,7 @@ private:
         std::vector<sptr<SceneSession>>& filteredSessions);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
+    DisplayId UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property);
 
     /*
      * Window Rotate Animation
@@ -1116,7 +1127,7 @@ private:
     void ClearSpecificSessionRemoteObjectMap(int32_t persistentId);
     WSError DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId);
 
-    WSError GetAppMainSceneSession(sptr<SceneSession>& sceneSession, int32_t persistentId);
+    WSError GetAppMainSceneSession(int32_t persistentId, sptr<SceneSession>& sceneSession);
     void CalculateCombinedExtWindowFlags();
     void UpdateSpecialExtWindowFlags(int32_t persistentId, ExtensionWindowFlags flags, ExtensionWindowFlags actions);
     void HideNonSecureFloatingWindows();
@@ -1188,7 +1199,6 @@ private:
     std::condition_variable nextFlushCompletedCV_;
     std::mutex nextFlushCompletedMutex_;
     RootSceneProcessBackEventFunc rootSceneProcessBackEventFunc_ = nullptr;
-    std::shared_ptr<LRUCache> snapshotLRUCache_;
 
     /*
      * Window Watermark
@@ -1291,6 +1301,11 @@ private:
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
+
+    /*
+     * Window Pattern
+     */
+    std::unique_ptr<LRUCache> snapshotLRUCache_;
 };
 } // namespace OHOS::Rosen
 

@@ -450,6 +450,7 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
             }
             flushWindowInfoCallback_();
         };
+        TLOGD(WmsLogTag::WMS_EVENT, "in");
         SceneSessionManager::GetInstance().PostFlushWindowInfoTask(task,
             UPDATE_WINDOW_INFO_TASK, UPDATE_TASK_DURATION);
     }
