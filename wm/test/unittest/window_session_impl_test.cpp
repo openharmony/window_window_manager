@@ -1257,6 +1257,7 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowTitleButtonRectChangeListener(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
 
