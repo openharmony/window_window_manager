@@ -113,9 +113,7 @@ bool PcFoldScreenManager::IsHalfFoldedOnMainDisplay(DisplayId displayId) const
 
 bool PcFoldScreenManager::IsHalfFoldedDisplayId(DisplayId displayId) const
 {
-    std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
-    return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED &&
-           (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID);
+    return displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID;
 }
 
 void PcFoldScreenManager::UpdateSystemKeyboardStatus(bool hasSystemKeyboard)
