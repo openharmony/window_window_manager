@@ -1257,13 +1257,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener02, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowTitleButtonRectChangeListener(listener10);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
-    ISystemDensityChangeListenerSptr listener11 = nullptr;
-    res = window->RegisterSystemDensityChangeListener(listener11);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-    res = window->UnregisterSystemDensityChangeListener(listener11);
-    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener02 end";
 }
 
@@ -1315,6 +1308,11 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     res = window->UnregisterMainWindowCloseListeners(listener12);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
 
+    ISystemDensityChangeListenerSptr listener13 = nullptr;
+    res = window->RegisterSystemDensityChangeListener(listener13);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterSystemDensityChangeListener(listener13);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
 }
