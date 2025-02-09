@@ -96,6 +96,8 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
+using GetConstrainedExtWindowInfoFunc =
+    std::function<std::optional<ExtensionWindowEventInfo>(const sptr<SceneSession>& sceneSession)>;
 using NotifyPrivacyModeChangeFunc = std::function<void(uint32_t isPrivacyMode)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
@@ -555,6 +557,7 @@ public:
     void PostProcessNotifyAvoidArea();
     bool IsImmersiveType() const;
     bool IsPcOrPadEnableActivation() const;
+    static void RegisterGetConstrainedExtWindowInfo(GetConstrainedExtWindowInfoFunc&& callback);
 
     /*
      * Multi User
@@ -751,6 +754,11 @@ protected:
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
     std::atomic_bool isThrowSlipToFullScreen_ = false;
     std::function<void(bool isAnimating)> onThrowSlipAnimationStateChangeFunc_;
+
+    /*
+     * UIExtension
+     */
+    static GetConstrainedExtWindowInfoFunc onGetConstrainedExtWindowInfoFunc_;
 
     /*
      * Multi Window

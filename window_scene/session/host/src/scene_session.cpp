@@ -84,6 +84,7 @@ MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
+GetConstrainedExtWindowInfoFunc SceneSession::onGetConstrainedExtWindowInfoFunc_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -2239,8 +2240,20 @@ void SceneSession::RemoveModalUIExtension(int32_t persistentId)
     NotifySessionInfoChange();
 }
 
+void SceneSession::RegisterGetConstrainedExtWindowInfo(GetConstrainedExtWindowInfoFunc&& callback)
+{
+    onGetConstrainedExtWindowInfoFunc_ = std::move(callback);
+}
+
 std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEventInfo()
 {
+    // Priority query constrained modal UIExt, if unavailable, then query normal modal UIExt
+    if (onGetConstrainedExtWindowInfoFunc_) {
+        if (auto constrainedExtEventInfo = onGetConstrainedExtWindowInfoFunc_(this)) {
+            TLOGD(WmsLogTag::WMS_UIEXT, "get constrained UIExt eventInfo");
+            return constrainedExtEventInfo;
+        }
+    }
     std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
     return modalUIExtensionInfoList_.empty() ? std::nullopt :
         std::make_optional<ExtensionWindowEventInfo>(modalUIExtensionInfoList_.back());
