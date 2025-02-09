@@ -19,7 +19,6 @@
 #include <parcel.h>
 #include <map>
 #include <float.h>
-
 #include "securec.h"
 
 namespace OHOS {
