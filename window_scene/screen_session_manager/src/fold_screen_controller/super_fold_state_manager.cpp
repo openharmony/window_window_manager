@@ -429,7 +429,7 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
         screenSession->GetValidWidth(),
         screenSession->GetValidHeight());
 }
- 
+
 void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession)
 {
     auto screeBounds = screenSession->GetScreenProperty().GetBounds();
@@ -446,7 +446,7 @@ void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> s
         screenSession->GetValidWidth(),
         screenSession->GetValidHeight());
 }
- 
+
 int32_t SuperFoldStateManager::GetCurrentValidHeight(sptr<ScreenSession> screenSession)
 {
     if (currentSuperFoldCreaseRegion_ != nullptr) {
