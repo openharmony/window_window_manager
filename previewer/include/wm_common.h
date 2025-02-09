@@ -20,6 +20,8 @@
 #include <map>
 #include <float.h>
 
+#include "securec.h"
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
