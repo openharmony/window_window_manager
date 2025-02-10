@@ -275,7 +275,7 @@ HWTEST_F(SceneInputManagerTest, UpdateFocusedSessionId, Function | SmallTest | L
     ExtensionWindowEventInfo extensionInfo {
         .persistentId = 12345
     };
-    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
     sceneInputManager->UpdateFocusedSessionId(sceneSession->GetPersistentId());
     EXPECT_EQ(sceneInputManager->focusedSessionId_, extensionInfo.persistentId);
 
@@ -729,24 +729,24 @@ HWTEST_F(SceneInputManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: UpdateConstrainedUIExtInfo
- * @tc.desc: UpdateConstrainedUIExtInfo
+ * @tc.name: UpdateConstrainedModalUIExtInfo
+ * @tc.desc: UpdateConstrainedModalUIExtInfo
  * @tc.type: FUNC
  */
-HWTEST_F(SceneInputManagerTest, UpdateConstrainedUIExtInfo, Function | SmallTest | Level3)
+HWTEST_F(SceneInputManagerTest, UpdateConstrainedModalUIExtInfo, Function | SmallTest | Level3)
 {
     std::map<uint64_t, std::vector<SecSurfaceInfo>> testMap;
     auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
     ASSERT_NE(oldDirty, nullptr);
     SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
-    SceneInputManager::GetInstance().UpdateConstrainedUIExtInfo(testMap);
+    SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(testMap);
 
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
     std::vector<SecSurfaceInfo> surfaceInfoList;
     SecSurfaceInfo secSurfaceInfo;
     surfaceInfoList.emplace_back(secSurfaceInfo);
     testMap[0] = surfaceInfoList;
-    SceneInputManager::GetInstance().UpdateConstrainedUIExtInfo(testMap);
+    SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(testMap);
 }
 
 /**

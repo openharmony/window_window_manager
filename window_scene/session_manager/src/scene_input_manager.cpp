@@ -172,9 +172,6 @@ std::string DumpDisplayInfo(const MMI::DisplayInfo& info)
 
 WM_IMPLEMENT_SINGLE_INSTANCE(SceneInputManager)
 
-using GetConstrainedExtWindowInfoFunc =
-    std::function<std::optional<ExtensionWindowEventInfo>(const sptr<SceneSession>& sceneSession)>;
-
 void SceneInputManager::Init()
 {
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
@@ -184,9 +181,9 @@ void SceneInputManager::Init()
         FlushDisplayInfoToMMI();
     };
     sceneSessionDirty_->RegisterFlushWindowInfoCallback(callback);
-    SceneSession::RegisterGetConstrainedExtWindowInfo(
+    SceneSession::RegisterGetConstrainedModalExtWindowInfo(
         [](const sptr<SceneSession>& sceneSession) -> std::optional<ExtensionWindowEventInfo> {
-            return SceneInputManager::GetInstance().GetConstrainedExtWindowInfo(sceneSession);
+            return SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
         });
 }
 
@@ -548,17 +545,17 @@ void SceneInputManager::UpdateSecSurfaceInfo(const std::map<uint64_t, std::vecto
     sceneSessionDirty_->UpdateSecSurfaceInfo(secSurfaceInfoMap);
 }
 
-void SceneInputManager::UpdateConstrainedUIExtInfo(
-    const std::map<uint64_t, std::vector<SecSurfaceInfo>>& constrainedUIExtInfoMap)
+void SceneInputManager::UpdateConstrainedModalUIExtInfo(
+    const std::map<uint64_t, std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap)
 {
     if (sceneSessionDirty_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
         return;
     }
-    sceneSessionDirty_->UpdateConstrainedUIExtInfo(constrainedUIExtInfoMap);
+    sceneSessionDirty_->UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
 }
 
-std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedExtWindowInfo(
+std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedModalExtWindowInfo(
     const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
@@ -569,14 +566,14 @@ std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedExtWind
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
         return std::nullopt;
     }
-    SecSurfaceInfo constrainedUIExtInfo;
-    if (!sceneSessionDirty_->GetLastConstrainedUIExtInfo(sceneSession, constrainedUIExtInfo)) {
+    SecSurfaceInfo constrainedModalUIExtInfo;
+    if (!sceneSessionDirty_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
         return std::nullopt;
     }
-    return std::make_optional<ExtensionWindowEventInfo>(ExtensionWindowEventInfo {
-        .persistentId = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(constrainedUIExtInfo.uiExtensionNodeId),
-        .pid = constrainedUIExtInfo.uiExtensionPid,
-        .isConstrained = true });
+    return ExtensionWindowEventInfo {
+        .persistentId = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(constrainedModalUIExtInfo.uiExtensionNodeId),
+        .pid = constrainedModalUIExtInfo.uiExtensionPid,
+        .isConstrainedModal = true };
 }
 }
 } // namespace OHOS::Rosen

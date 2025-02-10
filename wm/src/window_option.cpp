@@ -353,14 +353,14 @@ bool WindowOption::GetWindowTopmost() const
     return isTopmost_;
 }
 
-void WindowOption::SetIsConstrained(bool isConstrained)
+void WindowOption::SetConstrainedModal(bool isConstrainedModal)
 {
-    isConstrained_ = isConstrained;
+    isConstrainedModal_ = isConstrainedModal;
 }
 
-bool WindowOption::GetIsConstrained() const
+bool WindowOption::IsConstrainedModal() const
 {
-    return isConstrained_;
+    return isConstrainedModal_;
 }
 
 } // namespace Rosen

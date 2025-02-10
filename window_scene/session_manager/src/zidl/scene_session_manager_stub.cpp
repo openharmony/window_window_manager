@@ -968,12 +968,12 @@ int SceneSessionManagerStub::HandleAddExtensionWindowStageToSCB(MessageParcel& d
         TLOGE(WmsLogTag::WMS_UIEXT, "read surfaceNodeId failed");
         return ERR_INVALID_DATA;
     }
-    bool isConstrained;
-    if (!data.ReadBool(isConstrained)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "read isConstrained failed");
+    bool isConstrainedModal;
+    if (!data.ReadBool(isConstrainedModal)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read isConstrainedModal failed");
         return ERR_INVALID_DATA;
     }
-    AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, isConstrained);
+    AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, isConstrainedModal);
     return ERR_NONE;
 }
 
@@ -986,12 +986,12 @@ int SceneSessionManagerStub::HandleRemoveExtensionWindowStageFromSCB(MessageParc
         return ERR_INVALID_DATA;
     }
     sptr<IRemoteObject> token = data.ReadRemoteObject();
-    bool isConstrained;
-    if (!data.ReadBool(isConstrained)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "read isConstrained failed");
+    bool isConstrainedModal;
+    if (!data.ReadBool(isConstrainedModal)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "read isConstrainedModal failed");
         return ERR_INVALID_DATA;
     }
-    RemoveExtensionWindowStageFromSCB(sessionStage, token, isConstrained);
+    RemoveExtensionWindowStageFromSCB(sessionStage, token, isConstrainedModal);
     return ERR_NONE;
 }
 

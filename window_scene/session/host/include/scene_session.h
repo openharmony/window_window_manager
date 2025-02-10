@@ -94,7 +94,7 @@ using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
-using GetConstrainedExtWindowInfoFunc =
+using GetConstrainedModalExtWindowInfoFunc =
     std::function<std::optional<ExtensionWindowEventInfo>(const sptr<SceneSession>& sceneSession)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
@@ -495,8 +495,8 @@ public:
     void CheckExtensionOnLockScreenToClose();
     void CloseExtensionSync(const UIExtensionTokenInfo& tokenInfo);
     void OnNotifyAboveLockScreen();
-    void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
-    void RemoveModalUIExtension(int32_t persistentId);
+    void AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    void RemoveNormalModalUIExtension(int32_t persistentId);
     void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     std::optional<ExtensionWindowEventInfo> GetLastModalUIExtensionEventInfo();
     Vector2f GetSessionGlobalPosition(bool useUIExtension);
@@ -523,7 +523,7 @@ public:
     bool IsImmersiveType() const;
     bool SetFrameGravity(Gravity gravity);
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
-    static void RegisterGetConstrainedExtWindowInfo(GetConstrainedExtWindowInfoFunc&& callback);
+    static void RegisterGetConstrainedModalExtWindowInfo(GetConstrainedModalExtWindowInfoFunc&& callback);
 
     /*
      * Gesture Back
@@ -635,7 +635,7 @@ protected:
     /*
      * UIExtension
      */
-    static GetConstrainedExtWindowInfoFunc onGetConstrainedExtWindowInfoFunc_;
+    static GetConstrainedModalExtWindowInfoFunc onGetConstrainedModalExtWindowInfoFunc_;
 
     /*
      * PC Window

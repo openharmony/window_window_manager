@@ -38,8 +38,9 @@ public:
     void NotifyWindowInfoChange(const sptr<SceneSession>& scenenSession, const WindowUpdateType& type);
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
-    void UpdateConstrainedUIExtInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& constrainedUIExtInfoMap);
-    std::optional<ExtensionWindowEventInfo> GetConstrainedExtWindowInfo(const sptr<SceneSession>& sceneSession);
+    void UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+        std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap);
+    std::optional<ExtensionWindowEventInfo> GetConstrainedModalExtWindowInfo(const sptr<SceneSession>& sceneSession);
     void SetUserBackground(bool userBackground);
     void SetCurrentUserId(int32_t userId);
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);

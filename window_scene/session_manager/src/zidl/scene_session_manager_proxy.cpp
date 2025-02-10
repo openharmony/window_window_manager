@@ -1941,7 +1941,7 @@ void SceneSessionManagerProxy::ProcessModalExtensionPointDown(const sptr<IRemote
 }
 
 void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrained)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
 {
     if (sessionStage == nullptr || token == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
@@ -1966,8 +1966,8 @@ void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionS
         TLOGE(WmsLogTag::WMS_UIEXT, "Write surfaceNodeId failed");
         return;
     }
-    if (!data.WriteBool(isConstrained)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write isConstrained failed");
+    if (!data.WriteBool(isConstrainedModal)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isConstrainedModal failed");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -1983,7 +1983,7 @@ void SceneSessionManagerProxy::AddExtensionWindowStageToSCB(const sptr<ISessionS
 }
 
 void SceneSessionManagerProxy::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, bool isConstrained)
+    const sptr<IRemoteObject>& token, bool isConstrainedModal)
 {
     if (sessionStage == nullptr || token == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
@@ -2004,8 +2004,8 @@ void SceneSessionManagerProxy::RemoveExtensionWindowStageFromSCB(const sptr<ISes
         TLOGE(WmsLogTag::WMS_UIEXT, "Write token failed");
         return;
     }
-    if (!data.WriteBool(isConstrained)) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write isConstrained failed");
+    if (!data.WriteBool(isConstrainedModal)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write isConstrainedModal failed");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
