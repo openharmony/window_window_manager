@@ -2967,7 +2967,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
                 pcFoldScreenController_->GetMovingTimingCurve());
             SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal);
-        } else {
+        } else if (reason != SizeChangeReason::DRAG_START) {
             SetSurfaceBounds(globalRect, isGlobal, needFlush);
         }
         pcFoldScreenController_->RecordMoveRects(rect);
