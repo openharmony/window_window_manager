@@ -19,6 +19,7 @@
 #include "js_extension_window.h"
 #include "js_extension_window_utils.h"
 #include "window_manager_hilog.h"
+#include "js_window_utils.h"
 #include "permission.h"
 
 namespace OHOS {
@@ -317,19 +318,22 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
     }
 
     sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
-    NapiAsyncTask::CompleteCallback complete =
-        [window = windowExtensionSessionImpl_, contentStorage, contextUrl, parentToken, isLoadedByName](
-            napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (window == nullptr) {
-                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                TLOGE(WmsLogTag::WMS_UIEXT, "Get windowExtensionSessionImpl failed");
-                return;
-            }
-            LoadContentTask(contentStorage, contextUrl, window, env, task, parentToken, isLoadedByName);
-        };
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsEmbeddableWindowStage::OnLoadContent",
-        env, CreateAsyncTaskWithLastParam(env, callBack, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callBack, &result);
+    auto asyncTask = [window = windowExtensionSessionImpl_, contentStorage, contextUrl, parentToken, isLoadedByName,
+        env, task = napiAsyncTask](
+        napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (window == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+            TLOGE(WmsLogTag::WMS_UIEXT, "Get windowExtensionSessionImpl failed");
+            return;
+        }
+        LoadContentTask(contentStorage, contextUrl, window, env, *task, parentToken, isLoadedByName);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
     return result;
 }
 
