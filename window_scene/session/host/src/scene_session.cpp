@@ -6135,7 +6135,7 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
     }
     SetSessionGlobalRect(uiParam.rect_);
     if (!uiParam.needSync_ || !isNeedSyncSessionRect_) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, scenePanelNeedSync:%{public}u needSyncSessionRect:%{public}u "
             "rectAfter:%{public}s preRect:%{public}s preGlobalRect:%{public}s", GetPersistentId(), uiParam.needSync_,
             isNeedSyncSessionRect_, uiParam.rect_.ToString().c_str(), winRect_.ToString().c_str(),
             globalRect.ToString().c_str());
