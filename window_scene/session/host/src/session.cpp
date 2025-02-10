@@ -2898,6 +2898,10 @@ WSError Session::ProcessBackEvent()
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
     if (auto remoteObject = sessionStage_->AsObject();
         remoteObject && !remoteObject->IsProxyObject()) {
         PostExportTask([sessionStage = sessionStage_] {
