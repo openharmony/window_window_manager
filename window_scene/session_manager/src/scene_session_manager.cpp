@@ -1899,7 +1899,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
-        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d, displayId: %{public}" PRIu64,
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d, type: %{public}d, displayId: %{public}" PRIu64,
                where, sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
                sceneSession->GetSessionProperty()->GetDisplayId());
         return sceneSession;
