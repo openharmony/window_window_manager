@@ -945,8 +945,7 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
-        uint64_t displayId) -> std::vector<sptr<SceneSession>> {
+    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> backgroundSession;
         return backgroundSession;
     };
@@ -1089,7 +1088,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
+        specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [](WindowType type,
             uint64_t displayId)-> std::vector<sptr<SceneSession>>
     {
         SessionInfo info_;

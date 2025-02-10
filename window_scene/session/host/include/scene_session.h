@@ -40,8 +40,9 @@ using SpecificSessionCreateCallback =
   std::function<sptr<SceneSession>(const SessionInfo& info, sptr<WindowSessionProperty> property)>;
 using SpecificSessionDestroyCallback = std::function<WSError(const int32_t& persistentId)>;
 using CameraFloatSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
-using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(
-    WindowType type, uint64_t displayId)>;
+using GetSceneSessionVectorByTypeAndDisplayIdCallback = std::function<std::vector<sptr<SceneSession>>(
+    WindowType type, DisplayId displayId)>;
+using GetSceneSessionVectorByTypeCallback = std::function<std::vector<sptr<SceneSession>>(WindowType type)>;
 using UpdateAvoidAreaCallback = std::function<void(int32_t persistentId)>;
 using UpdateAvoidAreaByTypeCallback = std::function<void(int32_t persistentId, AvoidAreaType type)>;
 using UpdateOccupiedAreaIfNeedCallback = std::function<void(const int32_t& persistentId)>;
@@ -113,6 +114,7 @@ public:
         SpecificSessionDestroyCallback onDestroy_;
         ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags_;
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
+        GetSceneSessionVectorByTypeAndDisplayIdCallback onGetSceneSessionVectorByTypeAndDisplayId_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
         UpdateAvoidAreaCallback onUpdateAvoidArea_;
         UpdateAvoidAreaByTypeCallback onUpdateAvoidAreaByType_;
