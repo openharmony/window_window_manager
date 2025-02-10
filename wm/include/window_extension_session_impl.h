@@ -16,10 +16,12 @@
 #ifndef OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_EXTENSION_SESSION_IMPL_H
 
-#include <list>
+#include "window_session_impl.h"
+
+#include <optional>
 
 #include "accessibility_element_info.h"
-#include "window_session_impl.h"
+#include "extension_data_handler.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -47,6 +49,8 @@ public:
     void RegisterTransferComponentDataForResultListener(
         const NotifyTransferComponentDataForResultFunc& func) override;
     void TriggerBindModalUIExtension() override;
+    std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
     /*
      * Window Privacy
@@ -137,6 +141,7 @@ private:
     WMError CheckHideNonSecureWindowsPermission(bool shouldHide);
     void ReportModalUIExtensionMayBeCovered(bool byLoadContent) const;
 
+    std::shared_ptr<Extension::DataHandler> dataHandler_;
     sptr<IRemoteObject> abilityToken_ { nullptr };
     std::atomic<bool> isDensityFollowHost_ { false };
     std::optional<std::atomic<float>> hostDensityValue_ = std::nullopt;
