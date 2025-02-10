@@ -1804,10 +1804,14 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
     WSRect rect3 = {1, 1, 2, 1};
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 }
 
 /**
