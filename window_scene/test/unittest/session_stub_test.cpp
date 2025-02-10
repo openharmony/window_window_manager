@@ -505,6 +505,65 @@ HWTEST_F(SessionStubTest, HandleSetSystemEnableDrag_TestReadBool, Function | Sma
     res = session_->HandleSetSystemEnableDrag(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon01
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::shared_ptr<Media::PixelMap> icon = std::make_shared<Media::PixelMap>();
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon02
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon03
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    const uint32_t color[] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    uint32_t len = sizeof(color) / sizeof(color[0]);
+    Media::InitializationOptions opts;
+    opts.size.width = 2;
+    opts.size.height = 3;
+    opts.pixelFormat = Media::PixelFormat::UNKNOWN;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    std::shared_ptr<Media::PixelMap> icon = Media::PixelMap::Create(color, len, 0, opts.size.width, opts);
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

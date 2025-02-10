@@ -15,13 +15,17 @@
 
 #include "session/host/include/main_session.h"
 
-#include "session_helper.h"
+#include <ipc_skeleton.h>
+
+#include "common/include/session_permission.h"
 #include "window_helper.h"
+#include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MainSession" };
+constexpr int32_t MAX_LABEL_SIZE = 1024;
 } // namespace
 
 MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -308,5 +312,61 @@ bool MainSession::IsModal() const
 bool MainSession::IsApplicationModal() const
 {
     return IsModal();
+}
+
+WSError MainSession::SetSessionLabelAndIcon(const std::string& label,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", persistentId_);
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    const bool pidCheck = (callingPid != -1) && (callingPid == GetCallingPid());
+    if (!pidCheck ||
+        !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_SET_ABILITY_INSTANCE_INFO)) {
+        TLOGE(WmsLogTag::WMS_MAIN,
+            "The caller has not permission granted or not the same processs, "
+            "callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+            GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (systemConfig_.uiType_ != UI_TYPE_PC) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (label.empty() || label.length() > MAX_LABEL_SIZE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid label");
+        return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
+    }
+    return SetSessionLabelAndIconInner(label, icon);
+}
+
+WSError MainSession::SetSessionLabelAndIconInner(const std::string& label,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, label, icon] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is nullptr", where);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (session->updateSessionLabelAndIconFunc_) {
+            session->updateSessionLabelAndIconFunc_(label, icon);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+void MainSession::SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is null", where);
+            return;
+        }
+        session->updateSessionLabelAndIconFunc_ = std::move(func);
+    }, __func__);
 }
 } // namespace OHOS::Rosen
