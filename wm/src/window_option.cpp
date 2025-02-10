@@ -383,14 +383,14 @@ bool WindowOption::GetIsDensityFollowHost() const
     return isDensityFollowHost_;
 }
 
-void WindowOption::SetIsConstrained(bool isConstrained)
+void WindowOption::SetConstrainedModal(bool isConstrainedModal)
 {
-    isConstrained_ = isConstrained;
+    isConstrainedModal_ = isConstrainedModal;
 }
 
-bool WindowOption::GetIsConstrained() const
+bool WindowOption::IsConstrainedModal() const
 {
-    return isConstrained_;
+    return isConstrainedModal_;
 }
 
 } // namespace Rosen

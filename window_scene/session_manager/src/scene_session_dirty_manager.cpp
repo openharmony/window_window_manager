@@ -463,8 +463,8 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
     }
 }
 
-bool SceneSessionDirtyManager::GetLastConstrainedUIExtInfo(const sptr<SceneSession>& sceneSession,
-    SecSurfaceInfo& constrainedUIExtInfo)
+bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<SceneSession>& sceneSession,
+    SecSurfaceInfo& constrainedModalUIExtInfo)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
@@ -475,18 +475,18 @@ bool SceneSessionDirtyManager::GetLastConstrainedUIExtInfo(const sptr<SceneSessi
         TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
         return false;
     }
-    std::vector<SecSurfaceInfo> constrainedUIExtInfoList;
+    std::vector<SecSurfaceInfo> constrainedModalUIExtInfoList;
     auto surfaceNodeId = surfaceNode->GetId();
     {
-        std::shared_lock<std::shared_mutex> lock(constrainedUIExtInfoMutex_);
-        auto iter = constrainedUIExtInfoMap_.find(surfaceNodeId);
-        if (iter == constrainedUIExtInfoMap_.end()) {
+        std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        auto iter = constrainedModalUIExtInfoMap_.find(surfaceNodeId);
+        if (iter == constrainedModalUIExtInfoMap_.end()) {
             return false;
         }
-        constrainedUIExtInfoList = iter->second;
+        constrainedModalUIExtInfoList = iter->second;
     }
-    if (!constrainedUIExtInfoList.empty()) {
-        constrainedUIExtInfo = constrainedUIExtInfoList.back();
+    if (!constrainedModalUIExtInfoList.empty()) {
+        constrainedModalUIExtInfo = constrainedModalUIExtInfoList.back();
         return true;
     }
     return false;
@@ -543,16 +543,16 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
 {
     auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     if (modalUIExtensionEventInfo) {
-        if (modalUIExtensionEventInfo->isConstrained) {  // constrained UIExt
-            SecSurfaceInfo constrainedUIExtInfo;
-            if (!GetLastConstrainedUIExtInfo(sceneSession, constrainedUIExtInfo)) {
-                TLOGE(WmsLogTag::WMS_EVENT, "cannot find last constrained UIExtInfo");
+        if (modalUIExtensionEventInfo->isConstrainedModal) {  // constrained UIExt
+            SecSurfaceInfo constrainedModalUIExtInfo;
+            if (!GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
+                TLOGE(WmsLogTag::WMS_EVENT, "cannot find last constrained Modal UIExtInfo");
                 return;
             }
-            MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedUIExtInfo,
+            MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
                 hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
             windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
-            TLOGD(WmsLogTag::WMS_EVENT, "constrained UIExt id: %{public}d", windowInfo.id);
+            TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
             windowInfoList.emplace_back(windowInfo);
         } else {  // normal UIExt
             AddModalExtensionWindowInfo(windowInfoList, hostWindowInfo, sceneSession, *modalUIExtensionEventInfo);
@@ -1001,20 +1001,20 @@ void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     }
 }
 
-void SceneSessionDirtyManager::UpdateConstrainedUIExtInfo(const std::map<uint64_t,
-    std::vector<SecSurfaceInfo>>& constrainedUIExtInfoMap)
+void SceneSessionDirtyManager::UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+    std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap)
 {
-    bool updateConstrainedUIExtInfoNeeded = false;
+    bool updateConstrainedModalUIExtInfoNeeded = false;
     {
-        std::unique_lock<std::shared_mutex> lock(constrainedUIExtInfoMutex_);
-        if (constrainedUIExtInfoMap_ != constrainedUIExtInfoMap) {
-            constrainedUIExtInfoMap_ = constrainedUIExtInfoMap;
-            updateConstrainedUIExtInfoNeeded = true;
+        std::unique_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        if (constrainedModalUIExtInfoMap_ != constrainedModalUIExtInfoMap) {
+            constrainedModalUIExtInfoMap_ = constrainedModalUIExtInfoMap;
+            updateConstrainedModalUIExtInfoNeeded = true;
         }
     }
-    if (updateConstrainedUIExtInfoNeeded) {
+    if (updateConstrainedModalUIExtInfoNeeded) {
         ResetFlushWindowInfoTask();
-        DumpSecSurfaceInfoMap(constrainedUIExtInfoMap);
+        DumpSecSurfaceInfoMap(constrainedModalUIExtInfoMap);
     }
 }
 
