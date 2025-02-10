@@ -3575,12 +3575,13 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        WLOGFE("permission denied!");
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
-    }
+    bool oldSkipValue = property_->GetSnapshotSkip();
     property_->SetSnapshotSkip(isSkip);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
+    auto resError = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP);
+    if (resError != WMError::WM_OK) {
+        property_->SetSnapshotSkip(oldSkipValue);
+    }
+    return resError;
 }
 
 std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
