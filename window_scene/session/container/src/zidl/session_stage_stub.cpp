@@ -144,6 +144,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowVisibilityChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_TRANSFORM_CHANGE):
             return HandleNotifyTransformChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM):
+            return HandleNotifySingleHandTransformChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE):
             return HandleNotifyDialogStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT):
@@ -435,6 +437,15 @@ int SessionStageStub::HandleNotifyTransformChange(MessageParcel& data, MessagePa
     Transform transform;
     transform.Unmarshalling(data);
     NotifyTransformChange(transform);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifySingleHandTransformChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    SingleHandTransform singleHandTransform;
+    singleHandTransform.Unmarshalling(data);
+    NotifySingleHandTransformChange(singleHandTransform);
     return ERR_NONE;
 }
 
