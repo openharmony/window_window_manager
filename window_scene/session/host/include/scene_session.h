@@ -425,7 +425,8 @@ public:
      */
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
-    
+    virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
+
     void ClearSpecificSessionCbMap();
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
     void RegisterForceHideChangeCallback(NotifyForceHideChangeFunc&& callback);
