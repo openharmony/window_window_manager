@@ -937,6 +937,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionForeground, Function | SmallT
     uint32_t reason = 1;
     bool withAnimation = true;
     windowSceneSession->NotifySessionForeground(reason, withAnimation);
+    ASSERT_EQ(false, windowSceneSession->GetDefaultDensityEnabled());
 }
 
 /**
@@ -956,6 +957,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionBackground, Function | SmallT
     bool withAnimation = true;
     bool isFromInnerkits = true;
     windowSceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+    ASSERT_EQ(false, windowSceneSession->GetDefaultDensityEnabled());
 }
 
 /**
