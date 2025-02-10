@@ -95,6 +95,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_HANDWRITE)));
     napi_set_named_property(env, objValue, "TYPE_SCREEN_CONTROL", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
+    napi_set_named_property(env, objValue, "TYPE_WALLET_SWIPE_CARD", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_WALLET_SWIPE_CARD)));
 
     return objValue;
 }
