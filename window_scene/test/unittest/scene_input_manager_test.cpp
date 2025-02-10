@@ -24,6 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 constexpr int MAX_WINDOWINFO_NUM = 15;
+const static uint32_t DISPLAY_B_HEIGHT = 1608;
 class SceneInputManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -329,12 +330,12 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayInfos, Function | SmallTest | Le
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     int ret = displayInfos.size();
     ScreenProperty screenProperty0;
-    screenProperty0.SetValidHeight(1608);
+    screenProperty0.SetValidHeight(DISPLAY_B_HEIGHT);
     Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
         sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     ASSERT_EQ(ret + 1, displayInfos.size());
-    ASSERT_EQ(1608, displayInfos[0].validHeight);
+    ASSERT_EQ(DISPLAY_B_HEIGHT, displayInfos[0].validHeight);
 }
 
 /**
