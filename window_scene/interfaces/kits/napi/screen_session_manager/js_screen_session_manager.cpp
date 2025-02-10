@@ -91,6 +91,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::UpdateAvailableArea);
     BindNativeFunction(env, exportObj, "updateSuperFoldAvailableArea", moduleName,
         JsScreenSessionManager::UpdateSuperFoldAvailableArea);
+    BindNativeFunction(env, exportObj, "updateSuperFoldExpandAvailableArea", moduleName,
+        JsScreenSessionManager::UpdateSuperFoldExpandAvailableArea);
     BindNativeFunction(env, exportObj, "setScreenOffDelayTime", moduleName,
         JsScreenSessionManager::SetScreenOffDelayTime);
     BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
@@ -187,6 +189,13 @@ napi_value JsScreenSessionManager::UpdateSuperFoldAvailableArea(napi_env env, na
     WLOGD("[NAPI]UpdateSuperFoldAvailableArea");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnUpdateSuperFoldAvailableArea(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::UpdateSuperFoldExpandAvailableArea(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]UpdateSuperFoldExpandAvailableArea");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateSuperFoldExpandAvailableArea(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetScreenOffDelayTime(napi_env env, napi_callback_info info)
@@ -632,6 +641,38 @@ napi_value JsScreenSessionManager::OnUpdateSuperFoldAvailableArea(napi_env env, 
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnUpdateSuperFoldExpandAvailableArea(napi_env env, const napi_callback_info info)
+{
+    WLOGFD("[NAPI]OnUpdateSuperFoldExpandAvailableArea");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    DMRect area;
+    napi_value nativeObj = argv[1];
+    if (nativeObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect,the param is null");
+        return NapiGetUndefined(env);
+    } else if (!ConvertDMRectFromJs(env, nativeObj, area)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect");
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().UpdateSuperFoldExpandAvailableArea(screenId, area);
     return NapiGetUndefined(env);
 }
 
