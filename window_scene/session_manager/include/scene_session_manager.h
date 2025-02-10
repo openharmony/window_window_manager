@@ -777,12 +777,9 @@ private:
     /*
      * Window Immersive
      */
-    bool UpdateSessionAvoidAreaIfNeed(int32_t persistentId,
-        const sptr<SceneSession>& sceneSession, const AvoidArea& avoidArea, AvoidAreaType avoidAreaType);
-    void UpdateAvoidSessionAvoidArea(WindowType type, bool& needUpdate);
+    void UpdateAvoidSessionAvoidArea(WindowType type);
     void UpdateNormalSessionAvoidArea(int32_t persistentId, const sptr<SceneSession>& sceneSession, bool& needUpdate);
     void UpdateAvoidArea(int32_t persistentId);
-    void UpdateAvoidAreaByType(int32_t persistentId, AvoidAreaType type);
     void UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate);
 
     WSError IsLastFrameLayoutFinished(bool& isLayoutFinished);
@@ -1237,7 +1234,6 @@ private:
     std::map<uint64_t, WSRect> currAINavigationBarAreaMap_;
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
-    std::map<int32_t, std::map<AvoidAreaType, AvoidArea>> lastUpdatedAvoidArea_;
     static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;
     int32_t statusBarAvoidHeight_ = INVALID_STATUS_BAR_AVOID_HEIGHT;
 

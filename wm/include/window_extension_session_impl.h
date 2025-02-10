@@ -68,7 +68,8 @@ public:
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
 
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT) override;
     WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
@@ -147,8 +148,10 @@ private:
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
+    void UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     WMError GetSystemViewportConfig(SessionViewportConfig& config);
     void UpdateSystemViewportConfig();
     void UpdateExtensionDensity(SessionViewportConfig& config);

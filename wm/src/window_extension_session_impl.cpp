@@ -609,7 +609,7 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
 }
 
 WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const SceneAnimationConfig& config)
+    const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
@@ -633,23 +633,24 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
-        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction, avoidAreas);
     } else if (handler_ != nullptr) {
-        UpdateRectForOtherReason(wmRect, wmReason);
+        UpdateRectForOtherReason(wmRect, wmReason, avoidAreas);
     } else {
         NotifySizeChange(wmRect, wmReason);
-        UpdateViewportConfig(wmRect, wmReason);
+        UpdateViewportConfig(wmRect, wmReason, nullptr, nullptr, avoidAreas);
     }
     return WSError::WS_OK;
 }
 
 void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if (!handler_) {
         return;
     }
-    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction, avoidAreas]() mutable {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowExtensionSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
@@ -678,7 +679,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, nullptr, avoidAreas);
         RSNode::CloseImplicitAnimation();
         if (needSync) {
             rsTransaction->Commit();
@@ -689,16 +690,17 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
 }
 
-void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason)
+void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    auto task = [weak = wptr(this), wmReason, wmRect] {
+    auto task = [weak = wptr(this), wmReason, wmRect, avoidAreas] {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
         window->NotifySizeChange(wmRect, wmReason);
-        window->UpdateViewportConfig(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason, nullptr, nullptr, avoidAreas);
     };
     if (handler_) {
         handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForOtherReason");
@@ -849,7 +851,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfigInner(const Sessi
         TLOGW(WmsLogTag::WMS_UIEXT, "uiContent is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
-    uiContent->UpdateViewportConfig(viewportConfig, WindowSizeChangeReason::UNDEFINED, nullptr);
+    uiContent->UpdateViewportConfig(viewportConfig, WindowSizeChangeReason::UNDEFINED, nullptr, lastAvoidAreaMap_);
     return WSError::WS_OK;
 }
 

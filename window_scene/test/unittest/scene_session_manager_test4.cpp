@@ -836,13 +836,12 @@ HWTEST_F(SceneSessionManagerTest4, UpdateAvoidSessionAvoidArea, Function | Small
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WindowType type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    bool needUpdate = true;
-    ssm_->UpdateAvoidSessionAvoidArea(type, needUpdate);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
 
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
     sceneSession->isVisible_ = true;
-    ssm_->UpdateAvoidSessionAvoidArea(type, needUpdate);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 
