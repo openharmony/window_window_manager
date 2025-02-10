@@ -143,6 +143,10 @@ public:
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
 
     /**
      * @brief Close pip window while stopPip is called.
