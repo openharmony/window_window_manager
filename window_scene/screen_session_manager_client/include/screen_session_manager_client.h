@@ -133,6 +133,7 @@ private:
     sptr<IScreenConnectionChangeListener> screenConnectionChangeListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
+    SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
 };
 } // namespace OHOS::Rosen
 

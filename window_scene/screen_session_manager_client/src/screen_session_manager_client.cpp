@@ -23,6 +23,7 @@
 #include "dm_common.h"
 #include "pipeline/rs_node_map.h"
 #include "window_manager_hilog.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -360,6 +361,10 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode, screenSessionManager_->IsOrientationNeedChanged());
     screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
+    if (currentstate_ != SuperFoldStatus::KEYBOARD) {
+        screenSession->SetValidHeight(bounds.rect_.GetHeight());
+        screenSession->SetValidWidth(bounds.rect_.GetWidth());
+    }
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
@@ -670,6 +675,7 @@ void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int3
 
 void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
+    currentstate_ = superFoldStatus;
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");

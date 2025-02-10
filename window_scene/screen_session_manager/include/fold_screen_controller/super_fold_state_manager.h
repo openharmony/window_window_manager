@@ -101,6 +101,7 @@ private:
     void UnregisterHalfScreenSwitchesObserver();
     void OnHalfScreenSwitchesStateChanged();
     static bool ChangeScreenState(bool toHalf);
+    int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
 };
 } // Rosen
 } // OHOS

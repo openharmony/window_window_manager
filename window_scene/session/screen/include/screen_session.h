@@ -229,6 +229,10 @@ public:
     void SetIsBScreenHalf(bool isBScreenHalf);
     bool GetIsBScreenHalf() const;
     ScreenShape GetScreenShape() const;
+    void SetValidHeight(uint32_t validHeight);
+    void SetValidWidth(uint32_t validWidth);
+    int32_t GetValidHeight() const;
+    int32_t GetValidWidth() const;
     float GetSensorRotation() const;
 
     bool isPrimary_ { false };
