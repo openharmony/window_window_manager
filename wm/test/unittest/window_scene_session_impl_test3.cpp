@@ -292,6 +292,7 @@ HWTEST_F(WindowSceneSessionImplTest3, UpdateSubWindowState, Function | SmallTest
     windowSceneSessionImpl->UpdateSubWindowState(type);
     type = WindowType::APP_MAIN_WINDOW_BASE;
     windowSceneSessionImpl->UpdateSubWindowState(type);
+    ASSERT_EQ(false, windowSceneSessionImpl->GetDefaultDensityEnabled());
 }
 
 /**
