@@ -2506,7 +2506,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, Function | SmallTest | L
     bool highlight = false;
     WSError res = window->NotifyHighlightChange(highlight);
     EXPECT_EQ(highlight, false);
-    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(res, WSError::WS_OK);
     sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
     window->RegisterWindowHighlightChangeListeners(listener);
     res = window->NotifyHighlightChange(highlight);

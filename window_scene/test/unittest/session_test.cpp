@@ -1664,7 +1664,10 @@ HWTEST_F(WindowSessionTest, UpdateHighlightStatus, Function | SmallTest | Level2
 HWTEST_F(WindowSessionTest, NotifyHighlightChange, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.isSystem_ = true;
     EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_INVALID_SESSION);
+    session_->sessionInfo_.isSystem_ = false;
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_NULLPTR);
     session_->sessionStage_ = mockSessionStage_;
     session_->state_ = SessionState::STATE_CONNECT;
     EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_OK);
