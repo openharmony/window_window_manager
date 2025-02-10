@@ -520,6 +520,9 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction1, Function | SmallTest
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property, sceneSession,
         WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE));
 
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property, sceneSession,
         WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
 }
