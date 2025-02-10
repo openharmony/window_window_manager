@@ -321,11 +321,10 @@ napi_value JsEmbeddableWindowStage::OnLoadContent(napi_env env, napi_callback_in
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callBack, &result);
     auto asyncTask = [window = windowExtensionSessionImpl_, contentStorage, contextUrl, parentToken, isLoadedByName,
-        env, task = napiAsyncTask](
-        napi_env env, NapiAsyncTask& task, int32_t status) {
+        env, task = napiAsyncTask] {
         if (window == nullptr) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-            TLOGE(WmsLogTag::WMS_UIEXT, "Get windowExtensionSessionImpl failed");
+            TLOGNE(WmsLogTag::WMS_UIEXT, "Get windowExtensionSessionImpl failed");
             return;
         }
         LoadContentTask(contentStorage, contextUrl, window, env, *task, parentToken, isLoadedByName);
