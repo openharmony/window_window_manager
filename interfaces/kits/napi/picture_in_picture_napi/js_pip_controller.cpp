@@ -189,34 +189,33 @@ napi_value JsPipController::UpdateContentNode(napi_env env, napi_callback_info i
 napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "OnUpdateContentNode is called");
-    WmErrorCode errCode = WmErrorCode::WM_OK;
     size_t argc = NUMBER_FOUR;
     napi_value argv[NUMBER_FOUR] = {nullptr};
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != NUMBER_ONE) {
         TLOGE(WmsLogTag::WMS_PIP, "Argc count is invalid:%{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM),
+            "Invalidate params."));
+        return result;
     }
     napi_value typeNode = argv[0];
     if (GetType(env, typeNode) == napi_null || GetType(env, typeNode) == napi_undefined) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM),
+            "Invalidate params."));
+        return result;
+    }
+    if (!PictureInPictureManager::IsSupportPiP()) {
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+            "Capability not supported. Failed to call the API due to limited device capabilities."));
+        return result;
     }
     napi_ref typeNodeRef = nullptr;
     napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask, typeNodeRef, errCode,
+    auto asyncTask = [env, task = napiAsyncTask, typeNodeRef,
             weak = wptr<PictureInPictureController>(pipController_)]() {
-        if (errCode != WmErrorCode::WM_OK) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), "Invalidate params."));
-            return;
-        }
-        if (!PictureInPictureManager::IsSupportPiP()) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
-                "Capability not supported. Failed to call the API due to limited device capabilities."));
-            return;
-        }
         auto pipController = weak.promote();
         if (pipController == nullptr) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
