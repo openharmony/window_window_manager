@@ -232,8 +232,8 @@ public:
     WindowType GetParentWindowType() const;
     void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
     bool GetIsUIExtAnySubWindow() const;
-    void SetIsConstrained(bool isConstrained);
-    bool GetIsConstrained() const;
+    void SetConstrainedModal(bool isConstrainedModal);
+    bool IsConstrainedModal() const;
 
     /*
      * Multi Instance
@@ -427,7 +427,7 @@ private:
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
-    bool isConstrained_ = false;
+    bool isConstrainedModal_ = false;
 
     /*
      * Multi Instance

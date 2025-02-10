@@ -298,9 +298,9 @@ public:
         return WSError::WS_OK;
     }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrained = false) override {}
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false) override {}
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, bool isConstrained = false) override {}
+        const sptr<IRemoteObject>& token, bool isConstrainedModal = false) override {}
     void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override {}
     void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) override {}
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override

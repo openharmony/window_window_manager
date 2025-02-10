@@ -84,7 +84,7 @@ MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
-GetConstrainedExtWindowInfoFunc SceneSession::onGetConstrainedExtWindowInfoFunc_;
+GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -2190,7 +2190,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     return false;
 }
 
-void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+void SceneSession::AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d, pid=%{public}d", GetPersistentId(),
         extensionInfo.persistentId, extensionInfo.pid);
@@ -2223,7 +2223,7 @@ void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extens
     NotifySessionInfoChange();
 }
 
-void SceneSession::RemoveModalUIExtension(int32_t persistentId)
+void SceneSession::RemoveNormalModalUIExtension(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d", GetPersistentId(), persistentId);
     {
@@ -2240,16 +2240,16 @@ void SceneSession::RemoveModalUIExtension(int32_t persistentId)
     NotifySessionInfoChange();
 }
 
-void SceneSession::RegisterGetConstrainedExtWindowInfo(GetConstrainedExtWindowInfoFunc&& callback)
+void SceneSession::RegisterGetConstrainedModalExtWindowInfo(GetConstrainedModalExtWindowInfoFunc&& callback)
 {
-    onGetConstrainedExtWindowInfoFunc_ = std::move(callback);
+    onGetConstrainedModalExtWindowInfoFunc_ = std::move(callback);
 }
 
 std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEventInfo()
 {
     // Priority query constrained modal UIExt, if unavailable, then query normal modal UIExt
-    if (onGetConstrainedExtWindowInfoFunc_) {
-        if (auto constrainedExtEventInfo = onGetConstrainedExtWindowInfoFunc_(this)) {
+    if (onGetConstrainedModalExtWindowInfoFunc_) {
+        if (auto constrainedExtEventInfo = onGetConstrainedModalExtWindowInfoFunc_(this)) {
             TLOGD(WmsLogTag::WMS_UIEXT, "get constrained UIExt eventInfo");
             return constrainedExtEventInfo;
         }
