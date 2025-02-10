@@ -199,19 +199,35 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
     }
     napi_value typeNode = argv[0];
-    if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
+    if (GetType(env, typeNode) == napi_null || GetType(env, typeNode) == napi_undefined) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
         return NapiThrowInvalidParam(env, "Invalid typeNode.");
     }
-    if (pipController_ == nullptr) {
-        std::string errMsg = "OnUpdateNode error, controller is nullptr";
-        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
-        return NapiThrowInvalidParam(env, errMsg);
-    }
     napi_ref typeNodeRef = nullptr;
     napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
-    pipController_->UpdateContentNodeRef(typeNodeRef);
-    return NapiGetUndefined(env);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [env, task = napiAsyncTask, typeNodeRef,
+            weak = wptr<PictureInPictureController>(pipController_)]() {
+        if (!PictureInPictureManager::IsSupportPiP()) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+                "Capability not supported. Failed to call the API due to limited device capabilities."));
+            return;
+        }
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        pipController->UpdateContentNodeRef(typeNodeRef);
+        task->Resolve(env, NapiGetUndefined(env));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
+    return result;
 }
 
 napi_value JsPipController::UpdateContentSize(napi_env env, napi_callback_info info)
