@@ -159,13 +159,13 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, avoidArea, type, env = env_] {
+    auto jsCallback = [self = weakRef_, avoidArea, type, eng = env_] {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or env is nullptr");
+        if (thisListener == nullptr || eng == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
             return;
         }
-        napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(env, avoidArea, type);
+        napi_value avoidAreaValue = ConvertAvoidAreaToJsValue(eng, avoidArea, type);
         if (avoidAreaValue == nullptr) {
             return;
         }
@@ -174,14 +174,14 @@ void JsExtensionWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, Av
             thisListener->CallJsMethod(SYSTEM_AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         } else {
             napi_value objValue = nullptr;
-            napi_create_object(env, &objValue);
+            napi_create_object(eng, &objValue);
             if (objValue == nullptr) {
                 TLOGNE(WmsLogTag::WMS_UIEXT, "Failed to get object");
                 return;
             }
-            napi_set_named_property(env, objValue, "type",
-                                    CreateJsValue(env, static_cast<uint32_t>(type)));
-            napi_set_named_property(env, objValue, "area", avoidAreaValue);
+            napi_set_named_property(eng, objValue, "type",
+                                    CreateJsValue(eng, static_cast<uint32_t>(type)));
+            napi_set_named_property(eng, objValue, "area", avoidAreaValue);
             napi_value argv[] = { objValue };
             thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
@@ -199,10 +199,10 @@ void JsExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>&
         static_cast<uint32_t>(info->type_), info->rect_.posX_, info->rect_.posY_, info->rect_.width_,
         info->rect_.height_);
     // js callback should run in js thread
-    auto jsCallback = [self = weakRef_, info, env = env_] {
+    auto jsCallback = [self = weakRef_, info, eng = env_] {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or env is nullptr");
+        if (thisListener == nullptr || eng == nullptr) {
+            TLOGNE(WmsLogTag::WMS_UIEXT, "this listener or eng is nullptr");
             return;
         }
         napi_value argv[] = {CreateJsValue(eng, info->rect_.height_)};
