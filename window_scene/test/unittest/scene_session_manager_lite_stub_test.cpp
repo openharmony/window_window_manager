@@ -206,6 +206,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override 
+    { 
+        return WMError::WM_OK; 
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -805,6 +809,27 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRootMainWindowId, Function | 
     data.WriteInt32(persistentId);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetRootMainWindowId(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleMinimizeMainSession
+ * @tc.desc: test function : HandleMinimizeMainSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleMinimizeMainSession, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "appbundleName";
+    int32_t appIndex = 1;
+    int32_t userId = 1;
+
+    data.WriteString(bundleName);
+    data.WriteInt32(appIndex);
+    data.WriteInt32(userId);
+
+    auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMinimizeMainSession(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

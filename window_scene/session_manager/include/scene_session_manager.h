@@ -479,6 +479,7 @@ public:
         const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
+    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
