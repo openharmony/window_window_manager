@@ -412,7 +412,7 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
         pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
     }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+    ret = WindowAdapter::GetInstance().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
         WLOGFW("RegisterWindowManagerAgent failed!");
