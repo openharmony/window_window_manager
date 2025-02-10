@@ -791,8 +791,10 @@ bool MoveDragController::CheckDragEventLegal(const std::shared_ptr<MMI::PointerE
     }
     int32_t pointerId = pointerEvent->GetPointerId();
     int32_t startPointerId = moveDragProperty_.pointerId_;
-    if (GetStartDragFlag() && startPointerId != -1 && startPointerId != pointerId) {
-        WLOGFI("block unnecessary pointer event inside the window");
+    int32_t startPointerType = moveDragProperty_.pointerType_;
+    if (GetStartDragFlag() && ((startPointerId != -1 && startPointerId != pointerId) ||
+        (startPointerType != -1 && pointerEvent->GetSourceType() != startPointerType))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "block unnecessary pointer event inside the window");
         return false;
     }
     return true;
