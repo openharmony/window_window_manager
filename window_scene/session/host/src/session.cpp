@@ -1036,10 +1036,10 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    return UpdateRectWithAvoidArea(rect, reason, updateReason, rsTransaction, {});
+    return UpdateRectWithLayoutInfo(rect, reason, updateReason, rsTransaction, {});
 }
 
-WSError Session::UpdateRectWithAvoidArea(const WSRect& rect, SizeChangeReason reason,
+WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
