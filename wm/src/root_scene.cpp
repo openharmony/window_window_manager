@@ -21,6 +21,7 @@
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
+#include <ui/rs_node.h>
 #include <viewport_config.h>
 
 #include "ability_context.h"
@@ -276,6 +277,28 @@ WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
     }
     rect = getSessionRectCallback_(type);
     return WMError::WM_OK;
+}
+
+std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std::string& stringId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
+        return nullptr;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    return uiContent_->GetRSNodeByStringID(stringId);
+}
+
+void RootScene::SetTopWindowBoundaryByID(const std::string& stringId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    uiContent_->SetTopWindowBoundaryByID(stringId);
 }
 } // namespace Rosen
 } // namespace OHOS

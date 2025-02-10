@@ -61,6 +61,7 @@ class ResourceManager;
 } // namespace OHOS::Global::Resource
 
 namespace OHOS::Rosen {
+class RSNode;
 namespace AncoConsts {
     constexpr const char* ANCO_MISSION_ID = "ohos.anco.param.missionId";
     constexpr const char* ANCO_SESSION_ID = "ohos.anco.param.sessionId";
@@ -115,6 +116,8 @@ using IsRootSceneLastFrameLayoutFinishedFunc = std::function<bool()>;
 using NotifyStartPiPFailedFunc = std::function<void()>;
 using NotifyAppUseControlListFunc =
     std::function<void(ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList)>;
+using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
+using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -438,6 +441,15 @@ public:
      */
     WMError ReleaseForegroundSessionScreenLock() override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+
+    /*
+     * Window Layout
+     */
+    SingleHandTransform GetNormalSingleHandTransform() const;
+    void NotifySingleHandInfoChange(float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode);
+    void RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func);
+    void RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func);
+    void RegisterSingleHandContainerNode(const std::string& stringId);
 
     /*
      * Multi Window
@@ -924,6 +936,14 @@ private:
 
     void ResetWant(sptr<SceneSession>& sceneSession);
     RunnableFuture<std::vector<std::string>> dumpInfoFuture_;
+
+    /*
+     * Window Layout
+     */
+    SingleHandTransform singleHandTransform_;
+    GetRSNodeByStringIDFunc getRSNodeByStringIDFunc_;
+    SetTopWindowBoundaryByIDFunc setTopWindowBoundaryByIDFunc_;
+    bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
 
     /*
      * Window Pipeline

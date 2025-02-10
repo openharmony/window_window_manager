@@ -222,7 +222,10 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
                 static_cast<MMI::DisplayMode>(displayMode)),
             .displayDirection = displayRotation,
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
-            .transform = transformData};
+            .transform = transformData,
+            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
+            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY
+        };
         displayInfos.emplace_back(displayInfo);
     }
 }
@@ -435,7 +438,10 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
         }
     }
     lastWindowDefaultHotArea = currWindowDefaultHotArea;
-    idList += std::to_string(focusedSessionId_);
+    SingleHandTransform transform = SceneSessionManager::GetInstance().GetNormalSingleHandTransform();
+    idList += std::to_string(focusedSessionId_) + "|" +
+        std::to_string(transform.posX) + "|" + std::to_string(transform.posY) + "|" +
+        std::to_string(transform.scaleX) + "|" + std::to_string(transform.scaleY);
     if (lastIdList != idList) {
         windowEventID++;
         TLOGI(WmsLogTag::WMS_EVENT, "eid:%{public}d,size:%{public}d,idList:%{public}s",

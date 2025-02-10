@@ -26,6 +26,7 @@
 #include <hitrace_meter.h>
 #include "parameter.h"
 #include "publish/scb_dump_subscriber.h"
+#include <ui/rs_node.h>
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
@@ -1735,6 +1736,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->SetAppDragResizeType(dragResizeType);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
             sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
+        sceneSession->SetSingleHandTransform(singleHandTransform_);
     }
     return sceneSession;
 }
@@ -4571,9 +4573,7 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     oss << "-------------------------------------ScreenGroup " << screenGroupId
         << "-------------------------------------" << std::endl;
     oss << "WindowName           DisplayId Pid     WinId Type Mode Flag ZOrd Orientation [ x    y    w    h    ]"
-        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]"
-        << std::endl;
-
+        << " [ OffsetX OffsetY ] [ ScaleX  ScaleY  PivotX  PivotY  ]" << std::endl;
     std::vector<sptr<SceneSession>> allSession;
     std::vector<sptr<SceneSession>> backgroundSession;
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
@@ -4609,6 +4609,8 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
         count++;
     }
     oss << "Focus window: " << GetFocusedSessionId() << std::endl;
+    oss << "SingleHand: X[" << singleHandTransform_.posX << "] Y[" << singleHandTransform_.posY << "] scale["
+        << singleHandTransform_.scaleX << "]" << std::endl;
     oss << "Total window num: " << sceneSessionMapCopy.size() << std::endl;
     dumpInfo.append(oss.str());
     return WSError::WS_OK;
@@ -5657,6 +5659,94 @@ WSError SceneSessionManager::UpdateWindowMode(int32_t persistentId, int32_t wind
     }
     WindowMode mode = static_cast<WindowMode>(windowMode);
     return sceneSession->UpdateWindowMode(mode);
+}
+
+SingleHandTransform SceneSessionManager::GetNormalSingleHandTransform() const
+{
+    return singleHandTransform_;
+}
+
+void SceneSessionManager::NotifySingleHandInfoChange(
+    float singleHandScaleX, float singleHandScaleY, SingleHandMode singleHandMode)
+{
+    const char* const funcName = __func__;
+    taskScheduler_->PostAsyncTask([this, singleHandScaleX, singleHandScaleY, singleHandMode, funcName] {
+        if (systemConfig_.uiType_ != UI_TYPE_PHONE) {
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: only support phone", funcName);
+            return;
+        }
+        int32_t displayWidth = 0;
+        int32_t displayHeight = 0;
+        ScreenId defaultScreenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        if (!GetDisplaySizeById(defaultScreenId, displayWidth, displayHeight)) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: get display size failed", funcName);
+            return;
+        }
+        switch (singleHandMode) {
+            case SingleHandMode::MIDDLE:
+                singleHandTransform_.posX = 0;
+                singleHandTransform_.posY = 0;
+                break;
+            case SingleHandMode::LEFT:
+                singleHandTransform_.posX = 0;
+                singleHandTransform_.posY =
+                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
+                break;
+            case SingleHandMode::RIGHT:
+                singleHandTransform_.posX =
+                    static_cast<int32_t>(static_cast<float>(displayWidth) * (1 - singleHandScaleX));
+                singleHandTransform_.posY =
+                    static_cast<int32_t>(static_cast<float>(displayHeight) * (1 - singleHandScaleY));
+                break;
+            default:
+                break;
+        }
+        singleHandTransform_.scaleX = singleHandScaleX;
+        singleHandTransform_.scaleY = singleHandScaleY;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession == nullptr || sceneSession->GetSessionProperty()->GetDisplayId() != defaultScreenId ||
+                    sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
+                    continue;
+                }
+                sceneSession->SetSingleHandTransform(singleHandTransform_);
+                sceneSession->NotifySingleHandTransformChange(singleHandTransform_);
+            }
+        }
+        FlushWindowInfoToMMI();
+    }, funcName);
+}
+
+void SceneSessionManager::RegisterGetRSNodeByStringIDFunc(GetRSNodeByStringIDFunc&& func)
+{
+    getRSNodeByStringIDFunc_ = std::move(func);
+}
+
+void SceneSessionManager::RegisterSetTopWindowBoundaryByIDFunc(SetTopWindowBoundaryByIDFunc&& func)
+{
+    setTopWindowBoundaryByIDFunc_ = std::move(func);
+}
+
+void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& stringId)
+{
+    if (getRSNodeByStringIDFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "getRSNodeByStringIDFunc is nullptr");
+        return;
+    }
+    auto rsNode = getRSNodeByStringIDFunc_(stringId);
+    if (rsNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "node is nullptr");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
+    rsInterface_.SetWindowContainer(rsNode->GetId(), true);
+
+    if (setTopWindowBoundaryByIDFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "setTopWindowBoundaryByIDFunc is nullptr");
+        return;
+    }
+    setTopWindowBoundaryByIDFunc_(stringId);
 }
 
 #ifdef SECURITY_COMPONENT_MANAGER_ENABLE
@@ -7745,8 +7835,8 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
     }
     info->uiNodeId_ = sceneSession->GetUINodeId();
-    WSRect wsrect = sceneSession->GetSessionGlobalRect(); // only accessability and mmi need global
-    info->windowRect_ = {wsrect.posX_, wsrect.posY_, wsrect.width_, wsrect.height_ };
+    WSRect wsRect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
+    info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
     info->focused_ = sceneSession->GetPersistentId() == focusedSessionId_;
     info->type_ = sceneSession->GetWindowType();
     info->mode_ = sceneSession->GetWindowMode();
@@ -10763,6 +10853,19 @@ void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayIn
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
     TLOGI(WmsLogTag::WMS_MAIN, "update display region to w = %{public}d, h = %{public}d", displayWidth, displayHeight);
+}
+
+bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight)
+{
+    auto region = GetDisplayRegion(displayId);
+    if (region == nullptr) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "failed, displayId:%{public}" PRIu64, displayId);
+        return false;
+    }
+    const SkIRect& rect = region->getBounds();
+    displayWidth = rect.fRight;
+    displayHeight = rect.fBottom;
+    return true;
 }
 
 void SceneSessionManager::GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList)

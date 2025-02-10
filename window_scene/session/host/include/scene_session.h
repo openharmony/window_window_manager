@@ -201,6 +201,8 @@ public:
     WSError UpdateSessionRect(const WSRect& rect, const SizeChangeReason reason,
         bool isGlobal = false, bool isFromMoveToGlobal = false) override;
     WSError UpdateClientRect(const WSRect& rect) override;
+    void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
+    WSRect GetSessionGlobalRectWithSingleHandScale();
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
