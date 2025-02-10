@@ -32,6 +32,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 namespace {
 const std::string g_FoldScreenRect = system::GetParameter("const.window.foldscreen.config_rect", "");
 const int32_t PARAM_NUMBER_MIN = 10;
+const int32_t HEIGHT_HALF = 2;
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const char* KEYBOARD_ON_CONFIG = "version:3+main";
@@ -403,8 +404,17 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
 
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession)
 {
+    auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(false);
     screenSession->SetIsBScreenHalf(true);
+    int32_t validheight = GetCurrentValidHeight(screenSession);
+    if (screeBounds.rect_.GetWidth() < screeBounds.rect_.GetHeight()) {
+        screenSession->SetValidHeight(validheight);
+        screenSession->SetValidWidth(screeBounds.rect_.GetWidth());
+    } else {
+        screenSession->SetValidWidth(screeBounds.rect_.GetHeight());
+        screenSession->SetValidHeight(validheight);
+    }
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
     if (fakeDisplayInfo == nullptr) {
@@ -415,17 +425,45 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
     ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    ScreenSessionManager::GetInstance().UpdateValidArea(
+        screenSession->GetScreenId(),
+        screenSession->GetValidWidth(),
+        screenSession->GetValidHeight());
 }
 
 void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession)
 {
+    auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetIsBScreenHalf(true);
+    screenSession->SetValidHeight(screeBounds.rect_.GetHeight());
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     ScreenSessionManager::GetInstance().NotifyDisplayCreate(
         fakeScreenSession->ConvertToDisplayInfo());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    ScreenSessionManager::GetInstance().UpdateValidArea(
+        screenSession->GetScreenId(),
+        screenSession->GetValidWidth(),
+        screenSession->GetValidHeight());
+}
+
+int32_t SuperFoldStateManager::GetCurrentValidHeight(sptr<ScreenSession> screenSession)
+{
+    if (currentSuperFoldCreaseRegion_ != nullptr) {
+        std::vector<DMRect> creaseRects = currentSuperFoldCreaseRegion_->GetCreaseRects();
+        if (!creaseRects.empty()) {
+            TLOGI(WmsLogTag::DMS, "validheight: %{public}d", creaseRects[0].posY_);
+            return creaseRects[0].posY_;
+        }
+    }
+    TLOGE(WmsLogTag::DMS, "Get CreaseRects failed, validheight is half of height");
+    auto screeBounds = screenSession->GetScreenProperty().GetBounds();
+    if (screeBounds.rect_.GetWidth() < screeBounds.rect_.GetHeight()) {
+        return screeBounds.rect_.GetHeight() / HEIGHT_HALF;
+    } else {
+        return screeBounds.rect_.GetWidth() / HEIGHT_HALF;
+    }
 }
 
 void SuperFoldStateManager::BootFinishedCallback(const char *key, const char *value, void *context)

@@ -1854,6 +1854,8 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetRotation(0.0f);
     property.SetPhyWidth(screenCapability.GetPhyWidth());
     property.SetPhyHeight(screenCapability.GetPhyHeight());
+    property.SetValidWidth(screenBounds.rect_.width_);
+    property.SetValidHeight(screenBounds.rect_.height_);
     property.SetDpiPhyBounds(screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
     property.SetPhyBounds(screenBounds);
     property.SetBounds(screenBounds);
@@ -7722,5 +7724,16 @@ bool ScreenSessionManager::IsOrientationNeedChanged()
         return true;
     }
     return false;
+}
+
+void ScreenSessionManager::UpdateValidArea(ScreenId screenId, uint32_t validWidth, uint32_t validHeight)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    screenSession->SetValidWidth(validWidth);
+    screenSession->SetValidHeight(validHeight);
 }
 } // namespace OHOS::Rosen
