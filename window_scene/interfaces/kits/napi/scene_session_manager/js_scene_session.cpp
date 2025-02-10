@@ -416,6 +416,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::ThrowSlipDirectly);
     BindNativeFunction(env, objValue, "sendContainerModalEvent", moduleName, JsSceneSession::SendContainerModalEvent);
     BindNativeFunction(env, objValue, "setColorSpace", moduleName, JsSceneSession::SetColorSpace);
+    BindNativeFunction(env, objValue, "setSnapshotSkip", moduleName, JsSceneSession::SetSnapshotSkip);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -2319,6 +2320,13 @@ napi_value JsSceneSession::SetColorSpace(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetColorSpace(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetSnapshotSkip(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetSnapshotSkip(env, info) : nullptr;
 }
 
 bool JsSceneSession::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject)
@@ -6286,6 +6294,40 @@ napi_value JsSceneSession::OnSetColorSpace(napi_env env, napi_callback_info info
         return NapiGetUndefined(env);
     }
     session->SetColorSpace(colorSpace);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetSnapshotSkip(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isSkip = false;
+    if (!ConvertFromJsValue(env, argv[0], isSkip)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to isSkip");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id: %{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+                                      "Session is nullptr"));
+        return NapiGetUndefined(env);
+    }
+    if (session->SetSnapshotSkip(isSkip) != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "set snapshotSkip failed, id: %{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+                                      "Set failed"));
+        return NapiGetUndefined(env);
+    }
     return NapiGetUndefined(env);
 }
 } // namespace OHOS::Rosen
