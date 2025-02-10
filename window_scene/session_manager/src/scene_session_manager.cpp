@@ -6134,19 +6134,22 @@ void SceneSessionManager::SetHighlightSessionIds(const sptr<SceneSession>& scene
         TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
         return;
     }
-    for (auto persistentId : highlightIds_) {
-        auto session = GetSceneSession(persistentId);
-        if (session == nullptr) {
-            TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr");
-            continue;
+    {
+        std::lock_guard<std::mutex> lock(highlightIdsMutex_);
+        for (auto persistentId : highlightIds_) {
+            auto session = GetSceneSession(persistentId);
+            if (session == nullptr) {
+                TLOGE(WmsLogTag::WMS_FOCUS, "session is nullptr");
+                continue;
+            }
+            if (sceneSession->GetPersistentId() != persistentId) {
+                session->UpdateHighlightStatus(false);
+            }
         }
-        if (sceneSession->GetPersistentId() != persistentId) {
-            session->UpdateHighlightStatus(false);
-        }
+        sceneSession->UpdateHighlightStatus(true);
+        highlightIds_.clear();
+        highlightIds_.insert(sceneSession->GetPersistentId());
     }
-    sceneSession->UpdateHighlightStatus(true);
-    highlightIds_.clear();
-    highlightIds_.insert(sceneSession->GetPersistentId());
     TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds: %{public}s", GetHighlightIdsStr().c_str());
 }
 
@@ -6158,7 +6161,10 @@ void SceneSessionManager::AddHighlightSessionIds(const sptr<SceneSession>& scene
         return;
     }
     sceneSession->UpdateHighlightStatus(true);
-    highlightIds_.insert(sceneSession->GetPersistentId());
+    {
+        std::lock_guard<std::mutex> lock(highlightIdsMutex_);
+        highlightIds_.insert(sceneSession->GetPersistentId());
+    }
     TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds: %{public}s", GetHighlightIdsStr().c_str());
 }
 
@@ -6169,11 +6175,15 @@ void SceneSessionManager::RemoveHighlightSessionIds(const sptr<SceneSession>& sc
         TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
         return;
     }
-    if (highlightIds_.find(sceneSession->GetPersistentId()) != highlightIds_.end()) {
-        sceneSession->UpdateHighlightStatus(false);
-        highlightIds_.erase(sceneSession->GetPersistentId());
-    } else {
-        TLOGE(WmsLogTag::WMS_FOCUS, "not found scene session with id: %{public}d", sceneSession->GetPersistentId());
+    {
+        std::lock_guard<std::mutex> lock(highlightIdsMutex_);
+        if (highlightIds_.find(sceneSession->GetPersistentId()) != highlightIds_.end()) {
+            sceneSession->UpdateHighlightStatus(false);
+            highlightIds_.erase(sceneSession->GetPersistentId());
+        } else {
+            TLOGE(WmsLogTag::WMS_FOCUS, "not found scene session with id: %{public}d", sceneSession->GetPersistentId());
+        }
+
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "highlightIds: %{public}s", GetHighlightIdsStr().c_str());
 }
@@ -6182,11 +6192,15 @@ void SceneSessionManager::RemoveHighlightSessionIds(const sptr<SceneSession>& sc
 std::string SceneSessionManager::GetHighlightIdsStr()
 {
     std::ostringstream oss;
-    for (auto it = highlightIds_.begin(); it != highlightIds_.end(); it++) {
-        oss << *it;
-        if(std::next(it) != highlightIds_.end()) {
-            oss << ", ";
+    {
+        std::lock_guard<std::mutex> lock(highlightIdsMutex_);
+        for (auto it = highlightIds_.begin(); it != highlightIds_.end(); it++) {
+            oss << *it;
+            if(std::next(it) != highlightIds_.end()) {
+                oss << ", ";
+            }
         }
+
     }
     return oss.str();
 }

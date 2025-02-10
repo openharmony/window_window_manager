@@ -703,6 +703,7 @@ private:
     /*
      * Window Focus
      */
+    std::mutex highlightIdsMutex_;
     std::unordered_set<int32_t> highlightIds_;
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
