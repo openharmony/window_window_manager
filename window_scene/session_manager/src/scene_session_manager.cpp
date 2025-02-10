@@ -1899,9 +1899,9 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
         }
         PerformRegisterInRequestSceneSession(sceneSession);
         NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
-        TLOGNI(WmsLogTag::WMS_LIFE, "RequestSceneSession id: %{public}d, displayId: %{public}" PRIu64,
-               where, scneneSession->GetPersistentId(), scneneSession->GetWindowType(),
-               scneneSession->GetSessionProperty()->GetDisplayId());
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id: %{public}d, displayId: %{public}" PRIu64,
+               where, sceneSession->GetPersistentId(), sceneSession->GetWindowType(),
+               sceneSession->GetSessionProperty()->GetDisplayId());
         return sceneSession;
     };
     return taskScheduler_->PostSyncTask(task, "RequestSceneSession:PID" + std::to_string(sessionInfo.persistentId_));
