@@ -3596,7 +3596,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
         AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
         RegisterSecSurfaceInfoListener();
-        RegisterConstrainedUIExtInfoListener();
+        RegisterConstrainedModalUIExtInfoListener();
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, "InitUserInfo");
@@ -10234,9 +10234,9 @@ bool SceneSessionManager::GetExtensionWindowIds(const sptr<IRemoteObject>& token
     return true;
 }
 
-void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession, bool isConstrained)
+void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession, bool isConstrainedModal)
 {
-    auto task = [this, remoteExtSession, isConstrained]() {
+    auto task = [this, remoteExtSession, isConstrainedModal, where]() {
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
         if (iter == remoteExtSessionMap_.end()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession or already destroyed");
@@ -10265,8 +10265,8 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             if (oldFlags.privacyModeFlag) {
                 UpdatePrivateStateAndNotify(parentId);
             }
-            if (!isConstrained) {
-                sceneSession->RemoveModalUIExtension(persistentId);
+            if (!isConstrainedModal) {
+                sceneSession->RemoveNormalModalUIExtension(persistentId);
             }
             sceneSession->RemoveUIExtSurfaceNodeId(persistentId);
             sceneSession->RemoveExtensionTokenInfo(abilityToken);
@@ -10335,11 +10335,11 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
 }
 
 void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrained)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    auto task = [this, sessionStage, token, surfaceNodeId, isConstrained, pid, callingTokenId]() {
+    auto task = [this, sessionStage, token, surfaceNodeId, isConstrainedModal, pid, callingTokenId, where]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
             return;
@@ -10393,8 +10393,8 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
                 .persistentId = persistentId,
                 .pid = pid,
             };
-            if (!isConstrained) {
-                parentSession->AddModalUIExtension(extensionInfo);
+            if (!isConstrainedModal) {
+                parentSession->AddNormalModalUIExtension(extensionInfo);
             }
         }
     };
@@ -10402,10 +10402,10 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
 }
 
 void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, bool isConstrained)
+    const sptr<IRemoteObject>& token, bool isConstrainedModal)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
-    auto task = [this, sessionStage, token, isConstrained]() {
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    auto task = [this, sessionStage, token, isConstrainedModal]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
             return;
@@ -10421,7 +10421,7 @@ void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionS
             return;
         }
 
-        DestroyExtensionSession(remoteExtSession, isConstrained);
+        DestroyExtensionSession(remoteExtSession, isConstrainedModal);
     };
     taskScheduler_->PostAsyncTask(task, "RemoveExtensionWindowStageFromSCB");
 }
@@ -11430,7 +11430,7 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
         return;
     }
     auto secSurfaceInfoMap = secExtensionData->GetSecData();
-    auto task = [secSurfaceInfoMap]()-> WSError {
+    auto task = [secSurfaceInfoMap = std::move(secSurfaceInfoMap)]()-> WSError {
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
     };
@@ -11448,7 +11448,7 @@ void SceneSessionManager::RegisterSecSurfaceInfoListener()
     }
 }
 
-void SceneSessionManager::UpdateConstrainedUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedUIExtData,
+void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData,
     uint64_t userId)
 {
     if (currentUserId_ != static_cast<int32_t>(userId)) {
@@ -11456,18 +11456,18 @@ void SceneSessionManager::UpdateConstrainedUIExtInfo(std::shared_ptr<RSUIExtensi
             currentUserId_.load(), userId);
         return;
     }
-    auto constrainedUIExtInfoMap = constrainedUIExtData->GetSecData();
-    auto task = [constrainedUIExtInfoMap]()-> WSError {
-        SceneInputManager::GetInstance().UpdateConstrainedUIExtInfo(constrainedUIExtInfoMap);
+    auto constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
+    auto task = [constrainedModalUIExtInfoMap = std::move(constrainedModalUIExtInfoMap)]()-> WSError {
+        SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
         return WSError::WS_OK;
     };
-    taskScheduler_->PostAsyncTask(task, "UpdateConstrainedUIExtInfo");
+    taskScheduler_->PostAsyncTask(task, "UpdateConstrainedModalUIExtInfo");
 }
 
-void SceneSessionManager::RegisterConstrainedUIExtInfoListener()
+void SceneSessionManager::RegisterConstrainedModalUIExtInfoListener()
 {
-    auto callBack = [this](std::shared_ptr<RSUIExtensionData> constrainedUIExtData, uint64_t userid) {
-        this->UpdateConstrainedUIExtInfo(constrainedUIExtData, userid);
+    auto callBack = [this](std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userid) {
+        this->UpdateConstrainedModalUIExtInfo(constrainedModalUIExtData, userid);
     };
     TLOGI(WmsLogTag::WMS_EVENT, "in");
     if (rsInterface_.RegisterUIExtensionCallback(currentUserId_, callBack, true) != WM_OK) {
