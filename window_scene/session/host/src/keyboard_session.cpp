@@ -341,13 +341,13 @@ int32_t KeyboardSession::GetStatusBarHeight()
 {
     int32_t statusBarHeight = 0;
     auto sessionProperty = GetSessionProperty();
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr ||
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr ||
         sessionProperty == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardCallback_ or session property is null, get statusBarHeight failed!");
         return statusBarHeight;
     }
 
-    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+    std::vector<sptr<SceneSession>> statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (const auto& statusBar : statusBarVector) {
         if (statusBar != nullptr && statusBar->GetSessionRect().height_ > statusBarHeight) {
