@@ -22,6 +22,8 @@
 #include <sstream>
 #include <string>
 
+#include "wm_math.h"
+
 namespace OHOS {
 namespace Rosen {
 using DisplayId = uint64_t;
@@ -678,6 +680,43 @@ private:
     static inline bool NearZero(float val)
     {
         return val < 0.001f && val > -0.001f;
+    }
+};
+
+/**
+ * @struct SingleHandTransform
+ *
+ * @brief parameter of transform in single hand mode.
+ */
+struct SingleHandTransform {
+    int32_t posX = 0;
+    int32_t posY = 0;
+    float scaleX = 0;
+    float scaleY = 0;
+
+    bool operator==(const SingleHandTransform& right) const
+    {
+        return posX == right.posX && MathHelper::NearEqual(scaleX, right.scaleX) &&
+               posY == right.posY && MathHelper::NearEqual(scaleY, right.scaleY);
+    }
+
+    bool operator!=(const SingleHandTransform& right) const
+    {
+        return !(*this == right);
+    }
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(posX) && parcel.WriteInt32(posY) &&
+               parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY);
+    }
+
+    void Unmarshalling(Parcel& parcel)
+    {
+        posX = parcel.ReadInt32();
+        posY = parcel.ReadInt32();
+        scaleX = parcel.ReadFloat();
+        scaleY = parcel.ReadFloat();
     }
 };
 

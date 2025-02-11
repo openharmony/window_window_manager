@@ -936,6 +936,16 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
     return WSError::WS_OK;
 }
 
+void Session::SetSingleHandTransform(const SingleHandTransform& transform)
+{
+    singleHandTransform_ = transform;
+}
+
+SingleHandTransform Session::GetSingleHandTransform() const
+{
+    return singleHandTransform_;
+}
+
 WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
