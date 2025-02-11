@@ -1229,7 +1229,7 @@ WSError SessionStageProxy::SendExtensionData(MessageParcel& data, MessageParcel&
                                    reply, option);
     if (ret != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, ret: %{public}d", ret);
-                return WSError::WS_ERROR_IPC_FAILED;
+        return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
 }
