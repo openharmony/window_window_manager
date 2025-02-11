@@ -94,6 +94,7 @@ constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
+constexpr int32_t DISPLAY_ID_C = 999;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
@@ -782,6 +783,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         isExecuteDelayRaise_ = false;
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        property_->GetDisplayId() == DISPLAY_ID_C &&
         DisplayManager::GetInstance().GetFoldStatus() == FoldStatus::HALF_FOLD) {
         ResetSuperFoldDisplayY(pointerEvent);
     }
