@@ -41,15 +41,15 @@
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #endif
-#define RETURN_IF_CONVERT_FAIL(env, jsValue, value, paramName)                                            \
+#define RETURN_IF_CONVERT_FAIL(env, jsValue, value, paramName, logTag)                                    \
     do {                                                                                                  \
         if (!ConvertFromJsValue(env, jsValue, value)) {                                                   \
-            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to %{public}s", paramName);           \
+            TLOGE(logTag, "Failed to convert parameter to %{public}s", paramName);                        \
             napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), \
                 "Input parameter is missing or invalid"));                                                \
             return NapiGetUndefined(env);                                                                 \
         }                                                                                                 \
-        TLOGD(WmsLogTag::WMS_LIFE, "%{public}s: %{public}u", paramName, value);                           \
+        TLOGD(logTag, "%{public}s: %{public}u", paramName, value);                                        \
     } while (0)
 
 namespace OHOS::Rosen {
@@ -2003,22 +2003,22 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 
     bool needRemoveSession = false;
     if (argc >= ARGC_TWO && GetType(env, argv[ARGC_ONE]) == napi_boolean) {
-        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_ONE], needRemoveSession, "needRemoveSession");
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_ONE], needRemoveSession, "needRemoveSession", WmsLogTag::WMS_LIFE);
     }
 
     bool isSaveSnapshot = true;
     if (argc >= ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
-        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_TWO], isSaveSnapshot, "isSaveSnapshot");
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_TWO], isSaveSnapshot, "isSaveSnapshot", WmsLogTag::WMS_LIFE);
     }
 
     bool isForceClean = false;
     if (argc >= ARGC_FOUR && GetType(env, argv[ARGC_THREE]) == napi_boolean) {
-        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_THREE], isForceClean, "isForceClean");
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_THREE], isForceClean, "isForceClean", WmsLogTag::WMS_LIFE);
     }
 
     bool isUserRequestedExit = false;
     if (argc >= ARGC_FIVE && GetType(env, argv[ARGC_FOUR]) == napi_boolean) {
-        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_FOUR], isUserRequestedExit, "isUserRequestedExit");
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_FOUR], isUserRequestedExit, "isUserRequestedExit", WmsLogTag::WMS_LIFE);
     }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
