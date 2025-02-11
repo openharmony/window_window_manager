@@ -2135,7 +2135,7 @@ WMError WindowSessionImpl::GetDecorVisible(bool& isVisible)
         TLOGE(WmsLogTag::WMS_DECOR, "uicontent is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    isVisible = uiContent->GetContainerModalTitleVisible();
+    isVisible = uiContent->GetContainerModalTitleVisible(GetImmersiveModeEnabledState());
     return WMError::WM_OK;
 }
 
