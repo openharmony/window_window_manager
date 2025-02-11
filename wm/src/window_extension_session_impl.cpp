@@ -1390,11 +1390,10 @@ WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
 WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     auto state = data.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (state == static_cast<int32_t>(crossAxisState_.load())) {
+    if (state == static_cast<int32_t>(GetCrossAxisState())) {
         return WMError::WM_OK;
     }
-    if (state < static_cast<int32_t>(CrossAxisState::STATE_INVALID) ||
-        state > static_cast<int32_t>(CrossAxisState::STATE_END)) {
+    if (!IsValidCrossState(state)) {
         TLOGE(WmsLogTag::WMS_UIEXT, "invalid CrossAxisState:%{public}d", state);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
@@ -1415,7 +1414,7 @@ CrossAxisState WindowExtensionSessionImpl::GetCrossAxisState()
 void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
     const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func)
 {
-    auto consumer = [this, func](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+    auto consumer = [func](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
                                      std::optional<AAFwk::Want>& reply) {
         return static_cast<int32_t>(func(std::move(data), reply));
     };

@@ -5052,26 +5052,31 @@ void WindowSessionImpl::RegisterWindowInspectorCallback()
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 
-void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want)
+void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
 {
     want.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(static_cast<int32_t>(crossAxisState_.load())));
 }
 
-void WindowSessionImpl::UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want)
+void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want)
 {
     if (want == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "null want ptr");
         return;
     }
-    auto wantParam = want->GetParams();
-    auto configParam = wantParam.GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
+
+    const auto& configParam = want->GetParams().GetWantParams(Extension::UIEXTENSION_CONFIG_FIELD);
     auto state = configParam.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
-    if (state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
-        state <= static_cast<int32_t>(CrossAxisState::STATE_END)) {
+    if (IsValidCrossState(state)) {
         crossAxisState_ = static_cast<CrossAxisState>(state);
     }
     want->RemoveParam(Extension::UIEXTENSION_CONFIG_FIELD);
     TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
+}
+
+bool WindowSessionImpl::IsValidCrossState(const int32_t state)
+{
+    return state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
+        state < static_cast<int32_t>(CrossAxisState::STATE_END);
 }
 } // namespace Rosen
 } // namespace OHOS

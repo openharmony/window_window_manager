@@ -2276,9 +2276,9 @@ HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | Smal
 {
     AAFwk::Want want;
     std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
-    want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<int32_t>(CrossAxisState::STATE_END));
+    want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<int32_t>(CrossAxisState::STATE_CROSS));
     ASSERT_EQ(WMError::WM_OK, window_->OnCrossAxisStateChange(std::move(want), reply));
-    ASSERT_EQ(CrossAxisState::STATE_END, window_->crossAxisState_.load());
+    ASSERT_EQ(CrossAxisState::STATE_CROSS, window_->crossAxisState_.load());
 }
 }
 } // namespace Rosen
