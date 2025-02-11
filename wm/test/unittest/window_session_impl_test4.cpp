@@ -266,12 +266,14 @@ HWTEST_F(WindowSessionImplTest4, GetDecorVisible, Function | SmallTest | Level2)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetPersistentId(0);
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
     bool isVisible = true;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetDecorVisible(isVisible));
     window->property_->SetPersistentId(1);
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetDecorVisible(isVisible));
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleVisible(_)).WillRepeatedly(Return(false));
+    window->uiContent_ = std::move(uiContent);
     ASSERT_EQ(WMError::WM_OK, window->GetDecorVisible(isVisible));
     ASSERT_FALSE(isVisible);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorVisible end";

@@ -6448,7 +6448,7 @@ napi_value JsWindow::OnGetWindowDecorVisible(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
+    if (!windowToken_->IsPcOrPadCapabilityEnabled()) {
         TLOGE(WmsLogTag::WMS_DECOR, "device not support");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
     }
