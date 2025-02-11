@@ -1503,6 +1503,8 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
         virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+    OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE,
+        screenId);
     NotifyDisplayStateChange(screenId, screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
