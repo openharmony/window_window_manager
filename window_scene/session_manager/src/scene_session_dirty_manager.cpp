@@ -137,7 +137,8 @@ Vector2f CalRotationToTranslate(const MMI::Direction& displayRotation, float wid
     return translate;
 }
 
-Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo) {
+Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo)
+{
     std::vector<float> hostTransform = hostWindowInfo.transform;
     return Matrix3f(hostTransform[0], hostTransform[1], hostTransform[2],
                     hostTransform[3], hostTransform[4], hostTransform[5],
@@ -532,21 +533,22 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
     const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowInfo)
 {
     auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
-    if (modalUIExtensionEventInfo) {
-        if (modalUIExtensionEventInfo->isConstrainedModal) {  // constrained UIExt
-            SecSurfaceInfo constrainedModalUIExtInfo;
-            if (!GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
-                TLOGE(WmsLogTag::WMS_EVENT, "cannot find last constrained Modal UIExtInfo");
-                return;
-            }
-            MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
-                hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
-            windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
-            TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
-            windowInfoList.emplace_back(windowInfo);
-        } else {  // normal UIExt
-            AddModalExtensionWindowInfo(windowInfoList, hostWindowInfo, sceneSession, *modalUIExtensionEventInfo);
+    if (!modalUIExtensionEventInfo) {
+        return;
+    }
+    if (modalUIExtensionEventInfo->isConstrainedModal) {  // constrained UIExt
+        SecSurfaceInfo constrainedModalUIExtInfo;
+        if (!GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "cannot find last constrained Modal UIExtInfo");
+            return;
         }
+        MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
+            hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
+        windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
+        TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
+        windowInfoList.emplace_back(windowInfo);
+    } else {  // normal UIExt
+        AddModalExtensionWindowInfo(windowInfoList, hostWindowInfo, sceneSession, *modalUIExtensionEventInfo);
     }
 }
 
