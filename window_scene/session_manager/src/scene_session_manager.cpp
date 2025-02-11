@@ -12305,7 +12305,7 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
             currentUserId_.load(), userId);
         return;
     }
-    auto secSurfaceInfoMap = secExtensionData->GetSecData();
+    const auto& secSurfaceInfoMap = secExtensionData->GetSecData();
     auto task = [secSurfaceInfoMap = std::move(secSurfaceInfoMap)]()-> WSError {
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
@@ -12332,7 +12332,7 @@ void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIEx
             currentUserId_.load(), userId);
         return;
     }
-    auto constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
+    const auto& constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
     auto task = [constrainedModalUIExtInfoMap = std::move(constrainedModalUIExtInfoMap)]()-> WSError {
         SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
         return WSError::WS_OK;
