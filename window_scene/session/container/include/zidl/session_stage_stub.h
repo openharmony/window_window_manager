@@ -70,6 +70,7 @@ private:
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
