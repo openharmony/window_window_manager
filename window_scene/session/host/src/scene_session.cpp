@@ -1978,7 +1978,8 @@ std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEve
     // Priority query constrained modal UIExt, if unavailable, then query normal modal UIExt
     if (onGetConstrainedModalExtWindowInfoFunc_) {
         if (auto constrainedExtEventInfo = onGetConstrainedModalExtWindowInfoFunc_(this)) {
-            TLOGD(WmsLogTag::WMS_UIEXT, "get constrained UIExt eventInfo");
+            TLOGD(WmsLogTag::WMS_UIEXT, "get constrained UIExt eventInfo, id: %{public}d",
+                constrainedExtEventInfo->persistentId);
             return constrainedExtEventInfo;
         }
     }

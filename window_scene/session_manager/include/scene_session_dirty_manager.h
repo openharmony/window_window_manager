@@ -32,7 +32,6 @@ struct SecRectInfo;
 MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode);
 std::string DumpWindowInfo(const MMI::WindowInfo& info);
 std::string DumpRect(const std::vector<MMI::Rect>& rects);
-inline constexpr int32_t MATRIX3_SIZE { 9 };
 
 struct SingleHandData {
     float scaleX = 1.0f;
