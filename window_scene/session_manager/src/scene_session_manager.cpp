@@ -13088,7 +13088,7 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
     return initClientDisplayId;
 }
 
-void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(const int32_t persistentId,
+void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId,
     const LifeCycleTaskType taskType)
 {
     auto sceneSession = GetSceneSession(persistentId);
