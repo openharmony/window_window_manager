@@ -492,6 +492,15 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
 }
 
+void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->RecordEventFromScb(description, needRecordEvent);
+}
+
 void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)
 {
     if (screenSessionManager_ == nullptr) {

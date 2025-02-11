@@ -3136,6 +3136,36 @@ void ScreenSessionManagerProxy::NotifyFoldToExpandCompletion(bool foldToExpand)
     }
 }
 
+void ScreenSessionManagerProxy::RecordEventFromScb(std::string description, bool needRecordEvent)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("RecordEventFromScb: remote is null");
+        return;
+    }
+
+    MessageOption option(MessageOption::TF_ASYNC);
+    MessageParcel reply;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ;
+    }
+    if (!data.WriteString(description)) {
+        WLOGFE("Write description failed");
+        return;
+    }
+    if (!data.WriteBool(needRecordEvent)) {
+        WLOGFE("Write needRecordEvent failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_RECORD_EVENT_FROM_SCB),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 VirtualScreenFlag ScreenSessionManagerProxy::GetVirtualScreenFlag(ScreenId screenId)
 {
     sptr<IRemoteObject> remote = Remote();
