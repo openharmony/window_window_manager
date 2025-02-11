@@ -340,6 +340,7 @@ struct SessionInfo {
     bool isAtomicService_ = false;
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
+    int32_t specifiedId = 0;
 
     /*
      * UIExtension

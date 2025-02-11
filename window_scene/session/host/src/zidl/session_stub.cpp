@@ -504,6 +504,7 @@ int SessionStub::HandleChangeSessionVisibilityWithStatusBar(MessageParcel& data,
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
     abilitySessionInfo->callingTokenId = data.ReadUint32();
+    abilitySessionInfo->tmpSpecifiedId = data.ReadInt32();
     abilitySessionInfo->reuse = data.ReadBool();
     abilitySessionInfo->processOptions =
         std::shared_ptr<AAFwk::ProcessOptions>(data.ReadParcelable<AAFwk::ProcessOptions>());
@@ -534,6 +535,7 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
     abilitySessionInfo->state = static_cast<AAFwk::CallToState>(data.ReadInt32());
     abilitySessionInfo->uiAbilityId = data.ReadInt64();
     abilitySessionInfo->callingTokenId = data.ReadUint32();
+    abilitySessionInfo->tmpSpecifiedId = data.ReadInt32();
     abilitySessionInfo->reuse = data.ReadBool();
     abilitySessionInfo->processOptions.reset(data.ReadParcelable<AAFwk::ProcessOptions>());
     abilitySessionInfo->canStartAbilityFromBackground = data.ReadBool();

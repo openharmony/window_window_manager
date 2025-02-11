@@ -1649,6 +1649,28 @@ HWTEST_F(WindowSessionImplTest4, NotifySystemDensityChange01, Function | SmallTe
     ASSERT_EQ(WSError::WS_OK, ret);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
+
+/**
+ * @tc.name: GetLayoutTransform
+ * @tc.desc: GetLayoutTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetLayoutTransform, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetLayoutTransform");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Transform transform;
+    transform.scaleX_ = 1.0;
+    transform.scaleY_ = 1.0;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->NotifyTransformChange(transform);
+    Transform layoutTransform = window->GetLayoutTransform();
+    ASSERT_EQ(transform.scaleX_, layoutTransform.scaleX_);
+    ASSERT_EQ(transform.scaleY_, layoutTransform.scaleY_);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS
