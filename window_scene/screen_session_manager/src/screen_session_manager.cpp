@@ -6800,6 +6800,19 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 #endif
 }
 
+void ScreenSessionManager::RecordEventFromScb(std::string description, bool needRecordEvent)
+{
+    TLOGW(WmsLogTag::DMS, "%{public}s", description.c_str());
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
+    if (needRecordEvent) {
+        screenEventTracker_.RecordEvent(description);
+    }
+}
+
 void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CheckAndSendHiSysEvent");

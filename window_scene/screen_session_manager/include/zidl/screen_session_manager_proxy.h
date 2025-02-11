@@ -182,6 +182,7 @@ public:
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    void RecordEventFromScb(std::string description, bool needRecordEvent) override;
     void SwitchUser() override;
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
