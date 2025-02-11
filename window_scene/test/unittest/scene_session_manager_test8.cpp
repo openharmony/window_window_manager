@@ -308,9 +308,14 @@ HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest
     extensionWindowFlags.privacyModeFlag = false;
     sceneSession->combinedExtWindowFlags_ = extensionWindowFlags;
     EXPECT_EQ(false, sceneSession->combinedExtWindowFlags_.privacyModeFlag);
-    ssm_->DestroyExtensionSession(iRemoteObjectMocker);
+    int len = sceneSession->modalUIExtensionInfoList_.size();
+    ssm_->DestroyExtensionSession(iRemoteObjectMocker, true);
     constexpr uint32_t DES_WAIT_SYNC_IN_NS = 500000;
     usleep(DES_WAIT_SYNC_IN_NS);
+    EXPECT_EQ(len, sceneSession->modalUIExtensionInfoList_.size());
+    ssm_->DestroyExtensionSession(iRemoteObjectMocker, false);
+    usleep(DES_WAIT_SYNC_IN_NS);
+    EXPECT_EQ(len, sceneSession->modalUIExtensionInfoList_.size());
 }
 
 /**
