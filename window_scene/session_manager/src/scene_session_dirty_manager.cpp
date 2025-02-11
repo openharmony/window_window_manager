@@ -115,6 +115,17 @@ Vector2f CalRotationToTranslate(const MMI::Direction& displayRotation, float wid
     return translate;
 }
 
+Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo)
+{
+    std::vector<float> hostTransform = hostWindowInfo.transform;
+    if (hostTransform.size() != TRANSFORM_DATA_LEN) {
+        return Matrix3f();
+    }
+    return Matrix3f(hostTransform[0], hostTransform[1], hostTransform[2],  // 0,1,2: matrix index
+                    hostTransform[3], hostTransform[4], hostTransform[5],  // 3,4,5: matrix index
+                    hostTransform[6], hostTransform[7], hostTransform[8]); // 6,7,8: matrix index
+}
+
 void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
     const SingleHandData& singleHandData, bool useUIExtension) const
 {
@@ -456,6 +467,35 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
     }
 }
 
+bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<SceneSession>& sceneSession,
+    SecSurfaceInfo& constrainedModalUIExtInfo)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return false;
+    }
+    auto surfaceNode = sceneSession->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+        return false;
+    }
+    std::vector<SecSurfaceInfo> constrainedModalUIExtInfoList;
+    auto surfaceNodeId = surfaceNode->GetId();
+    {
+        std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        auto iter = constrainedModalUIExtInfoMap_.find(surfaceNodeId);
+        if (iter == constrainedModalUIExtInfoMap_.end()) {
+            return false;
+        }
+        constrainedModalUIExtInfoList = iter->second;
+    }
+    if (!constrainedModalUIExtInfoList.empty()) {
+        constrainedModalUIExtInfo = constrainedModalUIExtInfoList.back();
+        return true;
+    }
+    return false;
+}
+
 void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
     MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession,
     const ExtensionWindowEventInfo& extensionInfo)
@@ -502,6 +542,29 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     windowInfoList.emplace_back(windowInfo);
 }
 
+void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowInfo>& windowInfoList,
+    const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowInfo)
+{
+    auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    if (!modalUIExtensionEventInfo) {
+        return;
+    }
+    if (modalUIExtensionEventInfo->isConstrainedModal) {  // constrained UIExt
+        SecSurfaceInfo constrainedModalUIExtInfo;
+        if (!GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "cannot find last constrained Modal UIExtInfo");
+            return;
+        }
+        MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
+            hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
+        windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
+        TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
+        windowInfoList.emplace_back(windowInfo);
+    } else {  // normal UIExt
+        AddModalExtensionWindowInfo(windowInfoList, hostWindowInfo, sceneSession, *modalUIExtensionEventInfo);
+    }
+}
+
 auto SceneSessionDirtyManager::GetFullWindowInfoList() ->
 std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
@@ -530,8 +593,8 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             iter->second->GetZOrder() > sceneSessionValue->GetZOrder()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-        } else if (auto modalUIExtensionEventInfo = sceneSessionValue->GetLastModalUIExtensionEventInfo()) {
-            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue, *modalUIExtensionEventInfo);
+        } else {
+            GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
         TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
@@ -940,6 +1003,23 @@ void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     if (updateSecSurfaceInfoNeeded) {
         ResetFlushWindowInfoTask();
         DumpSecSurfaceInfoMap(secSurfaceInfoMap);
+    }
+}
+
+void SceneSessionDirtyManager::UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+    std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap)
+{
+    bool updateConstrainedModalUIExtInfoNeeded = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        if (constrainedModalUIExtInfoMap_ != constrainedModalUIExtInfoMap) {
+            constrainedModalUIExtInfoMap_ = constrainedModalUIExtInfoMap;
+            updateConstrainedModalUIExtInfoNeeded = true;
+        }
+    }
+    if (updateConstrainedModalUIExtInfoNeeded) {
+        ResetFlushWindowInfoTask();
+        DumpSecSurfaceInfoMap(constrainedModalUIExtInfoMap);
     }
 }
 
