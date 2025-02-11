@@ -595,7 +595,7 @@ public:
     WSError RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession);
     void StartAbilityBySpecified(const SessionInfo& sessionInfo);
     void NotifyWindowStateErrorFromMMI(int32_t pid, int32_t persistentId);
-    void RemoveLifeCycleTaskByPersistentId(const int32_t persistentId, const LifeCycleTaskType taskType);
+    void RemoveLifeCycleTaskByPersistentId(int32_t persistentId, const LifeCycleTaskType taskType);
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) override;
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) override;
