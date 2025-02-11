@@ -2308,7 +2308,6 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
         if (ret == WSError::WS_OK) {
             sceneSession->SetExitSplitOnBackground(false);
         }
-        sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
         abilityInfoMap_.clear(); // clear cache after terminate
         return ret;
     };
@@ -2350,7 +2349,6 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSession)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
-    sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
     return StartUIAbilityBySCB(abilitySessionInfo);
 }
 
@@ -2836,8 +2834,6 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         sceneSession->ResetSessionInfoResultCode();
     }
     NotifySessionForCallback(sceneSession, needRemoveSession);
-    // Arrive at the STOP task end.
-    sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
     // Clear js cb map if needed.
     sceneSession->ClearJsSceneSessionCbMap(needRemoveSession);
     return WSError::WS_OK;
@@ -8052,7 +8048,6 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             sceneSession->SetClientIdentityToken(abilitySessionInfo->identityToken);
             sceneSession->ResetSessionConnectState();
         }
-        sceneSession->RemoveLifeCycleTask(LifeCycleTaskType::START);
         return WSError::WS_OK;
     };
     std::string taskName = "RequestSceneSessionByCall:PID:" +
@@ -13007,5 +13002,16 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
         initClientDisplayId = VIRTUAL_DISPLAY_ID;
     }
     return initClientDisplayId;
+}
+
+void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId,
+    const LifeCycleTaskType taskType)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session:%{public}d is nullptr", persistentId);
+        return;
+    }
+    sceneSession->RemoveLifeCycleTask(taskType);
 }
 } // namespace OHOS::Rosen

@@ -1243,10 +1243,13 @@ void JsSceneSession::ProcessTerminateSessionRegister()
         return;
     }
     const char* const where = __func__;
-    session->SetTerminateSessionListener([weakThis = wptr(this), where](const SessionInfo& info) {
+    session->SetTerminateSessionListener([weakThis = wptr(this), persistentId = persistentId_, where](
+        const SessionInfo& info) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         jsSceneSession->TerminateSession(info);
@@ -1263,11 +1266,13 @@ void JsSceneSession::ProcessTerminateSessionRegisterNew()
         return;
     }
     const char* const where = __func__;
-    session->SetTerminateSessionListenerNew([weakThis = wptr(this), where](
+    session->SetTerminateSessionListenerNew([weakThis = wptr(this), persistentId = persistentId_, where](
         const SessionInfo& info, bool needStartCaller, bool isFromBroker) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         jsSceneSession->TerminateSessionNew(info, needStartCaller, isFromBroker);
@@ -1346,11 +1351,13 @@ void JsSceneSession::ProcessSessionExceptionRegister()
         return;
     }
     const char* const where = __func__;
-    session->SetSessionExceptionListener([weakThis = wptr(this), where](const SessionInfo& info,
-        bool needRemoveSession, bool startFail) {
+    session->SetSessionExceptionListener([weakThis = wptr(this), persistentId = persistentId_, where](
+        const SessionInfo& info, bool needRemoveSession, bool startFail) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         jsSceneSession->OnSessionException(info, needRemoveSession, startFail);
@@ -3757,6 +3764,8 @@ void JsSceneSession::PendingSessionActivation(SessionInfo& info)
         auto jsSceneSession = weakThis.promote();
         if (jsSceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "PendingSessionActivation JsSceneSession is null");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         jsSceneSession->PendingSessionActivationInner(sessionInfo);
@@ -3775,40 +3784,46 @@ void JsSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionInfo> 
         auto session = weakSession.promote();
         if (session == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         bool isFromAncoAndToAnco = session->IsAnco() && AbilityInfoManager::GetInstance().IsAnco(
             sessionInfo->bundleName_, sessionInfo->abilityName_, sessionInfo->moduleName_);
         if (session->DisallowActivationFromPendingBackground(sessionInfo->isPcOrPadEnableActivation_,
             sessionInfo->isFoundationCall_, sessionInfo->canStartAbilityFromBackground_, isFromAncoAndToAnco)) {
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "PendingSessionActivationInner jsSceneSession "
-                "id:%{public}d has been destroyed", persistentId);
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(PENDING_SCENE_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
-            return;
-        }
-        if (sessionInfo == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         napi_value argv[] = {jsSessionInfo};
-        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s task success, "
-            "id:%{public}d, requestId:%{public}d",
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s task success, id:%{public}d, requestId:%{public}d",
             where, sessionInfo->persistentId_, sessionInfo->requestId);
         napi_call_function(env, NapiGetUndefined(env),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+            sessionInfo->persistentId_, LifeCycleTaskType::START);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
@@ -3846,24 +3861,28 @@ void JsSceneSession::TerminateSession(const SessionInfo& info)
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "TerminateSession jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(TERMINATE_SESSION_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
-            return;
-        }
-        if (sessionInfo == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         napi_value argv[] = {jsSessionInfo};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+            persistentId, LifeCycleTaskType::STOP);
     };
     taskScheduler_->PostMainThreadTask(task, "TerminateSession name:" + info.abilityName_);
 }
@@ -3881,25 +3900,35 @@ void JsSceneSession::TerminateSessionNew(const SessionInfo& info, bool needStart
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "TerminateSessionNew jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(TERMINATE_SESSION_CB_NEW);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         napi_value jsNeedStartCaller = CreateJsValue(env, needStartCaller);
         if (jsNeedStartCaller == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsNeedStartCaller is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         napi_value jsNeedRemoveSession = CreateJsValue(env, needRemoveSession);
         if (jsNeedRemoveSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsNeedRemoveSession is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         napi_value argv[] = {jsNeedStartCaller, jsNeedRemoveSession};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+            persistentId, LifeCycleTaskType::STOP);
     };
     taskScheduler_->PostMainThreadTask(task, "TerminateSessionNew, name:" + info.abilityName_);
 }
@@ -4036,15 +4065,15 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "OnSessionException jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_EXCEPTION_CB);
         if (!jsCallBack) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
-            return;
-        }
-        if (sessionInfo == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "sessionInfo is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
@@ -4052,10 +4081,14 @@ void JsSceneSession::OnSessionException(const SessionInfo& info, bool needRemove
         napi_value jsStartFail = CreateJsValue(env, startFail);
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                persistentId, LifeCycleTaskType::STOP);
             return;
         }
         napi_value argv[] = {jsSessionInfo, jsNeedRemoveSession, jsStartFail};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+            persistentId, LifeCycleTaskType::STOP);
     };
     taskScheduler_->PostMainThreadTask(task, "OnSessionException, name" + info.bundleName_);
 }
