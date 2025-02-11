@@ -22,6 +22,7 @@
 #include <sstream>
 #include <string>
 
+#include "securec.h"
 #include "wm_math.h"
 
 namespace OHOS {
