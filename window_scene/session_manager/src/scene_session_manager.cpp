@@ -2747,6 +2747,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         info.bundleName_ = property->GetSessionInfo().bundleName_;
         info.abilityName_ = property->GetSessionInfo().abilityName_;
         info.moduleName_ = property->GetSessionInfo().moduleName_;
+        info.screenId_ = property->GetDisplayId();
 
         ClosePipWindowIfExist(type);
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
