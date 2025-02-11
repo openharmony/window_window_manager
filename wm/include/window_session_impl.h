@@ -207,8 +207,8 @@ public:
     WMError UnregisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
     void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
     void SetInputEventConsumer(const std::shared_ptr<IInputEventConsumer>& inputEventConsumer) override;
-    void GetExtensionConfig(AAFwk::WantParams& want) override;
-    void UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want) override;
+    void GetExtensionConfig(AAFwk::WantParams& want) const override;
+    void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) override;
 
     WMError SetBackgroundColor(const std::string& color) override;
     virtual Orientation GetRequestedOrientation() override;
@@ -514,6 +514,7 @@ protected:
     WMError GetVirtualPixelRatio(float& vpr);
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
+    bool IsValidCrossState(const int32_t state);
 
     /*
      * Window Immersive
