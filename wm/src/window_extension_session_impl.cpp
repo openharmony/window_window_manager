@@ -104,6 +104,8 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     if (context_) {
         abilityToken_ = context_->GetToken();
     }
+    // XTS log, please do not modify
+    TLOGI(WmsLogTag::WMS_UIEXT, "create a constrained modal UIExtension: %{public}d", property_->IsConstrainedModal());
     AddExtensionWindowStageToSCB(property_->IsConstrainedModal());
     WMError ret = Connect();
     if (ret != WMError::WM_OK) {

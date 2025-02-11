@@ -37,6 +37,15 @@ constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
 static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
+constexpr int MATRIX_INDEX_0 = 0;
+constexpr int MATRIX_INDEX_1 = 1;
+constexpr int MATRIX_INDEX_2 = 2;
+constexpr int MATRIX_INDEX_3 = 3;
+constexpr int MATRIX_INDEX_4 = 4;
+constexpr int MATRIX_INDEX_5 = 5;
+constexpr int MATRIX_INDEX_6 = 6;
+constexpr int MATRIX_INDEX_7 = 7;
+constexpr int MATRIX_INDEX_8 = 8;
 
 void AdjustMMIRotationFromDisplayMode(MMI::DisplayMode displayMode, MMI::Direction& rotation)
 {
@@ -140,9 +149,9 @@ Vector2f CalRotationToTranslate(const MMI::Direction& displayRotation, float wid
 Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo)
 {
     std::vector<float> hostTransform = hostWindowInfo.transform;
-    return Matrix3f(hostTransform[0], hostTransform[1], hostTransform[2],
-                    hostTransform[3], hostTransform[4], hostTransform[5],
-                    hostTransform[6], hostTransform[7], hostTransform[8]);
+    return Matrix3f(hostTransform[MATRIX_INDEX_0], hostTransform[MATRIX_INDEX_1], hostTransform[MATRIX_INDEX_2],
+                    hostTransform[MATRIX_INDEX_3], hostTransform[MATRIX_INDEX_4], hostTransform[MATRIX_INDEX_5],
+                    hostTransform[MATRIX_INDEX_6], hostTransform[MATRIX_INDEX_7], hostTransform[MATRIX_INDEX_8]);
 }
 
 void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
