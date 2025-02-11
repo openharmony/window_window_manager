@@ -255,6 +255,8 @@ public:
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    void SetLayoutTransform(const Transform& trans);
+    Transform GetLayoutTransform() const override;
     virtual WMError SetDecorVisible(bool isVisible) override;
     virtual WMError SetWindowTitleMoveEnabled(bool enable) override;
     virtual WMError SetDecorHeight(int32_t decorHeight) override;
@@ -416,6 +418,7 @@ protected:
     void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
+    mutable std::recursive_mutex transformMutex_;
 
     /*
      * Window Property
@@ -571,6 +574,7 @@ private:
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     bool postTaskDone_ = false;
     int16_t rotationAnimationCount_ { 0 };
+    Transform layoutTransform_;
 
     /*
      * PC Window
