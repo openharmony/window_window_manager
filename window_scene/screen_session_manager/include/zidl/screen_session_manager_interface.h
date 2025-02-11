@@ -178,6 +178,7 @@ public:
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
     virtual void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) {}
+    virtual void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area) {}
     virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
     virtual int32_t SetScreenOnDelayTime(int32_t delay) { return 0; }
     virtual void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) {}

@@ -857,6 +857,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SUPER_FOLD_EXPAND_AVAILABLE_AREA: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t posX = data.ReadInt32();
+            int32_t posY = data.ReadInt32();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMRect area = {posX, posY, width, height};
+            UpdateSuperFoldExpandAvailableArea(screenId, area);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME: {
             int32_t delay = data.ReadInt32();
             int32_t ret = SetScreenOffDelayTime(delay);
@@ -865,6 +875,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA: {
             ProcGetAvailableArea(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_EXPAND_AVAILABLE_AREA: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            DMRect area;
+            DMError ret = GetExpandAvailableArea(displayId, area);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            static_cast<void>(reply.WriteInt32(area.posX_));
+            static_cast<void>(reply.WriteInt32(area.posY_));
+            static_cast<void>(reply.WriteUint32(area.width_));
+            static_cast<void>(reply.WriteUint32(area.height_));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION: {
