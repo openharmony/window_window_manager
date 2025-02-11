@@ -2435,7 +2435,6 @@ bool Session::GetStateFromManager(const ManagerState key)
     switch (key) {
         case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
             return false;
-            break;
         default:
             return false;
     }
