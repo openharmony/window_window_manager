@@ -991,6 +991,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             ProcSetScreenSkipProtectedWindow(data, reply);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_RECORD_EVENT_FROM_SCB: {
+            std::string description = data.ReadString();
+            bool needRecordEvent = data.ReadBool();
+            RecordEventFromScb(description, needRecordEvent);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_IS_ORIENTATION_NEED_CHANGE: {
             reply.WriteBool(IsOrientationNeedChanged());
             break;
