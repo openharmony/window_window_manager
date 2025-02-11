@@ -31,6 +31,8 @@ inline bool NearZero(float val)
     return val < POS_ZERO && val > NAG_ZERO;
 }
 
+inline bool NearEqual(float left, float right) { return std::abs(left - right) < POS_ZERO; }
+
 inline float ToRadians(float degrees)
 {
     return degrees * PI / 180.0f;

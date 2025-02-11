@@ -2509,6 +2509,17 @@ public:
      * @return The string corresponding to the Window.
      */
     virtual std::string GetClassType() const { return "Window"; }
+
+    /**
+     * @brief Get layoutTransform of window uiContent.
+     *
+     * @return UiContent of layoutTransform.
+     */
+    virtual Transform GetLayoutTransform() const
+    {
+        static Transform trans;
+        return trans;
+    }
 };
 }
 }

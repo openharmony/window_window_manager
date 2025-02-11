@@ -504,6 +504,8 @@ public:
     WSRect GetClientRect() const;
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
+    void SetSingleHandTransform(const SingleHandTransform& transform);
+    SingleHandTransform GetSingleHandTransform() const;
 
     /*
      * Starting Window
@@ -808,6 +810,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    SingleHandTransform singleHandTransform_;
 
     /*
      * Screen Lock
