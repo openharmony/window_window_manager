@@ -654,6 +654,9 @@ void ScreenSession::Disconnect()
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
     property_ = newProperty;
+    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
+        return;
+    }
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");
         return;
