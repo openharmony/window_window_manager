@@ -5038,10 +5038,12 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         }
         if (abilitySessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
@@ -5075,17 +5077,19 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
         }
         if (abilitySessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (SessionHelper::IsMainWindow(session->GetWindowType()) && isFromClient &&
-            !session->clientIdentityToken_.empty() &&
-            session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
+        if (SessionHelper::IsMainWindow(session->GetWindowType()) && !session->clientIdentityToken_.empty() &&
+            isFromClient && session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s client exception not matched: %{public}s, %{public}s",
                 where, session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         if (session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
