@@ -1405,17 +1405,33 @@ HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CalcAvoidAreaForStatusBar
- * @tc.desc: CalcAvoidAreaForStatusBar
+ * @tc.name: CalcAvoidAreaHeightForStatusBar
+ * @tc.desc: CalcAvoidAreaHeightForStatusBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, CalcAvoidAreaForStatusBar, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, CalcAvoidAreaHeightForStatusBar, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "CalcAvoidAreaForStatusBar";
-    info.bundleName_ = "CalcAvoidAreaForStatusBar";
+    info.abilityName_ = "CalcAvoidAreaHeightForStatusBar";
+    info.bundleName_ = "CalcAvoidAreaHeightForStatusBar";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    int32_t result = sceneSession->CalcAvoidAreaForStatusBar();
+    int32_t result = sceneSession->CalcAvoidAreaHeightForStatusBar();
+
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: CalcAvoidAreaWidthForStatusBar
+ * @tc.desc: CalcAvoidAreaWidthForStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CalcAvoidAreaWidthForStatusBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalcAvoidAreaWidthForStatusBar";
+    info.bundleName_ = "CalcAvoidAreaWidthForStatusBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int32_t result = sceneSession->CalcAvoidAreaWidthForStatusBar();
 
     EXPECT_EQ(result, 0);
 }
