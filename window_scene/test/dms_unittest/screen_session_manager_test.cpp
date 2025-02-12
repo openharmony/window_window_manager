@@ -3657,19 +3657,19 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, Function |
  */
  HWTEST_F(ScreenSessionManagerTest, DoMakeUniqueScreenOld, Function | SmallTest | Level3)
  {
-     ASSERT_NE(ssm_, nullptr);
-     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
-     ASSERT_NE(displayManagerAgent, nullptr);
-     VirtualScreenOption virtualOption;
-     virtualOption.name_ = "createVirtualOption";
-     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-     if (screenId != VIRTUAL_SCREEN_ID) {
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    if (screenId != VIRTUAL_SCREEN_ID) {
         ASSERT_TRUE(screenId != VIRTUAL_SCREEN_ID);
-     }
-     std::vector<ScreenId> allUniqueScreenIds = {screenId, 99};
-     std::vector<DisplayId> displayIds = {};
-     ssm_->DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds);
-     ASSERT_EQ(displayIds.size(), 1);
+    }
+    std::vector<ScreenId> allUniqueScreenIds = {screenId, 99};
+    std::vector<DisplayId> displayIds = {};
+    ssm_->DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds);
+    ASSERT_EQ(displayIds.size(), 1);
 }
 }
 } // namespace Rosen
