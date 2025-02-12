@@ -9657,7 +9657,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 
 bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenType)
 {
-    if (screenType == ScreenType::VIRTUAL && (name == "HiCar" || name == "CeliaView")) {
+    if (screenType == ScreenType::VIRTUAL && name == "CeliaView") {
         return true;
     }
     return false;
