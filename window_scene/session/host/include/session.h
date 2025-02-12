@@ -82,6 +82,8 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
+using NofitySessionLabelAndIconUpdatedFunc =
+    std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 
 class ILifecycleListener {
 public:
@@ -636,6 +638,7 @@ protected:
     NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
+    NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
 
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
     SystemSessionConfig systemConfig_;

@@ -54,11 +54,23 @@ public:
     bool IsApplicationModal() const override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
+    /*
+     * Window LifeCycle
+     */
+    WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
+    void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
     void NotifyClientToUpdateInteractive(bool interactive) override;
     bool isClientInteractive_ = true;
+
+private:
+    /*
+     * Window LifeCycle
+     */
+    WSError SetSessionLabelAndIconInner(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H
