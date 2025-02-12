@@ -571,7 +571,7 @@ std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedModalEx
         return std::nullopt;
     }
     auto persistentId = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(constrainedModalUIExtInfo.uiExtensionNodeId);
-    if (windowId == 0) {
+    if (persistentId == 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "invalid persistentId");
         return std::nullopt;
     }
