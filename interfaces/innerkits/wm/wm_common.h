@@ -1199,6 +1199,34 @@ struct TitleButtonRect {
     }
 };
 
+/**
+ * @struct WindowLayoutInfo
+ *
+ * @brief Layout info for all windows on the screen.
+ */
+struct WindowLayoutInfo : public Parcelable {
+    Rect rect = { 0, 0, 0, 0 };
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+  
+    static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) ||
+            !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            delete windowLayoutInfo;
+            return nullptr;
+        }
+        return windowLayoutInfo;
+    }
+};
+
 /*
  * Config of keyboard animation
  */
