@@ -2602,6 +2602,12 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
+    return SetSupportedWindowModesInner(supportedWindowModes);
+}
+
+WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+{
     auto size = supportedWindowModes.size();
     if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
