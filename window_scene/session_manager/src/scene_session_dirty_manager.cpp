@@ -556,7 +556,10 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
         }
         MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
             hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
+        std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
+        windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
         windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
+        windowInfo.privacyUIFlag = false;
         TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
         windowInfoList.emplace_back(windowInfo);
     } else {  // normal UIExt
