@@ -291,9 +291,9 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->name_ = name_;
     displayInfo->SetWidth(bounds.rect_.GetWidth());
     if (isBScreenHalf_) {
-        std::vector<DMRect> creaseRects = property_.GetCreaseRects();
-        if (creaseRects.size() > 0) {
-            displayInfo->SetHeight(creaseRects[0].posY_);
+        DMRect creaseRect = property_.GetCreaseRect();
+        if (creaseRect.posY_ > 0) {
+            displayInfo->SetHeight(creaseRect.posY_);
         } else {
             displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
         }
