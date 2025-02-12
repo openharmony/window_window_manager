@@ -5073,7 +5073,7 @@ void WindowSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>
     TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
 }
 
-bool WindowSessionImpl::IsValidCrossState(const int32_t state)
+bool WindowSessionImpl::IsValidCrossState(int32_t state) const
 {
     return state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
         state < static_cast<int32_t>(CrossAxisState::STATE_END);
