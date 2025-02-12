@@ -4428,8 +4428,8 @@ DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId>
 {
     TLOGI(WmsLogTag::DMS, "screenId:%{public}" PRIu64"", screenId);
     sptr<ScreenSession> screen = GetScreenSession(screenId);
-    if (screen == nullptr || screen->GetScreenProperty().GetScreenType() != ScreenType::REAL) {
-        TLOGE(WmsLogTag::DMS, "screen is nullptr, or screenType is not real.");
+    if (screen == nullptr || screen->GetScreenProperty().GetScreenType() == ScreenType::UNDEFINED) {
+        TLOGE(WmsLogTag::DMS, "screen is nullptr, or screenType is undefined.");
         return DMError::DM_ERROR_NULLPTR;
     }
     screen->groupSmsId_ = 1;
