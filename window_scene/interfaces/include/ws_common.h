@@ -661,6 +661,8 @@ struct AppWindowSceneConfig {
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
+    WindowShadowConfig focusedShadowDark_;
+    WindowShadowConfig unfocusedShadowDark_;
     KeyboardSceneAnimationConfig keyboardAnimationIn_;
     KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;

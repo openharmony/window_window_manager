@@ -839,18 +839,33 @@ void SceneSessionManager::ConfigWindowEffect(const WindowSceneConfig::ConfigItem
             appWindowSceneConfig_.focusedShadow_ = config.focusedShadow_;
         }
     }
-
     item = effectConfig["appWindows"]["shadow"]["unfocused"];
     if (item.IsMap()) {
         if (ConfigAppWindowShadow(item, config.unfocusedShadow_)) {
             appWindowSceneConfig_.unfocusedShadow_ = config.unfocusedShadow_;
         }
     }
-
     AddAlphaToColor(appWindowSceneConfig_.focusedShadow_.alpha_, appWindowSceneConfig_.focusedShadow_.color_);
     AddAlphaToColor(appWindowSceneConfig_.unfocusedShadow_.alpha_, appWindowSceneConfig_.unfocusedShadow_.color_);
 
-    WLOGFI("successfully");
+    // config shadow in dark mode
+    item = effectConfig["appWindows"]["shadowDark"]["focused"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowShadow(item, config.focusedShadowDark_)) {
+            appWindowSceneConfig_.focusedShadowDark_ = config.focusedShadowDark_;
+        }
+    }
+    item = effectConfig["appWindows"]["shadowDark"]["unfocused"];
+    if (item.IsMap()) {
+        if (ConfigAppWindowShadow(item, config.unfocusedShadowDark_)) {
+            appWindowSceneConfig_.unfocusedShadowDark_ = config.unfocusedShadowDark_;
+        }
+    }
+    AddAlphaToColor(appWindowSceneConfig_.focusedShadowDark_.alpha_, appWindowSceneConfig_.focusedShadowDark_.color_);
+    AddAlphaToColor(appWindowSceneConfig_.unfocusedShadowDark_.alpha_,
+        appWindowSceneConfig_.unfocusedShadowDark_.color_);
+
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "successfully");
 }
 
 bool SceneSessionManager::ConfigAppWindowCornerRadius(const WindowSceneConfig::ConfigItem& item, float& out)
