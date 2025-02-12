@@ -141,6 +141,25 @@ const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISP
     {"follow_desktop",                      OHOS::AppExecFwk::DisplayOrientation::FOLLOW_DESKTOP},
 };
 
+const std::unordered_set<std::string> LAYOUT_INFO_WHITELIST = { 
+    "SCBSmartDock",
+    "SCBExtScreenDock",
+    "status_bar_tray",
+    "status_bar_personal",
+    "status_bar_sound_panel",
+    "status_bar_notification_panel",
+    "status_bar_input_panel",
+    "status_bar_control_center",
+    "status_bar_wifi_panel",
+    "status_bar_input_method",
+    "status_bar_assistant_translate",
+    "status_bar_quick_note",
+    "status_bar_bluetooth_panel",
+    "status_bar_battery_panel",
+    "status_bar_focus_mode_paddle",
+    "SCBStatusBar"
+};
+
 static const std::chrono::milliseconds WAIT_TIME(10 * 1000); // 10 * 1000 wait for 10s
 
 static std::shared_ptr<ScbDumpSubscriber> g_scbSubscriber(nullptr);
@@ -10003,6 +10022,59 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
     };
     // need sync task since animation transcation need
     return taskScheduler_->PostAsyncTask(task);
+}
+
+WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
+    std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    auto task = [this, displayId, &infos]() mutable {
+        constexpr bool isVirtualDisplay = false;
+        std::vector<sptr<SceneSession>> filteredSessions;
+        FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
+        for (const auto& session : filteredSessions) {
+            Rect globalScaledRect;
+            session->GetGlobalScaledRect(globalScaledRect);
+            auto windowLayoutInfo = sptr<WindowLayoutInfo>::MakeSptr();
+            windowLayoutInfo->rect = globalScaledRect;
+            infos.emplace_back(windowLayoutInfo);
+        }
+        return WMError::WM_OK;
+    };
+    return taskScheduler_->PostSyncTask(task, __func__);
+}
+
+void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+    std::vector<sptr<SceneSession>>& filteredSessions)
+{
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session == nullptr) {
+                continue;
+            }
+            if (session->GetSessionGlobalRect().IsInvalid()) {
+                continue;
+            }
+            if (IsGetWindowLayoutInfoNeeded(session) && session->GetSessionProperty()->GetDisplayId() == displayId &&
+                session->GetVisibilityState() != WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
+                filteredSessions.emplace_back(session);
+            }
+        }
+    }
+    std::sort(filteredSessions.begin(), filteredSessions.end(),
+              [](const sptr<SceneSession>& lhs, const sptr<SceneSession>& rhs) {
+                  return lhs->GetZOrder() > rhs->GetZOrder();
+              });
+}
+
+bool SceneSessionManager::IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const
+{
+    constexpr int32_t GROUP_ONE = 1;
+    std::string name = session->GetWindowName();
+    std::regex pattern("^(.*?)(\\d*)$"); // Remove last digit
+    std::smatch matches;
+    name = std::regex_search(name, matches, pattern) ? matches[GROUP_ONE] : name;
+    return !session->GetSessionInfo().isSystem_ || LAYOUT_INFO_WHITELIST.find(name) != LAYOUT_INFO_WHITELIST.end();
 }
 
 WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos)

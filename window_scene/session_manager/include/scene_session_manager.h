@@ -433,6 +433,12 @@ public:
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
 
+    /**
+     * Window Property
+     */
+    WMError ReleaseForegroundSessionScreenLock() override;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+
     /*
      * Multi Window
      */
@@ -451,11 +457,6 @@ public:
     WMError TerminateSessionByPersistentId(int32_t persistentId);
     WMError GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
         const std::vector<int32_t>& persistentIds, std::vector<uint64_t>& surfaceNodeIds) override;
-
-    /*
-     * Window Property
-     */
-    WMError ReleaseForegroundSessionScreenLock() override;
 
     /*
      * PiP Window
@@ -690,6 +691,13 @@ private:
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
+
+    /**
+     * Window Property
+     */
+    void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
+        std::vector<sptr<SceneSession>>& filteredSessions);
+    bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
 
     /**
      * PiP Window
