@@ -1302,12 +1302,15 @@ sptr<DisplayInfo> ScreenSessionManager::GetVisibleAreaDisplayInfoById(DisplayId 
         auto screenHeight = bounds.rect_.GetHeight();
         if (status == SuperFoldStatus::KEYBOARD) {
             if (screenWdith > screenHeight) {
-                auto temp = screenWdith;
-                screenWdith = screenHeight;
-                screenHeight = temp;
+                std::swap(screenWdith, screenHeight);
+            }
+            DMRect creaseRect = screenSession->GetScreenProperty().GetCreaseRect();
+            if (creaseRect.posY_ > 0) {
+                displayInfo->SetHeight(creaseRect.posY_);
+            } else {
+                displayInfo->SetHeight(screenHeight / HALF_SCREEN_PARAM);
             }
             displayInfo->SetWidth(screenWdith);
-            displayInfo->SetHeight(screenHeight / HALF_SCREEN_PARAM);
         } else {
             displayInfo->SetWidth(screenWdith);
             displayInfo->SetHeight(screenHeight);
@@ -1916,9 +1919,12 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         screenBounds = RRect({ 0, 0, screenMode.GetScreenHeight(), screenMode.GetScreenWidth() }, 0.0f, 0.0f);
         property.SetBounds(screenBounds);
     }
-    auto creaseRegion = GetCurrentFoldCreaseRegion();
+    sptr<FoldCreaseRegion> creaseRegion = GetCurrentFoldCreaseRegion();
     if (creaseRegion != nullptr) {
-        property.SetCreaseRects(creaseRegion->GetCreaseRects());
+        std::vector<DMRect> creaseRects = creaseRegion->GetCreaseRects();
+        if (creaseRects.size() > 0) {
+            property.SetCreaseRect(creaseRects[0]);
+        }
     }
 #endif
     property.CalcDefaultDisplayOrientation();
@@ -7367,9 +7373,9 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
     uint32_t screenWidth = screenProperty.GetBounds().rect_.GetWidth();
     uint32_t screenHeight = screenProperty.GetBounds().rect_.GetHeight();
     uint32_t fakeScreenHeight = screenHeight / HALF_SCREEN_PARAM;
-    std::vector<DMRect> creaseRects = screenProperty.GetCreaseRects();
-    if (creaseRects.size() > 0) {
-        fakeScreenHeight = screenHeight - (creaseRects[0].posY_ + creaseRects[0].height_);
+    DMRect creaseRect = screenProperty.GetCreaseRect();
+    if (creaseRect.height_ > 0) {
+        fakeScreenHeight = screenHeight - (static_cast<uint32_t>(creaseRect.posY_) + creaseRect.height_);
     }
     fakeScreenSession->UpdatePropertyByResolution(screenWidth, fakeScreenHeight);
     screenSession->UpdatePropertyByFakeBounds(screenWidth, fakeScreenHeight);

@@ -184,14 +184,14 @@ public:
         expandAvailableArea_ = area;
     }
 
-    std::vector<DMRect> GetCreaseRects()
+    DMRect GetCreaseRect()
     {
-        return creaseRects_;
+        return creaseRect_;
     }
 
-    void SetCreaseRects(std::vector<DMRect> creaseRects)
+    void SetCreaseRect(DMRect creaseRect)
     {
-        creaseRects_ = creaseRects;
+        creaseRect_ = creaseRect;
     }
 
     RRect GetPhysicalTouchBounds();
@@ -283,7 +283,7 @@ private:
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
     DMRect availableArea_;
     DMRect expandAvailableArea_;
-    std::vector<DMRect> creaseRects_;
+    DMRect creaseRect_;
 
     RRect physicalTouchBounds_;
     int32_t inputOffsetX_ { 0 };
