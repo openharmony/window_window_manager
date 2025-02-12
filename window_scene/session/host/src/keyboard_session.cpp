@@ -172,7 +172,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
     if (!IsSessionForeground() || !IsVisibleForeground()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
     }
     if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_ != nullptr) {
