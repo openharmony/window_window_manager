@@ -155,6 +155,7 @@ public:
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
     WmErrorCode StartMoveWindow() override;
     WmErrorCode StopMoveWindow() override;
+    WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
 
     /*
      * Compatible Mode
