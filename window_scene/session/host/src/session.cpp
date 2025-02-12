@@ -2302,6 +2302,7 @@ void Session::UnregisterSessionChangeListeners()
     sessionInfoLockedStateChangeFunc_ = nullptr;
     contextTransparentFunc_ = nullptr;
     sessionRectChangeFunc_ = nullptr;
+    updateSessionLabelAndIconFunc_ = nullptr;
     acquireRotateAnimationConfigFunc_ = nullptr;
     WLOGFD("UnregisterSessionChangeListenser, id: %{public}d", GetPersistentId());
 }

@@ -71,6 +71,8 @@ public:
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;
+    WSError SetSessionLabelAndIcon(const std::string& label,
+        const std::shared_ptr<Media::PixelMap>& icon) override;
 
     /*
      * UIExtension
