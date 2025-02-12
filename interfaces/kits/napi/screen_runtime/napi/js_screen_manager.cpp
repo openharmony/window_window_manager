@@ -779,8 +779,8 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
-        WLOGFE("Invalid args count, need two arg at least!");
+    if (argc < ARGC_ONE) {
+        WLOGFE("Invalid args count, need one arg at least!");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
     napi_value array = argv[0];
@@ -798,6 +798,9 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         if (!ConvertFromJsValue(env, value, screenId)) {
             return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
         }
+        if (static_cast<int32_t>(screenId) < 0) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "ScreenId cannot be a negative number");
+        }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
     napi_value lastParam = nullptr;
@@ -808,7 +811,7 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         std::vector<DisplayId> displayIds;
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().MakeUniqueScreen(screenIds, displayIds));
-        if (ret == DmErrorCode::DM_OK && !displayIds.empty()) {
+        if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsDisplayIdVectorObject(env, displayIds));
             WLOGI("makeUnique success");
         } else {
