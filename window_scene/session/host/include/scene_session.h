@@ -588,7 +588,8 @@ public:
     DragResizeType GetAppDragResizeType() const { return appDragResizeType_; }
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
-    int32_t CalcAvoidAreaForStatusBar();
+    int32_t CalcAvoidAreaHeightForStatusBar();
+    int32_t CalcAvoidAreaWidthForStatusBar();
     WSError SetMoveAvailableArea(DisplayId displayId);
 
     /*

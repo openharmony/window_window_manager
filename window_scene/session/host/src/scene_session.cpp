@@ -626,7 +626,7 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
-int32_t SceneSession::CalcAvoidAreaForStatusBar()
+int32_t SceneSession::CalcAvoidAreaHeightForStatusBar()
 {
     int32_t height = 0;
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
@@ -644,6 +644,24 @@ int32_t SceneSession::CalcAvoidAreaForStatusBar()
     return height;
 }
 
+int32_t SceneSession::CalcAvoidAreaWidthForStatusBar()
+{
+    int32_t width = 0;
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback is null");
+        return width;
+    }
+    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
+        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
+    for (auto& statusBar : statusBarVector) {
+        if (statusBar != nullptr && statusBar->GetSessionRect().width_ > width) {
+            width = statusBar->GetSessionRect().width_;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "width: %{public}d", width);
+    return width;
+}
+
 WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
 {
     sptr<Display> display = DisplayManager::GetInstance().GetDisplayById(displayId);
@@ -659,8 +677,8 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
 
-    if ((systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) && !systemConfig_.IsFreeMultiWindowMode()) {
-        int32_t statusBarHeight = CalcAvoidAreaForStatusBar();
+    if (systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) {
+        int32_t statusBarHeight = CalcAvoidAreaHeightForStatusBar();
         if (statusBarHeight > availableArea.posY_) {
             availableArea.posY_ = statusBarHeight;
         }
@@ -675,6 +693,10 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
         availableArea.height_ = currentScreenHeight - static_cast<uint32_t>(availableArea.posY_);
     }
 
+    if (bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
+        systemConfig_.IsPhoneWindow() && isFoldable) {
+        availableArea.width_ = CalcAvoidAreaWidthForStatusBar();
+    }
     TLOGD(WmsLogTag::WMS_KEYBOARD,
           "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
           availableArea.posX_, availableArea.posY_, availableArea.width_, availableArea.height_);
