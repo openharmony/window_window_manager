@@ -504,8 +504,10 @@ public:
      */
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
+    void SetDragActivated(bool dragActivated);
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
+    bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
 
@@ -813,6 +815,7 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    bool dragActivated_ = true;
     SingleHandTransform singleHandTransform_;
 
     /*

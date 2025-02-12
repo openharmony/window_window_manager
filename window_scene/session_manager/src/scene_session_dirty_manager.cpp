@@ -541,10 +541,10 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
         TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is null");
         return;
     }
-    bool dragEnabled = sessionProperty->GetDragEnabled();
-    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s dragEnabled: %{public}d", sceneSession->GetWindowName().c_str(),
-        dragEnabled);
-    if (dragEnabled) {
+    bool isDragAccessible = sceneSession->IsDragAccessible();
+    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s isDragAccessible: %{public}d", sceneSession->GetWindowName().c_str(),
+        isDragAccessible);
+    if (isDragAccessible) {
         float vpr = 1.5f; // 1.5: default vp
         auto displayId = sessionProperty->GetDisplayId();
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
@@ -577,7 +577,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
         }
     } else {
-        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is: %{public}d dragEnabled is false",
+        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is: %{public}d dragAccessible is false",
             sceneSession->GetPersistentId());
     }
 }
@@ -678,11 +678,11 @@ void SceneSessionDirtyManager::CheckIfUpdatePointAreas(const sptr<SceneSession>&
     auto maxMode = windowSessionProperty->GetMaximizeMode();
     bool isMainWindow = WindowHelper::IsMainWindow(windowType);
     bool isDecorDialog = WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    bool isNoDialogAndDragEnabledSystemWindow = WindowHelper::IsSystemWindow(windowType) &&
-        !WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->GetDragEnabled();
+    bool isNoDialogAndDragAccessibleSystemWindow = WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsDialogWindow(windowType) && sceneSession->IsDragAccessible();
     bool isDecorSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
     if ((windowMode == WindowMode::WINDOW_MODE_FLOATING &&
-         (isMainWindow || isDecorDialog || isDecorSubWindow || isNoDialogAndDragEnabledSystemWindow) &&
+         (isMainWindow || isDecorDialog || isDecorSubWindow || isNoDialogAndDragAccessibleSystemWindow) &&
          maxMode != MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
         sceneSession->GetSessionInfo().isSetPointerAreas_) {
         UpdatePointerAreas(sceneSession, pointerChangeAreas);

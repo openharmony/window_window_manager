@@ -257,6 +257,7 @@ public:
     /*
      * Window Layout
      */
+    WMError ActivateDragBySystem(bool activateDrag);
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     WMError SetWindowEnableDragBySystem(bool enableDrag);
     WSError OnDefaultDensityEnabled(bool isDefaultDensityEnabled) override;
