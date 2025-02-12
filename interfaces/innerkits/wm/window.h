@@ -2143,6 +2143,13 @@ public:
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
+     * @brief get compatible mode in pc.
+     *
+     * @return True means window is compatible mode in pc, false means the opposite.
+     */
+    virtual bool GetCompatibleModeInPc() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.

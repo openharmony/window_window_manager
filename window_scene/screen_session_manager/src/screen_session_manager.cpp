@@ -1503,6 +1503,8 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
         virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
+    OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE,
+        screenId);
     NotifyDisplayStateChange(screenId, screenSession->ConvertToDisplayInfo(),
         emptyMap, DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::VIRTUAL_PIXEL_RATIO_CHANGED);
@@ -1841,6 +1843,10 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         && (g_screenRotationOffSet == ROTATION_90 || g_screenRotationOffSet == ROTATION_270)) {
         screenBounds = RRect({ 0, 0, screenMode.GetScreenHeight(), screenMode.GetScreenWidth() }, 0.0f, 0.0f);
         property.SetBounds(screenBounds);
+    }
+    auto creaseRegion = GetCurrentFoldCreaseRegion();
+    if (creaseRegion != nullptr) {
+        property.SetCreaseRects(creaseRegion->GetCreaseRects());
     }
 #endif
     property.CalcDefaultDisplayOrientation();
@@ -6726,6 +6732,23 @@ DMError ScreenSessionManager::GetAvailableArea(DisplayId displayId, DMRect& area
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    auto displayInfo = GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get displayInfo.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    sptr<ScreenSession> screenSession;
+    screenSession = GetScreenSession(displayInfo->GetScreenId());
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get screen now");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    area = screenSession->GetExpandAvailableArea();
+    return DMError::DM_OK;
+}
+
 void ScreenSessionManager::UpdateAvailableArea(ScreenId screenId, DMRect area)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -6773,6 +6796,25 @@ void ScreenSessionManager::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRec
     }
 }
 
+void ScreenSessionManager::UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "update super fold available area permission denied!");
+        return;
+    }
+
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get default screen now");
+        return;
+    }
+    if (screenSession->UpdateExpandAvailableArea(area)) {
+        TLOGI(WmsLogTag::DMS,
+            "ExpandAvailableArea x: %{public}d, y: %{public}d, width: %{public}d, height: %{public}d",
+            area.posX_, area.posY_, area.width_, area.height_);
+    }
+}
+
 void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
 {
 #ifdef FOLD_ABILITY_ENABLE
@@ -6798,6 +6840,19 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
     }
     screenSession->UpdateRotationAfterBoot(foldToExpand);
 #endif
+}
+
+void ScreenSessionManager::RecordEventFromScb(std::string description, bool needRecordEvent)
+{
+    TLOGW(WmsLogTag::DMS, "%{public}s", description.c_str());
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied, clientName: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return;
+    }
+    if (needRecordEvent) {
+        screenEventTracker_.RecordEvent(description);
+    }
 }
 
 void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const
@@ -7090,8 +7145,13 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     uint32_t screenWidth = screenProperty.GetBounds().rect_.GetWidth();
     uint32_t screenHeight = screenProperty.GetBounds().rect_.GetHeight();
-    fakeScreenSession->UpdatePropertyByResolution(screenWidth, screenHeight / HALF_SCREEN_PARAM);
-    screenSession->UpdatePropertyByFakeBounds(screenWidth, screenHeight / HALF_SCREEN_PARAM);
+    uint32_t fakeScreenHeight = screenHeight / HALF_SCREEN_PARAM;
+    std::vector<DMRect> creaseRects = screenProperty.GetCreaseRects();
+    if (creaseRects.size() > 0) {
+        fakeScreenHeight = screenHeight - (creaseRects[0].posY_ + creaseRects[0].height_);
+    }
+    fakeScreenSession->UpdatePropertyByResolution(screenWidth, fakeScreenHeight);
+    screenSession->UpdatePropertyByFakeBounds(screenWidth, fakeScreenHeight);
     screenSession->SetFakeScreenSession(fakeScreenSession);
     screenSession->SetIsFakeInUse(true);
 }

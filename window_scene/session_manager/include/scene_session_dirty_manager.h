@@ -66,6 +66,10 @@ public:
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
+    void UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+        std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap);
+    bool GetLastConstrainedModalUIExtInfo(const sptr<SceneSession>& sceneSession,
+        SecSurfaceInfo& constrainedModalUIExtInfo);
 
 private:
     std::vector<MMI::WindowInfo> FullSceneSessionInfoUpdate() const;
@@ -90,6 +94,8 @@ private:
         MMI::WindowInfo& windowInfo) const;
     void AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList, MMI::WindowInfo windowInfo,
         const sptr<SceneSession>& sceneSession, const ExtensionWindowEventInfo& extensionInfo);
+    void GetModalUIExtensionInfo(std::vector<MMI::WindowInfo>& windowInfoList,
+        const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowInfo);
     std::vector<MMI::WindowInfo> GetSecSurfaceWindowinfoList(const sptr<SceneSession>& sceneSession,
         const MMI::WindowInfo& hostWindowinfo, const Matrix3f& hostTransform) const;
     MMI::WindowInfo GetSecComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
@@ -103,10 +109,12 @@ private:
         const sptr<WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas) const;
     std::mutex mutexlock_;
     mutable std::shared_mutex secSurfaceInfoMutex_;
+    mutable std::shared_mutex constrainedModalUIExtInfoMutex_;
     FlushWindowInfoCallback flushWindowInfoCallback_;
     std::atomic_bool sessionDirty_ { false };
     std::atomic_bool hasPostTask_ { false };
     std::map<uint64_t, std::vector<SecSurfaceInfo>> secSurfaceInfoMap_;
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> constrainedModalUIExtInfoMap_;
 };
 } //namespace OHOS::Rosen
 

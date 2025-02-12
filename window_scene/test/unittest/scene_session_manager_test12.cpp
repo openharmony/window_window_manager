@@ -1464,6 +1464,35 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionCrossAxisState, Function | Smal
     EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
     ssm_->UpdateSessionCrossAxisState(10, SuperFoldStatus::EXPANDED, SuperFoldStatus::FOLDED);
 }
+
+/**
+ * @tc.name: RemoveLifeCycleTaskByPersistentId
+ * @tc.desc: test RemoveLifeCycleTaskByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "testAbilityName1";
+    info.moduleName_ = "testModleName1";
+    info.bundleName_ = "testBundleName1";
+    info.persistentId_ = 100;
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+
+    auto task = []() {};
+    sceneSession->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
+    ssm_->RemoveLifeCycleTaskByPersistentId(100, LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 0);
+
+    sceneSession->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
+    ssm_->RemoveLifeCycleTaskByPersistentId(3, LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

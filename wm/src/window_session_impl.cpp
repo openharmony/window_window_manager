@@ -224,6 +224,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
     property_->SetIsUIExtAnySubWindow(option->GetIsUIExtAnySubWindow());
     property_->SetIsSystemKeyboard(option->IsSystemKeyboard());
+    property_->SetConstrainedModal(option->IsConstrainedModal());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
@@ -251,6 +252,11 @@ bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
 bool WindowSessionImpl::IsPcOrPadFreeMultiWindowMode() const
 {
     return windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode();
+}
+
+bool WindowSessionImpl::GetCompatibleModeInPc() const
+{
+    return property_->GetCompatibleModeInPc();
 }
 
 void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
@@ -306,7 +312,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
     }
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal());
 }
 
 WindowSessionImpl::~WindowSessionImpl()
@@ -1327,8 +1333,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     if (property_->GetCompatibleModeInPc()) {
         uiContent->HideWindowTitleButton(true, false, hideMinimizeButton, hideCloseButton);
+        uiContent->OnContainerModalEvent("scb_back_visibility", "true");
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+        uiContent->OnContainerModalEvent("scb_back_visibility", "false");
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
