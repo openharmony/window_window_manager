@@ -147,6 +147,10 @@ void CjWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
 {
 }
 
+void CjWindowListener::OnSystemDensityChanged(float density)
+{
+}
+
 void CjWindowListener::OnWindowStatusChange(WindowStatus status)
 {
 }

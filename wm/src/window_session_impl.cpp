@@ -121,6 +121,9 @@ std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::t
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
 std::mutex WindowSessionImpl::displayIdChangeListenerMutex_;
 std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::displayIdChangeListeners_;
+std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
+std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>>
+    WindowSessionImpl::systemDensityChangeListeners_;
 std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::windowNoInteractionListeners_;
 std::map<int32_t, std::vector<sptr<IWindowTitleButtonRectChangedListener>>>
     WindowSessionImpl::windowTitleButtonRectChangeListeners_;
@@ -1022,6 +1025,7 @@ WSError WindowSessionImpl::UpdateOrientation()
 
 WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
     property_->SetDisplayId(displayId);
     return WSError::WS_OK;
 }
@@ -1122,7 +1126,7 @@ float WindowSessionImpl::GetVirtualPixelRatio()
     return virtualPixelRatio_;
 }
 
-float WindowSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+float WindowSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
     if (useUniqueDensity_) {
         return virtualPixelRatio_;
@@ -2584,6 +2588,12 @@ void WindowSessionImpl::ClearUselessListeners(std::map<int32_t, T>& listeners, i
 }
 
 template<typename T>
+void WindowSessionImpl::ClearUselessListeners(std::unordered_map<int32_t, T>& listeners, int32_t persistentId)
+{
+    listeners.erase(persistentId);
+}
+
+template<typename T>
 EnableIfSame<T, IWindowStatusChangeListener, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListeners;
@@ -2635,6 +2645,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
         ClearUselessListeners(displayIdChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
+        ClearUselessListeners(systemDensityChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowNoInteractionListenerMutex_);
@@ -3415,6 +3429,20 @@ WMError WindowSessionImpl::UnregisterDisplayIdChangeListener(const IDisplayIdCha
     return UnregisterListener(displayIdChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}d", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
+    return RegisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}d", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
+    return UnregisterListener(systemDensityChangeListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener)
 {
     WLOGFD("Start to register window no interaction listener.");
@@ -3457,6 +3485,13 @@ EnableIfSame<T, IDisplayIdChangeListener,
 }
 
 template<typename T>
+EnableIfSame<T, ISystemDensityChangeListener,
+    std::vector<ISystemDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    return systemDensityChangeListeners_[GetPersistentId()];
+}
+
+template<typename T>
 EnableIfSame<T, IWindowNoInteractionListener, std::vector<IWindowNoInteractionListenerSptr>> WindowSessionImpl::GetListeners()
 {
     std::vector<IWindowNoInteractionListenerSptr> noInteractionListeners;
@@ -3474,6 +3509,18 @@ WSError WindowSessionImpl::NotifyDisplayIdChange(DisplayId displayId)
     for (auto& listener : displayIdChangeListeners) {
         if (listener != nullptr) {
             listener->OnDisplayIdChanged(displayId);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifySystemDensityChange(float density)
+{
+    std::lock_guard<std::mutex> lock(systemDensityChangeListenerMutex_);
+    const auto& systemDensityChangeListeners = GetListeners<ISystemDensityChangeListener>();
+    for (const auto& listener : systemDensityChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnSystemDensityChanged(density);
         }
     }
     return WSError::WS_OK;

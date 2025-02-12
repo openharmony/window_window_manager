@@ -17,6 +17,7 @@
 
 #include "ipc_skeleton.h"
 
+#include "ui_extension/host_data_handler.h"
 #include "window_manager_hilog.h"
 #include "anr_manager.h"
 
@@ -127,6 +128,7 @@ ExtensionSession::ExtensionSession(const SessionInfo& info) : Session(info)
     WLOGFD("Create extension session, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str());
     GeneratePersistentId(true, info.persistentId_);
+    dataHandler_ = std::make_shared<Extension::HostDataHandler>();
 }
 
 ExtensionSession::~ExtensionSession()
@@ -144,6 +146,18 @@ ExtensionSession::~ExtensionSession()
     remoteObject->RemoveDeathRecipient(channelDeath_);
     channelListener_ = nullptr;
     channelDeath_ = nullptr;
+}
+
+std::shared_ptr<IDataHandler> ExtensionSession::GetExtensionDataHandler() const
+{
+    return dataHandler_;
+}
+
+void ExtensionSession::SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+    const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler)
+{
+    Session::SetEventHandler(handler, exportHandler);
+    dataHandler_->SetEventHandler(handler);
 }
 
 WSError ExtensionSession::ConnectInner(
@@ -188,6 +202,7 @@ WSError ExtensionSession::ConnectInner(
             }
         }
 
+        session->dataHandler_->SetRemoteProxyObject(sessionStage->AsObject());
         return session->Session::ConnectInner(
             sessionStage, eventChannel, surfaceNode, systemConfig, property, token, pid, uid);
     };
@@ -466,5 +481,13 @@ WSError ExtensionSession::NotifyDumpInfo(const std::vector<std::string>& params,
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyDumpInfo(params, info);
+}
+
+WSError ExtensionSession::SendExtensionData(MessageParcel& data, MessageParcel& reply,
+                                            [[maybe_unused]] MessageOption& option)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
+    dataHandler_->NotifyDataConsumer(data, reply);
+    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

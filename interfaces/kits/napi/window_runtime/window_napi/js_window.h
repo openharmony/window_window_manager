@@ -130,6 +130,7 @@ public:
     static napi_value IsFocused(napi_env env, napi_callback_info info);
     static napi_value RequestFocus(napi_env env, napi_callback_info info);
     static napi_value StartMoving(napi_env env, napi_callback_info info);
+    static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -258,6 +259,7 @@ private:
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
