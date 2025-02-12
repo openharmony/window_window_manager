@@ -34,6 +34,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     VIRTUAL_SCREEN_RESIZE,
     RELATIVE_POSITION_CHANGE,
     SUPER_FOLD_STATUS_CHANGE,
+    VIRTUAL_PIXEL_RATIO_CHANGE,
     ACCESS_INFO_CHANGE,
 };
 class ScreenProperty {
@@ -173,6 +174,26 @@ public:
         availableArea_ = area;
     }
 
+    DMRect GetExpandAvailableArea()
+    {
+        return expandAvailableArea_;
+    }
+
+    void SetExpandAvailableArea(DMRect area)
+    {
+        expandAvailableArea_ = area;
+    }
+
+    std::vector<DMRect> GetCreaseRects()
+    {
+        return creaseRects_;
+    }
+
+    void SetCreaseRects(std::vector<DMRect> creaseRects)
+    {
+        creaseRects_ = creaseRects;
+    }
+
     RRect GetPhysicalTouchBounds();
 
     void SetPhysicalTouchBounds(bool isSecondaryDevice);
@@ -261,6 +282,8 @@ private:
     void UpdateYDpi();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
     DMRect availableArea_;
+    DMRect expandAvailableArea_;
+    std::vector<DMRect> creaseRects_;
 
     RRect physicalTouchBounds_;
     int32_t inputOffsetX_ { 0 };

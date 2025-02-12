@@ -1908,5 +1908,15 @@ bool WindowSessionProperty::GetExclusivelyHighlighted() const
 {
     return isExclusivelyHighlighted_;
 }
+
+void WindowSessionProperty::SetConstrainedModal(bool isConstrained)
+{
+    isConstrainedModal_ = isConstrained;
+}
+
+bool WindowSessionProperty::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
+}
 } // namespace Rosen
 } // namespace OHOS

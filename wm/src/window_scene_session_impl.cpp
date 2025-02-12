@@ -94,9 +94,11 @@ constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 const std::string PARAM_DUMP_HELP = "-h";
 constexpr float MIN_GRAY_SCALE = 0.0f;
 constexpr float MAX_GRAY_SCALE = 1.0f;
+constexpr int32_t DISPLAY_ID_C = 999;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
 const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
+const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
     WindowType::WINDOW_TYPE_THEME_EDITOR,
@@ -782,6 +784,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
         isExecuteDelayRaise_ = false;
     }
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        property_->GetDisplayId() == DISPLAY_ID_C &&
         DisplayManager::GetInstance().GetFoldStatus() == FoldStatus::HALF_FOLD) {
         ResetSuperFoldDisplayY(pointerEvent);
     }
@@ -1344,7 +1347,8 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         case WindowType::WINDOW_TYPE_DIALOG:
         case WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW:
         case WindowType::WINDOW_TYPE_PANEL:
-        case WindowType::WINDOW_TYPE_LAUNCHER_DOCK: {
+        case WindowType::WINDOW_TYPE_LAUNCHER_DOCK:
+        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
@@ -4945,6 +4949,9 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
             SetFullScreenWaterfallMode(lastFullScreenWaterfallMode);
         }
         return ret;
+    } else if (eventName == BACK_WINDOW_EVENT) {
+        HandleBackEvent();
+        return WMError::WM_OK;
     }
     return WMError::WM_DO_NOTHING;
 }

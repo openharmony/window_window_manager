@@ -960,6 +960,23 @@ HWTEST_F(WindowSessionImplTest3, IsFloatingWindowAppType, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GetCompatibleModeInPc
+ * @tc.desc: GetCompatibleModeInPc
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, GetCompatibleModeInPc, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetCompatibleModeInPc");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    bool enable = true;
+    window->property_->SetCompatibleModeInPc(enable);
+    EXPECT_EQ(true, window->GetCompatibleModeInPc());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: GetCompatibleModeInPc end";
+}
+
+/**
  * @tc.name: SetWindowContainerColor
  * @tc.desc: SetWindowContainerColor
  * @tc.type: FUNC
