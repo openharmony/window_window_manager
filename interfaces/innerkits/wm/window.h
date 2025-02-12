@@ -2581,6 +2581,28 @@ public:
         static Transform trans;
         return trans;
     }
+
+    /**
+     * @brief Show keyboard window
+     *
+     * @param mode Keyboard will show with special mode.
+     * @return WM_OK means window show success, others means failed.
+     */
+    virtual WMError ShowKeyboard(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Change keyboard view mode
+     *
+     * @param mode Keyboard will update to the special mode.
+     * @return WM_OK means view mode update success, others means failed.
+     */
+    virtual WMError ChangeKeyboardViewMode(KeyboardViewMode mode)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

@@ -1751,6 +1751,11 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus)
     return ret;
 }
 
+WMError WindowImpl::ShowKeyboard(KeyboardViewMode mode)
+{
+    return Show();
+}
+
 WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     WLOGD("id:%{public}u Hide, reason:%{public}u, Animation:%{public}d",
