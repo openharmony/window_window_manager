@@ -514,7 +514,7 @@ protected:
     WMError GetVirtualPixelRatio(float& vpr);
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
-    bool IsValidCrossState(const int32_t state);
+    bool IsValidCrossState(int32_t state) const;
 
     /*
      * Window Immersive
