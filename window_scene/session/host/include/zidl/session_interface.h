@@ -98,7 +98,7 @@ public:
 
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(
-        const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
+        const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
     {
         return WSError::WS_OK;
     }
