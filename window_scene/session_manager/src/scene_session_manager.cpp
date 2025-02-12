@@ -130,7 +130,9 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
-constexpr std::size_t SNAPSHOT_CACHE_CAPACITY = 3;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 24;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -330,7 +332,20 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
         [this](const sptr<IRemoteObject>& remoteObject) { this->ClearAllCollaboratorSessions(); });
 
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
-    snapshotLRUCache_ = std::make_unique<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
+
+    const static std::unordered_map<WindowUIType, std::size_t> SNAPSHOT_CACHE_CAPACITY_MAP = {
+        {WindowUIType::PC_WINDOW,      MAX_SNAPSHOT_IN_RECENT_PC},
+        {WindowUIType::PAD_WINDOW,     MAX_SNAPSHOT_IN_RECENT_PAD},
+        {WindowUIType::PHONE_WINDOW,   MAX_SNAPSHOT_IN_RECENT_PHONE},
+        {WindowUIType::INVALID_WINDOW, MAX_SNAPSHOT_IN_RECENT_PHONE},
+    };
+    std::size_t snapCapacity = SNAPSHOT_CACHE_CAPACITY_MAP.at(WindowUIType::INVALID_WINDOW);
+    if (SNAPSHOT_CACHE_CAPACITY_MAP.find(systemConfig_.windowUIType_) != SNAPSHOT_CACHE_CAPACITY_MAP.end()) {
+        snapCapacity = SNAPSHOT_CACHE_CAPACITY_MAP.at(systemConfig_.windowUIType_);
+    } else {
+        TLOGI(WmsLogTag::WMS_PATTERN, "invalid type: %{public}hhu", systemConfig_.windowUIType_);
+    }
+    snapshotLRUCache_ = std::make_unique<LRUCache>(snapCapacity);
 
     listenerController_ = std::make_shared<SessionListenerController>();
     windowFocusController_ = sptr<WindowFocusController>::MakeSptr();
@@ -2536,8 +2551,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             sceneSession->EditSessionInfo().callingTokenId_ = 0;
         }
 
-        if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) &&
-            systemConfig_.IsPcWindow() && !systemConfig_.freeMultiWindowEnable_) {
+        if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             PutSnapshotToCache(persistentId);
         }
 
