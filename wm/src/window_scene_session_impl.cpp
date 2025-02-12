@@ -911,8 +911,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING));
         bool onlySupportFullScreen = isWindowModeSupportFullscreen &&
             ((!windowSystemConfig_.IsPhoneWindow() && !windowSystemConfig_.IsPadWindow()) || IsFreeMultiWindowMode());
-        bool isCompatibleModeInPc = property_->GetCompatibleModeInPc();
-        if ((onlySupportFullScreen || property_->GetFullScreenStart()) && !isCompatibleModeInPc) {
+        if ((onlySupportFullScreen || property_->GetFullScreenStart()) && !property_->GetCompatibleModeInPc()) {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d fullScreenStart:%{public}d",
                 onlySupportFullScreen, property_->GetFullScreenStart());
             Maximize(MaximizePresentation::ENTER_IMMERSIVE);
@@ -2648,8 +2647,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
     bool onlySupportFullScreen =
         WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
         !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
-    bool isCompatibleModeInPc = property_->GetCompatibleModeInPc();
-    if (onlySupportFullScreen && !property_->IsLayoutFullScreen() && !isCompatibleModeInPc) {
+    if (onlySupportFullScreen && !property_->IsLayoutFullScreen() && !property_->GetCompatibleModeInPc()) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
             onlySupportFullScreen, property_->IsLayoutFullScreen());
         Maximize(MaximizePresentation::ENTER_IMMERSIVE);
