@@ -238,6 +238,9 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
         TLOGW(WmsLogTag::DMS, "physical screen switch to unique result: %{public}d", switchStatus);
         AddUniqueScreenDisplayId(displayIds, physicalScreenIds, switchStatus);
     }
+    if (displayIds.empty()) {
+        switchStatus = DMError::DM_ERROR_INVALID_PARAM;
+    }
     TLOGW(WmsLogTag::DMS, "mirror switch to unique end");
     return switchStatus;
 }
