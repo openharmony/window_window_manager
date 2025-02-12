@@ -2398,15 +2398,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
         if (!requirePersist) {
             return;
         }
-        std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session &&
-                (session->GetSystemConfig().IsPcWindow() ||
-                 session->GetSystemConfig().freeMultiWindowEnable_)) {
-                session->ResetSnapshot();
-            }
-        };
-        session->scenePersistence_->SaveSnapshot(pixelMap, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap);
     };
     if (!useFfrt) {
         task();
