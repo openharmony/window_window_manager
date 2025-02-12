@@ -536,8 +536,13 @@ WMError WindowExtensionSessionImpl::NapiSetUIContent(const std::string& contentI
             return WMError::WM_ERROR_NULLPTR;
         }
         uiContent->SetParentToken(token);
-        if (property_->GetUIExtensionUsage() == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
+        auto usage = property_->GetUIExtensionUsage();
+        if (usage == UIExtensionUsage::CONSTRAINED_EMBEDDED) {
             uiContent->SetUIContentType(Ace::UIContentType::SECURITY_UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::EMBEDDED) {
+            uiContent->SetUIContentType(Ace::UIContentType::UI_EXTENSION);
+        } else if (usage == UIExtensionUsage::MODAL) {
+            uiContent->SetUIContentType(Ace::UIContentType::MODAL_UI_EXTENSION);
         }
         uiContent->Initialize(this, contentInfo, storage, property_->GetParentId());
         // make uiContent available after Initialize/Restore

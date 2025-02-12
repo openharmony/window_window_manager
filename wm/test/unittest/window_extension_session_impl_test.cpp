@@ -965,6 +965,16 @@ HWTEST_F(WindowExtensionSessionImplTest, NapiSetUIContent, Function | SmallTest 
     ASSERT_EQ(WMError::WM_OK,
         window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::CONTINUATION,
         token, nullptr));
+
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::EMBEDDED);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::UIEXTENSION_USAGE_END);
+    ASSERT_EQ(WMError::WM_OK,
+        window_->NapiSetUIContent(contentInfo, env, storage, BackupAndRestoreType::NONE, token, nullptr));
 }
 
 /**
