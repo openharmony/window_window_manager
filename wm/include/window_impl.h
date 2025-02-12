@@ -337,6 +337,10 @@ private:
     {
         listeners.erase(winId);
     }
+    template<typename T> void ClearUselessListeners(std::unordered_map<uint32_t, T>& listeners, uint32_t winId)
+    {
+        listeners.erase(winId);
+    }
     template<typename T> EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();

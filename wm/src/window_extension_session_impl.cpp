@@ -30,6 +30,7 @@
 #include "singleton_container.h"
 #include "window_adapter.h"
 #include "input_transfer_station.h"
+#include "ui_extension/provider_data_handler.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -66,10 +67,16 @@ WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>&
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "UIExtension usage=%{public}u, the default state of hideNonSecureWindows is %{public}d",
         property_->GetUIExtensionUsage(), extensionWindowFlags_.hideNonSecureWindowsFlag);
+    dataHandler_ = std::make_shared<Extension::ProviderDataHandler>();
 }
 
 WindowExtensionSessionImpl::~WindowExtensionSessionImpl()
 {
+}
+
+std::shared_ptr<IDataHandler> WindowExtensionSessionImpl::GetExtensionDataHandler() const
+{
+    return dataHandler_;
 }
 
 WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
@@ -89,6 +96,10 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
         std::lock_guard<std::mutex> lock(hostSessionMutex_);
         hostSession_ = iSession;
     }
+
+    dataHandler_->SetEventHandler(handler_);
+    dataHandler_->SetRemoteProxyObject(iSession->AsObject());
+
     context_ = context;
     if (context_) {
         abilityToken_ = context_->GetToken();
@@ -817,7 +828,7 @@ WSError WindowExtensionSessionImpl::NotifyDensityFollowHost(bool isFollowHost, f
     return WSError::WS_OK;
 }
 
-float WindowExtensionSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+float WindowExtensionSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
     float vpr = 1.0f;
     if (displayInfo == nullptr) {
@@ -1186,6 +1197,14 @@ bool WindowExtensionSessionImpl::IsPcOrPadFreeMultiWindowMode() const
             static_cast<uint32_t>(ret));
     }
     return isPcOrPadFreeMultiWindowMode;
+}
+
+WSError WindowExtensionSessionImpl::SendExtensionData(MessageParcel& data, MessageParcel& reply,
+                                                      [[maybe_unused]] MessageOption& option)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d", GetPersistentId());
+    dataHandler_->NotifyDataConsumer(data, reply);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
