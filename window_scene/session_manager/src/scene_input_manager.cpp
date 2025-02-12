@@ -231,17 +231,17 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            .ppi = screenProperty.GetXDpi(),
             .offsetX = screenProperty.GetInputOffsetX(),
             .offsetY = screenProperty.GetInputOffsetY(),
+            .ppi = screenProperty.GetXDpi(),
+            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
+            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY,
             .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),
             .screenRealWidth = screenProperty.GetScreenRealWidth(),
             .screenRealHeight = screenProperty.GetScreenRealHeight(),
             .screenRealPPI = screenProperty.GetScreenRealPPI(),
             .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
-            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
-            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY,
             .validWidth = screenProperty.GetValidWidth(),
             .validHeight = screenProperty.GetValidHeight(),
             .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset())
@@ -606,7 +606,7 @@ std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedModalEx
         return std::nullopt;
     }
     auto persistentId = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(constrainedModalUIExtInfo.uiExtensionNodeId);
-    if (windowId == 0) {
+    if (persistentId == 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "invalid persistentId");
         return std::nullopt;
     }
