@@ -31,6 +31,7 @@ const std::string FLUSH_DISPLAY_INFO_THREAD = "OS_FlushDisplayInfoThread";
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
+constexpr int INVALID_PERSISTENT_ID = 0;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -606,7 +607,7 @@ std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedModalEx
         return std::nullopt;
     }
     auto persistentId = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(constrainedModalUIExtInfo.uiExtensionNodeId);
-    if (persistentId == 0) {
+    if (persistentId == INVALID_PERSISTENT_ID) {
         TLOGE(WmsLogTag::WMS_EVENT, "invalid persistentId");
         return std::nullopt;
     }
