@@ -355,7 +355,7 @@ bool WindowOption::GetWindowTopmost() const
 
 void WindowOption::SetConstrainedModal(bool isConstrainedModal)
 {
-    isConstrainedModal_ = isConstrainedModal;
+    isConstrainedModal_ = (uiExtensionUsage_ == static_cast<uint32_t>(UIExtensionUsage::MODAL)) && isConstrainedModal;
 }
 
 bool WindowOption::IsConstrainedModal() const

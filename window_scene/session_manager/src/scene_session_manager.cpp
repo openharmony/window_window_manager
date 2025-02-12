@@ -10304,7 +10304,7 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
                 "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
                 pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
                 parentSession->GetSessionGlobalRect().ToString().c_str());
-            parentSession->UpdateModalUIExtension(extensionInfo);
+            parentSession->UpdateNormalModalUIExtension(extensionInfo);
         }
     };
     taskScheduler_->PostAsyncTask(task, "UpdateModalExtensionRect");
