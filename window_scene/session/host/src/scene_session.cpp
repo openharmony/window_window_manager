@@ -1929,7 +1929,7 @@ void SceneSession::AddNormalModalUIExtension(const ExtensionWindowEventInfo& ext
     NotifySessionInfoChange();
 }
 
-void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+void SceneSession::UpdateNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d,pid=%{public}d,"
         "Rect:[%{public}d %{public}d %{public}d %{public}d]",
