@@ -178,6 +178,9 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    float GetCustomDensity() const override;
+    WMError SetCustomDensity(float density) override;
+    WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -196,7 +199,7 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
-    float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
+    float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
@@ -266,6 +269,10 @@ private:
      * Window Property
      */
     void InitSystemSessionDragEnable();
+    bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
+    bool IsDefaultDensityEnabled();
+    float GetMainWindowCustomDensity();
+    float customDensity_ = UNDEFINED_DENSITY;
 
     /**
      * Sub Window

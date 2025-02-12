@@ -404,6 +404,20 @@ public:
 using IDisplayIdChangeListenerSptr = sptr<IDisplayIdChangeListener>;
 
 /**
+ * @class ISystemDensityChangeListener
+ *
+ * @brief Listener to observe system density associated with the window changed.
+ */
+class ISystemDensityChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when system density changed.
+     */
+    virtual void OnSystemDensityChanged(float density) {}
+};
+using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
+
+/**
  * @class IWindowNoInteractionListenerSptr
  *
  * @brief Listener to observe no interaction event for a long time of window.
@@ -1919,6 +1933,24 @@ public:
         const IDisplayIdChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register system density change listener.
+     *
+     * @param listener ISystemDensityChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterSystemDensityChangeListener(
+        const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister system density change listener.
+     *
+     * @param listener ISystemDensityChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterSystemDensityChangeListener(
+        const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Get the window limits of current window.
      *
      * @param windowLimits.
@@ -2124,6 +2156,29 @@ public:
      * @return True means use default density, window's layout not follow to system change, false means the opposite.
      */
     virtual bool GetDefaultDensityEnabled() { return false; }
+
+    /**
+     * @brief Set custom density of window.
+     *
+     * @param density the custom density of window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetCustomDensity(float density) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get custom density of window.
+     *
+     * @return custom density.
+     */
+    virtual float GetCustomDensity() const { return UNDEFINED_DENSITY; }
+
+    /**
+     * @brief Get the window density of current window.
+     *
+     * @param densityInfo the struct representing system density, default density and custom density.
+     * @return WMError.
+     */
+    virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
 
     /**
      * @brief Get virtual pixel ratio.

@@ -327,6 +327,7 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     napi_value GetWindowLimitsAndConvertToJsValue(napi_env env, const WindowLimits& windowLimits);
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ModalityTypeInit(napi_env env);
+    napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityInfo& windowDensityInfo);
     napi_value ExtensionWindowAttributeInit(napi_env env);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
