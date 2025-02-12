@@ -104,6 +104,7 @@ static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
 static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 static bool g_isPcDevice = false;
+static uint32_t g_internalWidth = 3120;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
@@ -116,7 +117,6 @@ constexpr uint32_t NUMBER_OF_PHYSICAL_SCREEN = 2;
 constexpr bool ADD_VOTE = true;
 constexpr bool REMOVE_VOTE = false;
 constexpr uint32_t OLED_60_HZ = 60;
-constexpr uint32_t EXTEND_WIDTH = 3120;
 constexpr uint32_t FOUR_K_WIDTH = 3840;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
@@ -1875,6 +1875,23 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetScreenRealDPI();
 }
 
+void ScreenSessionManager::GetInternalWidth()
+{
+    ScreenId screenId = GetInternalScreenId();
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null");
+        return;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    uint32_t screenWidth = screenProperty.GetScreenRealWidth();
+    uint32_t screenHeight = screenProperty.GetScreenRealHeight();
+    g_internalWidth = (screenWidth > screenHeight) ? screenWidth : screenHeight;
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64", g_internalWidth is:%{public}u",
+        screenId, static_cast<uint32_t>(g_internalWidth));
+    return;
+}
+
 void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session,
     ScreenProperty property)
 {
@@ -1887,6 +1904,8 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         TLOGW(WmsLogTag::DMS, "xml isSupportOffScreenRendering is fasle");
         return;
     }
+    GetInternalWidth();
+    TLOGD(WmsLogTag::DMS, "g_internalWidth: %{public}u", static_cast<uint32_t>(g_internalWidth));
     float offScreenPPIThreshold = static_cast<float>(ScreenSceneConfig::GetOffScreenPPIThreshold());
     uint32_t screenWidth = property.GetBounds().rect_.GetWidth();
     uint32_t screenHeight = property.GetBounds().rect_.GetHeight();
@@ -1902,22 +1921,22 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         session->SetExtendProperty(screenBounds, false, false);
         session->SetAvailableArea({0, 0, FOUR_K_WIDTH, screenAdjustHeight});
         TLOGD(WmsLogTag::DMS, "screenWidth > 4K, screenId:%{public}" PRIu64"", screenId);
-    } else if (screenWidth < EXTEND_WIDTH && screenPPI < offScreenPPIThreshold) {
-        float scale = static_cast<float>(EXTEND_WIDTH) / screenWidth;
+    } else if (screenWidth < g_internalWidth && screenPPI < offScreenPPIThreshold) {
+        float scale = static_cast<float>(g_internalWidth) / screenWidth;
         uint32_t screenAdjustHeight = static_cast<uint32_t>(std::round(screenHeight * scale));
-        auto screenBounds = RRect({ 0, 0, EXTEND_WIDTH, screenAdjustHeight }, 0.0f, 0.0f);
+        auto screenBounds = RRect({ 0, 0, g_internalWidth, screenAdjustHeight }, 0.0f, 0.0f);
         session->SetExtendProperty(screenBounds, false, true);
-        session->SetAvailableArea({0, 0, FOUR_K_WIDTH, screenAdjustHeight});
-        TLOGD(WmsLogTag::DMS, "screenWidth > 4K, screenId:%{public}" PRIu64"", screenId);
+        session->SetAvailableArea({0, 0, g_internalWidth, screenAdjustHeight});
+        TLOGD(WmsLogTag::DMS, "screenWidth < g_internalWidth, screenId:%{public}" PRIu64"", screenId);
     } else {
         TLOGW(WmsLogTag::DMS, "no need adjust, screenId:%{public}" PRIu64"", screenId);
         return;
     }
     std::ostringstream oss;
     oss << "screenId:" << screenId
-        << ", screenWidth: " <<  property.GetBounds().rect_.GetWidth()
-        << ", screenHeight: " << property.GetBounds().rect_.GetHeight()
-        << ", propertyCurrentOffScreenRendering: " << property.GetCurrentOffScreenRendering()
+        << ", screenWidth: " <<  session->GetScreenProperty().GetBounds().rect_.GetWidth()
+        << ", screenHeight: " << session->GetScreenProperty().GetBounds().rect_.GetHeight()
+        << ", propertyCurrentOffScreenRendering: " << session->GetScreenProperty().GetCurrentOffScreenRendering()
         << ", screenPPI: " << screenPPI;
     TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 }
@@ -1929,24 +1948,25 @@ void ScreenSessionManager::SetExtendedScreenFallbackPlan(ScreenId screenId)
         TLOGE(WmsLogTag::DMS, "screen session is null");
         return;
     }
+    if (screenSession->GetIsInternal()) {
+        TLOGW(WmsLogTag::DMS, "screen is internal");
+        return;
+    }
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     if (!screenProperty.GetCurrentOffScreenRendering()) {
-        TLOGI(WmsLogTag::DMS, "propertyCurrentOffScreenRendering is false");
+        TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64", propertyCurrentOffScreenRendering is false", screenId);
         return;
     }
     uint32_t screenAdjustWidth;
     uint32_t screenAdjustHeight;
-    if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
-        TLOGD(WmsLogTag::DMS, "Screen is extend");
-        screenAdjustWidth = screenProperty.GetBounds().rect_.GetWidth();
-        screenAdjustHeight = screenProperty.GetBounds().rect_.GetHeight();
-    } else if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+    if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
         TLOGD(WmsLogTag::DMS, "Screen is mirror");
         screenAdjustWidth = screenProperty.GetScreenRealWidth();
         screenAdjustHeight = screenProperty.GetScreenRealHeight();
     } else {
-        TLOGD(WmsLogTag::DMS, "Screen is extend or mirror");
-        return;
+        TLOGD(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64", setPhysicalScreenResolution", screenId);
+        screenAdjustWidth = screenProperty.GetBounds().rect_.GetWidth();
+        screenAdjustHeight = screenProperty.GetBounds().rect_.GetHeight();
     }
     ScreenId rsScreenId;
     if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
@@ -6424,6 +6444,7 @@ void ScreenSessionManager::RecoverMultiScreenMode()
             !iter.second->GetIsInternal() && iter.second->GetIsCurrentInUse()) {
             TLOGW(WmsLogTag::DMS, "found external screen, screenId: %{public}" PRIu64, iter.first);
             RecoverRestoredMultiScreenMode(iter.second);
+            SetExtendedScreenFallbackPlan(iter.first);
         }
     }
 }
