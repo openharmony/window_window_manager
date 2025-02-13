@@ -6667,7 +6667,7 @@ void SceneSession::AddSidebarMaskColorModifier()
     if (rsNodeTemp) {
         maskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
             Rosen::RSColor::FromArgbInt(defaultMaskColor_));
-        std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier = 
+        std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
             std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(maskColorValue_);
         rsNodeTemp->AddModifier(modifier);
     }
