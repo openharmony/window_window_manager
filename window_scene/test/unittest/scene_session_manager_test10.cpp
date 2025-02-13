@@ -111,8 +111,6 @@ void SceneSessionManagerTest10::InitTestSceneSessionForListWindowInfo()
     sceneSession1->SetSessionRect(rect);
     sceneSession1->SetSessionGlobalRect(rect);
     sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
-    int32_t zOrder = 100;
-    sceneSession1->SetZOrder(zOrder);
     sceneSession1->GetSessionProperty()->SetDisplayId(0);
     ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
 
@@ -124,8 +122,6 @@ void SceneSessionManagerTest10::InitTestSceneSessionForListWindowInfo()
     sceneSession2->SetSessionRect(rect);
     sceneSession2->SetSessionGlobalRect(rect);
     sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
-    zOrder = 101;
-    sceneSession2->SetZOrder(zOrder);
     sceneSession2->GetSessionProperty()->SetDisplayId(0);
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
 
@@ -137,8 +133,6 @@ void SceneSessionManagerTest10::InitTestSceneSessionForListWindowInfo()
     sceneSession3->SetSessionRect(rect);
     sceneSession3->SetSessionGlobalRect(rect);
     sceneSession3->SetSessionState(SessionState::STATE_FOREGROUND);
-    zOrder = 102;
-    sceneSession3->SetZOrder(zOrder);
     sceneSession3->GetSessionProperty()->SetDisplayId(0);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
 
@@ -150,8 +144,6 @@ void SceneSessionManagerTest10::InitTestSceneSessionForListWindowInfo()
     sceneSession4->SetSessionRect(rect);
     sceneSession4->SetSessionGlobalRect(rect);
     sceneSession4->SetSessionState(SessionState::STATE_FOREGROUND);
-    zOrder = 103;
-    sceneSession4->SetZOrder(zOrder);
     sceneSession4->GetSessionProperty()->SetDisplayId(0);
     ssm_->sceneSessionMap_.insert({ sceneSession4->GetPersistentId(), sceneSession4 });
 
@@ -163,8 +155,6 @@ void SceneSessionManagerTest10::InitTestSceneSessionForListWindowInfo()
     sceneSession5->SetSessionRect(rect);
     sceneSession5->SetSessionGlobalRect(rect);
     sceneSession5->SetSessionState(SessionState::STATE_BACKGROUND);
-    zOrder = 0;
-    sceneSession5->SetZOrder(zOrder);
     sceneSession5->GetSessionProperty()->SetDisplayId(0);
     ssm_->sceneSessionMap_.insert({ sceneSession5->GetPersistentId(), sceneSession5 });
 
@@ -176,9 +166,8 @@ void SceneSessionManagerTest10::InitTestSceneSessionForListWindowInfo()
     sceneSession6->SetSessionRect(rect);
     sceneSession6->SetSessionGlobalRect(rect);
     sceneSession6->SetSessionState(SessionState::STATE_FOREGROUND);
-    zOrder = 104;
-    sceneSession6->SetZOrder(zOrder);
-    sceneSession6->GetSessionProperty()->SetDisplayId(11);
+    constexpr DisplayId SECOND_DISPLAY_ID = 11;
+    sceneSession6->GetSessionProperty()->SetDisplayId(SECOND_DISPLAY_ID);
     ssm_->sceneSessionMap_.insert({ sceneSession6->GetPersistentId(), sceneSession6 });
 }
 
