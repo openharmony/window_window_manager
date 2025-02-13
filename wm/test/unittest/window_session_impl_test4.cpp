@@ -851,7 +851,7 @@ HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     window->ConsumePointerEvent(pointerEvent);
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->ConsumeKeyEvent(keyEvent);
     ASSERT_EQ(nullptr, window->GetUIContentSharedPtr());
     ASSERT_EQ(false, window->PreNotifyKeyEvent(keyEvent));
