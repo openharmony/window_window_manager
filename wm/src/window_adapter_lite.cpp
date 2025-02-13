@@ -162,7 +162,7 @@ bool WindowAdapterLite::InitSSMProxy()
 
 void WindowAdapterLite::OnUserSwitch()
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched lite");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "User switched lite");
     ClearWindowAdapter();
     InitSSMProxy();
     ReregisterWindowManagerLiteAgent();
