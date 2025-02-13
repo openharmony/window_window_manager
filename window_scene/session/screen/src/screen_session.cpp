@@ -289,11 +289,15 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     RRect bounds = property_.GetBounds();
     RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
     if (isBScreenHalf_) {
-        displayInfo->SetWidth(bounds.rect_.GetWidth());
-        displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
+        std::vector<DMRect> creaseRects = property_.GetCreaseRects();
+        if (creaseRects.size() > 0) {
+            displayInfo->SetHeight(creaseRects[0].posY_);
+        } else {
+            displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
+        }
     } else {
-        displayInfo->SetWidth(bounds.rect_.GetWidth());
         displayInfo->SetHeight(bounds.rect_.GetHeight());
     }
     displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
@@ -654,6 +658,9 @@ void ScreenSession::Disconnect()
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
     property_ = newProperty;
+    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
+        return;
+    }
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");
         return;
@@ -1801,6 +1808,15 @@ bool ScreenSession::UpdateAvailableArea(DMRect area)
     return true;
 }
 
+bool ScreenSession::UpdateExpandAvailableArea(DMRect area)
+{
+    if (property_.GetExpandAvailableArea() == area) {
+        return false;
+    }
+    property_.SetExpandAvailableArea(area);
+    return true;
+}
+
 void ScreenSession::SetAvailableArea(DMRect area)
 {
     property_.SetAvailableArea(area);
@@ -1809,6 +1825,11 @@ void ScreenSession::SetAvailableArea(DMRect area)
 DMRect ScreenSession::GetAvailableArea()
 {
     return property_.GetAvailableArea();
+}
+
+DMRect ScreenSession::GetExpandAvailableArea()
+{
+    return property_.GetExpandAvailableArea();
 }
 
 void ScreenSession::SetFoldScreen(bool isFold)

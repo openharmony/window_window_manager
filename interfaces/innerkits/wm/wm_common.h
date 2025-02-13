@@ -108,6 +108,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SCB_DEFAULT,
     WINDOW_TYPE_TRANSPARENT_VIEW,
     WINDOW_TYPE_SCREEN_CONTROL,
+    WINDOW_TYPE_WALLET_SWIPE_CARD,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -872,6 +873,7 @@ struct ExtensionWindowEventInfo {
     Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
     Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
     bool hasUpdatedRect = false;
+    bool isConstrainedModal = false;
 };
 
 /**

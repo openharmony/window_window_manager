@@ -208,6 +208,7 @@ private:
     static napi_value SendContainerModalEvent(napi_env env, napi_callback_info info);
     static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     static napi_value SetColorSpace(napi_env env, napi_callback_info info);
+    static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
     static napi_value ThrowSlipDirectly(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
@@ -281,6 +282,7 @@ private:
     napi_value OnSendContainerModalEvent(napi_env env, napi_callback_info info);
     napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     napi_value OnSetColorSpace(napi_env env, napi_callback_info info);
+    napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
     napi_value OnThrowSlipDirectly(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);

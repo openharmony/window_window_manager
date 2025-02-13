@@ -855,7 +855,7 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     extensionInfo.persistentId = 12345;
     extensionInfo.pid = 1234;
     extensionInfo.windowRect = { 1, 2, 3, 4 };
-    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
 
     auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     EXPECT_TRUE(getInfo);
@@ -865,12 +865,12 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
 
     Rect windowRect = { 5, 6, 7, 8 };
     extensionInfo.windowRect = windowRect;
-    sceneSession->UpdateModalUIExtension(extensionInfo);
+    sceneSession->UpdateNormalModalUIExtension(extensionInfo);
     getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     EXPECT_TRUE(getInfo);
     EXPECT_EQ(getInfo.value().windowRect, windowRect);
 
-    sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
+    sceneSession->RemoveNormalModalUIExtension(extensionInfo.persistentId);
     EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
@@ -1804,10 +1804,14 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
     WSRect rect3 = {1, 1, 2, 1};
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 }
 
 /**

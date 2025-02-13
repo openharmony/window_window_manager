@@ -84,6 +84,7 @@ MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
+GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -2186,7 +2187,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     return false;
 }
 
-void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+void SceneSession::AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d, pid=%{public}d", GetPersistentId(),
         extensionInfo.persistentId, extensionInfo.pid);
@@ -2197,7 +2198,7 @@ void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extension
     NotifySessionInfoChange();
 }
 
-void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+void SceneSession::UpdateNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d,pid=%{public}d,"
         "Rect:[%{public}d %{public}d %{public}d %{public}d]",
@@ -2219,7 +2220,7 @@ void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extens
     NotifySessionInfoChange();
 }
 
-void SceneSession::RemoveModalUIExtension(int32_t persistentId)
+void SceneSession::RemoveNormalModalUIExtension(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d", GetPersistentId(), persistentId);
     {
@@ -2236,8 +2237,21 @@ void SceneSession::RemoveModalUIExtension(int32_t persistentId)
     NotifySessionInfoChange();
 }
 
+void SceneSession::RegisterGetConstrainedModalExtWindowInfo(GetConstrainedModalExtWindowInfoFunc&& callback)
+{
+    onGetConstrainedModalExtWindowInfoFunc_ = std::move(callback);
+}
+
 std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEventInfo()
 {
+    // Priority query constrained modal UIExt, if unavailable, then query normal modal UIExt
+    if (onGetConstrainedModalExtWindowInfoFunc_) {
+        if (auto constrainedExtEventInfo = onGetConstrainedModalExtWindowInfoFunc_(this)) {
+            TLOGD(WmsLogTag::WMS_UIEXT, "get constrained UIExt eventInfo, id: %{public}d",
+                constrainedExtEventInfo->persistentId);
+            return constrainedExtEventInfo;
+        }
+    }
     std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
     return modalUIExtensionInfoList_.empty() ? std::nullopt :
         std::make_optional<ExtensionWindowEventInfo>(modalUIExtensionInfoList_.back());
@@ -2585,7 +2599,8 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
     // modify the window coordinates when move end
     MMI::PointerEvent::PointerItem pointerItem;
     if ((action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP || action == MMI::PointerEvent::POINTER_ACTION_MOVE) &&
-        needNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem)) {
+        needNotifyClient && pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem) &&
+        IsStartMoving()) {
         int32_t windowX = pointerItem.GetDisplayX() - winRect_.posX_;
         int32_t windowY = pointerItem.GetDisplayY() - winRect_.posY_;
         TLOGD(WmsLogTag::WMS_EVENT, "move end position: windowX:%{private}d windowY:%{private}d action:%{public}d",
@@ -3593,23 +3608,27 @@ void SceneSession::NotifyPrivacyModeChange()
     }
 }
 
-void SceneSession::SetSnapshotSkip(bool isSkip)
+WMError SceneSession::SetSnapshotSkip(bool isSkip)
 {
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, permission denied!", GetPersistentId());
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     auto property = GetSessionProperty();
     if (!property) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is null");
-        return;
+        return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
     auto surfaceNode = GetSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode_ is null");
-        return;
+        return WMError::WM_ERROR_DESTROYED_OBJECT;
     }
     bool lastSnapshotSkip = property->GetSnapshotSkip();
     if (lastSnapshotSkip == isSkip) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "Snapshot skip does not change, do nothing, isSkip: %{public}d, "
             "id: %{public}d", isSkip, GetPersistentId());
-        return;
+        return WMError::WM_OK;
     }
     property->SetSnapshotSkip(isSkip);
     auto rsTransaction = RSTransactionProxy::GetInstance();
@@ -3624,6 +3643,7 @@ void SceneSession::SetSnapshotSkip(bool isSkip)
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
     }
+    return WMError::WM_OK;
 }
 
 void SceneSession::SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled)
@@ -4740,8 +4760,7 @@ WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProp
 WMError SceneSession::HandleActionUpdateSnapshotSkip(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
-    SetSnapshotSkip(property->GetSnapshotSkip());
-    return WMError::WM_OK;
+    return SetSnapshotSkip(property->GetSnapshotSkip());
 }
 
 WMError SceneSession::HandleActionUpdateMaximizeState(const sptr<WindowSessionProperty>& property,
@@ -5034,10 +5053,12 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
         }
         if (abilitySessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_NULLPTR;
         }
         if (session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
@@ -5071,17 +5092,19 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
         }
         if (abilitySessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s abilitySessionInfo is null", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (SessionHelper::IsMainWindow(session->GetWindowType()) && isFromClient &&
-            !session->clientIdentityToken_.empty() &&
-            session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
+        if (SessionHelper::IsMainWindow(session->GetWindowType()) && !session->clientIdentityToken_.empty() &&
+            isFromClient && session->clientIdentityToken_ != abilitySessionInfo->identityToken) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s client exception not matched: %{public}s, %{public}s",
                 where, session->clientIdentityToken_.c_str(), abilitySessionInfo->identityToken.c_str());
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_PARAM;
         }
         if (session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s is terminating, return!", where);
+            session->RemoveLifeCycleTask(LifeCycleTaskType::STOP);
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
         session->isTerminating_ = true;
