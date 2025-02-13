@@ -6680,6 +6680,10 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
         TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
         return;
     }
+    if (!maskColorValue_) {
+        TLOGE(WmsLogTag::WMS_PC, "maskColorValue is null");
+        return;
+    }
     TLOGI(WmsLogTag::WMS_PC, "needBlur: %{public}d", needBlur);
     // sidebar animation duration
     constexpr int32_t duration = 150;
