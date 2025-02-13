@@ -500,6 +500,14 @@ DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
 }
 
+DMError ScreenManagerAdapter::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+    ScreenId& screenGroupId)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->MakeMirrorForRecord(mainScreenId, mirrorScreenId, screenGroupId);
+}
+
 DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
     DMRect mainScreenRegion, ScreenId& screenGroupId)
 {
@@ -589,6 +597,18 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     INIT_PROXY_CHECK_RETURN(nullptr);
 
     return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
+}
+
+sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    WLOGFD("enter, displayId: %{public}" PRIu64" ", displayId);
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("display id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    return displayManagerServiceProxy_->GetVisibleAreaDisplayInfoById(displayId);
 }
 
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
@@ -795,6 +815,17 @@ DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& are
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->GetAvailableArea(displayId, area);
+}
+
+DMError DisplayManagerAdapter::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetExpandAvailableArea(displayId, area);
 }
 
 VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)

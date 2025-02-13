@@ -160,6 +160,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getAllWindowVisibilityInfos", moduleName,
         JsSceneSessionManager::GetAllWindowVisibilityInfos);
     BindNativeFunction(env, exportObj, "prepareTerminate", moduleName, JsSceneSessionManager::PrepareTerminate);
+    BindNativeFunction(env, exportObj, "asyncPrepareTerminate", moduleName,
+        JsSceneSessionManager::AsyncPrepareTerminate);
     BindNativeFunction(env, exportObj, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
     BindNativeFunction(env, exportObj, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
     BindNativeFunction(env, exportObj, "notifySingleHandInfoChange", moduleName,
@@ -449,16 +451,18 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
     taskScheduler_->PostMainThreadTask(task, info);
 }
 
-void JsSceneSessionManager::OnShiftFocus(int32_t persistentId)
+void JsSceneSessionManager::OnShiftFocus(int32_t persistentId, DisplayId displayGroupId)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_FOCUS, "persistentId: %{public}d, displayGroupId: %{public}" PRIu64,
+          persistentId, displayGroupId);
 
-    auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_]() {
+    auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_, displayGroupId]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, persistentId)};
+        napi_value argv[] = { CreateJsValue(env, persistentId),
+                              CreateJsValue(env, static_cast<int64_t>(displayGroupId)) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "OnShiftFocus, PID:" + std::to_string(persistentId));
@@ -570,9 +574,9 @@ void JsSceneSessionManager::ProcessOutsideDownEvent()
 
 void JsSceneSessionManager::ProcessShiftFocus()
 {
-    ProcessShiftFocusFunc func = [this](int32_t persistentId) {
+    ProcessShiftFocusFunc func = [this](int32_t persistentId, DisplayId displayGroupId) {
         TLOGND(WmsLogTag::WMS_FOCUS, "ProcessShiftFocus called");
-        this->OnShiftFocus(persistentId);
+        this->OnShiftFocus(persistentId, displayGroupId);
     };
     NotifySCBAfterUpdateFocusFunc focusedCallback = [this]() {
         TLOGND(WmsLogTag::WMS_FOCUS, "scb uicontent focus");
@@ -640,6 +644,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().RegisterGetRSNodeByStringIDFunc(
         [](const std::string& id) {
         return RootScene::staticRootScene_->GetRSNodeByStringID(id);
+    });
+    SceneSessionManager::GetInstance().RegisterSetTopWindowBoundaryByIDFunc(
+        [](const std::string& id) {
+        RootScene::staticRootScene_->SetTopWindowBoundaryByID(id);
     });
 }
 
@@ -903,6 +911,12 @@ napi_value JsSceneSessionManager::PrepareTerminate(napi_env env, napi_callback_i
     WLOGFD("[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnPrepareTerminate(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::AsyncPrepareTerminate(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnAsyncPrepareTerminate(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::PerfRequestEx(napi_env env, napi_callback_info info)
@@ -2468,6 +2482,40 @@ napi_value JsSceneSessionManager::OnPrepareTerminate(napi_env env, napi_callback
     return result;
 }
 
+napi_value JsSceneSessionManager::OnAsyncPrepareTerminate(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto isPrepareTerminate = std::make_shared<bool>(false);
+    auto execute = [persistentId, isPrepareTerminate] {
+        SceneSessionManager::GetInstance().PrepareTerminate(persistentId, *isPrepareTerminate);
+    };
+    auto complete = [isPrepareTerminate](napi_env env, NapiAsyncTask& task, int32_t status) {
+        task.ResolveWithCustomize(env, CreateJsValue(env, static_cast<int32_t>(WSErrorCode::WS_OK)),
+            CreateJsValue(env, *isPrepareTerminate));
+    };
+    napi_value result = nullptr;
+    napi_value callback = argv[ARG_INDEX_ONE];
+    NapiAsyncTask::Schedule("JsSceneSessionManager::OnAsyncPrepareTerminate", env,
+        CreateAsyncTaskWithLastParam(env, callback, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsSceneSessionManager::OnPerfRequestEx(napi_env env, napi_callback_info info)
 {
     WLOGFD("in");
@@ -2573,7 +2621,7 @@ napi_value JsSceneSessionManager::OnNotifySingleHandInfoChange(napi_env env, nap
         singleHandMode = SingleHandMode::RIGHT;
     }
     SceneSessionManager::GetInstance().NotifySingleHandInfoChange(
-        singleHandScaleX, singleHandScaleY, singleHandMode);
+        static_cast<float>(singleHandScaleX), static_cast<float>(singleHandScaleY), singleHandMode);
     return NapiGetUndefined(env);
 }
 

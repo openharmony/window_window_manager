@@ -218,6 +218,18 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
     }
 }
 
+void IntentionEventManager::InputEventListener::SendKeyEventConsumedResultToSCB(
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed) const
+{
+    if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) &&
+        keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
+        TLOGD(WmsLogTag::WMS_EVENT, "keyCode:%{public}d, isConsumed:%{public}d",
+            keyEvent->GetKeyCode(), isConsumed);
+        SceneSessionManager::GetInstance().NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
+    }
+}
+
 void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
     int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const
 {
@@ -246,7 +258,7 @@ void IntentionEventManager::InputEventListener::DispatchKeyEventCallback(
         return;
     }
 
-    focusedSceneSession->SendKeyEventToUI(keyEvent);
+    SendKeyEventConsumedResultToSCB(keyEvent, focusedSceneSession->SendKeyEventToUI(keyEvent));
 }
 
 void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
@@ -288,6 +300,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
     }
     bool isConsumed = focusedSceneSession->SendKeyEventToUI(keyEvent, true);
     if (isConsumed) {
+        SendKeyEventConsumedResultToSCB(keyEvent, isConsumed);
         TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "SendKeyEventToUI id:%{public}d isConsumed:%{public}d",
             keyEvent->GetId(), static_cast<int>(isConsumed));
         return;
@@ -314,7 +327,7 @@ void IntentionEventManager::InputEventListener::OnInputEvent(std::shared_ptr<MMI
         keyEvent->MarkProcessed();
         return;
     }
-    focusedSceneSession->SendKeyEventToUI(keyEvent);
+    SendKeyEventConsumedResultToSCB(keyEvent, focusedSceneSession->SendKeyEventToUI(keyEvent));
 }
 
 bool IntentionEventManager::InputEventListener::IsKeyboardEvent(

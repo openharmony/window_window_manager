@@ -189,6 +189,15 @@ bool FoldScreenController::GetTentMode()
     return sensorFoldStateManager_->IsTentMode();
 }
 
+bool FoldScreenController::GetCameraMode()
+{
+    if (sensorFoldStateManager_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetCameraMode: sensorFoldStateManager_ is null");
+        return false;
+    }
+    return sensorFoldStateManager_->IsCameraMode();
+}
+
 void FoldScreenController::OnTentModeChanged(bool isTentMode)
 {
     if (sensorFoldStateManager_ == nullptr) {
@@ -260,7 +269,11 @@ bool FoldScreenController::GetModeChangeRunningStatus()
 
 void FoldScreenController::SetdisplayModeChangeStatus(bool status)
 {
-    foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenPolicy_->SetSecondaryDisplayModeChangeStatus(status);
+    } else {
+        foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    }
 }
 
 bool FoldScreenController::GetdisplayModeRunningStatus()

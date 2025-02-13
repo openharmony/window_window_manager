@@ -21,10 +21,7 @@ module_output_path = "window_manager/window_manager"
 ohos_fuzztest("DisplayManagerFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
-  include_dirs = [
-    "../../../../interfaces/innerkits/dm",
-    "//commonlibrary/c_utils/base/include",
-  ]
+  include_dirs = [ "../../../../interfaces/innerkits/dm" ]
 
   configs = [
     "../..:configs_cc_ld",

@@ -337,6 +337,7 @@ public:
     virtual bool IsPcWindow() const { return false; }
     virtual bool IsPcOrPadCapabilityEnabled() const { return false; }
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool GetCompatibleModeInPc() const { return false; }
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) = 0;
     virtual WMError RegisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
     virtual WMError UnregisterWindowVisibilityChangeListener(const WindowVisibilityListenerSptr& listener) = 0;
@@ -475,6 +476,25 @@ public:
      * @return True means window delay raise is enabled
      */
     virtual bool IsWindowDelayRaiseEnabled() const { return false; }
+
+    /**
+     * @brief Set whether to enable exclusively highlight.
+     *
+     * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Get highlight property of window.
+     *
+     * @param highlighted True means the window is highlighted, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

@@ -156,6 +156,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteParcelable(info);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            auto info = GetVisibleAreaDisplayInfoById(displayId);
+            reply.WriteParcelable(info);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN: {
             ScreenId screenId = data.ReadUint64();
             auto info = GetDisplayInfoByScreen(screenId);
@@ -283,6 +289,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             }
             ScreenId screenGroupId = INVALID_SCREEN_ID;
             DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_FOR_RECORD: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<ScreenId> mirrorScreenId;
+            if (!data.ReadUInt64Vector(&mirrorScreenId)) {
+                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                break;
+            }
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeMirrorForRecord(mainScreenId, mirrorScreenId, screenGroupId);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;
@@ -823,6 +842,31 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             UpdateAvailableArea(screenId, area);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SUPER_FOLD_AVAILABLE_AREA: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t bPosX = data.ReadInt32();
+            int32_t bPosY = data.ReadInt32();
+            uint32_t bWidth = data.ReadUint32();
+            uint32_t bHeight = data.ReadUint32();
+            DMRect bArea = {bPosX, bPosY, bWidth, bHeight};
+            int32_t cPosX = data.ReadInt32();
+            int32_t cPosY = data.ReadInt32();
+            uint32_t cWidth = data.ReadUint32();
+            uint32_t cHeight = data.ReadUint32();
+            DMRect cArea = {cPosX, cPosY, cWidth, cHeight};
+            UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UPDATE_SUPER_FOLD_EXPAND_AVAILABLE_AREA: {
+            auto screenId = static_cast<ScreenId>(data.ReadUint64());
+            int32_t posX = data.ReadInt32();
+            int32_t posY = data.ReadInt32();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMRect area = {posX, posY, width, height};
+            UpdateSuperFoldExpandAvailableArea(screenId, area);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_OFF_DELAY_TIME: {
             int32_t delay = data.ReadInt32();
             int32_t ret = SetScreenOffDelayTime(delay);
@@ -831,6 +875,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_GET_AVAILABLE_AREA: {
             ProcGetAvailableArea(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_EXPAND_AVAILABLE_AREA: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            DMRect area;
+            DMError ret = GetExpandAvailableArea(displayId, area);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            static_cast<void>(reply.WriteInt32(area.posX_));
+            static_cast<void>(reply.WriteInt32(area.posY_));
+            static_cast<void>(reply.WriteUint32(area.width_));
+            static_cast<void>(reply.WriteUint32(area.height_));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_NOTIFY_FOLD_TO_EXPAND_COMPLETION: {
@@ -955,6 +1010,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_SKIP_PROTECTED_WINDOW: {
             ProcSetScreenSkipProtectedWindow(data, reply);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_RECORD_EVENT_FROM_SCB: {
+            std::string description = data.ReadString();
+            bool needRecordEvent = data.ReadBool();
+            RecordEventFromScb(description, needRecordEvent);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_IS_ORIENTATION_NEED_CHANGE: {
+            reply.WriteBool(IsOrientationNeedChanged());
             break;
         }
         default:

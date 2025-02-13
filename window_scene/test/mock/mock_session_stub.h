@@ -78,6 +78,7 @@ public:
     MOCK_METHOD1(GetAllAvoidAreas, WSError(std::map<AvoidAreaType, AvoidArea>& avoidAreas));
     MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action));
+    MOCK_METHOD1(GetCrossAxisState, WSError(CrossAxisState& state));
 };
 } // namespace Rosen
 } // namespace OHOS

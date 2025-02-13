@@ -185,6 +185,14 @@ WMError WindowAdapter::GetUnreliableWindowInfo(int32_t windowId,
     return wmsProxy->GetUnreliableWindowInfo(windowId, infos);
 }
 
+WMError WindowAdapter::ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->ListWindowInfo(windowInfoOption, infos);
+}
+
 WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -686,13 +694,17 @@ MaximizeMode WindowAdapter::GetMaximizeMode()
     return wmsProxy->GetMaximizeMode();
 }
 
-void WindowAdapter::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowAdapter::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->GetFocusWindowInfo(focusInfo);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        wmsProxy->GetFocusWindowInfo(focusInfo, displayId);
+    } else {
+        wmsProxy->GetFocusWindowInfo(focusInfo);
+    }
 }
 
 WMError WindowAdapter::UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener)
@@ -844,23 +856,23 @@ WMError WindowAdapter::RequestFocusStatus(int32_t persistentId, bool isFocused)
 }
 
 void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId);
+    wmsProxy->AddExtensionWindowStageToSCB(sessionStage, token, surfaceNodeId, isConstrainedModal);
 }
 
 void WindowAdapter::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token)
+    const sptr<IRemoteObject>& token, bool isConstrainedModal)
 {
     INIT_PROXY_CHECK_RETURN();
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->RemoveExtensionWindowStageFromSCB(sessionStage, token);
+    wmsProxy->RemoveExtensionWindowStageFromSCB(sessionStage, token, isConstrainedModal);
 }
 
 void WindowAdapter::ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY)

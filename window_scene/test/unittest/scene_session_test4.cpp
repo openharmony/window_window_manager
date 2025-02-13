@@ -469,6 +469,9 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction1, Function | SmallTest
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_SYSTEM_PRIVACY_MODE));
 
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession->surfaceNode_ = surfaceNode;
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP));
 }
@@ -1367,8 +1370,8 @@ HWTEST_F(SceneSessionTest4, GetSystemAvoidArea, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "HandleActionUpdateAvoidAreaOption";
-    info.bundleName_ = "HandleActionUpdateAvoidAreaOption";
+    info.abilityName_ = "CheckGetAvoidAreaAvailable";
+    info.bundleName_ = "CheckGetAvoidAreaAvailable";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     sptr<WindowSessionProperty> property = session->GetSessionProperty();
     property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
@@ -1387,6 +1390,31 @@ HWTEST_F(SceneSessionTest4, CheckGetAvoidAreaAvailable, Function | SmallTest | L
     session->SetSessionProperty(property);
     ret = session->CheckGetAvoidAreaAvailable(AvoidAreaType::TYPE_SYSTEM);
     ASSERT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: GetAvoidAreaBytype
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, GetAvoidAreaBytype, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetAvoidAreaBytype";
+    info.bundleName_ = "GetAvoidAreaBytype";
+    WSRect rect({0, 0, 10, 10});
+    AvoidArea avoidArea;
+    std::vector<sptr<SceneSession>> sessionVector;
+    for (int i = 0; i < 1000; i++) {
+        sessionVector.push_back(sptr<SceneSession>::MakeSptr(info, nullptr));
+        sessionVector[i]->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+        sessionVector[i]->GetSessionProperty()->SetAvoidAreaOption(
+            static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW));
+    }
+    for (int i = 0; i < 1000; i++) {
+        avoidArea = sessionVector[i]->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect);
+        ASSERT_EQ(avoidArea.topRect_.posX_, 0);
+    }
 }
 }
 }

@@ -534,6 +534,22 @@ public:
      */
     bool GetIsDensityFollowHost() const;
 
+    /**
+     * @brief Set whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @param isConstrainedModal true - is a constrained modal UIExtension,
+     *                           false - is not a constrained modal UIExtension,
+     */
+    void SetConstrainedModal(bool isConstrainedModal);
+
+    /**
+     * @brief Get whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @return true - is a constrained modal UIExtension,
+     *         false - is not a constrained modal UIExtension,
+     */
+    bool IsConstrainedModal() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -576,6 +592,7 @@ private:
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     float density_ = 1.0f;
     bool isDensityFollowHost_ = false;
+    bool isConstrainedModal_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

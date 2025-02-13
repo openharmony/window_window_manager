@@ -35,6 +35,7 @@ public:
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override { return nullptr; }
+    virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override {return nullptr; }
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override { return DMError::DM_OK; }
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override { return true; }
@@ -155,6 +156,7 @@ public:
 
     FoldDisplayMode GetFoldDisplayMode() override { return FoldDisplayMode::UNKNOWN; }
 
+    bool IsOrientationNeedChanged() override {return false;};
     bool IsFoldable() override { return false; };
     bool IsCaptured() override { return false; };
 
@@ -175,6 +177,8 @@ public:
     virtual void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) {}
     virtual void UpdateAvailableArea(ScreenId screenId, DMRect area) {}
+    virtual void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) {}
+    virtual void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area) {}
     virtual int32_t SetScreenOffDelayTime(int32_t delay) { return 0; }
     virtual int32_t SetScreenOnDelayTime(int32_t delay) { return 0; }
     virtual void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) {}
@@ -185,6 +189,7 @@ public:
     virtual void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) {}
     virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
+    virtual void RecordEventFromScb(std::string description, bool needRecordEvent) {}
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override { return DMError::DM_OK; }

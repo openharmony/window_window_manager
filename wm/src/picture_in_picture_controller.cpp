@@ -489,7 +489,7 @@ void PictureInPictureController::UpdateContentNodeRef(napi_ref nodeRef)
     if (pipOption_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "option is null");
         SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
-            pipOption_->GetPipTemplate(), FAILED, "option is null");
+            0, FAILED, "option is null");
         return;
     }
     pipOption_->SetTypeNodeRef(nodeRef);
@@ -600,6 +600,19 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
         listener->OnControlEvent(controlType, status);
     }
     pipOption_->SetPiPControlStatus(controlType, status);
+}
+
+void PictureInPictureController::PipSizeChange(uint32_t width, uint32_t height, double scale)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
+          width, height, scale);
+    PiPWindowSize windowSize;
+    windowSize.width = width;
+    windowSize.height = height;
+    windowSize.scale = scale;
+    for (auto& listener : pipWindowSizeListeners_) {
+        listener->OnPipSizeChange(windowSize);
+    }
 }
 
 void PictureInPictureController::RestorePictureInPictureWindow()
@@ -818,6 +831,11 @@ WMError PictureInPictureController::RegisterPiPControlObserver(const sptr<IPiPCo
     return RegisterListener(pipControlObservers_, listener);
 }
 
+WMError PictureInPictureController::RegisterPiPWindowSize(const sptr<IPiPWindowSize>& listener)
+{
+    return RegisterListener(pipWindowSizeListeners_, listener);
+}
+
 WMError PictureInPictureController::UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
 {
     return UnregisterListener(pipLifeCycleListeners_, listener);
@@ -831,6 +849,11 @@ WMError PictureInPictureController::UnregisterPiPActionObserver(const sptr<IPiPA
 WMError PictureInPictureController::UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener)
 {
     return UnregisterListener(pipControlObservers_, listener);
+}
+
+WMError PictureInPictureController::UnregisterPiPWindowSize(const sptr<IPiPWindowSize>& listener)
+{
+    return UnregisterListener(pipWindowSizeListeners_, listener);
 }
 
 template<typename T>
