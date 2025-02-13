@@ -160,6 +160,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getAllWindowVisibilityInfos", moduleName,
         JsSceneSessionManager::GetAllWindowVisibilityInfos);
     BindNativeFunction(env, exportObj, "prepareTerminate", moduleName, JsSceneSessionManager::PrepareTerminate);
+    BindNativeFunction(env, exportObj, "asyncPrepareTerminate", moduleName,
+        JsSceneSessionManager::AsyncPrepareTerminate);
     BindNativeFunction(env, exportObj, "perfRequestEx", moduleName, JsSceneSessionManager::PerfRequestEx);
     BindNativeFunction(env, exportObj, "updateWindowMode", moduleName, JsSceneSessionManager::UpdateWindowMode);
     BindNativeFunction(env, exportObj, "notifySingleHandInfoChange", moduleName,
