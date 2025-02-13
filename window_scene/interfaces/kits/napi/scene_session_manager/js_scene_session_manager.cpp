@@ -49,7 +49,6 @@
                 "Input parameter is missing or invalid"));                                                \
             return NapiGetUndefined(env);                                                                 \
         }                                                                                                 \
-        TLOGD(logTag, "%{public}s: %{public}u", paramName, value);                                        \
     } while (0)
 
 namespace OHOS::Rosen {
