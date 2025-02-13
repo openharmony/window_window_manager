@@ -430,8 +430,8 @@ HWTEST_F(SceneSessionManagerTest4, GetDisplayRegion, Function | SmallTest | Leve
     const SkIRect& rect1 = region1->getBounds(); 
     EXPECT_EQ(rect1.fLeft, 0);
     EXPECT_EQ(rect1.fTop, 0);
-    EXPECT_EQ(rect1.fRight, width);
-    EXPECT_EQ(rect1.fBottom, height);
+    EXPECT_EQ(rect1.fRight, right);
+    EXPECT_EQ(rect1.fBottom, bottom);
 }
 
 /**
