@@ -35,6 +35,7 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
+class RSNode;
 using GetSessionRectCallback = std::function<WSRect(AvoidAreaType)>;
 
 class RootScene : public Window {
@@ -108,6 +109,12 @@ public:
     }
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+
+    /*
+     * Window Layout
+     */
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
+    void SetTopWindowBoundaryByID(const std::string& stringId);
 
     WMError GetSessionRectByType(AvoidAreaType type, WSRect& rect);
 
