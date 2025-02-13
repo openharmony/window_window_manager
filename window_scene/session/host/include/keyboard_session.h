@@ -53,6 +53,8 @@ public:
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
+    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
@@ -81,6 +83,7 @@ private:
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
+    NotifyKeyboarViewModeChangeFunc changeKeyboardViewModeFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H

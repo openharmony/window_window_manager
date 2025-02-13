@@ -188,6 +188,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleExtensionProviderData(data, reply, option);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
             return HandleSetSessionLabelAndIcon(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE):
+            return HandleChangeKeyboardViewMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1121,6 +1123,22 @@ int SessionStub::HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t mode = 0;
+    if (!data.ReadUint32(mode)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid data");
+        return ERR_INVALID_DATA;
+    }
+    if (mode >= static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard view mode");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(mode));
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

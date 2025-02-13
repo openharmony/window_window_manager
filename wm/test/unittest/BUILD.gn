@@ -48,6 +48,7 @@ group("unittest") {
     ":wm_window_scene_effect_test",
     ":wm_window_scene_session_impl_test3",
     ":wm_window_scene_session_impl_test4",
+    ":wm_window_scene_session_impl_test5",
     ":wm_window_scene_test",
     ":wm_window_session_impl_test4",
     "ui_extension:wm_extension_window_impl_test",
@@ -443,6 +444,29 @@ ohos_unittest("wm_window_scene_session_impl_test4") {
   sources = [ "window_scene_session_impl_test4.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("wm_window_scene_session_impl_test5") {
+  module_out_path = module_out_path
+  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [ "window_scene_session_impl_test5.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/test/common/utils:libtestutil",
+  ]
 
   external_deps = [
     "c_utils:utils",

@@ -1071,7 +1071,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
-        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_);
+        parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_)  &&
+        parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_));;
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1147,6 +1148,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsSupportDragInPcCompatibleMode(parcel.ReadBool());
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
+    property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
     return property;
 }
 
@@ -1198,6 +1200,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isLayoutFullScreen_ = property->isLayoutFullScreen_;
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
+    keyboardViewMode_ = property->keyboardViewMode_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1637,6 +1640,16 @@ bool WindowSessionProperty::GetFullScreenStart() const
 void WindowSessionProperty::SetFullScreenStart(bool fullScreenStart)
 {
     fullScreenStart_ = fullScreenStart;
+}
+
+void WindowSessionProperty::SetKeyboardViewMode(KeyboardViewMode mode)
+{
+    keyboardViewMode_ = mode;
+}
+
+KeyboardViewMode WindowSessionProperty::GetKeyboardViewMode() const
+{
+    return keyboardViewMode_;
 }
 } // namespace Rosen
 } // namespace OHOS
