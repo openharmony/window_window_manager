@@ -6012,7 +6012,6 @@ void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& fun
     notifyVisibleChangeFunc_ = func;
 }
 
-
 void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func)
 {
     privacyModeChangeNotifyFunc_ = func;

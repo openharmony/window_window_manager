@@ -1503,12 +1503,12 @@ int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& r
     TLOGD(WmsLogTag::WMS_EVENT, "In");
     std::string eventName;
     if (!data.ReadString(eventName)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read eventName failed.");
+        TLOGE(WmsLogTag::WMS_EVENT, "Read eventName failed.");
         return ERR_INVALID_DATA;
     }
     std::string eventValue;
     if (!data.ReadString(eventValue)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read eventValue failed.");
+        TLOGE(WmsLogTag::WMS_EVENT, "Read eventValue failed.");
         return ERR_INVALID_DATA;
     }
     WSError errCode = OnContainerModalEvent(eventName, eventValue);
