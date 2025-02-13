@@ -204,6 +204,7 @@ void KeyboardSession::OnCallingSessionUpdated()
     }
     WSRect panelRect = { 0, 0, 0, 0 };
     panelRect = (keyboardPanelSession_ == nullptr) ? panelRect : keyboardPanelSession_->GetSessionRect();
+    RecalculatePanelRectForAvoidArea(panelRect);
     sptr<SceneSession> callingSession = GetSceneSession(GetCallingSessionId());
     if (callingSession == nullptr) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Calling session is nullptr");
@@ -306,16 +307,22 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         sessionProperty->SetKeyboardLayoutParams(params);
         session->MoveAndResizeKeyboard(params, sessionProperty, false);
         session->SetKeyboardSessionGravity(static_cast<SessionGravity>(params.gravity_));
+        // avoidHeight is set, notify avoidArea in case ui params don't flush
+        if (params.landscapeAvoidHeight_ >= 0 && params.portraitAvoidHeight_ >= 0) {
+            session->NotifyClientToUpdateAvoidArea();
+        }
         if (session->adjustKeyboardLayoutFunc_) {
             session->adjustKeyboardLayoutFunc_(params);
         }
         session->NotifySessionRectChange(session->GetSessionRequestRect(), SizeChangeReason::UNDEFINED);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, keyboardId: %{public}d, gravity: %{public}u, "
+            "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d, "
             "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, "
             "PortraitPanelRect: %{public}s, requestRect: %{public}s", session->GetPersistentId(),
-            static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
-            params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
-            params.PortraitPanelRect_.ToString().c_str(), session->GetSessionRequestRect().ToString().c_str());
+            static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
+            params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
+            params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str(),
+            session->GetSessionRequestRect().ToString().c_str());
         return WSError::WS_OK;
     };
     PostTask(task, "AdjustKeyboardLayout");
@@ -451,11 +458,14 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
     if (oriPosYBeforeRaisedByKeyboard != 0 && isCallingSessionFloating) {
         callingSessionRect.posY_ = oriPosYBeforeRaisedByKeyboard;
     }
-    if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(keyboardPanelRect, callingSessionRect, 0, 0)) &&
+    // update panel rect for avoid area caculate
+    WSRect panelAvoidRect = keyboardPanelRect;
+    RecalculatePanelRectForAvoidArea(panelAvoidRect);
+    if (SessionHelper::IsEmptyRect(SessionHelper::GetOverlap(panelAvoidRect, callingSessionRect, 0, 0)) &&
         oriPosYBeforeRaisedByKeyboard == 0) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "No overlap area, keyboardRect: %{public}s, callingRect: %{public}s",
             keyboardPanelRect.ToString().c_str(), callingSessionRect.ToString().c_str());
-        NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, keyboardPanelRect, rsTransaction);
+        NotifyOccupiedAreaChangeInfo(callingSession, callingSessionRect, panelAvoidRect, rsTransaction);
         return;
     }
 
@@ -467,12 +477,12 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
             callingSession->SetOriPosYBeforeRaisedByKeyboard(callingSessionRect.posY_);
         }
         // calculate new rect of calling session
-        newRect.posY_ = std::max(keyboardPanelRect.posY_ - newRect.height_, statusHeight);
+        newRect.posY_ = std::max(panelAvoidRect.posY_ - newRect.height_, statusHeight);
         newRect.posY_ = std::min(oriPosYBeforeRaisedByKeyboard, newRect.posY_);
-        NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
+        NotifyOccupiedAreaChangeInfo(callingSession, newRect, panelAvoidRect, rsTransaction);
         callingSession->UpdateSessionRect(newRect, SizeChangeReason::UNDEFINED);
     } else {
-        NotifyOccupiedAreaChangeInfo(callingSession, newRect, keyboardPanelRect, rsTransaction);
+        NotifyOccupiedAreaChangeInfo(callingSession, newRect, panelAvoidRect, rsTransaction);
     }
 
     TLOGI(WmsLogTag::WMS_KEYBOARD, "keyboardRect: %{public}s, CallSession OriRect: %{public}s, NewRect: %{public}s"
@@ -683,6 +693,46 @@ void KeyboardSession::MoveAndResizeKeyboard(const KeyboardLayoutParams& params,
         rect.ToString().c_str(), newRequestRect.ToString().c_str(), isLandscape, screenWidth, screenHeight);
 }
 
+bool KeyboardSession::IsVisibleForeground() const
+{
+    return isVisible_;
+}
+
+void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
+{
+    auto sessionProperty = GetSessionProperty();
+    KeyboardLayoutParams params = sessionProperty->GetKeyboardLayoutParams();
+    if (params.landscapeAvoidHeight_ < 0 || params.portraitAvoidHeight_ < 0) {
+        return;
+    }
+    if (params.LandscapePanelRect_.width_ != params.PortraitPanelRect_.width_) {
+        if (static_cast<uint32_t>(panelRect.width_ == params.LandscapePanelRect_.width_)) {
+            panelRect.posY_ += panelRect.height_ - params.landscapeAvoidHeight_;
+            panelRect.height_ = params.landscapeAvoidHeight_;
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "landscapeAvoidHeight %{public}d", panelRect.height_);
+            return;
+        }
+        if (static_cast<uint32_t>(panelRect.width_ == params.PortraitPanelRect_.width_)) {
+            panelRect.posY_ += panelRect.height_ - params.portraitAvoidHeight_;
+            panelRect.height_ = params.portraitAvoidHeight_;
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "portraitAvoidHeight %{public}d", panelRect.height_);
+            return;
+        }
+    }
+    uint32_t screenWidth = 0;
+    uint32_t screenHeight = 0;
+    bool result = GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
+    if (!result) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "getScreenWidthAndHeight failed");
+        return;
+    }
+    bool isLandscape = screenHeight < screenWidth;
+    int32_t height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
+    panelRect.posY_ += panelRect.height_ - height_;
+    panelRect.height_ = height_;
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
+}
+
 WSError KeyboardSession::ChangeKeyboardViewMode(KeyboardViewMode mode)
 {
     PostTask([weakThis = wptr(this), mode]() {
@@ -698,11 +748,6 @@ WSError KeyboardSession::ChangeKeyboardViewMode(KeyboardViewMode mode)
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
-}
-
-bool KeyboardSession::IsVisibleForeground() const
-{
-    return isVisible_;
 }
 
 void KeyboardSession::SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func)
