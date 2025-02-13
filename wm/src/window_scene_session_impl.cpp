@@ -4953,6 +4953,13 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, name: %{public}s, value: %{public}s",
         GetPersistentId(), eventName.c_str(), value.c_str());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->OnContainerModalEvent(eventName, value);
     if (eventName == WATERFALL_WINDOW_EVENT) {
         bool lastFullScreenWaterfallMode = isFullScreenWaterfallMode_.load();
         SetFullScreenWaterfallMode(true);

@@ -5194,6 +5194,19 @@ WSError SceneSession::SendContainerModalEvent(const std::string& eventName, cons
     return sessionStage_->SendContainerModalEvent(eventName, eventValue);
 }
 
+WSError SceneSession::OnContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
+    if (eventName == "scb_relocation_to_top") {
+        if (eventValue == "true") {
+            ThrowSlipDirectly(WSRectF {0.0f, -10.0f, 0.0f, 0.0f});
+        } else {
+            ThrowSlipDirectly(WSRectF {0.0f, 10.0f, 0.0f, 0.0f});
+        }
+    }
+    return WSError::WS_OK;
+}
+
 void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {

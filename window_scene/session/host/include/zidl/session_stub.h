@@ -113,6 +113,7 @@ private:
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
     int HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply);
+    int HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
     int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
