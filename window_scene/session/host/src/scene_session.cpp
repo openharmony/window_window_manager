@@ -126,6 +126,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (ret != WSError::WS_OK) {
             return ret;
         }
+        session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
         session->NotifyPropertyWhenConnect();
         return ret;
     };
@@ -326,6 +327,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
                 ret, persistentId);
             return ret;
         }
+        session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
         auto leashWinSurfaceNode = session->GetLeashWinSurfaceNode();
         if (leashWinSurfaceNode && sessionProperty) {
             bool lastPrivacyMode = sessionProperty->GetPrivacyMode() || sessionProperty->GetSystemPrivacyMode();
@@ -1495,6 +1497,17 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
     return WSError::WS_OK;
 }
 
+void SceneSession::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
+{
+    if (!IsSessionForeground() && !IsVisible()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground and not visible!", GetPersistentId());
+        return;
+    }
+    if (sessionStage_ != nullptr) {
+        sessionStage_->NotifySingleHandTransformChange(singleHandTransform);
+    }
+}
+
 /** @note @window.hierarchy */
 WSError SceneSession::RaiseToAppTop()
 {
@@ -1973,6 +1986,24 @@ Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
     }
     Vector2f position(windowRect.posX_, windowRect.posY_);
     return position;
+}
+
+WSRect SceneSession::GetSessionGlobalRectWithSingleHandScale()
+{
+    WSRect rectWithTransform = GetSessionGlobalRect();
+    const SingleHandTransform& transform = GetSingleHandTransform();
+    if (transform.posX == 0 && transform.posY == 0) {
+        return rectWithTransform;
+    }
+    rectWithTransform.posX_ =
+        static_cast<int32_t>(static_cast<float>(rectWithTransform.posX_) * transform.scaleX) + transform.posX;
+    rectWithTransform.posY_ =
+        static_cast<int32_t>(static_cast<float>(rectWithTransform.posY_) * transform.scaleY) + transform.posY;
+    rectWithTransform.width_ =
+        static_cast<int32_t>(static_cast<float>(rectWithTransform.width_) * transform.scaleX);
+    rectWithTransform.height_ =
+        static_cast<int32_t>(static_cast<float>(rectWithTransform.height_) * transform.scaleY);
+    return rectWithTransform;
 }
 
 void SceneSession::AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId)
