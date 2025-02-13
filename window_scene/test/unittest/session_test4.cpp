@@ -938,6 +938,121 @@ HWTEST_F(WindowSessionTest4, GetIsMidScene, Function | SmallTest | Level2)
     ASSERT_EQ(result, WSError::WS_OK);
     ASSERT_EQ(isMidScene, false);
 }
+
+/**
+ * @tc.name: GetWindowUIInfoForWindowInfo01
+ * @tc.desc: GetWindowUIInfoForWindowInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetWindowUIInfoForWindowInfo01, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 0, 0, 100, 100 };
+    sceneSession->SetSessionRect(rect);
+    sceneSession->SetSessionGlobalRect(rect);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    int32_t zOrder = 100;
+    sceneSession->SetZOrder(zOrder);
+    sceneSession->GetSessionProperty()->SetDisplayId(0);
+
+    WindowUIInfo windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
+    ASSERT_EQ(windowUIInfo.visibilityState, sceneSession->GetVisibilityState());
+}
+
+/**
+ * @tc.name: GetWindowDisplayInfoForWindowInfo01
+ * @tc.desc: GetWindowDisplayInfoForWindowInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetWindowDisplayInfoForWindowInfo01, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 5, 0, 100, 100 };
+    sceneSession->SetSessionRect(rect);
+    sceneSession->SetSessionGlobalRect(rect);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    int32_t zOrder = 100;
+    sceneSession->SetZOrder(zOrder);
+    sceneSession->GetSessionProperty()->SetDisplayId(11);
+
+    WindowDisplayInfo windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
+    ASSERT_EQ(windowDisplayInfo.displayId, sceneSession->GetSessionProperty()->GetDisplayId());
+}
+
+/**
+ * @tc.name: GetWindowLayoutInfoForWindowInfo01
+ * @tc.desc: GetWindowLayoutInfoForWindowInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetWindowLayoutInfoForWindowInfo01, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 5, 0, 100, 100 };
+    sceneSession->SetSessionRect(rect);
+    sceneSession->SetSessionGlobalRect(rect);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    int32_t zOrder = 100;
+    sceneSession->SetZOrder(zOrder);
+    sceneSession->GetSessionProperty()->SetDisplayId(0);
+
+    WindowLayoutInfo windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
+    ASSERT_EQ(windowLayoutInfo.rect.posX_, 5);
+    ASSERT_EQ(windowLayoutInfo.rect.posY_, 0);
+    ASSERT_EQ(windowLayoutInfo.rect.width_, 100);
+    ASSERT_EQ(windowLayoutInfo.rect.height_, 100);
+}
+
+/**
+ * @tc.name: GetWindowMetaInfoForWindowInfo01
+ * @tc.desc: GetWindowMetaInfoForWindowInfo Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.isSystem_ = false;
+    sessionInfo.bundleName_ = "bundleName";
+    sessionInfo.abilityName_ = "abilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowName("sceneSession");
+    sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 5, 0, 100, 100 };
+    sceneSession->SetSessionRect(rect);
+    sceneSession->SetSessionGlobalRect(rect);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    int32_t zOrder = 100;
+    sceneSession->SetZOrder(zOrder);
+    sceneSession->GetSessionProperty()->SetDisplayId(0);
+    SessionInfo sessionInfo1;
+    sessionInfo1.isSystem_ = true;
+    sessionInfo1.abilityName_ = "abilityName1";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    rect = { 200, 0, 100, 100 };
+    sceneSession1->SetSessionRect(rect);
+    sceneSession1->SetSessionGlobalRect(rect);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    zOrder = 100;
+    sceneSession1->SetZOrder(zOrder);
+    sceneSession1->GetSessionProperty()->SetDisplayId(0);
+
+    WindowMetaInfo windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo.windowId, sceneSession->GetWindowId());
+    ASSERT_EQ(windowMetaInfo.windowName, sceneSession->GetSessionProperty()->GetWindowName());
+    ASSERT_EQ(windowMetaInfo.bundleName, sceneSession->GetSessionInfo().bundleName_);
+    ASSERT_EQ(windowMetaInfo.abilityName, sceneSession->GetSessionInfo().abilityName_);
+    WindowMetaInfo windowMetaInfo1 = sceneSession1->GetWindowMetaInfoForWindowInfo();
+    ASSERT_EQ(windowMetaInfo1 .windowName, sceneSession1->GetSessionInfo().abilityName_);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

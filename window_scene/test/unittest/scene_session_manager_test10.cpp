@@ -36,6 +36,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     void InitTestSceneSession(DisplayId displayId, int32_t windowId, int32_t zOrder, bool visible, WSRect rect);
+    void InitTestSceneSessionForListWindowInfo();
 
     static sptr<SceneSessionManager> ssm_;
 private:
@@ -98,6 +99,87 @@ void SceneSessionManagerTest10::InitTestSceneSession(DisplayId displayId,
     sceneSession->property_->SetDisplayId(displayId);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     EXPECT_EQ(windowId, sceneSession->GetPersistentId());
+}
+
+void SceneSessionManagerTest10::InitTestSceneSessionForListWindowInfo()
+{
+    SessionInfo sessionInfo1;
+    sessionInfo1.isSystem_ = false;
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sceneSession1->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WSRect rect = { 0, 0, 100, 100 };
+    sceneSession1->SetSessionRect(rect);
+    sceneSession1->SetSessionGlobalRect(rect);
+    sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
+    int32_t zOrder = 100;
+    sceneSession1->SetZOrder(zOrder);
+    sceneSession1->GetSessionProperty()->SetDisplayId(0);
+    ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
+
+    SessionInfo sessionInfo2;
+    sessionInfo2.isSystem_ = false;
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
+    sceneSession2->SetVisibilityState(WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION);
+    rect = { 0, 0, 120, 120 };
+    sceneSession2->SetSessionRect(rect);
+    sceneSession2->SetSessionGlobalRect(rect);
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    zOrder = 101;
+    sceneSession2->SetZOrder(zOrder);
+    sceneSession2->GetSessionProperty()->SetDisplayId(0);
+    ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
+
+    SessionInfo sessionInfo3;
+    sessionInfo3.isSystem_ = false;
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(sessionInfo3, nullptr);
+    sceneSession3->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    rect = { 0, 100, 120, 120 };
+    sceneSession3->SetSessionRect(rect);
+    sceneSession3->SetSessionGlobalRect(rect);
+    sceneSession3->SetSessionState(SessionState::STATE_FOREGROUND);
+    zOrder = 102;
+    sceneSession3->SetZOrder(zOrder);
+    sceneSession3->GetSessionProperty()->SetDisplayId(0);
+    ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
+
+    SessionInfo sessionInfo4;
+    sessionInfo4.isSystem_ = false;
+    sptr<SceneSession> sceneSession4 = sptr<SceneSession>::MakeSptr(sessionInfo4, nullptr);
+    sceneSession4->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    rect = { 0, 3000, 120, 120 };
+    sceneSession4->SetSessionRect(rect);
+    sceneSession4->SetSessionGlobalRect(rect);
+    sceneSession4->SetSessionState(SessionState::STATE_FOREGROUND);
+    zOrder = 103;
+    sceneSession4->SetZOrder(zOrder);
+    sceneSession4->GetSessionProperty()->SetDisplayId(0);
+    ssm_->sceneSessionMap_.insert({ sceneSession4->GetPersistentId(), sceneSession4 });
+
+    SessionInfo sessionInfo5;
+    sessionInfo5.isSystem_ = false;
+    sptr<SceneSession> sceneSession5 = sptr<SceneSession>::MakeSptr(sessionInfo5, nullptr);
+    sceneSession5->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    rect = { 0, 0, 100, 100 };
+    sceneSession5->SetSessionRect(rect);
+    sceneSession5->SetSessionGlobalRect(rect);
+    sceneSession5->SetSessionState(SessionState::STATE_BACKGROUND);
+    zOrder = 0;
+    sceneSession5->SetZOrder(zOrder);
+    sceneSession5->GetSessionProperty()->SetDisplayId(0);
+    ssm_->sceneSessionMap_.insert({ sceneSession5->GetPersistentId(), sceneSession5 });
+
+    SessionInfo sessionInfo6;
+    sessionInfo6.isSystem_ = true;
+    sptr<SceneSession> sceneSession6 = sptr<SceneSession>::MakeSptr(sessionInfo6, nullptr);
+    sceneSession6->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    rect = { 0, 200, 120, 120 };
+    sceneSession6->SetSessionRect(rect);
+    sceneSession6->SetSessionGlobalRect(rect);
+    sceneSession6->SetSessionState(SessionState::STATE_FOREGROUND);
+    zOrder = 104;
+    sceneSession6->SetZOrder(zOrder);
+    sceneSession6->GetSessionProperty()->SetDisplayId(11);
+    ssm_->sceneSessionMap_.insert({ sceneSession6->GetPersistentId(), sceneSession6 });
 }
 
 namespace {
@@ -1058,6 +1140,211 @@ HWTEST_F(SceneSessionManagerTest10, MinimizeMainSession, Function | SmallTest | 
 
     result = ssm_->MinimizeMainSession(sessionInfo.bundleName_, sessionInfo.appIndex_, 1);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
+
+/**
+ * @tc.name: ListWindowInfo
+ * @tc.desc: WM_ERROR_INVALID_PERMISSION
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, ListWindowInfo01, Function | SmallTest | Level3)
+{
+    WindowInfoOption windowInfoOption;
+    std::vector<sptr<WindowInfo>> infos;
+    ASSERT_EQ(ssm_->ListWindowInfo(windowInfoOption, infos), WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo01
+ * @tc.desc: ALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo01, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::ALL;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = DISPLAY_ID_INVALID;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 6);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo02
+ * @tc.desc: EXCLUDE_SYSTEM
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo02, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::EXCLUDE_SYSTEM;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = DISPLAY_ID_INVALID;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 5);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo03
+ * @tc.desc: VISIBLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo03, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::VISIBLE;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = DISPLAY_ID_INVALID;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 4);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo04
+ * @tc.desc: FOREGROUND
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo04, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::FOREGROUND;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = DISPLAY_ID_INVALID;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 5);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo05
+ * @tc.desc: EXCLUDE_SYSTEM | VISIBLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo05, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::EXCLUDE_SYSTEM | WindowInfoFilterOption::VISIBLE;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = DISPLAY_ID_INVALID;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 3);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo06
+ * @tc.desc: EXCLUDE_SYSTEM | FOREGROUND
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo06, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::EXCLUDE_SYSTEM |
+        WindowInfoFilterOption::FOREGROUND;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = DISPLAY_ID_INVALID;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 4);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo07
+ * @tc.desc: FOREGROUND | VISIBLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo07, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::FOREGROUND | WindowInfoFilterOption::VISIBLE;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = DISPLAY_ID_INVALID;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 4);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: FilterForListWindowInfo08
+ * @tc.desc: displayId = 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, FilterForListWindowInfo08, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    InitTestSceneSessionForListWindowInfo();
+    WindowInfoOption windowInfoOption;
+    windowInfoOption.windowInfoFilterOption = WindowInfoFilterOption::ALL;
+    windowInfoOption.windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    windowInfoOption.displayId = 0;
+    windowInfoOption.windowId = 0;
+    int32_t filterNum = 0;
+    for (const auto& [_, sceneSession] : ssm_->sceneSessionMap_) {
+        if (ssm_->FilterForListWindowInfo(windowInfoOption, sceneSession)) {
+            filterNum++;
+        }
+    }
+    ASSERT_EQ(filterNum, 5);
+    ssm_->sceneSessionMap_.clear();
 }
 }  // namespace
 }
