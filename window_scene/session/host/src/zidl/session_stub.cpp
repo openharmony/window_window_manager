@@ -244,6 +244,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleStartMovingWithCoordinate(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_CROSS_AXIS_STATE):
             return HandleGetCrossAxisState(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
+            return HandleContainerModalEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1493,6 +1495,24 @@ int SessionStub::HandleGetCrossAxisState(MessageParcel& data, MessageParcel& rep
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "In");
+    std::string eventName;
+    if (!data.ReadString(eventName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read eventName failed.");
+        return ERR_INVALID_DATA;
+    }
+    std::string eventValue;
+    if (!data.ReadString(eventValue)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read eventValue failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = OnContainerModalEvent(eventName, eventValue);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
