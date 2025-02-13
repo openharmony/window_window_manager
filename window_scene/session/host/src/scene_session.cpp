@@ -1223,7 +1223,6 @@ void SceneSession::SetWinRectWhenUpdateRect(const WSRect& rect)
     }
 }
 
-
 WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
