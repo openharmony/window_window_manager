@@ -911,6 +911,12 @@ napi_value JsSceneSessionManager::PrepareTerminate(napi_env env, napi_callback_i
     return (me != nullptr) ? me->OnPrepareTerminate(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::AsyncPrepareTerminate(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnAsyncPrepareTerminate(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::PerfRequestEx(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
@@ -2471,6 +2477,40 @@ napi_value JsSceneSessionManager::OnPrepareTerminate(napi_env env, napi_callback
     SceneSessionManager::GetInstance().PrepareTerminate(persistentId, isPrepareTerminate);
     napi_value result = nullptr;
     napi_get_boolean(env, isPrepareTerminate, &result);
+    return result;
+}
+
+napi_value JsSceneSessionManager::OnAsyncPrepareTerminate(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t persistentId = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to persistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto isPrepareTerminate = std::make_shared<bool>(false);
+    auto execute = [persistentId, isPrepareTerminate] {
+        SceneSessionManager::GetInstance().PrepareTerminate(persistentId, *isPrepareTerminate);
+    };
+    auto complete = [isPrepareTerminate](napi_env env, NapiAsyncTask& task, int32_t status) {
+        task.ResolveWithCustomize(env, CreateJsValue(env, static_cast<int32_t>(WSErrorCode::WS_OK)),
+            CreateJsValue(env, *isPrepareTerminate));
+    };
+    napi_value result = nullptr;
+    napi_value callback = argv[ARG_INDEX_ONE];
+    NapiAsyncTask::Schedule("JsSceneSessionManager::OnAsyncPrepareTerminate", env,
+        CreateAsyncTaskWithLastParam(env, callback, std::move(execute), std::move(complete), &result));
     return result;
 }
 
