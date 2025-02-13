@@ -31,6 +31,7 @@ const std::string FLUSH_DISPLAY_INFO_THREAD = "OS_FlushDisplayInfoThread";
 constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
+constexpr int INVALID_PERSISTENT_ID = 0;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -178,6 +179,10 @@ void SceneInputManager::Init()
     sceneSessionDirty_ = std::make_shared<SceneSessionDirtyManager>();
     eventLoop_ = AppExecFwk::EventRunner::Create(FLUSH_DISPLAY_INFO_THREAD);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
+    SceneSession::RegisterGetConstrainedModalExtWindowInfo(
+        [](const sptr<SceneSession>& sceneSession) -> std::optional<ExtensionWindowEventInfo> {
+            return SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+        });
 }
 
 void SceneInputManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback)
@@ -227,17 +232,17 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            .ppi = screenProperty.GetXDpi(),
             .offsetX = screenProperty.GetInputOffsetX(),
             .offsetY = screenProperty.GetInputOffsetY(),
+            .ppi = screenProperty.GetXDpi(),
+            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
+            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY,
             .isCurrentOffScreenRendering = screenProperty.GetCurrentOffScreenRendering(),
             .screenRealWidth = screenProperty.GetScreenRealWidth(),
             .screenRealHeight = screenProperty.GetScreenRealHeight(),
             .screenRealPPI = screenProperty.GetScreenRealPPI(),
             .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
-            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
-            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY,
             .validWidth = screenProperty.GetValidWidth(),
             .validHeight = screenProperty.GetValidHeight(),
             .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset())
@@ -574,6 +579,42 @@ void SceneInputManager::UpdateSecSurfaceInfo(const std::map<uint64_t, std::vecto
         return;
     }
     sceneSessionDirty_->UpdateSecSurfaceInfo(secSurfaceInfoMap);
+}
+
+void SceneInputManager::UpdateConstrainedModalUIExtInfo(
+    const std::map<uint64_t, std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap)
+{
+    if (sceneSessionDirty_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        return;
+    }
+    sceneSessionDirty_->UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
+}
+
+std::optional<ExtensionWindowEventInfo> SceneInputManager::GetConstrainedModalExtWindowInfo(
+    const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return std::nullopt;
+    }
+    if (sceneSessionDirty_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
+        return std::nullopt;
+    }
+    SecSurfaceInfo constrainedModalUIExtInfo;
+    if (!sceneSessionDirty_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
+        return std::nullopt;
+    }
+    auto persistentId = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(constrainedModalUIExtInfo.uiExtensionNodeId);
+    if (persistentId == INVALID_PERSISTENT_ID) {
+        TLOGE(WmsLogTag::WMS_EVENT, "invalid persistentId");
+        return std::nullopt;
+    }
+    return ExtensionWindowEventInfo {
+        .persistentId = persistentId,
+        .pid = constrainedModalUIExtInfo.uiExtensionPid,
+        .isConstrainedModal = true };
 }
 }
 } // namespace OHOS::Rosen

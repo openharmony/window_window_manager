@@ -2646,6 +2646,20 @@ HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetCompatibleModeInPc
+ * @tc.desc: GetCompatibleModeInPc
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetCompatibleModeInPc, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    auto ret = window->GetCompatibleModeInPc();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: IsPcOrPadCapabilityEnabled
  * @tc.desc: IsPcOrPadCapabilityEnabled
  * @tc.type: FUNC
