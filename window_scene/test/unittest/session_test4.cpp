@@ -954,8 +954,6 @@ HWTEST_F(WindowSessionTest4, GetWindowUIInfoForWindowInfo01, Function | SmallTes
     sceneSession->SetSessionRect(rect);
     sceneSession->SetSessionGlobalRect(rect);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    int32_t zOrder = 100;
-    sceneSession->SetZOrder(zOrder);
     sceneSession->GetSessionProperty()->SetDisplayId(0);
 
     WindowUIInfo windowUIInfo = sceneSession->GetWindowUIInfoForWindowInfo();
@@ -977,9 +975,8 @@ HWTEST_F(WindowSessionTest4, GetWindowDisplayInfoForWindowInfo01, Function | Sma
     sceneSession->SetSessionRect(rect);
     sceneSession->SetSessionGlobalRect(rect);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    int32_t zOrder = 100;
-    sceneSession->SetZOrder(zOrder);
-    sceneSession->GetSessionProperty()->SetDisplayId(11);
+    constexpr DisplayId SECOND_DISPLAY_ID = 11;
+    sceneSession->GetSessionProperty()->SetDisplayId(SECOND_DISPLAY_ID);
 
     WindowDisplayInfo windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
     ASSERT_EQ(windowDisplayInfo.displayId, sceneSession->GetSessionProperty()->GetDisplayId());
@@ -1000,8 +997,6 @@ HWTEST_F(WindowSessionTest4, GetWindowLayoutInfoForWindowInfo01, Function | Smal
     sceneSession->SetSessionRect(rect);
     sceneSession->SetSessionGlobalRect(rect);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    int32_t zOrder = 100;
-    sceneSession->SetZOrder(zOrder);
     sceneSession->GetSessionProperty()->SetDisplayId(0);
 
     WindowLayoutInfo windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
@@ -1029,8 +1024,6 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallT
     sceneSession->SetSessionRect(rect);
     sceneSession->SetSessionGlobalRect(rect);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    int32_t zOrder = 100;
-    sceneSession->SetZOrder(zOrder);
     sceneSession->GetSessionProperty()->SetDisplayId(0);
     SessionInfo sessionInfo1;
     sessionInfo1.isSystem_ = true;
@@ -1041,8 +1034,6 @@ HWTEST_F(WindowSessionTest4, GetWindowMetaInfoForWindowInfo01, Function | SmallT
     sceneSession1->SetSessionRect(rect);
     sceneSession1->SetSessionGlobalRect(rect);
     sceneSession1->SetSessionState(SessionState::STATE_FOREGROUND);
-    zOrder = 100;
-    sceneSession1->SetZOrder(zOrder);
     sceneSession1->GetSessionProperty()->SetDisplayId(0);
 
     WindowMetaInfo windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
