@@ -727,7 +727,8 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange, Function | SmallTest | 
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->OnSessionStateChange(1, state);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     ASSERT_NE(nullptr, ssm_);
@@ -736,7 +737,7 @@ HWTEST_F(SceneSessionManagerTest6, OnSessionStateChange, Function | SmallTest | 
     ASSERT_NE(nullptr, ssm_);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->OnSessionStateChange(1, state);
-    ssm_->focusedSessionId_ = 0;
+    focusGroup->SetFocusedSessionId(0);
     ASSERT_NE(nullptr, ssm_);
     ssm_->OnSessionStateChange(1, state);
 }
@@ -1530,7 +1531,8 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, Function | 
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
-    ssm_->focusedSessionId_ = sceneSession->GetPersistentId();
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(sceneSession->GetPersistentId());
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->ProcessBackEvent();
 
@@ -1642,7 +1644,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionBySessionInfo, Function | Smal
     info4.persistentId_ = 0;
     info4.isPersistentRecover_ = false;
     ASSERT_EQ(ssm_->GetSceneSessionBySessionInfo(info4), nullptr);
-    
+
     SessionInfo info5;
     info5.persistentId_ = 5;
     info5.isPersistentRecover_ = true;
@@ -1795,69 +1797,6 @@ HWTEST_F(SceneSessionManagerTest6, OnDisplayStateChange, Function | SmallTest | 
 }
 
 /**
- * @tc.name: UpdateSessionAvoidAreaIfNeed
- * @tc.desc: UpdateSessionAvoidAreaIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 0;
-    sptr<SceneSession> sceneSession = nullptr;
-    AvoidArea avoidArea;
-    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_KEYBOARD;
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->enterRecent_ = false;
-    auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    ssm_->enterRecent_ = true;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
-    sessionInfo.abilityName_ = "UpdateSessionAvoidAreaIfNeed";
-    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    ssm_->enterRecent_ = false;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    ssm_->lastUpdatedAvoidArea_.clear();
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: UpdateSessionAvoidAreaIfNeed01
- * @tc.desc: UpdateSessionAvoidAreaIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, UpdateSessionAvoidAreaIfNeed01, Function | SmallTest | Level3)
-{
-    int32_t persistentId = 0;
-    AvoidArea avoidArea;
-    AvoidAreaType avoidAreaType = AvoidAreaType::TYPE_KEYBOARD;
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest6";
-    sessionInfo.abilityName_ = "UpdateSessionAvoidAreaIfNeed";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->enterRecent_ = false;
-    std::map<AvoidAreaType, AvoidArea> mapAvoidAreaType;
-    mapAvoidAreaType.insert(std::make_pair(avoidAreaType, avoidArea));
-    ssm_->lastUpdatedAvoidArea_.insert(std::make_pair(persistentId, mapAvoidAreaType));
-    auto ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    avoidAreaType = AvoidAreaType::TYPE_SYSTEM;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, false);
-    avoidArea.topRect_.posX_ = 1;
-    ret = ssm_->UpdateSessionAvoidAreaIfNeed(persistentId, sceneSession, avoidArea, avoidAreaType);
-    EXPECT_EQ(ret, true);
-}
-
-/**
  * @tc.name: CheckIfReuseSession
  * @tc.desc: CheckIfReuseSession
  * @tc.type: FUNC
@@ -1966,7 +1905,6 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession04, Function | SmallTest |
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
     ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
-    
     auto ret3 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret3, BrokerStates::BROKER_UNKOWN);
     ssm_->abilityInfoMap_.erase(list);
@@ -2003,7 +1941,6 @@ HWTEST_F(SceneSessionManagerTest6, CheckIfReuseSession05, Function | SmallTest |
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
         iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
     ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
-    
     auto ret4 = ssm_->CheckIfReuseSession(sessionInfo);
     ASSERT_EQ(ret4, BrokerStates::BROKER_UNKOWN);
     ssm_->abilityInfoMap_.erase(list);

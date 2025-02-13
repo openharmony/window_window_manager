@@ -356,7 +356,8 @@ HWTEST_F(SceneSessionManagerTest10, TestCheckLastFocusedAppSessionFocus_01, Func
     sptr<SceneSession> nextSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
     ASSERT_NE(nextSession, nullptr);
 
-    ssm_->lastFocusedAppSessionId_ = nextSession->GetPersistentId();
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetLastFocusedAppSessionId(nextSession->GetPersistentId());
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
 }
 
@@ -381,13 +382,14 @@ HWTEST_F(SceneSessionManagerTest10, TestCheckLastFocusedAppSessionFocus_02, Func
     info2.windowType_ = 1;
     sptr<SceneSession> nextSession = sptr<SceneSession>::MakeSptr(info2, nullptr);
 
-    ssm_->lastFocusedAppSessionId_ = 124;
+    ssm_->windowFocusController_->UpdateFocusedAppSessionId(DEFAULT_DISPLAY_ID, 124);
     focusedSession->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
 
     nextSession->property_->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     ASSERT_EQ(false, ssm_->CheckLastFocusedAppSessionFocus(focusedSession, nextSession));
-    ASSERT_EQ(0, ssm_->lastFocusedAppSessionId_);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    ASSERT_EQ(0, focusGroup->GetLastFocusedAppSessionId());
 }
 
 /**
@@ -558,7 +560,8 @@ HWTEST_F(SceneSessionManagerTest10, ProcessFocusZOrderChange, Function | SmallTe
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->ProcessFocusZOrderChange(97);
 
     sceneSession->lastZOrder_ = 2203;
@@ -897,7 +900,7 @@ HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | Sm
 {
     ssm_->sceneSessionMap_.clear();
     std::vector<uint32_t> zOrderList;
-    ssm_->lastFocusedAppSessionId_ = INVALID_SESSION_ID;
+    ssm_->windowFocusController_->UpdateFocusedAppSessionId(DEFAULT_DISPLAY_ID, INVALID_SESSION_ID);
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
 
     SessionInfo sessionInfo;
@@ -905,15 +908,16 @@ HWTEST_F(SceneSessionManagerTest10, ProcessUpdateLastFocusedAppId, Function | Sm
     sessionInfo.abilityName_ = "lastFocusedAppSession";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
-    ssm_->lastFocusedAppSessionId_ = 1;
+    ssm_->windowFocusController_->UpdateFocusedAppSessionId(DEFAULT_DISPLAY_ID, 1);
     sceneSession->zOrder_ = 101;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
 
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
-    ASSERT_EQ(1, ssm_->lastFocusedAppSessionId_);
+    ASSERT_EQ(1, focusGroup->GetLastFocusedAppSessionId());
 
     zOrderList.push_back(103);
     ssm_->ProcessUpdateLastFocusedAppId(zOrderList);
-    ASSERT_EQ(INVALID_SESSION_ID, ssm_->lastFocusedAppSessionId_);
+    ASSERT_EQ(INVALID_SESSION_ID, focusGroup->GetLastFocusedAppSessionId());
 }
 
 /**
@@ -982,7 +986,6 @@ HWTEST_F(SceneSessionManagerTest10, TestIsNeedSkipWindowModeTypeCheck_04, Functi
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->SetRSVisible(true);
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    
     DisplayId displayId = 1001;
     sceneSession->property_->SetDisplayId(displayId);
     auto ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, true);
@@ -990,31 +993,6 @@ HWTEST_F(SceneSessionManagerTest10, TestIsNeedSkipWindowModeTypeCheck_04, Functi
 
     ret = ssm_->IsNeedSkipWindowModeTypeCheck(sceneSession, false);
     ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: UpdateAvoidAreaByType
- * @tc.desc: test UpdateAvoidAreaByType
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest10, UpdateAvoidAreaByType, Function | SmallTest | Level3)
-{
-    SessionInfo info;
-    info.abilityName_ = "test";
-    info.bundleName_ = "test";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-
-    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
-    sceneSession->isVisible_ = true;
-    sceneSession->state_ = SessionState::STATE_ACTIVE;
-    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
-    ssm_->avoidAreaListenerSessionSet_.insert(sceneSession->GetPersistentId());
-    ssm_->UpdateAvoidAreaByType(sceneSession->GetPersistentId(), AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-    EXPECT_EQ(ssm_->lastUpdatedAvoidArea_.find(sceneSession->GetPersistentId()), ssm_->lastUpdatedAvoidArea_.end());
-    ssm_->avoidAreaListenerSessionSet_.erase(sceneSession->GetPersistentId());
-    ssm_->sceneSessionMap_.erase(sceneSession->GetPersistentId());
 }
 
 /**

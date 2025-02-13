@@ -2252,6 +2252,34 @@ HWTEST_F(WindowExtensionSessionImplTest, NotifyExtensionDataConsumer01, Function
     // Verify window mode was updated
     ASSERT_EQ(WindowMode::WINDOW_MODE_FLOATING, window_->GetWindowMode());
 }
+
+/**
+ * @tc.name: RegisterConsumer
+ * @tc.desc: RegisterConsumer Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, RegisterConsumer, Function | SmallTest | Level3)
+{
+    window_->RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
+        std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
+        window_, std::placeholders::_1, std::placeholders::_2));
+    ASSERT_NE(nullptr,
+        window_->dataConsumers_[static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE)]);
+}
+
+/**
+ * @tc.name: OnCrossAxisStateChange
+ * @tc.desc: OnCrossAxisStateChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnCrossAxisStateChange, Function | SmallTest | Level3)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    want.SetParam(Extension::CROSS_AXIS_FIELD, static_cast<int32_t>(CrossAxisState::STATE_END));
+    ASSERT_EQ(WMError::WM_OK, window_->OnCrossAxisStateChange(std::move(want), reply));
+    ASSERT_EQ(CrossAxisState::STATE_END, window_->crossAxisState_.load());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

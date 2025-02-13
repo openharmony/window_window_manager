@@ -1025,6 +1025,20 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowRect, Function | SmallTest | Level2
 }
 
 /**
+ * @tc.name: GetWindowSizeLimits
+ * @tc.desc: GetWindowSizeLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetWindowSizeLimits, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    WindowSizeLimits windowSizeLimits = { 0, 0, 0, 0 };
+    property->SetWindowSizeLimits(windowSizeLimits);
+    auto result = property->GetWindowSizeLimits();
+    ASSERT_EQ(result, windowSizeLimits);
+}
+
+/**
  * @tc.name: GetRequestRect
  * @tc.desc: GetRequestRect
  * @tc.type: FUNC

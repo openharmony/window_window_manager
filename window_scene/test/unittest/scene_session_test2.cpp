@@ -158,91 +158,6 @@ HWTEST_F(SceneSessionTest2, GetSystemAvoidArea, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: HandleEnterWinwdowArea1
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, HandleEnterWinwdowArea1, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleEnterWinwdowArea1";
-    info.bundleName_ = "HandleEnterWinwdowArea1";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-
-    sceneSession->SetSessionProperty(property);
-    WSError result = sceneSession->HandleEnterWinwdowArea(-1, -1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
-
-    result = sceneSession->HandleEnterWinwdowArea(1, -1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
-
-    result = sceneSession->HandleEnterWinwdowArea(-1, 1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: HandleEnterWinwdowArea2
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, HandleEnterWinwdowArea2, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleEnterWinwdowArea2";
-    info.bundleName_ = "HandleEnterWinwdowArea2";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
-        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback_, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    sceneSession->SetSessionProperty(property);
-    WSError result = sceneSession->HandleEnterWinwdowArea(1, 1);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->sessionInfo_.isSystem_ = true;
-    result = sceneSession->HandleEnterWinwdowArea(1, 1);
-    result = sceneSession->HandleEnterWinwdowArea(1, 1);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::ABOVE_APP_SYSTEM_WINDOW_END);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    sceneSession->SetSessionProperty(property);
-    result = sceneSession->HandleEnterWinwdowArea(1, 1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_TYPE);
-
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    sceneSession->SetSessionProperty(property);
-    result = sceneSession->HandleEnterWinwdowArea(1, 1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_TYPE);
-
-    property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    property->SetWindowMode(WindowMode::WINDOW_MODE_UNDEFINED);
-    sceneSession->SetSessionProperty(property);
-    result = sceneSession->HandleEnterWinwdowArea(1, 1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_TYPE);
-}
-
-/**
  * @tc.name: TransferPointerEvent
  * @tc.desc: TransferPointerEvent
  * @tc.type: FUNC
@@ -613,6 +528,9 @@ HWTEST_F(SceneSessionTest2, UpdateAvoidArea, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, sceneSession->sessionStage_);
     result = sceneSession->UpdateAvoidArea(nullptr, AvoidAreaType::TYPE_SYSTEM);
     EXPECT_EQ(WSError::WS_OK, result);
+    sceneSession->foregroundInteractiveStatus_.store(false);
+    result = sceneSession->UpdateAvoidArea(nullptr, AvoidAreaType::TYPE_SYSTEM);
+    EXPECT_EQ(WSError::WS_DO_NOTHING, result);
 }
 
 /**

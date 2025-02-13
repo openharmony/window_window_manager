@@ -56,7 +56,6 @@ class PiPContent extends ViewPU {
         this.xComponentId = 'pipContent';
         this.xComponentType = 'surface';
         this.setInitiallyProvidedValue(g2);
-        this.finalizeConstruction();
     }
     setInitiallyProvidedValue(e2) {
         if (e2.xComponentController !== undefined) {

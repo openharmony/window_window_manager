@@ -890,6 +890,46 @@ HWTEST_F(SessionStageStubTest, HandleSendContainerModalEvent, Function | SmallTe
     data.WriteString("value2");
     ASSERT_EQ(0, sessionStageStub_->HandleSendContainerModalEvent(data, reply));
 }
+
+/**
+ * @tc.name: HandleNotifyHighlightChange
+ * @tc.desc: test function : HandleNotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+ 
+    data.WriteBool(false);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyHighlightChange(data, reply));
+}
+
+/**
+ * @tc.name: HandleNotifyWindowCrossAxisChange
+ * @tc.desc: test function : HandleNotifyWindowCrossAxisChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowCrossAxisChange, Function | SmallTest | Level1)
+{
+    sptr<SessionStageMocker> sessionStageStub = sptr<SessionStageMocker>::MakeSptr();
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    CrossAxisState state  = CrossAxisState::STATE_CROSS;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CROSS_AXIS);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(static_cast<uint32_t>(state));
+    EXPECT_CALL(*sessionStageStub, NotifyWindowCrossAxisChange(state)).Times(1);
+    sessionStageStub->OnRemoteRequest(code, data, reply, option);
+    MessageParcel data2;
+    data2.WriteBool(true);
+    EXPECT_EQ(sessionStageStub->HandleNotifyWindowCrossAxisChange(data, reply), ERR_INVALID_DATA);
+    MessageParcel data3;
+    data2.WriteUint32(1000);
+    EXPECT_EQ(sessionStageStub->HandleNotifyWindowCrossAxisChange(data, reply), ERR_INVALID_DATA);
+}
 }
 }
 }

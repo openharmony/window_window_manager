@@ -57,6 +57,7 @@ public:
     void ExitCoordination();
     Drawing::Rect GetScreenSnapshotRect();
     void SetMainScreenRegion(DMRect& mainScreenRegion);
+    bool GetCameraMode();
     /*
      *    Avoid fold to expand process queues public interface
      */

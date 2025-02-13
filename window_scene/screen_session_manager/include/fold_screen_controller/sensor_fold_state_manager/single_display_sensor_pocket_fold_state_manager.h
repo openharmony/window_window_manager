@@ -64,6 +64,7 @@ public:
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void RegisterApplicationStateObserver() override;
+    bool IsCameraMode() override;
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);

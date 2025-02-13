@@ -192,6 +192,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
             return HandleSetDragActivated(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE):
+            return HandleNotifyHighlightChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CROSS_AXIS):
+            return HandleNotifyWindowCrossAxisChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
+            return HandleNotifyPipSizeChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -230,29 +236,46 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
         TLOGE(WmsLogTag::WMS_LAYOUT, "read hasRSTransaction failed.");
         return -1;
     }
-    int32_t animationDuration = 0;
+    SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = 0 };
     if (hasRSTransaction) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
         if (!transaction) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "transaction unMarsh failed.");
             return -1;
         }
-        if (!data.ReadInt32(animationDuration)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "read animationDuration failed");
-            return -1;
-        }
-        SceneAnimationConfig config { .rsTransaction_ = transaction, .animationDuration_ = animationDuration };
-        WSError errCode = UpdateRect(rect, reason, config);
-        reply.WriteUint32(static_cast<uint32_t>(errCode));
-    } else {
-        if (!data.ReadInt32(animationDuration)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "read animationDuration failed");
-            return -1;
-        }
-        SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = animationDuration };
-        WSError errCode = UpdateRect(rect, reason, config);
-        reply.WriteUint32(static_cast<uint32_t>(errCode));
+        config.rsTransaction_ = transaction;
     }
+    if (!data.ReadInt32(config.animationDuration_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read animationDuration failed");
+        return -1;
+    }
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read avoid area size failed");
+        return -1;
+    }
+    constexpr uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
+    if (size > AVOID_AREA_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "avoid area size is invalid");
+        return -1;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = data.ReadUint32();
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
+            type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "read avoid area type failed");
+            return -1;
+        }
+        sptr<AvoidArea> area = data.ReadParcelable<AvoidArea>();
+        if (area == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "read avoid area failed");
+            return -1;
+        }
+        avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
+    }
+    WSError errCode = UpdateRect(rect, reason, config, avoidAreas);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -754,6 +777,54 @@ int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, Message
         return ERR_INVALID_VALUE;
     }
     SendContainerModalEvent(eventName, eventValue);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called!");
+    bool isHighlight = false;
+    if (!data.ReadBool(isHighlight)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read isHighlight failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyHighlightChange(isHighlight);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyWindowCrossAxisChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    uint32_t state = 0;
+    if (!data.ReadUint32(state)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Read cross axis state failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (state >= static_cast<uint32_t>(CrossAxisState::STATE_END)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "invalid cross axis state.");
+        return ERR_INVALID_DATA;
+    }
+    NotifyWindowCrossAxisChange(static_cast<CrossAxisState>(state));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    uint32_t width;
+    if (!data.ReadUint32(width)) {
+        return ERR_INVALID_VALUE;
+    }
+    uint32_t height;
+    if (!data.ReadUint32(height)) {
+        return ERR_INVALID_VALUE;
+    }
+    float scale;
+    if (!data.ReadFloat(scale)) {
+        return ERR_INVALID_VALUE;
+    }
+    NotifyPipWindowSizeChange(width, height, scale);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

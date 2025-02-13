@@ -165,10 +165,16 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraRotationStatusChange(fl
     }
     if ((angle > ANGLE_MIN_VAL) && (angle < CAMERA_MAX_VAL) &&
         applicationStateObserver_->IsCameraForeground()) {
-        if (!isCameraRotationStrategy_) {
-            TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, into camera status", angle);
-            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
-            isCameraRotationStrategy_ = true;
+        // "< 1e-6" means validSensorRotation is 0.
+        if (fabsf(ScreenSessionManager::GetInstance().GetScreenSession(0)->GetValidSensorRotation() - 0.f) < 1e-6) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, but SensorRotation is 0,"
+                "not into camera status", angle);
+        } else {
+            if (!isCameraRotationStrategy_) {
+                TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, into camera status", angle);
+                ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
+                isCameraRotationStrategy_ = true;
+            }
         }
     } else {
         if (isCameraRotationStrategy_) {
@@ -327,6 +333,11 @@ void SingleDisplaySensorPocketFoldStateManager::ReportTentStatusChange(ReportTen
     if (ret != 0) {
         TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
+}
+
+bool SingleDisplaySensorPocketFoldStateManager::IsCameraMode()
+{
+    return isCameraRotationStrategy_;
 }
 
 ApplicationStatePocketObserver::ApplicationStatePocketObserver() {}

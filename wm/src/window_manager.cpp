@@ -428,7 +428,7 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
         pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
     }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+    ret = WindowAdapter::GetInstance().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
         WLOGFW("RegisterWindowManagerAgent failed!");
@@ -1033,9 +1033,9 @@ WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token,
     return WMError::WM_OK;
 }
 
-void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
-    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo);
+    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo, displayId);
 }
 
 void WindowManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const
@@ -1115,6 +1115,20 @@ WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetUnreliableWindowInfo(windowId, infos);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "get unreliable window info failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos) const
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowInfoOption: %{public}u %{public}u %{public}" PRIu64" %{public}d",
+        static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
+        static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
+        windowInfoOption.displayId, windowInfoOption.windowId);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ListWindowInfo(windowInfoOption, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }

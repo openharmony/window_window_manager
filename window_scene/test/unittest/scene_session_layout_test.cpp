@@ -714,6 +714,34 @@ HWTEST_F(SceneSessionLayoutTest, NotifySingleHandTransformChange, Function | Sma
     sceneSession->NotifySingleHandTransformChange(testTransform);
     ASSERT_NE(100, testTransform.posX);
 }
+
+/**
+ * @tc.name: GetSessionGlobalRectWithSingleHandScale
+ * @tc.desc: GetSessionGlobalRectWithSingleHandScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionLayoutTest, GetSessionGlobalRectWithSingleHandScale, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetSessionGlobalRectWithSingleHandScale";
+    info.bundleName_ = "GetSessionGlobalRectWithSingleHandScale";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    SingleHandTransform testTransform;
+    WSRect globalRect = { 100, 100, 800, 800 };
+    sceneSession->SetSessionGlobalRect(globalRect);
+    sceneSession->SetSingleHandTransform(testTransform);
+    ASSERT_EQ(sceneSession->GetSessionGlobalRect().posX_,
+              sceneSession->GetSessionGlobalRectWithSingleHandScale().posX_);
+
+    testTransform.posX = 10;
+    testTransform.posY = 10;
+    testTransform.scaleX = 0.75f;
+    testTransform.scaleY = 0.75f;
+    sceneSession->SetSingleHandTransform(testTransform);
+    ASSERT_NE(sceneSession->GetSessionGlobalRect().posX_,
+              sceneSession->GetSessionGlobalRectWithSingleHandScale().posX_);
+}
 } // namespace
 } // Rosen
 } // OHOS

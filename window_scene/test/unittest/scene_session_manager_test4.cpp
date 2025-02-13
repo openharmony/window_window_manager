@@ -499,8 +499,8 @@ HWTEST_F(SceneSessionManagerTest4, ReportWindowProfileInfos, Function | SmallTes
     sceneSession->sessionInfo_.isSystem_ = false;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->ReportWindowProfileInfos();
-
-    ssm_->focusedSessionId_ = 123;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(123);
     ssm_->ReportWindowProfileInfos();
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
@@ -612,17 +612,17 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
     ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession, 0), WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(0, sceneSession), WSError::WS_ERROR_INVALID_SESSION);
 
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_OK);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(1, sceneSession01), WSError::WS_OK);
 
     ASSERT_NE(sceneSession01->property_, nullptr);
     sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_MEDIA;
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_ERROR_INVALID_CALLING);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(1, sceneSession01), WSError::WS_ERROR_INVALID_CALLING);
 
     sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     sceneSession01->property_->SetParentPersistentId(2);
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_OK);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(1, sceneSession01), WSError::WS_OK);
 }
 
 /**
@@ -836,13 +836,12 @@ HWTEST_F(SceneSessionManagerTest4, UpdateAvoidSessionAvoidArea, Function | Small
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WindowType type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    bool needUpdate = true;
-    ssm_->UpdateAvoidSessionAvoidArea(type, needUpdate);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
 
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
     sceneSession->isVisible_ = true;
-    ssm_->UpdateAvoidSessionAvoidArea(type, needUpdate);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 
@@ -1233,23 +1232,18 @@ HWTEST_F(SceneSessionManagerTest4, GetAccessibilityWindowInfo, Function | SmallT
 HWTEST_F(SceneSessionManagerTest4, ShiftAppWindowFocus02, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->SetFocusedSessionId(INVALID_SESSION_ID);
+    ssm_->SetFocusedSessionId(INVALID_SESSION_ID, DEFAULT_DISPLAY_ID);
     int32_t sourcePersistentId = INVALID_SESSION_ID;
-    int32_t targetPersistentId = INVALID_SESSION_ID;
-    auto result = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result, WSError::WS_DO_NOTHING);
+    int32_t targetPersistentId = 1;
 
-    targetPersistentId = 1;
-    result = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
+    auto result = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
 
     SessionInfo info;
     info.abilityName_ = "abilityName";
     info.bundleName_ = "bundleName";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(INVALID_SESSION_ID, sceneSession));
-    ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     result = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_SESSION);
@@ -1258,9 +1252,7 @@ HWTEST_F(SceneSessionManagerTest4, ShiftAppWindowFocus02, Function | SmallTest |
     info01.abilityName_ = "abilityName01";
     info01.bundleName_ = "bundleName01";
     sptr<SceneSession> sceneSession01 = sptr<SceneSession>::MakeSptr(info01, nullptr);
-    ASSERT_NE(sceneSession01, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
-    ASSERT_NE(sceneSession01->property_, nullptr);
     sceneSession01->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     result = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);
@@ -1765,7 +1757,7 @@ HWTEST_F(SceneSessionManagerTest4, GetNextFocusableSession, Function | SmallTest
     ssm_->sceneSessionMap_.insert(std::make_pair(3, sceneSession03));
     ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
     ssm_->sceneSessionMap_.insert(std::make_pair(5, sceneSession05));
-    sptr<SceneSession> result = ssm_->GetNextFocusableSession(1);
+    sptr<SceneSession> result = ssm_->GetNextFocusableSession(DEFAULT_DISPLAY_ID, 1);
     EXPECT_EQ(result, sceneSession);
 }
 
@@ -1815,10 +1807,10 @@ HWTEST_F(SceneSessionManagerTest4, GetTopNearestBlockingFocusSession, Function |
     ssm_->sceneSessionMap_.insert(std::make_pair(4, sceneSession04));
     ssm_->sceneSessionMap_.insert(std::make_pair(8, parentSceneSession));
 
-    sptr<SceneSession> ret = ssm_->GetTopNearestBlockingFocusSession(0, true);
+    sptr<SceneSession> ret = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 0, true);
     EXPECT_EQ(ret, sceneSession01);
 
-    ret = ssm_->GetTopNearestBlockingFocusSession(10, true);
+    ret = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, 10, true);
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -1837,7 +1829,7 @@ HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, Function | SmallTe
     bool byForeground = true;
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     sceneSession->SetForceHideState(ForceHideState::HIDDEN_WHEN_FOCUSED);
-    WSError result = ssm_->RequestFocusSpecificCheck(sceneSession, byForeground, reason);
+    WSError result = ssm_->RequestFocusSpecificCheck(DEFAULT_DISPLAY_ID, sceneSession, byForeground, reason);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 
     sceneSession->SetForceHideState(ForceHideState::NOT_HIDDEN);
@@ -1845,7 +1837,7 @@ HWTEST_F(SceneSessionManagerTest4, RequestFocusSpecificCheck, Function | SmallTe
     ASSERT_NE(sceneSession01, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession01));
     sceneSession01->parentSession_ = sceneSession;
-    result = ssm_->RequestFocusSpecificCheck(sceneSession, byForeground, reason);
+    result = ssm_->RequestFocusSpecificCheck(DEFAULT_DISPLAY_ID, sceneSession, byForeground, reason);
     EXPECT_EQ(result, WSError::WS_OK);
 }
 

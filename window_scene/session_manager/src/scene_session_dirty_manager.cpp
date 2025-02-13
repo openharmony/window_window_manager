@@ -115,6 +115,18 @@ Vector2f CalRotationToTranslate(const MMI::Direction& displayRotation, float wid
     return translate;
 }
 
+Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo)
+{
+    const std::vector<float>& hostTransform = hostWindowInfo.transform;
+    if (hostTransform.size() != TRANSFORM_DATA_LEN) {
+        TLOGE(WmsLogTag::WMS_EVENT, "transform data len invalid, id: %{public}d", hostWindowInfo.id);
+        return Matrix3f();
+    }
+    return Matrix3f(hostTransform[0], hostTransform[1], hostTransform[2],  // 0,1,2: matrix index
+                    hostTransform[3], hostTransform[4], hostTransform[5],  // 3,4,5: matrix index
+                    hostTransform[6], hostTransform[7], hostTransform[8]); // 6,7,8: matrix index
+}
+
 void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
     const SingleHandData& singleHandData, bool useUIExtension) const
 {
@@ -450,9 +462,37 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
             }
             flushWindowInfoCallback_();
         };
+        TLOGD(WmsLogTag::WMS_EVENT, "in");
         SceneSessionManager::GetInstance().PostFlushWindowInfoTask(task,
             UPDATE_WINDOW_INFO_TASK, UPDATE_TASK_DURATION);
     }
+}
+
+bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<SceneSession>& sceneSession,
+    SecSurfaceInfo& constrainedModalUIExtInfo)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return false;
+    }
+    auto surfaceNode = sceneSession->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+        return false;
+    }
+    auto surfaceNodeId = surfaceNode->GetId();
+    {
+        std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        auto iter = constrainedModalUIExtInfoMap_.find(surfaceNodeId);
+        if (iter == constrainedModalUIExtInfoMap_.end()) {
+            return false;
+        }
+        if (!iter->second.empty()) {
+            constrainedModalUIExtInfo = iter->second.back();
+            return true;
+        }
+    }
+    return false;
 }
 
 void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
@@ -468,11 +508,14 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
         auto singleHandData = GetSingleHandData(sceneSession);
         MMI::Rect windowRect = {
-            .x = extensionInfo.windowRect.posX_ * singleHandData.scaleX + singleHandData.singleHandX,
-            .y = extensionInfo.windowRect.posY_ * singleHandData.scaleY + singleHandData.singleHandY,
+            .x = static_cast<float>(extensionInfo.windowRect.posX_) * singleHandData.scaleX +
+                 singleHandData.singleHandX,
+            .y = static_cast<float>(extensionInfo.windowRect.posY_) * singleHandData.scaleY +
+                 singleHandData.singleHandY,
             .width = extensionInfo.windowRect.width_,
             .height = extensionInfo.windowRect.height_
         };
+        windowInfo.area = windowRect;
         std::vector<MMI::Rect> touchHotAreas;
         MMI::Rect touchRect = {
             .x = 0,
@@ -496,6 +539,32 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
     windowInfo.zOrder = windowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
 
     windowInfoList.emplace_back(windowInfo);
+}
+
+void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowInfo>& windowInfoList,
+    const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowInfo)
+{
+    auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    if (!modalUIExtensionEventInfo) {
+        return;
+    }
+    if (modalUIExtensionEventInfo->isConstrainedModal) {  // constrained UIExt
+        SecSurfaceInfo constrainedModalUIExtInfo;
+        if (!GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "cannot find last constrained Modal UIExtInfo");
+            return;
+        }
+        MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
+            hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
+        std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
+        windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
+        windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
+        windowInfo.privacyUIFlag = false;
+        TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
+        windowInfoList.emplace_back(windowInfo);
+    } else {  // normal UIExt
+        AddModalExtensionWindowInfo(windowInfoList, hostWindowInfo, sceneSession, *modalUIExtensionEventInfo);
+    }
 }
 
 auto SceneSessionDirtyManager::GetFullWindowInfoList() ->
@@ -526,8 +595,8 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             iter->second->GetZOrder() > sceneSessionValue->GetZOrder()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-        } else if (auto modalUIExtensionEventInfo = sceneSessionValue->GetLastModalUIExtensionEventInfo()) {
-            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue, *modalUIExtensionEventInfo);
+        } else {
+            GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
         TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
@@ -648,7 +717,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
     auto displayId = windowSessionProperty->GetDisplayId();
-    auto singleHandData = GetSingleHandData(sceneSession);
+    const auto& singleHandData = GetSingleHandData(sceneSession);
     CalTransform(sceneSession, transform, singleHandData);
     std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
 
@@ -694,20 +763,21 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
     SingleHandData singleHandData;
     auto sessionProperty = sceneSession->GetSessionProperty();
     auto displayId = sessionProperty->GetDisplayId();
-    std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-    if (screensProperties.find(displayId) == screensProperties.end()) {
+    const std::map<ScreenId, ScreenProperty>& screensProperties =
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    auto screenPropertyIter = screensProperties.find(displayId);
+    if (screenPropertyIter == screensProperties.end()) {
         return singleHandData;
     }
-    SingleHandTransform transform = sceneSession->GetSingleHandTransform();
-    auto screenProperty = screensProperties[displayId];
+    const SingleHandTransform& transform = sceneSession->GetSingleHandTransform();
+    const auto& screenProperty = screenPropertyIter->second;
     singleHandData.scaleX = transform.scaleX;
     singleHandData.scaleY = transform.scaleY;
     singleHandData.width = screenProperty.GetBounds().rect_.GetWidth();
     singleHandData.height = screenProperty.GetBounds().rect_.GetHeight();
     singleHandData.singleHandX = transform.posX;
     singleHandData.singleHandY = transform.posY;
-    singleHandData.pivotX = NearZero(transform.posX) ? 0.0f : singleHandData.width;
+    singleHandData.pivotX = (transform.posX == 0) ? 0.0f : singleHandData.width;
     return singleHandData;
 }
 
@@ -935,6 +1005,23 @@ void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     if (updateSecSurfaceInfoNeeded) {
         ResetFlushWindowInfoTask();
         DumpSecSurfaceInfoMap(secSurfaceInfoMap);
+    }
+}
+
+void SceneSessionDirtyManager::UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+    std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap)
+{
+    bool updateConstrainedModalUIExtInfoNeeded = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        if (constrainedModalUIExtInfoMap_ != constrainedModalUIExtInfoMap) {
+            constrainedModalUIExtInfoMap_ = constrainedModalUIExtInfoMap;
+            updateConstrainedModalUIExtInfoNeeded = true;
+        }
+    }
+    if (updateConstrainedModalUIExtInfoNeeded) {
+        ResetFlushWindowInfoTask();
+        DumpSecSurfaceInfoMap(constrainedModalUIExtInfoMap);
     }
 }
 

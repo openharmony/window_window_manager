@@ -39,6 +39,9 @@ public:
     void NotifyWindowInfoChangeFromSession(const sptr<SceneSession>& sceneSession);
     void NotifyMMIWindowPidChange(const sptr<SceneSession>& sceneSession, const bool startMoving);
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
+    void UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+        std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap);
+    std::optional<ExtensionWindowEventInfo> GetConstrainedModalExtWindowInfo(const sptr<SceneSession>& sceneSession);
     using FlushWindowInfoCallback = std::function<void()>;
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>

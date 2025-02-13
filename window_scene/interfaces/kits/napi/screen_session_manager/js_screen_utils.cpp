@@ -131,6 +131,8 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE)));
     napi_set_named_property(env, objValue, "ACCESS_INFO_CHANGE", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::ACCESS_INFO_CHANGE)));
+    napi_set_named_property(env, objValue, "VIRTUAL_PIXEL_RATIO_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE)));
     return objValue;
 }
 
@@ -171,6 +173,10 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeType(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeType::ROTATION_END)));
     napi_set_named_property(env, objValue, "ROTATION_UPDATE_PROPERTY_ONLY", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY)));
+    napi_set_named_property(env, objValue, "ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY)));
+    napi_set_named_property(env, objValue, "UNDEFINED", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeType::UNDEFINED)));
     return objValue;
 }
 
