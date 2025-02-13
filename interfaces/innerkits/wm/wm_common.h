@@ -169,8 +169,8 @@ enum class SubWindowModalType : uint32_t {
     TYPE_WINDOW_MODALITY,
     TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
-    TYPE_MENU,
-    END = TYPE_MENU,
+    TYPE_TEXT_MENU,
+    END = TYPE_TEXT_MENU,
 };
 
 /**
@@ -349,7 +349,7 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_HANDWRITING = 1 << 6,
     WINDOW_FLAG_IS_TOAST = 1 << 7,
     WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
-    WINDOW_FLAG_IS_MENU = 1 << 9,
+    WINDOW_FLAG_IS_TEXT_MENU = 1 << 9,
     WINDOW_FLAG_END = 1 << 10,
 };
 
