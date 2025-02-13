@@ -8517,7 +8517,8 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     infos.emplace_back(info);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, innerWid: %{public}d, nodeId: %{public}d"
           ", bundleName: %{public}s, displayId: %{public}" PRIu64 ", rect: %{public}s",
-          info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str());
+          info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str(),
+          info->displayId_, info->windowRect_);
     return true;
 }
 
