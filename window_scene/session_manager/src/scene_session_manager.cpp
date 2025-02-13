@@ -9011,16 +9011,17 @@ void SceneSessionManager::InitWithRenderServiceAdded()
     }
 }
 
-WMError SceneSessionManager::SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType)
+WMError SceneSessionManager::SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType, bool isRegularAnimation)
 {
     if (sceneType > SystemAnimatedSceneType::SCENE_OTHERS) {
         WLOGFE("The input scene type is valid, scene type is %{public}d", sceneType);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
-    auto task = [this, sceneType]() {
+    auto task = [this, sceneType, isRegularAnimation]() {
         TLOGND(WmsLogTag::WMS_PC, "Set system animated scene %{public}d.", sceneType);
-        bool ret = rsInterface_.SetSystemAnimatedScenes(static_cast<SystemAnimatedScenes>(sceneType));
+        bool ret = rsInterface_.SetSystemAnimatedScenes(
+            static_cast<SystemAnimatedScenes>(sceneType), isRegularAnimation);
         if (!ret) {
             TLOGNE(WmsLogTag::WMS_PC, "Set system animated scene failed.");
         }

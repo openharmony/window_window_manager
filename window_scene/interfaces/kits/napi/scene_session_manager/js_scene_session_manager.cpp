@@ -2442,9 +2442,16 @@ napi_value JsSceneSessionManager::OnSetSystemAnimatedScenes(napi_env env, napi_c
             "Input parameter is invalid."));
         return NapiGetUndefined(env);
     }
+    bool isRegularAnimation = false;
+    if (argc >= ARGC_TWO && !ConvertFromJsValue(env, argv[1], sceneCode)) {
+        WLOGFE("Faile to convert parameter to regular animation.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
 
     SystemAnimatedSceneType sceneType = static_cast<SystemAnimatedSceneType>(sceneCode);
-    WMError ret = SceneSessionManager::GetInstance().SetSystemAnimatedScenes(sceneType);
+    WMError ret = SceneSessionManager::GetInstance().SetSystemAnimatedScenes(sceneType, isRegularAnimation);
     if (ret != WMError::WM_OK) {
         WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         WLOGFE("Failed, return %{public}d", wmErrorCode);
