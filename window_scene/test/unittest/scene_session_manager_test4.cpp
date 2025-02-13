@@ -427,11 +427,11 @@ HWTEST_F(SceneSessionManagerTest4, GetDisplayRegion, Function | SmallTest | Leve
     ssm_->displayRegionMap_[displayId] = std::make_shared<SkRegion>(rect);
     auto region1 = ssm_->GetDisplayRegion(displayId);
     ASSERT_NE(region1, nullptr);
-    const SkIRect& rect = region1->getBounds(); 
-    EXPECT_EQ(rect.fLeft, 0);
-    EXPECT_EQ(rect.fTop, 0);
-    EXPECT_EQ(rect.fRight, width);
-    EXPECT_EQ(rect.fBottom, height);
+    const SkIRect& rect1 = region1->getBounds(); 
+    EXPECT_EQ(rect1.fLeft, 0);
+    EXPECT_EQ(rect1.fTop, 0);
+    EXPECT_EQ(rect1.fRight, width);
+    EXPECT_EQ(rect1.fBottom, height);
 }
 
 /**
