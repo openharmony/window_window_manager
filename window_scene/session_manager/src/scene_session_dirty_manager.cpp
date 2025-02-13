@@ -117,8 +117,9 @@ Vector2f CalRotationToTranslate(const MMI::Direction& displayRotation, float wid
 
 Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo)
 {
-    std::vector<float> hostTransform = hostWindowInfo.transform;
+    const std::vector<float>& hostTransform = hostWindowInfo.transform;
     if (hostTransform.size() != TRANSFORM_DATA_LEN) {
+        TLOGE(WmsLogTag::WMS_EVENT, "transform data len invalid, id: %{public}d", hostWindowInfo.id);
         return Matrix3f();
     }
     return Matrix3f(hostTransform[0], hostTransform[1], hostTransform[2],  // 0,1,2: matrix index
@@ -479,7 +480,6 @@ bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<Scene
         TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
         return false;
     }
-    std::vector<SecSurfaceInfo> constrainedModalUIExtInfoList;
     auto surfaceNodeId = surfaceNode->GetId();
     {
         std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
@@ -487,11 +487,10 @@ bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<Scene
         if (iter == constrainedModalUIExtInfoMap_.end()) {
             return false;
         }
-        constrainedModalUIExtInfoList = iter->second;
-    }
-    if (!constrainedModalUIExtInfoList.empty()) {
-        constrainedModalUIExtInfo = constrainedModalUIExtInfoList.back();
-        return true;
+        if (!iter->second.empty()) {
+            constrainedModalUIExtInfo = iter->second.back();
+            return true;
+        }
     }
     return false;
 }
@@ -557,7 +556,10 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
         }
         MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
             hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
+        std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
+        windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
         windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
+        windowInfo.privacyUIFlag = false;
         TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
         windowInfoList.emplace_back(windowInfo);
     } else {  // normal UIExt
