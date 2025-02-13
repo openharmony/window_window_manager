@@ -26,6 +26,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
+#include "ui/rs_surface_node.h"
 #include "window_helper.h"
 #include "wm_common.h"
 
@@ -719,6 +720,64 @@ HWTEST_F(SceneSessionTest3, SetWindowCornerRadius, Function | SmallTest | Level2
     };
     session->onSetWindowCornerRadiusFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->SetWindowCornerRadius(1.0f));
+}
+
+/**
+ * @tc.name: AddSidebarMaskColorModifier
+ * @tc.desc: AddSidebarMaskColorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, AddSidebarMaskColorModifier, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddSidebarMaskColorModifier";
+    info.bundleName_ = "AddSidebarMaskColorModifier";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->AddSidebarMaskColorModifier();
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    EXPECT_EQ(nullptr, session->maskColorValue_);
+    
+    session->surfaceNode_ = surfaceNode;
+    session->AddSidebarMaskColorModifier();
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+    EXPECT_NE(nullptr, session->maskColorValue_);
+}
+
+/**
+ * @tc.name: SetSidebarMaskColorModifier
+ * @tc.desc: SetSidebarMaskColorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSidebarMaskColorModifier, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSidebarMaskColorModifier";
+    info.bundleName_ = "SetSidebarMaskColorModifier";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+     
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->AddSidebarMaskColorModifier();
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    EXPECT_EQ(nullptr, session->maskColorValue_);
+    
+    session->surfaceNode_ = surfaceNode;
+    session->AddSidebarMaskColorModifier();
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
+    EXPECT_NE(nullptr, session->maskColorValue_);
+    
+    session->SetSidebarMaskColorModifier(false);
+    Rosen::RSColor colorClose = session->maskColorValue_->Get();
+    EXPECT_EQ(session->defaultMaskColor_, colorClose.AsArgbInt());
+    
+    session->SetSidebarMaskColorModifier(true);
+    Rosen::RSColor colorOpen = session->maskColorValue_->Get();
+    EXPECT_EQ(session->snapshotMaskColor_, colorOpen.AsArgbInt());
 }
 }
 }
