@@ -261,6 +261,8 @@ public:
      */
     virtual WSError SetSessionLabelAndIcon(const std::string& label,
         const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
+    
+    virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 

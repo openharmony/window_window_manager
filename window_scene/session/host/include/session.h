@@ -84,6 +84,7 @@ using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 
 class ILifecycleListener {
 public:
@@ -334,6 +335,11 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
+    
+    /*
+     * Keyboard Window
+     */
+    void SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
 
     /*
      * Window Focus
@@ -707,6 +713,11 @@ protected:
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
     static bool isScbCoreEnabled_;
+
+    /*
+     * Keyboard Window
+     */
+    NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
 
 private:
     void HandleDialogForeground();
