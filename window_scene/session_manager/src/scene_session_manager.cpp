@@ -8497,7 +8497,6 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
     }
     info->uiNodeId_ = sceneSession->GetUINodeId();
-    info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
     info->type_ = sceneSession->GetWindowType();
     info->mode_ = sceneSession->GetWindowMode();
     info->layer_ = sceneSession->GetZOrder();
@@ -8513,6 +8512,7 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         displayId = sceneSession->TransformGlobalRectToRelativeRect(wsRect);
     }
     info->displayId_ = displayId;
+    info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
     info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
     infos.emplace_back(info);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, innerWid: %{public}d, nodeId: %{public}d"
