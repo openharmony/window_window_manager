@@ -1607,12 +1607,11 @@ WSError SessionStageProxy::NotifyHighlightChange(bool isHighlight)
     }
 
     if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE),
-        data, reply, option) != ERR_NONE) {
+                            data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = reply.ReadInt32();
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 void SessionStageProxy::NotifyWindowCrossAxisChange(CrossAxisState state)

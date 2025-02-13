@@ -3851,6 +3851,10 @@ bool SceneSession::IsSystemSessionAboveApp() const
 /** @note @window.focus */
 bool SceneSession::IsSameMainSession(const sptr<SceneSession>& prevSession)
 {
+    if (prevSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "prevSession is nullptr");
+        return false;
+    }
     int32_t currSessionId = GetMainSessionId();
     int32_t prevSessionId = prevSession->GetMainSessionId();
     return currSessionId == prevSessionId && prevSessionId != INVALID_SESSION_ID;
