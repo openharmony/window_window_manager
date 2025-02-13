@@ -53,6 +53,7 @@ public:
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
+    void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
     WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
     void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
 
