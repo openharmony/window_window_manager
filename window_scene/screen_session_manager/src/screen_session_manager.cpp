@@ -5752,7 +5752,7 @@ void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& 
     float translateY = 0.0f;
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         if (FoldDisplayMode::MAIN == GetFoldDisplayMode()) {
-            CalcDisplayNodeTranslateOnFoldableRotation(session, scaleX, scaleY, pivotX, pivotY,
+            CalcDisplayNodeTranslateOnPocketFoldRotation(session, scaleX, scaleY, pivotX, pivotY,
                 translateX, translateY);
         } else {
             CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
