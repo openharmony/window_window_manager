@@ -64,7 +64,6 @@ ohos_shared_library("screen_session_manager") {
     "src/connection/screen_cast_connection.cpp",
     "src/connection/screen_session_ability_connection.cpp",
     "src/connection/screen_snapshot_picker_connection.cpp",
-    "src/multi_screen_manager.cpp",
     "src/publish/screen_session_publish.cpp",
     "src/screen_cutout_controller.cpp",
     "src/screen_rotation_property.cpp",
@@ -193,6 +192,66 @@ ohos_shared_library("screen_session_manager") {
       "src/fold_screen_controller/super_fold_sensor_manager.cpp",
       "src/fold_screen_controller/super_fold_state_manager.cpp",
     ]
+    print("window manager fold ability is enabled.")
+  } else {
+    print("window manager fold ability is disabled.")
+  }
+
+  if (window_manager_feature_screen_active_mode) {
+    defines += [ "WM_SCREEN_ACTIVE_MODE_ENABLE" ]
+    print("window manager active mode ability is enabled.")
+  } else {
+    print("window manager active mode ability is disabled.")
+  }
+
+  if (window_manager_feature_screen_color_gamut) {
+    defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
+    print("window manager screen color gamut ability is enabled.")
+  } else {
+    print("window manager screen color gamut ability is disabled.")
+  }
+
+  if (window_manager_feature_screen_hdr_format) {
+    defines += [ "WM_SCREEN_HDR_FORMAT_ENABLE" ]
+    print("window manager screen hdr format ability is enabled.")
+  } else {
+    print("window manager screen hdr format ability is disabled.")
+  }
+
+  if (window_manager_feature_screen_color_space) {
+    defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
+    print("window manager screen color space ability is enabled.")
+  } else {
+    print("window manager screen color space ability is disabled.")
+  }
+
+  if (window_manager_feature_multi_screen) {
+    defines += [ "WM_MULTI_SCREEN_ENABLE" ]
+    sources += [ "src/multi_screen_manager.cpp" ]
+    print("window manager screen multi screen ability is enabled.")
+  } else {
+    print("window manager screen multi screen ability is disabled.")
+  }
+
+  if (window_manager_feature_multi_screen_frame_ctl) {
+    defines += [ "WM_MULTI_SCREEN_CTL_ABILITY_ENABLE" ]
+    print("window manager screen multi screen frame ctl ability is enabled.")
+  } else {
+    print("window manager screen multi screen frame ctl ability is disabled.")
+  }
+
+  if (window_manager_feature_cam_mode) {
+    defines += [ "WM_CAM_MODE_ABILITY_ENABLE" ]
+    print("window manager screen camera mode ability is enabled.")
+  } else {
+    print("window manager screen camera mode ability is disabled.")
+  }
+
+  if (window_manager_feature_multi_usr) {
+    defines += [ "WM_MULTI_USR_ABILITY_ENABLE" ]
+    print("window manager screen multi usr ability is enabled.")
+  } else {
+    print("window manager screen multi usr ability is disabled.")
   }
 
   innerapi_tags = [ "platformsdk" ]
