@@ -4247,7 +4247,7 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
         }
         validScreenIds.emplace_back(screenId);
     }
-    auto allUniqueScreenIds = GetAllValidScreenIds(validScreenIds);
+    const auto& allUniqueScreenIds = GetAllValidScreenIds(validScreenIds);
     if (allUniqueScreenIds.empty()) {
         TLOGE(WmsLogTag::DMS, "screenIds is invalid.");
         return DMError::DM_ERROR_NULLPTR;
