@@ -179,14 +179,7 @@ void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Conf
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", staticRootScene_->GetWindowId());
             return;
         }
-        bool isUpdateConfig = true;
-        for (const auto& ignoreCtx : ignoreWindowContexts) {
-            if (context.get() == ignoreCtx.get()) {
-                isUpdateConfig = false;
-                break;
-            }
-        }
-        if (isUpdateConfig) {
+        if (std::count(ignoreWindowContexts.begin(), ignoreWindowContexts.end(), context) != 0) {
             staticRootScene_->UpdateConfiguration(configuration);
             if (configurationUpdatedCallback_) {
                 configurationUpdatedCallback_(configuration);
