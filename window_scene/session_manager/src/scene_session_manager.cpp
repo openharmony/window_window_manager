@@ -2767,10 +2767,10 @@ void SceneSessionManager::EraseSceneSessionAndMarkDirtyLocked(int32_t persistent
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSession>& sceneSession,
-    bool needRemoveSession, bool isSaveSnapshot, bool isForceClean)
+    bool needRemoveSession, bool isSaveSnapshot, bool isForceClean, bool isUserRequestedExit)
 {
-    auto task = [this, weakSceneSession = wptr(sceneSession),
-                 needRemoveSession, isSaveSnapshot, isForceClean]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
+    auto task = [this, weakSceneSession = wptr(sceneSession), needRemoveSession, isSaveSnapshot, isForceClean,
+                 isUserRequestedExit]() THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto sceneSession = weakSceneSession.promote();
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session is nullptr");
@@ -2778,7 +2778,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         auto persistentId = sceneSession->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_MAIN, "Destruct session id:%{public}d remove:%{public}d isSaveSnapshot:%{public}d "
-            "isForceClean:%{public}d", persistentId, needRemoveSession, isSaveSnapshot, isForceClean);
+            "isForceClean:%{public}d isUserRequestedExit:%{public}d", persistentId, needRemoveSession, isSaveSnapshot,
+            isForceClean, isUserRequestedExit);
         RequestSessionUnfocus(persistentId, FocusChangeReason::SCB_SESSION_REQUEST_UNFOCUS);
         avoidAreaListenerSessionSet_.erase(persistentId);
         DestroyDialogWithMainWindow(sceneSession);
@@ -2798,7 +2799,8 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
         sceneSession->GetCloseAbilityWantAndClean(sceneSessionInfo->want);
         ResetSceneSessionInfoWant(sceneSessionInfo);
-        return RequestSceneSessionDestructionInner(sceneSession, sceneSessionInfo, needRemoveSession, isForceClean);
+        return RequestSceneSessionDestructionInner(
+            sceneSession, sceneSessionInfo, needRemoveSession, isForceClean, isUserRequestedExit);
     };
     std::string taskName = "RequestSceneSessionDestruction:PID:" +
         (sceneSession != nullptr ? std::to_string(sceneSession->GetPersistentId()) : "nullptr");
@@ -2837,15 +2839,16 @@ void SceneSessionManager::ResetWantInfo(const sptr<SceneSession>& sceneSession)
 }
 
 WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSession>& sceneSession,
-    sptr<AAFwk::SessionInfo> sceneSessionInfo, const bool needRemoveSession, const bool isForceClean)
+    sptr<AAFwk::SessionInfo> sceneSessionInfo, const bool needRemoveSession, const bool isForceClean,
+    bool isUserRequestedExit)
 {
     auto persistentId = sceneSession->GetPersistentId();
     TLOGI(WmsLogTag::WMS_MAIN, "begin CloseUIAbility: %{public}d system: %{public}d",
         persistentId, sceneSession->GetSessionInfo().isSystem_);
     if (isForceClean) {
-        AAFwk::AbilityManagerClient::GetInstance()->CleanUIAbilityBySCB(sceneSessionInfo);
+        AAFwk::AbilityManagerClient::GetInstance()->CleanUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit);
     } else {
-        AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sceneSessionInfo);
+        AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit);
     }
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
     if (needRemoveSession) {
