@@ -926,6 +926,9 @@ SubWindowModalType SceneSession::GetSubWindowModalType() const
     if (WindowHelper::IsToastSubWindow(windowType, property->GetWindowFlags())) {
         return SubWindowModalType::TYPE_TOAST;
     }
+    if (WindowHelper::IsMenuSubWindow(windowType, property->GetWindowFlags())) {
+        return SubWindowModalType::TYPE_MENU;
+    }
     if (WindowHelper::IsDialogWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_DIALOG;
     } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
@@ -6656,6 +6659,53 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
     }
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
+    }
+}
+
+void SceneSession::AddSidebarMaskColorModifier()
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+        return;
+    }
+
+    auto rsNodeTemp = Rosen::RSNodeMap::Instance().GetNode(surfaceNode->GetId());
+    if (rsNodeTemp) {
+        maskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
+            Rosen::RSColor::FromArgbInt(defaultMaskColor_));
+        std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
+            std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(maskColorValue_);
+        rsNodeTemp->AddModifier(modifier);
+    }
+}
+
+void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+        return;
+    }
+    if (!maskColorValue_) {
+        TLOGE(WmsLogTag::WMS_PC, "maskColorValue is null");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_PC, "needBlur: %{public}d", needBlur);
+    // sidebar animation duration
+    constexpr int32_t duration = 150;
+    if (needBlur) {
+        Rosen::RSAnimationTimingProtocol timingProtocol;
+        timingProtocol.SetDuration(duration);
+        timingProtocol.SetDirection(true);
+        timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
+        timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
+
+        Rosen::RSNode::OpenImplicitAnimation(timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
+        maskColorValue_->Set(Rosen::RSColor::FromArgbInt(defaultMaskColor_));
+        Rosen::RSNode::CloseImplicitAnimation();
+    } else {
+        maskColorValue_->Set(Rosen::RSColor::FromArgbInt(snapshotMaskColor_));
     }
 }
 } // namespace OHOS::Rosen

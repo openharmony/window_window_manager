@@ -714,8 +714,10 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     }
 #endif
     if (screenEvent == ScreenEvent::CONNECTED) {
+        connectScreenNumber_ ++;
         HandleScreenConnectEvent(screenSession, screenId, screenEvent);
     } else if (screenEvent == ScreenEvent::DISCONNECTED) {
+        connectScreenNumber_ --;
         HandleScreenDisconnectEvent(screenSession, screenId, screenEvent);
     } else {
         TLOGE(WmsLogTag::DMS, "screenEvent error!");
@@ -942,6 +944,7 @@ bool ScreenSessionManager::CheckMultiScreenInfo(MultiScreenInfo &info, sptr<Scre
     bool isRestored = IsScreenRestored(screenSession);
     if (!isRestored) {
         TLOGE(WmsLogTag::DMS, "no restored screen found");
+        ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
         SetMultiScreenDefaultRelativePosition();
         return false;
     }
@@ -961,6 +964,47 @@ bool ScreenSessionManager::CheckMultiScreenInfo(MultiScreenInfo &info, sptr<Scre
     }
     TLOGW(WmsLogTag::DMS, "read param success");
     return true;
+}
+
+void ScreenSessionManager::ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination)
+{
+    MultiScreenMode multiScreenMode;
+    if (screenCombination == ScreenCombination::SCREEN_EXTEND) {
+        multiScreenMode = MultiScreenMode::SCREEN_EXTEND;
+    } else {
+        multiScreenMode = MultiScreenMode::SCREEN_MIRROR;
+    }
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "EXTEND_DISPLAY_PLUG_IN_AND_OUT",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "PLUG_IN_AND_OUT", static_cast<int32_t>(screenEvent),
+        "DISPLAY_CONNECT_NUM", connectScreenNumber_,
+        "DISPLAY_INUSED_NUM", GetCurrentInUseScreenNumber(),
+        "EXTENSION_DISPLAY_MODE_STATUS", static_cast<int32_t>(multiScreenMode),
+        "MAIN_DISPLAY_ID", GetInternalScreenId());
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
+int32_t ScreenSessionManager::GetCurrentInUseScreenNumber()
+{
+    int32_t inUseScreenNumber_ = 0;
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+            screenSession->GetIsCurrentInUse()) {
+            TLOGI(WmsLogTag::DMS, "found screenId = %{public}" PRIu64, sessionIt.first);
+            inUseScreenNumber_++;
+        }
+    }
+    return inUseScreenNumber_;
 }
 
 void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSession,
@@ -1020,8 +1064,8 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
     }
+    ScreenCombination screenCombination = screenSession->GetScreenCombination();
     if (g_isPcDevice) {
-        ScreenCombination screenCombination = screenSession->GetScreenCombination();
         if (screenCombination == ScreenCombination::SCREEN_MAIN ||
             screenCombination == ScreenCombination::SCREEN_EXTEND) {
             TLOGW(WmsLogTag::DMS, "need to change screen");
@@ -1049,6 +1093,7 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         screenSessionMap_.erase(screenId);
     }
     if (g_isPcDevice) {
+        ReportHandleScreenEvent(ScreenEvent::DISCONNECTED, screenCombination);
         SetMultiScreenFrameControl();
     }
     if (!(screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) {
@@ -5750,7 +5795,14 @@ void ScreenSessionManager::SetDisplayScaleInner(ScreenId screenId, const float& 
     }
     float translateX = 0.0f;
     float translateY = 0.0f;
-    if (ROTATE_POLICY == FOLDABLE_DEVICE && FoldDisplayMode::FULL == GetFoldDisplayMode()) {
+    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
+        if (FoldDisplayMode::MAIN == GetFoldDisplayMode()) {
+            CalcDisplayNodeTranslateOnFoldableRotation(session, scaleX, scaleY, pivotX, pivotY,
+                translateX, translateY);
+        } else {
+            CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
+        }
+    } else if (ROTATE_POLICY == FOLDABLE_DEVICE && FoldDisplayMode::FULL == GetFoldDisplayMode()) {
         CalcDisplayNodeTranslateOnFoldableRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
     } else {
         CalcDisplayNodeTranslateOnRotation(session, scaleX, scaleY, pivotX, pivotY, translateX, translateY);
@@ -5803,6 +5855,56 @@ void ScreenSessionManager::CalcDisplayNodeTranslateOnFoldableRotation(sptr<Scree
         case Rotation::ROTATION_270:
             rotatedPivotX = pivotX;
             rotatedPivotY = pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        default:
+            TLOGE(WmsLogTag::DMS, "Unknown Rotation %{public}d", rotation);
+            break;
+    }
+    translateX = (DEFAULT_PIVOT - rotatedPivotX) * (scaleX - DEFAULT_SCALE) * width;
+    translateY = (DEFAULT_PIVOT - rotatedPivotY) * (scaleY - DEFAULT_SCALE) * height;
+}
+
+void ScreenSessionManager::CalcDisplayNodeTranslateOnPocketFoldRotation(sptr<ScreenSession>& session,
+                                                                        const float& scaleX, const float& scaleY,
+                                                                        const float& pivotX, const float& pivotY,
+                                                                        float& translateX, float& translateY)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DMS, "session is nullptr");
+        return;
+    }
+    const ScreenProperty& screenProperty = session->GetScreenProperty();
+    auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+    Rotation rotation = session->GetRotation();
+    float rotatedPivotX = DEFAULT_PIVOT;
+    float rotatedPivotY = DEFAULT_PIVOT;
+    float width = 0.0f;
+    float height = 0.0f;
+    switch (rotation) {
+        case Rotation::ROTATION_0:
+            rotatedPivotX = 1.0f - pivotY;
+            rotatedPivotY = pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_90:
+            rotatedPivotX = pivotX;
+            rotatedPivotY = pivotY;
+            width = screenWidth;
+            height = screenHeight;
+            break;
+        case Rotation::ROTATION_180:
+            rotatedPivotX = pivotY;
+            rotatedPivotY = 1.0f - pivotX;
+            width = screenHeight;
+            height = screenWidth;
+            break;
+        case Rotation::ROTATION_270:
+            rotatedPivotX = 1.0f - pivotX;
+            rotatedPivotY = 1.0f - pivotY;
             width = screenWidth;
             height = screenHeight;
             break;
@@ -6463,8 +6565,10 @@ void ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
         SetMultiScreenMode(info.mainScreenOption.screenId_, info.secondaryScreenOption.screenId_,
             info.multiScreenMode);
         TLOGW(WmsLogTag::DMS, "mirror, return befor OnScreenConnectionChanged");
+        ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_MIRROR);
         return;
     }
+    ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
     clientProxy_->OnScreenConnectionChanged(screenSession->GetScreenId(), ScreenEvent::CONNECTED,
         screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
     auto ret = SetMultiScreenRelativePosition(info.mainScreenOption, info.secondaryScreenOption);
