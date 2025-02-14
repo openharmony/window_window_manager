@@ -400,6 +400,7 @@ private:
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
+    void GetInternalWidth();
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
@@ -417,6 +418,8 @@ private:
     bool GetMultiScreenInfo(MultiScreenInfo &info);
     bool CheckMultiScreenInfo(MultiScreenInfo &info, sptr<ScreenSession> screenSession);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
+    int32_t GetCurrentInUseScreenNumber();
+    void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
@@ -544,6 +547,7 @@ private:
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
+    int32_t connectScreenNumber_ = 0;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
@@ -606,6 +610,9 @@ private:
     void SetDisplayScaleInner(ScreenId screenId, const float& scaleX, const float& scaleY, const float& pivotX,
                                   const float& pivotY);
     void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                   const float& scaleY, const float& pivotX, const float& pivotY,
+                                                   float& translateX, float& translateY);
+    void CalcDisplayNodeTranslateOnPocketFoldRotation(sptr<ScreenSession>& session, const float& scaleX,
                                                    const float& scaleY, const float& pivotX, const float& pivotY,
                                                    float& translateX, float& translateY);
     void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,

@@ -3153,14 +3153,14 @@ public:
      *
      * @param want the want to store param.
      */
-    virtual void GetExtensionConfig(AAFwk::WantParams& want) {}
+    virtual void GetExtensionConfig(AAFwk::WantParams& want) const {}
  
     /**
      * @brief Update custom extension param.
      *
      * @param want the want to update param.
      */
-    virtual void UpdateExtensionConfig(std::shared_ptr<AAFwk::Want> want) {}
+    virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 };
 }
 }

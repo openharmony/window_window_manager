@@ -16,6 +16,10 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
 
+#include <animation/rs_animation_timing_curve.h>
+#include <animation/rs_animation_timing_protocol.h>
+#include <animation/rs_symbol_animation.h>
+#include <pipeline/rs_node_map.h>
 #include <modifier/rs_property.h>
 #include <modifier/rs_property_modifier.h>
 
@@ -214,6 +218,7 @@ public:
     void UpdateSessionState(SessionState state) override;
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
+    void SetWinRectWhenUpdateRect(const WSRect& rect);
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
@@ -322,6 +327,8 @@ public:
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
     void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
     void CloneWindow(NodeId surfaceNodeId);
+    void AddSidebarMaskColorModifier();
+    void SetSidebarMaskColorModifier(bool needBlur);
 
     /*
      * PC Window Layout
@@ -528,7 +535,7 @@ public:
     void OnNotifyAboveLockScreen();
     void AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     void RemoveNormalModalUIExtension(int32_t persistentId);
-    void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    void UpdateNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     std::optional<ExtensionWindowEventInfo> GetLastModalUIExtensionEventInfo();
     Vector2f GetSessionGlobalPosition(bool useUIExtension);
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
@@ -1061,6 +1068,13 @@ private:
      * Window Property
      */
     NotifySetWindowCornerRadiusFunc onSetWindowCornerRadiusFunc_;
+
+    /*
+     * PC Window Sidebar Blur
+     */
+    uint32_t defaultMaskColor_ = 0xe5ffffff;
+    uint32_t snapshotMaskColor_ = 0xffe5e5e5;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> maskColorValue_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H

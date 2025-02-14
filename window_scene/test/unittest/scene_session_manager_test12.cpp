@@ -1339,17 +1339,17 @@ HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, Function | SmallTest 
     sptr<SceneSession> nullSceneSession1;
     sptr<SceneSession> nullSceneSession2;
  
-    ssm_->UpdateHighlightStatus(nullSceneSession1, nullSceneSession2, false);
-    ssm_->UpdateHighlightStatus(preSceneSession, nullSceneSession2, false);
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, true);
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, nullSceneSession1, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, true);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     currSceneSession->property_->isExclusivelyHighlighted_ = false;
     info1.isSystem_ = true;
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     info1.isSystem_ = false;
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     preSceneSession->property_->SetPersistentId(2);
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
 }
  
 /**
@@ -1370,7 +1370,7 @@ HWTEST_F(SceneSessionManagerTest12, SetHighlightSessionIds, Function | SmallTest
     currSceneSession->property_->SetPersistentId(1);
     currSceneSession->persistentId_ = 1;
     ssm_->highlightIds_.clear();
-    ssm_->SetHighlightSessionIds(currSceneSession);
+    ssm_->SetHighlightSessionIds(currSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
 }
  
@@ -1402,8 +1402,8 @@ HWTEST_F(SceneSessionManagerTest12, AddHighlightSessionIds, Function | SmallTest
     currSceneSession->persistentId_ = 2;
     preSceneSession->property_ = property1;
     currSceneSession->property_ = property2;
-    ssm_->AddHighlightSessionIds(currSceneSession);
-    ssm_->AddHighlightSessionIds(preSceneSession);
+    ssm_->AddHighlightSessionIds(currSceneSession, false);
+    ssm_->AddHighlightSessionIds(preSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
     ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
 }
@@ -1438,8 +1438,8 @@ HWTEST_F(SceneSessionManagerTest12, RemoveHighlightSessionIds, Function | SmallT
  
     preSceneSession->property_ = property1;
     currSceneSession->property_ = property2;
-    ssm_->AddHighlightSessionIds(currSceneSession);
-    ssm_->AddHighlightSessionIds(preSceneSession);
+    ssm_->AddHighlightSessionIds(currSceneSession, false);
+    ssm_->AddHighlightSessionIds(preSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
     ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
     ssm_->RemoveHighlightSessionIds(currSceneSession);
