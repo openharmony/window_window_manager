@@ -683,8 +683,8 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
         availableArea.height_ = currentScreenHeight - static_cast<uint32_t>(availableArea.posY_);
     }
 
-    if (bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
-        systemConfig_.IsPhoneWindow() && isFoldable && statusBarRect.width_) {
+    bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
+    if (systemConfig_.IsPhoneWindow() && isFoldable && statusBarRect.width_) {
         availableArea.width_ = statusBarRect.width_;
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD,
