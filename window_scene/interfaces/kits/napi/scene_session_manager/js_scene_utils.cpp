@@ -1468,8 +1468,8 @@ napi_value SubWindowModalTypeInit(napi_env env)
         static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
     napi_set_named_property(env, objValue, "TYPE_TOAST", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_TOAST)));
-    napi_set_named_property(env, objValue, "TYPE_MENU", CreateJsValue(env,
-        static_cast<int32_t>(SubWindowModalType::TYPE_MENU)));
+    napi_set_named_property(env, objValue, "TYPE_TEXT_MENU", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_TEXT_MENU)));
     napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
     return objValue;
