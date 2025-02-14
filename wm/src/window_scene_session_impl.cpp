@@ -612,7 +612,9 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
             return;
         }
         std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-        isColorModeSetByApp = !config->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP).empty();
+        if (config == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
+        }
         colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
         bool hasDarkRes = false;
         appContext->AppHasDarkRes(hasDarkRes);
@@ -3147,6 +3149,9 @@ void WindowSceneSessionImpl::UpdateConfigurationForSpecified(
         return;
     }
     for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+        if (subWindowSession == nullptr) {
+            continue;
+        }
         subWindowSession->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
