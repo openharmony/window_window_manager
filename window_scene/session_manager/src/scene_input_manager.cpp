@@ -245,7 +245,9 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
             .validWidth = screenProperty.GetValidWidth(),
             .validHeight = screenProperty.GetValidHeight(),
-            .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset())
+            .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset()),
+            .physicalWidth = screenProperty.GetPhyWidth(),
+            .physicalHeight = screenProperty.GetPhyHeight()
         };
         displayInfos.emplace_back(displayInfo);
     }
@@ -480,7 +482,8 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
                           << displayInfo.screenRealPPI << "|" << displayInfo.screenRealDPI << "|"
                           << static_cast<int32_t>(displayInfo.screenCombination) << "|"
                           << displayInfo.validWidth << "|" << displayInfo.validHeight << "|"
-                          << displayInfo.fixedDirection << ",";
+                          << displayInfo.fixedDirection << "|" << displayInfo.physicalWidth << "|"
+                          << displayInfo.physicalHeight << ",";
     }
 
     std::string displayList = displayListStream.str();
