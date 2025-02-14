@@ -46,7 +46,7 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MENU) &&
+    if (property->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU) &&
         GetForceHideState() != ForceHideState::NOT_HIDDEN) {
         TLOGI(WmsLogTag::WMS_SUB, "UEC force hide, id: %{public}d forceHideState: %{public}d",
             GetPersistentId(), GetForceHideState());
