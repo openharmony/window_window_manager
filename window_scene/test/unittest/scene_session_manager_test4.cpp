@@ -396,6 +396,8 @@ HWTEST_F(SceneSessionManagerTest4, UpdateDisplayRegion, Function | SmallTest | L
 
     displayInfo->SetHeight(height);
     PcFoldScreenManager::GetInstance().SetDisplayInfo(displayId, SuperFoldStatus::HALF_FOLDED);
+    PcFoldScreenManager::GetInstance().SetDisplayRects(
+        WSRect::EMPTY_RECT, { 0, 0, width, height }, WSRect::EMPTY_RECT);
     ssm_->UpdateDisplayRegion(displayInfo);
     ASSERT_NE(ssm_->displayRegionMap_.count(displayId), 0);
     auto region = ssm_->displayRegionMap_[displayId];

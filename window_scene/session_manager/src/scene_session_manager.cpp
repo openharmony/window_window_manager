@@ -8516,9 +8516,9 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
     infos.emplace_back(info);
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, innerWid: %{public}d, nodeId: %{public}d"
-          ", bundleName: %{public}s, displayId: %{public}" PRIu64 ", rect: %{public}s",
-          info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str(),
-          info->displayId_, info->windowRect_);
+        ", bundleName: %{public}s, displayId: %{public}" PRIu64 ", rect: %{public}s",
+        info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str(),
+        info->displayId_, info->windowRect_.ToString().c_str());
     return true;
 }
 
@@ -11749,7 +11749,8 @@ void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayIn
     SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "update display region to w: %{public}d, h: %{public}d", displayWidth, displayHeight);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "update display region to w: %{public}d, h: %{public}d",
+        displayWidth, displayHeight);
 }
 
 bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight)
