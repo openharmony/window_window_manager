@@ -22,6 +22,7 @@
 
 #include "accessibility_element_info.h"
 #include "extension_data_handler.h"
+#include "extension/extension_business_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -67,7 +68,8 @@ public:
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override {}
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
 
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT) override;
     WSError NotifyAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
@@ -131,6 +133,7 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    CrossAxisState GetCrossAxisState() override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -139,14 +142,16 @@ protected:
 private:
     void InputMethodKeyEventResultCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool consumed,
         std::shared_ptr<std::promise<bool>> isConsumedPromise, std::shared_ptr<bool> isTimeout);
-    void AddExtensionWindowStageToSCB();
-    void RemoveExtensionWindowStageFromSCB();
+    void AddExtensionWindowStageToSCB(bool isConstrainedModal = false);
+    void RemoveExtensionWindowStageFromSCB(bool isConstrainedModal = false);
     void CheckAndAddExtWindowFlags();
     void CheckAndRemoveExtWindowFlags();
     WMError UpdateExtWindowFlags(const ExtensionWindowFlags& flags, const ExtensionWindowFlags& actions);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
-        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void UpdateRectForOtherReason(const Rect &wmRect, WindowSizeChangeReason wmReason);
+        const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
+    void UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     WMError GetSystemViewportConfig(SessionViewportConfig& config);
     void UpdateSystemViewportConfig();
     void UpdateExtensionDensity(SessionViewportConfig& config);
@@ -159,6 +164,9 @@ private:
     WMError SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
         sptr<IRemoteObject> token, AppExecFwk::Ability* ability, bool initByName = false);
     void RegisterDataConsumer();
+    void RegisterConsumer(Extension::Businesscode code,
+        const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func);
+    WMError OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     std::shared_ptr<Extension::DataHandler> dataHandler_;
     std::unordered_map<uint32_t, DataConsumeCallback> dataConsumers_;  // Read only after init

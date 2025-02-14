@@ -155,6 +155,7 @@ public:
     WmErrorCode StartMoveWindow() override;
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
+    WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
 
     /*
      * Compatible Mode

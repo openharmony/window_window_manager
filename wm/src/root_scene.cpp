@@ -400,5 +400,16 @@ std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std::string&
     TLOGI(WmsLogTag::WMS_LAYOUT, "end");
     return uiContent_->GetRSNodeByStringID(stringId);
 }
+
+void RootScene::SetTopWindowBoundaryByID(const std::string& stringId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    uiContent_->SetTopWindowBoundaryByID(stringId);
+}
 } // namespace Rosen
 } // namespace OHOS

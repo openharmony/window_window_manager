@@ -277,6 +277,9 @@ public:
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
+    virtual WSError UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
+        const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     WSError UpdateDensity();
     WSError UpdateOrientation();
 
@@ -400,7 +403,7 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
-    virtual WSError UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange = true);
+    virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
 
@@ -582,6 +585,9 @@ public:
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
     SingleHandTransform GetSingleHandTransform() const;
+    void SetClientDisplayId(DisplayId displayId);
+    DisplayId GetClientDisplayId() const;
+    void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
 
     /*
      * Screen Lock
@@ -754,7 +760,8 @@ protected:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
-    DisplayId lastUpdatedDisplayId_ = 0;
+    DisplayId clientDisplayId_ = 0; // Window displayId on the client
+    DisplayId configDisplayId_ = 0;
     SuperFoldStatus lastScreenFoldStatus_ = SuperFoldStatus::UNKNOWN;
 
     /*

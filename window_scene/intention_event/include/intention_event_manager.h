@@ -51,6 +51,7 @@ private:
         int32_t focusedSessionId, std::shared_ptr<MMI::KeyEvent> keyEvent, bool consumed) const;
     bool CheckPointerEvent(const std::shared_ptr<MMI::PointerEvent> pointerEvent) const;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    void SendKeyEventConsumedResultToSCB(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed) const;
     void SetPointerEventStatus(
         int32_t fingerId, int32_t action, int32_t sourceType, const sptr<SceneSession>& sceneSession) const;
     Ace::UIContent* uiContent_ = nullptr;

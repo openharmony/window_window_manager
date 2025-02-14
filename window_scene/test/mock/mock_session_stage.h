@@ -27,8 +27,8 @@ public:
     ~SessionStageMocker() {};
 
     MOCK_METHOD1(SetActive, WSError(bool active));
-    MOCK_METHOD3(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config));
+    MOCK_METHOD4(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
+        const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas));
     MOCK_METHOD0(UpdateDensity, void(void));
     MOCK_METHOD0(UpdateOrientation, WSError(void));
     MOCK_METHOD1(UpdateSessionViewportConfig, WSError(const SessionViewportConfig& config));
@@ -76,6 +76,8 @@ public:
     MOCK_METHOD2(SendContainerModalEvent, WSError(const std::string& eventName, const std::string& eventValue));
     MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
+    MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
+    MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(uint32_t width, uint32_t height, double scale));
 };
 } // namespace Rosen
 } // namespace OHOS

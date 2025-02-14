@@ -83,6 +83,8 @@ private:
     int HandleSetSupportEnterWaterfallMode(MessageParcel& data, MessageParcel& reply);
     int HandleSendContainerModalEvent(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyWindowCrossAxisChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

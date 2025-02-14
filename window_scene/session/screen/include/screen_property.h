@@ -34,6 +34,7 @@ enum class ScreenPropertyChangeReason : uint32_t {
     VIRTUAL_SCREEN_RESIZE,
     RELATIVE_POSITION_CHANGE,
     SUPER_FOLD_STATUS_CHANGE,
+    VIRTUAL_PIXEL_RATIO_CHANGE,
     ACCESS_INFO_CHANGE,
 };
 class ScreenProperty {
@@ -146,6 +147,12 @@ public:
     void SetStartY(uint32_t startY);
     uint32_t GetStartY() const;
 
+    void SetValidHeight(uint32_t validHeight);
+    int32_t GetValidHeight() const;
+ 
+    void SetValidWidth(uint32_t validWidth);
+    int32_t GetValidWidth() const;
+
     void SetStartPosition(uint32_t startX, uint32_t startY);
 
     void SetScreenType(ScreenType type);
@@ -165,6 +172,26 @@ public:
     void SetAvailableArea(DMRect area)
     {
         availableArea_ = area;
+    }
+
+    DMRect GetExpandAvailableArea()
+    {
+        return expandAvailableArea_;
+    }
+
+    void SetExpandAvailableArea(DMRect area)
+    {
+        expandAvailableArea_ = area;
+    }
+
+    std::vector<DMRect> GetCreaseRects()
+    {
+        return creaseRects_;
+    }
+
+    void SetCreaseRects(std::vector<DMRect> creaseRects)
+    {
+        creaseRects_ = creaseRects;
     }
 
     RRect GetPhysicalTouchBounds();
@@ -244,6 +271,9 @@ private:
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
 
+    uint32_t validWidth_ { UINT32_MAX };
+    uint32_t validHeight_ { UINT32_MAX };
+
     ScreenShape screenShape_ { ScreenShape::RECTANGLE };
 
     ScreenType type_ { ScreenType::REAL };
@@ -252,6 +282,8 @@ private:
     void UpdateYDpi();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
     DMRect availableArea_;
+    DMRect expandAvailableArea_;
+    std::vector<DMRect> creaseRects_;
 
     RRect physicalTouchBounds_;
     int32_t inputOffsetX_ { 0 };

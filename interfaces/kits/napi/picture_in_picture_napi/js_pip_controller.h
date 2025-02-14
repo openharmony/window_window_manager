@@ -46,6 +46,7 @@ private:
         STATE_CHANGE_CB,
         CONTROL_PANEL_ACTION_EVENT_CB,
         CONTROL_EVENT_CB,
+        SIZE_CHANGE_CB,
     };
 
     napi_value OnStartPictureInPicture(napi_env env, napi_callback_info info);
@@ -67,9 +68,11 @@ private:
     void ProcessStateChangeRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessActionEventRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessControlEventRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessSizeChangeRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessActionEventUnRegister(const sptr<JsPiPWindowListener>& listener);
     void ProcessControlEventUnRegister(const sptr<JsPiPWindowListener>& listener);
+    void ProcessSizeChangeUnRegister(const sptr<JsPiPWindowListener>& listener);
 
     sptr<PictureInPictureController> pipController_ = nullptr;
     std::map<std::string, ListenerType> listenerCodeMap_;

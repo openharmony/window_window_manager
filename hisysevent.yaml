@@ -157,6 +157,14 @@ CONTAINER_START_BEGIN:
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   TIMESTAMP: {type: INT64, desc: timestamp}
 
+EXTEND_DISPLAY_PLUG_IN_AND_OUT:
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Records the insertion and removal events of the extended display, preserve: true}
+  PLUG_IN_AND_OUT: {type: UINT32, desc: display plug in and out}
+  DISPLAY_CONNECT_NUM: {type: INT32, desc: Number of connected displays}
+  DISPLAY_INUSED_NUM: {type: INT32, desc: Number of inUsed displays}
+  EXTENSION_DISPLAY_MODE_STATUS: {type: UINT32, desc: extension display mode status}
+  MAIN_DISPLAY_ID: {type: UINT32, desc: Current main display ID}
+
 VH_MODE:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: notify VH_MODE}
   MODE: {type: INT32, desc: VH MODE after rotation}

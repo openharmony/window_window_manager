@@ -19,6 +19,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "zidl/screen_session_manager_client_interface.h"
+#include "common_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -66,10 +67,15 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<TestClient> testClient_;
+    void SetAceessTokenPermission(const std::string processName);
 };
 
 void MultiScreenManagerTest::SetUpTestCase()
 {
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("foundation", perms, 1);
 }
 
 void MultiScreenManagerTest::TearDownTestCase()

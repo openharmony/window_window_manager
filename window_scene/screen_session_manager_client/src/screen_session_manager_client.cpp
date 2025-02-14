@@ -23,6 +23,7 @@
 #include "dm_common.h"
 #include "pipeline/rs_node_map.h"
 #include "window_manager_hilog.h"
+#include "fold_screen_controller/super_fold_state_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -358,8 +359,12 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->SetPhysicalRotation(directionInfo.phyRotation_);
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
-        foldDisplayMode);
+        foldDisplayMode, screenSessionManager_->IsOrientationNeedChanged());
     screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
+    if (currentstate_ != SuperFoldStatus::KEYBOARD) {
+        screenSession->SetValidHeight(bounds.rect_.GetHeight());
+        screenSession->SetValidWidth(bounds.rect_.GetWidth());
+    }
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
@@ -451,6 +456,15 @@ void ScreenSessionManagerClient::UpdateSuperFoldAvailableArea(ScreenId screenId,
     screenSessionManager_->UpdateSuperFoldAvailableArea(screenId, bArea, cArea);
 }
 
+void ScreenSessionManagerClient::UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->UpdateSuperFoldExpandAvailableArea(screenId, area);
+}
+
 int32_t ScreenSessionManagerClient::SetScreenOffDelayTime(int32_t delay)
 {
     if (!screenSessionManager_) {
@@ -485,6 +499,15 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
+void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->RecordEventFromScb(description, needRecordEvent);
 }
 
 void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)
@@ -670,6 +693,7 @@ void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int3
 
 void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
+    currentstate_ = superFoldStatus;
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");

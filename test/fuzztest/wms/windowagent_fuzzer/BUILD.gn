@@ -27,12 +27,8 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "../../../../wmserver/include",
     "../../../../interfaces/innerkits/wm",
     "../../../../interfaces/innerkits/dm",
-    "//commonlibrary/c_utils/base/include",
 
     # for abilityContext
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
-    "//base/global/resource_management/interfaces/inner_api/include",
     "//third_party/node/deps/icu-small/source/common",
     "${ability_runtime_inner_api_path}/ability_manager/include",
 
@@ -57,6 +53,8 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -66,6 +64,7 @@ ohos_fuzztest("WindowAgentFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "resource_management:global_resmgr",
   ]
 }
 

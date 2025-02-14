@@ -119,6 +119,8 @@ private:
 
     // Window Property
     int HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply);
+    // Layout
+    int HandleGetCrossAxisState(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

@@ -817,6 +817,17 @@ DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& are
     return displayManagerServiceProxy_->GetAvailableArea(displayId, area);
 }
 
+DMError DisplayManagerAdapter::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetExpandAvailableArea(displayId, area);
+}
+
 VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
 {
     INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
