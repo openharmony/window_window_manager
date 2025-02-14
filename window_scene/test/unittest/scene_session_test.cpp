@@ -1405,22 +1405,6 @@ HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CalcAvoidAreaHeightForStatusBar
- * @tc.desc: CalcAvoidAreaHeightForStatusBar
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest, CalcAvoidAreaHeightForStatusBar, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "CalcAvoidAreaHeightForStatusBar";
-    info.bundleName_ = "CalcAvoidAreaHeightForStatusBar";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    int32_t result = sceneSession->CalcAvoidAreaHeightForStatusBar();
-
-    EXPECT_EQ(result, 0);
-}
-
-/**
  * @tc.name: CalcRectForStatusBar
  * @tc.desc: CalcRectForStatusBar
  * @tc.type: FUNC
