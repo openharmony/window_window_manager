@@ -267,6 +267,30 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll02, Function |
 }
 
 /**
+ * @tc.name: UpdateConfigurationForAll03
+ * @tc.desc: UpdateConfigurationForAll03 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, UpdateConfigurationForAll03, Function | SmallTest | Level3)
+{
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
+    ASSERT_NE(nullptr, window_->property_);
+    window_->property_->SetPersistentId(1);
+    ASSERT_EQ(WMError::WM_OK, window_->Create(abilityContext, session));
+    ASSERT_NE(nullptr, window_);
+    window_->windowExtensionSessionSet_.insert(window_);
+    std::vector<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowContexts;
+    ignoreWindowContexts.push_back(abilityContext);
+    window_->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+    window_->windowExtensionSessionSet_.erase(window_);
+}
+
+/**
  * @tc.name: MoveTo01
  * @tc.desc: MoveTo
  * @tc.type: FUNC
