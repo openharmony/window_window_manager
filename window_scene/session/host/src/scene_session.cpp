@@ -1617,8 +1617,7 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     } else {
         rect.posY_ += winRect_.posY_;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lowerScreenPosY: %{public}d, output: %{public}s",
-        GetPersistentId(), lowerScreenPosY, rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, output: %{public}s", GetPersistentId(), rect.ToString().c_str());
 }
 
 /** @note @window.layout */
