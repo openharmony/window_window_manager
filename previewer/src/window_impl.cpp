@@ -15,6 +15,8 @@
 
 #include "window_impl.h"
 
+#include <unordered_set>
+
 #include "dm_common.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
@@ -77,7 +79,7 @@ sptr<Window> WindowImpl::Find(const std::string& name)
 
 const std::shared_ptr<AbilityRuntime::Context> WindowImpl::GetContext() const
 {
-    return nullptr;
+    return context_;
 }
 
 sptr<Window> WindowImpl::FindWindowById(uint32_t windowId)
@@ -112,12 +114,26 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
     return std::vector<sptr<Window>>();
 }
 
-void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
+    std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
+        ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::lock_guard<std::mutex> lock(globalMutex_);
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
-        window->UpdateConfiguration(configuration);
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            continue;
+        }
+        auto context = window->GetContext();
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
+            continue;
+        }
+        if (ignoreWindowCtxSet.count(context) == 0) {
+            window->UpdateConfiguration(configuration);
+        }
     }
 }
 
@@ -877,6 +893,17 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
         WLOGFD("notify ace winId:%{public}u", GetWindowId());
         uiContent_->UpdateConfiguration(configuration);
     }
+}
+
+void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace winId: %{public}u", GetWindowId());
+    uiContent_->UpdateConfiguration(configuration, resourceManager);
 }
 
 void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)

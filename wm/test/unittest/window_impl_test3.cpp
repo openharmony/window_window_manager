@@ -537,6 +537,48 @@ HWTEST_F(WindowImplTest3, UpdateConfiguration, Function | SmallTest | Level3)
 }
 
 /**
+ * @tc.name: UpdateConfigurationForSpecified
+ * @tc.desc: UpdateConfigurationForSpecified test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, UpdateConfigurationForSpecified, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateConfigurationForSpecified");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    window->RestoreSplitWindowMode(0u);
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
+
+    option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowName("subwindow");
+    sptr<WindowImpl> subWindow = sptr<WindowImpl>::MakeSptr(option);
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, subWindow->Create(window->GetWindowId()));
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
+
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    Ace::UIContentMocker* content = reinterpret_cast<Ace::UIContentMocker*>(window->uiContent_.get());
+    subWindow->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    Ace::UIContentMocker* subContent = reinterpret_cast<Ace::UIContentMocker*>(subWindow->uiContent_.get());
+    EXPECT_CALL(*content, UpdateConfiguration(_, _));
+    EXPECT_CALL(*subContent, UpdateConfiguration(_, _));
+    window->UpdateConfigurationForSpecified(configuration, resourceManager);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*content, Destroy());
+    EXPECT_CALL(*subContent, Destroy());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: UpdateWindowState
  * @tc.desc: UpdateWindowState test
  * @tc.type: FUNC
@@ -874,6 +916,28 @@ HWTEST_F(WindowImplTest3, UpdateConfigurationForAll01, Function | SmallTest | Le
     ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID));
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     sptr<Window>(window)->UpdateConfigurationForAll(configuration);
+    EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UpdateConfigurationForAll02
+ * @tc.desc: UpdateConfigurationForAll02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImplTest3, UpdateConfigurationForAll02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowImpl> window = sptr<WindowImpl>::MakeSptr(option);
+    EXPECT_CALL(m->Mock(), GetSystemConfig(_)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _, _, _)).Times(1).WillOnce(Return(WMError::WM_OK));
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    ASSERT_EQ(WMError::WM_OK, window->Create(INVALID_WINDOW_ID, abilityContext));
+    std::vector<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowContexts;
+    ignoreWindowContexts.push_back(abilityContext);
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }

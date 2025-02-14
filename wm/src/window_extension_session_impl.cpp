@@ -168,12 +168,39 @@ void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppEx
     }
 }
 
-void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
-    WLOGD("notify scene ace update config");
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+        uiContent->UpdateConfiguration(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+    }
+}
+
+void WindowExtensionSessionImpl::UpdateConfigurationForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify scene ace update config");
+    std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
+        ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     for (const auto& window : windowExtensionSessionSet_) {
-        window->UpdateConfiguration(configuration);
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            continue;
+        }
+        auto context = window->GetContext();
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
+            continue;
+        }
+        if (ignoreWindowCtxSet.count(context) == 0) {
+            window->UpdateConfiguration(configuration);
+        }
     }
 }
 
