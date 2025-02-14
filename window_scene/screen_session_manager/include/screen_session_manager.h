@@ -418,6 +418,8 @@ private:
     bool GetMultiScreenInfo(MultiScreenInfo &info);
     bool CheckMultiScreenInfo(MultiScreenInfo &info, sptr<ScreenSession> screenSession);
     void SetExtendedScreenFallbackPlan(ScreenId screenId);
+    int32_t GetCurrentInUseScreenNumber();
+    void ReportHandleScreenEvent(ScreenEvent screenEvent, ScreenCombination screenCombination);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
@@ -545,6 +547,7 @@ private:
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
+    int32_t connectScreenNumber_ = 0;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };
 
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
