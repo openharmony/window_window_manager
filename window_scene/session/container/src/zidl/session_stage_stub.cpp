@@ -788,8 +788,7 @@ int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_FOCUS, "Read isHighlight failed.");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = NotifyHighlightChange(isHighlight);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    NotifyHighlightChange(isHighlight);
     return ERR_NONE;
 }
 
