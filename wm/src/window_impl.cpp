@@ -3445,6 +3445,9 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
         return;
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            continue;
+        }
         subWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
