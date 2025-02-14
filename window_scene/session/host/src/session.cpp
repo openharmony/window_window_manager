@@ -2436,13 +2436,11 @@ bool Session::GetStateFromManager(const ManagerState key)
     if (getStateFromManagerFunc_) {
         return getStateFromManagerFunc_(key);
     }
-    switch (key)
-    {
-    case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
-        return false;
-        break;
-    default:
-        return false;
+    switch (key) {
+        case ManagerState::MANAGER_STATE_SCREEN_LOCKED:
+            return false;
+        default:
+            return false;
     }
 }
 

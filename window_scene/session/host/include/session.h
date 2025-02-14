@@ -163,7 +163,12 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
-
+    /*
+     * App Use Control
+     */
+    virtual bool GetIsUseControlSession() const { return false; }
+    virtual void SetIsUseControlSession(bool isUseControlSession) {}
+    
     /*
      * Callbacks for ILifecycleListener
      */

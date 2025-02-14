@@ -8187,7 +8187,8 @@ WSError SceneSessionManager::NotifyAppUseControlList(
         TLOGW(WmsLogTag::WMS_LIFE, "The caller is not system-app, can not use system-api");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WRITE_APP_LOCK)) {
+    if (type == ControlAppType::APP_LOCK &&
+        !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WRITE_APP_LOCK)) {
         TLOGW(WmsLogTag::WMS_LIFE, "write app lock permission denied");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
@@ -11752,5 +11753,33 @@ WMError SceneSessionManager::GetRootMainWindowId(int32_t persistentId, int32_t& 
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, where);
+}
+
+WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId)
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if ((currentUserId_ != userId && currentUserId_ != DEFAULT_USERID) ||
+        (currentUserId_ == DEFAULT_USERID && userId != GetUserIdByUid(getuid()))) {
+        TLOGW(WmsLogTag::WMS_LIFE, "currentUserId:%{public}d userId:%{public}d GetUserIdByUid:%{public}d",
+            currentUserId_.load(), userId, GetUserIdByUid(getuid()));
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    const char* const where = __func__;
+    taskScheduler_->PostAsyncTask([this, bundleName, appIndex, where] {
+        std::vector<sptr<SceneSession>> mainSessions;
+        GetMainSessionByBundleNameAndAppIndex(bundleName, appIndex, mainSessions);
+        if (mainSessions.empty()) {
+            TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s, not found any main session", where);
+            return;
+        }
+        for (const auto& session : mainSessions) {
+            session->OnSessionEvent(SessionEvent::EVENT_MINIMIZE);
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, id:%{public}d.", where, session->GetPersistentId());
+        }
+    }, __func__);
+    return WMError::WM_OK;
 }
 } // namespace OHOS::Rosen
