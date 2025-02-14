@@ -41,7 +41,8 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteUint32(availableHeight_) && parcel.WriteFloat(scaleX_) &&
         parcel.WriteFloat(scaleY_) && parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
         parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(screenShape_));
+        parcel.WriteUint32(static_cast<uint32_t>(screenShape_)) &&
+        parcel.WriteUint32(static_cast<uint32_t>(originRotation_));
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -52,6 +53,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     }
     uint32_t type = (uint32_t)DisplayType::DEFAULT;
     uint32_t rotation;
+    uint32_t originRotation;
     uint32_t orientation;
     uint32_t displayState;
     uint32_t displayOrientation;
@@ -75,7 +77,8 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadUint32(displayInfo->availableHeight_) && parcel.ReadFloat(displayInfo->scaleX_) &&
         parcel.ReadFloat(displayInfo->scaleY_) && parcel.ReadFloat(displayInfo->pivotX_) &&
         parcel.ReadFloat(displayInfo->pivotY_) && parcel.ReadFloat(displayInfo->translateX_) &&
-        parcel.ReadFloat(displayInfo->translateY_) && parcel.ReadUint32(screenShape);
+        parcel.ReadFloat(displayInfo->translateY_) && parcel.ReadUint32(screenShape) &&
+        parcel.ReadUint32(originRotation);
     if (!res) {
         delete displayInfo;
         return nullptr;
@@ -86,6 +89,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     displayInfo->displayState_ = static_cast<DisplayState>(displayState);
     displayInfo->displayOrientation_ = static_cast<DisplayOrientation>(displayOrientation);
     displayInfo->screenShape_ = static_cast<ScreenShape>(screenShape);
+    displayInfo->originRotation_ = static_cast<Rotation>(originRotation);
     return displayInfo;
 }
 } // namespace OHOS::Rosen
