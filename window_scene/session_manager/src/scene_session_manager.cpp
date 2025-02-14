@@ -6210,7 +6210,7 @@ void SceneSessionManager::RemoveHighlightSessionIds(const sptr<SceneSession>& sc
     {
         std::lock_guard<std::mutex> lock(highlightIdsMutex_);
         if (highlightIds_.find(sceneSession->GetPersistentId()) != highlightIds_.end()) {
-            sceneSession->UpdateHighlightStatus(false);
+            sceneSession->UpdateHighlightStatus(false, false);
             highlightIds_.erase(sceneSession->GetPersistentId());
         } else {
             TLOGE(WmsLogTag::WMS_FOCUS, "not found scene session with id: %{public}d", sceneSession->GetPersistentId());
