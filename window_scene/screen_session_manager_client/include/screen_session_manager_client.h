@@ -74,10 +74,12 @@ public:
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
     void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea);
+    void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area);
     int32_t SetScreenOffDelayTime(int32_t delay);
     int32_t SetScreenOnDelayTime(int32_t delay);
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
+    void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
@@ -133,6 +135,7 @@ private:
     sptr<IScreenConnectionChangeListener> screenConnectionChangeListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
+    SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
 };
 } // namespace OHOS::Rosen
 

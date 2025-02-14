@@ -19,8 +19,10 @@
 #include <refbase.h>
 
 #include "xml_config_base.h"
-#include "libxml/parser.h"
-#include "libxml/tree.h"
+
+struct _xmlNode;
+typedef struct _xmlNode xmlNode;
+typedef xmlNode* xmlNodePtr;
 
 namespace OHOS {
 namespace Rosen {

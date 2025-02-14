@@ -23,6 +23,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
 #include "session_info.h"
 #include "session_manager.h"
@@ -1338,17 +1339,17 @@ HWTEST_F(SceneSessionManagerTest12, UpdateHighlightStatus, Function | SmallTest 
     sptr<SceneSession> nullSceneSession1;
     sptr<SceneSession> nullSceneSession2;
  
-    ssm_->UpdateHighlightStatus(nullSceneSession1, nullSceneSession2, false);
-    ssm_->UpdateHighlightStatus(preSceneSession, nullSceneSession2, false);
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, true);
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, nullSceneSession1, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, nullSceneSession2, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, true);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     currSceneSession->property_->isExclusivelyHighlighted_ = false;
     info1.isSystem_ = true;
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     info1.isSystem_ = false;
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
     preSceneSession->property_->SetPersistentId(2);
-    ssm_->UpdateHighlightStatus(preSceneSession, currSceneSession, false);
+    ssm_->UpdateHighlightStatus(DEFAULT_DISPLAY_ID, preSceneSession, currSceneSession, false);
 }
  
 /**
@@ -1369,7 +1370,7 @@ HWTEST_F(SceneSessionManagerTest12, SetHighlightSessionIds, Function | SmallTest
     currSceneSession->property_->SetPersistentId(1);
     currSceneSession->persistentId_ = 1;
     ssm_->highlightIds_.clear();
-    ssm_->SetHighlightSessionIds(currSceneSession);
+    ssm_->SetHighlightSessionIds(currSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
 }
  
@@ -1401,8 +1402,8 @@ HWTEST_F(SceneSessionManagerTest12, AddHighlightSessionIds, Function | SmallTest
     currSceneSession->persistentId_ = 2;
     preSceneSession->property_ = property1;
     currSceneSession->property_ = property2;
-    ssm_->AddHighlightSessionIds(currSceneSession);
-    ssm_->AddHighlightSessionIds(preSceneSession);
+    ssm_->AddHighlightSessionIds(currSceneSession, false);
+    ssm_->AddHighlightSessionIds(preSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
     ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
 }
@@ -1437,8 +1438,8 @@ HWTEST_F(SceneSessionManagerTest12, RemoveHighlightSessionIds, Function | SmallT
  
     preSceneSession->property_ = property1;
     currSceneSession->property_ = property2;
-    ssm_->AddHighlightSessionIds(currSceneSession);
-    ssm_->AddHighlightSessionIds(preSceneSession);
+    ssm_->AddHighlightSessionIds(currSceneSession, false);
+    ssm_->AddHighlightSessionIds(preSceneSession, false);
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 1, true);
     ASSERT_EQ(ssm_->highlightIds_.count(2) == 1, true);
     ssm_->RemoveHighlightSessionIds(currSceneSession);
@@ -1447,6 +1448,51 @@ HWTEST_F(SceneSessionManagerTest12, RemoveHighlightSessionIds, Function | SmallT
     ASSERT_EQ(ssm_->highlightIds_.count(1) == 0, true);
 }
 
+/**
+ * @tc.name: UpdateSessionCrossAxisState
+ * @tc.desc: test function : UpdateSessionCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, UpdateSessionCrossAxisState, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    ssm_->UpdateSessionCrossAxisState(10, SuperFoldStatus::EXPANDED, SuperFoldStatus::FOLDED);
+}
+
+/**
+ * @tc.name: RemoveLifeCycleTaskByPersistentId
+ * @tc.desc: test RemoveLifeCycleTaskByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "testAbilityName1";
+    info.moduleName_ = "testModleName1";
+    info.bundleName_ = "testBundleName1";
+    info.persistentId_ = 100;
+
+    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.emplace(100, sceneSession);
+
+    auto task = []() {};
+    sceneSession->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
+    ssm_->RemoveLifeCycleTaskByPersistentId(100, LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 0);
+
+    sceneSession->PostLifeCycleTask(task, "task1", LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
+    ssm_->RemoveLifeCycleTaskByPersistentId(3, LifeCycleTaskType::START);
+    ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

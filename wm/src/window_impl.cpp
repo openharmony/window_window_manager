@@ -3448,7 +3448,7 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
     WLOGI("Update AvoidArea, id: %{public}u", property_->GetWindowId());
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
-    UpdateViewportConfig(GetRect(), display, WindowSizeChangeReason::UNDEFINED, nullptr, {{type, *avoidArea}});
+    UpdateViewportConfig(GetRect(), display, WindowSizeChangeReason::AVOID_AREA_CHANGE, nullptr, {{type, *avoidArea}});
     NotifyAvoidAreaChange(avoidArea, type);
 }
 
@@ -4039,7 +4039,8 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_SEARCHING_BAR:
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
-        case WindowType::WINDOW_TYPE_DIALOG: {
+        case WindowType::WINDOW_TYPE_DIALOG:
+        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }

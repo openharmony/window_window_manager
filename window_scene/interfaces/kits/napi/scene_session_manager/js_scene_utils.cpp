@@ -1468,6 +1468,8 @@ napi_value SubWindowModalTypeInit(napi_env env)
         static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
     napi_set_named_property(env, objValue, "TYPE_TOAST", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_TEXT_MENU", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_TEXT_MENU)));
     napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
     return objValue;
@@ -1670,6 +1672,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
+    SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     return objValue;
 }
 

@@ -364,6 +364,27 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, InitScreenParams, Function | SmallTest 
     policy.InitScreenParams();
     EXPECT_FALSE(policy.onBootAnimation_);
 }
+
+/**
+ * @tc.name: SetSecondaryDisplayModeChangeStatus01
+ * @tc.desc: test function : SetSecondaryDisplayModeChangeStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SetSecondaryDisplayModeChangeStatus01, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.SetSecondaryDisplayModeChangeStatus(true);
+    EXPECT_EQ(policy.secondaryPengdingTask_, 2);
+
+    policy.SetSecondaryDisplayModeChangeStatus(false);
+    EXPECT_EQ(policy.secondaryPengdingTask_, 1);
+
+    policy.SetSecondaryDisplayModeChangeStatus(false);
+    EXPECT_EQ(policy.secondaryPengdingTask_, 0);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

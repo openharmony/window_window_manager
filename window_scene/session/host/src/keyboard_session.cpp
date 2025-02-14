@@ -27,6 +27,12 @@ KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSes
     : SystemSession(info, specificCallback)
 {
     keyboardCallback_ = keyboardCallback;
+    scenePersistence_ = sptr<ScenePersistence>::MakeSptr(info.bundleName_, GetPersistentId());
+    if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
+        // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
+        scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "RenameSnapshotFromOldPersistentId %{public}d", info.persistentId_);
+    }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Create KeyboardSession");
 }
 

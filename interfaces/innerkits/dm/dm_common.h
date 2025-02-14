@@ -481,6 +481,12 @@ struct MultiScreenPositionOptions {
     uint32_t startY_;
 };
 
+struct MultiScreenInfo {
+    MultiScreenMode multiScreenMode;
+    MultiScreenPositionOptions mainScreenOption;
+    MultiScreenPositionOptions secondaryScreenOption;
+};
+
 /**
  * @brief fold display physical resolution
  */

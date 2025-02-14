@@ -219,6 +219,15 @@ public:
     sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
 
     /**
+     * @brief get available area of the display.(the screen area without dock and statusbar)
+     *
+     * @param displayId Id of the target display.
+     * @param area available area of the screen.
+     * @return DMError
+     */
+    DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
+
+    /**
      * @brief Get the display object by corresponding screenId.
      *
      * @param screenId The id of the target screen.

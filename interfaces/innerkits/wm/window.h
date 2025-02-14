@@ -166,6 +166,16 @@ public:
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
 };
 
+class IWindowCrossAxisListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window cross screen axis state changed.
+     *
+     * @param state is window across screen axis.
+     */
+    virtual void OnCrossAxisChange(CrossAxisState state) {}
+};
+
 /**
  * @class IWindowStatusChangeListener
  *
@@ -2133,6 +2143,13 @@ public:
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
 
     /**
+     * @brief get compatible mode in pc.
+     *
+     * @return True means window is compatible mode in pc, false means the opposite.
+     */
+    virtual bool GetCompatibleModeInPc() const { return false; }
+
+    /**
      * @brief Register transfer component data callback.
      *
      * @param func Function to notify transfer component data.
@@ -3101,6 +3118,49 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get cross screen axis state.
+     *
+     * @return The cross screen axis state of the Window.
+     */
+    virtual CrossAxisState GetCrossAxisState() { return CrossAxisState::STATE_INVALID; }
+
+    /**
+     * @brief Register window screen axis state change listener.
+     *
+     * @param listener IWindowCrossAxisChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window screen axis state change listener.
+     *
+     * @param listener IWindowCrossAxisChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Get custom extension param.
+     *
+     * @param want the want to store param.
+     */
+    virtual void GetExtensionConfig(AAFwk::WantParams& want) const {}
+ 
+    /**
+     * @brief Update custom extension param.
+     *
+     * @param want the want to update param.
+     */
+    virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 };
 }
 }

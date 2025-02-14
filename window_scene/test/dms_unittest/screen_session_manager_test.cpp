@@ -23,6 +23,7 @@
 #include <surface.h>
 #include "scene_board_judgement.h"
 #include "fold_screen_state_internel.h"
+#include "common_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,6 +50,7 @@ public:
     ScreenId DEFAULT_SCREEN_ID {0};
     ScreenId VIRTUAL_SCREEN_ID {2};
     ScreenId VIRTUAL_SCREEN_RS_ID {100};
+    void SetAceessTokenPermission(const std::string processName);
 };
 
 sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
@@ -56,6 +58,10 @@ sptr<ScreenSessionManager> ScreenSessionManagerTest::ssm_ = nullptr;
 void ScreenSessionManagerTest::SetUpTestCase()
 {
     ssm_ = new ScreenSessionManager();
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("foundation", perms, 1);
 }
 
 void ScreenSessionManagerTest::TearDownTestCase()
