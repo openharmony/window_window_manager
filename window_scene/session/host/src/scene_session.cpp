@@ -3589,7 +3589,10 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 void SceneSession::NotifyPrivacyModeChange()
 {
     bool isPrivacyMode = GetSessionProperty()->GetPrivacyMode();
-    bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
+    {
+        std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
+        bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
+    }
     TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
         "last privacyMode:%{public}d",
         GetPersistentId(), currExtPrivacyMode, isPrivacyMode, isPrivacyMode_);
