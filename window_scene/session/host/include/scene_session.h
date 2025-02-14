@@ -1046,7 +1046,7 @@ private:
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
         behindWindowFilterEnabledModifier_; // Only accessed on main thread
-    bool isDragEnd_ = false;
+    bool isDragging_ = false;
     std::atomic<bool> isCrossAxisOfLayout_ = false;
     std::atomic<uint32_t> crossAxisState_ = 0;
 
