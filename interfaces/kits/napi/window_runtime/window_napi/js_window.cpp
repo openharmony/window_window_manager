@@ -6842,11 +6842,11 @@ static void CreateNewSubWindowTask(const sptr<Window>& windowToken, const std::s
             static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "windowOption is null"));
         return;
     }
-    if (!WindowHelper::IsSubWindow(windowToken->GetType()) &&
+    if (!WindowHelper::IsFloatOrSubWindow(windowToken->GetType()) &&
         !WindowHelper::IsMainWindow(windowToken->GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "This is not subWindow or mainWindow.");
+        TLOGE(WmsLogTag::WMS_SUB, "invalid window type: %{public}d", windowToken->GetType());
         task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "This is not subWindow or mainWindow"));
+            "invalid window type"));
         return;
     }
     windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
