@@ -35,7 +35,7 @@ public:
         bool shouldBackToCaller = true) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override;
     WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override;
-    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override;
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override;
     WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) override;
     WSError GetSessionInfos(const std::string& deviceId, int32_t numMax,
         std::vector<SessionInfoBean>& sessionInfos) override;
@@ -83,7 +83,9 @@ public:
         const std::vector<AppUseControlInfo>& controlList) override;
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override;
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override;
-    
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) override;
+
 protected:
     SceneSessionManagerLite() = default;
     virtual ~SceneSessionManagerLite() = default;

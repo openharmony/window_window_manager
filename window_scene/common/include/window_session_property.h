@@ -107,8 +107,6 @@ public:
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
     WindowType GetWindowType() const;
-    bool GetFocusable() const;
-    bool GetFocusableOnShow() const;
     bool GetTouchable() const;
     bool GetDragEnabled() const;
     bool GetHideNonSystemFloatingWindows() const;
@@ -213,18 +211,28 @@ public:
     bool GetIsUIExtensionSubWindowFlag() const;
     void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
     bool GetIsUIExtensionAbilityProcess() const;
+    void SetConstrainedModal(bool isConstrainedModal);
+    bool IsConstrainedModal() const;
 
     /**
      * PC Window
      */
-    void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
-    void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
+    void SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void GetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const;
 
     /*
      * Keyboard
      */
     void SetKeyboardViewMode(KeyboardViewMode mode);
     KeyboardViewMode GetKeyboardViewMode() const;
+
+    /*
+     * Window focus
+     */
+    bool GetFocusable() const;
+    bool GetFocusableOnShow() const;
+    bool GetExclusivelyHighlighted() const;
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
 
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
@@ -253,6 +261,7 @@ private:
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
     bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
+    bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -277,6 +286,7 @@ private:
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
     void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
+    void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
     mutable std::mutex requestRectMutex_;
@@ -284,8 +294,6 @@ private:
     mutable std::mutex windowRectMutex_;
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
-    bool focusable_ { true };
-    bool focusableOnShow_ { true };
     bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };
@@ -372,17 +380,25 @@ private:
     bool isUIExtensionSubWindowFlag_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isConstrainedModal_ = false;
 
     /**
      * PC Window
      */
     mutable std::mutex supportWindowModesMutex_;
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
 
     /*
      * Keyboard
      */
     KeyboardViewMode keyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+
+    /*
+     * Window Focus
+     */
+    bool focusable_ { true };
+    bool focusableOnShow_ { true };
+    bool isExclusivelyHighlighted_ { true };
 };
 
 struct FreeMultiWindowConfig : public Parcelable {

@@ -86,6 +86,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
     TYPE_HANDWRITE,
+    TYPE_WALLET_SWIPE_CARD,
     TYPE_END
 };
 
@@ -122,6 +123,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
     { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
     { WindowType::WINDOW_TYPE_HANDWRITE,           ApiWindowType::TYPE_HANDWRITE         },
+    { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -147,6 +149,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
     { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
     { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
+    { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -282,6 +285,24 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     { ApiModalityType::WINDOW_MODALITY,         ModalityType::WINDOW_MODALITY      },
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };
+
+using AsyncCallbackFunc_ = std::function<void(napi_env env, size_t argc, napi_value* argv)>;
+
+class AsyncCallback : virtual public RefBase {
+public:
+    AsyncCallbackFunc_ resolvedCallback_ = nullptr;
+    AsyncCallbackFunc_ rejectedCallback_ = nullptr;
+    AsyncCallback(AsyncCallbackFunc_ resolvedCallback, AsyncCallbackFunc_ rejectedCallback)
+        : resolvedCallback_(resolvedCallback), rejectedCallback_(rejectedCallback) {}
+};
+
+    /*
+     * Promise
+     */
+    bool CheckPromise(napi_env env, napi_value promiseObj);
+    napi_value ResolvedCallback(napi_env env, napi_callback_info info);
+    napi_value RejectedCallback(napi_env env, napi_callback_info info);
+    bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallback);
 
     napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos);
     napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info);

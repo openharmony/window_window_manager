@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include "window_test_utils.h"
 #include "wm_common.h"
+#include "scene_board_judgement.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -130,13 +132,22 @@ HWTEST_F(WindowInputMethodTest, ShowKeyboard01, Function | MediumTest | Level3)
         .rect = Utils::customAppRect_,
         .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
         .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = true,
+        .needAvoid = false,
         .parentLimit = false,
         .showWhenLocked = true,
         .parentId = INVALID_WINDOW_ID,
     };
     const sptr<Window>& fullWindow = Utils::CreateTestWindow(windowInfo);
     if (fullWindow == nullptr) {
+        return;
+    }
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        sleep(TEST_SLEEP_SECOND);
+        ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(KeyboardViewMode::NON_IMMERSIVE_MODE));
+        sleep(TEST_SLEEP_SECOND);
+        ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::NON_IMMERSIVE_MODE));
+        sleep(TEST_SLEEP_SECOND);
+        fullWindow->Destroy();
         return;
     }
     ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(KeyboardViewMode::DARK_IMMERSIVE_MODE));

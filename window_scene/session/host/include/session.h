@@ -85,6 +85,7 @@ using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfi
 using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
+using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
 
 class ILifecycleListener {
 public:
@@ -292,7 +293,6 @@ public:
     sptr<ScenePersistence> GetScenePersistence() const;
     void SetParentSession(const sptr<Session>& session);
     sptr<Session> GetParentSession() const;
-    sptr<Session> GetMainSession();
     void BindDialogToParentSession(const sptr<Session>& session);
     void RemoveDialogToParentSession(const sptr<Session>& session);
     std::vector<sptr<Session>> GetDialogVector() const;
@@ -367,6 +367,9 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
+    virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
+    WSError NotifyHighlightChange(bool isHighlight);
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
 
     /*
      * Multi Window
@@ -543,6 +546,12 @@ public:
      */
     bool IsScreenLockWindow() const;
 
+    /*
+     * PC Window
+     */
+    sptr<Session> GetMainSession() const;
+    sptr<Session> GetMainOrFloatSession() const;
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -638,6 +647,8 @@ protected:
     NotifySystemSessionKeyEventFunc systemSessionKeyEventFunc_;
     NotifyContextTransparentFunc contextTransparentFunc_;
     NotifyFrameLayoutFinishFunc frameLayoutFinishFunc_;
+    std::mutex highlightChangeFuncMutex_;
+    NotifyHighlightChangeFunc highlightChangeFunc_;
 
     /**
      * Window LifeCycle
@@ -686,7 +697,8 @@ protected:
      * Window Focus
      */
     bool isFocused_ = false;
-    bool blockingFocus_ {false};
+    bool blockingFocus_ { false };
+    bool isHighlight_ { false };
 
     uint32_t uiNodeId_ = 0;
     float aspectRatio_ = 0.0f;

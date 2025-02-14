@@ -84,6 +84,7 @@ public:
         TRANS_ID_GET_ROOT_MAIN_WINDOW_ID,
         TRANS_ID_UI_EXTENSION_CREATION_CHECK,
         TRANS_ID_MINIMIZE_MAIN_SESSION,
+        TRANS_ID_HAS_FLOAT_FOREGROUND,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -94,7 +95,7 @@ public:
         bool shouldBackToCaller = true) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
-    virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
+    virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
@@ -158,6 +159,20 @@ public:
      * @permission application requires SA permission or SystemApp permission
      */
     virtual WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) = 0;
+
+    /**
+     * @brief Query if there is float type window foreground of an abilityToken
+     *
+     * This function is used to query if there is float type window foreground of an ability
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param abilityToken token of ability
+     * @param hasOrNot result for output
+     */
+    virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H

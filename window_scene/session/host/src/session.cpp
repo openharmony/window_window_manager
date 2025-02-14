@@ -1062,7 +1062,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-        property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
+        property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     }
     if (sessionProperty && property) {
         property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
@@ -1829,12 +1829,24 @@ sptr<Session> Session::GetParentSession() const
     return parentSession_;
 }
 
-sptr<Session> Session::GetMainSession()
+sptr<Session> Session::GetMainSession() const
 {
     if (SessionHelper::IsMainWindow(GetWindowType())) {
-        return this;
+        return const_cast<Session*>(this);
     } else if (parentSession_) {
         return parentSession_->GetMainSession();
+    } else {
+        return nullptr;
+    }
+}
+
+sptr<Session> Session::GetMainOrFloatSession() const
+{
+    auto windowType = GetWindowType();
+    if (SessionHelper::IsMainWindow(windowType) || windowType == WindowType::WINDOW_TYPE_FLOAT) {
+        return const_cast<Session*>(this);
+    } else if (parentSession_) {
+        return parentSession_->GetMainOrFloatSession();
     } else {
         return nullptr;
     }
@@ -2197,6 +2209,10 @@ void Session::ResetSnapshot()
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
     snapshot_ = nullptr;
+    if (scenePersistence_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "scenePersistence_ %{public}d nullptr", persistentId_);
+        return;
+    }
     scenePersistence_->ResetSnapshotCache();
 }
 
@@ -2220,15 +2236,7 @@ void Session::SaveSnapshot(bool useFfrt)
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
         }
-        std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session &&
-                (session->GetSystemConfig().uiType_ == UI_TYPE_PC ||
-                 session->GetSystemConfig().freeMultiWindowEnable_)) {
-                session->ResetSnapshot();
-            }
-        };
-        session->scenePersistence_->SaveSnapshot(pixelMap, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap);
     };
     if (!useFfrt) {
         task();
@@ -2513,6 +2521,55 @@ WSError Session::RequestFocus(bool isFocused)
     }
     FocusChangeReason reason = FocusChangeReason::CLIENT_REQUEST;
     NotifyRequestFocusStatusNotifyManager(isFocused, false, reason);
+    return WSError::WS_OK;
+}
+
+void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "property is nullptr, windowId: %{public}d", persistentId_);
+        return;
+    }
+    if (isExclusivelyHighlighted == property->GetExclusivelyHighlighted()) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d", persistentId_,
+        isExclusivelyHighlighted);
+    property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
+}
+
+WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS,
+        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
+        persistentId_, isHighlight_, isHighlight, needBlockHighlightNotify);
+    if (isHighlight_ == isHighlight) {
+        return WSError::WS_DO_NOTHING;
+    }
+    isHighlight_ = isHighlight;
+    if (needBlockHighlightNotify) {
+        NotifyHighlightChange(isHighlight);
+    }
+    std::lock_guard lock(highlightChangeFuncMutex_);
+    if (highlightChangeFunc_ != nullptr) {
+        highlightChangeFunc_(isHighlight);
+    }
+    return WSError::WS_OK;
+}
+
+WSError Session::NotifyHighlightChange(bool isHighlight)
+{
+    if (IsSystemSession()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+            persistentId_, GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyHighlightChange(isHighlight);
     return WSError::WS_OK;
 }
 
@@ -2923,6 +2980,10 @@ WSError Session::ProcessBackEvent()
         TLOGW(WmsLogTag::WMS_EVENT, "Session is invalid, id: %{public}d state: %{public}u",
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session stage is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
     }
     if (auto remoteObject = sessionStage_->AsObject();
         remoteObject && !remoteObject->IsProxyObject()) {
