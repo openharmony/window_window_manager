@@ -986,14 +986,16 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    int32_t lowerScreenPosY =
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    auto screenHeight = defaultDisplayRect.height_ + foldCreaseRect.height_ + virtualDisplayRect.height_;
+    if (rect.posY_ > screenHeight) {
+        rect.posY_ -= lowerScreenPosY;
+        return clientDisplayId_;
+    }
     DisplayId updatedDisplayId = DEFAULT_DISPLAY_ID;
     if (rect.posY_ >= lowerScreenPosY) {
-        if (WindowHelper::IsMainWindow(GetWindowType())) {
-            updatedDisplayId = VIRTUAL_DISPLAY_ID;
-        }
+        updatedDisplayId = VIRTUAL_DISPLAY_ID;
         rect.posY_ -= lowerScreenPosY;
     }
     return updatedDisplayId;
@@ -1016,7 +1018,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         return;
     }
     if (GetScreenId() != DISPLAY_ID_INVALID &&
-        !PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId())) {
+        !PcFoldScreenManager::GetInstance().IsPcFoldScreen(GetScreenId())) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 " not need",
             GetPersistentId(), GetScreenId());
         return;

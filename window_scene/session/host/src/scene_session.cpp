@@ -1587,11 +1587,13 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             GetPersistentId(), GetScreenId());
         return;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lastRect: %{public}s, currRect: %{public}s",
+        GetPersistentId(), winRect_.ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
     if (configDisplayId_ != DISPLAY_ID_INVALID &&
-        !PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(configDisplayId_)) {
+        !PcFoldScreenManager::GetInstance().IsPcFoldScreen(configDisplayId_)) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, configDisplayId: %{public}" PRIu64,
             GetPersistentId(), configDisplayId_);
         return;
@@ -1606,13 +1608,16 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     if (configDisplayId_ != VIRTUAL_DISPLAY_ID && clientDisplayId != VIRTUAL_DISPLAY_ID) {
         return;
     }
-    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-        PcFoldScreenManager::GetInstance().GetDisplayRects();
-    auto lowerScreenPosY =
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    rect.posY_ += lowerScreenPosY;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lowerScreenPosY: %{public}d, output: %{public}s",
-        GetPersistentId(), lowerScreenPosY, rect.ToString().c_str());
+    if (rect.posY_ >= 0) {
+        const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+            PcFoldScreenManager::GetInstance().GetDisplayRects();
+        auto lowerScreenPosY =
+            defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+        rect.posY_ += lowerScreenPosY;
+    } else {
+        rect.posY_ += winRect_.posY_;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, output: %{public}s", GetPersistentId(), rect.ToString().c_str());
 }
 
 /** @note @window.layout */
