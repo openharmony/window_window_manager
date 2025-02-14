@@ -111,7 +111,7 @@ bool PcFoldScreenManager::IsHalfFoldedOnMainDisplay(DisplayId displayId) const
     return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED && displayId == DEFAULT_DISPLAY_ID;
 }
 
-bool PcFoldScreenManager::IsHalfFoldedDisplayId(DisplayId displayId) const
+bool PcFoldScreenManager::IsPcFoldScreen(DisplayId displayId) const
 {
     return displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID;
 }
