@@ -131,6 +131,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetRootMainWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_MINIMIZE_MAIN_SESSION):
             return HandleMinimizeMainSession(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_HAS_FLOAT_FOREGROUND):
+            return HandleHasFloatingWindowForeground(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -801,6 +803,27 @@ int SceneSessionManagerLiteStub::HandleMinimizeMainSession(MessageParcel& data, 
         TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed.");
         return ERR_INVALID_DATA;
     };
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "in");
+    sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "AbilityToken is null.");
+        return ERR_INVALID_DATA;
+    }
+    bool hasOrNot = false;
+    WMError errCode = HasFloatingWindowForeground(abilityToken, hasOrNot);
+    if (!reply.WriteBool(hasOrNot)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write hasOrNot failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
