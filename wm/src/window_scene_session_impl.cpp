@@ -2625,6 +2625,12 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
+    return SetSupportedWindowModesInner(supportedWindowModes);
+}
+
+WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+{
     auto size = supportedWindowModes.size();
     if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
@@ -2634,6 +2640,13 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
     uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
     if (windowModeSupportType == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is 0");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool onlySupportSplit = (windowModeSupportType ==
+                            (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                             WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY));
+    if (onlySupportSplit) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is only support split");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
