@@ -2243,7 +2243,12 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     }
     // 多屏协作灭屏不通知锁屏
     gotScreenOffNotify_  = false;
-    sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
+    if (!g_isPcDevice && reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT &&
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS &&
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON &&
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
+    }
     sessionDisplayPowerController_->isSuspendBegin_ = true;
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
