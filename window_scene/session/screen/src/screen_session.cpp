@@ -335,6 +335,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
+    displayInfo->SetOriginRotation(property_.GetScreenRotation());
     return displayInfo;
 }
 
