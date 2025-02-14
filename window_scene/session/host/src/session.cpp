@@ -2703,21 +2703,21 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
     property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
 }
 
-WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
+WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify)
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
-        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d",
-        persistentId_, isHighlight_, isHighlight, isNotifyHighlightChange);
+        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
+        persistentId_, isHighlight_, isHighlight, needBlockHighlightNotify);
     if (isHighlight_ == isHighlight) {
         return WSError::WS_DO_NOTHING;
     }
     isHighlight_ = isHighlight;
-    if (isNotifyHighlightChange) {
+    if (needBlockHighlightNotify) {
         NotifyHighlightChange(isHighlight);
-        std::lock_guard lock(highlightChangeFuncMutex_);
-        if (highlightChangeFunc_ != nullptr) {
-            highlightChangeFunc_(isHighlight);
-        }
+    }
+    std::lock_guard lock(highlightChangeFuncMutex_);
+    if (highlightChangeFunc_ != nullptr) {
+        highlightChangeFunc_(isHighlight);
     }
     return WSError::WS_OK;
 }
