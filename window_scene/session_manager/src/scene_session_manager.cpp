@@ -8557,10 +8557,6 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
         info->wid_ = static_cast<int32_t>(sceneSession->GetPersistentId());
     }
     info->uiNodeId_ = sceneSession->GetUINodeId();
-    WSRect wsRect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
-    info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
-    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-    info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
     info->type_ = sceneSession->GetWindowType();
     info->mode_ = sceneSession->GetWindowMode();
     info->layer_ = sceneSession->GetZOrder();
@@ -8569,11 +8565,20 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->scaleY_ = sceneSession->GetScaleY();
     info->bundleName_ = sceneSession->GetSessionInfo().bundleName_;
     info->touchHotAreas_ = sceneSession->GetTouchHotAreas();
-    info->displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
     info->isDecorEnable_ = sceneSession->GetSessionProperty()->IsDecorEnable();
+    WSRect wsRect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
+    DisplayId displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId)) {
+        displayId = sceneSession->TransformGlobalRectToRelativeRect(wsRect);
+    }
+    info->displayId_ = displayId;
+    info->focused_ = sceneSession->GetPersistentId() == GetFocusedSessionId(displayId);
+    info->windowRect_ = { wsRect.posX_, wsRect.posY_, wsRect.width_, wsRect.height_ };
     infos.emplace_back(info);
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, inWid=%{public}d, uiNId=%{public}d, bundleName=%{public}s",
-        info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str());
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, innerWid: %{public}d, nodeId: %{public}d"
+        ", bundleName: %{public}s, displayId: %{public}" PRIu64 ", rect: %{public}s",
+        info->wid_, info->innerWid_, info->uiNodeId_, info->bundleName_.c_str(),
+        info->displayId_, info->windowRect_.ToString().c_str());
     return true;
 }
 
@@ -11678,7 +11683,12 @@ std::shared_ptr<SkRegion> SceneSessionManager::GetDisplayRegion(DisplayId displa
         TLOGE(WmsLogTag::WMS_MAIN, "invalid display size of display: %{public}" PRIu64, displayId);
         return nullptr;
     }
-
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+        const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+            PcFoldScreenManager::GetInstance().GetDisplayRects();
+        displayHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "update display height in pc fold");
+    }
     SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
@@ -11689,20 +11699,27 @@ std::shared_ptr<SkRegion> SceneSessionManager::GetDisplayRegion(DisplayId displa
 void SceneSessionManager::UpdateDisplayRegion(const sptr<DisplayInfo>& displayInfo)
 {
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "update display region failed, displayInfo is nullptr.");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "update display region failed, displayInfo is nullptr.");
         return;
     }
     auto displayId = displayInfo->GetDisplayId();
     int32_t displayWidth = displayInfo->GetWidth();
     int32_t displayHeight = displayInfo->GetHeight();
     if (displayWidth == 0 || displayHeight == 0) {
-        TLOGE(WmsLogTag::WMS_MAIN, "invalid display size of display: %{public}" PRIu64, displayId);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid display size of display: %{public}" PRIu64, displayId);
         return;
+    }
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+        const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+            PcFoldScreenManager::GetInstance().GetDisplayRects();
+        displayHeight = virtualDisplayRect.posY_ + virtualDisplayRect.height_;
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "update display height in pc fold");
     }
     SkIRect rect {.fLeft = 0, .fTop = 0, .fRight = displayWidth, .fBottom = displayHeight};
     auto region = std::make_shared<SkRegion>(rect);
     displayRegionMap_[displayId] = region;
-    TLOGI(WmsLogTag::WMS_MAIN, "update display region to w=%{public}d, h=%{public}d", displayWidth, displayHeight);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "update display region to w: %{public}d, h: %{public}d",
+        displayWidth, displayHeight);
 }
 
 bool SceneSessionManager::GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight)
