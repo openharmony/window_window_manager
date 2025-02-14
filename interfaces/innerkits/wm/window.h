@@ -39,6 +39,10 @@ class Ability;
 enum class SupportWindowMode;
 }
 
+namespace OHOS::Global::Resource {
+class ResourceManager;
+} // namespace OHOS::Global::Resource
+
 namespace OHOS::AbilityRuntime {
 class AbilityContext;
 class Context;
@@ -689,8 +693,10 @@ public:
      * @brief Update configuration for all windows
      *
      * @param configuration configuration for app
+     * @param ignoreWindowContexts context of window which will be ignored
      */
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
 
     /**
      * @brief Update theme configuration for all windows
@@ -1440,6 +1446,15 @@ public:
      * @param configuration Window configuration.
      */
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
+
+    /**
+     * @brief Update Configuration.
+     *
+     * @param configuration Window configuration.
+     * @param resourceManager The resource manager
+     */
+    virtual void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) {}
 
     /**
      * @brief Update theme configuration.

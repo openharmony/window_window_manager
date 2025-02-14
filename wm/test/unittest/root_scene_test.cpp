@@ -21,6 +21,7 @@
 #include "root_scene.h"
 
 #include "app_mgr_client.h"
+#include "mock_uicontent.h"
 #include "singleton.h"
 #include "singleton_container.h"
 
@@ -101,6 +102,22 @@ HWTEST_F(RootSceneTest, UpdateConfiguration, Function | SmallTest | Level3)
 
     rootScene.uiContent_ = nullptr;
     rootScene.UpdateConfiguration(configuration);
+    ASSERT_EQ(1, rootScene.GetWindowId());
+}
+
+/**
+ * @tc.name: UpdateConfigurationForSpecified
+ * @tc.desc: UpdateConfigurationForSpecified Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UpdateConfigurationForSpecified, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+
+    rootScene.uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    rootScene.UpdateConfigurationForSpecified(configuration, resourceManager);
     ASSERT_EQ(1, rootScene.GetWindowId());
 }
 

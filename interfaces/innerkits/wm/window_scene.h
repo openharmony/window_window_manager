@@ -138,6 +138,15 @@ public:
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     /**
+     * Update ability configuration for specified window.
+     *
+     * @param configuration the configuration of ability
+     * @param resourceManager the resource manager
+     */
+    void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager);
+
+    /**
      * Set main window system bar property
      *
      * @param type the type of window

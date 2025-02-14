@@ -341,6 +341,26 @@ HWTEST_F(WindowSceneTest, UpdateConfiguration02, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateConfigurationForSpecified
+ * @tc.desc: UpdateConfigurationForSpecified Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, UpdateConfigurationForSpecified, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    scene->UpdateConfigurationForSpecified(configuration, resourceManager);
+}
+
+/**
  * @tc.name: GetContentInfo01
  * @tc.desc: GetContentInfo nullptr
  * @tc.type: FUNC

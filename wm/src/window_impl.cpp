@@ -269,11 +269,25 @@ std::vector<sptr<Window>> WindowImpl::GetSubWindow(uint32_t parentId)
     return std::vector<sptr<Window>>(subWindowMap_[parentId].begin(), subWindowMap_[parentId].end());
 }
 
-void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
+    std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
+        ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     for (const auto& winPair : windowMap_) {
         auto window = winPair.second.second;
-        window->UpdateConfiguration(configuration);
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            continue;
+        }
+        auto context = window->GetContext();
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
+            continue;
+        }
+        if (ignoreWindowCtxSet.count(context) == 0) {
+            window->UpdateConfiguration(configuration);
+        }
     }
 }
 
@@ -3416,6 +3430,25 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
     }
     for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
         subWindow->UpdateConfiguration(configuration);
+    }
+}
+
+void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    if (uiContent_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+        uiContent_->UpdateConfiguration(configuration, resourceManager);
+    }
+    if (subWindowMap_.count(GetWindowId()) == 0) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "no subWindow, winId: %{public}u", GetWindowId());
+        return;
+    }
+    for (auto& subWindow : subWindowMap_.at(GetWindowId())) {
+        if (subWindow == nullptr) {
+            continue;
+        }
+        subWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
     }
 }
 
