@@ -41,6 +41,15 @@
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #endif
+#define RETURN_IF_CONVERT_FAIL(env, jsValue, value, paramName, logTag)                                    \
+    do {                                                                                                  \
+        if (!ConvertFromJsValue(env, jsValue, value)) {                                                   \
+            TLOGE(logTag, "Failed to convert parameter to %{public}s", paramName);                        \
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), \
+                "Input parameter is missing or invalid"));                                                \
+            return NapiGetUndefined(env);                                                                 \
+        }                                                                                                 \
+    } while (0)
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
@@ -1964,8 +1973,8 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
@@ -2001,35 +2010,22 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
 
     bool needRemoveSession = false;
     if (argc >= ARGC_TWO && GetType(env, argv[ARGC_ONE]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[ARGC_ONE], needRemoveSession)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to needRemoveSession");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
-        TLOGD(WmsLogTag::WMS_LIFE, "needRemoveSession: %{public}u", needRemoveSession);
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_ONE], needRemoveSession, "needRemoveSession", WmsLogTag::WMS_LIFE);
     }
 
     bool isSaveSnapshot = true;
     if (argc >= ARGC_THREE && GetType(env, argv[ARGC_TWO]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[ARGC_TWO], isSaveSnapshot)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isSaveSnapshot");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
-        TLOGD(WmsLogTag::WMS_LIFE, "isSaveSnapshot: %{public}u", isSaveSnapshot);
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_TWO], isSaveSnapshot, "isSaveSnapshot", WmsLogTag::WMS_LIFE);
     }
 
     bool isForceClean = false;
     if (argc >= ARGC_FOUR && GetType(env, argv[ARGC_THREE]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[ARGC_THREE], isForceClean)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isForceClean");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
-        TLOGD(WmsLogTag::WMS_LIFE, "isForceClean: %{public}u", isForceClean);
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_THREE], isForceClean, "isForceClean", WmsLogTag::WMS_LIFE);
+    }
+
+    bool isUserRequestedExit = false;
+    if (argc >= ARGC_FIVE && GetType(env, argv[ARGC_FOUR]) == napi_boolean) {
+        RETURN_IF_CONVERT_FAIL(env, argv[ARGC_FOUR], isUserRequestedExit, "isUserRequestedExit", WmsLogTag::WMS_LIFE);
     }
 
     if (errCode == WSErrorCode::WS_ERROR_INVALID_PARAM) {
@@ -2039,7 +2035,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionDestruction(napi_env env,
     }
 
     SceneSessionManager::GetInstance().RequestSceneSessionDestruction(sceneSession,
-        needRemoveSession, isSaveSnapshot, isForceClean);
+        needRemoveSession, isSaveSnapshot, isForceClean, isUserRequestedExit);
     return NapiGetUndefined(env);
 }
 
