@@ -644,7 +644,7 @@ DMRect SceneSession::CalcRectForStatusBar()
             statusBarRect.height_ = static_cast<uint32_t>(statusBar->GetSessionRect().height_);
         }
         if (static_cast<uint32_t>(statusBar->GetSessionRect().width_) > statusBarRect.width_) {
-            statusBarRect.width_ = static_cast<uint32_t>(statusBar->GetSessionRect().width_)
+            statusBarRect.width_ = static_cast<uint32_t>(statusBar->GetSessionRect().width_);
         }
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD, "width: %{public}d, height: %{public}d", statusBarRect.width_, statusBarRect.height_);
