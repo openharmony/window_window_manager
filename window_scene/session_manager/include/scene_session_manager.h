@@ -765,8 +765,8 @@ private:
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
     void UpdateOccupiedAreaIfNeed(int32_t persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
-    void UpdateHighlightStatus(DisplayId displayId, const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,
-        bool isProactiveUnfocus);
+    void UpdateHighlightStatus(DisplayId displayId, const sptr<SceneSession>& preSceneSession,
+        const sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus);
     void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
