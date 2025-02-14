@@ -171,6 +171,8 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
+    static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
+    static napi_value IsWindowHighlighted(napi_env env, napi_callback_info info);
 
     /**
      * Sub Window
@@ -182,6 +184,11 @@ public:
      */
     static napi_value SetGestureBackEnabled(napi_env env, napi_callback_info info);
     static napi_value GetGestureBackEnabled(napi_env env, napi_callback_info info);
+
+    /**
+     * Window Decor
+     */
+    static napi_value SetWindowTitle(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -261,6 +268,8 @@ private:
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDensityInfo(napi_env env, napi_callback_info info);
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
+    napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
+    napi_value OnIsWindowHighlighted(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -331,6 +340,11 @@ private:
      */
     napi_value OnSetGestureBackEnabled(napi_env env, napi_callback_info info);
     napi_value OnGetGestureBackEnabled(napi_env env, napi_callback_info info);
+
+    /**
+     * Window Decor
+     */
+    napi_value OnSetWindowTitle(napi_env env, napi_callback_info info);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;

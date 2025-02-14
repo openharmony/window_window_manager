@@ -27,7 +27,7 @@ bool LRUCache::Visit(int32_t key)
 
 int32_t LRUCache::Put(int32_t key)
 {
-    int32_t lastRemovedKey = -1;
+    int32_t lastRemovedKey = UNDEFINED_REMOVED_KEY;
     if (!Visit(key)) {
         if (cacheList_.size() >= capacity_) {
             lastRemovedKey = cacheList_.back();

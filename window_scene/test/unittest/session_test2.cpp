@@ -566,6 +566,23 @@ HWTEST_F(WindowSessionTest2, Snapshot01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: ResetSnapshot
+ * @tc.desc: ResetSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ResetSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    session_->snapshot_ = std::make_shared<Media::PixelMap>();
+
+    session_->ResetSnapshot();
+    ASSERT_EQ(nullptr, session_->snapshot_);
+}
+
+/**
  * @tc.name: SaveSnapshot
  * @tc.desc: SaveSnapshot Test
  * @tc.type: FUNC
@@ -2308,6 +2325,33 @@ HWTEST_F(WindowSessionTest2, GetMainSession, Function | SmallTest | Level2)
     ASSERT_NE(subSubSession->property_, nullptr);
     subSubSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     EXPECT_EQ(session, subSubSession->GetMainSession());
+}
+
+/**
+ * @tc.name: GetMainOrFloatSession
+ * @tc.desc: GetMainOrFloatSession Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, GetMainOrFloatSession, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    SessionInfo info;
+    info.abilityName_ = "GetMainOrFloatSession";
+    info.moduleName_ = "GetMainOrFloatSession";
+    info.bundleName_ = "GetMainOrFloatSession";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(session, session->GetMainOrFloatSession());
+
+    sptr<Session> floatSession = sptr<Session>::MakeSptr(info);
+    floatSession->SetParentSession(session);
+    floatSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    EXPECT_EQ(floatSession, floatSession->GetMainOrFloatSession());
+
+    sptr<Session> subSession = sptr<Session>::MakeSptr(info);
+    subSession->SetParentSession(floatSession);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(floatSession, subSession->GetMainOrFloatSession());
 }
 
 /**

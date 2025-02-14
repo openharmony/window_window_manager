@@ -20,6 +20,9 @@
 #include <unordered_map>
 
 namespace OHOS::Rosen {
+namespace {
+constexpr int32_t UNDEFINED_REMOVED_KEY = -1;
+} // namespace
 class LRUCache {
 public:
     LRUCache(std::size_t capacity) : capacity_(capacity) {}

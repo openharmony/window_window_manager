@@ -91,6 +91,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_KEYBOARD_PANEL,
     WINDOW_TYPE_SCB_DEFAULT,
     WINDOW_TYPE_TRANSPARENT_VIEW,
+    WINDOW_TYPE_WALLET_SWIPE_CARD,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -834,6 +835,7 @@ struct ExtensionWindowEventInfo {
     Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
     Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
     bool hasUpdatedRect = false;
+    bool isConstrainedModal = false;
 };
 
 /**
@@ -1134,6 +1136,12 @@ struct PiPTemplateInfo {
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
+};
+
+struct PiPWindowSize {
+    uint32_t width;
+    uint32_t height;
+    double scale;
 };
 
 using OnCallback = std::function<void(int64_t, int64_t)>;

@@ -52,7 +52,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError RegisterSessionListener(const sptr<ISessionListener>& listener) override
+    WSError RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover = false) override
     {
         return WSError::WS_OK;
     }
@@ -208,6 +208,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WMError MinimizeMainSession(const std::string& bundleName,
         int32_t appIndex, int32_t userId) override { return WMError::WM_OK; }
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasFloatingShowing) override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {

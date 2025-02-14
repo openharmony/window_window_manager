@@ -76,7 +76,7 @@ WSError SceneSessionManagerLite::GetSessionInfoByContinueSessionId(
     return SceneSessionManager::GetInstance().GetSessionInfoByContinueSessionId(continueSessionId, sessionInfo);
 }
 
-WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener)
+WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover)
 {
     WLOGFD("run RegisterSessionListener");
     return SceneSessionManager::GetInstance().RegisterSessionListener(listener);
@@ -283,5 +283,12 @@ WMError SceneSessionManagerLite::GetRootMainWindowId(int32_t persistentId, int32
 WMError SceneSessionManagerLite::MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId)
 {
     return SceneSessionManager::GetInstance().MinimizeMainSession(bundleName, appIndex, userId);
+}
+
+WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+    bool& hasOrNot)
+{
+    return SceneSessionManager::GetInstance().HasFloatingWindowForeground(abilityToken,
+        hasOrNot);
 }
 } // namespace OHOS::Rosen

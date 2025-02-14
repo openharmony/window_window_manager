@@ -84,6 +84,8 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_VIEW_MODE_CHANGE_CB,
+    HIGHLIGHT_CHANGE_CB,
+    SET_SUPPORT_WINDOW_MODES_CB,
 };
 
 class SceneSession;
@@ -128,6 +130,7 @@ private:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
+    static napi_value NotifyPipSizeChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
@@ -158,6 +161,9 @@ private:
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
+    static napi_value SetColorSpace(napi_env env, napi_callback_info info);
+    static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
+    static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -189,12 +195,13 @@ private:
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
     napi_value OnSetPiPControlEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPipSizeChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
+    napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info   info);
     napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
@@ -213,6 +220,9 @@ private:
     napi_value OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
+    napi_value OnSetColorSpace(napi_env env, napi_callback_info info);
+    napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
+    napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
@@ -271,6 +281,12 @@ private:
     void ProcessUpdateSessionLabelAndIconRegister();
     void ProcessKeyboardStateChangeRegister();
     void ProcessKeyboardViewModeChangeRegister();
+    void ProcessSetHighlightChangeRegister();
+
+    /*
+     * PC Window Layout
+     */
+    void ProcessSetSupportedWindowModesRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -326,9 +342,16 @@ private:
     void NotifyFrameLayoutFinish();
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+
+    /*
+     * PC Window Layout
+     */
+    void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
+
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
+    void NotifyHighlightChange(bool isHighlight);
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 

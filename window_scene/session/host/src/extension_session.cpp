@@ -233,6 +233,7 @@ WSError ExtensionSession::TransferAbilityResult(uint32_t resultCode, const AAFwk
 
 WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (extSessionEventCallback_ != nullptr &&
         extSessionEventCallback_->transferExtensionDataFunc_ != nullptr) {
         extSessionEventCallback_->transferExtensionDataFunc_(wantParams);
@@ -242,6 +243,7 @@ WSError ExtensionSession::TransferExtensionData(const AAFwk::WantParams& wantPar
 
 WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSError::WS_ERROR_INVALID_SESSION;
     }
@@ -252,6 +254,7 @@ WSError ExtensionSession::TransferComponentData(const AAFwk::WantParams& wantPar
 WSErrorCode ExtensionSession::TransferComponentDataSync(const AAFwk::WantParams& wantParams,
                                                         AAFwk::WantParams& reWantParams)
 {
+    TLOGI(WmsLogTag::WMS_UIEXT, "persistenId: %{public}d", GetPersistentId());
     if (!IsSessionValid()) {
         return WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     }
