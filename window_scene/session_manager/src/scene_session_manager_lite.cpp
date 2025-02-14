@@ -279,4 +279,9 @@ WMError SceneSessionManagerLite::GetRootMainWindowId(int32_t persistentId, int32
 {
     return SceneSessionManager::GetInstance().GetRootMainWindowId(persistentId, hostWindowId);
 }
+
+WMError SceneSessionManagerLite::MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId)
+{
+    return SceneSessionManager::GetInstance().MinimizeMainSession(bundleName, appIndex, userId);
+}
 } // namespace OHOS::Rosen
