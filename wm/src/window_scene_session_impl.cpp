@@ -614,6 +614,7 @@ void WindowSceneSessionImpl::UpdateDefaultStatusBarColor()
         std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
         if (config == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "config is null, winId: %{public}d", GetPersistentId());
+            return;
         }
         colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
         bool hasDarkRes = false;
