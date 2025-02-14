@@ -403,7 +403,7 @@ public:
     void NotifyUIRequestFocus();
     virtual void NotifyUILostFocus();
     WSError NotifyFocusStatus(bool isFocused);
-    virtual WSError UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange = true);
+    virtual WSError UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify);
     WSError NotifyHighlightChange(bool isHighlight);
     void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
 

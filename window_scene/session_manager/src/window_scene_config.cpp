@@ -53,6 +53,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "appWindows",                                   WindowSceneConfig::ValueType::MAP },
     { "cornerRadius",                                 WindowSceneConfig::ValueType::MAP },
     { "shadow",                                       WindowSceneConfig::ValueType::MAP },
+    { "shadowDark",                                   WindowSceneConfig::ValueType::MAP },
     { "focused",                                      WindowSceneConfig::ValueType::MAP },
     { "unfocused",                                    WindowSceneConfig::ValueType::MAP },
     { "decor",                                        WindowSceneConfig::ValueType::MAP },

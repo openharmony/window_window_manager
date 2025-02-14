@@ -986,14 +986,16 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
 {
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
         PcFoldScreenManager::GetInstance().GetDisplayRects();
-    int32_t lowerScreenPosY =
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    TLOGD(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    auto screenHeight = defaultDisplayRect.height_ + foldCreaseRect.height_ + virtualDisplayRect.height_;
+    if (rect.posY_ > screenHeight) {
+        rect.posY_ -= lowerScreenPosY;
+        return clientDisplayId_;
+    }
     DisplayId updatedDisplayId = DEFAULT_DISPLAY_ID;
     if (rect.posY_ >= lowerScreenPosY) {
-        if (WindowHelper::IsMainWindow(GetWindowType())) {
-            updatedDisplayId = VIRTUAL_DISPLAY_ID;
-        }
+        updatedDisplayId = VIRTUAL_DISPLAY_ID;
         rect.posY_ -= lowerScreenPosY;
     }
     return updatedDisplayId;
@@ -1016,7 +1018,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
         return;
     }
     if (GetScreenId() != DISPLAY_ID_INVALID &&
-        !PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(GetScreenId())) {
+        !PcFoldScreenManager::GetInstance().IsPcFoldScreen(GetScreenId())) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, displayId: %{public}" PRIu64 " not need",
             GetPersistentId(), GetScreenId());
         return;
@@ -2398,15 +2400,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
         if (!requirePersist) {
             return;
         }
-        std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session &&
-                (session->GetSystemConfig().IsPcWindow() ||
-                 session->GetSystemConfig().freeMultiWindowEnable_)) {
-                session->ResetSnapshot();
-            }
-        };
-        session->scenePersistence_->SaveSnapshot(pixelMap, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap);
     };
     if (!useFfrt) {
         task();
@@ -2711,21 +2705,21 @@ void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
     property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
 }
 
-WSError Session::UpdateHighlightStatus(bool isHighlight, bool isNotifyHighlightChange)
+WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify)
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
-        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, isNotify:%{public}d",
-        persistentId_, isHighlight_, isHighlight, isNotifyHighlightChange);
+        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
+        persistentId_, isHighlight_, isHighlight, needBlockHighlightNotify);
     if (isHighlight_ == isHighlight) {
         return WSError::WS_DO_NOTHING;
     }
     isHighlight_ = isHighlight;
-    if (isNotifyHighlightChange) {
+    if (needBlockHighlightNotify) {
         NotifyHighlightChange(isHighlight);
-        std::lock_guard lock(highlightChangeFuncMutex_);
-        if (highlightChangeFunc_ != nullptr) {
-            highlightChangeFunc_(isHighlight);
-        }
+    }
+    std::lock_guard lock(highlightChangeFuncMutex_);
+    if (highlightChangeFunc_ != nullptr) {
+        highlightChangeFunc_(isHighlight);
     }
     return WSError::WS_OK;
 }

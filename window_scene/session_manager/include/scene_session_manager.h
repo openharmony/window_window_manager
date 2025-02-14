@@ -706,6 +706,7 @@ private:
     /*
      * Window Focus
      */
+    std::mutex highlightIdsMutex_;
     std::unordered_set<int32_t> highlightIds_;
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
@@ -764,10 +765,10 @@ private:
     std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
     void UpdateOccupiedAreaIfNeed(int32_t persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
-    void UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,
-        bool isProactiveUnfocus);
-    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession);
-    void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession);
+    void UpdateHighlightStatus(DisplayId displayId, const sptr<SceneSession>& preSceneSession,
+        const sptr<SceneSession>& currSceneSession, bool isProactiveUnfocus);
+    void SetHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
+    void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
     std::string GetHighlightIdsStr();
 

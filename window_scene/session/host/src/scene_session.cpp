@@ -948,6 +948,9 @@ SubWindowModalType SceneSession::GetSubWindowModalType() const
     if (WindowHelper::IsToastSubWindow(windowType, property->GetWindowFlags())) {
         return SubWindowModalType::TYPE_TOAST;
     }
+    if (WindowHelper::IsTextMenuSubWindow(windowType, property->GetWindowFlags())) {
+        return SubWindowModalType::TYPE_TEXT_MENU;
+    }
     if (WindowHelper::IsDialogWindow(windowType)) {
         modalType = SubWindowModalType::TYPE_DIALOG;
     } else if (WindowHelper::IsModalSubWindow(windowType, property->GetWindowFlags())) {
@@ -1217,9 +1220,9 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: position change no need notify client id:%{public}d, "
                 "rect:%{public}s, preRect:%{public}s", where,
                 session->GetPersistentId(), rect.ToString().c_str(), session->winRect_.ToString().c_str());
-            session->winRect_ = rect;
+            session->SetWinRectWhenUpdateRect(rect);
         } else {
-            session->winRect_ = rect;
+            session->SetWinRectWhenUpdateRect(rect);
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
@@ -1229,6 +1232,17 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             rect.ToString().c_str(), session->GetClientRect().ToString().c_str());
     }, __func__ + GetRectInfo(rect));
     return WSError::WS_OK;
+}
+
+/** @note @window.layout */
+void SceneSession::SetWinRectWhenUpdateRect(const WSRect& rect)
+{
+    if (GetIsMidScene() && rect.posX_ == 0 && rect.posY_ == 0) {
+        winRect_.width_ = rect.width_;
+        winRect_.height_ = rect.height_;
+    } else {
+        winRect_ = rect;
+    }
 }
 
 WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
@@ -1595,11 +1609,13 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             GetPersistentId(), GetScreenId());
         return;
     }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lastRect: %{public}s, currRect: %{public}s",
+        GetPersistentId(), winRect_.ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
     if (configDisplayId_ != DISPLAY_ID_INVALID &&
-        !PcFoldScreenManager::GetInstance().IsHalfFoldedDisplayId(configDisplayId_)) {
+        !PcFoldScreenManager::GetInstance().IsPcFoldScreen(configDisplayId_)) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, configDisplayId: %{public}" PRIu64,
             GetPersistentId(), configDisplayId_);
         return;
@@ -1614,13 +1630,16 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     if (configDisplayId_ != VIRTUAL_DISPLAY_ID && clientDisplayId != VIRTUAL_DISPLAY_ID) {
         return;
     }
-    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-        PcFoldScreenManager::GetInstance().GetDisplayRects();
-    auto lowerScreenPosY =
-        defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-    rect.posY_ += lowerScreenPosY;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lowerScreenPosY: %{public}d, output: %{public}s",
-        GetPersistentId(), lowerScreenPosY, rect.ToString().c_str());
+    if (rect.posY_ >= 0) {
+        const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
+            PcFoldScreenManager::GetInstance().GetDisplayRects();
+        auto lowerScreenPosY =
+            defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+        rect.posY_ += lowerScreenPosY;
+    } else {
+        rect.posY_ += winRect_.posY_;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, output: %{public}s", GetPersistentId(), rect.ToString().c_str());
 }
 
 /** @note @window.layout */
@@ -2220,7 +2239,7 @@ void SceneSession::AddNormalModalUIExtension(const ExtensionWindowEventInfo& ext
     NotifySessionInfoChange();
 }
 
-void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+void SceneSession::UpdateNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d,pid=%{public}d,"
         "Rect:[%{public}d %{public}d %{public}d %{public}d]",
@@ -3873,6 +3892,10 @@ bool SceneSession::IsSystemSessionAboveApp() const
 /** @note @window.focus */
 bool SceneSession::IsSameMainSession(const sptr<SceneSession>& prevSession)
 {
+    if (prevSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "prevSession is nullptr");
+        return false;
+    }
     int32_t currSessionId = GetMainSessionId();
     int32_t prevSessionId = prevSession->GetMainSessionId();
     return currSessionId == prevSessionId && prevSessionId != INVALID_SESSION_ID;
@@ -6674,6 +6697,53 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
     }
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
+    }
+}
+
+void SceneSession::AddSidebarMaskColorModifier()
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+        return;
+    }
+
+    auto rsNodeTemp = Rosen::RSNodeMap::Instance().GetNode(surfaceNode->GetId());
+    if (rsNodeTemp) {
+        maskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
+            Rosen::RSColor::FromArgbInt(defaultMaskColor_));
+        std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier> modifier =
+            std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(maskColorValue_);
+        rsNodeTemp->AddModifier(modifier);
+    }
+}
+
+void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
+{
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+        return;
+    }
+    if (!maskColorValue_) {
+        TLOGE(WmsLogTag::WMS_PC, "maskColorValue is null");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_PC, "needBlur: %{public}d", needBlur);
+    // sidebar animation duration
+    constexpr int32_t duration = 150;
+    if (needBlur) {
+        Rosen::RSAnimationTimingProtocol timingProtocol;
+        timingProtocol.SetDuration(duration);
+        timingProtocol.SetDirection(true);
+        timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
+        timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
+
+        Rosen::RSNode::OpenImplicitAnimation(timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
+        maskColorValue_->Set(Rosen::RSColor::FromArgbInt(defaultMaskColor_));
+        Rosen::RSNode::CloseImplicitAnimation();
+    } else {
+        maskColorValue_->Set(Rosen::RSColor::FromArgbInt(snapshotMaskColor_));
     }
 }
 } // namespace OHOS::Rosen

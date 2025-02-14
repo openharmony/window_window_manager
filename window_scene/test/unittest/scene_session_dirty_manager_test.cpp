@@ -703,7 +703,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | S
 
     Rect windowRect {1, 1, 7, 8};
     extensionInfo.windowRect = windowRect;
-    sceneSession->UpdateModalUIExtension(extensionInfo);
+    sceneSession->UpdateNormalModalUIExtension(extensionInfo);
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
     ASSERT_EQ(windowInfoList.size(), 3);
     EXPECT_EQ(windowInfoList[2].defaultHotAreas.size(), 1);

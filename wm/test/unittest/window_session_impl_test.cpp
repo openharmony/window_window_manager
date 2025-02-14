@@ -2110,7 +2110,7 @@ HWTEST_F(WindowSessionImplTest, UpdateExtensionConfig, Function | SmallTest | Le
     wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     want->SetParams(wantParam);
     window->UpdateExtensionConfig(want);
-    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_END);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
 }
 } // namespace
 } // namespace Rosen
