@@ -69,7 +69,8 @@ public:
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
     WMError SetWindowLimits(WindowLimits& windowLimits, bool isForce) override;
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static sptr<Window> GetMainWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
@@ -78,6 +79,8 @@ public:
     // only main window, sub window, dialog window can use
     static int32_t GetParentMainWindowId(int32_t windowId);
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     WMError NotifyMemoryLevel(int32_t level) override;
 
     virtual WMError AddWindowFlag(WindowFlag flag) override;
@@ -342,6 +345,7 @@ private:
     bool IsDefaultDensityEnabled();
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
+    std::string specifiedColorMode_;
 
     /*
      * Sub Window

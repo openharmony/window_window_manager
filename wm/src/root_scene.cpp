@@ -149,13 +149,41 @@ void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configurat
     }
 }
 
-void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void RootScene::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
-    WLOGFD("in");
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+        return;
+    }
+    uiContent_->UpdateConfiguration(configuration, resourceManager);
+    if (configuration == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "config is null, winId: %{public}u", GetWindowId());
+        return;
+    }
+    std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    if (!RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "set dark color mode failed, winId: %{public}u, colorMode: %{public}s",
+            GetWindowId(), colorMode.c_str());
+    }
+}
+
+void RootScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
     if (staticRootScene_) {
-        staticRootScene_->UpdateConfiguration(configuration);
-        if (configurationUpdatedCallback_) {
-            configurationUpdatedCallback_(configuration);
+        auto context = staticRootScene_->GetContext();
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", staticRootScene_->GetWindowId());
+            return;
+        }
+        if (std::count(ignoreWindowContexts.begin(), ignoreWindowContexts.end(), context) != 0) {
+            staticRootScene_->UpdateConfiguration(configuration);
+            if (configurationUpdatedCallback_) {
+                configurationUpdatedCallback_(configuration);
+            }
         }
     }
 }
