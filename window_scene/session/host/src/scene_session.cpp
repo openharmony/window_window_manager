@@ -626,40 +626,29 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
     return WSError::WS_OK;
 }
 
-int32_t SceneSession::CalcAvoidAreaHeightForStatusBar()
+DMRect SceneSession::CalcRectForStatusBar()
 {
-    int32_t height = 0;
+    DMRect statusBarRect = {0, 0, 0, 0};
     if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback is null");
-        return height;
+        return statusBarRect;
     }
     const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
-        if (statusBar != nullptr && statusBar->IsVisible() && statusBar->GetSessionRect().height_ > height) {
-            height = statusBar->GetSessionRect().height_;
+        if (statusBar == nullptr) {
+            continue;
+        }
+        if (statusBar->IsVisible() &&
+            static_cast<uint32_t>(statusBar->GetSessionRect().height_) > statusBarRect.height_) {
+            statusBarRect.height_ = static_cast<uint32_t>(statusBar->GetSessionRect().height_);
+        }
+        if (static_cast<uint32_t>(statusBar->GetSessionRect().width_) > statusBarRect.width_) {
+            statusBarRect.width_ = static_cast<uint32_t>(statusBar->GetSessionRect().width_)
         }
     }
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "height: %{public}d", height);
-    return height;
-}
-
-int32_t SceneSession::CalcAvoidAreaWidthForStatusBar()
-{
-    int32_t width = 0;
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback is null");
-        return width;
-    }
-    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
-        WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
-    for (auto& statusBar : statusBarVector) {
-        if (statusBar != nullptr && statusBar->GetSessionRect().width_ > width) {
-            width = statusBar->GetSessionRect().width_;
-        }
-    }
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "width: %{public}d", width);
-    return width;
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "width: %{public}d, height: %{public}d", statusBarRect.width_, statusBarRect.height_);
+    return statusBarRect;
 }
 
 WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
@@ -677,8 +666,9 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
 
+    DMRect statusBarRect = CalcRectForStatusBar();
     if (systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) {
-        int32_t statusBarHeight = CalcAvoidAreaHeightForStatusBar();
+        uint32_t statusBarHeight = statusBarRect.height_;
         if (statusBarHeight > availableArea.posY_) {
             availableArea.posY_ = statusBarHeight;
         }
@@ -694,8 +684,8 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     }
 
     if (bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
-        systemConfig_.IsPhoneWindow() && isFoldable) {
-        availableArea.width_ = CalcAvoidAreaWidthForStatusBar();
+        systemConfig_.IsPhoneWindow() && isFoldable && statusBarRect.width_) {
+        availableArea.width_ = statusBarRect.width_;
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD,
           "the available area x is: %{public}d, y is: %{public}d, width is: %{public}d, height is: %{public}d",
