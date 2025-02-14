@@ -26,6 +26,7 @@
 #include <parameters.h>
 #include <hitrace_meter.h>
 #include "parameter.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "publish/scb_dump_subscriber.h"
 #include <ui/rs_node.h>
 
@@ -11475,6 +11476,17 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         WSRect hostRect = sceneSession->GetSessionRect();
+        auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+        auto needTransRect = currScreenFoldStatus != SuperFoldStatus::UNKNOWN &&
+            currScreenFoldStatus != SuperFoldStatus::FOLDED && currScreenFoldStatus != SuperFoldStatus::EXPANDED;
+        auto isSystemKeyboard = sceneSession->GetSessionProperty() != nullptr &&
+            sceneSession->GetSessionProperty()->IsSystemKeyboard();
+        if (!isSystemKeyboard && needTransRect) {
+            WSRect globalRect = hostRect;
+            sceneSession->TransformGlobalRectToRelativeRect(hostRect);
+            TLOGI(WmsLogTag::WMS_UIEXT, "Transform globalRect: %{public}s to relativeRect: %{public}s",
+                globalRect.ToString().c_str(), hostRect.ToString().c_str());
+        }
         rect = {hostRect.posX_, hostRect.posY_, hostRect.width_, hostRect.height_};
         return WSError::WS_OK;
     };
