@@ -3314,9 +3314,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
         }
         sceneSession->winRect_ = rect;
         sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
-        if (sceneSession->reason_ == SizeChangeReason::DRAG_END) {
-            sceneSession->isDragEnd_ = true; // isDragEnd_ only reset by Vsync, not flushuiparam
-        }
+        sceneSession->isDragging_ = true; // isDrag only reset by Vsync, not flushuiparam
         return WSError::WS_OK;
     }, __func__);
 }
@@ -5533,8 +5531,12 @@ WSError SceneSession::UpdateSizeChangeReason(SizeChangeReason reason)
 
 void SceneSession::ResetSizeChangeReasonIfDirty()
 {
-    if (IsDirtyWindow() && GetSizeChangeReason() != SizeChangeReason::DRAG &&
-        GetSizeChangeReason() != SizeChangeReason::DRAG_END) {
+    auto reason = GetSizeChangeReason();
+    if (IsDirtyWindow() &&
+        reason != SizeChangeReason::DRAG &&
+        reason != SizeChangeReason::DRAG_END &&
+        reason != SizeChangeReason::DRAG_START &&
+        reason != SizeChangeReason::DRAG_MOVE) {
         UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     }
 }
@@ -5546,15 +5548,13 @@ bool SceneSession::IsDirtyWindow()
 
 bool SceneSession::IsDirtyDragWindow()
 {
-    return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT) || isDragEnd_;
+    return dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT) || isDragging_;
 }
 
 void SceneSession::ResetDirtyDragFlags()
 {
     dirtyFlags_ &= ~static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT);
-    if (reason_ == SizeChangeReason::DRAG_END) {
-        isDragEnd_ = false;
-    }
+    isDragging_ = false;
 }
 
 void SceneSession::NotifyUILostFocus()
