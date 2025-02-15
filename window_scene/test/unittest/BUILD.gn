@@ -1389,6 +1389,19 @@ ohos_unittest("ws_dfx_hisysevent_test") {
   ]
 }
 
+ohos_unittest("ws_window_manager_lru_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_manager_lru_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [

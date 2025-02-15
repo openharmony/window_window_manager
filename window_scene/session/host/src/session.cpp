@@ -2197,6 +2197,10 @@ void Session::ResetSnapshot()
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
     snapshot_ = nullptr;
+    if (scenePersistence_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "scenePersistence_ %{public}d nullptr", persistentId_);
+        return;
+    }
     scenePersistence_->ResetSnapshotCache();
 }
 
@@ -2220,15 +2224,7 @@ void Session::SaveSnapshot(bool useFfrt)
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
         }
-        std::function<void()> func = [weakThis]() {
-            auto session = weakThis.promote();
-            if (session &&
-                (session->GetSystemConfig().uiType_ == UI_TYPE_PC ||
-                 session->GetSystemConfig().freeMultiWindowEnable_)) {
-                session->ResetSnapshot();
-            }
-        };
-        session->scenePersistence_->SaveSnapshot(pixelMap, func);
+        session->scenePersistence_->SaveSnapshot(pixelMap);
     };
     if (!useFfrt) {
         task();
