@@ -144,6 +144,12 @@ public:
     virtual void AfterDestroyed() {}
 };
 
+class IWindowSceneListner : virtual public RefBase {
+public:
+    virtual void AfterAttachToFrameNode() {}
+    virtual void AfterDetachFromFrameNode() {}
+};
+
 /**
  * @class IWindowChangeListener
  *
@@ -3176,6 +3182,14 @@ public:
      * @param want the want to update param.
      */
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
+
+    /**
+     * @brief Register window scene attach or detach framenode listener.
+     *
+     * @param listener IWindowSceneListner.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowSceneListener(const sptr<IWindowSceneListner>& listener) { return WMError::WM_OK; }
 };
 }
 }
