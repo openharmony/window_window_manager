@@ -198,6 +198,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowCrossAxisChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
             return HandleNotifyPipSizeChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_SCENE_CHANGE):
+            return HandleNotifyWindowSceneAttachStateChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -826,4 +828,16 @@ int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParc
     NotifyPipWindowSizeChange(width, height, scale);
     return ERR_NONE;
 }
+
+int SessionStageStub::HandleNotifyWindowSceneAttachStateChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "in");
+    bool isAttach = false;
+    if (!data.ReadBool(isAttach)) {
+        return ERR_INVALID_VALUE;
+    }
+    NotifyWindowSceneAttachStateChange(isAttach);
+    return ERR_NONE;
+}
+
 } // namespace OHOS::Rosen

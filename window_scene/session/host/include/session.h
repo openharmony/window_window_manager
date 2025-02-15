@@ -614,6 +614,11 @@ public:
     WindowLayoutInfo GetWindowLayoutInfoForWindowInfo() const;
     WindowMetaInfo GetWindowMetaInfoForWindowInfo() const;
 
+    /**
+     * Window Scene
+     */
+    void NotifyWindowSceneAttachStateChange(bool isAttach);
+
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
     public:

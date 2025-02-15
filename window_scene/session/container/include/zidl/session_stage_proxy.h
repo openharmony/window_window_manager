@@ -89,6 +89,7 @@ public:
     WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
+    WSError NotifyWindowSceneAttachStateChange(bool isAttach) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
