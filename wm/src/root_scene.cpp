@@ -105,6 +105,7 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
+    uiContent_->AddFocusActiveChangeCallback(notifyWatchFocusActiveChangeCallback_);
     RegisterInputEventListener();
 }
 
@@ -416,6 +417,11 @@ void RootScene::NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInf
         }
     };
     handler_->PostTask(task, __func__);
+}
+
+void RootScene::RegisterNotifyWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeCallback&& callback)
+{
+    notifyWatchFocusActiveChangeCallback_ = std::move(callback);
 }
 
 std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std::string& stringId)
