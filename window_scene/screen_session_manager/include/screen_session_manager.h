@@ -426,7 +426,7 @@ private:
     ScreenRotation ConvertOffsetToCorrectRotation(int32_t phyOffset);
     void MultiScreenModeChange(ScreenId mainScreenId, ScreenId secondaryScreenId, const std::string& operateType);
     void SetClientInner();
-    void RecoverMultiScreenMode();
+    void RecoverMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -509,6 +509,7 @@ private:
     std::mutex oldScbPidsMutex_;
     std::condition_variable scbSwitchCV_;
     int32_t currentUserId_ { 0 };
+    int32_t currentUserIdForSettings_ { 0 };
     int32_t currentScbPId_ { -1 };
     std::vector<int32_t> oldScbPids_ {};
     std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyMap_;
