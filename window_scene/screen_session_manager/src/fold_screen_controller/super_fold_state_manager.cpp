@@ -124,6 +124,11 @@ void SuperFoldStateManager::InitSuperFoldStateManagerMap()
         SuperFoldStatus::HALF_FOLDED,
         &SuperFoldStateManager::DoFoldedToHalfFolded);
 
+    AddStateManagerMap(SuperFoldStatus::FOLDED,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
+        SuperFoldStatus::EXPANDED,
+        &SuperFoldStateManager::DoAngleChangeExpanded);
+
     AddStateManagerMap(SuperFoldStatus::EXPANDED,
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
         SuperFoldStatus::HALF_FOLDED,
