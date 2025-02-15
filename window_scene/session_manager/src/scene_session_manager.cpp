@@ -122,7 +122,9 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
-constexpr std::size_t SNAPSHOT_CACHE_CAPACITY = 3;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 24;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -294,7 +296,21 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
         WLOGFE("Failed to register bundle status callback.");
     }
     ScbDumpSubscriber::Subscribe(g_scbSubscriber);
-    snapshotLRUCache_ = std::make_unique<LRUCache>(SNAPSHOT_CACHE_CAPACITY);
+
+    const static std::string invalidUitype = "";
+    const static std::unordered_map<std::string, std::size_t> SNAPSHOT_CACHE_CAPACITY_MAP = {
+        {UI_TYPE_PHONE, MAX_SNAPSHOT_IN_RECENT_PC},
+        {UI_TYPE_PAD,   MAX_SNAPSHOT_IN_RECENT_PAD},
+        {UI_TYPE_PC,    MAX_SNAPSHOT_IN_RECENT_PHONE},
+        {invalidUitype,            MAX_SNAPSHOT_IN_RECENT_PHONE},
+    };
+    std::size_t snapCapacity = SNAPSHOT_CACHE_CAPACITY_MAP.at(invalidUitype);
+    if (SNAPSHOT_CACHE_CAPACITY_MAP.find(systemConfig_.uiType_) != SNAPSHOT_CACHE_CAPACITY_MAP.end()) {
+        snapCapacity = SNAPSHOT_CACHE_CAPACITY_MAP.at(systemConfig_.uiType_);
+    } else {
+        TLOGI(WmsLogTag::WMS_PATTERN, "invalid type: %{public}s", systemConfig_.uiType_.c_str());
+    }
+    snapshotLRUCache_ = std::make_unique<LRUCache>(snapCapacity);
 }
 
 SceneSessionManager::~SceneSessionManager()
@@ -2323,7 +2339,7 @@ void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
     if (int32_t removedCacheId = snapshotLRUCache_->Put(persistentId);
-        removedCacheId != -1) {
+        removedCacheId != UNDEFINED_REMOVED_KEY) {
         if (auto removedCacheSession = GetSceneSession(removedCacheId)) {
             removedCacheSession->ResetSnapshot();
         } else {
@@ -2366,8 +2382,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             scnSession->SetSessionInfo(info);
         }
 
-        if (WindowHelper::IsMainWindow(scnSession->GetWindowType()) &&
-            systemConfig_.uiType_ != UI_TYPE_PC && !systemConfig_.freeMultiWindowEnable_) {
+        if (SessionHelper::IsMainWindow(scnSession->GetWindowType())) {
             PutSnapshotToCache(persistentId);
         }
 
