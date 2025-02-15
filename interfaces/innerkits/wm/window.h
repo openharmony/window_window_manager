@@ -144,7 +144,12 @@ public:
     virtual void AfterDestroyed() {}
 };
 
-class IWindowSceneListner : virtual public RefBase {
+/**
+ * @class IWindowSceneAttachStateChangeListner
+ *
+ * @brief IWindowSceneAttachStateChangeListner is used to observe the window scene attach or detach state changed.
+ */
+class IWindowSceneAttachStateChangeListner : virtual public RefBase {
 public:
     virtual void AfterAttachToFrameNode() {}
     virtual void AfterDetachFromFrameNode() {}
@@ -3186,10 +3191,13 @@ public:
     /**
      * @brief Register window scene attach or detach framenode listener.
      *
-     * @param listener IWindowSceneListner.
+     * @param listener IWindowSceneAttachStateChangeListner.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterWindowSceneListener(const sptr<IWindowSceneListner>& listener) { return WMError::WM_OK; }
+    virtual WMError RegisterWindowSceneAttachStateChangeListener(const sptr<IWindowSceneAttachStateChangeListner>& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
