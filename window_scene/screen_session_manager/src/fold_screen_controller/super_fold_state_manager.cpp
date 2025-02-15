@@ -43,6 +43,7 @@ static bool isHalfScreenSwitchOn_ = false;
 static bool isHalfFolded_ = false;
 static bool isKeyboardOn_ = false;
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
+static sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -404,6 +405,11 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
 
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession)
 {
+    HandleHalfScreenDisplayNotify(screenSession);
+}
+
+void SuperFoldStateManager::HandleHalfScreenDisplayNotify(sptr<ScreenSession> screenSession)
+{
     auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(false);
     screenSession->SetIsBScreenHalf(true);
@@ -432,6 +438,15 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
 }
 
 void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession)
+{
+    if (isHalfScreen_) {
+        TLOGI(WmsLogTag::DMS, "current is half screen");
+        return;
+    }
+    HandleFullScreenDisplayNotify(screenSession);
+}
+
+void SuperFoldStateManager::HandleFullScreenDisplayNotify(sptr<ScreenSession> screenSession)
 {
     auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(true);
@@ -552,6 +567,9 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
     if (toHalf) {
         screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
         screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
+        HandleHalfScreenDisplayNotify(screenSession);
+    } else {
+        HandleFullScreenDisplayNotify(screenSession);
     }
     OHOS::Rect rectCur{
         .x = 0,
