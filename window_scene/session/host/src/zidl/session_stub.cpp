@@ -184,6 +184,12 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowRectAutoSave(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY):
             return HandleNotifyExtensionDetachToDisplay(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
+            return HandleExtensionProviderData(data, reply, option);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
+            return HandleSetSessionLabelAndIcon(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE):
+            return HandleChangeKeyboardViewMode(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1031,6 +1037,13 @@ int SessionStub::HandleNotifyExtensionDetachToDisplay(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStub::HandleExtensionProviderData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "in");
+    static_cast<void>(SendExtensionData(data, reply, option));
+    return ERR_NONE;
+}
+
 int SessionStub::HandleRequestFocus(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called");
@@ -1090,6 +1103,42 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
     WSError errCode = OnSetWindowRectAutoSave(enabled);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply)
+{
+    std::string label;
+    if (!data.ReadString(label)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read label failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<Media::PixelMap> icon(data.ReadParcelable<Media::PixelMap>());
+    if (icon == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read icon failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = SetSessionLabelAndIcon(label, icon);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t mode = 0;
+    if (!data.ReadUint32(mode)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid data");
+        return ERR_INVALID_DATA;
+    }
+    if (mode >= static_cast<uint32_t>(KeyboardViewMode::VIEW_MODE_END)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid keyboard view mode");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(mode));
+    reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

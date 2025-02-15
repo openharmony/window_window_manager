@@ -98,7 +98,7 @@ public:
 
     virtual WSError RaiseToAppTop() { return WSError::WS_OK; }
     virtual WSError UpdateSessionRect(
-        const WSRect &rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
+        const WSRect& rect, const SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false)
     {
         return WSError::WS_OK;
     }
@@ -143,6 +143,10 @@ public:
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
 
     /**
      * @brief Close pip window while stopPip is called.
@@ -245,6 +249,20 @@ public:
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
+
+    /**
+     * @brief set session label and icon
+     *
+     * @param label
+     * @param icon
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission ohos.permission.SET_ABILITY_INSTANCE_INFO
+     * @scene 15
+     */
+    virtual WSError SetSessionLabelAndIcon(const std::string& label,
+        const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
+    
+    virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 

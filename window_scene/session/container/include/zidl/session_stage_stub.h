@@ -58,6 +58,7 @@ private:
     int HandleNotifyDensityFollowHost(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowVisibilityChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyTransformChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySingleHandTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetPipActionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSetPiPControlEvent(MessageParcel& data, MessageParcel& reply);
@@ -70,6 +71,8 @@ private:
     int HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySessionFullScreen(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int HandleSetDragActivated(MessageParcel& data, MessageParcel& reply);
     int HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

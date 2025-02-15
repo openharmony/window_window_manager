@@ -119,6 +119,7 @@ const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_LAUNCHER_DOCK
 };
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 4;
+constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 }
@@ -567,7 +568,7 @@ void WindowSceneSessionImpl::UpdateWindowState()
         bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
         bool isSystemWindow = WindowHelper::IsSystemWindow(windowType);
         UpdateWindowSizeLimits();
-        if ((isSubWindow || isDialogWindow || isSystemWindow) && property_->GetDragEnabled()) {
+        if ((isSubWindow || isDialogWindow || isSystemWindow) && IsWindowDraggable()) {
             WLOGFD("sync window limits to server side in order to make size limits work while resizing");
             UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         }
@@ -641,9 +642,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetUIExtensionDestroyCompleteInSubWindow();
         InputTransferStation::GetInstance().AddInputWindow(this);
     }
-    TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, \
-        id:%{public}d], state:%{public}u, windowmode:%{public}u",
-        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode());
+    TLOGD(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, "
+        "id:%{public}d], state:%{public}u, mode:%{public}u, displayId:%{public}" PRIu64,
+        property_->GetWindowName().c_str(), property_->GetPersistentId(), state_, GetMode(), property_->GetDisplayId());
     return ret;
 }
 
@@ -754,14 +755,14 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
         static_cast<int>(HOTZONE_TOUCH * vpr);
     AreaType dragType = AreaType::UNDEFINED;
     WindowType windowType = property_->GetWindowType();
-    bool isSystemDragEnabledType = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
-    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDragEnabledType) {
+    bool isSystemDraggableType = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
+    if (property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || isSystemDraggableType) {
         dragType = SessionHelper::GetAreaType(winX, winY, sourceType, outside, vpr, rect);
     }
     TLOGD(WmsLogTag::WMS_EVENT, "dragType: %{public}d", dragType);
     bool isDecorDialog = windowType == WindowType::WINDOW_TYPE_DIALOG && property_->IsDecorEnable();
-    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !property_->GetDragEnabled();
-    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !property_->GetDragEnabled();
+    bool isFixedSubWin = WindowHelper::IsSubWindow(windowType) && !IsWindowDraggable();
+    bool isFixedSystemWin = WindowHelper::IsSystemWindow(windowType) && !IsWindowDraggable();
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, needNotifyEvent);
     TLOGD(WmsLogTag::WMS_EVENT, "isFixedSystemWin %{public}d, isFixedSubWin %{public}d, isDecorDialog %{public}d",
@@ -1196,6 +1197,18 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     return ret;
 }
 
+WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Show keyboard with view mode: %{public}u", static_cast<uint32_t>(mode));
+    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode: %{public}u. Use default view mode",
+            static_cast<uint32_t>(mode));
+        mode = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    }
+    property_->SetKeyboardViewMode(mode);
+    return Show();
+}
+
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     auto hostSession = GetHostSession();
@@ -1265,6 +1278,33 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     TLOGI(WmsLogTag::WMS_LIFE, "Window hide success [id:%{public}d, type: %{public}d",
         property_->GetPersistentId(), type);
     return res;
+}
+
+WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
+        static_cast<uint32_t>(mode));
+    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (mode == property_->GetKeyboardViewMode()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "The mode is same.");
+        return WMError::WM_DO_NOTHING;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is invalid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetKeyboardViewMode(mode);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->ChangeKeyboardViewMode(mode));
 }
 
 WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
@@ -3843,9 +3883,9 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool
     }
 
     WindowType windowType = GetType();
-    bool isDragEnabledSystemWin = WindowHelper::IsSystemWindow(windowType) && property_->GetDragEnabled();
+    bool isDraggableSystemWin = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
     if (!WindowHelper::IsMainWindow(windowType) && !WindowHelper::IsSubWindow(windowType) &&
-        windowType != WindowType::WINDOW_TYPE_DIALOG && !isDragEnabledSystemWin) {
+        windowType != WindowType::WINDOW_TYPE_DIALOG && !isDraggableSystemWin) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowType not support. WinId:%{public}u, WindowType:%{public}u",
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -3971,31 +4011,20 @@ bool WindowSceneSessionImpl::GetDefaultDensityEnabled()
     return isDefaultDensityEnabled_.load();
 }
 
-float WindowSceneSessionImpl::GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo)
+float WindowSceneSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo)
 {
-    float vpr = 1.0f;
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is nullptr");
-        return vpr;
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
+        return INVALID_DEFAULT_DENSITY;
     }
-    bool isDefaultDensityEnabled = false;
-    if (WindowHelper::IsMainWindow(GetType())) {
-        isDefaultDensityEnabled = GetDefaultDensityEnabled();
-    } else {
-        auto mainWindow = FindMainWindowWithContext();
-        if (mainWindow) {
-            isDefaultDensityEnabled = mainWindow->GetDefaultDensityEnabled();
-            CopyUniqueDensityParameter(mainWindow);
-        }
+    if (IsDefaultDensityEnabled()) {
+        return displayInfo->GetDefaultVirtualPixelRatio();
     }
-    if (isDefaultDensityEnabled) {
-        vpr = displayInfo->GetDefaultVirtualPixelRatio();
-    } else if (useUniqueDensity_) {
-        vpr = virtualPixelRatio_;
-    } else {
-        vpr = displayInfo->GetVirtualPixelRatio();
+    if (useUniqueDensity_) {
+        return virtualPixelRatio_;
     }
-    return vpr;
+    auto vpr = GetMainWindowCustomDensity();
+    return vpr >= MINIMUM_CUSTOM_DENSITY && vpr <= MAXIMUM_CUSTOM_DENSITY ? vpr : displayInfo->GetVirtualPixelRatio();
 }
 
 WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
@@ -4155,6 +4184,7 @@ WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
     property_->SetDisplayId(displayId);
     NotifyDisplayInfoChange();
     if (displayIdChanged) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
         NotifyDisplayIdChange(displayId);
     }
     return WSError::WS_OK;
@@ -4187,6 +4217,10 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
+    }
+    if (IsSystemDensityChanged(displayInfo)) {
+        lastSystemDensity_ = displayInfo->GetVirtualPixelRatio();
+        NotifySystemDensityChange(displayInfo->GetVirtualPixelRatio());
     }
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
@@ -4534,6 +4568,98 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
     }
     enable = gestureBackEnabled_;
     TLOGD(WmsLogTag::WMS_IMMS, "id: %{public}u, enable: %{public}u", GetWindowId(), enable);
+    return WMError::WM_OK;
+}
+
+bool WindowSceneSessionImpl::IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo)
+{
+    if (MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
+        return false;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}d, lastDensity: %{public}f, currDensity: %{public}f",
+        GetPersistentId(), lastSystemDensity_, displayInfo->GetVirtualPixelRatio());
+    return true;
+}
+
+bool WindowSceneSessionImpl::IsDefaultDensityEnabled()
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return GetDefaultDensityEnabled();
+    }
+    if (auto mainWindow = FindMainWindowWithContext()) {
+        CopyUniqueDensityParameter(mainWindow);
+        return mainWindow->GetDefaultDensityEnabled();
+    }
+    return false;
+}
+
+float WindowSceneSessionImpl::GetMainWindowCustomDensity()
+{
+    if (WindowHelper::IsMainWindow(GetType())) {
+        return GetCustomDensity();
+    }
+    auto mainWindow = FindMainWindowWithContext();
+    return mainWindow ? mainWindow->GetCustomDensity() : UNDEFINED_DENSITY;
+}
+
+float WindowSceneSessionImpl::GetCustomDensity() const
+{
+    return customDensity_;
+}
+
+WMError WindowSceneSessionImpl::SetCustomDensity(float density)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, density=%{public}f", GetWindowId(), density);
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if ((density < MINIMUM_CUSTOM_DENSITY && !MathHelper::NearZero(density - UNDEFINED_DENSITY)) ||
+        density > MAXIMUM_CUSTOM_DENSITY) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set invalid density=%{public}f", GetWindowId(), density);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, must be app main window", GetWindowId());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (MathHelper::NearZero(customDensity_ - density)) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u set density not change", GetWindowId());
+        return WMError::WM_OK;
+    }
+    isDefaultDensityEnabled_ = false;
+    customDensity_ = density;
+    UpdateDensity();
+
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "display is null, winId=%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is null, winId=%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    densityInfo.systemDensity = displayInfo->GetVirtualPixelRatio();
+    densityInfo.defaultDensity = displayInfo->GetDefaultVirtualPixelRatio();
+    auto customDensity = UNDEFINED_DENSITY;
+    if (IsDefaultDensityEnabled()) {
+        customDensity = displayInfo->GetDefaultVirtualPixelRatio();
+    } else {
+        customDensity = GetCustomDensity();
+        customDensity = MathHelper::NearZero(customDensity - UNDEFINED_DENSITY) ? displayInfo->GetVirtualPixelRatio()
+                                                                                : customDensity;
+    }
+    densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
 }
 } // namespace Rosen

@@ -1847,6 +1847,32 @@ WSError SessionProxy::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
     return static_cast<WSError>(reply.ReadInt32());
 }
 
+WSError SessionProxy::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(mode))) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboard layout params write failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(reply.ReadInt32());
+}
+
 WMError SessionProxy::UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
@@ -1971,6 +1997,24 @@ void SessionProxy::NotifyExtensionEventAsync(uint32_t notifyEvent)
         TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed");
         return;
     }
+}
+
+WSError SessionProxy::SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    auto ret = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA), data,
+                                   reply, option);
+    if (ret != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "SendRequest failed, ret code: %{public}u", ret);
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    return WSError::WS_OK;
 }
 
 WSError SessionProxy::RequestFocus(bool isFocused)
@@ -2129,5 +2173,41 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
+}
+
+WSError SessionProxy::SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(label)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write label failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(icon.get())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write icon failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "sendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read ret failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return static_cast<WSError>(ret);
 }
 } // namespace OHOS::Rosen

@@ -2744,6 +2744,19 @@ HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | 
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
+
+/**
+ * @tc.name: GetLayoutTransform
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    Transform trans;
+    ASSERT_EQ(trans, window->GetLayoutTransform());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
 }
 } // namespace Rosen
 } // namespace OHOS

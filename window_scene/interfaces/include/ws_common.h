@@ -137,6 +137,12 @@ enum class StartMethod : int32_t {
     START_CALL
 };
 
+enum class SingleHandMode : int32_t {
+    LEFT = 0,
+    RIGHT,
+    MIDDLE
+};
+
 /**
  * @brief collaborator type.
  */
@@ -341,6 +347,11 @@ struct SessionInfo {
     bool isBackTransition_ = false;
     bool needClearInNotShowRecent_ = false;
     int32_t specifiedId = 0;
+
+    /*
+     * App Use Control
+     */
+    bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
 
     /*
      * UIExtension

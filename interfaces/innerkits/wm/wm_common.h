@@ -16,11 +16,17 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <parcel.h>
 #include <map>
-#include <float.h>
 #include <sstream>
 #include <string>
+
+#include <float.h>
+
+#include <parcel.h>
+
+#include "../dm/dm_common.h"
+#include "securec.h"
+#include "wm_math.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -281,6 +287,7 @@ enum class SystemBarSettingFlag : uint32_t {
 enum class ControlAppType : uint8_t {
     CONTROL_APP_TYPE_BEGIN = 0,
     APP_LOCK = 1,
+    PARENT_CONTROL,
     CONTROL_APP_TYPE_END,
 };
 
@@ -582,18 +589,21 @@ struct MainWindowState : public Parcelable {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
-    constexpr int32_t INVALID_USER_ID = -1;
-    constexpr int32_t SYSTEM_USERID = 0;
-    constexpr int32_t BASE_USER_RANGE = 200000;
-    constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+constexpr int32_t INVALID_USER_ID = -1;
+constexpr int32_t SYSTEM_USERID = 0;
+constexpr int32_t BASE_USER_RANGE = 200000;
+constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
+constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -678,6 +688,43 @@ private:
     static inline bool NearZero(float val)
     {
         return val < 0.001f && val > -0.001f;
+    }
+};
+
+/**
+ * @struct SingleHandTransform
+ *
+ * @brief parameter of transform in single hand mode.
+ */
+struct SingleHandTransform {
+    int32_t posX = 0;
+    int32_t posY = 0;
+    float scaleX = 0;
+    float scaleY = 0;
+
+    bool operator==(const SingleHandTransform& right) const
+    {
+        return posX == right.posX && MathHelper::NearEqual(scaleX, right.scaleX) &&
+               posY == right.posY && MathHelper::NearEqual(scaleY, right.scaleY);
+    }
+
+    bool operator!=(const SingleHandTransform& right) const
+    {
+        return !(*this == right);
+    }
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(posX) && parcel.WriteInt32(posY) &&
+               parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY);
+    }
+
+    void Unmarshalling(Parcel& parcel)
+    {
+        posX = parcel.ReadInt32();
+        posY = parcel.ReadInt32();
+        scaleX = parcel.ReadFloat();
+        scaleY = parcel.ReadFloat();
     }
 };
 
@@ -1156,6 +1203,34 @@ struct TitleButtonRect {
     }
 };
 
+/**
+ * @struct WindowLayoutInfo
+ *
+ * @brief Layout info for all windows on the screen.
+ */
+struct WindowLayoutInfo : public Parcelable {
+    Rect rect = { 0, 0, 0, 0 };
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+  
+    static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) ||
+            !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            delete windowLayoutInfo;
+            return nullptr;
+        }
+        return windowLayoutInfo;
+    }
+};
+
 /*
  * Config of keyboard animation
  */
@@ -1234,6 +1309,20 @@ struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveOut;
 };
 
+struct MoveConfiguration {
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 23;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
+};
+
 enum class CaseType {
     CASE_WINDOW_MANAGER = 0,
     CASE_WINDOW,
@@ -1283,6 +1372,29 @@ struct ExtensionWindowConfig {
     Rect windowRect;
     SubWindowOptions subWindowOptions;
     SystemWindowOptions systemWindowOptions;
+};
+
+/**
+ * @struct WindowDensityInfo
+ *
+ * @brief Currently available density
+ */
+struct WindowDensityInfo {
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
 };
 
 /**
@@ -1354,6 +1466,14 @@ public:
         delete params;
         return nullptr;
     }
+};
+
+enum class KeyboardViewMode: uint32_t {
+    NON_IMMERSIVE_MODE = 0,
+    IMMERSIVE_MODE,
+    LIGHT_IMMERSIVE_MODE,
+    DARK_IMMERSIVE_MODE,
+    VIEW_MODE_END,
 };
 }
 }

@@ -47,6 +47,8 @@ private:
     sptr<KeyboardSession> GetKeyboardSession(const std::string& abilityName, const std::string& bundleName);
     sptr<SceneSession> GetSceneSession(const std::string& abilityName, const std::string& bundleName);
     sptr<KSSceneSessionMocker> GetSceneSessionMocker(const std::string& abilityName, const std::string& bundleName);
+    static constexpr uint32_t SPLIT_TEST_SLEEP_S = 1;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void KeyboardSessionTest::SetUpTestCase()
@@ -1360,6 +1362,29 @@ HWTEST_F(KeyboardSessionTest, UseFocusIdIfCallingSessionIdInvalid01, Function | 
     keyboardSession->UseFocusIdIfCallingSessionIdInvalid();
     resultId = keyboardSession->GetCallingSessionId();
     ASSERT_EQ(resultId, 100);
+}
+
+/**
+ * @tc.name: ChangeKeyboardViewMode
+ * @tc.desc: test ChangeKeyboardViewMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest, ChangeKeyboardViewMode, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ChangeKeyboardViewMode";
+    info.bundleName_ = "ChangeKeyboardViewMode";
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
+
+    auto result = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    keyboardSession->changeKeyboardViewModeFunc_ = [&result](KeyboardViewMode mode) {
+        result = mode;
+    };
+    keyboardSession->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    sleep(SPLIT_TEST_SLEEP_S);
+    ASSERT_EQ(result, KeyboardViewMode::DARK_IMMERSIVE_MODE);
+    auto mode = keyboardSession->property_->GetKeyboardViewMode();
+    ASSERT_EQ(mode, KeyboardViewMode::DARK_IMMERSIVE_MODE);
 }
 }  // namespace
 }  // namespace Rosen

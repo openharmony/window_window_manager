@@ -81,6 +81,9 @@ enum class ListenerFuncType : uint32_t {
     SET_WINDOW_RECT_AUTO_SAVE_CB,
     UPDATE_APP_USE_CONTROL_CB,
     RESTORE_MAIN_WINDOW_CB,
+    UPDATE_SESSION_LABEL_AND_ICON_CB,
+    KEYBOARD_STATE_CHANGE_CB,
+    KEYBOARD_VIEW_MODE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -96,6 +99,7 @@ public:
     sptr<SceneSession> GetNativeSession() const;
 
 private:
+    static napi_value ActivateDragBySystem(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UpdateNativeVisibility(napi_env env, napi_callback_info info);
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
@@ -155,6 +159,7 @@ private:
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
 
+    napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
@@ -263,6 +268,9 @@ private:
     void ProcessRegisterCallback(ListenerFuncType listenerFuncType);
     void ProcessSetWindowRectAutoSaveRegister();
     void RegisterUpdateAppUseControlCallback();
+    void ProcessUpdateSessionLabelAndIconRegister();
+    void ProcessKeyboardStateChangeRegister();
+    void ProcessKeyboardViewModeChangeRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -318,6 +326,9 @@ private:
     void NotifyFrameLayoutFinish();
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+    void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+    void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
+    void OnKeyboardViewModeChange(KeyboardViewMode mode);
 
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
 

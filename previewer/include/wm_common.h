@@ -16,9 +16,13 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <parcel.h>
 #include <map>
+
 #include <float.h>
+
+#include <parcel.h>
+#include "dm_common.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -351,15 +355,19 @@ enum class WindowLayoutMode : uint32_t {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
 
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+
+constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
+constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
 }
 
 /**
@@ -535,6 +543,29 @@ struct SystemBarProperty {
 };
 
 /**
+ * @struct WindowDensityInfo
+ *
+ * @brief Currently available density
+ */
+struct WindowDensityInfo {
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
+};
+
+/**
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
@@ -700,6 +731,34 @@ struct TitleButtonRect {
     }
 };
 
+/**
+ * @struct WindowLayoutInfo
+ *
+ * @brief Layout info for all windows on the screen.
+ */
+struct WindowLayoutInfo : public Parcelable {
+    Rect rect = { 0, 0, 0, 0 };
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+  
+    static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo;
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) ||
+            !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            delete windowLayoutInfo;
+            return nullptr;
+        }
+        return windowLayoutInfo;
+    }
+};
+
 /*
  * Config of keyboard animation
  */
@@ -776,6 +835,20 @@ public:
 struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveIn;
     KeyboardAnimationCurve curveOut;
+};
+
+struct MoveConfiguration {
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 23;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
 };
 
 enum class MaximizePresentation {

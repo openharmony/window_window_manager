@@ -44,6 +44,10 @@ public:
         const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) = 0;
     virtual void UpdateDensity() = 0;
     virtual WSError UpdateOrientation() = 0;
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
     virtual WSError UpdateFocus(bool isFocused) = 0;
@@ -76,6 +80,15 @@ public:
     virtual WSError UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
     virtual void NotifyTransformChange(const Transform& transform) = 0;
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
+
+    /**
+     * @brief Notify single hand transform.
+     *
+     * Notify singleHandTransform when single hand mode changed.
+     *
+     * @param singleHandTransform transform to change.
+     */
+    virtual void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) = 0;
 
     /**
      * @brief Set pip event to client.
@@ -151,6 +164,7 @@ public:
         return WSError::WS_OK;
     }
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
+    virtual WSError SetDragActivated(bool dragActivated) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

@@ -317,6 +317,10 @@ public:
         const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags) override;
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
+    /*
+     * Keyboard
+     */
+    WMError ShowKeyboard(KeyboardViewMode mode) override;
 
     /*
      * Gesture Back
@@ -334,6 +338,10 @@ private:
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> void ClearUselessListeners(std::map<uint32_t, T>& listeners, uint32_t winId)
+    {
+        listeners.erase(winId);
+    }
+    template<typename T> void ClearUselessListeners(std::unordered_map<uint32_t, T>& listeners, uint32_t winId)
     {
         listeners.erase(winId);
     }

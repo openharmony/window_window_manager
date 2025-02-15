@@ -220,6 +220,12 @@ public:
     void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
     void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
 
+    /*
+     * Keyboard
+     */
+    void SetKeyboardViewMode(KeyboardViewMode mode);
+    KeyboardViewMode GetKeyboardViewMode() const;
+
 private:
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
@@ -372,6 +378,11 @@ private:
      */
     mutable std::mutex supportWindowModesMutex_;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+
+    /*
+     * Keyboard
+     */
+    KeyboardViewMode keyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
