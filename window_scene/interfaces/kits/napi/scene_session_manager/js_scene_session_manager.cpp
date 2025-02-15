@@ -674,6 +674,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
     rootScene_->RegisterUpdateRootSceneAvoidAreaCallback([] {
         SceneSessionManager::GetInstance().UpdateRootSceneAvoidArea();
     });
+    rootScene_->RegisterNotifyWatchFocusActiveChangeCallback([](bool isFocusActive) {
+        SceneSessionManager::GetInstance().NotifyWatchFocusActiveChange(isFocusActive);
+    });
     if (!Session::IsScbCoreEnabled()) {
         rootScene_->SetFrameLayoutFinishCallback([] {
             SceneSessionManager::GetInstance().NotifyUpdateRectAfterLayout();
