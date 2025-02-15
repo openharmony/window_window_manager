@@ -40,6 +40,7 @@ class RSNode;
 using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
+using NotifyWatchFocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
 
 class RootScene : public Window {
 public:
@@ -81,6 +82,11 @@ public:
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     void NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info);
+
+    /*
+     * watch
+     */
+    void RegisterNotifyWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeCallback&& callback);
 
     const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
 
@@ -158,6 +164,11 @@ private:
     mutable std::mutex occupiedAreaMutex_;
     std::unordered_set<sptr<IOccupiedAreaChangeListener>, SptrHash<IOccupiedAreaChangeListener>>
         occupiedAreaChangeListeners_;
+
+    /*
+     * watch
+     */
+    NotifyWatchFocusActiveChangeCallback notifyWatchFocusActiveChangeCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS
