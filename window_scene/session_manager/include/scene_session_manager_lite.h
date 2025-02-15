@@ -82,7 +82,8 @@ public:
     WSError NotifyAppUseControlList(ControlAppType type, int32_t userId,
         const std::vector<AppUseControlInfo>& controlList) override;
     WMError GetRootMainWindowId(int32_t persistentId, int32_t& hostWindowId) override;
-
+    WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId) override;
+    
 protected:
     SceneSessionManagerLite() = default;
     virtual ~SceneSessionManagerLite() = default;

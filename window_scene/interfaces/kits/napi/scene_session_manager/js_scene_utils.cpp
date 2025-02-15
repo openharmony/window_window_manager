@@ -300,6 +300,19 @@ bool IsJsFullScreenStartUndefined(napi_env env, napi_value jsFullscreenStart, Se
     return true;
 }
 
+static bool IsJsIsUseControlSessionUndefined(napi_env env, napi_value jsIsUseControlSession, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsIsUseControlSession) != napi_undefined) {
+        bool isUseControlSession = false;
+        if (!ConvertFromJsValue(env, jsIsUseControlSession, isUseControlSession)) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isUseControlSession");
+            return false;
+        }
+        sessionInfo.isUseControlSession = isUseControlSession;
+    }
+    return true;
+}
+
 bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sessionInfo)
 {
     napi_value jsBundleName = nullptr;
@@ -388,6 +401,8 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isSetPointerAreas", &jsIsSetPointerAreas);
     napi_value jsProcessOption = nullptr;
     napi_get_named_property(env, jsObject, "processOptions", &jsProcessOption);
+    napi_value jsIsUseControlSession = nullptr;
+    napi_get_named_property(env, jsObject, "isAppUseControl", &jsIsUseControlSession);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
         return false;
@@ -411,6 +426,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
         return false;
     }
     if (!IsJsProcessOptionUndefined(env, jsProcessOption, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsIsUseControlSessionUndefined(env, jsIsUseControlSession, sessionInfo)) {
         return false;
     }
     return true;
@@ -1489,6 +1507,33 @@ napi_value KeyboardGravityInit(napi_env env)
         static_cast<int32_t>(SessionGravity::SESSION_GRAVITY_BOTTOM)));
     napi_set_named_property(env, objValue, "GRAVITY_DEFAULT", CreateJsValue(env,
         static_cast<int32_t>(SessionGravity::SESSION_GRAVITY_DEFAULT)));
+    return objValue;
+}
+
+napi_value KeyboardViewModeInit(napi_env env)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NON_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::NON_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "LIGHT_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::LIGHT_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "DARK_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::DARK_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "VIEW_MODE_END", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::VIEW_MODE_END)));
     return objValue;
 }
 

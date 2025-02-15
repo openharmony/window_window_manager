@@ -541,6 +541,20 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
     return objValue;
 }
 
+napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        napi_set_element(env, arrayValue, i, CreateJsWindowLayoutInfoObject(env, infos[i]));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
@@ -560,6 +574,14 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
         }
     }
     return arrayValue;
+}
+
+napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
+    return objValue;
 }
 
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
@@ -904,6 +926,20 @@ napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& 
     return objValue;
 }
 
+napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityInfo& windowDensityInfo)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(
+        env, objValue, "systemDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.systemDensity)));
+    napi_set_named_property(
+        env, objValue, "defaultDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.defaultDensity)));
+    napi_set_named_property(
+        env, objValue, "customDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.customDensity)));
+    return objValue;
+}
+
 bool CheckCallingPermission(std::string permission)
 {
     WLOGD("Permission: %{public}s", permission.c_str());
@@ -970,6 +1006,26 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
             return false;
         }
         windowMask.emplace_back(elementArray);
+    }
+    return true;
+}
+
+bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "jsObject is null");
+        return false;
+    }
+    napi_value jsConfig = nullptr;
+    napi_get_named_property(env, jsObject, "displayId", &jsConfig);
+    if (GetType(env, jsConfig) != napi_undefined) {
+        int64_t displayId = DISPLAY_ID_INVALID;
+        if (!ConvertFromJsValue(env, jsConfig, displayId)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
+            return false;
+        }
+        moveConfiguration.displayId = static_cast<DisplayId>(displayId);
+        return true;
     }
     return true;
 }

@@ -681,6 +681,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
     pointerEvent->AddPointerItem(pointerItem);
@@ -744,6 +746,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     pointerEvent->SetPointerId(0);
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
     pointerEvent->AddPointerItem(pointerItem);
@@ -803,6 +807,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     pointerEvent->SetPointerId(0);
     pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_DOWN);
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerItem.SetPointerId(0);
     pointerEvent->AddPointerItem(pointerItem);

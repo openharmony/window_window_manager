@@ -21,8 +21,10 @@
 #include <iremote_stub.h>
 #include <transaction/rs_interfaces.h>
 #include <ui_content.h>
+#include <ui/rs_node.h>
 #include <viewport_config.h>
 
+#include "ability_context.h"
 #include "app_mgr_client.h"
 #include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
@@ -96,6 +98,7 @@ void RootScene::LoadContent(const std::string& contentUrl, napi_env env, napi_va
         return;
     }
 
+    context_ = context->weak_from_this();
     uiContent_->Initialize(this, contentUrl, storage);
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
@@ -274,6 +277,28 @@ WMError RootScene::GetSessionRectByType(AvoidAreaType type, WSRect& rect)
     }
     rect = getSessionRectCallback_(type);
     return WMError::WM_OK;
+}
+
+std::shared_ptr<Rosen::RSNode> RootScene::GetRSNodeByStringID(const std::string& stringId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
+        return nullptr;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    return uiContent_->GetRSNodeByStringID(stringId);
+}
+
+void RootScene::SetTopWindowBoundaryByID(const std::string& stringId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}s", stringId.c_str());
+    if (uiContent_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "uiContent is null, winId: %{public}d", GetWindowId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "end");
+    uiContent_->SetTopWindowBoundaryByID(stringId);
 }
 } // namespace Rosen
 } // namespace OHOS

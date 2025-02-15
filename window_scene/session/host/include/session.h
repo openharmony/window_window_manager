@@ -82,6 +82,9 @@ using NotifySystemSessionKeyEventFunc = std::function<bool(std::shared_ptr<MMI::
 using NotifyContextTransparentFunc = std::function<void()>;
 using NotifyFrameLayoutFinishFunc = std::function<void()>;
 using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfig& config)>;
+using NofitySessionLabelAndIconUpdatedFunc =
+    std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 
 class ILifecycleListener {
 public:
@@ -123,7 +126,7 @@ public:
     explicit Session(const SessionInfo& info);
     virtual ~Session();
     bool isKeyboardPanelEnabled_ = false;
-    void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
+    virtual void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
         const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler = nullptr);
 
     /**
@@ -160,7 +163,12 @@ public:
     void SetSessionSnapshotListener(const NotifySessionSnapshotFunc& func);
     WSError TerminateSessionNew(const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker);
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
-
+    /*
+     * App Use Control
+     */
+    virtual bool GetIsUseControlSession() const { return false; }
+    virtual void SetIsUseControlSession(bool isUseControlSession) {}
+    
     /*
      * Callbacks for ILifecycleListener
      */
@@ -332,6 +340,11 @@ public:
     void NotifyContextTransparent();
     bool NeedCheckContextTransparent() const;
     void SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func);
+    
+    /*
+     * Keyboard Window
+     */
+    void SetKeyboardStateChangeListener(const NotifyKeyboardStateChangeFunc& func);
 
     /*
      * Window Focus
@@ -502,8 +515,12 @@ public:
      */
     void SetClientRect(const WSRect& rect);
     WSRect GetClientRect() const;
+    void SetDragActivated(bool dragActivated);
     void SetClientDragEnable(bool dragEnable);
     std::optional<bool> GetClientDragEnable() const;
+    bool IsDragAccessible() const;
+    void SetSingleHandTransform(const SingleHandTransform& transform);
+    SingleHandTransform GetSingleHandTransform() const;
 
     /*
      * Starting Window
@@ -634,6 +651,7 @@ protected:
     NotifyTerminateSessionFuncTotal terminateSessionFuncTotal_;
     NotifySessionExceptionFunc sessionExceptionFunc_;
     NotifySessionExceptionFunc jsSceneSessionExceptionFunc_;
+    NofitySessionLabelAndIconUpdatedFunc updateSessionLabelAndIconFunc_;
 
     AcquireRotateAnimationConfigFunc acquireRotateAnimationConfigFunc_;
     SystemSessionConfig systemConfig_;
@@ -700,6 +718,11 @@ protected:
     bool isStarting_ = false;   // when start app, session is starting state until foreground
     std::atomic_bool mainUIStateDirty_ = false;
     static bool isScbCoreEnabled_;
+
+    /*
+     * Keyboard Window
+     */
+    NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
 
 private:
     void HandleDialogForeground();
@@ -808,6 +831,8 @@ private:
      * Window Layout
      */
     std::optional<bool> clientDragEnable_;
+    bool dragActivated_ = true;
+    SingleHandTransform singleHandTransform_;
 
     /*
      * Screen Lock

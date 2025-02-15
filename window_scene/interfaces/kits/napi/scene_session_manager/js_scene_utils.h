@@ -182,6 +182,7 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
 napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
+napi_value KeyboardViewModeInit(napi_env env);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);

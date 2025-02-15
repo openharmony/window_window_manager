@@ -28,6 +28,7 @@ public:
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "") override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
+    WMError ShowKeyboard(KeyboardViewMode mode) override;
     WMError Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
     WMError Destroy(bool needNotifyServer, bool needClearListener = true) override;
     WMError NotifyDrawingCompleted() override;
@@ -108,6 +109,7 @@ public:
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
+    WMError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
 
     virtual bool IsTransparent() const override;
     virtual bool IsTurnScreenOn() const override;
@@ -178,6 +180,9 @@ public:
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    float GetCustomDensity() const override;
+    WMError SetCustomDensity(float density) override;
+    WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -196,7 +201,7 @@ protected:
     void UpdateWindowSizeLimits();
     WindowLimits GetSystemSizeLimits(uint32_t displayWidth, uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
-    float GetVirtualPixelRatio(sptr<DisplayInfo> displayInfo) override;
+    float GetVirtualPixelRatio(const sptr<DisplayInfo>& displayInfo) override;
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
@@ -267,6 +272,10 @@ private:
      * Window Property
      */
     void InitSystemSessionDragEnable();
+    bool IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo);
+    bool IsDefaultDensityEnabled();
+    float GetMainWindowCustomDensity();
+    float customDensity_ = UNDEFINED_DENSITY;
 
     /**
      * Sub Window
