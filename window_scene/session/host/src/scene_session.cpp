@@ -68,6 +68,8 @@ constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
+constexpr VELOCITY_RELOCATION_TO_TOP = WSRectF {0.0f, -10.0f, 0.0f, 0.0f};
+constexpr VELOCITY_RELOCATION_TO_BOTTOM = WSRectF {0.0f, 10.0f, 0.0f, 0.0f};
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -5196,12 +5198,12 @@ WSError SceneSession::SendContainerModalEvent(const std::string& eventName, cons
 
 WSError SceneSession::OnContainerModalEvent(const std::string& eventName, const std::string& eventValue)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
     if (eventName == "scb_relocation_to_top") {
         if (eventValue == "true") {
-            ThrowSlipDirectly(WSRectF {0.0f, -10.0f, 0.0f, 0.0f});
+            ThrowSlipDirectly(VELOCITY_RELOCATION_TO_TOP);
         } else {
-            ThrowSlipDirectly(WSRectF {0.0f, 10.0f, 0.0f, 0.0f});
+            ThrowSlipDirectly(VELOCITY_RELOCATION_TO_BOTTOM);
         }
     }
     return WSError::WS_OK;
