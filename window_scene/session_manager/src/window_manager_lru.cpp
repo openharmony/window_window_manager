@@ -16,10 +16,6 @@
 #include "window_manager_lru.h"
 
 namespace OHOS::Rosen {
-namespace {
-constexpr int32_t UNDEFINED_REMOVED_KEY = -1;
-} // namespace
-
 bool LRUCache::Visit(int32_t key)
 {
     if (auto it = cacheMap_.find(key); it != cacheMap_.end()) {
