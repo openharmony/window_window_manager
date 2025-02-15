@@ -129,7 +129,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
-std::mutex WindowSceneSessionImpl::windowSceneListenerMutex_;
+std::mutex WindowSceneSessionImpl::windowSceneAttachStateChangeListenerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -4550,12 +4550,12 @@ WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::RegisterWindowSceneListener(const sptr<IWindowSceneListener>& listener)
+WMError WindowSceneSessionImpl::RegisterWindowSceneAttachStateChangeListener(const sptr<IWindowSceneListener>& listener)
 {
-    std::lock_guard<std::mutex> lockListener(windowSceneListenerMutex_);
+    std::lock_guard<std::mutex> lockListener(windowSceneAttachStateChangeListenerMutex_);
     if (listener == nullptr) {
         TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
-        windowSceneListener_ = listener;
+        windowSceneAttachStateChangeListener_ = listener;
         return WMError::WM_OK;
     }
     TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d listener already registered", GetPersistentId());
@@ -4565,15 +4565,15 @@ WMError WindowSceneSessionImpl::RegisterWindowSceneListener(const sptr<IWindowSc
 WMError WindowSceneSessionImpl::NotifyWindowSceneAttachStateChange(bool isAttach)
 {
     TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
-    if (!windowSceneListener_) {
+    if (!windowSceneAttachStateChangeListener_) {
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
     if (isAttach) {
-        windowSceneListener_->AfterAttachToFrameNode();
+        windowSceneAttachStateChangeListener_->AfterAttachToFrameNode();
     } else {
-        windowSceneListener_->AfterDetachFromFrameNode();
+        windowSceneAttachStateChangeListener_->AfterDetachFromFrameNode();
     }
     return WMError::WM_OK;
 }

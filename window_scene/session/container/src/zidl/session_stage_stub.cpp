@@ -198,7 +198,7 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowCrossAxisChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
             return HandleNotifyPipSizeChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_SCENE_CHANGE):
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_SCENE_ATTACH_STATE_CHANGE):
             return HandleNotifyWindowSceneAttachStateChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
@@ -834,7 +834,7 @@ int SessionStageStub::HandleNotifyWindowSceneAttachStateChange(MessageParcel& da
     TLOGD(WmsLogTag::WMS_SUB, "in");
     bool isAttach = false;
     if (!data.ReadBool(isAttach)) {
-        return ERR_INVALID_VALUE;
+        return ERR_INVALID_DATA;
     }
     NotifyWindowSceneAttachStateChange(isAttach);
     return ERR_NONE;
