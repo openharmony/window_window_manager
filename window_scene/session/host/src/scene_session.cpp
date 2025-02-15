@@ -68,8 +68,8 @@ constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
-constexpr VELOCITY_RELOCATION_TO_TOP = WSRectF {0.0f, -10.0f, 0.0f, 0.0f};
-constexpr VELOCITY_RELOCATION_TO_BOTTOM = WSRectF {0.0f, 10.0f, 0.0f, 0.0f};
+constexpr WSRectF VELOCITY_RELOCATION_TO_TOP = {0.0f, -10.0f, 0.0f, 0.0f};
+constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
