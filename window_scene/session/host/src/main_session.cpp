@@ -215,7 +215,7 @@ void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 
 void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d, isExitSplitOnBackground: %{public}d", persistentId_,
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "id:%{public}d, isExitSplitOnBackground:%{public}d", persistentId_,
         isExitSplitOnBackground);
     isExitSplitOnBackground_ = isExitSplitOnBackground;
 }
