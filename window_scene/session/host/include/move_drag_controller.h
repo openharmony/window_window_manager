@@ -322,7 +322,7 @@ private:
     int32_t originalDisplayOffsetY_ = 0;
     std::mutex displayIdSetDuringMoveDragMutex_;
     std::set<uint64_t> displayIdSetDuringMoveDrag_;
-    DMRect moveAvailableArea_;
+    DMRect moveAvailableArea_ = {0, 0, 0, 0};
     DisplayId moveInputBarStartDisplayId_ = DISPLAY_ID_INVALID;
     ScreenSizeProperty screenSizeProperty_;
     // Above guarded by displayIdSetDuringMoveDragMutex_
