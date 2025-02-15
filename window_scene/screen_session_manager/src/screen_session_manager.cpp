@@ -2040,6 +2040,7 @@ void ScreenSessionManager::SetExtendedScreenFallbackPlan(ScreenId screenId)
     int32_t res = -1;
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetPhysicalScreenResolution(%" PRIu64")", screenId);
     res = rsInterface_.SetPhysicalScreenResolution(rsScreenId, screenAdjustWidth, screenAdjustHeight);
+    screenSession->Resize(screenAdjustWidth, screenAdjustHeight);
     if (res != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "RS SetPhysicalScreenResolution failed.");
         screenEventTracker_.RecordEvent("SetPhysicalScreenResolution failed.");
