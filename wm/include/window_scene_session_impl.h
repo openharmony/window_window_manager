@@ -197,6 +197,13 @@ public:
     WMError Close() override;
     WMError CloseDirectly() override;
 
+    /*
+     * Window Scene
+     */
+    WMError RegisterWindowAttachStateChangeListener(
+        const sptr<IWindowAttachStateChangeListner>& listener) override;
+    WMError UnregisterWindowAttachStateChangeListener() override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -311,6 +318,13 @@ private:
     std::unordered_map<int32_t, std::vector<bool>> eventMapTriggerByDisplay_;
     std::unordered_map<int32_t, std::vector<int32_t>> eventMapDeltaXByDisplay_;
     std::unordered_map<int32_t, std::vector<PointInfo>> downPointerByDisplay_;
+
+    /*
+     * Window Scene
+     */
+    static std::mutex windowAttachStateChangeListenerMutex_;
+    sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
+    WSError NotifyWindowAttachStateChange(bool isAttach) override;
 };
 } // namespace Rosen
 } // namespace OHOS
