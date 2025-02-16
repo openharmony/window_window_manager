@@ -465,6 +465,7 @@ protected:
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
     std::atomic_bool isHighlighted_ = false;
+    bool shouldReNotifyHighlight_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -590,6 +591,7 @@ private:
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
     void NotifyAfterPaused();
+    void NotifyUIContentHighlightStatus(bool isHighlighted);
 
     /*
      * Window Decor listener
