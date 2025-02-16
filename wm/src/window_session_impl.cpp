@@ -3310,7 +3310,8 @@ void WindowSessionImpl::NotifyWindowAfterUnfocused()
     CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
 }
 
-void NotifyUIContentHighlightStatus(bool isHighlighted){
+void WindowSessionImpl::NotifyUIContentHighlightStatus(bool isHighlighted)
+{
     if (isHighlighted) {
         CALL_UI_CONTENT(ActiveWindow);
     } else {
