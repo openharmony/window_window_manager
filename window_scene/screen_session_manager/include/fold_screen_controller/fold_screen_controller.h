@@ -48,7 +48,7 @@ public:
     bool GetTentMode();
     FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
-    void OnTentModeChanged(bool isTentMode);
+    void OnTentModeChanged(bool isTentMode int32_t hall = -1);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
