@@ -7596,14 +7596,14 @@ void ScreenSessionManager::OnScreenExtendChange(ScreenId mainScreenId, ScreenId 
     clientProxy_->OnScreenExtendChanged(mainScreenId, extendScreenId);
 }
 
-void ScreenSessionManager::OnTentModeChanged(bool isTentMode)
+void ScreenSessionManager::OnTentModeChanged(bool isTentMode, int32_t hall)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!foldScreenController_) {
         TLOGI(WmsLogTag::DMS, "foldScreenController_ is null");
         return;
     }
-    foldScreenController_->OnTentModeChanged(isTentMode);
+    foldScreenController_->OnTentModeChanged(isTentMode, hall);
 #endif
 }
 
