@@ -169,13 +169,12 @@ void TentMotionEventCallback(const MotionSensorEvent& motionData)
         }
     }
     TLOGI(WmsLogTag::DMS, "tent mode change with hall %{public}d", realhall);
-
     if (motionData.status == MOTION_ACTION_TENT_MODE_ON) {
         ScreenTentProperty::HandleSensorEventInput(true, realhall);
     } else if (motionData.status == MOTION_ACTION_TENT_MODE_OFF) {
         ScreenTentProperty::HandleSensorEventInput(false, realhall);
     } else {
-        TLOGI(WmsLogTag::DMS, "dms: tent motion:%{public}d invalid", motionData.status);
+        TLOGI(WmsLogTag::DMS, "tent motion:%{public}d invalid", motionData.status);
     }
 }
 #endif
