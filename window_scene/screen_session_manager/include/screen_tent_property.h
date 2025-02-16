@@ -32,7 +32,7 @@ class ScreenTentProperty : public RefBase {
 public:
     ScreenTentProperty() = delete;
     ~ScreenTentProperty() = default;
-    static void HandleSensorEventInput(bool isTentMode);
+    static void HandleSensorEventInput(bool isTentMode, int32_t hall = -1);
 };
 } // Rosen
 } // OHOS

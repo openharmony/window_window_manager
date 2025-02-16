@@ -159,12 +159,23 @@ void MotionTentSubscriber::UnsubscribeMotionSensor()
 
 void TentMotionEventCallback(const MotionSensorEvent& motionData)
 {
+    int32_t realhall = -1;
+    if (motionData.dataLen > 0 && motionData.data != nullptr) {
+        int32_t currenthall = motionData.data[0];
+        if (currenthall == 0 || currenthall == 1) {
+            realhall = currenthall;
+        } else {
+            TLOGW(WmsLogTag::DMS, "motion hall invalid %{public}d", currenthall);
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "tent mode change with hall %{public}d", realhall);
+
     if (motionData.status == MOTION_ACTION_TENT_MODE_ON) {
-        ScreenTentProperty::HandleSensorEventInput(true);
+        ScreenTentProperty::HandleSensorEventInput(true, realhall);
     } else if (motionData.status == MOTION_ACTION_TENT_MODE_OFF) {
-        ScreenTentProperty::HandleSensorEventInput(false);
+        ScreenTentProperty::HandleSensorEventInput(false, realhall);
     } else {
-        TLOGI(WmsLogTag::DMS, "tent motion:%{public}d invalid", motionData.status);
+        TLOGI(WmsLogTag::DMS, "dms: tent motion:%{public}d invalid", motionData.status);
     }
 }
 #endif
