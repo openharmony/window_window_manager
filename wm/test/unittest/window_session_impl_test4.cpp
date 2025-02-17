@@ -270,6 +270,9 @@ HWTEST_F(WindowSessionImplTest4, GetDecorVisible, Function | SmallTest | Level2)
     bool isVisible = true;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetDecorVisible(isVisible));
     window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorVisible(isVisible));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetDecorVisible(isVisible));
     auto uiContent = std::make_unique<Ace::UIContentMocker>();
     EXPECT_CALL(*uiContent, GetContainerModalTitleVisible(_)).WillRepeatedly(Return(false));
