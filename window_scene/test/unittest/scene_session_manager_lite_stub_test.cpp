@@ -455,9 +455,24 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionToken, Function |
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint64(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionToken1
+ * @tc.desc: test function : HandleGetFocusSessionToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionToken1, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -469,9 +484,24 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement, Function
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint64(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionElement1
+ * @tc.desc: test function : HandleGetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement1, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -690,9 +720,24 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionInfo, Function | 
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint64(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionInfo1
+ * @tc.desc: test function : HandleGetFocusSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionInfo1, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
