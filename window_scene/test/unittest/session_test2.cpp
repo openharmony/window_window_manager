@@ -504,7 +504,6 @@ HWTEST_F(WindowSessionTest2, ResetSnapshot, Function | SmallTest | Level2)
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
     session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(nullptr, session_->scenePersistence_);
     session_->snapshot_ = std::make_shared<Media::PixelMap>();
 
     session_->ResetSnapshot();
