@@ -1160,6 +1160,59 @@ HWTEST_F(SceneSessionManagerTest5, CheckSessionPropertyOnRecovery, Function | Sm
 }
 
 /**
+ * @tc.name: PutSnapshotToCache
+ * @tc.desc: PutSnapshotToCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 30;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 30;
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
+    ssm_->sceneSessionMap_.insert({30, sceneSession});
+    for (int32_t id = 30; id <= 33; ++id) {
+        ssm_->PutSnapshotToCache(id);
+    }
+    ASSERT_EQ(sceneSession->snapshot_, nullptr);
+}
+
+/**
+ * @tc.name: VisitSnapshotFromCache
+ * @tc.desc: VisitSnapshotFromCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 30;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 30;
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    ssm_->sceneSessionMap_.insert({30, sceneSession});
+    sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
+    for (int32_t id = 30; id < 33; ++id) {
+        ssm_->PutSnapshotToCache(id);
+    }
+    ssm_->VisitSnapshotFromCache(30);
+    usleep(WAIT_SYNC_IN_NS);
+    ssm_->PutSnapshotToCache(33);
+    ASSERT_NE(sceneSession->snapshot_, nullptr);
+}
+
+/**
  * @tc.name: RequestSceneSessionBackground
  * @tc.desc: RequestSceneSessionBackground
  * @tc.type: FUNC

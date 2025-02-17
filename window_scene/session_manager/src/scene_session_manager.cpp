@@ -2511,7 +2511,7 @@ void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
     if (int32_t removedCacheId = snapshotLRUCache_->Put(persistentId);
-        removedCacheId != -1) {
+        removedCacheId != UNDEFINED_REMOVED_KEY) {
         if (auto removedCacheSession = GetSceneSession(removedCacheId)) {
             removedCacheSession->ResetSnapshot();
         } else {
