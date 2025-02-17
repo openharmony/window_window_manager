@@ -759,7 +759,7 @@ protected:
     bool IsFullScreenWaterfallMode();
     void UpdateWaterfallMode(SessionEvent event);
     sptr<PcFoldScreenController> pcFoldScreenController_ = nullptr;
-    std::atomic_bool isThrowSlipToFullScreen_ = false;
+    std::atomic<uint32_t> throwSlipToFullScreenAnimCount_ = 0;
     std::function<void(bool isAnimating)> onThrowSlipAnimationStateChangeFunc_;
 
     /*
