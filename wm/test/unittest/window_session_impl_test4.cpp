@@ -2140,12 +2140,16 @@ HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowWillCloseListeners, Fu
     sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
     option_->SetWindowName("ClearListenersById_windowWillCloseListeners");
     sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
     window_->property_->SetPersistentId(1);
     int persistentId = window_->GetPersistentId();
     window_->ClearListenersById(persistentId);
 
     sptr<IWindowWillCloseListener> listener_ = sptr<MockIWindowWillCloseListener>::MakeSptr();
-    window_->RegisterWindowWillCloseListeners(listener_);
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window_->RegisterWindowWillCloseListeners(listener_));
     ASSERT_NE(window_->windowWillCloseListeners_.find(persistentId), window_->windowWillCloseListeners_.end());
 
     window_->ClearListenersById(persistentId);
