@@ -22,9 +22,9 @@ namespace {
     /**
      * ACE call to native event mame
      */
-    const std::string WINDOW_WATERFALL_EVENT = "scb_waterfall_window_event";
-    const std::string WINDOW_RELOCATION_EVENT = "scb_relocation_to_top";
-    const std::string WINDOW_WATERFALL_VISIBILITY_EVENT = "scb_waterfall_visibility";
+    const std::string WINDOW_WATERFALL_EVENT = "win_waterfall_window_event";
+    const std::string WINDOW_RELOCATION_EVENT = "win_relocation_to_top";
+    const std::string WINDOW_WATERFALL_VISIBILITY_EVENT = "win_waterfall_visibility";
 }
 } // Rosen
 } // OHOS
