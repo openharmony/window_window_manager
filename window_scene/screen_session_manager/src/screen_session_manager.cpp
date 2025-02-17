@@ -1939,7 +1939,7 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
     property.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
-    property.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), GetFoldDisplayMode());
+    property.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
     property.SetCurrentOffScreenRendering(false);
     property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
@@ -6239,7 +6239,7 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
 #ifdef FOLD_ABILITY_ENABLE
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession != nullptr) {
-        if (foldStatus == FoldStatus::FOLDED) {
+        if (foldStatus == FoldStatus::FOLDED && !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
             screenSession->SetDefaultDeviceRotationOffset(0);
         } else {
             screenSession->SetDefaultDeviceRotationOffset(defaultDeviceRotationOffset_);
@@ -6341,6 +6341,10 @@ void ScreenSessionManager::RefreshMirrorScreenRegion(ScreenId screenId)
 {
 #if defined(FOLD_ABILITY_ENABLE) && defined(WM_MULTI_SCREEN_ENABLE)
     auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get screen session");
+        return;
+    }
     if (screenSession->GetName() == "CastEngine" || screenSession->GetName() == "Cooperation") {
         DMRect mainScreenRegion = {0, 0, 0, 0};
         foldScreenController_->SetMainScreenRegion(mainScreenRegion);

@@ -183,15 +183,14 @@ public:
     bool IsTouchEnabled();
     void SetIsPhysicalMirrorSwitch(bool isPhysicalMirrorSwitch);
     bool GetIsPhysicalMirrorSwitch();
-    void UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode);
+    void UpdateTouchBoundsAndOffset();
     void UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
         FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
-    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
-        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
+    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
