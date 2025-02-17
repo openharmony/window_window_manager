@@ -51,6 +51,7 @@
 #include "screen_manager.h"
 #include "screen.h"
 #include "fold_screen_state_internel.h"
+#include "fold_screen_common.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
@@ -5199,7 +5200,7 @@ WSError SceneSession::SendContainerModalEvent(const std::string& eventName, cons
 WSError SceneSession::OnContainerModalEvent(const std::string& eventName, const std::string& eventValue)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
-    if (eventName == "scb_relocation_to_top") {
+    if (eventName == WINDOW_RELOCATION_EVENT) {
         if (eventValue == "true") {
             ThrowSlipDirectly(VELOCITY_RELOCATION_TO_TOP);
         } else {
