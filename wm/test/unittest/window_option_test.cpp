@@ -560,7 +560,6 @@ HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3
 HWTEST_F(WindowOptionTest, SetConstrainedModal, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(nullptr, option);
     ASSERT_EQ(false, option->IsConstrainedModal());
     option->SetConstrainedModal(true);
     ASSERT_EQ(false, option->IsConstrainedModal());
