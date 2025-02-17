@@ -151,8 +151,8 @@ public:
  */
 class IWindowAttachStateChangeListner : virtual public RefBase {
 public:
-    virtual void AfterAttachToFrameNode() {}
-    virtual void AfterDetachFromFrameNode() {}
+    virtual void AfterAttached() {}
+    virtual void AfterDetached() {}
 };
 
 /**
