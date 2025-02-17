@@ -1022,6 +1022,11 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteBool(IsOrientationNeedChanged());
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_IS_REAL_SCREEN: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            reply.WriteBool(GetIsRealScreen(screenId));
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
