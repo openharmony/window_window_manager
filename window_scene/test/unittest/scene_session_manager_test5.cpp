@@ -1173,13 +1173,10 @@ HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, Function | SmallTest | Le
     info.bundleName_ = "test2";
     info.persistentId_ = 30;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
     std::string bundleName = "testBundleName";
     int32_t persistentId = 30;
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
     sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
     ssm_->sceneSessionMap_.insert({30, sceneSession});
     for (int32_t id = 30; id <= 33; ++id) {
         ssm_->PutSnapshotToCache(id);
@@ -1201,14 +1198,11 @@ HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, Function | SmallTest 
     info.bundleName_ = "test2";
     info.persistentId_ = 30;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
     std::string bundleName = "testBundleName";
     int32_t persistentId = 30;
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
     ssm_->sceneSessionMap_.insert({30, sceneSession});
     sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
-    ASSERT_NE(sceneSession->snapshot_, nullptr);
     for (int32_t id = 30; id < 33; ++id) {
         ssm_->PutSnapshotToCache(id);
     }

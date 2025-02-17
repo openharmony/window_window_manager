@@ -260,7 +260,6 @@ HWTEST_F(ScenePersistenceTest, ResetSnapshotCache, Function | SmallTest | Level1
     std::string bundleName = "testBundleName";
     int32_t persistentId = 1423;
     sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
-    ASSERT_NE(nullptr, scenePersistence);
     scenePersistence->ResetSnapshotCache();
     ASSERT_EQ(scenePersistence->isSavingSnapshot_, false);
 }

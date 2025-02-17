@@ -57,7 +57,6 @@ void LRUCacheTest::TearDown()
 HWTEST_F(LRUCacheTest, Visit, Function | SmallTest | Level2)
 {
     testLRUCache_ = std::make_unique<LRUCache>(TEST_CACHE_CAPACITY);
-    ASSERT_NE(testLRUCache_, nullptr);
     bool res = testLRUCache_->Visit(30);
     ASSERT_EQ(res, false);
 
@@ -74,7 +73,6 @@ HWTEST_F(LRUCacheTest, Visit, Function | SmallTest | Level2)
 HWTEST_F(LRUCacheTest, Put, Function | SmallTest | Level2)
 {
     testLRUCache_ = std::make_unique<LRUCache>(TEST_CACHE_CAPACITY);
-    ASSERT_NE(testLRUCache_, nullptr);
     int32_t res = testLRUCache_->Put(30);
     ASSERT_EQ(res, -1);
 
