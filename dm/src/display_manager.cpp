@@ -656,7 +656,6 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
             if (interval < getDisplayIntervalUs_ && !needUpdateDisplayFromDMS_) {
                 auto iter = displayMap_.find(displayId);
                 if (iter != displayMap_.end()) {
-                    WLOGFW("update display from cache, Id: %{public}" PRIu64" ", displayId);
                     return displayMap_[displayId];
                 }
             }
