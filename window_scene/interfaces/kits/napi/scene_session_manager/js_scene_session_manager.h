@@ -81,6 +81,7 @@ public:
     static napi_value GetBatchAbilityInfos(napi_env env, napi_callback_info info);
     static napi_value GetAbilityInfo(napi_env env, napi_callback_info info);
     static napi_value PrepareTerminate(napi_env env, napi_callback_info info);
+    static napi_value AsyncPrepareTerminate(napi_env env, napi_callback_info info);
     static napi_value PerfRequestEx(napi_env env, napi_callback_info info);
     static napi_value UpdateWindowMode(napi_env env, napi_callback_info info);
     static napi_value NotifySingleHandInfoChange(napi_env env, napi_callback_info info);
@@ -154,6 +155,7 @@ private:
     napi_value OnGetBatchAbilityInfos(napi_env env, napi_callback_info info);
     napi_value OnGetAbilityInfo(napi_env env, napi_callback_info info);
     napi_value OnPrepareTerminate(napi_env env, napi_callback_info info);
+    napi_value OnAsyncPrepareTerminate(napi_env env, napi_callback_info info);
     napi_value OnPerfRequestEx(napi_env env, napi_callback_info info);
     napi_value OnUpdateWindowMode(napi_env env, napi_callback_info info);
     napi_value OnNotifySingleHandInfoChange(napi_env env, napi_callback_info info);
