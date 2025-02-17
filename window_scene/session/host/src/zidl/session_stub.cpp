@@ -1511,8 +1511,7 @@ int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& r
         TLOGE(WmsLogTag::WMS_EVENT, "Read eventValue failed.");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = OnContainerModalEvent(eventName, eventValue);
-    reply.WriteUint32(static_cast<uint32_t>(errCode));
+    OnContainerModalEvent(eventName, eventValue);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
