@@ -1576,7 +1576,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        session->NotifyWindowSceneAttachStateChange(isAttach);
+        session->NotifyWindowAttachStateChange(isAttach);
         TLOGND(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
         if (!isAttach && session->detachCallback_ != nullptr) {
@@ -1956,12 +1956,12 @@ void Session::NotifyScreenshot()
     sessionStage_->NotifyScreenshot();
 }
 
-void Session::NotifyWindowSceneAttachStateChange(bool isAttach)
+void Session::NotifyWindowAttachStateChange(bool isAttach)
 {
     if (!sessionStage_) {
         return;
     }
-    sessionStage_->NotifyWindowSceneAttachStateChange(isAttach);
+    sessionStage_->NotifyWindowAttachStateChange(isAttach);
 }
 
 WSError Session::NotifyCloseExistPipWindow()

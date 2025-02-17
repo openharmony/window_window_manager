@@ -1639,7 +1639,7 @@ void SessionStageProxy::NotifyWindowCrossAxisChange(CrossAxisState state)
     }
 }
 
-WSError SessionStageProxy::NotifyWindowSceneAttachStateChange(bool isAttach)
+WSError SessionStageProxy::NotifyWindowAttachStateChange(bool isAttach)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1657,7 +1657,8 @@ WSError SessionStageProxy::NotifyWindowSceneAttachStateChange(bool isAttach)
         TLOGE(WmsLogTag::WMS_SUB, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_SCENE_ATTACH_STATE_CHANGE),
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_SUB, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
