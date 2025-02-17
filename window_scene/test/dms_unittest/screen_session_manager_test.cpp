@@ -1542,6 +1542,10 @@ HWTEST_F(ScreenSessionManagerTest, SetMirror, Function | SmallTest | Level3)
     ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(2, screens, DMRect::NONE()));
     ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(9, screens, DMRect::NONE()));
     ASSERT_EQ(DMError::DM_OK, ssm_->SetMirror(screenId, screens, DMRect::NONE()));
+    auto mirrorscreen = ssm_->GetScreenSession(screenId);
+    ASSERT_TRUE(mirrorscreen != nullptr);
+    mirrorscreen->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    ASSERT_EQ(DMError::DM_ERROR_NULLPTR, ssm_->SetMirror(screenId, screens, DMRect::NONE()));
     ssm_->DestroyVirtualScreen(screenId);
 }
 
