@@ -4555,26 +4555,26 @@ WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
 {
     std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (listener == nullptr) {
-        TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
-        windowAttachStateChangeListener_ = listener;
-        return WMError::WM_OK;
+        TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d, listener is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d listener already registered", GetPersistentId());
-    return WMError::WM_ERROR_INVALID_OPERATION;
+    windowAttachStateChangeListener_ = listener;
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
+    return WMError::WM_OK;
 }
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
-    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
     if (!windowAttachStateChangeListener_) {
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
         return WSError::WS_ERROR_NULLPTR;
     }
 
     if (isAttach) {
-        windowAttachStateChangeListener_->AfterAttachToFrameNode();
+        windowAttachStateChangeListener_->AfterAttached();
     } else {
-        windowAttachStateChangeListener_->AfterDetachFromFrameNode();
+        windowAttachStateChangeListener_->AfterDetached();
     }
     return WSError::WS_OK;
 }
