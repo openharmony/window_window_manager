@@ -2374,6 +2374,10 @@ void Session::ResetSnapshot()
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
     snapshot_ = nullptr;
+    if (scenePersistence_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "scenePersistence_ %{public}d nullptr", persistentId_);
+        return;
+    }
     scenePersistence_->ResetSnapshotCache();
 }
 
