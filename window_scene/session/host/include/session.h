@@ -617,7 +617,7 @@ public:
     /**
      * Window Scene
      */
-    void NotifyWindowSceneAttachStateChange(bool isAttach);
+    void NotifyWindowAttachStateChange(bool isAttach);
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {

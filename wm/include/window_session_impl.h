@@ -752,7 +752,7 @@ private:
     /*
      * Window Scene
      */
-    WSError NotifyWindowSSceneChange(bool isAttach) override { return WSError::WS_OK; }
+    WSError NotifyWindowAttachStateChange(bool isAttach) override { return WSError::WS_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

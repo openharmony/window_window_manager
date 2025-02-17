@@ -129,7 +129,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
-std::mutex WindowSceneSessionImpl::windowSceneAttachStateChangeListenerMutex_;
+std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -4550,32 +4550,33 @@ WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
     return WMError::WM_OK;
 }
 
-WMError WindowSceneSessionImpl::RegisterWindowSceneAttachStateChangeListener(const sptr<IWindowSceneListener>& listener)
+WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
+    const sptr<IWindowAttachStateChangeListner>& listener)
 {
-    std::lock_guard<std::mutex> lockListener(windowSceneAttachStateChangeListenerMutex_);
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (listener == nullptr) {
         TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
-        windowSceneAttachStateChangeListener_ = listener;
+        windowAttachStateChangeListener_ = listener;
         return WMError::WM_OK;
     }
     TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d listener already registered", GetPersistentId());
     return WMError::WM_ERROR_INVALID_OPERATION;
 }
 
-WMError WindowSceneSessionImpl::NotifyWindowSceneAttachStateChange(bool isAttach)
+WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
     TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
-    if (!windowSceneAttachStateChangeListener_) {
+    if (!windowAttachStateChangeListener_) {
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
-        return WMError::WM_ERROR_NULLPTR;
+        return WSError::WS_ERROR_NULLPTR;
     }
 
     if (isAttach) {
-        windowSceneAttachStateChangeListener_->AfterAttachToFrameNode();
+        windowAttachStateChangeListener_->AfterAttachToFrameNode();
     } else {
-        windowSceneAttachStateChangeListener_->AfterDetachFromFrameNode();
+        windowAttachStateChangeListener_->AfterDetachFromFrameNode();
     }
-    return WMError::WM_OK;
+    return WSError::WS_OK;
 }
 
 WMError WindowSceneSessionImpl::UnregisterKeyboardPanelInfoChangeListener(

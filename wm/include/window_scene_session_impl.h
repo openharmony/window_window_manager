@@ -234,8 +234,8 @@ public:
     /*
      * Window Scene
      */
-    WMError RegisterWindowSceneAttachStateChangeListener(
-        const sptr<IWindowSceneAttachStateChangeListner& listener) override;
+    WMError RegisterWindowAttachStateChangeListener(
+        const sptr<IWindowAttachStateChangeListner>& listener) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -396,9 +396,9 @@ private:
     /*
      * Window Scene
      */
-    static std::mutex windowSceneAttachStateChangeListenerMutex_;
-    sptr<IWindowSceneAttachStateChangeListner> windowSceneAttachStateChangeListener_;
-    WSError NotifyWindowSceneAttachStateChange(bool isAttach) override;
+    static std::mutex windowAttachStateChangeListenerMutex_;
+    sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
+    WSError NotifyWindowAttachStateChange(bool isAttach) override;
 };
 } // namespace Rosen
 } // namespace OHOS
