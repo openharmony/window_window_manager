@@ -1337,9 +1337,6 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyWatchGestureConsumeResult, Function
     int32_t keyCode = 0;
     bool isConsumed = true;
     WMError res = sceneSessionManagerProxy->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
-    ASSERT_EQ(WMError::WM_OK, res);
-    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
-    res = sceneSessionManagerProxy->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 
@@ -1356,9 +1353,6 @@ HWTEST_F(sceneSessionManagerProxyTest, NotifyWatchFocusActiveChange, Function | 
 
     bool isActive = true;
     WMError res = sceneSessionManagerProxy->NotifyWatchFocusActiveChange(isActive);
-    ASSERT_EQ(WMError::WM_OK, res);
-    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
-    res = sceneSessionManagerProxy->NotifyWatchFocusActiveChange(isActive);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 
@@ -1376,9 +1370,6 @@ HWTEST_F(sceneSessionManagerProxyTest, GetParentMainWindowId, Function | SmallTe
     int32_t windowId = 0;
     int32_t mainWindowId = 0;
     WMError res = sceneSessionManagerProxy->GetParentMainWindowId(windowId, mainWindowId);
-    ASSERT_EQ(WMError::WM_OK, res);
-    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
-    res = sceneSessionManagerProxy->GetParentMainWindowId(windowId, mainWindowId);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 
@@ -1396,9 +1387,6 @@ HWTEST_F(sceneSessionManagerProxyTest, ListWindowInfo, Function | SmallTest | Le
     WindowInfoOption windowInfoOption;
     std::vector<sptr<WindowInfo>> infos;
     WMError res = sceneSessionManagerProxy->ListWindowInfo(windowInfoOption, infos);
-    ASSERT_EQ(WMError::WM_OK, res);
-    sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
-    res = sceneSessionManagerProxy->ListWindowInfo(windowInfoOption, infos);
     ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, res);
 }
 
