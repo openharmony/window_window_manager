@@ -1768,7 +1768,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetVisibleAreaDisplayInfoById(Displ
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW(": remote is nullptr");
+        WLOGFW("remote is nullptr");
         return nullptr;
     }
 
@@ -1776,22 +1776,22 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetVisibleAreaDisplayInfoById(Displ
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE(": WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFW(": WriteUint64 displayId failed");
+        WLOGFW("WriteUint64 displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW(": SendRequest failed");
+        WLOGFW("SendRequest failed");
         return nullptr;
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        WLOGFW(": SendRequest nullptr.");
+        WLOGFW("SendRequest nullptr.");
         return nullptr;
     }
     return info;
