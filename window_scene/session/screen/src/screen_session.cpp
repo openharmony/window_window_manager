@@ -579,14 +579,12 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
-    FoldDisplayMode foldDisplayMode)
+ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
-    OptimizeSecondaryDisplayMode(updatedProperty.GetBounds(), foldDisplayMode);
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    UpdateTouchBoundsAndOffset();
     return property_;
 }
 
@@ -836,10 +834,15 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
-void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdateTouchBoundsAndOffset()
 {
-    property_.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
-    property_.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), foldDisplayMode);
+    bool isSecondaryDevice = FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
+    property_.SetPhysicalTouchBounds(isSecondaryDevice);
+    property_.SetInputOffsetY(isSecondaryDevice);
+    if (isSecondaryDevice) {
+        property_.SetValidHeight(property_.GetBounds().rect_.GetHeight());
+        property_.SetValidWidth(property_.GetBounds().rect_.GetWidth());
+    }
 }
 
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
@@ -857,7 +860,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    UpdateTouchBoundsAndOffset();
     Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
     DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation, foldDisplayMode, isChanged);
     property_.UpdateDeviceRotation(targetDeviceRotation);
@@ -914,7 +917,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
         property_.SetValidHeight(bounds.rect_.GetHeight());
         property_.SetValidWidth(bounds.rect_.GetWidth());
     }
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    UpdateTouchBoundsAndOffset();
     {
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (!displayNode_) {
@@ -958,7 +961,7 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.SetValidHeight(bounds.rect_.GetHeight());
         property_.SetValidWidth(bounds.rect_.GetWidth());
     }
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    UpdateTouchBoundsAndOffset();
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),

@@ -26,12 +26,11 @@ constexpr float INCH_2_MM = 25.4f;
 constexpr int32_t HALF_VALUE = 2;
 constexpr int32_t TRUNCATE_TWO_DECIMALS = 100;
 constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
-constexpr float SECONDARY_ROTATION_0 = 0.0F;
 constexpr float SECONDARY_ROTATION_90 = 90.0F;
-constexpr float SECONDARY_ROTATION_180 = 180.0F;
 constexpr float SECONDARY_ROTATION_270 = 270.0F;
-constexpr int32_t SECONDARY_MAIN_OFFSETY = -2176;
 constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
+constexpr int32_t FULL_STATUS_WIDTH = 2048;
+constexpr int32_t SCREEN_HEIGHT = 2232;
 constexpr float EPSILON = 1e-6f;
 constexpr float PPI_TO_DPI = 1.6f;
 }
@@ -580,20 +579,19 @@ int32_t ScreenProperty::GetInputOffsetY()
     return inputOffsetY_;
 }
 
-void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode)
+static inline bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
 {
-    inputOffsetY_ = 0;
+    return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
+}
+
+void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice)
+{
+    inputOffsetX_ = 0;
     if (!isSecondaryDevice) {
         return;
     }
-    if (foldDisplayMode == FoldDisplayMode::FULL) {
-        if (rotation_ == SECONDARY_ROTATION_0 || rotation_ == SECONDARY_ROTATION_90) {
-            inputOffsetY_ = SECONDARY_FULL_OFFSETY;
-        }
-    } else if (foldDisplayMode == FoldDisplayMode::MAIN) {
-        if (rotation_ == SECONDARY_ROTATION_180 || rotation_ == SECONDARY_ROTATION_270) {
-            inputOffsetY_ = SECONDARY_MAIN_OFFSETY;
-        }
+    if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(), FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        inputOffsetX_ = SECONDARY_FULL_OFFSETY;
     }
 }
 

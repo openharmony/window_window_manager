@@ -202,7 +202,7 @@ public:
 
     int32_t GetInputOffsetY();
 
-    void SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode);
+    void SetInputOffsetY(bool isSecondaryDevice);
 
     float CalculatePPI();
     uint32_t CalculateDPI();
