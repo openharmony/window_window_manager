@@ -446,7 +446,7 @@ private:
      * Keyboard
      */
     bool isSystemKeyboard_ = false;
-    KeyboardViewMode KeyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+    KeyboardViewMode keyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
 
     /*
      * Window Immersive
