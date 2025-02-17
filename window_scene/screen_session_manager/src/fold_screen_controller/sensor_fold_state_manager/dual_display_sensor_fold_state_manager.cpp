@@ -73,6 +73,13 @@ DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager()
 
 DualDisplaySensorFoldStateManager::~DualDisplaySensorFoldStateManager() {}
 
+void DualDisplaySensorFoldStateManager::UpdateHallSwitchAppInfo(FoldStatus foldStatus)
+{
+    if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
+        isHallSwitchApp_ = true;
+    }
+}
+
 void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
@@ -87,6 +94,7 @@ void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
         angle = ANGLE_MIN_VAL;
     }
     FoldStatus nextState = GetNextFoldState(angle, hall);
+    UpdateHallSwitchAppInfo(nextState);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
 
@@ -104,6 +112,7 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
         angle = INWARD_HALF_FOLDED_MIN_THRESHOLD + 1.0f;
     }
     FoldStatus nextState = GetNextFoldState(angle, hall);
+    UpdateHallSwitchAppInfo(nextState);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
 
@@ -111,12 +120,10 @@ FoldStatus DualDisplaySensorFoldStateManager::GetNextFoldState(float angle, int 
 {
     FoldStatus state = GetCurrentState();
     if (std::isgreaterequal(angle, INWARD_EXPAND_THRESHOLD)) {
-        isHallSwitchApp_ = true;
-        return FoldStatus::EXPAND;
+        state = FoldStatus::EXPAND;
     }
     if (std::islessequal(angle, INWARD_FOLDED_LOWER_THRESHOLD)) {
-        isHallSwitchApp_ = true;
-        return FoldStatus::FOLDED;
+        state = FoldStatus::FOLDED;
     }
     if (isHallSwitchApp_) {
         if (std::isgreaterequal(angle, INWARD_FOLDED_UPPER_THRESHOLD)
@@ -127,7 +134,6 @@ FoldStatus DualDisplaySensorFoldStateManager::GetNextFoldState(float angle, int 
     } else {
         if (std::isgreaterequal(angle, INWARD_HALF_FOLDED_MIN_THRESHOLD)
             && std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD)) {
-            isHallSwitchApp_ = true;
             return FoldStatus::HALF_FOLD;
         }
     }
