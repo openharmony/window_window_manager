@@ -158,6 +158,7 @@ private:
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     static napi_value SetFreezeImmediately(napi_env env, napi_callback_info info);
+    static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -213,6 +214,7 @@ private:
     napi_value OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
+    napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
 
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
