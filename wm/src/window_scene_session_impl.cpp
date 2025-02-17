@@ -365,7 +365,6 @@ WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
         property_->SetParentPersistentId(parentSession->GetPersistentId());
         property_->SetDisplayId(parentSession->GetDisplayId());
     }
-    SetDefaultDisplayIdIfNeed();
     return WMError::WM_OK;
 }
 
