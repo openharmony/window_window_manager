@@ -156,6 +156,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             screenSessionMap_.emplace(screenId, screenSession);
         }
         screenSession->SetIsExtend(isExtend);
+        screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(screenId));
         NotifyScreenConnect(screenSession);
         if (screenConnectionListener_) {
             WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
