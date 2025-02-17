@@ -586,6 +586,7 @@ public:
      */
     WSError SetSplitButtonVisible(bool isVisible);
     WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue);
+    WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
     void RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& func);
 
     /*

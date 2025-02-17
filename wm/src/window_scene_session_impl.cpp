@@ -24,6 +24,7 @@
 #include <application_context.h>
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
+#include "common/include/fold_screen_common.h"
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "display_manager_adapter.h"
@@ -97,7 +98,6 @@ constexpr float MAX_GRAY_SCALE = 1.0f;
 constexpr int32_t DISPLAY_ID_C = 999;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
-const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
 const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
 const std::unordered_set<WindowType> INVALID_SYSTEM_WINDOW_TYPE = {
     WindowType::WINDOW_TYPE_NEGATIVE_SCREEN,
@@ -4986,7 +4986,7 @@ WSError WindowSceneSessionImpl::SetSupportEnterWaterfallMode(bool isSupportEnter
             TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent unavailable", where);
             return;
         }
-        uiContent->OnContainerModalEvent("scb_waterfall_visibility", isSupportEnter ? "true" : "false");
+        uiContent->OnContainerModalEvent(WINDOW_WATERFALL_VISIBILITY_EVENT, isSupportEnter ? "true" : "false");
     }, __func__);
     return WSError::WS_OK;
 }
@@ -4995,7 +4995,14 @@ WMError WindowSceneSessionImpl::OnContainerModalEvent(const std::string& eventNa
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, name: %{public}s, value: %{public}s",
         GetPersistentId(), eventName.c_str(), value.c_str());
-    if (eventName == WATERFALL_WINDOW_EVENT) {
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->OnContainerModalEvent(eventName, value);
+    if (eventName == WINDOW_WATERFALL_EVENT) {
         bool lastFullScreenWaterfallMode = isFullScreenWaterfallMode_.load();
         SetFullScreenWaterfallMode(true);
         auto ret = Maximize();
