@@ -3010,7 +3010,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
 {
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
-    isThrowSlipToFullScreen_.store(false);
+    throwSlipToFullScreenAnimCount_.store(0);
     if (pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
         (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
@@ -3101,6 +3101,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
     if (needSetFullScreen) {
         // maximize end rect and notify last rect
+        throwSlipToFullScreenAnimCount_.fetch_add(1);
         pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
         if (pcFoldScreenController_->IsThrowSlipDirectly()) {
             pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
@@ -3153,11 +3154,17 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session go background when throw", where);
             return;
         }
-        if (!session->isThrowSlipToFullScreen_.load()) {
+        if (session->throwSlipToFullScreenAnimCount_.load() == 0) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session moved when throw", where);
             return;
         }
-        session->isThrowSlipToFullScreen_.store(false);
+        if (session->throwSlipToFullScreenAnimCount_.load() > 1) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s throw-slip fullscreen animation count: %{public}u",
+                where, session->throwSlipToFullScreenAnimCount_.load());
+            session->throwSlipToFullScreenAnimCount_.fetch_sub(1);
+            return;
+        }
+        session->throwSlipToFullScreenAnimCount_.fetch_sub(1);
         if (!session->onSessionEvent_) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s invalid callback", where);
             return;
