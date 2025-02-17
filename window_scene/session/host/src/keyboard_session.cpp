@@ -350,7 +350,7 @@ int32_t KeyboardSession::GetFocusedSessionId()
 static WSRect CalculateSafeRectForMidScene(const WSRect& windowRect, const WSRect& keyboardRect, float scaleX,
     float scaleY)
 {
-    if (scaleX == 0.0f || scaleY == 0.0f) {
+    if (MathHelper::NearZero(scaleX) || MathHelper::NearZero(scaleY)) {
         return { 0, 0, 0, 0 };
     }
     const WSRect scaledWindowRect = {
