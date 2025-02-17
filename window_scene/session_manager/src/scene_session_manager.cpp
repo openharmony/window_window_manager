@@ -5070,7 +5070,7 @@ void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
     oss << "All Focus window: " << std::endl;
     if (allFocusedSessionList.size() > 0) {
         for (const auto& focusState : allFocusedSessionList) {
-            oss << "DisplayId: " << focusState.first << " Focus window: " << focusState.second << std::endl;
+            oss << "DisplayId: " << focusState.first << " windowId: " << focusState.second << std::endl;
         }
     }
 }
