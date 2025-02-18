@@ -579,7 +579,7 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
     }
     currRect_ = rect;
     if (rectChangeReason == RectChangeReason::UNDEFINED) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "ingore undefined reason to change last reason");
+        TLOGD(WmsLogTag::WMS_LAYOUT, "ignore undefined reason to change last reason");
     } else {
         currentReason_ = rectChangeReason;
     }
