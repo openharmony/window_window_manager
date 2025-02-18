@@ -538,13 +538,13 @@ HWTEST_F(SceneSessionTest3, RegisterSupportWindowModesCallback, Function | Small
     info.bundleName_ = "RegisterSupportWindowModesCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    NotifySetSupportWindowModesFunc func1 = [sceneSession](
-        std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes) {
+    NotifySetSupportedWindowModesFunc func1 = [sceneSession](
+        std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes) {
         return;
     };
 
     sceneSession->RegisterSupportWindowModesCallback(std::move(func1));
-    ASSERT_NE(nullptr, sceneSession->onSetSupportWindowModesFunc_);
+    ASSERT_NE(nullptr, sceneSession->onSetSupportedWindowModesFunc_);
 }
 }
 }

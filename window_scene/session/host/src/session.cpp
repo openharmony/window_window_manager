@@ -1062,7 +1062,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         property->SetWindowRect(rect);
         property->SetPersistentId(GetPersistentId());
         property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
-        property->SetSupportWindowModes(GetSessionInfo().supportWindowModes);
+        property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     }
     if (sessionProperty && property) {
         property->SetRequestedOrientation(sessionProperty->GetRequestedOrientation());
