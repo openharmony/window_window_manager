@@ -69,7 +69,7 @@ public:
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
-    WMError SetWindowLimits(WindowLimits& windowLimits) override;
+    WMError SetWindowLimits(WindowLimits& windowLimits, bool isForce) override;
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
@@ -190,6 +190,11 @@ public:
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
 
+    /**
+     * Window Decor
+     */
+    WMError SetWindowTitle(const std::string& title) override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -263,6 +268,7 @@ private:
     void UpdateDefaultStatusBarColor();
     WMError MoveAndResizeKeyboard(const KeyboardLayoutParams& params);
     bool userLimitsSet_ = false;
+    bool forceLimits_ = false;
     bool enableDefaultAnimation_ = true;
     sptr<IAnimationTransitionController> animationTransitionController_;
     uint32_t setSameSystembarPropertyCnt_ = 0;

@@ -2258,7 +2258,9 @@ HWTEST_F(WindowTest, SetWindowLimits, Function | SmallTest | Level2)
     sptr<Window> window = new Window();
     ASSERT_NE(nullptr, window);
     WindowLimits windowLimits;
-    auto ret = window->SetWindowLimits(windowLimits);
+    auto ret = window->SetWindowLimits(windowLimits, false);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ret = window->SetWindowLimits(windowLimits, true);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -2682,6 +2684,20 @@ HWTEST_F(WindowTest, SetTitleButtonVisible, Function | SmallTest | Level2)
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: SetWindowTitle
+ * @tc.desc: SetWindowTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetWindowTitle, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    std::string title = "SetWindowTitle";
+    auto ret = window->SetWindowTitle(title);
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
 /**
