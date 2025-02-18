@@ -2568,7 +2568,8 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
-    if (!(windowSystemConfig_.IsPcWindow() || IsFreeMultiWindowMode())) {
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!(isPC || IsFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is not PC, not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2584,9 +2585,22 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_PARAM;
     }
 
+    return SetSupportedWindowModesInner(supportedWindowModes);
+}
+
+WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
+    const std::vectorAppExecFwk::SupportWindowMode& supportedWindowModes)
+{
     uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
     if (windowModeSupportType == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is 0");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool onlySupportSplit = (windowModeSupportType == 
+                            (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                             WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY));
+    if (onlySupportSplit) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is only support split");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
