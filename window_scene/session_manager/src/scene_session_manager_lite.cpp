@@ -284,4 +284,11 @@ WMError SceneSessionManagerLite::MinimizeMainSession(const std::string& bundleNa
 {
     return SceneSessionManager::GetInstance().MinimizeMainSession(bundleName, appIndex, userId);
 }
+
+WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+    bool& hasOrNot)
+{
+    return SceneSessionManager::GetInstance().HasFloatingWindowForeground(abilityToken,
+        hasOrNot);
+}
 } // namespace OHOS::Rosen
