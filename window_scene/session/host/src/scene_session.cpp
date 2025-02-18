@@ -1630,7 +1630,9 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             PcFoldScreenManager::GetInstance().GetDisplayRects();
         auto lowerScreenPosY =
             defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-        rect.posY_ += lowerScreenPosY;
+        if (rect.posY_ < lowerScreenPosY) {
+            rect.posY_ += lowerScreenPosY;
+        }
     } else {
         rect.posY_ += winRect_.posY_;
     }
