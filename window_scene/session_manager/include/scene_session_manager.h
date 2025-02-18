@@ -484,7 +484,13 @@ public:
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override;
 
-    /**
+    /*
+     * Specific Window
+     */
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) override;
+
+    /*
      * Window Lifecycle
      */
     void RemoveAppInfo(const std::string& bundleName);

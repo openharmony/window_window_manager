@@ -624,7 +624,7 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits, Function | SmallTest | Le
     windowSceneSessionImpl->state_ = WindowState::STATE_CREATED;
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    auto ret = windowSceneSessionImpl->SetWindowLimits(windowLimits, false);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
     ASSERT_NE(nullptr, windowSceneSessionImpl->property_);
     windowSceneSessionImpl->property_->SetWindowType(WindowType::WINDOW_TYPE_PIP);
@@ -648,15 +648,23 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowLimits01, Function | SmallTest | 
     subWindow->SetWindowName("SetWindowLimits01");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(subWindow);
     ASSERT_NE(nullptr, windowSceneSessionImpl);
-    WindowLimits windowLimits = {1000, 1000, 1000, 1000, 0.0f, 0.0f};
-    windowSceneSessionImpl->SetWindowLimits(windowLimits);
+    WindowLimits windowLimits = { 1000, 1000, 1000, 1000, 0.0f, 0.0f };
     windowSceneSessionImpl->property_->SetPersistentId(1004);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestMoudle", "CreateTestAbility"};
     sptr<SessionMocker> subSesssion = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, subSesssion);
     windowSceneSessionImpl->hostSession_ = subSesssion;
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_END);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, true));
+
+    windowSceneSessionImpl->property_->SetWindowType(WindowType::BELOW_APP_SYSTEM_WINDOW_BASE);
+    EXPECT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetWindowLimits(windowLimits, false));
+    EXPECT_EQ(WMError::WM_OK, windowSceneSessionImpl->SetWindowLimits(windowLimits, true));
+
+    windowSceneSessionImpl->property_->SetDragEnabled(false);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, windowSceneSessionImpl->SetWindowLimits(windowLimits, true));
 }
 
 /**

@@ -120,6 +120,8 @@ const std::unordered_set<WindowType> INVALID_SCB_WINDOW_TYPE = {
 };
 constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 4;
 constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
+constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
+constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -977,10 +979,8 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
     if (displayWidth == 0 || displayHeight == 0) {
         return;
     }
-
     virtualPixelRatio = GetVirtualPixelRatio(displayInfo);
     const auto& systemLimits = GetSystemSizeLimits(displayWidth, displayHeight, virtualPixelRatio);
-
     if (userLimitsSet_) {
         customizedLimits = property_->GetUserWindowLimits();
     } else {
@@ -991,7 +991,6 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits.minHeight_ = static_cast<uint32_t>(customizedLimits.minHeight_ * virtualPixelRatio);
     }
     newLimits = systemLimits;
-
     // calculate new limit size
     if (systemLimits.minWidth_ <= customizedLimits.maxWidth_ &&
         customizedLimits.maxWidth_ <= systemLimits.maxWidth_) {
@@ -1001,11 +1000,21 @@ void WindowSceneSessionImpl::CalculateNewLimitsByLimits(
         customizedLimits.maxHeight_ <= systemLimits.maxHeight_) {
         newLimits.maxHeight_ = customizedLimits.maxHeight_;
     }
-    if (systemLimits.minWidth_ <= customizedLimits.minWidth_ &&
+    uint32_t limitMinWidth = systemLimits.minWidth_;
+    uint32_t limitMinHeight = systemLimits.minHeight_;
+    if (forceLimits_ && windowSystemConfig_.uiType_ == UI_TYPE_PC) {
+        uint32_t forceLimitMinWidth = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
+        uint32_t forceLimitMinHeight = static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
+        limitMinWidth = std::min(forceLimitMinWidth, limitMinWidth);
+        limitMinHeight = std::min(forceLimitMinHeight, limitMinHeight);
+        newLimits.minWidth_ = limitMinWidth;
+        newLimits.minHeight_ = limitMinHeight;
+    }
+    if (limitMinWidth <= customizedLimits.minWidth_ &&
         customizedLimits.minWidth_ <= newLimits.maxWidth_) {
         newLimits.minWidth_ = customizedLimits.minWidth_;
     }
-    if (systemLimits.minHeight_ <= customizedLimits.minHeight_ &&
+    if (limitMinHeight <= customizedLimits.minHeight_ &&
         customizedLimits.minHeight_ <= newLimits.maxHeight_) {
         newLimits.minHeight_ = customizedLimits.minHeight_;
     }
@@ -2270,6 +2279,32 @@ bool WindowSceneSessionImpl::IsDecorEnable() const
     return enable;
 }
 
+WMError WindowSceneSessionImpl::SetWindowTitle(const std::string& title)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "Session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!(IsPcWindow() || windowSystemConfig_.uiType_ == UI_TYPE_PAD)) {
+        TLOGE(WmsLogTag::WMS_DECOR, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!IsDecorEnable()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "DecorEnable is false");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context_);
+        if (abilityContext == nullptr) {
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        abilityContext->SetMissionLabel(title);
+    } else {
+        return SetAPPWindowLabel(title);
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::Minimize()
 {
     WLOGFI("WindowSceneSessionImpl::Minimize id: %{public}d", GetPersistentId());
@@ -2294,10 +2329,6 @@ WMError WindowSceneSessionImpl::Maximize()
     if (IsWindowSessionInvalid()) {
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
-        return WMError::WM_OK;
     }
     if (WindowHelper::IsMainWindow(GetType())) {
         SetLayoutFullScreen(enableImmersiveMode_);
@@ -2327,10 +2358,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     if (property_ == nullptr || property_->GetCompatibleModeInPc()) {
         TLOGE(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, can not Maximize");
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
-        return WMError::WM_OK;
     }
     titleHoverShowEnabled_ = true;
     dockHoverShowEnabled_ = true;
@@ -3932,13 +3959,13 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
 }
 
-WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
+WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool isForcible)
 {
-    WLOGFI("SetWindowLimits WinId:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
-        "maxWidth:%{public}u, maxHeight:%{public}u", GetWindowId(), windowLimits.minWidth_,
-        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, minWidth:%{public}u, minHeight:%{public}u, "
+        "maxWidth:%{public}u, maxHeight:%{public}u, isForcible:%{public}u", GetWindowId(), windowLimits.minWidth_,
+        windowLimits.minHeight_, windowLimits.maxWidth_, windowLimits.maxHeight_, isForcible);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
@@ -3946,7 +3973,7 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
     bool isDraggableSystemWin = WindowHelper::IsSystemWindow(windowType) && IsWindowDraggable();
     if (!WindowHelper::IsMainWindow(windowType) && !WindowHelper::IsSubWindow(windowType) &&
         windowType != WindowType::WINDOW_TYPE_DIALOG && !isDraggableSystemWin) {
-        WLOGFE("windowType not support. WinId:%{public}u, WindowType:%{public}u",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowType not support. WinId:%{public}u, WindowType:%{public}u",
             GetWindowId(), static_cast<uint32_t>(windowType));
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -3964,11 +3991,12 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits)
     property_->SetUserWindowLimits({
         maxWidth, maxHeight, minWidth, minHeight, customizedLimits.maxRatio_, customizedLimits.minRatio_
     });
+    forceLimits_ = isForcible;
     userLimitsSet_ = true;
     UpdateWindowSizeLimits();
     WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     if (ret != WMError::WM_OK) {
-        WLOGFE("update window proeprty failed! id: %{public}u.", GetWindowId());
+        TLOGE(WmsLogTag::WMS_LAYOUT, "update window proeprty failed! id: %{public}u.", GetWindowId());
         return ret;
     }
     UpdateNewSize();
