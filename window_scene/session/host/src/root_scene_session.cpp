@@ -124,7 +124,7 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
           rect.ToString().c_str(), barArea.ToString().c_str(), avoidArea.ToString().c_str());
 }
 
-AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
+AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
         auto session = weakThis.promote();

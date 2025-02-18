@@ -134,7 +134,8 @@ public:
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
-    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT) { return {}; }
+    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
@@ -146,6 +147,15 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
+
+    /**
+     * @brief this interface is invoked by the ACE to the native host.
+     * @param eventName invoking event name, which is used to distinguish different invoking types.
+     * @param eventValue used to transfer parameters.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WSError OnContainerModalEvent(const std::string& eventName,
+        const std::string& eventValue) { return WSError::WS_OK; }
 
     /**
      * @brief Obtains the global maximization mode of window.

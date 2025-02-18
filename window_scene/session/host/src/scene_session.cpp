@@ -51,6 +51,7 @@
 #include "screen_manager.h"
 #include "screen.h"
 #include "fold_screen_state_internel.h"
+#include "fold_screen_common.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/pc_fold_screen_controller.h"
@@ -68,6 +69,9 @@ constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
+constexpr WSRectF VELOCITY_RELOCATION_TO_TOP = {0.0f, -10.0f, 0.0f, 0.0f};
+constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
+constexpr int32_t API_VERSION_16 = 16;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -1626,7 +1630,9 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             PcFoldScreenManager::GetInstance().GetDisplayRects();
         auto lowerScreenPosY =
             defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-        rect.posY_ += lowerScreenPosY;
+        if (rect.posY_ < lowerScreenPosY) {
+            rect.posY_ += lowerScreenPosY;
+        }
     } else {
         rect.posY_ += winRect_.posY_;
     }
@@ -2177,7 +2183,7 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
-bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
+bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVersion)
 {
     if (type == AvoidAreaType::TYPE_KEYBOARD) {
         return true;
@@ -2185,7 +2191,8 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     WindowMode mode = GetWindowMode();
     WindowType winType = GetWindowType();
     if (WindowHelper::IsSubWindow(winType)) {
-        if (GetSessionProperty()->GetAvoidAreaOption() &
+        if (apiVersion >= API_VERSION_16 &&
+            GetSessionProperty()->GetAvoidAreaOption() &
             static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d option %{public}d",
                 GetPersistentId(), GetSessionProperty()->GetAvoidAreaOption());
@@ -2193,7 +2200,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
         }
         auto parentSession = GetParentSession();
         if (parentSession != nullptr && parentSession->GetSessionRect() == GetSessionRect()) {
-            return parentSession->CheckGetAvoidAreaAvailable(type);
+            return parentSession->CheckGetAvoidAreaAvailable(type, apiVersion);
         } else if (parentSession == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "parentSession is nullptr");
         }
@@ -2356,9 +2363,9 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
-AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect)
+AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
 {
-    if (!CheckGetAvoidAreaAvailable(type)) {
+    if (!CheckGetAvoidAreaAvailable(type, apiVersion)) {
         return {};
     }
 
@@ -2392,15 +2399,15 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
     }
 }
 
-AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
+AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
 {
-    return PostSyncTask([weakThis = wptr(this), type, rect, where = __func__]() -> AvoidArea {
+    return PostSyncTask([weakThis = wptr(this), type, rect, apiVersion, where = __func__]() -> AvoidArea {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
-        return session->GetAvoidAreaByTypeInner(type, rect);
+        return session->GetAvoidAreaByTypeInner(type, rect, apiVersion);
     }, __func__);
 }
 
@@ -3007,7 +3014,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
 {
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
-    isThrowSlipToFullScreen_.store(false);
+    throwSlipToFullScreenAnimCount_.store(0);
     if (pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
         (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
@@ -3098,6 +3105,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     bool needSetFullScreen = pcFoldScreenController_->IsStartFullScreen();
     if (needSetFullScreen) {
         // maximize end rect and notify last rect
+        throwSlipToFullScreenAnimCount_.fetch_add(1);
         pcFoldScreenController_->ResizeToFullScreen(endRect, GetStatusBarHeight(), GetDockHeight());
         if (pcFoldScreenController_->IsThrowSlipDirectly()) {
             pcFoldScreenController_->ThrowSlipFloatingRectDirectly(
@@ -3150,11 +3158,17 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session go background when throw", where);
             return;
         }
-        if (!session->isThrowSlipToFullScreen_.load()) {
+        if (session->throwSlipToFullScreenAnimCount_.load() == 0) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session moved when throw", where);
             return;
         }
-        session->isThrowSlipToFullScreen_.store(false);
+        if (session->throwSlipToFullScreenAnimCount_.load() > 1) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s throw-slip fullscreen animation count: %{public}u",
+                where, session->throwSlipToFullScreenAnimCount_.load());
+            session->throwSlipToFullScreenAnimCount_.fetch_sub(1);
+            return;
+        }
+        session->throwSlipToFullScreenAnimCount_.fetch_sub(1);
         if (!session->onSessionEvent_) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s invalid callback", where);
             return;
@@ -3618,20 +3632,15 @@ void SceneSession::SetPrivacyMode(bool isPrivacy)
 
 void SceneSession::NotifyPrivacyModeChange()
 {
-    auto sessionProperty = GetSessionProperty();
-    if (sessionProperty == nullptr) {
-        TLOGW(WmsLogTag::WMS_SCB, "sessionProperty is null");
-        return;
-    }
-
-    bool curExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
-    bool curPrivacyMode = curExtPrivacyMode || sessionProperty->GetPrivacyMode();
-    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, curExtPrivacyMode:%{public}d, session property privacyMode:%{public}d"
-        ", old privacyMode:%{public}d",
-        GetPersistentId(), curExtPrivacyMode, sessionProperty->GetPrivacyMode(), isPrivacyMode_);
-
-    if (curPrivacyMode != isPrivacyMode_) {
-        isPrivacyMode_ = curPrivacyMode;
+    bool isPrivacyMode = GetSessionProperty()->GetPrivacyMode();
+    std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
+    bool currExtPrivacyMode = combinedExtWindowFlags_.privacyModeFlag;
+    TLOGD(WmsLogTag::WMS_SCB, "id:%{public}d, currExtPrivacyMode:%{public}d, session property privacyMode: %{public}d, "
+        "last privacyMode:%{public}d",
+        GetPersistentId(), currExtPrivacyMode, isPrivacyMode, isPrivacyMode_);
+    bool mixedPrivacyMode = currExtPrivacyMode || isPrivacyMode;
+    if (mixedPrivacyMode != isPrivacyMode_) {
+        isPrivacyMode_ = mixedPrivacyMode;
         if (privacyModeChangeNotifyFunc_) {
             privacyModeChangeNotifyFunc_(isPrivacyMode_);
         }
@@ -5225,6 +5234,19 @@ WSError SceneSession::SendContainerModalEvent(const std::string& eventName, cons
     return sessionStage_->SendContainerModalEvent(eventName, eventValue);
 }
 
+WSError SceneSession::OnContainerModalEvent(const std::string& eventName, const std::string& eventValue)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "name: %{public}s, value: %{public}s", eventName.c_str(), eventValue.c_str());
+    if (eventName == WINDOW_RELOCATION_EVENT) {
+        if (eventValue == "true") {
+            ThrowSlipDirectly(VELOCITY_RELOCATION_TO_TOP);
+        } else {
+            ThrowSlipDirectly(VELOCITY_RELOCATION_TO_BOTTOM);
+        }
+    }
+    return WSError::WS_OK;
+}
+
 void SceneSession::RegisterSetLandscapeMultiWindowFunc(NotifyLandscapeMultiWindowSessionFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
@@ -5645,13 +5667,14 @@ void SceneSession::SetShouldHideNonSecureWindows(bool shouldHide)
 
 void SceneSession::CalculateCombinedExtWindowFlags()
 {
-    // Only correct when each flag is true when active, and once a uiextension is active, the host is active
-    std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
-    combinedExtWindowFlags_.bitData = 0;
-    for (const auto& iter: extWindowFlagsMap_) {
-        combinedExtWindowFlags_.bitData |= iter.second.bitData;
+    {
+        // Only correct when each flag is true when active, and once a uiextension is active, the host is active
+        std::unique_lock<std::shared_mutex> lock(combinedExtWindowFlagsMutex_);
+        combinedExtWindowFlags_.bitData = 0;
+        for (const auto& iter: extWindowFlagsMap_) {
+            combinedExtWindowFlags_.bitData |= iter.second.bitData;
+        }
     }
-
     NotifyPrivacyModeChange();
 }
 
@@ -6032,9 +6055,16 @@ void SceneSession::SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& fun
     notifyVisibleChangeFunc_ = func;
 }
 
-void SceneSession::SetPrivacyModeChangeNotifyFunc(const NotifyPrivacyModeChangeFunc& func)
+void SceneSession::SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func)
 {
-    privacyModeChangeNotifyFunc_ = func;
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SCB, "%{public}s session is null", where);
+            return;
+        }
+        session->privacyModeChangeNotifyFunc_ = std::move(func);
+    }, __func__);
 }
 
 void SceneSession::SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func)

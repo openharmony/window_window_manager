@@ -379,6 +379,7 @@ public:
     void MultiScreenChangeOuter(const std::string& outerFlag);
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     void UpdateValidArea(ScreenId screenId, uint32_t validWidth, uint32_t validHeight);
+    bool GetIsRealScreen(ScreenId screenId) override;
 
 protected:
     ScreenSessionManager();
@@ -631,6 +632,7 @@ private:
     void SetMultiScreenOuterMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     void RecoveryMultiScreenNormalMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     bool IsFakeDisplayExist();
+    DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

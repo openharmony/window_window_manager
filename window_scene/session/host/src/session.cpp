@@ -1012,6 +1012,11 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
             GetPersistentId(), rect.ToString().c_str());
         return;
     }
+    if (rect.IsInvalid()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "skip window: %{public}d invalid rect: %{public}s",
+            GetPersistentId(), rect.ToString().c_str());
+        return;
+    }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Error status");
@@ -1034,9 +1039,6 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     }
     WSRect lastRect = rect;
     auto updatedDisplayId = TransformGlobalRectToRelativeRect(rect);
-    if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
-        UpdateDisplayIdByParentSession(updatedDisplayId);
-    }
     auto ret = UpdateClientDisplayId(updatedDisplayId);
     lastScreenFoldStatus_ = currScreenFoldStatus;
     TLOGI(WmsLogTag::WMS_LAYOUT, "CalculatedRect: winId: %{public}d, input: %{public}s, output: %{public}s,"
@@ -2374,6 +2376,10 @@ void Session::ResetSnapshot()
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
     std::lock_guard lock(snapshotMutex_);
     snapshot_ = nullptr;
+    if (scenePersistence_ == nullptr) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "scenePersistence_ %{public}d nullptr", persistentId_);
+        return;
+    }
     scenePersistence_->ResetSnapshotCache();
 }
 

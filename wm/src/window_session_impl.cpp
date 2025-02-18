@@ -32,6 +32,7 @@
 
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
+#include "common/include/fold_screen_common.h"
 #include "display_info.h"
 #include "display_manager.h"
 #include "extension/extension_business_info.h"
@@ -1350,7 +1351,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
                 TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s uiContent unavailable", where);
                 return;
             }
-            uiContent->OnContainerModalEvent("scb_waterfall_visibility",
+            uiContent->OnContainerModalEvent(WINDOW_WATERFALL_VISIBILITY_EVENT,
                 window->supportEnterWaterfallMode_ ? "true" : "false");
         }, "UIContentOnContainerModalEvent");
     }

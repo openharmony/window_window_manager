@@ -212,15 +212,18 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
                 "Capability not supported. Failed to call the API due to limited device capabilities."));
+            napi_delete_reference(env, typeNodeRef);
             return;
         }
         auto pipController = weak.promote();
         if (pipController == nullptr) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
                 "PiP internal error."));
+            napi_delete_reference(env, typeNodeRef);
             return;
         }
         pipController->UpdateContentNodeRef(typeNodeRef);
+        napi_delete_reference(env, typeNodeRef);
         task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {

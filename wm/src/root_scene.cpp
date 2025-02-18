@@ -33,7 +33,6 @@
 
 #include "intention_event_manager.h"
 #include "window_manager_hilog.h"
-#include "sys_cap_util.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -283,14 +282,14 @@ void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
     vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
-WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
+WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect, int32_t apiVersion)
 {
     if (getSessionAvoidAreaByTypeCallback_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
-        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
+    if (apiVersion != API_VERSION_INVALID && apiVersion < API_VERSION_16) {
+        TLOGI(WmsLogTag::WMS_IMMS, "api version not supported");
         return WMError::WM_DO_NOTHING;
     }
     avoidArea = getSessionAvoidAreaByTypeCallback_(type);
@@ -319,10 +318,6 @@ WMError RootScene::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedL
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
-        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
-        return WMError::WM_DO_NOTHING;
-    }
     bool firstInserted = false;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -343,10 +338,6 @@ WMError RootScene::UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChange
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "listener is null");
         return WMError::WM_ERROR_NULLPTR;
-    }
-    if (SysCapUtil::GetApiCompatibleVersion() < API_VERSION_16) {
-        TLOGI(WmsLogTag::WMS_IMMS, "api version is not support");
-        return WMError::WM_DO_NOTHING;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "unregister success");
     std::lock_guard<std::mutex> lock(mutex_);

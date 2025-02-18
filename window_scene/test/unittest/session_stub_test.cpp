@@ -469,6 +469,7 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
     ASSERT_EQ(data.WriteInt32(0), true);
     ASSERT_EQ(data.WriteInt32(10), true);
     ASSERT_EQ(data.WriteInt32(10), true);
+    ASSERT_EQ(data.WriteInt32(12), true);
     res = session_->HandleGetAvoidAreaByType(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteFloat(2.0f), true);
@@ -970,6 +971,23 @@ HWTEST_F(SessionStubTest, HandleGetCrossAxisState, Function | SmallTest | Level2
     uint32_t state = 0;
     reply.ReadUint32(state);
     ASSERT_EQ(state, static_cast<uint32_t>(CrossAxisState::STATE_CROSS));
+}
+
+/**
+ * @tc.name: HandleContainerModalEvent
+ * @tc.desc: sessionStub HandleContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleContainerModalEvent, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("name");
+    data.WriteString("value");
+    auto result = session_->HandleContainerModalEvent(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    result = session_->HandleContainerModalEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
 }
 }
 } // namespace Rosen
