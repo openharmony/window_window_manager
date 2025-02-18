@@ -66,7 +66,13 @@ public:
 
     static inline bool IsModalWindow(uint32_t windowFlags)
     {
-        return windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+        return (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) ||
+            (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
+    }
+
+    static inline bool IsTextMenuSubWindow(WindowType type, uint32_t windowFlags)
+    {
+        return IsSubWindow(type) && (windowFlags & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU));
     }
 
     static inline bool IsDialogWindow(WindowType type)

@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <regex>
 #include <application_context.h>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
+#include <gtest/gtest.h>
+#include <regex>
 
 #include "context.h"
 #include "interfaces/include/ws_common.h"
@@ -27,8 +27,9 @@
 #include "session_info.h"
 #include "session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
-#include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/pc_fold_screen_controller.h"
+#include "session/host/include/scene_session.h"
 #include "window_manager_agent.h"
 #include "zidl/window_manager_agent_interface.h"
 
@@ -381,16 +382,58 @@ HWTEST_F(SceneSessionManagerTest4, UpdateDisplayRegion, Function | SmallTest | L
     ssm_->UpdateDisplayRegion(nullptr);
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
     ASSERT_NE(displayInfo, nullptr);
-    displayInfo->SetWidth(0);
+
+    constexpr DisplayId displayId = 0;
+    constexpr int32_t width = 100;
+    displayInfo->SetDisplayId(displayId);
+    displayInfo->SetWidth(width);
     ssm_->UpdateDisplayRegion(displayInfo);
 
-    displayInfo->SetWidth(1);
-    displayInfo->SetHeight(0);
+    constexpr int32_t height = 200;
+    displayInfo->SetWidth(width);
+    displayInfo->SetHeight(height);
     ssm_->UpdateDisplayRegion(displayInfo);
 
-    displayInfo->SetHeight(1);
+    displayInfo->SetHeight(height);
+    PcFoldScreenManager::GetInstance().SetDisplayInfo(displayId, SuperFoldStatus::HALF_FOLDED);
+    PcFoldScreenManager::GetInstance().SetDisplayRects(
+        WSRect::EMPTY_RECT, { 0, 0, width, height }, WSRect::EMPTY_RECT);
     ssm_->UpdateDisplayRegion(displayInfo);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+    ASSERT_NE(ssm_->displayRegionMap_.count(displayId), 0);
+    auto region = ssm_->displayRegionMap_[displayId];
+    ASSERT_NE(region, nullptr);
+    const SkIRect& rect = region->getBounds();
+    EXPECT_EQ(rect.fLeft, 0);
+    EXPECT_EQ(rect.fTop, 0);
+    EXPECT_EQ(rect.fRight, width);
+    EXPECT_EQ(rect.fBottom, height);
+}
+
+/**
+ * @tc.name: GetDisplayRegion
+ * @tc.desc: GetDisplayRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest4, GetDisplayRegion, Function | SmallTest | Level3)
+{
+    ASSERT_NE(nullptr, ssm_);
+    constexpr DisplayId displayId = 0;
+    auto region = ssm_->GetDisplayRegion(displayId);
+    EXPECT_NE(region, nullptr);
+
+    constexpr int32_t left = 0;
+    constexpr int32_t top = 0;
+    constexpr int32_t right = 100;
+    constexpr int32_t bottom = 200;
+    SkIRect rect { .fLeft = left, .fTop = top, .fRight = right, .fBottom = bottom };
+    ssm_->displayRegionMap_[displayId] = std::make_shared<SkRegion>(rect);
+    auto region1 = ssm_->GetDisplayRegion(displayId);
+    ASSERT_NE(region1, nullptr);
+    const SkIRect& rect1 = region1->getBounds();
+    EXPECT_EQ(rect1.fLeft, 0);
+    EXPECT_EQ(rect1.fTop, 0);
+    EXPECT_EQ(rect1.fRight, right);
+    EXPECT_EQ(rect1.fBottom, bottom);
 }
 
 /**
@@ -612,17 +655,17 @@ HWTEST_F(SceneSessionManagerTest4, GetAppMainSceneSession, Function | SmallTest 
     ssm_->sceneSessionMap_.insert(std::make_pair(0, sceneSession));
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession01));
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession, 0), WSError::WS_ERROR_INVALID_SESSION);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(0, sceneSession), WSError::WS_ERROR_INVALID_SESSION);
 
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_OK);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(1, sceneSession01), WSError::WS_OK);
 
     ASSERT_NE(sceneSession01->property_, nullptr);
     sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_MEDIA;
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_ERROR_INVALID_CALLING);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(1, sceneSession01), WSError::WS_ERROR_INVALID_CALLING);
 
     sceneSession01->property_->type_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     sceneSession01->property_->SetParentPersistentId(2);
-    EXPECT_EQ(ssm_->GetAppMainSceneSession(sceneSession01, 1), WSError::WS_OK);
+    EXPECT_EQ(ssm_->GetAppMainSceneSession(1, sceneSession01), WSError::WS_OK);
 }
 
 /**
@@ -836,13 +879,12 @@ HWTEST_F(SceneSessionManagerTest4, UpdateAvoidSessionAvoidArea, Function | Small
     ASSERT_NE(sceneSession, nullptr);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WindowType type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    bool needUpdate = true;
-    ssm_->UpdateAvoidSessionAvoidArea(type, needUpdate);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
 
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
     sceneSession->isVisible_ = true;
-    ssm_->UpdateAvoidSessionAvoidArea(type, needUpdate);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 

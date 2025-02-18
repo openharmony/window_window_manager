@@ -24,6 +24,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 constexpr int MAX_WINDOWINFO_NUM = 15;
+const static uint32_t DISPLAY_B_HEIGHT = 1608;
 class SceneInputManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -289,7 +290,7 @@ HWTEST_F(SceneInputManagerTest, UpdateFocusedSessionId, Function | SmallTest | L
     ExtensionWindowEventInfo extensionInfo {
         .persistentId = 12345
     };
-    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
     sceneInputManager->UpdateFocusedSessionId(sceneSession->GetPersistentId());
     EXPECT_EQ(sceneInputManager->focusedSessionId_, extensionInfo.persistentId);
 
@@ -329,10 +330,12 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayInfos, Function | SmallTest | Le
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     int ret = displayInfos.size();
     ScreenProperty screenProperty0;
+    screenProperty0.SetValidHeight(DISPLAY_B_HEIGHT);
     Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
         sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     ASSERT_EQ(ret + 1, displayInfos.size());
+    ASSERT_EQ(DISPLAY_B_HEIGHT, displayInfos[0].validHeight);
 }
 
 /**
@@ -705,6 +708,27 @@ HWTEST_F(SceneInputManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Lev
     SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
     SceneInputManager::GetInstance().UpdateSecSurfaceInfo(emptyMap);
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: UpdateConstrainedModalUIExtInfo
+ * @tc.desc: UpdateConstrainedModalUIExtInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UpdateConstrainedModalUIExtInfo, Function | SmallTest | Level3)
+{
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> testMap;
+    auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
+    ASSERT_NE(oldDirty, nullptr);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
+    SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(testMap);
+
+    SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
+    std::vector<SecSurfaceInfo> surfaceInfoList;
+    SecSurfaceInfo secSurfaceInfo;
+    surfaceInfoList.emplace_back(secSurfaceInfo);
+    testMap[0] = surfaceInfoList;
+    SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(testMap);
 }
 
 /**

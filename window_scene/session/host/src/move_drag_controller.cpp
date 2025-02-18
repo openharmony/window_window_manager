@@ -622,11 +622,11 @@ void MoveDragController::AdjustTargetPositionByAvailableArea(int32_t& moveDragFi
     moveDragFinalX = std::max(moveAvailableArea_.posX_, moveDragFinalX);
     moveDragFinalY = std::max(moveAvailableArea_.posY_, moveDragFinalY);
 
-    int32_t rightBoundsLimit =
-        moveAvailableArea_.posX_ + moveAvailableArea_.width_ - moveDragProperty_.originalRect_.width_;
-    int32_t bottomBoundsLimit =
-        moveAvailableArea_.posY_ + moveAvailableArea_.height_ - moveDragProperty_.originalRect_.height_;
-    
+    int32_t rightBoundsLimit = moveAvailableArea_.posX_ + static_cast<int32_t>(moveAvailableArea_.width_) -
+                               moveDragProperty_.originalRect_.width_;
+    int32_t bottomBoundsLimit = moveAvailableArea_.posY_ + static_cast<int32_t>(moveAvailableArea_.height_) -
+                                moveDragProperty_.originalRect_.height_;
+
     if (moveDragFinalX >= rightBoundsLimit) {
         moveDragFinalX = rightBoundsLimit;
     }
@@ -649,10 +649,10 @@ MoveDirection MoveDragController::CalcMoveDirection(DisplayId lastDisplayId, Dis
     ScreenProperty lastScreenProperty = lastScreenSession->GetScreenProperty();
     ScreenProperty currentScreenProperty = currentScreenSession->GetScreenProperty();
 
-    int32_t lastOriginStartX = lastScreenProperty.GetStartX();
-    int32_t lastOriginStartY = lastScreenProperty.GetStartY();
-    int32_t currentOriginStartX = currentScreenProperty.GetStartX();
-    int32_t currentOriginStartY = currentScreenProperty.GetStartY();
+    uint32_t lastOriginStartX = lastScreenProperty.GetStartX();
+    uint32_t lastOriginStartY = lastScreenProperty.GetStartY();
+    uint32_t currentOriginStartX = currentScreenProperty.GetStartX();
+    uint32_t currentOriginStartY = currentScreenProperty.GetStartY();
 
     uint32_t lastScreenWidth = lastScreenProperty.GetBounds().rect_.width_;
     uint32_t lastScreenHeight = lastScreenProperty.GetBounds().rect_.height_;
@@ -775,8 +775,8 @@ void MoveDragController::HandleBottomToUpCross(DisplayId targetDisplayId,
                                                int32_t& moveDragFinalY)
 {
     UpdateMoveAvailableArea(targetDisplayId);
-    int32_t dockBarHeight =
-        screenSizeProperty_.currentDisplayTop - moveAvailableArea_.posY_ - moveAvailableArea_.height_;
+    int32_t dockBarHeight = screenSizeProperty_.currentDisplayTop - moveAvailableArea_.posY_ -
+                            static_cast<int32_t>(moveAvailableArea_.height_);
     int32_t boundaryPos =
         screenSizeProperty_.height - dockBarHeight - moveDragProperty_.originalPointerWindowY_;
     if (pointerDisplayY <= boundaryPos) {

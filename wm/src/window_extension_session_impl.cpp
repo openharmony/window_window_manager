@@ -25,7 +25,6 @@
 #endif
 
 #include "display_info.h"
-#include "extension/extension_business_info.h"
 #include "input_transfer_station.h"
 #include "perform_reporter.h"
 #include "session_permission.h"
@@ -108,7 +107,9 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     if (context_) {
         abilityToken_ = context_->GetToken();
     }
-    AddExtensionWindowStageToSCB();
+    // XTS log, please do not modify
+    TLOGI(WmsLogTag::WMS_UIEXT, "IsConstrainedModal: %{public}d", property_->IsConstrainedModal());
+    AddExtensionWindowStageToSCB(property_->IsConstrainedModal());
     WMError ret = Connect();
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "name:%{public}s %{public}d connect fail. ret:%{public}d",
@@ -135,7 +136,7 @@ WMError WindowExtensionSessionImpl::Create(const std::shared_ptr<AbilityRuntime:
     return WMError::WM_OK;
 }
 
-void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
+void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB(bool isConstrainedModal)
 {
     if (!abilityToken_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
@@ -147,10 +148,10 @@ void WindowExtensionSessionImpl::AddExtensionWindowStageToSCB()
     }
 
     SingletonContainer::Get<WindowAdapter>().AddExtensionWindowStageToSCB(sptr<ISessionStage>(this), abilityToken_,
-        surfaceNode_->GetId());
+        surfaceNode_->GetId(), isConstrainedModal);
 }
 
-void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB()
+void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB(bool isConstrainedModal)
 {
     if (!abilityToken_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "token is nullptr");
@@ -158,7 +159,7 @@ void WindowExtensionSessionImpl::RemoveExtensionWindowStageFromSCB()
     }
 
     SingletonContainer::Get<WindowAdapter>().RemoveExtensionWindowStageFromSCB(sptr<ISessionStage>(this),
-        abilityToken_);
+        abilityToken_, isConstrainedModal);
 }
 
 void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -169,12 +170,39 @@ void WindowExtensionSessionImpl::UpdateConfiguration(const std::shared_ptr<AppEx
     }
 }
 
-void WindowExtensionSessionImpl::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void WindowExtensionSessionImpl::UpdateConfigurationForSpecified(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
-    WLOGD("notify scene ace update config");
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
+        uiContent->UpdateConfiguration(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId: %{public}u", GetWindowId());
+    }
+}
+
+void WindowExtensionSessionImpl::UpdateConfigurationForAll(
+    const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify scene ace update config");
+    std::unordered_set<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowCtxSet(
+        ignoreWindowContexts.begin(), ignoreWindowContexts.end());
     std::unique_lock<std::shared_mutex> lock(windowExtensionSessionMutex_);
     for (const auto& window : windowExtensionSessionSet_) {
-        window->UpdateConfiguration(configuration);
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is null");
+            continue;
+        }
+        auto context = window->GetContext();
+        if (context == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "context is null, winId: %{public}u", window->GetWindowId());
+            continue;
+        }
+        if (ignoreWindowCtxSet.count(context) == 0) {
+            window->UpdateConfiguration(configuration);
+        }
     }
 }
 
@@ -242,7 +270,7 @@ WMError WindowExtensionSessionImpl::Destroy(bool needNotifyServer, bool needClea
     ClearVsyncStation();
     SetUIContentComplete();
     SetUIExtensionDestroyComplete();
-    RemoveExtensionWindowStageFromSCB();
+    RemoveExtensionWindowStageFromSCB(property_->IsConstrainedModal());
     TLOGI(WmsLogTag::WMS_LIFE, "Destroyed success, id: %{public}d.", GetPersistentId());
     return WMError::WM_OK;
 }
@@ -612,7 +640,7 @@ WMError WindowExtensionSessionImpl::SetUIContentInner(const std::string& content
 }
 
 WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reason,
-    const SceneAnimationConfig& config)
+    const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     auto wmReason = static_cast<WindowSizeChangeReason>(reason);
     Rect wmRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
@@ -636,23 +664,24 @@ WSError WindowExtensionSessionImpl::UpdateRect(const WSRect& rect, SizeChangeRea
 
     if (wmReason == WindowSizeChangeReason::ROTATION) {
         const std::shared_ptr<RSTransaction>& rsTransaction = config.rsTransaction_;
-        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction);
+        UpdateRectForRotation(wmRect, preRect, wmReason, rsTransaction, avoidAreas);
     } else if (handler_ != nullptr) {
-        UpdateRectForOtherReason(wmRect, wmReason);
+        UpdateRectForOtherReason(wmRect, wmReason, avoidAreas);
     } else {
         NotifySizeChange(wmRect, wmReason);
-        UpdateViewportConfig(wmRect, wmReason);
+        UpdateViewportConfig(wmRect, wmReason, nullptr, nullptr, avoidAreas);
     }
     return WSError::WS_OK;
 }
 
 void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const Rect& preRect,
-    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction)
+    WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
     if (!handler_) {
         return;
     }
-    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction]() mutable {
+    auto task = [weak = wptr(this), wmReason, wmRect, preRect, rsTransaction, avoidAreas]() mutable {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowExtensionSessionImpl::UpdateRectForRotation");
         auto window = weak.promote();
         if (!window) {
@@ -681,7 +710,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (wmRect != preRect) {
             window->NotifySizeChange(wmRect, wmReason);
         }
-        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction);
+        window->UpdateViewportConfig(wmRect, wmReason, rsTransaction, nullptr, avoidAreas);
         RSNode::CloseImplicitAnimation();
         if (needSync) {
             rsTransaction->Commit();
@@ -692,16 +721,17 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
     handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForRotation");
 }
 
-void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason)
+void WindowExtensionSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, WindowSizeChangeReason wmReason,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    auto task = [weak = wptr(this), wmReason, wmRect] {
+    auto task = [weak = wptr(this), wmReason, wmRect, avoidAreas] {
         auto window = weak.promote();
         if (!window) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "window is null, updateViewPortConfig failed");
             return;
         }
         window->NotifySizeChange(wmRect, wmReason);
-        window->UpdateViewportConfig(wmRect, wmReason);
+        window->UpdateViewportConfig(wmRect, wmReason, nullptr, nullptr, avoidAreas);
     };
     if (handler_) {
         handler_->PostTask(task, "WMS_WindowExtensionSessionImpl_UpdateRectForOtherReason");
@@ -852,7 +882,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfigInner(const Sessi
         TLOGW(WmsLogTag::WMS_UIEXT, "uiContent is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
-    uiContent->UpdateViewportConfig(viewportConfig, WindowSizeChangeReason::UNDEFINED, nullptr);
+    uiContent->UpdateViewportConfig(viewportConfig, WindowSizeChangeReason::UNDEFINED, nullptr, lastAvoidAreaMap_);
     return WSError::WS_OK;
 }
 
@@ -1391,6 +1421,40 @@ WMError WindowExtensionSessionImpl::SetWindowMode(WindowMode mode)
     return WMError::WM_OK;
 }
 
+WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    auto state = data.GetIntParam(Extension::CROSS_AXIS_FIELD, 0);
+    if (state == static_cast<int32_t>(GetCrossAxisState())) {
+        return WMError::WM_OK;
+    }
+    if (!IsValidCrossState(state)) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "invalid CrossAxisState:%{public}d", state);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    crossAxisState_ = static_cast<CrossAxisState>(state);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_CROSS_AXIS_STATE),
+            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "CrossAxisState:%{public}d", state);
+    return WMError::WM_OK;
+}
+
+CrossAxisState WindowExtensionSessionImpl::GetCrossAxisState()
+{
+    return crossAxisState_.load();
+}
+
+void WindowExtensionSessionImpl::RegisterConsumer(Extension::Businesscode code,
+    const std::function<WMError(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)>& func)
+{
+    auto consumer = [func](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
+                                     std::optional<AAFwk::Want>& reply) {
+        return static_cast<int32_t>(func(std::move(data), reply));
+    };
+    dataConsumers_.emplace(static_cast<uint32_t>(code), std::move(consumer));
+}
+
 void WindowExtensionSessionImpl::RegisterDataConsumer()
 {
     auto windowModeConsumer = [this](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
@@ -1407,6 +1471,9 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
     };
     dataConsumers_.emplace(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_MODE),
                            std::move(windowModeConsumer));
+    RegisterConsumer(Extension::Businesscode::SYNC_CROSS_AXIS_STATE,
+        std::bind(&WindowExtensionSessionImpl::OnCrossAxisStateChange,
+        this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
                                                   std::optional<AAFwk::Want>& reply) -> int32_t {

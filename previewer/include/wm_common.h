@@ -102,6 +102,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SCENE_BOARD,
     WINDOW_TYPE_KEYBOARD_PANEL,
     WINDOW_TYPE_SCREEN_CONTROL,
+    WINDOW_TYPE_WALLET_SWIPE_CARD,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -266,7 +267,8 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_HANDWRITING = 1 << 6,
     WINDOW_FLAG_IS_TOAST = 1 << 7,
     WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
-    WINDOW_FLAG_END = 1 << 9,
+    WINDOW_FLAG_IS_TEXT_MENU = 1 << 9,
+    WINDOW_FLAG_END = 1 << 10,
 };
 
 /**
@@ -344,6 +346,7 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
+    AVOID_AREA_CHANGE,
     END
 };
 

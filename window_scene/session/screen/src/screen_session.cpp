@@ -289,11 +289,15 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     RRect bounds = property_.GetBounds();
     RRect phyBounds = property_.GetPhyBounds();
     displayInfo->name_ = name_;
+    displayInfo->SetWidth(bounds.rect_.GetWidth());
     if (isBScreenHalf_) {
-        displayInfo->SetWidth(bounds.rect_.GetWidth());
-        displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
+        std::vector<DMRect> creaseRects = property_.GetCreaseRects();
+        if (creaseRects.size() > 0) {
+            displayInfo->SetHeight(creaseRects[0].posY_);
+        } else {
+            displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
+        }
     } else {
-        displayInfo->SetWidth(bounds.rect_.GetWidth());
         displayInfo->SetHeight(bounds.rect_.GetHeight());
     }
     displayInfo->SetPhysicalWidth(phyBounds.rect_.GetWidth());
@@ -331,6 +335,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->SetTranslateX(property_.GetTranslateX());
     displayInfo->SetTranslateY(property_.GetTranslateY());
     displayInfo->SetScreenShape(property_.GetScreenShape());
+    displayInfo->SetOriginRotation(property_.GetScreenRotation());
     return displayInfo;
 }
 
@@ -456,6 +461,26 @@ bool ScreenSession::GetIsPcUse()
     return isPcUse_;
 }
 
+void ScreenSession::SetValidHeight(uint32_t validHeight)
+{
+    property_.SetValidHeight(validHeight);
+}
+ 
+void ScreenSession::SetValidWidth(uint32_t validWidth)
+{
+    property_.SetValidWidth(validWidth);
+}
+ 
+int32_t ScreenSession::GetValidHeight() const
+{
+    return property_.GetValidHeight();
+}
+ 
+int32_t ScreenSession::GetValidWidth() const
+{
+    return property_.GetValidWidth();
+}
+
 void ScreenSession::SetIsBScreenHalf(bool isBScreenHalf)
 {
     isBScreenHalf_ = isBScreenHalf;
@@ -516,6 +541,16 @@ ScreenProperty ScreenSession::GetScreenProperty() const
     return property_;
 }
 
+void ScreenSession::SetSerialNumber(std::string serialNumber)
+{
+    serialNumber_ = serialNumber;
+}
+
+std::string ScreenSession::GetSerialNumber() const
+{
+    return serialNumber_;
+}
+
 void ScreenSession::SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX,
                                    float translateY)
 {
@@ -544,14 +579,12 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
-    FoldDisplayMode foldDisplayMode)
+ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
-    OptimizeSecondaryDisplayMode(updatedProperty.GetBounds(), foldDisplayMode);
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    UpdateTouchBoundsAndOffset();
     return property_;
 }
 
@@ -634,6 +667,9 @@ void ScreenSession::Disconnect()
 void ScreenSession::PropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
     property_ = newProperty;
+    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
+        return;
+    }
     if (screenChangeListenerList_.empty()) {
         WLOGFE("screenChangeListenerList is empty.");
         return;
@@ -706,6 +742,11 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
         }
         listener->OnSensorRotationChange(sensorRotation, screenId_);
     }
+}
+
+float ScreenSession::GetValidSensorRotation()
+{
+    return currentValidSensorRotation_;
 }
 
 void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate)
@@ -793,10 +834,15 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
     screenFlag_ = screenFlag;
 }
 
-void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
+void ScreenSession::UpdateTouchBoundsAndOffset()
 {
-    property_.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
-    property_.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice(), foldDisplayMode);
+    bool isSecondaryDevice = FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
+    property_.SetPhysicalTouchBounds(isSecondaryDevice);
+    property_.SetInputOffsetY(isSecondaryDevice);
+    if (isSecondaryDevice) {
+        property_.SetValidHeight(property_.GetBounds().rect_.GetHeight());
+        property_.SetValidWidth(property_.GetBounds().rect_.GetWidth());
+    }
 }
 
 void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceRotation,
@@ -814,7 +860,7 @@ void ScreenSession::UpdateToInputManager(RRect bounds, int rotation, int deviceR
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    UpdateTouchBoundsAndOffset();
     Rotation targetDeviceRotation = ConvertIntToRotation(deviceRotation);
     DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetDeviceRotation, foldDisplayMode, isChanged);
     property_.UpdateDeviceRotation(targetDeviceRotation);
@@ -867,7 +913,11 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    if (!isBScreenHalf_ || property_.GetIsFakeInUse()) {
+        property_.SetValidHeight(bounds.rect_.GetHeight());
+        property_.SetValidWidth(bounds.rect_.GetWidth());
+    }
+    UpdateTouchBoundsAndOffset();
     {
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (!displayNode_) {
@@ -907,7 +957,11 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
     property_.SetRotation(static_cast<float>(rotation));
     property_.UpdateScreenRotation(targetRotation);
     property_.SetDisplayOrientation(displayOrientation);
-    UpdateTouchBoundsAndOffset(foldDisplayMode);
+    if (!isBScreenHalf_ || property_.GetIsFakeInUse()) {
+        property_.SetValidHeight(bounds.rect_.GetHeight());
+        property_.SetValidWidth(bounds.rect_.GetWidth());
+    }
+    UpdateTouchBoundsAndOffset();
     WLOGFI("bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
@@ -1284,6 +1338,7 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetSourceMode(sourceMode);
     info->SetType(property_.GetScreenType());
     info->SetModeId(activeIdx_);
+    info->SetSerialNumber(serialNumber_);
 
     info->lastParent_ = lastGroupSmsId_;
     info->parent_ = groupSmsId_;
@@ -1303,6 +1358,7 @@ sptr<ScreenInfo> ScreenSession::ConvertToScreenInfo() const
 
 DMError ScreenSession::GetScreenColorGamut(ScreenColorGamut& colorGamut)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenColorGamut(rsId_, colorGamut);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenColorGamut fail! rsId %{public}" PRIu64"", rsId_);
@@ -1310,11 +1366,13 @@ DMError ScreenSession::GetScreenColorGamut(ScreenColorGamut& colorGamut)
     }
     WLOGI("GetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamut %{public}u",
         rsId_, static_cast<uint32_t>(colorGamut));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenColorGamut(int32_t colorGamutIdx)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     std::vector<ScreenColorGamut> colorGamuts;
     DMError res = GetScreenSupportedColorGamuts(colorGamuts);
     if (res != DMError::DM_OK) {
@@ -1333,11 +1391,13 @@ DMError ScreenSession::SetScreenColorGamut(int32_t colorGamutIdx)
     }
     WLOGI("SetScreenColorGamut ok! rsId %{public}" PRIu64", colorGamutIdx %{public}u",
         rsId_, colorGamutIdx);
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetScreenGamutMap(ScreenGamutMap& gamutMap)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenGamutMap(rsId_, gamutMap);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenGamutMap fail! rsId %{public}" PRIu64"", rsId_);
@@ -1345,11 +1405,13 @@ DMError ScreenSession::GetScreenGamutMap(ScreenGamutMap& gamutMap)
     }
     WLOGI("GetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
         rsId_, static_cast<uint32_t>(gamutMap));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenGamutMap(ScreenGamutMap gamutMap)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     if (gamutMap > GAMUT_MAP_HDR_EXTENSION) {
         return DMError::DM_ERROR_INVALID_PARAM;
     }
@@ -1360,6 +1422,7 @@ DMError ScreenSession::SetScreenGamutMap(ScreenGamutMap gamutMap)
     }
     WLOGI("SetScreenGamutMap ok! rsId %{public}" PRIu64", gamutMap %{public}u",
         rsId_, static_cast<uint32_t>(gamutMap));
+#endif
     return DMError::DM_OK;
 }
 
@@ -1398,6 +1461,7 @@ DMError ScreenSession::SetPixelFormat(GraphicPixelFormat pixelFormat)
 
 DMError ScreenSession::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrFormats)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(rsId_, hdrFormats);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("SCB: ScreenSession::GetSupportedHDRFormats fail! rsId %{public}" PRIu64 ", ret:%{public}d",
@@ -1406,12 +1470,13 @@ DMError ScreenSession::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrF
     }
     WLOGI("SCB: ScreenSession::GetSupportedHDRFormats ok! rsId %{public}" PRIu64 ", size %{public}u",
         rsId_, static_cast<uint32_t>(hdrFormats.size()));
-
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenHDRFormat(rsId_, hdrFormat);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenHDRFormat fail! rsId %{public}" PRIu64, rsId_);
@@ -1419,11 +1484,13 @@ DMError ScreenSession::GetScreenHDRFormat(ScreenHDRFormat& hdrFormat)
     }
     WLOGI("GetScreenHDRFormat ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
         rsId_, static_cast<uint32_t>(hdrFormat));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     std::vector<ScreenHDRFormat> hdrFormats;
     DMError res = GetSupportedHDRFormats(hdrFormats);
     if (res != DMError::DM_OK) {
@@ -1442,11 +1509,13 @@ DMError ScreenSession::SetScreenHDRFormat(int32_t modeIdx)
     }
     WLOGI("SetScreenHDRFormat ok! rsId %{public}" PRIu64 ", modeIdx %{public}d",
         rsId_, modeIdx);
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceType>& colorSpaces)
 {
+#ifdef WM_SCREEN_COLOR_SPACE_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorSpaces(rsId_, colorSpaces);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("SCB: ScreenSession::GetSupportedColorSpaces fail! rsId %{public}" PRIu64 ", ret:%{public}d",
@@ -1455,11 +1524,13 @@ DMError ScreenSession::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceT
     }
     WLOGI("SCB: ScreenSession::GetSupportedColorSpaces ok! rsId %{public}" PRIu64 ", size %{public}u",
         rsId_, static_cast<uint32_t>(colorSpaces.size()));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace)
 {
+#ifdef WM_SCREEN_COLOR_SPACE_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenColorSpace(rsId_, colorSpace);
     if (ret != StatusCode::SUCCESS) {
         WLOGE("GetScreenColorSpace fail! rsId %{public}" PRIu64, rsId_);
@@ -1467,11 +1538,13 @@ DMError ScreenSession::GetScreenColorSpace(GraphicCM_ColorSpaceType& colorSpace)
     }
     WLOGI("GetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
         rsId_, static_cast<uint32_t>(colorSpace));
+#endif
     return DMError::DM_OK;
 }
 
 DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
 {
+#ifdef WM_SCREEN_COLOR_SPACE_ENABLE
     std::vector<GraphicCM_ColorSpaceType> colorSpaces;
     DMError res = GetSupportedColorSpaces(colorSpaces);
     if (res != DMError::DM_OK) {
@@ -1490,6 +1563,7 @@ DMError ScreenSession::SetScreenColorSpace(GraphicCM_ColorSpaceType colorSpace)
     }
     WLOGI("SetScreenColorSpace ok! rsId %{public}" PRIu64 ", colorSpace %{public}u",
         rsId_, static_cast<uint32_t>(colorSpace));
+#endif
     return DMError::DM_OK;
 }
 
@@ -1768,6 +1842,15 @@ bool ScreenSession::UpdateAvailableArea(DMRect area)
     return true;
 }
 
+bool ScreenSession::UpdateExpandAvailableArea(DMRect area)
+{
+    if (property_.GetExpandAvailableArea() == area) {
+        return false;
+    }
+    property_.SetExpandAvailableArea(area);
+    return true;
+}
+
 void ScreenSession::SetAvailableArea(DMRect area)
 {
     property_.SetAvailableArea(area);
@@ -1776,6 +1859,11 @@ void ScreenSession::SetAvailableArea(DMRect area)
 DMRect ScreenSession::GetAvailableArea()
 {
     return property_.GetAvailableArea();
+}
+
+DMRect ScreenSession::GetExpandAvailableArea()
+{
+    return property_.GetExpandAvailableArea();
 }
 
 void ScreenSession::SetFoldScreen(bool isFold)
@@ -1950,5 +2038,10 @@ void ScreenSession::SetShareProtect(bool needShareProtect)
 bool ScreenSession::GetShareProtect()
 {
     return needShareProtect_;
+}
+
+float ScreenSession::GetSensorRotation() const
+{
+    return currentSensorRotation_;
 }
 } // namespace OHOS::Rosen

@@ -459,6 +459,7 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest | Level2)
 {
+#ifdef FOLD_ABILITY_ENABLE
     GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode start";
     ScreenSessionConfig config = {
         .screenId = 100,
@@ -483,6 +484,7 @@ HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest
     EXPECT_EQ(foldDisplayMode, FoldDisplayMode::GLOBAL_FULL);
 
     GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode end";
+#endif
 }
 
 /**
@@ -843,6 +845,7 @@ HWTEST_F(ScreenSessionTest, SetPixelFormat, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, Function | SmallTest | Level2)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     GTEST_LOG_(INFO) << "GetSupportedHDRFormats start";
     ScreenSessionConfig config = {
         .screenId = 100,
@@ -859,6 +862,7 @@ HWTEST_F(ScreenSessionTest, GetSupportedHDRFormats, Function | SmallTest | Level
         ASSERT_NE(res, DMError::DM_OK);
     }
     GTEST_LOG_(INFO) << "GetSupportedHDRFormats end";
+#endif
 }
 
 /**
@@ -893,6 +897,7 @@ HWTEST_F(ScreenSessionTest, GetScreenHDRFormat, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, SetScreenHDRFormat, Function | SmallTest | Level2)
 {
+#ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     GTEST_LOG_(INFO) << "SetScreenHDRFormat start";
     ScreenSessionConfig config = {
         .screenId = 100,
@@ -912,6 +917,7 @@ HWTEST_F(ScreenSessionTest, SetScreenHDRFormat, Function | SmallTest | Level2)
         ASSERT_NE(res, DMError::DM_OK);
     }
     GTEST_LOG_(INFO) << "SetScreenHDRFormat end";
+#endif
 }
 
 /**
@@ -1315,6 +1321,7 @@ HWTEST_F(ScreenSessionTest, SetScreenCombination, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -1327,6 +1334,7 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
         ASSERT_NE(res, DMError::DM_OK);
     }
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenColorGamut end";
+#endif
 }
 
 /**
@@ -1336,6 +1344,7 @@ HWTEST_F(ScreenSessionTest, GetScreenColorGamut, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -1344,6 +1353,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2
     DMError res = session->SetScreenColorGamut(colorGamut);
     ASSERT_EQ(res, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut end";
+#endif
 }
 
 /**
@@ -1353,6 +1363,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut01, Function | SmallTest | Level2
  */
 HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -1361,6 +1372,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2
     DMError res = session->SetScreenColorGamut(colorGamut);
     ASSERT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenColorGamut end";
+#endif
 }
 
 /**
@@ -1370,6 +1382,7 @@ HWTEST_F(ScreenSessionTest, SetScreenColorGamut02, Function | SmallTest | Level2
  */
 HWTEST_F(ScreenSessionTest, GetScreenGamutMap, Function | SmallTest | Level2)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenGamutMap start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -1378,6 +1391,7 @@ HWTEST_F(ScreenSessionTest, GetScreenGamutMap, Function | SmallTest | Level2)
     DMError res = session->GetScreenGamutMap(gamutMap);
     ASSERT_EQ(res, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     GTEST_LOG_(INFO) << "ScreenSessionTest: GetScreenGamutMap end";
+#endif
 }
 
 /**
@@ -1387,6 +1401,7 @@ HWTEST_F(ScreenSessionTest, GetScreenGamutMap, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, SetScreenGamutMap, Function | SmallTest | Level2)
 {
+#ifdef WM_SCREEN_COLOR_GAMUT_ENABLE
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenGamutMap start";
     sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
     ASSERT_NE(session, nullptr);
@@ -1398,6 +1413,7 @@ HWTEST_F(ScreenSessionTest, SetScreenGamutMap, Function | SmallTest | Level2)
     res = session->SetScreenGamutMap(gamutMap);
     ASSERT_EQ(res, DMError::DM_ERROR_RENDER_SERVICE_FAILED);
     GTEST_LOG_(INFO) << "ScreenSessionTest: SetScreenGamutMap end";
+#endif
 }
 
 /**

@@ -507,6 +507,26 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateConfiguration01, Function | SmallTes
 }
 
 /**
+ * @tc.name: UpdateConfigurationForSpecified
+ * @tc.desc: UpdateConfigurationForSpecified
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, UpdateConfigurationForSpecified, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateConfiguration01");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> windowSceneSession = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    int ret = 0;
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    windowSceneSession->UpdateConfigurationForSpecified(configuration, resourceManager);
+    windowSceneSession->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    windowSceneSession->UpdateConfigurationForSpecified(configuration, resourceManager);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: UpdateConfigurationForAll01
  * @tc.desc: UpdateConfigurationForAll
  * @tc.type: FUNC
@@ -521,6 +541,28 @@ HWTEST_F(WindowSceneSessionImplTest2, UpdateConfigurationForAll01, Function | Sm
     std::shared_ptr<AppExecFwk::Configuration> configuration;
     windowSceneSession->UpdateConfigurationForAll(configuration);
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: UpdateConfigurationForAll02
+ * @tc.desc: UpdateConfigurationForAll02 Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest2, UpdateConfigurationForAll02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateConfigurationForAll02");
+    option->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto abilityContext = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+    ASSERT_NE(nullptr, abilityContext);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext, session));
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::vector<std::shared_ptr<AbilityRuntime::Context>> ignoreWindowContexts;
+    ignoreWindowContexts.push_back(abilityContext);
+    window->UpdateConfigurationForAll(configuration, ignoreWindowContexts);
 }
 
 /**
@@ -937,6 +979,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionForeground, Function | SmallT
     uint32_t reason = 1;
     bool withAnimation = true;
     windowSceneSession->NotifySessionForeground(reason, withAnimation);
+    ASSERT_EQ(false, windowSceneSession->GetDefaultDensityEnabled());
 }
 
 /**
@@ -956,6 +999,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifySessionBackground, Function | SmallT
     bool withAnimation = true;
     bool isFromInnerkits = true;
     windowSceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
+    ASSERT_EQ(false, windowSceneSession->GetDefaultDensityEnabled());
 }
 
 /**

@@ -53,6 +53,7 @@ public:
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
     sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
+    DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     bool IsFoldable();
@@ -655,7 +656,6 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
             if (interval < getDisplayIntervalUs_ && !needUpdateDisplayFromDMS_) {
                 auto iter = displayMap_.find(displayId);
                 if (iter != displayMap_.end()) {
-                    WLOGFW("update display from cache, Id: %{public}" PRIu64" ", displayId);
                     return displayMap_[displayId];
                 }
             }
@@ -709,6 +709,16 @@ sptr<DisplayInfo> DisplayManager::GetVisibleAreaDisplayInfoById(DisplayId displa
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return pImpl_->GetVisibleAreaDisplayInfoById(displayId);
+}
+
+DMError DisplayManager::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    return pImpl_->GetExpandAvailableArea(displayId, area);
+}
+
+DMError DisplayManager::Impl::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetExpandAvailableArea(displayId, area);
 }
 
 sptr<Display> DisplayManager::GetDisplayByScreen(ScreenId screenId)

@@ -44,7 +44,10 @@ const RSAnimationTimingCurve THROW_SLIP_CURVE =
 constexpr int32_t RULE_TRANS_X = 48; // dp
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr WSRect RECT_ZERO = { 0, 0, 0, 0 };
+
+// all displayId
 constexpr DisplayId DEFAULT_DISPLAY_ID = 0;
+constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 } // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(PcFoldScreenManager);
@@ -106,6 +109,11 @@ bool PcFoldScreenManager::IsHalfFoldedOnMainDisplay(DisplayId displayId) const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
     return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED && displayId == DEFAULT_DISPLAY_ID;
+}
+
+bool PcFoldScreenManager::IsPcFoldScreen(DisplayId displayId) const
+{
+    return displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID;
 }
 
 void PcFoldScreenManager::UpdateSystemKeyboardStatus(bool hasSystemKeyboard)

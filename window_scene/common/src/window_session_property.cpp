@@ -1197,7 +1197,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
-        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(KeyboardViewMode_)) &&
+        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_);
 }
 
@@ -1370,7 +1370,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
     backgroundAlpha_ = property->backgroundAlpha_;
-    KeyboardViewMode_ = property->KeyboardViewMode_;
+    keyboardViewMode_ = property->keyboardViewMode_;
     isExclusivelyHighlighted_ = property->isExclusivelyHighlighted_;
     cornerRadius_ = property->cornerRadius_;
 }
@@ -1881,12 +1881,12 @@ bool WindowSessionProperty::IsSystemKeyboard() const
 
 void WindowSessionProperty::SetKeyboardViewMode(KeyboardViewMode mode)
 {
-    KeyboardViewMode_ = mode;
+    keyboardViewMode_ = mode;
 }
 
 KeyboardViewMode WindowSessionProperty::GetKeyboardViewMode() const
 {
-    return KeyboardViewMode_;
+    return keyboardViewMode_;
 }
 
 uint8_t WindowSessionProperty::GetBackgroundAlpha() const
@@ -1907,6 +1907,16 @@ void WindowSessionProperty::SetExclusivelyHighlighted(bool isExclusivelyHighligh
 bool WindowSessionProperty::GetExclusivelyHighlighted() const
 {
     return isExclusivelyHighlighted_;
+}
+
+void WindowSessionProperty::SetConstrainedModal(bool isConstrained)
+{
+    isConstrainedModal_ = isConstrained;
+}
+
+bool WindowSessionProperty::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
 }
 } // namespace Rosen
 } // namespace OHOS

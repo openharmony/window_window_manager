@@ -142,10 +142,10 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithoutHotArea, Function | 
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
                           touchHotAreas[0].width == 1270 && touchHotAreas[0].height == 2700;
-    ASSERT_NE(touchHotResult, true);
+    ASSERT_EQ(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
                             pointerHotAreas[0].width == 1270 && pointerHotAreas[0].height == 2700;
-    ASSERT_NE(pointerHotResult, true);
+    ASSERT_EQ(pointerHotResult, true);
 }
 
 /**
@@ -176,10 +176,10 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithHotArea, Function | Sma
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     bool touchHotResult = touchHotAreas[0].x == 0 && touchHotAreas[0].y == 0 &&
                           touchHotAreas[0].width == 300 && touchHotAreas[0].height == 500;
-    ASSERT_NE(touchHotResult, true);
+    ASSERT_EQ(touchHotResult, true);
     bool pointerHotResult = pointerHotAreas[0].x == 0 && pointerHotAreas[0].y == 0 &&
                             pointerHotAreas[0].width == 300 && pointerHotAreas[0].height == 500;
-    ASSERT_NE(pointerHotResult, true);
+    ASSERT_EQ(pointerHotResult, true);
 }
 
 /**

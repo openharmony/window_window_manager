@@ -1294,6 +1294,23 @@ HWTEST_F(SessionProxyTest, GetCrossAxisState, Function | SmallTest | Level2)
     WSError res = sProxy->GetCrossAxisState(state);
     ASSERT_EQ(res, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: OnContainerModalEvent
+ * @tc.desc: OnContainerModalEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, OnContainerModalEvent, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnContainerModalEvent start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    WSError res = sProxy->OnContainerModalEvent("name", "value");
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: OnContainerModalEvent end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -165,10 +165,16 @@ void SingleDisplaySensorPocketFoldStateManager::SetCameraRotationStatusChange(fl
     }
     if ((angle > ANGLE_MIN_VAL) && (angle < CAMERA_MAX_VAL) &&
         applicationStateObserver_->IsCameraForeground()) {
-        if (!isCameraRotationStrategy_) {
-            TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, into camera status", angle);
-            ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
-            isCameraRotationStrategy_ = true;
+        // "< 1e-6" means validSensorRotation is 0.
+        if (fabsf(ScreenSessionManager::GetInstance().GetScreenSession(0)->GetValidSensorRotation() - 0.f) < 1e-6) {
+            TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, but SensorRotation is 0,"
+                "not into camera status", angle);
+        } else {
+            if (!isCameraRotationStrategy_) {
+                TLOGI(WmsLogTag::DMS, "angle is:%{public}f and is camera app, into camera status", angle);
+                ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::CAMERA_STATUS);
+                isCameraRotationStrategy_ = true;
+            }
         }
     } else {
         if (isCameraRotationStrategy_) {
@@ -258,7 +264,8 @@ void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver
     });
 }
 
-void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy)
+void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent,
+    sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall)
 {
     bool isNotRepeated = isTent ^ IsTentMode();
     if (!isNotRepeated) {
@@ -278,7 +285,12 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
         ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
     } else {
-        FoldStatus nextState = GetNextFoldState(currentAngle, currentHall);
+        FoldStatus nextState = FoldStatus::UNKNOWN;
+        if (hall == -1) {
+            nextState = GetNextFoldState(currentAngle, currentHall);
+        } else {
+            nextState = GetNextFoldState(currentAngle, hall);
+        }
         HandleSensorChange(nextState, currentAngle, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();
