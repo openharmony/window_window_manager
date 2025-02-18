@@ -338,7 +338,7 @@ private:
     /*
      * PC Window Layout
      */
-    void OnSetSupportedWindowModes(std::vectorAppExecFwk::SupportWindowMode&& supportedWindowModes);
+    void OnSetSupportedWindowModes(AppExecFwk::SupportWindowMode&& supportedWindowModes);
 
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
