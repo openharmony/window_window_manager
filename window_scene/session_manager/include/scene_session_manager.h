@@ -502,6 +502,9 @@ public:
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
+    void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
+        std::vector<sptr<SceneSession>>& mainSessions) const;
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
 
     /*
      * Window Pattern
@@ -1016,6 +1019,7 @@ private:
      * Window Lifecycle
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
+    std::unordered_set<std::string> sessionLockedStateCacheSet_;
 
     /*
      * Window Pattern
