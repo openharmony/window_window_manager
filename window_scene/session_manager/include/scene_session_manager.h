@@ -48,6 +48,7 @@
 #include "session/host/include/session.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_listener_controller.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 #include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "thread_safety_annotations.h"
@@ -772,6 +773,8 @@ private:
     void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
     std::string GetHighlightIdsStr();
+    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo, bool& isColdStart,
+        bool isUserSwitch = false);
 
     /*
      * PC Window
@@ -1003,6 +1006,7 @@ private:
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     bool needBlockNotifyFocusStatusUntilForeground_ { false };
     bool needBlockNotifyUnfocusStatus_ { false };
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
 
     /*
      * DFX
