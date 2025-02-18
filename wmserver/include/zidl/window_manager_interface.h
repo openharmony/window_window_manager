@@ -259,6 +259,8 @@ public:
         DragResizeType dragResizeType) { return WMError::WM_OK; }
     virtual WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) { return WMError::WM_OK; }
+    virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) { return WMError::WM_OK; }
 };
 }
 }

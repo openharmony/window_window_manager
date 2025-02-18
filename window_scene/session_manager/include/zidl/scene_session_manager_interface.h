@@ -299,6 +299,8 @@ public:
         DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
