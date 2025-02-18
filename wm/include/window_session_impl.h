@@ -465,7 +465,7 @@ protected:
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
     std::atomic_bool isHighlighted_ = false;
-    bool shouldReNotifyHighlight_ = false;
+    std::atomic_bool shouldReNotifyHighlight_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
