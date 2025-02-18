@@ -910,9 +910,14 @@ int SessionStub::HandleGetAvoidAreaByType(MessageParcel& data, MessageParcel& re
         TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
         return ERR_INVALID_DATA;
     }
+    int32_t apiVersion = API_VERSION_INVALID;
+    if (!data.ReadInt32(apiVersion)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read api version error");
+        return ERR_INVALID_DATA;
+    }
     AvoidAreaType type = static_cast<AvoidAreaType>(typeId);
     WLOGFD("HandleGetAvoidArea type:%{public}d", typeId);
-    AvoidArea avoidArea = GetAvoidAreaByType(type, rect);
+    AvoidArea avoidArea = GetAvoidAreaByType(type, rect, apiVersion);
     reply.WriteParcelable(&avoidArea);
     return ERR_NONE;
 }

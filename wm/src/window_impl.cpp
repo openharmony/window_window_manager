@@ -401,7 +401,7 @@ SystemBarProperty WindowImpl::GetSystemBarPropertyByType(WindowType type) const
     return curProperties[type];
 }
 
-WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect)
+WMError WindowImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect, int32_t apiVersion)
 {
     if (!IsWindowValid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
