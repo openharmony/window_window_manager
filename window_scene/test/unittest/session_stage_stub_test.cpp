@@ -488,6 +488,21 @@ HWTEST_F(SessionStageStubTest, HandleSetEnableDragBySystem, Function | SmallTest
     data.WriteBool(false);
     ASSERT_EQ(0, sessionStageStub_->HandleSetEnableDragBySystem(data, reply));
 }
+
+/**
+ * @tc.name: HandleNotifyHighlightChange
+ * @tc.desc: test function : HandleNotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyHighlightChange, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+ 
+    data.WriteBool(false);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(0, sessionStageStub_->HandleNotifyHighlightChange(data, reply));
+}
 }
 }
 }

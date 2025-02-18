@@ -2528,6 +2528,55 @@ WSError Session::RequestFocus(bool isFocused)
     return WSError::WS_OK;
 }
 
+void Session::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "property is nullptr, windowId: %{public}d", persistentId_);
+        return;
+    }
+    if (isExclusivelyHighlighted == property->GetExclusivelyHighlighted()) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d", persistentId_,
+        isExclusivelyHighlighted);
+    property->SetExclusivelyHighlighted(isExclusivelyHighlighted);
+}
+
+WSError Session::UpdateHighlightStatus(bool isHighlight, bool needBlockHighlightNotify)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS,
+        "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
+        persistentId_, isHighlight_, isHighlight, needBlockHighlightNotify);
+    if (isHighlight_ == isHighlight) {
+        return WSError::WS_DO_NOTHING;
+    }
+    isHighlight_ = isHighlight;
+    if (needBlockHighlightNotify) {
+        NotifyHighlightChange(isHighlight);
+    }
+    std::lock_guard lock(highlightChangeFuncMutex_);
+    if (highlightChangeFunc_ != nullptr) {
+        highlightChangeFunc_(isHighlight);
+    }
+    return WSError::WS_OK;
+}
+
+WSError Session::NotifyHighlightChange(bool isHighlight)
+{
+    if (IsSystemSession()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Session is invalid, id: %{public}d state: %{public}u",
+            persistentId_, GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sessionStage is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    sessionStage_->NotifyHighlightChange(isHighlight);
+    return WSError::WS_OK;
+}
+
 WSError Session::SetCompatibleModeInPc(bool enable, bool isSupportDragInPcCompatibleMode)
 {
     TLOGI(WmsLogTag::WMS_SCB, "SetCompatibleModeInPc enable: %{public}d, isSupportDragInPcCompatibleMode: %{public}d",

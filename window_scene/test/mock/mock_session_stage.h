@@ -69,6 +69,7 @@ public:
         std::vector<std::string>& info));
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
+    MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
 };
 } // namespace Rosen
 } // namespace OHOS
