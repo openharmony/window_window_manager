@@ -84,6 +84,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_VIEW_MODE_CHANGE_CB,
+    SET_SUPPORT_WINDOW_MODES_CB,
 };
 
 class SceneSession;
