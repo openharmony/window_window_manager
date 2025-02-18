@@ -469,6 +469,7 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
     ASSERT_EQ(data.WriteInt32(0), true);
     ASSERT_EQ(data.WriteInt32(10), true);
     ASSERT_EQ(data.WriteInt32(10), true);
+    ASSERT_EQ(data.WriteInt32(12), true);
     res = session_->HandleGetAvoidAreaByType(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteFloat(2.0f), true);
