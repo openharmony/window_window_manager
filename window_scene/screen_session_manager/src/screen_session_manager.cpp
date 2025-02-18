@@ -4386,16 +4386,34 @@ DMError ScreenSessionManager::MakeUniqueScreen(const std::vector<ScreenId>& scre
         TLOGE(WmsLogTag::DMS, "screen is empty");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-    ScreenId uniqueScreenId = screenIds[0];
+    std::vector<ScreenId> validScreenIds;
+    for (auto screenId : screenIds) {
+        if (!IsDefaultMirrorMode(screenId)) {
+            continue;
+        }
+        validScreenIds.emplace_back(screenId);
+    }
+    const auto& allUniqueScreenIds = GetAllValidScreenIds(validScreenIds);
+    if (allUniqueScreenIds.empty()) {
+        TLOGE(WmsLogTag::DMS, "screenIds is invalid.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    ScreenId uniqueScreenId = validScreenIds[0];
     auto uniqueScreen = GetScreenSession(uniqueScreenId);
     if (uniqueScreen != nullptr) {
         if (uniqueScreen->GetSourceMode() == ScreenSourceMode::SCREEN_UNIQUE) {
             TLOGW(WmsLogTag::DMS, "make unique ignore");
             return DMError::DM_OK;
         }
-        return MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
+        return MultiScreenManager::GetInstance().UniqueSwitch(allUniqueScreenIds, displayIds);
     }
-    for (auto screenId : screenIds) {
+    return DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds);
+}
+
+DMError ScreenSessionManager::DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds,
+    std::vector<DisplayId>& displayIds)
+{
+    for (auto screenId : allUniqueScreenIds) {
         ScreenId rsScreenId = SCREEN_ID_INVALID;
         bool res = ConvertScreenIdToRsScreenId(screenId, rsScreenId);
         TLOGI(WmsLogTag::DMS, "unique screenId: %{public}" PRIu64" rsScreenId: %{public}" PRIu64,
