@@ -6248,6 +6248,8 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         // 维护外屏独立dpi
         if (foldStatus == FoldStatus::FOLDED) {
+            // sub screen default rotation off set
+            screenSession->SetDefaultDeviceRotationOffset(270);
             auto property = screenSession->GetScreenProperty();
             densityDpi_ = property.GetDensity();
             SetVirtualPixelRatio(GetDefaultScreenId(), subDensityDpi_);
