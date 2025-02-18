@@ -428,6 +428,26 @@ public:
      * @return WMError
      */
     virtual WMError NotifyRemoveStartingWindow() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Set whether to enable exclusively highlight.
+     *
+     * @param isExclusivelyHighlighted the value true means to exclusively highlight, and false means the opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Get highlight property of window.
+     *
+     * @param highlighted True means the window is highlighted, and false means the opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
 };
 }
 }
