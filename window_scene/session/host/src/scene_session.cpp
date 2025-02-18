@@ -3753,7 +3753,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
+        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}" PRIu64, action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     property->SetSystemCalling(isSystemCalling);
@@ -3764,7 +3764,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             TLOGE(WmsLogTag::DEFAULT, "the session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}" PRIu64, sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
         return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
     };
@@ -4246,7 +4246,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
 void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}" PRIu64,
         GetPersistentId(), action);
     if (sessionChangeByActionNotifyManagerFunc_ == nullptr) {
         TLOGW(WmsLogTag::DEFAULT, "func is null");
