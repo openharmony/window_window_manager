@@ -2126,7 +2126,7 @@ void JsSceneSessionManager::SetIsClearSession(napi_env env, napi_value jsSceneSe
         int32_t operatorType = -1;
         if (ConvertFromJsValue(env, jsOperatorType, operatorType)) {
             TLOGD(WmsLogTag::DEFAULT, "operatorType: %{public}d", operatorType);
-             if (operatorType == SessionOperationType::TYPE_CLEAR) {
+            if (operatorType == SessionOperationType::TYPE_CLEAR) {
                 sceneSession->SetSessionInfoIsClearSession(true);
             }
         }
