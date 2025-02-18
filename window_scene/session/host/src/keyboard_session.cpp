@@ -708,7 +708,7 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     }
     bool isLandscape = screenHeight < screenWidth;
     int32_t height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
-    panelRect.posY_ += height_ - params.portraitAvoidHeight_;
+    panelRect.posY_ += panelRect.height_ - height_;
     panelRect.height_ = height_;
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
 }
