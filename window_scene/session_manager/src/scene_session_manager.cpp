@@ -2482,7 +2482,7 @@ WSError SceneSessionManager::DestroyDialogWithMainWindow(const sptr<SceneSession
 void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        WLOGFW("sceneSession is nullptr");
+        TLOGW(WmsLogTag::WMS_SUB, "sceneSession is nullptr");
         return;
     }
     for (const auto& elem : sceneSession->GetSubSession()) {
@@ -3426,15 +3426,15 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
     }
     auto ret = sceneSession->UpdateActiveStatus(false);
     WindowDestroyNotifyVisibility(sceneSession);
-    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) {
+    auto windowType = sceneSession->GetWindowType();
+    if (windowType == WindowType::WINDOW_TYPE_DIALOG) {
         auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
         if (parentSession == nullptr) {
             TLOGE(WmsLogTag::WMS_DIALOG, "Dialog not bind parent");
         } else {
             parentSession->RemoveDialogToParentSession(sceneSession);
         }
-    }
-    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_TOAST) {
+    } else if (windowType == WindowType::WINDOW_TYPE_TOAST) {
         auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
         if (parentSession != nullptr) {
             TLOGD(WmsLogTag::WMS_TOAST, "Find parentSession, id: %{public}d", persistentId);
@@ -3442,6 +3442,8 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         } else {
             TLOGW(WmsLogTag::WMS_TOAST, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
+    } else if (windowType == WindowType::WINDOW_TYPE_FLOAT) {
+        DestroySubSession(sceneSession);
     }
     ret = sceneSession->Disconnect();
     sceneSession->ClearSpecificSessionCbMap();
@@ -4477,15 +4479,18 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
     const auto& state = session->GetSessionState();
     if (WindowHelper::IsSubWindow(session->GetWindowType())) {
-        const auto& parentSceneSession = session->GetParentSession();
-        if (parentSceneSession == nullptr) {
-            WLOGFW("Can not find parent for this sub window, id: %{public}d", session->GetPersistentId());
+        const auto& mainOrFloatSession = session->GetMainOrFloatSession();
+        if (mainOrFloatSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_SUB, "Can not find parent for this sub window, id: %{public}d",
+                session->GetPersistentId());
             return false;
         }
-        const auto& parentState = parentSceneSession->GetSessionState();
         if (session->IsVisible() || (state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND)) {
-            if (parentState == SessionState::STATE_INACTIVE || parentState == SessionState::STATE_BACKGROUND) {
-                WLOGFD("Parent of this sub window is at background, id: %{public}d", session->GetPersistentId());
+            const auto mainOrFloatSessionState = mainOrFloatSession->GetSessionState();
+            if (mainOrFloatSessionState == SessionState::STATE_INACTIVE ||
+                mainOrFloatSessionState == SessionState::STATE_BACKGROUND) {
+                TLOGD(WmsLogTag::WMS_SUB, "Parent of this sub window is at background, id: %{public}d",
+                    session->GetPersistentId());
                 return false;
             }
             WLOGFD("Sub window is at foreground, id: %{public}d", session->GetPersistentId());
@@ -4496,10 +4501,10 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
 
     if (session->IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        WLOGFD("Window is at foreground, id: %{public}d", session->GetPersistentId());
+        TLOGD(WmsLogTag::WMS_SUB, "Window is at foreground, id: %{public}d", session->GetPersistentId());
         return true;
     }
-    WLOGFD("Window is at background, id: %{public}d", session->GetPersistentId());
+    TLOGD(WmsLogTag::WMS_SUB, "Window is at background, id: %{public}d", session->GetPersistentId());
     return false;
 }
 
