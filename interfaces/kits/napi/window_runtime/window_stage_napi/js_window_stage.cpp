@@ -761,7 +761,10 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetCustomDensity(density));
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u,%{public}s] set density=%{public}f, result=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
-    return CreateJsValue(env, static_cast<int32_t>(ret));
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    return NapiGetUndefined(env);
 }
 
 napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)

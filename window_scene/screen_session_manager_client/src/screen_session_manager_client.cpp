@@ -156,6 +156,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
             screenSessionMap_.emplace(screenId, screenSession);
         }
         screenSession->SetIsExtend(isExtend);
+        screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(screenId));
         NotifyScreenConnect(screenSession);
         if (screenConnectionListener_) {
             WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
@@ -360,7 +361,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode, screenSessionManager_->IsOrientationNeedChanged());
-    screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
+    screenSession->UpdateTouchBoundsAndOffset();
     if (currentstate_ != SuperFoldStatus::KEYBOARD) {
         screenSession->SetValidHeight(bounds.rect_.GetHeight());
         screenSession->SetValidWidth(bounds.rect_.GetWidth());

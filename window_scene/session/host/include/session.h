@@ -536,7 +536,8 @@ public:
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(bool enable);
 
-    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
+    virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type,
+        int32_t apiVersion = API_VERSION_INVALID) { return true; }
 
     virtual bool IsVisibleForeground() const;
     void SetIsStarting(bool isStarting);
