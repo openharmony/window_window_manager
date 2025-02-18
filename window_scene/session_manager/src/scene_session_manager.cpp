@@ -11782,4 +11782,72 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
     }, __func__);
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId)
+{
+    TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d",
+    sourcePersistentId, targetPersistentId);
+    if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (sourcePersistentId == targetPersistentId) {
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    sptr<SceneSession> sourceSession = GetSceneSession(sourcePersistentId);
+    if (sourceSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is nullptr", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (!WindowHelper::IsAppWindow(sourceSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_PC, "sourceSession %{public}d is not app window", sourcePersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    sptr<SceneSession> targetSession = GetSceneSession(targetPersistentId);
+    if (targetSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is nullptr", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_SESSION;
+    }
+    if (!WindowHelper::IsAppWindow(targetSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not app window", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
+        TLOGE(WmsLogTag::WMS_PC, "verify bundle failed, source name is %{public}s but target name is %{public}s)",
+        sourceSession->GetSessionInfo().bundleName_.c_str(), targetSession->GetSessionInfo().bundleName_.c_str());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (!SessionPermission::IsSameBundleNameAsCalling(targetSession->GetSessionInfo().bundleName_)) {
+        TLOGE(WmsLogTag::WMS_PC, "targetSession %{public}d is not same bundle as calling", targetPersistentId);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != targetSession->GetCallingPid()) {
+        TLOGE(WmsLogTag::WMS_PC, "permission denied, not call by the same process");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    return ShiftAppWindowPointerEventInner(sourcePersistentId, targetPersistentId,
+        targetSession->GetSessionProperty()->GetDisplayId());
+}
+
+WMError SceneSessionManager::ShiftAppWindowPointerEventInner(
+    int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId)
+{
+    return taskScheduler_->PostSyncTask([sourceWindowId, targetWindowId, targetDisplayId] {
+        auto display = DisplayManager::GetInstance().GetDisplayById(targetDisplayId);
+        float vpr = 1.5f; // 1.5f: default virtual pixel ratio
+        if (display) {
+            vpr = display->GetVirtualPixelRatio();
+        }
+        int32_t outside = static_cast<int32_t>(HOTZONE_TOUCH * vpr * 2); // double touch hotzone
+        MMI::ShiftWindowParam param;
+        param.sourceWindowId = sourceWindowId;
+        param.targetWindowId = targetWindowId;
+        param.x = -outside;
+        param.y = -outside;
+        int ret = MMI::InputManager::GetInstance()->ShiftAppPointerEvent(param, true);
+        TLOGNI(WmsLogTag::WMS_PC, "sourceWindowId %{public}d targetWindowId %{public}d vpr %{public}f ret %{public}d",
+            param.sourceWindowId, param.targetWindowId, vpr, ret);
+        return ret == 0 ? WMError::WM_OK : WMError::WM_ERROR_INVALID_CALLING;
+    }, __func__);
+}
 } // namespace OHOS::Rosen

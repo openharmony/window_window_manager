@@ -46,7 +46,6 @@ public:
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
     bool IsStartMoving() override;
-    WmErrorCode StartMoveWindow() override;
     WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
@@ -159,6 +158,13 @@ public:
     WMError SetWindowRectAutoSave(bool enabled) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
 
+    /*
+     * PC Window Layout
+     */
+    WmErrorCode StartMoveWindow() override;
+    WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
+    WmErrorCode StopMoveWindow() override;
+
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
@@ -245,6 +251,11 @@ private:
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
+
+    /*
+     * PC Window Layout
+     */
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
 
     /**
      * Window Immersive

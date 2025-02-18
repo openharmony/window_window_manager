@@ -123,6 +123,7 @@ public:
         TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE,
         TRANS_ID_SET_APP_DRAG_RESIZE_TYPE,
         TRANS_ID_GET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -299,6 +300,8 @@ public:
         DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
+        int32_t targetPersistentId) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

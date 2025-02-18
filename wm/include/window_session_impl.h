@@ -332,7 +332,6 @@ protected:
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
-    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void CopyUniqueDensityParameter(sptr<WindowSessionImpl> parentWindow);
     sptr<WindowSessionImpl> FindMainWindowWithContext();
     sptr<WindowSessionImpl> FindExtensionWindowWithContext();
@@ -342,6 +341,18 @@ protected:
 
     void RefreshNoInteractionTimeoutMonitor();
     WindowStatus GetWindowStatusInner(WindowMode mode);
+
+    /*
+     * PC Event Filter
+     */
+    bool FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    bool FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
+    WMError ClearKeyEventFilter() override;
+    WMError SetMouseEventFilter(MouseEventFilterFunc filter) override;
+    WMError ClearMouseEventFilter() override;
+    WMError SetTouchEventFilter(TouchEventFilterFunc filter) override;
+    WMError ClearTouchEventFilter() override;
 
     /**
      * Sub Window
@@ -381,8 +392,6 @@ protected:
     bool escKeyEventTriggered_ = false;
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
-    virtual WMError SetKeyEventFilter(KeyEventFilterFunc filter) override;
-    virtual WMError ClearKeyEventFilter() override;
     WSError SwitchFreeMultiWindow(bool enable) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
@@ -562,8 +571,6 @@ private:
 
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
-    std::shared_mutex keyEventFilterMutex_;
-    KeyEventFilterFunc keyEventFilter_;
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
     sptr<WindowOption> windowOption_;
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
@@ -585,6 +592,16 @@ private:
      * PC Window
      */
     uint32_t targetAPIVersion_ = 0;
+
+    /*
+     * PC Event Filter
+     */
+    std::mutex keyEventFilterMutex_;
+    KeyEventFilterFunc keyEventFilter_;
+    std::mutex mouseEventFilterMutex_;
+    MouseEventFilterFunc mouseEventFilter_;
+    std::mutex touchEventFilterMutex_;
+    TouchEventFilterFunc touchEventFilter_;
 };
 } // namespace Rosen
 } // namespace OHOS
