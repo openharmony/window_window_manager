@@ -379,6 +379,7 @@ public:
     void MultiScreenChangeOuter(const std::string& outerFlag);
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     void UpdateValidArea(ScreenId screenId, uint32_t validWidth, uint32_t validHeight);
+    bool GetIsRealScreen(ScreenId screenId) override;
 
 protected:
     ScreenSessionManager();

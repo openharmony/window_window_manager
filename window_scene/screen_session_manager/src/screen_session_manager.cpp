@@ -8015,4 +8015,19 @@ void ScreenSessionManager::UpdateValidArea(ScreenId screenId, uint32_t validWidt
     screenSession->SetValidWidth(validWidth);
     screenSession->SetValidHeight(validHeight);
 }
+
+bool ScreenSessionManager::GetIsRealScreen(ScreenId screenId)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied.calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return false;
+    }
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return false;
+    }
+    return screenSession->GetIsRealScreen();
+}
 } // namespace OHOS::Rosen
