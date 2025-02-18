@@ -276,9 +276,9 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
 
     /*
-+     * PC Window Layout
-+     */
-+    void ProcessSetSupportedWindowModesRegister();
+     * PC Window Layout
+     */
+    void ProcessSetSupportedWindowModesRegister();
 
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -338,8 +338,8 @@ private:
     /*
      * PC Window Layout
      */
-    void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes);
-
+    void OnSetSupportedWindowModes(std::vectorAppExecFwk::SupportWindowMode&& supportedWindowModes);
+    
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
