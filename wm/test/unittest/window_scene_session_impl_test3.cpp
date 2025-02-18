@@ -1987,11 +1987,9 @@ HWTEST_F(WindowSceneSessionImplTest3, SetSupportedWindowModes, Function | SmallT
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
-    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
-        AppExecFwk::SupportWindowMode::FULLSCREEN,
-        AppExecFwk::SupportWindowMode::SPLIT,
-        AppExecFwk::SupportWindowMode::FLOATING
-    };
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = { AppExecFwk::SupportWindowMode::FULLSCREEN,
+                                                                        AppExecFwk::SupportWindowMode::SPLIT,
+                                                                        AppExecFwk::SupportWindowMode::FLOATING };
 
     windowSceneSessionImpl->windowSystemConfig_.uiType_ = UI_TYPE_PC;
     auto ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
