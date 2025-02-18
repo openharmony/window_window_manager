@@ -623,12 +623,12 @@ HWTEST_F(SessionProxyTest, NotifySupportWindowModesChange, Function | SmallTest 
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
         AppExecFwk::SupportWindowMode::FULLSCREEN,
         AppExecFwk::SupportWindowMode::SPLIT,
         AppExecFwk::SupportWindowMode::FLOATING
     };
-    WSError res = sProxy->NotifySupportWindowModesChange(supportWindowModes);
+    WSError res = sProxy->NotifySupportWindowModesChange(supportedWindowModes);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifySupportWindowModesChange end";
 }

@@ -217,8 +217,8 @@ public:
     /**
      * PC Window
      */
-    void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
-    void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
+    void SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void GetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const;
 
     /*
      * Keyboard
@@ -377,7 +377,7 @@ private:
      * PC Window
      */
     mutable std::mutex supportWindowModesMutex_;
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
 
     /*
      * Keyboard

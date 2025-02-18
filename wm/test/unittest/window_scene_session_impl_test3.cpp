@@ -1974,58 +1974,58 @@ HWTEST_F(WindowSceneSessionImplTest3, SetWindowRectAutoSave, Function | SmallTes
 }
 
 /**
- * @tc.name: SetSupportWindowModes
- * @tc.desc: SetSupportWindowModes
+ * @tc.name: SetSupportedWindowModes
+ * @tc.desc: SetSupportedWindowModes
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest3, SetSupportWindowModes, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest3, SetSupportedWindowModes, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetSupportWindowModes");
+    option->SetWindowName("SetSupportedWindowModes");
     sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes = {
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes = {
         AppExecFwk::SupportWindowMode::FULLSCREEN,
         AppExecFwk::SupportWindowMode::SPLIT,
         AppExecFwk::SupportWindowMode::FLOATING
     };
 
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    auto ret = windowSceneSessionImpl->SetSupportWindowModes(supportWindowModes);
+    auto ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_OK, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ret = windowSceneSessionImpl->SetSupportWindowModes(supportWindowModes);
+    ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = windowSceneSessionImpl->SetSupportWindowModes(supportWindowModes);
+    ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
 
     windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    supportWindowModes.clear();
-    ret = windowSceneSessionImpl->SetSupportWindowModes(supportWindowModes);
+    supportedWindowModes.clear();
+    ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
-    ret = windowSceneSessionImpl->SetSupportWindowModes(supportWindowModes);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+    ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
 
-    supportWindowModes.clear();
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
-    ret = windowSceneSessionImpl->SetSupportWindowModes(supportWindowModes);
+    supportedWindowModes.clear();
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FULLSCREEN);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+    ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    supportWindowModes.clear();
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
-    supportWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
-    ret = windowSceneSessionImpl->SetSupportWindowModes(supportWindowModes);
+    supportedWindowModes.clear();
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::FLOATING);
+    supportedWindowModes.push_back(AppExecFwk::SupportWindowMode::SPLIT);
+    ret = windowSceneSessionImpl->SetSupportedWindowModes(supportedWindowModes);
     EXPECT_EQ(WMError::WM_OK, ret);
 }
 }
