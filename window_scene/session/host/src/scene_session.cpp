@@ -5442,6 +5442,20 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
     PostTask(task, __func__);
 }
 
+void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportWindowModesFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or func is null", where);
+            return;
+        }
+        session->onSetSupportWindowModesFunc_ = std::move(func);
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
+}
+
 bool SceneSession::SetFrameGravity(Gravity gravity)
 {
     if (surfaceNode_ == nullptr) {

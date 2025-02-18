@@ -2183,6 +2183,44 @@ WSError SessionProxy::OnSetWindowRectAutoSave(bool enabled)
     return WSError::WS_OK;
 }
 
+WSError SessionProxy::NotifySupportWindowModesChange(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto size = supportWindowModes.size();
+    if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        if (!data.WriteUint32(static_cast<uint32_t>(size))) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        for (decltype(size) i = 0; i < size; i++) {
+            if (!data.WriteInt32(static_cast<int32_t>(supportWindowModes[i]))) {
+                return WSError::WS_ERROR_IPC_FAILED;
+            }
+        }
+    } else {
+        if (!data.WriteUint32(0)) {
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUPPORT_WINDOW_MODES),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionProxy::SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)
 {
     MessageParcel data;

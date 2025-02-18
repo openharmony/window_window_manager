@@ -895,7 +895,7 @@ JsSessionType GetApiType(WindowType type)
     }
 }
 
-static napi_value CreateSupportWindowModes(napi_env env,
+napi_value CreateSupportWindowModes(napi_env env,
     const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes)
 {
     napi_value arrayValue = nullptr;

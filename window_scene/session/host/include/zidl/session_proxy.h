@@ -124,6 +124,9 @@ public:
      */
     WSError RemoveStartingWindow() override;
 
+    WSError NotifySupportWindowModesChange(
+        const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) override;
+
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };
