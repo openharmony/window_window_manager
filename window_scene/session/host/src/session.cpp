@@ -1015,6 +1015,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     if (rect.IsInvalid()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "skip window: %{public}d invalid rect: %{public}s",
             GetPersistentId(), rect.ToString().c_str());
+        return;
     }
     auto currScreenFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
     if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
