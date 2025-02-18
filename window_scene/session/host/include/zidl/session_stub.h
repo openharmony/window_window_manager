@@ -109,6 +109,7 @@ private:
 
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
+    int HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
     int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);

@@ -65,6 +65,8 @@ using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
 using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
+using MouseEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
+using TouchEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -1651,11 +1653,28 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move window. It is called by application.
+     * @brief Start moving window. It is called by application.
      *
      * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Start moving window. It is called by application.
+     *
+     * @param offsetX expected pointer position x-axis offset in window when start moving.
+     * @param offsetY expected pointer position y-axis offset in window when start moving.
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Stop moving window. It is called by application. Support pc window and pad free multi-window.
+     *
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StopMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set flag that need remove window input channel.
@@ -2392,6 +2411,42 @@ public:
      * @return WMError
     */
     virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
+
+    /**
+     * @brief register mouseEvent filter.
+     *
+     * @param mouseEventFilterFunc callback func when window receive mouseEvent
+     * @return WMError
+     */
+    virtual WMError SetMouseEventFilter(MouseEventFilterFunc mouseEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear mouseEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearMouseEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief register touchEvent filter.
+     *
+     * @param touchEventFilterFunc callback func when window receive touchEvent
+     * @return WMError
+     */
+    virtual WMError SetTouchEventFilter(TouchEventFilterFunc touchEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear touchEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearTouchEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register window rect change listener.

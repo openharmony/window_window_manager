@@ -627,8 +627,9 @@ void SceneSession::HandleSessionDragEvent(SessionEvent event)
 
 WSError SceneSession::SyncSessionEvent(SessionEvent event)
 {
-    if (event != SessionEvent::EVENT_START_MOVE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event, eventId=%{public}d", event);
+    if (event != SessionEvent::EVENT_START_MOVE && event != SessionEvent::EVENT_END_MOVE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "This is not start move event or end move event, "
+            "eventId=%{public}u windowId=%{public}d", event, GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
     const char* const funcName = __func__;
@@ -638,6 +639,14 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: session or moveDragController is null", funcName);
             return WSError::WS_ERROR_NULLPTR;
         }
+        if (event == SessionEvent::EVENT_END_MOVE) {
+            if (!session->moveDragController_->GetStartMoveFlag()) {
+                TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "Repeat operation, window is not moving");
+                return WSError::WS_OK;
+            }
+            session->moveDragController_->StopMoving();
+            return WSError::WS_OK;
+        }
         if (session->moveDragController_->GetStartMoveFlag()) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: Repeat operation, system window is moving", funcName);
             return WSError::WS_ERROR_REPEAT_OPERATION;
@@ -645,6 +654,34 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
         session->OnSessionEvent(event);
         return WSError::WS_OK;
     }, funcName);
+}
+
+WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+                                                    int32_t pointerPosX, int32_t pointerPosY)
+{
+    return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session || !session->moveDragController_) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: session or moveDragController is null", where);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (session->moveDragController_->GetStartMoveFlag()) {
+            TLOGNW(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: Repeat operation, window is moving", where);
+            return WSError::WS_ERROR_REPEAT_OPERATION;
+        }
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s: offsetX:%{public}d offsetY:%{public}d pointerPosX:%{public}d"
+            " pointerPosY:%{public}d", where, offsetX, offsetY, pointerPosX, pointerPosY);
+        WSRect winRect = {
+            pointerPosX - offsetX,
+            pointerPosY - offsetY,
+            session->winRect_.width_,
+            session->winRect_.height_
+        };
+        session->moveDragController_->HandleStartMovingWithCoordinate(offsetX,
+            offsetY, pointerPosX, pointerPosY, winRect);
+        session->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
+        return WSError::WS_OK;
+    }, __func__);
 }
 
 uint32_t SceneSession::GetWindowDragHotAreaType(uint32_t type, int32_t pointerX, int32_t pointerY)
@@ -2342,6 +2379,7 @@ WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEve
             moveDragController_->ConsumeMoveEvent(pointerEvent, winRect_)) {
             PresentFoucusIfNeed(pointerEvent->GetPointerAction());
             pointerEvent->MarkProcessed();
+            Session::TransferPointerEvent(pointerEvent, needNotifyClient);
             return WSError::WS_OK;
         }
     }
