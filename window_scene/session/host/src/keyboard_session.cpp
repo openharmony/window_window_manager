@@ -347,11 +347,39 @@ int32_t KeyboardSession::GetFocusedSessionId()
     return keyboardCallback_->onGetFocusedSessionId();
 }
 
+static WSRect CalculateSafeRectForMidScene(const WSRect& windowRect, const WSRect& keyboardRect, float scaleX,
+    float scaleY)
+{
+    if (MathHelper::NearZero(scaleX) || MathHelper::NearZero(scaleY)) {
+        return { 0, 0, 0, 0 };
+    }
+    const WSRect scaledWindowRect = {
+        windowRect.posX_,
+        windowRect.posY_,
+        static_cast<int32_t>(windowRect.width_ * scaleX),
+        static_cast<int32_t>(windowRect.height_ * scaleY)
+    };
+
+    const WSRect overlap = SessionHelper::GetOverlap(scaledWindowRect, keyboardRect, 0, 0);
+    if (SessionHelper::IsEmptyRect(overlap)) {
+        return { 0, 0, 0, 0 };
+    }
+
+    const WSRect result = {
+        static_cast<int32_t>((overlap.posX_ - scaledWindowRect.posX_) / scaleX),
+        static_cast<int32_t>((overlap.posY_ - scaledWindowRect.posY_) / scaleY),
+        static_cast<int32_t>(overlap.width_ / scaleX),
+        static_cast<int32_t>(overlap.height_ / scaleY)
+    };
+    return result;
+}
+
 void KeyboardSession::NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
     const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction)
 {
     // if keyboard will occupy calling, notify calling window the occupied area and safe height
-    const WSRect& safeRect = SessionHelper::GetOverlap(occupiedArea, rect, 0, 0);
+    const WSRect& safeRect = !callingSession->GetIsMidScene() ? SessionHelper::GetOverlap(occupiedArea, rect, 0, 0) :
+        CalculateSafeRectForMidScene(rect, occupiedArea, callingSession->GetScaleX(), callingSession->GetScaleY());
     const WSRect& lastSafeRect = callingSession->GetLastSafeRect();
     if (lastSafeRect == safeRect) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "SafeRect is same to lastSafeRect: %{public}s", safeRect.ToString().c_str());
@@ -437,7 +465,8 @@ void KeyboardSession::RaiseCallingSession(const WSRect& keyboardPanelRect, bool 
     }
     NotifyKeyboardPanelInfoChange(keyboardPanelRect, true);
 
-    bool isCallingSessionFloating = (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING);
+    bool isCallingSessionFloating = (callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) &&
+        !callingSession->GetIsMidScene();
     if (!CheckIfNeedRaiseCallingSession(callingSession, isCallingSessionFloating)) {
         return;
     }
