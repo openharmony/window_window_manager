@@ -2093,6 +2093,14 @@ public:
     }
 
     /**
+     * @brief Set Window new title
+     *
+     * @param title Window new title
+     * @return Errorcode of window.
+     */
+    virtual WMError SetWindowTitle(const std::string& title) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Set decor height of window.
      *
      * @param decorHeight Decor height of window
