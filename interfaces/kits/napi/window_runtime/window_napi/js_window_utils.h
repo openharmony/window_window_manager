@@ -274,6 +274,8 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAX_TO_SPLIT,          RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_MAX,          RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
