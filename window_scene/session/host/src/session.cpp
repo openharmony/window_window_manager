@@ -3493,7 +3493,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
 
 void Session::SetBufferAvailable(bool bufferAvailable)
 {
-    WLOGFI("SetBufferAvailable: %{public}d", bufferAvailable);
+    TLOGD(WmsLogTag::DEFAULT, "Set:%{public}d", bufferAvailable);
     if (bufferAvailableChangeFunc_) {
         bufferAvailableChangeFunc_(bufferAvailable);
     }

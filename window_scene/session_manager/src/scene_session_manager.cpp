@@ -5129,14 +5129,16 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     }
     for (const auto& elem : sceneSessionMapCopy) {
         auto curSession = elem.second;
-        if (curSession == nullptr ||
-            (!curSession->GetSessionInfo().isSystem_ &&
-             (curSession->GetSessionState() < SessionState::STATE_FOREGROUND ||
-              curSession->GetSessionState() > SessionState::STATE_BACKGROUND))) {
-            WLOGFW("Session is nullptr or session state is invalid, id: %{public}d, state: %{public}u",
-                curSession->GetPersistentId(), curSession->GetSessionState());
+        if (curSession == nullptr) {
+            WLOGFW("nullptr");
             continue;
         }
+        if (!curSession->GetSessionInfo().isSystem_ && (curSession->GetSessionState() <
+            SessionState::STATE_FOREGROUND || curSession->GetSessionState() > SessionState::STATE_BACKGROUND)) {
+            WLOGFW("id:%{public}d,invalid state:%{public}u",
+                 curSession->GetPersistentId(), curSession->GetSessionState());
+             continue;
+         }
         if (IsSessionVisibleForeground(curSession)) {
             allSession.push_back(curSession);
         } else {
@@ -5204,12 +5206,12 @@ void SceneSessionManager::DumpSessionElementInfo(const sptr<SceneSession>& sessi
     std::vector<std::string> resetParams;
     resetParams.assign(params.begin() + 2, params.end()); // 2: params num
     if (resetParams.empty()) {
-        WLOGI("do not dump ui info");
+        WLOGD("do not dump ui info");
         return;
     }
 
     if (!session->GetSessionInfo().isSystem_) {
-        WLOGFI("Dump normal session, not system");
+        WLOGFD("Dump normal session, not system");
         dumpInfoFuture_.ResetLock({});
         session->DumpSessionElementInfo(resetParams);
         std::vector<std::string> infos = dumpInfoFuture_.GetResult(2000); // 2000: wait for 2000ms
@@ -5217,7 +5219,7 @@ void SceneSessionManager::DumpSessionElementInfo(const sptr<SceneSession>& sessi
             dumpInfo.append(info).append("\n");
         }
     } else {
-        WLOGFI("Dump system session");
+        WLOGFD("Dump system session");
         std::vector<std::string> infos;
         dumpRootSceneFunc_(resetParams, infos);
         for (auto& info: infos) {
@@ -7652,12 +7654,12 @@ int SceneSessionManager::GetRemoteSessionInfo(const std::string& deviceId,
 bool SceneSessionManager::CheckIsRemote(const std::string& deviceId)
 {
     if (deviceId.empty()) {
-        WLOGFI("deviceId is empty.");
+        WLOGFI("empty");
         return false;
     }
     std::string localDeviceId;
     if (!GetLocalDeviceId(localDeviceId)) {
-        WLOGFE("get local deviceId failed");
+        WLOGFE("GetLocalDeviceId failed");
         return false;
     }
     if (localDeviceId == deviceId) {

@@ -331,7 +331,7 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
             SessionPermission::VerifyPermissionByBundleName(info.bundleName_,
                                                             "ohos.permission.CALLED_TRANSITION_ON_LOCK_SCREEN",
                                                             SceneSessionManager::GetInstance().GetCurrentUserId());
-        TLOGI(WmsLogTag::WMS_SCB,
+        TLOGD(WmsLogTag::WMS_SCB,
             "root isCalledRightlyByCallerId result is: %{public}d", info.isCalledRightlyByCallerId_);
     }
 }
