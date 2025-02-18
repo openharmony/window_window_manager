@@ -807,11 +807,11 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetLastConstrainedModalUIExtInfo, Functio
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     surfaceNode->SetId(1);
-    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->surfaceNode_ = surfaceNode;
     ret = manager_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo);
     ASSERT_EQ(ret, false);
 
-    sceneSession->GetSurfaceNode()->SetId(0);
+    sceneSession->surfaceNode_->SetId(0);
     ret = manager_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo);
     ASSERT_EQ(ret, false);
 
@@ -850,7 +850,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetModalUIExtensionInfo, Function | Small
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     surfaceNode->SetId(0);
-    sceneSession->SetSurfaceNode(surfaceNode);
+    sceneSession->surfaceNode_ = surfaceNode;
     SecSurfaceInfo secSurfaceInfo;
     manager_->constrainedModalUIExtInfoMap_.clear();
     manager_->constrainedModalUIExtInfoMap_[0].emplace_back(secSurfaceInfo);
