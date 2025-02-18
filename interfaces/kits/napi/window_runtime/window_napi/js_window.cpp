@@ -279,14 +279,14 @@ napi_value JsWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info in
 
 napi_value JsWindow::RegisterWindowCallback(napi_env env, napi_callback_info info)
 {
-    WLOGI("RegisterWindowCallback");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRegisterWindowCallback(env, info) : nullptr;
 }
 
 napi_value JsWindow::UnregisterWindowCallback(napi_env env, napi_callback_info info)
 {
-    WLOGI("UnregisterWindowCallback");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnUnregisterWindowCallback(env, info) : nullptr;
 }
@@ -588,7 +588,7 @@ napi_value JsWindow::SetWindowPrivacyMode(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetTouchable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetTouchable");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetTouchable(env, info) : nullptr;
 }
@@ -624,7 +624,7 @@ napi_value JsWindow::HideNonSystemFloatingWindows(napi_env env, napi_callback_in
 
 napi_value JsWindow::SetWindowTouchable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetTouchable");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowTouchable(env, info) : nullptr;
 }

@@ -174,7 +174,7 @@ static std::string Str16ToStr8(const std::u16string& str)
 
 int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 {
-    WLOGI("dump begin fd: %{public}d", fd);
+    TLOGD(WmsLogTag::DEFAULT, "dump begin fd: %{public}d", fd);
     if (fd < 0) {
         return -1;
     }
@@ -200,7 +200,7 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& a
         WLOGFE("write error");
         return -1; // WMError::WM_ERROR_INVALID_OPERATION;
     }
-    WLOGI("dump end");
+    TLOGD(WmsLogTag::DEFAULT, "dump end");
     return 0;
 }
 
@@ -365,7 +365,7 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
             return;
         }
-        TLOGI(WmsLogTag::WMS_RECOVER, "WMS is already connected, notify client");
+        TLOGI(WmsLogTag::WMS_RECOVER, "WMS ready,notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
     }
 }

@@ -49,11 +49,11 @@ constexpr size_t ARGC_ONE = 1;
 
 napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
 {
-    WLOGD("Create.");
+    TLOGND(WmsLogTag::DMS, "Create.");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -79,7 +79,7 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
 
 void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGD("Finalizer.");
+    TLOGND(WmsLogTag::DMS, "Finalizer.");
     std::unique_ptr<JsScreenSession>(static_cast<JsScreenSession*>(data));
 }
 
@@ -118,7 +118,7 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
 
 JsScreenSession::~JsScreenSession()
 {
-    WLOGI("~JsScreenSession");
+    TLOGNI(WmsLogTag::DMS, "~JsScreenSession");
 }
 
 napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
@@ -194,25 +194,25 @@ napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_
 
 napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
-    WLOGI("JsScreenSession::OnSetScreenRotationLocked is called");
+    TLOGNI(WmsLogTag::DMS, "JsScreenSession::OnSetScreenRotationLocked is called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     bool isLocked = true;
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("ConvertNativeValueTo isLocked failed!");
+        TLOGE(WmsLogTag::DMS, "ConvertNativeValueTo isLocked failed!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     napi_get_value_bool(env, nativeVal, &isLocked);
     if (screenSession_ == nullptr) {
-        WLOGFE("Failed to register screen change listener, session is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to register screen change listener, session is null!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -450,7 +450,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId scre
 {
     const std::string callbackType = ON_SENSOR_ROTATION_CHANGE_CALLBACK;
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -610,9 +610,9 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     PowerStateChangeReason reason)
 {
     const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
-    WLOGD("[UL_POWER]%{public}s.", callbackType.c_str());
+    TLOGND(WmsLogTag::DMS, "[UL_POWER]%{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFW("[UL_POWER]%{public}s is unregistered!", callbackType.c_str());
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]%{public}s is unregistered!", callbackType.c_str());
         return;
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -642,21 +642,21 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnPowerStatusChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnPowerStatusChange: Failed to SendEvent.");
         } else {
-            WLOGFI("OnPowerStatusChange: Sucess to SendEvent.");
+            TLOGI(WmsLogTag::DMS, "OnPowerStatusChange: Sucess to SendEvent.");
         }
     } else {
-        WLOGFE("OnPowerStatusChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnPowerStatusChange: env is nullptr");
     }
 }
 
 void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ROTATION_LOCKED_CHANGE;
-    WLOGD("Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
+    TLOGND(WmsLogTag::DMS, "Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -753,10 +753,10 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, 
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnHoverStatusChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnHoverStatusChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnHoverStatusChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnHoverStatusChange: env is nullptr");
     }
 }
 

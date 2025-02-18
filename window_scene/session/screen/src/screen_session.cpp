@@ -136,14 +136,14 @@ void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
 
 ScreenSession::~ScreenSession()
 {
-    WLOGI("~ScreenSession");
+    TLOGNI(WmsLogTag::DMS, "~ScreenSession");
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string& name,
     const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode)
     : name_(name), screenId_(screenId), rsId_(rsId), property_(property), displayNode_(displayNode)
 {
-    WLOGFI("Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"", screenId_);
+    TLOGI(WmsLogTag::DMS, "Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"", screenId_);
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
@@ -152,13 +152,13 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
-        WLOGI("Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"", screenId_);
+        TLOGNI(WmsLogTag::DMS, "Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"", screenId_);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
     } else {
-        WLOGFE("Failed to create displayNode, displayNode is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
     }
     RSTransaction::FlushImplicitTransaction();
 }
@@ -172,13 +172,13 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
         .isSync = true};
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
-        WLOGI("Success to create displayNode in constructor_2, screenid is %{public}" PRIu64"", screenId_);
+        TLOGNI(WmsLogTag::DMS, "Success to create displayNode in constructor_2, screenid is %{public}" PRIu64"", screenId_);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
     } else {
-        WLOGFE("Failed to create displayNode, displayNode is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
     }
     RSTransaction::FlushImplicitTransaction();
 }
@@ -191,13 +191,13 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     Rosen::RSDisplayNodeConfig config = { .screenId = rsId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
-        WLOGI("Success to create displayNode in constructor_3, rs id is %{public}" PRIu64"", rsId_);
+        TLOGNI(WmsLogTag::DMS, "Success to create displayNode in constructor_3, rs id is %{public}" PRIu64"", rsId_);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
     } else {
-        WLOGFE("Failed to create displayNode, displayNode is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
     }
     RSTransaction::FlushImplicitTransaction();
 }
@@ -206,7 +206,7 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
 {
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
-        WLOGFI("SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
+        TLOGI(WmsLogTag::DMS, "SetDisplayNodeScreenId %{public}" PRIu64"", screenId);
         displayNode_->SetScreenId(screenId);
     }
 }
@@ -214,28 +214,28 @@ void ScreenSession::SetDisplayNodeScreenId(ScreenId screenId)
 void ScreenSession::RegisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
 {
     if (screenChangeListener == nullptr) {
-        WLOGFE("Failed to register screen change listener, listener is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to register screen change listener, listener is null!");
         return;
     }
 
     if (std::find(screenChangeListenerList_.begin(), screenChangeListenerList_.end(), screenChangeListener) !=
         screenChangeListenerList_.end()) {
-        WLOGFI("Repeat to register screen change listener!");
+        TLOGI(WmsLogTag::DMS, "Repeat to register screen change listener!");
         return;
     }
 
     screenChangeListenerList_.emplace_back(screenChangeListener);
     if (screenState_ == ScreenState::CONNECTION) {
         screenChangeListener->OnConnect(screenId_);
-        WLOGFI("Success to call onconnect callback.");
+        TLOGI(WmsLogTag::DMS, "Success to call onconnect callback.");
     }
-    WLOGFI("Success to register screen change listener.");
+    TLOGI(WmsLogTag::DMS, "Success to register screen change listener.");
 }
 
 void ScreenSession::UnregisterScreenChangeListener(IScreenChangeListener* screenChangeListener)
 {
     if (screenChangeListener == nullptr) {
-        WLOGFE("Failed to unregister screen change listener, listener is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to unregister screen change listener, listener is null!");
         return;
     }
 
@@ -391,11 +391,11 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
 {
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorGamuts(rsId_, colorGamuts);
     if (ret != StatusCode::SUCCESS) {
-        WLOGE("SCB: ScreenSession::GetScreenSupportedColorGamuts fail! rsId %{public}" PRIu64", ret:%{public}d",
+        TLOGNE(WmsLogTag::DMS, "SCB: ScreenSession::GetScreenSupportedColorGamuts fail! rsId %{public}" PRIu64", ret:%{public}d",
             rsId_, ret);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    WLOGI("SCB: ScreenSession::GetScreenSupportedColorGamuts ok! rsId %{public}" PRIu64", size %{public}u",
+    TLOGNI(WmsLogTag::DMS, "SCB: ScreenSession::GetScreenSupportedColorGamuts ok! rsId %{public}" PRIu64", size %{public}u",
         rsId_, static_cast<uint32_t>(colorGamuts.size()));
 
     return DMError::DM_OK;
@@ -629,19 +629,19 @@ void ScreenSession::ReleaseDisplayNode()
 {
     std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     displayNode_ = nullptr;
-    WLOGFI("displayNode_ is released.");
+    TLOGI(WmsLogTag::DMS, "displayNode_ is released.");
 }
 
 void ScreenSession::Connect()
 {
     screenState_ = ScreenState::CONNECTION;
     if (screenChangeListenerList_.empty()) {
-        WLOGFE("screenChangeListenerList is empty.");
+        TLOGE(WmsLogTag::DMS, "screenChangeListenerList is empty.");
         return;
     }
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
-            WLOGFE("screenChangeListener is null.");
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
         listener->OnConnect(screenId_);
@@ -737,7 +737,7 @@ void ScreenSession::SensorRotationChange(float sensorRotation)
     currentSensorRotation_ = sensorRotation;
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
-            WLOGFE("screenChangeListener is null.");
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
         listener->OnSensorRotationChange(sensorRotation, screenId_);
@@ -803,7 +803,7 @@ void ScreenSession::ScreenOrientationChange(float orientation)
 {
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
-            WLOGFE("screenChangeListener is null.");
+            TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
         listener->OnScreenOrientationChange(orientation, screenId_);
@@ -937,7 +937,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
     {
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (!displayNode_) {
-            WLOGFI("update failed since null display node with rotation:%{public}d displayOrientation:%{public}u",
+            TLOGI(WmsLogTag::DMS, "update failed since null display node with rotation:%{public}d displayOrientation:%{public}u",
                 rotation, displayOrientation);
             return;
         }
@@ -1195,7 +1195,7 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
             return isVerticalScreen ? Rotation::ROTATION_270 : Rotation::ROTATION_180;
         }
         default: {
-            WLOGE("unknown orientation %{public}u", orientation);
+            TLOGNE(WmsLogTag::DMS, "unknown orientation %{public}u", orientation);
             return Rotation::ROTATION_0;
         }
     }
@@ -1238,7 +1238,7 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
             return isVerticalScreen ? DisplayOrientation::LANDSCAPE_INVERTED : DisplayOrientation::PORTRAIT_INVERTED;
         }
         default: {
-            WLOGE("unknown rotation %{public}u", rotation);
+            TLOGNE(WmsLogTag::DMS, "unknown rotation %{public}u", rotation);
             return DisplayOrientation::UNKNOWN;
         }
     }
@@ -1275,7 +1275,7 @@ DisplayOrientation ScreenSession::CalcDeviceOrientation(Rotation rotation,
             break;
         }
         default: {
-            WLOGE("unknown rotation %{public}u", rotation);
+            TLOGNE(WmsLogTag::DMS, "unknown rotation %{public}u", rotation);
         }
     }
     return displayRotation;
@@ -1327,7 +1327,7 @@ ScreenCombination ScreenSession::GetScreenCombination() const
 void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
 {
     if (info == nullptr) {
-        WLOGE("FillScreenInfo failed! info is nullptr");
+        TLOGNE(WmsLogTag::DMS, "FillScreenInfo failed! info is nullptr");
         return;
     }
     info->SetScreenId(screenId_);
@@ -1452,10 +1452,10 @@ DMError ScreenSession::GetPixelFormat(GraphicPixelFormat& pixelFormat)
 {
     auto ret = RSInterfaces::GetInstance().GetPixelFormat(rsId_, pixelFormat);
     if (ret != StatusCode::SUCCESS) {
-        WLOGE("GetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
+        TLOGNE(WmsLogTag::DMS, "GetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    WLOGI("GetPixelFormat ok! rsId %{public}" PRIu64 ", pixelFormat %{public}u",
+    TLOGNI(WmsLogTag::DMS, "GetPixelFormat ok! rsId %{public}" PRIu64 ", pixelFormat %{public}u",
         rsId_, static_cast<uint32_t>(pixelFormat));
     return DMError::DM_OK;
 }
@@ -1467,10 +1467,10 @@ DMError ScreenSession::SetPixelFormat(GraphicPixelFormat pixelFormat)
     }
     auto ret = RSInterfaces::GetInstance().SetPixelFormat(rsId_, pixelFormat);
     if (ret != StatusCode::SUCCESS) {
-        WLOGE("SetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
+        TLOGNE(WmsLogTag::DMS, "SetPixelFormat fail! rsId %{public}" PRIu64, rsId_);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    WLOGI("SetPixelFormat ok! rsId %{public}" PRIu64 ", gamutMap %{public}u",
+    TLOGNI(WmsLogTag::DMS, "SetPixelFormat ok! rsId %{public}" PRIu64 ", gamutMap %{public}u",
         rsId_, static_cast<uint32_t>(pixelFormat));
     return DMError::DM_OK;
 }
@@ -1599,18 +1599,18 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     if (displayNode_ != nullptr) {
         displayNode_->SetDisplayNodeMirrorConfig(config);
         if (screenId_ == 0 && isFold_) {
-            WLOGFI("Return InitRSDisplayNode foldScreen0");
+            TLOGI(WmsLogTag::DMS, "Return InitRSDisplayNode foldScreen0");
             return;
         }
     } else {
         std::shared_ptr<RSDisplayNode> rsDisplayNode = RSDisplayNode::Create(config);
         if (rsDisplayNode == nullptr) {
-            WLOGE("fail to add child. create rsDisplayNode fail!");
+            TLOGNE(WmsLogTag::DMS, "fail to add child. create rsDisplayNode fail!");
             return;
         }
         displayNode_ = rsDisplayNode;
     }
-    WLOGFI("SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
+    TLOGI(WmsLogTag::DMS, "SetDisplayOffset: posX:%{public}d, posY:%{public}d", startPoint.posX_, startPoint.posY_);
     displayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     uint32_t width = 0;
     uint32_t height = 0;
@@ -1660,7 +1660,7 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
                                                 sptr<ScreenSession> defaultScreenSession)
 {
     if (screenSession == nullptr) {
-        WLOGE("screenSession is nullptr.");
+        TLOGNE(WmsLogTag::DMS, "screenSession is nullptr.");
         return false;
     }
     config = { screenSession->rsId_ };
@@ -1673,26 +1673,26 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
             break;
         case ScreenCombination::SCREEN_MIRROR: {
             if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
-                WLOGI("SCREEN_MIRROR, config is not mirror");
+                TLOGNI(WmsLogTag::DMS, "SCREEN_MIRROR, config is not mirror");
                 break;
             }
             if (defaultScreenSession == nullptr) {
-                WLOGFE("defaultScreenSession is nullptr");
+                TLOGE(WmsLogTag::DMS, "defaultScreenSession is nullptr");
                 break;
             }
             std::shared_ptr<RSDisplayNode> displayNode = defaultScreenSession->GetDisplayNode();
             if (displayNode == nullptr) {
-                WLOGFE("displayNode is nullptr, cannot get DisplayNode");
+                TLOGE(WmsLogTag::DMS, "displayNode is nullptr, cannot get DisplayNode");
                 break;
             }
             NodeId nodeId = displayNode->GetId();
-            WLOGI("mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
+            TLOGNI(WmsLogTag::DMS, "mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
                 mirrorScreenId_, screenSession->rsId_, nodeId);
             config = {screenSession->rsId_, true, nodeId, true};
             break;
         }
         default:
-            WLOGE("fail to add child. invalid group combination:%{public}u", combination_);
+            TLOGNE(WmsLogTag::DMS, "fail to add child. invalid group combination:%{public}u", combination_);
             return false;
     }
     return true;
@@ -1702,13 +1702,13 @@ bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPo
                                   sptr<ScreenSession> defaultScreenSession)
 {
     if (smsScreen == nullptr) {
-        WLOGE("AddChild, smsScreen is nullptr.");
+        TLOGNE(WmsLogTag::DMS, "AddChild, smsScreen is nullptr.");
         return false;
     }
     ScreenId screenId = smsScreen->screenId_;
     auto iter = screenSessionMap_.find(screenId);
     if (iter != screenSessionMap_.end()) {
-        WLOGE("AddChild, screenSessionMap_ has smsScreen:%{public}" PRIu64"", screenId);
+        TLOGNE(WmsLogTag::DMS, "AddChild, screenSessionMap_ has smsScreen:%{public}" PRIu64"", screenId);
         return false;
     }
     struct RSDisplayNodeConfig config;
@@ -1726,7 +1726,7 @@ bool ScreenSessionGroup::AddChildren(std::vector<sptr<ScreenSession>>& smsScreen
 {
     size_t size = smsScreens.size();
     if (size != startPoints.size()) {
-        WLOGE("AddChildren, unequal size.");
+        TLOGNE(WmsLogTag::DMS, "AddChildren, unequal size.");
         return false;
     }
     bool res = true;
@@ -1739,7 +1739,7 @@ bool ScreenSessionGroup::AddChildren(std::vector<sptr<ScreenSession>>& smsScreen
 bool ScreenSessionGroup::RemoveChild(sptr<ScreenSession>& smsScreen)
 {
     if (smsScreen == nullptr) {
-        WLOGE("RemoveChild, smsScreen is nullptr.");
+        TLOGNE(WmsLogTag::DMS, "RemoveChild, smsScreen is nullptr.");
         return false;
     }
     ScreenId screenId = smsScreen->screenId_;
@@ -1839,7 +1839,7 @@ void ScreenSession::Resize(uint32_t width, uint32_t height)
         {
             std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
             if (displayNode_ == nullptr) {
-                WLOGFE("displayNode_ is null, resize failed");
+                TLOGE(WmsLogTag::DMS, "displayNode_ is null, resize failed");
                 return;
             }
             displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
@@ -1884,7 +1884,7 @@ DMRect ScreenSession::GetExpandAvailableArea()
 
 void ScreenSession::SetFoldScreen(bool isFold)
 {
-    WLOGFI("SetFoldScreen %{public}u", isFold);
+    TLOGI(WmsLogTag::DMS, "SetFoldScreen %{public}u", isFold);
     isFold_ = isFold;
 }
 
@@ -1936,7 +1936,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
     {
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (displayNode_ == nullptr) {
-            WLOGFE("get screen snapshot displayNode_ is null");
+            TLOGE(WmsLogTag::DMS, "get screen snapshot displayNode_ is null");
             return nullptr;
         }
     }

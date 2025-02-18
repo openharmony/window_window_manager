@@ -103,7 +103,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
 
 napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("env or exportObj is null!");
         return nullptr;
@@ -338,11 +338,11 @@ void JsSceneSessionManager::OnCreateKeyboardSession(const sptr<SceneSession>& ke
 void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& sceneSession, const SessionInfo& info)
 {
     if (sceneSession == nullptr) {
-        WLOGFI("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_RECOVER, "sceneSession is nullptr");
         return;
     }
 
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::WMS_RECOVER, "[NAPI]");
     wptr<SceneSession> weakSession(sceneSession);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
     auto task = [this, weakSession, sessionInfo, jsCallBack = GetJSCallback(RECOVER_SCENE_SESSION_CB), env = env_]() {
@@ -373,7 +373,7 @@ void JsSceneSessionManager::OnRecoverSceneSession(const sptr<SceneSession>& scen
         napi_value argv[] = { jsSceneSessionObj, jsSessionRecoverInfo };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    WLOGFD("Post task");
+    TLOGD(WmsLogTag::WMS_RECOVER, "post task");
     taskScheduler_->PostMainThreadTask(task, "OnRecoverSceneSession");
 }
 
@@ -712,7 +712,7 @@ napi_value JsSceneSessionManager::UpdateFocus(napi_env env, napi_callback_info i
 
 napi_value JsSceneSessionManager::ProcessBackEvent(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnProcessBackEvent(env, info) : nullptr;
 }
@@ -748,13 +748,13 @@ napi_value JsSceneSessionManager::OnInitScheduleUtils(napi_env env, napi_callbac
 
 void JsSceneSessionManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     std::unique_ptr<JsSceneSessionManager>(static_cast<JsSceneSessionManager*>(data));
 }
 
 napi_value JsSceneSessionManager::GetRootSceneSession(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnGetRootSceneSession(env, info) : nullptr;
 }
@@ -871,14 +871,14 @@ napi_value JsSceneSessionManager::UpdateRotateAnimationConfig(napi_env env, napi
 
 napi_value JsSceneSessionManager::SetVmaCacheStatus(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetVmaCacheStatus(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::InitWithRenderServiceAdded(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnInitWithRenderServiceAdded(env, info) : nullptr;
 }
@@ -2125,8 +2125,8 @@ void JsSceneSessionManager::SetIsClearSession(napi_env env, napi_value jsSceneSe
     if (GetType(env, jsOperatorType) != napi_undefined) {
         int32_t operatorType = -1;
         if (ConvertFromJsValue(env, jsOperatorType, operatorType)) {
-            WLOGFI("operatorType: %{public}d", operatorType);
-            if (operatorType == SessionOperationType::TYPE_CLEAR) {
+            TLOGD(WmsLogTag::DEFAULT, "operatorType: %{public}d", operatorType);
+             if (operatorType == SessionOperationType::TYPE_CLEAR) {
                 sceneSession->SetSessionInfoIsClearSession(true);
             }
         }
@@ -2366,7 +2366,7 @@ napi_value JsSceneSessionManager::OnSetVmaCacheStatus(napi_env env, napi_callbac
 
 napi_value JsSceneSessionManager::OnInitWithRenderServiceAdded(napi_env env, napi_callback_info info)
 {
-    WLOGFI("in");
+    TLOGD(WmsLogTag::DEFAULT, "in");
     SceneSessionManager::GetInstance().InitWithRenderServiceAdded();
     return NapiGetUndefined(env);
 }
