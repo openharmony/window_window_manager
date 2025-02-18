@@ -7102,7 +7102,7 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const s
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
     auto conditionFunc =  [this, focusedSessionId](const sptr<SceneSession>& iter) {
-        return iter && iter->GetPersistentId() == focusedSessionId; 
+        return iter && iter->GetPersistentId() == focusedSessionId;
     };
     if (std::find_if(topmostVec.begin(), topmostVec.end(), std::move(conditionFunc)) != topmostVec.end()) {
         TLOGD(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId);
@@ -7137,7 +7137,7 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(const sptr<Sc
     std::vector<sptr<Session>> dialogVec = mainSession->GetDialogVector();
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-    auto conditionFunc =  [this, focusedSessionId](const sptr<Session>& iter) { 
+    auto conditionFunc =  [this, focusedSessionId](const sptr<Session>& iter) {
         return iter && iter->GetPersistentId() == focusedSessionId;
     };
     if (std::find_if(dialogVec.begin(), dialogVec.end(), std::move(conditionFunc)) != dialogVec.end()) {
@@ -8569,7 +8569,8 @@ bool SceneSessionManager::FillWindowInfo(std::vector<sptr<AccessibilityWindowInf
     info->isDecorEnable_ = sceneSession->GetSessionProperty()->IsDecorEnable();
     WSRect wsRect = sceneSession->GetSessionGlobalRectWithSingleHandScale(); // only accessability and mmi need global
     DisplayId displayId = sceneSession->GetSessionProperty()->GetDisplayId();
-    if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId)) {
+    if (!sceneSession->GetSessionInfo().isSystem_ &&
+        PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId)) {
         displayId = sceneSession->TransformGlobalRectToRelativeRect(wsRect);
     }
     info->displayId_ = displayId;
@@ -10874,7 +10875,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
             }
-            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {
                 windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
             }
             infos.emplace_back(windowInfo);
