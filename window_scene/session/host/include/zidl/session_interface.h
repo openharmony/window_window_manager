@@ -149,6 +149,15 @@ public:
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
 
     /**
+     * @brief this interface is invoked by the ACE to the native host.
+     * @param eventName invoking event name, which is used to distinguish different invoking types.
+     * @param eventValue used to transfer parameters.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WSError OnContainerModalEvent(const std::string& eventName,
+        const std::string& eventValue) { return WSError::WS_OK; }
+
+    /**
      * @brief Obtains the global maximization mode of window.
      *
      * @param mode Indicates the {@link MaximizeMode}.

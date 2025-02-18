@@ -39,6 +39,10 @@ class Ability;
 enum class SupportWindowMode;
 }
 
+namespace OHOS::Global::Resource {
+class ResourceManager;
+} // namespace OHOS::Global::Resource
+
 namespace OHOS::AbilityRuntime {
 class AbilityContext;
 class Context;
@@ -689,8 +693,10 @@ public:
      * @brief Update configuration for all windows
      *
      * @param configuration configuration for app
+     * @param ignoreWindowContexts context of window which will be ignored
      */
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
 
     /**
      * @brief Update theme configuration for all windows
@@ -1442,6 +1448,15 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 
     /**
+     * @brief Update Configuration.
+     *
+     * @param configuration Window configuration.
+     * @param resourceManager The resource manager
+     */
+    virtual void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) {}
+
+    /**
      * @brief Update theme configuration.
      * @param configuration Window configuration.
      */
@@ -2141,6 +2156,13 @@ public:
      * @return True means pc window or pad free multi-window, false means the opposite.
      */
     virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+
+    /**
+     * @brief get compatible mode in pc.
+     *
+     * @return True means window is compatible mode in pc, false means the opposite.
+     */
+    virtual bool GetCompatibleModeInPc() const { return false; }
 
     /**
      * @brief Register transfer component data callback.
@@ -3140,6 +3162,20 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Get custom extension param.
+     *
+     * @param want the want to store param.
+     */
+    virtual void GetExtensionConfig(AAFwk::WantParams& want) const {}
+ 
+    /**
+     * @brief Update custom extension param.
+     *
+     * @param want the want to update param.
+     */
+    virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
 };
 }
 }

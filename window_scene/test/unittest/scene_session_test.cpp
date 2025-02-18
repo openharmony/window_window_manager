@@ -855,7 +855,7 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     extensionInfo.persistentId = 12345;
     extensionInfo.pid = 1234;
     extensionInfo.windowRect = { 1, 2, 3, 4 };
-    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
 
     auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     EXPECT_TRUE(getInfo);
@@ -865,12 +865,12 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
 
     Rect windowRect = { 5, 6, 7, 8 };
     extensionInfo.windowRect = windowRect;
-    sceneSession->UpdateModalUIExtension(extensionInfo);
+    sceneSession->UpdateNormalModalUIExtension(extensionInfo);
     getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     EXPECT_TRUE(getInfo);
     EXPECT_EQ(getInfo.value().windowRect, windowRect);
 
-    sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
+    sceneSession->RemoveNormalModalUIExtension(extensionInfo.persistentId);
     EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
@@ -1405,19 +1405,20 @@ HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: CalcAvoidAreaForStatusBar
- * @tc.desc: CalcAvoidAreaForStatusBar
+ * @tc.name: CalcRectForStatusBar
+ * @tc.desc: CalcRectForStatusBar
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, CalcAvoidAreaForStatusBar, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest, CalcRectForStatusBar, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "CalcAvoidAreaForStatusBar";
-    info.bundleName_ = "CalcAvoidAreaForStatusBar";
+    info.abilityName_ = "CalcRectForStatusBar";
+    info.bundleName_ = "CalcRectForStatusBar";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    int32_t result = sceneSession->CalcAvoidAreaForStatusBar();
-
-    EXPECT_EQ(result, 0);
+    uint32_t width = sceneSession->CalcRectForStatusBar().width_;
+    uint32_t height = sceneSession->CalcRectForStatusBar().height_;
+    EXPECT_EQ(width, 0);
+    EXPECT_EQ(height, 0);
 }
 
 /**
@@ -1538,27 +1539,25 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTe
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     WSRect rect = {0, 0, 0, 0};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 0);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     rect = {0, 100, 0, 0};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 100);
 
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-        PcFoldScreenManager::GetInstance().GetDisplayRects();
-    sceneSession->lastUpdatedDisplayId_ = 0;
+    sceneSession->clientDisplayId_ = 0;
     rect = {0, 100, 100, 100};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 100);
-    sceneSession->lastUpdatedDisplayId_ = 999;
+    sceneSession->clientDisplayId_ = 999;
     rect = {0, 100, 100, 100};
     auto rect2 = rect;
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_ + defaultDisplayRect.height_ + foldCreaseRect.height_ / 2);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
+    EXPECT_EQ(rect.posY_, rect2.posY_);
 }
 
 /**
@@ -1806,10 +1805,14 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
     WSRect rect3 = {1, 1, 2, 1};
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 }
 
 /**
@@ -1969,9 +1972,6 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | 
         isLayoutFinished = true;
         return WSError::WS_OK;
     };
-    sceneSession->specificCallback_->onUpdateAvoidAreaByType_ = [](int32_t persistentId, AvoidAreaType type) {};
-    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
-
     sceneSession->specificCallback_ = nullptr;
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
 }

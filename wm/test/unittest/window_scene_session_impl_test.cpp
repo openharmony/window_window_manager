@@ -1642,7 +1642,9 @@ HWTEST_F(WindowSceneSessionImplTest, SetSnapshotSkip, Function | SmallTest | Lev
 
     window->surfaceNode_ = surfaceNode_mocker;
     auto surfaceNode = window->GetSurfaceNode();
+    window->property_->SetSnapshotSkip(true);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetSnapshotSkip(false));
+    ASSERT_EQ(true, window->property_->GetSnapshotSkip());
 }
 
 /**

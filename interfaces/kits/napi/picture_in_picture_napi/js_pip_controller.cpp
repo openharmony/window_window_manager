@@ -29,6 +29,7 @@ namespace {
     const std::string STATE_CHANGE_CB = "stateChange";
     const std::string CONTROL_PANEL_ACTION_EVENT_CB = "controlPanelActionEvent";
     const std::string CONTROL_EVENT_CB = "controlEvent";
+    const std::string SIZE_CHANGE_CB = "pipWindowSizeChange";
 }
 
 void BindFunctions(napi_env env, napi_value object, const char* moduleName)
@@ -65,6 +66,7 @@ JsPipController::JsPipController(const sptr<PictureInPictureController>& pipCont
         { STATE_CHANGE_CB, ListenerType::STATE_CHANGE_CB },
         { CONTROL_PANEL_ACTION_EVENT_CB, ListenerType::CONTROL_PANEL_ACTION_EVENT_CB },
         { CONTROL_EVENT_CB, ListenerType::CONTROL_EVENT_CB },
+        { SIZE_CHANGE_CB, ListenerType::SIZE_CHANGE_CB },
     };
 }
 
@@ -197,19 +199,38 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         return NapiThrowInvalidParam(env, "Invalid args count, 1 arg is needed.");
     }
     napi_value typeNode = argv[0];
-    if (typeNode == nullptr || GetType(env, typeNode) == napi_undefined) {
+    if (GetType(env, typeNode) == napi_null || GetType(env, typeNode) == napi_undefined) {
         TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
         return NapiThrowInvalidParam(env, "Invalid typeNode.");
     }
-    if (pipController_ == nullptr) {
-        std::string errMsg = "OnUpdateNode error, controller is nullptr";
-        TLOGE(WmsLogTag::WMS_PIP, "%{public}s", errMsg.c_str());
-        return NapiThrowInvalidParam(env, errMsg);
-    }
     napi_ref typeNodeRef = nullptr;
     napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
-    pipController_->UpdateContentNodeRef(typeNodeRef);
-    return NapiGetUndefined(env);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [env, task = napiAsyncTask, typeNodeRef,
+            weak = wptr<PictureInPictureController>(pipController_)]() {
+        if (!PictureInPictureManager::IsSupportPiP()) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
+                "Capability not supported. Failed to call the API due to limited device capabilities."));
+            napi_delete_reference(env, typeNodeRef);
+            return;
+        }
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            napi_delete_reference(env, typeNodeRef);
+            return;
+        }
+        pipController->UpdateContentNodeRef(typeNodeRef);
+        napi_delete_reference(env, typeNodeRef);
+        task->Resolve(env, NapiGetUndefined(env));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
+    return result;
 }
 
 napi_value JsPipController::UpdateContentSize(napi_env env, napi_callback_info info)
@@ -428,6 +449,9 @@ WmErrorCode JsPipController::RegisterListenerWithType(napi_env env, const std::s
         case ListenerType::CONTROL_EVENT_CB:
             ProcessControlEventRegister(pipWindowListener);
             break;
+        case ListenerType::SIZE_CHANGE_CB:
+            ProcessSizeChangeRegister(pipWindowListener);
+            break;
         default:
             break;
     }
@@ -483,6 +507,16 @@ void JsPipController::ProcessControlEventRegister(const sptr<JsPiPWindowListener
     pipController_->RegisterPiPControlObserver(thisListener);
 }
 
+void JsPipController::ProcessSizeChangeRegister(const sptr<JsPiPWindowListener>& listener)
+{
+    if (pipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+        return;
+    }
+    sptr<IPiPWindowSize> thisListener(listener);
+    pipController_->RegisterPiPWindowSize(thisListener);
+}
+
 void JsPipController::ProcessStateChangeUnRegister(const sptr<JsPiPWindowListener>& listener)
 {
     if (pipController_ == nullptr) {
@@ -511,6 +545,16 @@ void JsPipController::ProcessControlEventUnRegister(const sptr<JsPiPWindowListen
     }
     sptr<IPiPControlObserver> thisListener(listener);
     pipController_->UnregisterPiPControlObserver(thisListener);
+}
+
+void JsPipController::ProcessSizeChangeUnRegister(const sptr<JsPiPWindowListener>& listener)
+{
+    if (pipController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "controller is nullptr");
+        return;
+    }
+    sptr<IPiPWindowSize> thisListener(listener);
+    pipController_->UnregisterPiPWindowSize(thisListener);
 }
 
 napi_value JsPipController::UnregisterCallback(napi_env env, napi_callback_info info)
@@ -601,6 +645,9 @@ WmErrorCode JsPipController::UnRegisterListener(const std::string& type,
             break;
         case ListenerType::CONTROL_EVENT_CB:
             ProcessControlEventUnRegister(pipWindowListener);
+            break;
+        case ListenerType::SIZE_CHANGE_CB:
+            ProcessSizeChangeUnRegister(pipWindowListener);
             break;
         default:
             break;

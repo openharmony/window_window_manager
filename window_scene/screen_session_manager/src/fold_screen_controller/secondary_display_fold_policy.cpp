@@ -226,7 +226,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     } else {
         TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
+    screenSession->UpdatePropertyByFoldControl(screenProperty_);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
@@ -249,7 +249,9 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenPrope
         .w = screenParams_[SCREEN_HEIGHT],
         .h = screenParams_[FULL_STATUS_WIDTH],
     };
-    RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
 #endif
@@ -267,7 +269,9 @@ void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature(ScreenPrope
         .w = screenParams_[SCREEN_HEIGHT],
         .h = screenParams_[MAIN_STATUS_WIDTH],
     };
-    RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_MAIN, TpFeatureConfigType::AFT_TP_FEATURE);
 #endif
@@ -285,7 +289,9 @@ void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(Scree
         .w = screenParams_[SCREEN_HEIGHT],
         .h = screenParams_[GLOBAL_FULL_STATUS_WIDTH],
     };
-    RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    if (!onBootAnimation_) {
+        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+    }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_GLOBAL_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
 #endif

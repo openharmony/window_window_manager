@@ -851,7 +851,7 @@ HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     window->ConsumePointerEvent(pointerEvent);
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->ConsumeKeyEvent(keyEvent);
     ASSERT_EQ(nullptr, window->GetUIContentSharedPtr());
     ASSERT_EQ(false, window->PreNotifyKeyEvent(keyEvent));
@@ -2140,12 +2140,16 @@ HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowWillCloseListeners, Fu
     sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
     option_->SetWindowName("ClearListenersById_windowWillCloseListeners");
     sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
     window_->property_->SetPersistentId(1);
     int persistentId = window_->GetPersistentId();
     window_->ClearListenersById(persistentId);
 
     sptr<IWindowWillCloseListener> listener_ = sptr<MockIWindowWillCloseListener>::MakeSptr();
-    window_->RegisterWindowWillCloseListeners(listener_);
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window_->RegisterWindowWillCloseListeners(listener_));
     ASSERT_NE(window_->windowWillCloseListeners_.find(persistentId), window_->windowWillCloseListeners_.end());
 
     window_->ClearListenersById(persistentId);
@@ -2506,7 +2510,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, Function | SmallTest | L
     bool highlight = false;
     WSError res = window->NotifyHighlightChange(highlight);
     EXPECT_EQ(highlight, false);
-    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(res, WSError::WS_OK);
     sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
     window->RegisterWindowHighlightChangeListeners(listener);
     res = window->NotifyHighlightChange(highlight);

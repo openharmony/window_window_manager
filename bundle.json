@@ -22,7 +22,15 @@
         "window_manager_dayu210_resource_config",
         "window_manager_feature_subscribe_motion",
         "window_manager_feature_tp_enable",
-        "window_manager_fold_ability"
+        "window_manager_fold_ability",
+        "window_manager_feature_screen_active_mode",
+        "window_manager_feature_screen_color_gamut",
+        "window_manager_feature_screen_hdr_format",
+        "window_manager_feature_screen_color_space",
+        "window_manager_feature_multi_screen",
+        "window_manager_feature_multi_screen_frame_ctl",
+        "window_manager_feature_cam_mode",
+        "window_manager_feature_multi_usr"
       ],
       "adapted_system_type": [ "standard" ],
       "rom": "8000KB",

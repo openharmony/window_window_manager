@@ -91,10 +91,14 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::UpdateAvailableArea);
     BindNativeFunction(env, exportObj, "updateSuperFoldAvailableArea", moduleName,
         JsScreenSessionManager::UpdateSuperFoldAvailableArea);
+    BindNativeFunction(env, exportObj, "updateSuperFoldExpandAvailableArea", moduleName,
+        JsScreenSessionManager::UpdateSuperFoldExpandAvailableArea);
     BindNativeFunction(env, exportObj, "setScreenOffDelayTime", moduleName,
         JsScreenSessionManager::SetScreenOffDelayTime);
     BindNativeFunction(env, exportObj, "notifyFoldToExpandCompletion", moduleName,
         JsScreenSessionManager::NotifyFoldToExpandCompletion);
+    BindNativeFunction(env, exportObj, "recordEventFromScb", moduleName,
+        JsScreenSessionManager::RecordEventFromScb);
     BindNativeFunction(env, exportObj, "getFoldStatus", moduleName, JsScreenSessionManager::GetFoldStatus);
     BindNativeFunction(env, exportObj, "getSuperFoldStatus", moduleName, JsScreenSessionManager::GetSuperFoldStatus);
     BindNativeFunction(env, exportObj, "getScreenSnapshot", moduleName,
@@ -187,6 +191,13 @@ napi_value JsScreenSessionManager::UpdateSuperFoldAvailableArea(napi_env env, na
     return (me != nullptr) ? me->OnUpdateSuperFoldAvailableArea(env, info) : nullptr;
 }
 
+napi_value JsScreenSessionManager::UpdateSuperFoldExpandAvailableArea(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]UpdateSuperFoldExpandAvailableArea");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnUpdateSuperFoldExpandAvailableArea(env, info) : nullptr;
+}
+
 napi_value JsScreenSessionManager::SetScreenOffDelayTime(napi_env env, napi_callback_info info)
 {
     WLOGD("[NAPI]SetScreenOffDelayTime");
@@ -205,6 +216,13 @@ napi_value JsScreenSessionManager::NotifyFoldToExpandCompletion(napi_env env, na
     WLOGD("[NAPI]NotifyFoldToExpandCompletion");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyFoldToExpandCompletion(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::RecordEventFromScb(napi_env env, napi_callback_info info)
+{
+    WLOGD("[NAPI]RecordEventFromScb");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnRecordEventFromScb(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::GetFoldStatus(napi_env env, napi_callback_info info)
@@ -626,6 +644,38 @@ napi_value JsScreenSessionManager::OnUpdateSuperFoldAvailableArea(napi_env env, 
     return NapiGetUndefined(env);
 }
 
+napi_value JsScreenSessionManager::OnUpdateSuperFoldExpandAvailableArea(napi_env env, const napi_callback_info info)
+{
+    WLOGFD("[NAPI]OnUpdateSuperFoldExpandAvailableArea");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t screenId;
+    if (!ConvertFromJsValue(env, argv[0], screenId)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    DMRect area;
+    napi_value nativeObj = argv[1];
+    if (nativeObj == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect,the param is null");
+        return NapiGetUndefined(env);
+    } else if (!ConvertDMRectFromJs(env, nativeObj, area)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to DMRect");
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().UpdateSuperFoldExpandAvailableArea(screenId, area);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsScreenSessionManager::OnSetScreenOffDelayTime(napi_env env, const napi_callback_info info)
 {
     WLOGFD("[NAPI]OnSetScreenOffDelayTime");
@@ -674,6 +724,36 @@ napi_value JsScreenSessionManager::OnNotifyFoldToExpandCompletion(napi_env env, 
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().NotifyFoldToExpandCompletion(foldToExpand);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnRecordEventFromScb(napi_env env, const napi_callback_info info)
+{
+    WLOGFD("[NAPI]OnRecordEventFromScb");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string description;
+    if (!ConvertFromJsValue(env, argv[0], description)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to description");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool needRecordEvent;
+    if (!ConvertFromJsValue(env, argv[1], needRecordEvent)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to needRecordEvent");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().RecordEventFromScb(description, needRecordEvent);
     return NapiGetUndefined(env);
 }
 

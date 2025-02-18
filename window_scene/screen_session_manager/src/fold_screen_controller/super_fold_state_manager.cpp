@@ -32,6 +32,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(SuperFoldStateManager)
 namespace {
 const std::string g_FoldScreenRect = system::GetParameter("const.window.foldscreen.config_rect", "");
 const int32_t PARAM_NUMBER_MIN = 10;
+const int32_t HEIGHT_HALF = 2;
 #ifdef TP_FEATURE_ENABLE
 const int32_t TP_TYPE = 12;
 const char* KEYBOARD_ON_CONFIG = "version:3+main";
@@ -42,6 +43,7 @@ static bool isHalfScreenSwitchOn_ = false;
 static bool isHalfFolded_ = false;
 static bool isKeyboardOn_ = false;
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
+static sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
 }
 
 void SuperFoldStateManager::DoAngleChangeFolded(SuperFoldStatusChangeEvents event)
@@ -122,6 +124,11 @@ void SuperFoldStateManager::InitSuperFoldStateManagerMap()
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
         SuperFoldStatus::HALF_FOLDED,
         &SuperFoldStateManager::DoFoldedToHalfFolded);
+
+    AddStateManagerMap(SuperFoldStatus::FOLDED,
+        SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED,
+        SuperFoldStatus::EXPANDED,
+        &SuperFoldStateManager::DoAngleChangeExpanded);
 
     AddStateManagerMap(SuperFoldStatus::EXPANDED,
         SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED,
@@ -367,6 +374,12 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
 {
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetIsBScreenHalf(true);
+    auto screenWidth = screenSession->GetScreenProperty().GetBounds().rect_.GetWidth();
+    auto screenHeight = screenSession->GetScreenProperty().GetBounds().rect_.GetHeight();
+    if (screenWidth > screenHeight) {
+        TLOGW(WmsLogTag::DMS, "not vertical, swap width and height");
+        screenSession->UpdatePropertyByResolution(screenHeight, screenWidth);
+    }
     ScreenSessionManager::GetInstance().NotifyDisplayChanged(
         screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::SUPER_FOLD_RESOLUTION_CHANGED);
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
@@ -397,8 +410,22 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
 
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession)
 {
+    HandleHalfScreenDisplayNotify(screenSession);
+}
+
+void SuperFoldStateManager::HandleHalfScreenDisplayNotify(sptr<ScreenSession> screenSession)
+{
+    auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(false);
     screenSession->SetIsBScreenHalf(true);
+    int32_t validheight = GetCurrentValidHeight(screenSession);
+    if (screeBounds.rect_.GetWidth() < screeBounds.rect_.GetHeight()) {
+        screenSession->SetValidHeight(validheight);
+        screenSession->SetValidWidth(screeBounds.rect_.GetWidth());
+    } else {
+        screenSession->SetValidWidth(screeBounds.rect_.GetHeight());
+        screenSession->SetValidHeight(validheight);
+    }
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
     if (fakeDisplayInfo == nullptr) {
@@ -409,17 +436,54 @@ void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession> sc
     ScreenSessionManager::GetInstance().NotifyDisplayDestroy(fakeDisplayId);
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    ScreenSessionManager::GetInstance().UpdateValidArea(
+        screenSession->GetScreenId(),
+        screenSession->GetValidWidth(),
+        screenSession->GetValidHeight());
 }
 
 void SuperFoldStateManager::HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession)
 {
+    if (isHalfScreen_) {
+        TLOGI(WmsLogTag::DMS, "current is half screen");
+        return;
+    }
+    HandleFullScreenDisplayNotify(screenSession);
+}
+
+void SuperFoldStateManager::HandleFullScreenDisplayNotify(sptr<ScreenSession> screenSession)
+{
+    auto screeBounds = screenSession->GetScreenProperty().GetBounds();
     screenSession->UpdatePropertyByFakeInUse(true);
     screenSession->SetIsBScreenHalf(true);
+    screenSession->SetValidHeight(screeBounds.rect_.GetHeight());
     sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
     ScreenSessionManager::GetInstance().NotifyDisplayCreate(
         fakeScreenSession->ConvertToDisplayInfo());
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
+    ScreenSessionManager::GetInstance().UpdateValidArea(
+        screenSession->GetScreenId(),
+        screenSession->GetValidWidth(),
+        screenSession->GetValidHeight());
+}
+
+int32_t SuperFoldStateManager::GetCurrentValidHeight(sptr<ScreenSession> screenSession)
+{
+    if (currentSuperFoldCreaseRegion_ != nullptr) {
+        std::vector<DMRect> creaseRects = currentSuperFoldCreaseRegion_->GetCreaseRects();
+        if (!creaseRects.empty()) {
+            TLOGI(WmsLogTag::DMS, "validheight: %{public}d", creaseRects[0].posY_);
+            return creaseRects[0].posY_;
+        }
+    }
+    TLOGE(WmsLogTag::DMS, "Get CreaseRects failed, validheight is half of height");
+    auto screeBounds = screenSession->GetScreenProperty().GetBounds();
+    if (screeBounds.rect_.GetWidth() < screeBounds.rect_.GetHeight()) {
+        return screeBounds.rect_.GetHeight() / HEIGHT_HALF;
+    } else {
+        return screeBounds.rect_.GetWidth() / HEIGHT_HALF;
+    }
 }
 
 void SuperFoldStateManager::BootFinishedCallback(const char *key, const char *value, void *context)
@@ -496,18 +560,21 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
         TLOGI(WmsLogTag::DMS, "screen is already in the desired state, no need to change");
         return false;
     }
-    sptr<ScreenSession> meScreenSession = ScreenSessionManager::GetInstance().
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().
         GetDefaultScreenSession();
-    if (meScreenSession == nullptr) {
+    if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "screen session is null!");
         return false;
     }
-    auto screenProperty = meScreenSession->GetScreenProperty();
+    auto screenProperty = screenSession->GetScreenProperty();
     auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     if (toHalf) {
         screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
         screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
+        HandleHalfScreenDisplayNotify(screenSession);
+    } else {
+        HandleFullScreenDisplayNotify(screenSession);
     }
     OHOS::Rect rectCur{
         .x = 0,

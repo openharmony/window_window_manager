@@ -1774,7 +1774,7 @@ HWTEST_F(SceneSessionTest5, IsSameMainSession, Function | SmallTest | Level2)
     subSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ASSERT_EQ(true, subSession1->IsSameMainSession(subSession1));
     currSceneSession->persistentId_ = 2;
-    ASSERT_EQ(false, subSession1->IsSameMainSession(subSession1));
+    ASSERT_EQ(false, subSession1->IsSameMainSession(subSession2));
 }
  
 /**

@@ -779,8 +779,8 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
-        WLOGFE("Invalid args count, need two arg at least!");
+    if (argc < ARGC_ONE) {
+        WLOGFE("Invalid args count, need one arg at least!");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
     }
     napi_value array = argv[0];
@@ -798,6 +798,9 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         if (!ConvertFromJsValue(env, value, screenId)) {
             return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
         }
+        if (static_cast<int32_t>(screenId) < 0) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "ScreenId cannot be a negative number");
+        }
         screenIds.emplace_back(static_cast<ScreenId>(screenId));
     }
     napi_value lastParam = nullptr;
@@ -808,7 +811,7 @@ napi_value OnMakeUnique(napi_env env, napi_callback_info info)
         std::vector<DisplayId> displayIds;
         DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().MakeUniqueScreen(screenIds, displayIds));
-        if (ret == DmErrorCode::DM_OK && !displayIds.empty()) {
+        if (ret == DmErrorCode::DM_OK) {
             task->Resolve(env, CreateJsDisplayIdVectorObject(env, displayIds));
             WLOGI("makeUnique success");
         } else {
@@ -1155,24 +1158,24 @@ napi_value OnSetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
         WLOGFE("JsScreenManager::OnSetScreenPrivacyMaskImage failed, Invalidate params.");
         return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
     }
-    NapiAsyncTask::CompleteCallback complete = [screenId, privacyMaskImg](napi_env env, NapiAsyncTask& task,
-        int32_t status) {
+    napi_value lastParam = nullptr;
+    lastParam = (argc >= ARGC_THREE && GetType(env, argv[ARGC_THREE - 1]) ==
+        napi_function) ? argv[ARGC_THREE - 1] : argv[ARGC_TWO - 1];
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [screenId, privacyMaskImg, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnSetScreenPrivacyMaskImage");
         auto res = DM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<ScreenManager>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg));
         if (res != DmErrorCode::DM_OK) {
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(res), "SetScreenPrivacyMaskImage failed."));
-            WLOGFE("JSScreenManager::SetScreenPrivacyMaskImage failed.");
-            return;
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(res), "OnSetScreenPrivacyMaskImage failed."));
+            WLOGFE("OnSetScreenPrivacyMaskImage failed.");
         } else {
-            task.Resolve(env, NapiGetUndefined(env));
-            WLOGFI("JSScreenManager::SetScreenPrivacyMaskImage success.");
+            task->Resolve(env, NapiGetUndefined(env));
         }
+        delete task;
     };
-    napi_value lastParam = (privacyMaskImg != nullptr && argc >= ARGC_THREE && GetType(env, argv[ARGC_THREE - 1]) ==
-        napi_function) ? argv[ARGC_THREE - 1] : argv[ARGC_TWO - 1];
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JSScreenManager::SetScreenPrivacyMaskImage", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
     return result;
 }
 

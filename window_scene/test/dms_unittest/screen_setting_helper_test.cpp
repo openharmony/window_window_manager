@@ -354,48 +354,6 @@ namespace {
     }
 
     /**
-     * @tc.name: GetSettingRecoveryResolutionString
-     * @tc.desc: GetSettingRecoveryResolutionString Test
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRecoveryResolutionString, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::vector<std::string> resolutionString = {};
-        std::string key = "test, str";
-        auto ret = screenSettingHelper.GetSettingRecoveryResolutionString(resolutionString, key);
-        ASSERT_FALSE(ret);
-    }
-
-    /**
-     * @tc.name: GetSettingScreenModeString
-     * @tc.desc: GetSettingScreenModeString Test
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingScreenModeString, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::vector<std::string> screenModeStrings = {};
-        std::string key = "test, str";
-        auto ret = screenSettingHelper.GetSettingScreenModeString(screenModeStrings, key);
-        ASSERT_FALSE(ret);
-    }
-
-    /**
-     * @tc.name: GetSettingRelativePositionString
-     * @tc.desc: GetSettingRelativePositionString Test
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRelativePositionString, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        std::vector<std::string> relativePositionStrings = {};
-        std::string key = "test";
-        auto ret = screenSettingHelper.GetSettingRelativePositionString(relativePositionStrings, key);
-        ASSERT_FALSE(ret);
-    }
-
-    /**
      * @tc.name: IsNumber01
      * @tc.desc: IsNumber01 Test
      * @tc.type: FUNC
@@ -419,62 +377,6 @@ namespace {
         std::string test_str = "test";
         auto ret = screenSettingHelper.IsNumber(test_str);
         ASSERT_FALSE(ret);
-    }
-
-    /**
-     * @tc.name: GetDataFromString01
-     * @tc.desc: GetDataFromString Test01
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetDataFromString01, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        MultiScreenRecoverOption option;
-        std::string test_str = "11 1920 1080";
-        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
-        ASSERT_EQ(ret, 3);
-    }
-
-    /**
-     * @tc.name: GetDataFromString02
-     * @tc.desc: GetDataFromString Test02
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetDataFromString02, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        MultiScreenRecoverOption option;
-        std::string test_str = "11 1";
-        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
-        ASSERT_EQ(ret, 2);
-    }
-
-    /**
-     * @tc.name: GetDataFromString03
-     * @tc.desc: GetDataFromString Test03
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetDataFromString03, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        MultiScreenRecoverOption option;
-        std::string test_str = "test 1920 1080";
-        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
-        ASSERT_EQ(ret, 0xffffffff);
-    }
-
-    /**
-     * @tc.name: GetDataFromString04
-     * @tc.desc: GetDataFromString Test04
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetDataFromString04, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
-        MultiScreenRecoverOption option;
-        std::string test_str = "11 test 1080";
-        auto ret = screenSettingHelper.GetDataFromString(option, test_str);
-        ASSERT_EQ(ret, 0xffffffff);
     }
 }
 } // namespace Rosen
