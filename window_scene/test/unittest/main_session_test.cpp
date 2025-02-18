@@ -478,6 +478,25 @@ HWTEST_F(MainSessionTest, NotifySupportWindowModesChange, Function | SmallTest |
 
     EXPECT_EQ(WSError::WS_OK, session->NotifySupportWindowModesChange(supportedWindowModes));
 }
+
+/**
+ * @tc.name: NotifySessionLockStateChange
+ * @tc.desc: NotifySessionLockStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifySessionLockStateChange, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifySessionLockStateChangeBundle";
+    info.moduleName_ = "NotifySessionLockStateChangeModule";
+    info.abilityName_ = "NotifySessionLockStateChangeAbility";
+    info.appIndex_ = 0;
+
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+
+    session->NotifySessionLockStateChange(true);
+    EXPECT_EQ(session->GetSessionLockState(), true);
+}
 }
 }
 }

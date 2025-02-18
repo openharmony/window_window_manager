@@ -133,6 +133,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleMinimizeMainSession(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_HAS_FLOAT_FOREGROUND):
             return HandleHasFloatingWindowForeground(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO):
+            return HandleLockSessionByAbilityInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -822,6 +824,38 @@ int SceneSessionManagerLiteStub::HandleHasFloatingWindowForeground(MessageParcel
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    AbilityInfoBase abilityInfo;
+    if (!data.ReadString(abilityInfo.bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadString(abilityInfo.moduleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read moduleName");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadString(abilityInfo.abilityName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read abilityName");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(abilityInfo.appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+    bool isLock = false;
+    if (!data.ReadBool(isLock)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read isLock");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = LockSessionByAbilityInfo(abilityInfo, isLock);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

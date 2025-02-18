@@ -210,6 +210,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         int32_t appIndex, int32_t userId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasFloatingShowing) override { return WMError::WM_OK; }
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
+        bool isLock) override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -830,6 +832,32 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMinimizeMainSession, Function | 
     data.WriteInt32(userId);
 
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMinimizeMainSession(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleLockSessionByAbilityInfo
+ * @tc.desc: test function : HandleLockSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbilityInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "appbundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t appIndex = 0;
+    bool isLock = true;
+
+    data.WriteString(bundleName);
+    data.WriteString(moduleName);
+    data.WriteString(abilityName);
+    data.WriteInt32(appIndex);
+    data.WriteBool(isLock);
+
+    auto res =
+        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

@@ -61,6 +61,10 @@ public:
      */
     WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
     void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
+    void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
+    void NotifySessionLockStateChange(bool isLockedState) override;
+    void SetSessionLockState(bool isLockedState);
+    bool GetSessionLockState() const;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -73,6 +77,8 @@ private:
      * Window LifeCycle
      */
     WSError SetSessionLabelAndIconInner(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+    NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
+    bool isLockedState_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H
