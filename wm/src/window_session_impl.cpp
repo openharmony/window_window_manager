@@ -1536,6 +1536,11 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         NotifyUIContentFocusStatus();
         shouldReNotifyFocus_ = false;
     }
+    if (shouldReNotifyHighlight_) {
+        // uiContent may be nullptr when notify highlight status, need to notify again when uiContent is not empty.
+        NotifyUIContentHighlightStatus(isHighlighted_);
+        shouldReNotifyHighlight_ = false;
+    }
     if (aceRet != OHOS::Ace::UIContentErrorCode::NO_ERRORS) {
         WLOGFE("failed to init or restore uicontent with file %{public}s. errorCode: %{public}d",
             contentInfo.c_str(), static_cast<uint16_t>(aceRet));
@@ -1720,10 +1725,10 @@ WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     isHighlighted_ = isHighlight;
-    if (isHighlighted_) {
-        CALL_UI_CONTENT(ActiveWindow);
+    if (GetUIContentSharedPtr() != nullptr) {
+        NotifyUIContentHighlightStatus(isHighlighted_);
     } else {
-        CALL_UI_CONTENT(UnActiveWindow);
+        shouldReNotifyHighlight_ = true;
     }
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
     auto highlightChangeListeners = GetListeners<IWindowHighlightChangeListener>();
@@ -3304,6 +3309,15 @@ void WindowSessionImpl::NotifyWindowAfterUnfocused()
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     // use needNotifyUinContent to separate ui content callbacks
     CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyUIContentHighlightStatus(bool isHighlighted)
+{
+    if (isHighlighted) {
+        CALL_UI_CONTENT(ActiveWindow);
+    } else {
+        CALL_UI_CONTENT(UnActiveWindow);
+    }
 }
 
 void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
