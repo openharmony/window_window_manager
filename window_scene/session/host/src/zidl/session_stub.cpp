@@ -184,6 +184,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetWindowRectAutoSave(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_DETACH_TO_DISPLAY):
             return HandleNotifyExtensionDetachToDisplay(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SUPPORT_WINDOW_MODES):
+            return HandleSetSupportWindowModes(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
             return HandleExtensionProviderData(data, reply, option);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_SESSION_LABEL_AND_ICON):
@@ -1103,6 +1105,25 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
     }
     TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
     WSError errCode = OnSetWindowRectAutoSave(enabled);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetSupportWindowModes(MessageParcel& data, MessageParcel& reply)
+{
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        return ERR_INVALID_DATA;
+    }
+    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
+    if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        supportWindowModes.reserve(size);
+        for (uint32_t i = 0; i < size; i++) {
+            supportWindowModes.push_back(
+                static_cast<AppExecFwk::SupportWindowMode>(data.ReadInt32()));
+        }
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "size: %{public}u", size);
+    NotifySupportWindowModesChange(supportWindowModes);
     return ERR_NONE;
 }
 

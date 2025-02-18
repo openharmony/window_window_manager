@@ -274,6 +274,11 @@ private:
     void ProcessKeyboardStateChangeRegister();
     void ProcessKeyboardViewModeChangeRegister();
 
+    /*
++     * PC Window Layout
++     */
++    void ProcessSetSupportWindowModesRegister();
+
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
@@ -328,6 +333,12 @@ private:
     void NotifyFrameLayoutFinish();
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+
+    /*
+     * PC Window Layout
+     */
+    void OnSetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportWindowModes);
+
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
