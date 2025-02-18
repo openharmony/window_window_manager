@@ -632,6 +632,7 @@ private:
     void SetMultiScreenOuterMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     void RecoveryMultiScreenNormalMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     bool IsFakeDisplayExist();
+    DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
