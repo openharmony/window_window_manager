@@ -401,7 +401,8 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDisconnectSpecificSessionInner02, 
     std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -505,12 +506,15 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDisconnectSpecificSessionInner, Fu
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     ProcessShiftFocusFunc shiftFocusFunc_;
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     property->SetPersistentId(1);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
