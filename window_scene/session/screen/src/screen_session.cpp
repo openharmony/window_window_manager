@@ -579,11 +579,19 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
+ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
+    FoldDisplayMode foldDisplayMode)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
+    OptimizeSecondaryDisplayMode(updatedProperty.GetBounds(), foldDisplayMode);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        DisplayOrientation deviceOrientation =
+            CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode, true);
+        property_.SetDisplayOrientation(deviceOrientation);
+        property_.SetDeviceOrientation(deviceOrientation);
+    }
     UpdateTouchBoundsAndOffset();
     return property_;
 }
