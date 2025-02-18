@@ -227,6 +227,7 @@ public:
         return nullptr;
     }
     virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
+    virtual bool GetIsRealScreen(ScreenId screenId) { return false; }
 };
 } // namespace Rosen
 } // namespace OHOS
