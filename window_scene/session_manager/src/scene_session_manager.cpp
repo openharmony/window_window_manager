@@ -11429,6 +11429,10 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
             currentUserId_.load(), userid);
         return;
     }
+    if (secExtensionData == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "invalid secExtensionData");
+        return;
+    }
     const auto& secSurfaceInfoMap = secExtensionData->GetSecData();
     auto task = [secSurfaceInfoMap = std::move(secSurfaceInfoMap)]()-> WSError {
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
@@ -11454,6 +11458,10 @@ void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIEx
     if (currentUserId_ != static_cast<int32_t>(userId)) {
         TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userId:%{public}" PRIu64,
             currentUserId_.load(), userId);
+        return;
+    }
+    if (constrainedModalUIExtData == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "invalid constrainedModalUIExtData");
         return;
     }
     const auto& constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
