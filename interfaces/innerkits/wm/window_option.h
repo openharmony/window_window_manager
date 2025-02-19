@@ -488,6 +488,22 @@ public:
      */
     bool GetIsUIExtensionSubWindowFlag() const;
 
+    /**
+     * @brief Set whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @param isConstrainedModal true - is a constrained modal UIExtension,
+     *                           false - is not a constrained modal UIExtension,
+     */
+    void SetConstrainedModal(bool isConstrainedModal);
+
+    /**
+     * @brief Get whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @return true - is a constrained modal UIExtension,
+     *         false - is not a constrained modal UIExtension,
+     */
+    bool IsConstrainedModal() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -527,6 +543,7 @@ private:
     bool isExtensionTag_ = false;
     bool isUIExtensionSubWindowFlag_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isConstrainedModal_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

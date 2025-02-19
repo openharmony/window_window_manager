@@ -36,6 +36,7 @@ class AxisEvent;
 namespace OHOS::AppExecFwk {
 class Configuration;
 class Ability;
+enum class SupportWindowMode;
 }
 
 namespace OHOS::AbilityRuntime {
@@ -274,6 +275,10 @@ public:
     virtual WMError Recover() = 0;
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowRectAutoSave(bool enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual void StartMove() = 0;
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_OK; }
     virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
