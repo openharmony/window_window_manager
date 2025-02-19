@@ -437,7 +437,7 @@ HWTEST_F(SceneSessionManagerTest5, UpdateBrightness, Function | SmallTest | Leve
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, property);
     ASSERT_NE(property, nullptr);
-    ssm_->UpdateBrightness(1);
+    ssm_->UpdateBrightness(1, false);
     FocusChangeInfo focusInfo;
     ssm_->GetCurrentUserId();
     ssm_->GetFocusWindowInfo(focusInfo);
