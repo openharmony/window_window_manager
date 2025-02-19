@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "common/include/session_permission.h"
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -1117,9 +1118,10 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation, Function | SmallTes
     int32_t windowId = 5;
     uint32_t callingTokenId = 0;
     int32_t pid = 0;
+    bool isSystemCalling = SessionPermission::IsSystemCalling();
     AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
     auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
-    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_ERROR_INVALID_WINDOW : WMError::WM_ERROR_NOT_SYSTEM_APP);
 
     SessionInfo info;
     sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
@@ -1130,7 +1132,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation, Function | SmallTes
     Session session(info);
     session.getStateFromManagerFunc_ = getStateFalse;
     ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_OK : WMError::WM_ERROR_NOT_SYSTEM_APP);
 
     session.getStateFromManagerFunc_ = getStateTrue;
     ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
@@ -1148,6 +1150,7 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallT
     int32_t windowId = 0;
     uint32_t callingTokenId = 0;
     int32_t pid = 0;
+    bool isSystemCalling = SessionPermission::IsSystemCalling();
     AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
 
     SessionInfo info;
@@ -1160,12 +1163,12 @@ HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallT
 
     session.property_ = nullptr;
     ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_OK : WMError::WM_ERROR_NOT_SYSTEM_APP);
 
     sceneSession->IsShowOnLockScreen(0);
     session.zOrder_ = 1;
     ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_OK : WMError::WM_ERROR_NOT_SYSTEM_APP);
 }
 
 /**
