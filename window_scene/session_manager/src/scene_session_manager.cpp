@@ -6197,7 +6197,6 @@ static bool IsSmallFoldProduct()
 {
     static const std::string foldScreenType = system::GetParameter("const.window.foldscreen.type", "");
     if (foldScreenType.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "foldScreenType is empty");
         return false;
     }
     return foldScreenType[0] == '2';
