@@ -607,6 +607,36 @@ void ScreenSessionManagerClientProxy::ScreenCaptureNotify(ScreenId mainScreenId,
     }
 }
 
+void ScreenSessionManagerClientProxy::OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(isCameraBackSelfie)) {
+        WLOGFE("Write isCameraBackSelfie failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 void ScreenSessionManagerClientProxy::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
     sptr<IRemoteObject> remote = Remote();

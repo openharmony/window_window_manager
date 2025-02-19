@@ -2258,7 +2258,7 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
 }
 
 //SetFoldDisplayModeFromJs add DMError to return DMErrorCode for js
-DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode)
+DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2274,6 +2274,10 @@ DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMod
     }
     if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
         WLOGFE("Write displayMode failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(reason)) {
+        WLOGFE("Write reason failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS),

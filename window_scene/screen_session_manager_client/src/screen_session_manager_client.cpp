@@ -270,6 +270,16 @@ void ScreenSessionManagerClient::OnScreenRotationLockedChanged(ScreenId screenId
     screenSession->SetScreenRotationLocked(isLocked);
 }
 
+void ScreenSessionManagerClient::OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->HandleCameraBackSelfieChange(isCameraBackSelfie);
+}
+
 void ScreenSessionManagerClient::RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener)
 {
     displayChangeListener_ = listener;

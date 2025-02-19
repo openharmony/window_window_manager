@@ -765,6 +765,22 @@ void ScreenSession::HoverStatusChange(int32_t hoverStatus, bool needRotate)
     }
 }
 
+void ScreenSession::HandleCameraBackSelfieChange(bool isCameraBackSelfie)
+{
+    CameraBackSelfieChange(isCameraBackSelfie);
+}
+
+void ScreenSession::CameraBackSelfieChange(bool isCameraBackSelfie)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
+        listener->OnCameraBackSelfieChange(isCameraBackSelfie, screenId_);
+    }
+}
+
 void ScreenSession::ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     for (auto& listener : screenChangeListenerList_) {
