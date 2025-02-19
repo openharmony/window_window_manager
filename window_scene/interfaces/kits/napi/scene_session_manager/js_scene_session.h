@@ -84,6 +84,7 @@ enum class ListenerFuncType : uint32_t {
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_VIEW_MODE_CHANGE_CB,
+    SET_SUPPORT_WINDOW_MODES_CB,
 };
 
 class SceneSession;
@@ -274,6 +275,11 @@ private:
     void ProcessKeyboardStateChangeRegister();
     void ProcessKeyboardViewModeChangeRegister();
 
+    /*
+     * PC Window Layout
+     */
+    void ProcessSetSupportedWindowModesRegister();
+
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
@@ -328,6 +334,12 @@ private:
     void NotifyFrameLayoutFinish();
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+
+    /*
+     * PC Window Layout
+     */
+    void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
+
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
