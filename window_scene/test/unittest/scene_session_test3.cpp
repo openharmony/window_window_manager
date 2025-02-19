@@ -866,7 +866,7 @@ HWTEST_F(SceneSessionTest3, CloseExtensionSync, Function | SmallTest | Level2)
 HWTEST_F(SceneSessionTest3, NotifyFrameLayoutFinishFromApp, Function | SmallTest | Level2)
 {
     bool notifyListener = 0;
-    WSRect rect{10, 10 ,10, 10};
+    WSRect rect{10, 10, 10, 10};
     SessionInfo info;
     info.abilityName_ = "NotifyFrameLayoutFinishFromApp";
     info.bundleName_ = "NotifyFrameLayoutFinishFromApp";
