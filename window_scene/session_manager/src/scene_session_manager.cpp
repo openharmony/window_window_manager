@@ -11792,7 +11792,7 @@ WMError SceneSessionManager::ShiftAppWindowPointerEvent(int32_t sourcePersistent
 {
     TLOGD(WmsLogTag::WMS_PC, "sourcePersistentId %{public}d targetPersistentId %{public}d",
     sourcePersistentId, targetPersistentId);
-    if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
+    if (!(systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.freeMultiWindowEnable_)) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (sourcePersistentId == targetPersistentId) {

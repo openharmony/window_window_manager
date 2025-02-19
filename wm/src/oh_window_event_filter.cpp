@@ -68,7 +68,6 @@ KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
         OH_Input_SetKeyEventDisplayId(input, keyEvent.GetTargetDisplayId());
         return filter(input);
     };
-    return func ;
 }
 
 WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t windowId,
