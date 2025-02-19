@@ -35,6 +35,8 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+const std::string RESOLVED_CALLBACK = "resolvedCallback";
+const std::string REJECTED_CALLBACK = "rejectedCallback";
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -1140,6 +1142,105 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     return ParseModalityParam(env, jsObject, windowOption);
+}
+
+bool CheckPromise(napi_env env, napi_value promiseObj)
+{
+    if (promiseObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj is nullptr");
+        return false;
+    }
+    bool isPromise = false;
+    napi_is_promise(env, promiseObj, &isPromise);
+    return isPromise;
+}
+
+napi_value ResolvedCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    void* returnValue = nullptr;
+    if (napi_get_cb_info(env, info, &argc, argv, nullptr, &returnValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to get returnValue");
+        return nullptr;
+    }
+    auto* asyncCallback = static_cast<AsyncCallback*>(returnValue);
+    if (asyncCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
+        return nullptr;
+    }
+    if (asyncCallback->resolvedCallback_ != nullptr) {
+        asyncCallback->resolvedCallback_(env, argc, argv);
+    } else {
+        TLOGW(WmsLogTag::WMS_PC, "resolvedCallback is nullptr");
+    }
+    returnValue = nullptr;
+    return nullptr;
+}
+
+napi_value RejectedCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    void* returnValue = nullptr;
+    if (napi_get_cb_info(env, info, &argc, argv, nullptr, &returnValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to get returnValue");
+        return nullptr;
+    }
+    auto* asyncCallback = static_cast<AsyncCallback*>(returnValue);
+    if (asyncCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
+        return nullptr;
+    }
+    if (asyncCallback->rejectedCallback_ != nullptr) {
+        asyncCallback->rejectedCallback_(env, argc, argv);
+    } else {
+        TLOGW(WmsLogTag::WMS_PC, "rejectedCallback is nullptr");
+    }
+    returnValue = nullptr;
+    return nullptr;
+}
+
+bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallback)
+{
+    if (!CheckPromise(env, promiseObj)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj not is promise");
+        return false;
+    }
+
+    napi_value promiseThen = nullptr;
+    napi_get_named_property(env, promiseObj, "then", &promiseThen);
+    if (promiseThen == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj then property is nullptr");
+        return false;
+    }
+    if (!NapiIsCallable(env, promiseThen)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseThen not is callable");
+        return false;
+    }
+    napi_value resolvedCallback = nullptr;
+    napi_create_function(env, RESOLVED_CALLBACK.c_str(), RESOLVED_CALLBACK.size(),
+        ResolvedCallback, asyncCallback, &resolvedCallback);
+    napi_value thenArgv[] = { resolvedCallback };
+    napi_call_function(env, promiseObj, promiseThen, ArraySize(thenArgv), thenArgv, nullptr);
+
+    napi_value promiseCatch = nullptr;
+    napi_get_named_property(env, promiseObj, "catch", &promiseCatch);
+    if (promiseCatch == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj catch property is nullptr");
+        return false;
+    }
+    if (!NapiIsCallable(env, promiseCatch)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseCatch not is callable");
+        return false;
+    }
+    napi_value rejectedCallback = nullptr;
+    napi_create_function(env, REJECTED_CALLBACK.c_str(), REJECTED_CALLBACK.size(),
+        RejectedCallback, asyncCallback, &rejectedCallback);
+    napi_value catchArgv[] = { rejectedCallback };
+    napi_call_function(env, promiseObj, promiseCatch, ArraySize(catchArgv), catchArgv, nullptr);
+
+    return true;
 }
 
 napi_value ExtensionWindowAttributeInit(napi_env env)
