@@ -1,0 +1,292 @@
+diff --git a/interfaces/innerkits/wm/wm_common.h b/interfaces/innerkits/wm/wm_common.h
+index 8e6bcbafb199369f0321f4e7f92063ff1d3b3453..925d69869d4d27448b327135004e58db1ff36f4f 100644
+--- a/interfaces/innerkits/wm/wm_common.h
++++ b/interfaces/innerkits/wm/wm_common.h
+@@ -1782,6 +1782,14 @@ enum class KeyboardViewMode: uint32_t {
+     DARK_IMMERSIVE_MODE,
+     VIEW_MODE_END,
+ };
++
++/*
++ * Multi User
++ */
++enum class UserSwitchEventType: uint32_t {
++    SWITCHING,
++    SWITCHED,
++};
+ }
+ }
+ #endif // OHOS_ROSEN_WM_COMMON_H
+diff --git a/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.cpp b/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.cpp
+index 27b98e7d3a64d4bb89ca7af761f6dbe43124cc81..fa9b1f1726132db29ee4d5052860f06279dadfcf 100644
+--- a/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.cpp
++++ b/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.cpp
+@@ -182,7 +182,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
+     BindNativeFunction(env, exportObj, "updateSessionDisplayId", moduleName,
+         JsSceneSessionManager::UpdateSessionDisplayId);
+     BindNativeFunction(env, exportObj, "notifyStackEmpty", moduleName, JsSceneSessionManager::NotifyStackEmpty);
+-    BindNativeFunction(env, exportObj, "notifySwitchingUser", moduleName, JsSceneSessionManager::NotifySwitchingUser);
++    BindNativeFunction(env, exportObj, "handleUserSwitch", moduleName, JsSceneSessionManager::HandleUserSwitch);
+     BindNativeFunction(env, exportObj, "notifySessionRecoverStatus", moduleName,
+         JsSceneSessionManager::NotifySessionRecoverStatus);
+     BindNativeFunction(env, exportObj, "setStatusBarDefaultVisibilityPerDisplay", moduleName,
+@@ -1037,11 +1037,11 @@ napi_value JsSceneSessionManager::NotifyStackEmpty(napi_env env, napi_callback_i
+     return (me != nullptr) ? me->OnNotifyStackEmpty(env, info) : nullptr;
+ }
+ 
+-napi_value JsSceneSessionManager::NotifySwitchingUser(napi_env env, napi_callback_info info)
++napi_value JsSceneSessionManager::HandleUserSwitch(napi_env env, napi_callback_info info)
+ {
+-    TLOGI(WmsLogTag::WMS_MULTI_USER, "[NAPI]");
++    TLOGD(WmsLogTag::WMS_MULTI_USER, "[NAPI]");
+     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+-    return (me != nullptr) ? me->OnNotifySwitchingUser(env, info) : nullptr;
++    return (me != nullptr) ? me->OnHandleUserSwitch(env, info) : nullptr;
+ }
+ 
+ napi_value JsSceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info)
+@@ -2913,26 +2913,33 @@ napi_value JsSceneSessionManager::OnNotifyStackEmpty(napi_env env, napi_callback
+     return NapiGetUndefined(env);
+ }
+ 
+-napi_value JsSceneSessionManager::OnNotifySwitchingUser(napi_env env, napi_callback_info info)
++napi_value JsSceneSessionManager::OnHandleUserSwitch(napi_env env, napi_callback_info info)
+ {
+-    size_t argc = 4;
+-    napi_value argv[4] = {nullptr};
++    size_t argc = DEFAULT_ARG_COUNT;
++    napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};
+     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+-    if (argc < ARGC_ONE) {
+-        WLOGFE("Argc is invalid: %{public}zu", argc);
++    if (argc != ARGC_TWO) {
++        TLOGE(WmsLogTag::WMS_MULTI_USER, "Argc is invalid: %{public}zu", argc);
+         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+-            "Input parameter is missing or invalid"));
++                                      "Input parameter is missing or invalid"));
++        return NapiGetUndefined(env);
++    }
++    uint32_t eventTypeValue = 0;
++    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], eventTypeValue)) {
++        TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to convert parameter to eventTypeValue");
++        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
++                                      "Input parameter is missing or invalid"));
+         return NapiGetUndefined(env);
+     }
++    UserSwitchEventType eventType = static_cast<UserSwitchEventType>(eventTypeValue);
+     bool isUserActive = true;
+-    if (!ConvertFromJsValue(env, argv[0], isUserActive)) {
+-        WLOGFE("Failed to convert parameter to isUserActive");
++    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], isUserActive)) {
++        TLOGE(WmsLogTag::WMS_MULTI_USER, "Failed to convert parameter to isUserActive");
+         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+-            "Input parameter is missing or invalid"));
++                                      "Input parameter is missing or invalid"));
+         return NapiGetUndefined(env);
+     }
+-
+-    SceneSessionManager::GetInstance().NotifySwitchingUser(isUserActive);
++    SceneSessionManager::GetInstance().HandleUserSwitch(eventType, isUserActive);
+     return NapiGetUndefined(env);
+ }
+ 
+diff --git a/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.h b/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.h
+index 4afdcba243e0da3afda4443b40574eadf232af40..734e14f1cadd4cd383128ac713c03831fb64be97 100644
+--- a/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.h
++++ b/window_scene/interfaces/kits/napi/scene_session_manager/js_scene_session_manager.h
+@@ -144,7 +144,7 @@ public:
+      * Multi User
+      */
+     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
+-    static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
++    static napi_value HandleUserSwitch(napi_env env, napi_callback_info info);
+ 
+ private:
+     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
+@@ -234,7 +234,7 @@ private:
+      * Multi User
+      */
+     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
+-    napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
++    napi_value OnHandleUserSwitch(napi_env env, napi_callback_info info);
+ 
+     void OnRootSceneBackEvent();
+     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
+diff --git a/window_scene/session_manager/include/scene_session_manager.h b/window_scene/session_manager/include/scene_session_manager.h
+index c5d75e61d5d2cd7c332bf11e402b2e5f4b1e18c2..3b9697ad8895fb60496721a8a87de8ec1fa1a389 100644
+--- a/window_scene/session_manager/include/scene_session_manager.h
++++ b/window_scene/session_manager/include/scene_session_manager.h
+@@ -295,7 +295,7 @@ public:
+      * Multi User
+      */
+     WSError InitUserInfo(int32_t userId, std::string& fileDir);
+-    void NotifySwitchingUser(const bool isUserActive);
++    void HandleUserSwitch(const UserSwitchEventType type, const bool isUserActive);
+     int32_t GetCurrentUserId() const;
+ 
+     void StartWindowInfoReportLoop();
+@@ -898,6 +898,9 @@ private:
+     bool IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession);
+     bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
+     WSError StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive);
++    void ProcessUIAbilityOnUserSwitch(bool isUserActive);
++    void HandleUserSwitching(bool isUserActive);
++    void HandleUserSwitched(bool isUserActive);
+ 
+     /*
+      * Window Recover
+diff --git a/window_scene/session_manager/src/scene_session_manager.cpp b/window_scene/session_manager/src/scene_session_manager.cpp
+index ed641ca6befd96b893e281f2fa8c1183586d1789..043025a5aa5276f365590d4ff9f1086fd2e7a3c9 100644
+--- a/window_scene/session_manager/src/scene_session_manager.cpp
++++ b/window_scene/session_manager/src/scene_session_manager.cpp
+@@ -4057,44 +4057,68 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
+     return WSError::WS_OK;
+ }
+ 
+-void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
+-{
+-    taskScheduler_->PostSyncTask([this, isUserActive, where = __func__]() {
+-        TLOGNI(WmsLogTag::WMS_MULTI_USER, "%{public}s: IsUserActive=%{public}u, currentUserId=%{public}d", where,
+-            isUserActive, currentUserId_.load());
+-        isUserBackground_ = !isUserActive;
+-        SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
+-        if (isUserActive) { // switch to current user
+-            SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+-            if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
+-                MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
+-            }
+-            AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
+-            // notify screenSessionManager to recover current user
+-            ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
+-            FlushWindowInfoToMMI(true);
+-            NotifyAllAccessibilityInfo();
+-            rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+-            UpdatePrivateStateAndNotifyForAllScreens();
+-        } else { // switch to another user
+-            SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
+-            rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
++void SceneSessionManager::ProcessUIAbilityOnUserSwitch(bool isUserActive)
++{
++    int32_t pid = GetPid();
++    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
++    for (const auto& [_, sceneSession] : sceneSessionMap_) {
++        if (sceneSession == nullptr) {
++            TLOGE(WmsLogTag::WMS_MULTI_USER, "session is null");
++            continue;
++        }
++        // Change app life cycle in pc when user switch, do app freeze or unfreeze
++        if (IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid)) {
++            StartOrMinimizeUIAbilityBySCB(sceneSession, isUserActive);
+         }
++    }
++}
+ 
+-        // Change app life cycle in pc when user switch, do app freeze
+-        int32_t pid = GetPid();
+-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+-        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+-            if (sceneSession == nullptr) {
+-                TLOGNE(WmsLogTag::WMS_MULTI_USER, "%{public}s: session is null", where);
+-                continue;
+-            }
+-            if (IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid)) {
+-                StartOrMinimizeUIAbilityBySCB(sceneSession, isUserActive);
+-            }
++void SceneSessionManager::HandleUserSwitching(bool isUserActive)
++{
++    isUserBackground_ = !isUserActive;
++    SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
++    if (isUserActive) { // switch to current user
++        SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
++        if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
++            MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
++        }
++        AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
++        // notify screenSessionManager to recover current user
++        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
++        FlushWindowInfoToMMI(true);
++        NotifyAllAccessibilityInfo();
++        rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
++        UpdatePrivateStateAndNotifyForAllScreens();
++    } else { // switch to another user
++        SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
++        rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
++        // minimized UI abilities when the user is switching and inactive
++        ProcessUIAbilityOnUserSwitch(isUserActive);
++    }
++}
++
++void SceneSessionManager::HandleUserSwitched(bool isUserActive)
++{
++    if (isUserActive) {
++        // start UI abilities only after the user has switched and become active
++        ProcessUIAbilityOnUserSwitch(isUserActive);
++    }
++}
++
++void SceneSessionManager::HandleUserSwitch(const UserSwitchEventType type, const bool isUserActive)
++{
++    auto task = [this, type, isUserActive, where = __func__] {
++        TLOGNI(WmsLogTag::WMS_MULTI_USER,
++               "%{public}s: currentUserId: %{public}d, switchEventType: %{public}u, isUserActive: %{public}u",
++               where, currentUserId_.load(), type, isUserActive);
++        if (type == UserSwitchEventType::SWITCHING) {
++            HandleUserSwitching(isUserActive);
++        } else {
++            HandleUserSwitched(isUserActive);
+         }
+         return WSError::WS_OK;
+-    }, __func__);
++    };
++    taskScheduler_->PostSyncTask(task, __func__);
+ }
+ 
+ sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
+diff --git a/window_scene/test/unittest/scene_session_manager_test3.cpp b/window_scene/test/unittest/scene_session_manager_test3.cpp
+index 5066021abebc7883d0d84706fe869415413200e9..b01dc1e4ac1acaae648bf366bd4926a836b75767 100644
+--- a/window_scene/test/unittest/scene_session_manager_test3.cpp
++++ b/window_scene/test/unittest/scene_session_manager_test3.cpp
+@@ -979,24 +979,26 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch4, Function
+ }
+ 
+ /**
+- * @tc.name: NotifySwitchingUser
++ * @tc.name: HandleUserSwitch
+  * @tc.desc: SceneSesionManager notify switching user
+  * @tc.type: FUNC
+  */
+-HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser, Function | SmallTest | Level3)
++HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch, Function | SmallTest | Level3)
+ {
+     int ret = 0;
+-    ssm_->NotifySwitchingUser(true);
+-    ssm_->NotifySwitchingUser(false);
++    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, true);
++    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, true);
++    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, false);
++    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, false);
+     ASSERT_EQ(ret, 0);
+ }
+ 
+ /**
+- * @tc.name: NotifySwitchingUser1
++ * @tc.name: HandleUserSwitch1
+  * @tc.desc: notify switching user on PC
+  * @tc.type: FUNC
+  */
+-HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser1, Function | SmallTest | Level3)
++HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch1, Function | SmallTest | Level3)
+ {
+     ASSERT_NE(nullptr, ssm_);
+     ssm_->systemConfig_.backgroundswitch = true;
+@@ -1014,7 +1016,8 @@ HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser1, Function | SmallTest |
+     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), nullptr });
+-    ssm_->NotifySwitchingUser(false);
++    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, false);
++    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, false);
+ }
+ 
+ /**
+ 
