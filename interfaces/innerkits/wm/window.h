@@ -2395,6 +2395,9 @@ public:
      */
     virtual WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief Set the single frame composer enabled flag of a window.
