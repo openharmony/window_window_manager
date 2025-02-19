@@ -76,6 +76,7 @@ public:
     bool IsContentSizeChanged(float width, float height, float posX, float posY);
     void DoActionEvent(const std::string& actionName, int32_t status);
     void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
+    void PipSizeChange(uint32_t width, uint32_t height, double scale);
     void PreRestorePictureInPicture();
     void RestorePictureInPictureWindow();
     void PrepareSource();
@@ -83,9 +84,11 @@ public:
     WMError RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
+    WMError RegisterPiPWindowSize(const sptr<IPiPWindowSize>& listener);
     WMError UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError UnregisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);
+    WMError UnregisterPiPWindowSize(const sptr<IPiPWindowSize>& listener);
     sptr<IPiPLifeCycle> GetPictureInPictureLifecycle() const;
     sptr<IPiPActionObserver> GetPictureInPictureActionObserver() const;
     sptr<IPiPControlObserver> GetPictureInPictureControlObserver() const;
@@ -120,6 +123,7 @@ private:
     std::vector<sptr<IPiPLifeCycle>> pipLifeCycleListeners_;
     std::vector<sptr<IPiPActionObserver>> pipActionObservers_;
     std::vector<sptr<IPiPControlObserver>> pipControlObservers_;
+    std::vector<sptr<IPiPWindowSize>> pipWindowSizeListeners_;
     sptr<Window> window_ = nullptr;
     sptr<Window> mainWindow_ = nullptr;
     sptr<IWindowLifeCycle> mainWindowLifeCycleListener_ = nullptr;

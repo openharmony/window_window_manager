@@ -140,5 +140,33 @@ void JsPiPWindowListener::OnControlEvent(PiPControlType controlType, PiPControlS
         TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
     }
 }
+
+void JsPiPWindowListener::OnPipSizeChange(const PiPWindowSize& size)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called, size info: weight %{public}u height %{public}u scale %{public}f",
+          size.height, size.width, size.scale);
+    auto napiTask = [jsCallback = jsCallBack_, size, env = env_]() {
+        napi_value value = nullptr;
+        napi_create_object(env, &value);
+        if (value == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PIP, "Failed to convert rect to jsObject");
+            return;
+        }
+        napi_set_named_property(env, value, "width", CreateJsValue(env, static_cast<uint32_t>(size.width)));
+        napi_set_named_property(env, value, "height", CreateJsValue(env, static_cast<uint32_t>(size.height)));
+        napi_set_named_property(env, value, "scale", CreateJsValue(env, static_cast<double>(size.scale)));
+        napi_value argv[] = {value};
+        CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            TLOGE(WmsLogTag::WMS_PIP, "Failed to SendEvent");
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_PIP, "env is nullptr");
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS
