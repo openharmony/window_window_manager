@@ -1228,6 +1228,16 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    // update avoid areas to listeners
+    for (const auto& [type, avoidArea] : avoidAreas) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
+            type, avoidArea.ToString().c_str());
+        if (lastAvoidAreaMap_[type] != avoidArea) {
+            lastAvoidAreaMap_[type] = avoidArea;
+            NotifyAvoidAreaChange(sptr<AvoidArea>::MakeSptr(avoidArea), type);
+        }
+    }
+
     sptr<DisplayInfo> displayInfo;
     if (info == nullptr) {
         auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -1259,14 +1269,6 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
         return;
-    }
-    for (const auto& [type, avoidArea] : avoidAreas) {
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
-            type, avoidArea.ToString().c_str());
-        if (lastAvoidAreaMap_[type] != avoidArea) {
-            lastAvoidAreaMap_[type] = avoidArea;
-            NotifyAvoidAreaChange(sptr<AvoidArea>::MakeSptr(avoidArea), type);
-        }
     }
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_);
 
