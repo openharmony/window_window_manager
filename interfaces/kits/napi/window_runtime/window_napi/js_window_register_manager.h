@@ -46,6 +46,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_NO_INTERACTION_DETECT_CB,
     WINDOW_RECT_CHANGE_CB,
     SUB_WINDOW_CLOSE_CB,
+    WINDOW_WILL_CLOSE_CB,
     WINDOW_STAGE_EVENT_CB,
     WINDOW_STAGE_CLOSE_CB,
     WINDOW_HIGHLIGHT_CHANGE_CB,
@@ -102,6 +103,8 @@ private:
     WmErrorCode ProcessSubWindowCloseRegister(sptr<JsWindowListener> listener, sptr<Window> window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessMainWindowCloseRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessWindowWillCloseRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessWindowHighlightChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);

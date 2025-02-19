@@ -1281,6 +1281,36 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest |
 }
 
 /**
+ * @tc.name: NotifyWindowWillClose
+ * @tc.desc: NotifyWindowWillClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyWindowWillClose, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWindowWillClose");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    WMError res = window->NotifyWindowWillClose(window);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IWindowWillCloseListener> listener = sptr<MockIWindowWillCloseListener>::MakeSptr();
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    res = window->RegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->NotifyWindowWillClose(window);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->UnRegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->NotifyWindowWillClose(window);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
  * @tc.name: UpdateVirtualPixelRatio
  * @tc.desc: test UpdateVirtualPixelRatio
  * @tc.type: FUNC
@@ -1445,6 +1475,35 @@ HWTEST_F(WindowSessionImplTest4, SetEnableDragBySystem, Function | SmallTest | L
     window->property_->SetDragEnabled(true);
     window->SetEnableDragBySystem(false);
     ASSERT_FALSE(window->property_->GetDragEnabled());
+}
+
+/**
+ * @tc.name: ClearListenersById_windowWillCloseListeners
+ * @tc.desc: ClearListenersById_windowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowWillCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowWillCloseListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_windowWillCloseListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowWillCloseListener> listener_ = sptr<MockIWindowWillCloseListener>::MakeSptr();
+    window_->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    ASSERT_EQ(WMError::WM_OK, window_->RegisterWindowWillCloseListeners(listener_));
+    ASSERT_NE(window_->windowWillCloseListeners_.find(persistentId), window_->windowWillCloseListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->windowWillCloseListeners_.find(persistentId), window_->windowWillCloseListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowWillCloseListeners end";
 }
 
 /**
