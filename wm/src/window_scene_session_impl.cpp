@@ -2589,7 +2589,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
 }
 
 WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
-    const std::vectorAppExecFwk::SupportWindowMode& supportedWindowModes)
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
     uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
     if (windowModeSupportType == 0) {
