@@ -3573,7 +3573,7 @@ WSError SceneSessionManager::ProcessBackEvent()
         }
         TLOGNI(WmsLogTag::WMS_MAIN, "ProcessBackEvent session persistentId:%{public}d needBlock:%{public}d",
             focusedSessionId_, needBlockNotifyFocusStatusUntilForeground_);
-        if (needBlockNotifyFocusStatusUntilForeground_) {
+        if (needBlockNotifyFocusStatusUntilForeground_ || !session->IsSessionValid()) {
             TLOGND(WmsLogTag::WMS_MAIN, "RequestSessionBack when start session");
             if (session->GetSessionInfo().abilityInfo != nullptr &&
                 session->GetSessionInfo().abilityInfo->unclearableMission) {
