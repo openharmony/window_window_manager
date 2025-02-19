@@ -1459,7 +1459,7 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 
     /**
-     * @brief Update Configuration.
+     * @brief Update configuration for specified window.
      *
      * @param configuration Window configuration.
      * @param resourceManager The resource manager
