@@ -1137,6 +1137,12 @@ struct PiPTemplateInfo {
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
 };
 
+struct PiPWindowSize {
+    uint32_t width;
+    uint32_t height;
+    double scale;
+};
+
 using OnCallback = std::function<void(int64_t, int64_t)>;
 
 /**

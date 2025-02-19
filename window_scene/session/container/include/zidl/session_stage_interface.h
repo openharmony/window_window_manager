@@ -102,6 +102,18 @@ public:
     virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
 
     /**
+     * @brief notify pip size to client.
+     *
+     * Notify the pip size to client. including width, height and scale.
+     *
+     * @param width Indicates the size width.
+     * @param height Indicates the size height.
+     * @param scale Indicates the size scale.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) = 0;
+
+    /**
      * @brief Set the media control event to client.
      *
      * Set the media control event to client. The event is from pip control panel operation.
