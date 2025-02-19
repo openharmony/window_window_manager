@@ -223,19 +223,19 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
     WLOGI("called.");
     Extension::OnConnect(want);
     napi_env env = jsRuntime_.GetNapiEnv();
-    std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback> complete =
-        std::make_unique<AbilityRuntime::NapiAsyncTask::CompleteCallback>(
-        [=] (napi_env env, AbilityRuntime::NapiAsyncTask& task, int32_t status) {
-            napi_env napiEnv = jsRuntime_.GetNapiEnv();
-            napi_value napiWant = OHOS::AppExecFwk::WrapWant(napiEnv, want);
-            napi_value argv[] = { napiWant };
-            CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv));
+    auto jsCallback = [weakThis = wptr(this), want, env] {
+        auto connection = weakThis.promote();
+        if (!connection) {
+            WLOGI("session is null or already disconnected");
+            return;
         }
-    );
-    napi_ref callback = nullptr;
-    std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    AbilityRuntime::NapiAsyncTask::Schedule("JsWindowExtension::OnConnect", env,
-        std::make_unique<AbilityRuntime::NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
+        napi_value argv[] = { napiWant };
+        CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
+        WLOGE("send event failed");
+    }
 
     if (!stub_) {
         WLOGFE("stub is nullptr.");
@@ -309,28 +309,32 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
 void JsWindowExtension::OnWindowCreated() const
 {
     napi_env env = jsRuntime_.GetNapiEnv();
-    std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback> complete =
-        std::make_unique<AbilityRuntime::NapiAsyncTask::CompleteCallback>(
-        [=] (napi_env env, AbilityRuntime::NapiAsyncTask& task, int32_t status) {
-            auto window = stub_->GetWindow();
-            if (window == nullptr) {
-                WLOGFE("get window failed");
-                return;
-            }
-            napi_value value = CreateJsWindowObject(env, window);
-            if (value == nullptr) {
-                WLOGFE("Create js window failed");
-                return;
-            }
-            napi_value argv[] = { value };
-            CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv));
+    auto jsCallback = [weakThis = wptr(this), env] {
+        auto connection = weakThis.promote();
+        if (!connection) {
+            WLOGI("session is null or already disconnected");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    AbilityRuntime::NapiAsyncTask::Schedule("JsWindowExtension::OnWindowCreated", env,
-        std::make_unique<AbilityRuntime::NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        if (connection->stub_ == nullptr) {
+            WLOGE("stub is nullptr");
+            return;
+        }
+        auto window = connection->stub_->GetWindow();
+        if (window == nullptr) {
+            WLOGE("get window failed");
+            return;
+        }
+        napi_value value = CreateJsWindowObject(env, window);
+        if (value == nullptr) {
+            WLOGE("Create js window failed");
+            return;
+        }
+        napi_value argv[] = { value };
+        connection->CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
+        WLOGE("send event failed");
+    }
 }
 
 napi_valuetype GetType(napi_env env, napi_value value)
