@@ -1234,7 +1234,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
             type, avoidArea.ToString().c_str());
         if (lastAvoidAreaMap_[type] != avoidArea) {
             lastAvoidAreaMap_[type] = avoidArea;
-            NotifyAvoidAreaChange(sptr<AvoidArea>::MakeSptr(avoidArea), type);
+            NotifyAvoidAreaChange(new AvoidArea(avoidArea), type);
         }
     }
 

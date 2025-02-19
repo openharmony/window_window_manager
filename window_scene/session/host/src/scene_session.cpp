@@ -1907,9 +1907,7 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
         return ret;
     }
     if (isLayoutFinished) {
-        UpdateAvoidArea(
-            sptr<AvoidArea>::MakeSptr(GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM)),
-            AvoidAreaType::TYPE_SYSTEM);
+        UpdateAvoidArea(new AvoidArea(GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM)), AvoidAreaType::TYPE_SYSTEM);
     } else {
         MarkAvoidAreaAsDirty();
     }
