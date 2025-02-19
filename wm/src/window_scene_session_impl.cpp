@@ -2596,7 +2596,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is 0");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    bool onlySupportSplit = (windowModeSupportType == 
+    bool onlySupportSplit = (windowModeSupportType ==
                             (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                              WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY));
     if (onlySupportSplit) {

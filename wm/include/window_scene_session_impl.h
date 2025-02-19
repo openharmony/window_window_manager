@@ -250,7 +250,7 @@ private:
     /*
     * PC Window Layout
     */
-    WMError SetSupportedWindowModesInner(const std::vectorAppExecFwk::SupportWindowMode& supportedWindowModes);
+    WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
 
     /**
      * Window Immersive
