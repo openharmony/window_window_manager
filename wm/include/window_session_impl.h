@@ -274,6 +274,7 @@ public:
      * Window Decor
      */
     WMError SetDecorVisible(bool isVisible) override;
+    WMError GetDecorVisible(bool& isVisible) override;
     WMError SetWindowTitleMoveEnabled(bool enable) override;
     WMError SetDecorHeight(int32_t decorHeight) override;
     WMError GetDecorHeight(int32_t& height) override;
