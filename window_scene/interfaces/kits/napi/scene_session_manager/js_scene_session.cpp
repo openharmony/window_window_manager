@@ -3468,7 +3468,7 @@ void JsSceneSession::OnSessionTouchableChange(bool touchable)
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed",
-                 persistentId);
+                persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_TOUCHABLE_CHANGE_CB);

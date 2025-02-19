@@ -5148,9 +5148,6 @@ WSError SceneSessionManager::GetAllSessionDumpInfo(std::string& dumpInfo)
     allSession.insert(allSession.end(), backgroundSession.begin(), backgroundSession.end());
     uint32_t count = 0;
     for (const auto& session : allSession) {
-        if (session == nullptr) {
-            continue;
-        }
         if (count == static_cast<uint32_t>(allSession.size() - backgroundSession.size())) {
             oss << "---------------------------------------------------------------------------------------"
                 << std::endl;

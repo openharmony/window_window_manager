@@ -143,7 +143,8 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
     const ScreenProperty& property, const std::shared_ptr<RSDisplayNode>& displayNode)
     : name_(name), screenId_(screenId), rsId_(rsId), property_(property), displayNode_(displayNode)
 {
-    TLOGI(WmsLogTag::DMS, "Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"", screenId_);
+    TLOGI(WmsLogTag::DMS, "Success to create screenSession in constructor_0, screenid is %{public}" PRIu64"",
+        screenId_);
 }
 
 ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, ScreenId defaultScreenId)
@@ -152,7 +153,8 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
-        TLOGNI(WmsLogTag::DMS, "Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"", screenId_);
+        TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_1, screenid is %{public}" PRIu64"",
+            screenId_);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
@@ -172,7 +174,8 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
         .isSync = true};
     displayNode_ = Rosen::RSDisplayNode::Create(config);
     if (displayNode_) {
-        TLOGNI(WmsLogTag::DMS, "Success to create displayNode in constructor_2, screenid is %{public}" PRIu64"", screenId_);
+        TLOGI(WmsLogTag::DMS, "Success to create displayNode in constructor_2, screenid is %{public}" PRIu64"",
+            screenId_);
         displayNode_->SetFrame(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
             property_.GetBounds().rect_.width_, property_.GetBounds().rect_.height_);
         displayNode_->SetBounds(property_.GetBounds().rect_.left_, property_.GetBounds().rect_.top_,
@@ -270,11 +273,11 @@ void ScreenSession::EnableMirrorScreenRegion()
     auto ret = RSInterfaces::GetInstance().SetMirrorScreenVisibleRect(screenId,
         { rect.posX_, rect.posY_, rect.width_, rect.height_ });
     if (ret != StatusCode::SUCCESS) {
-        TLOGE(WmsLogTag::DMS, "ScreenSession::EnableMirrorScreenRegion fail! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
+        TLOGE(WmsLogTag::DMS, "Fail! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
         ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     } else {
-        TLOGE(WmsLogTag::DMS, "ScreenSession::EnableMirrorScreenRegion success! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
+        TLOGE(WmsLogTag::DMS, "Success! rsId %{public}" PRIu64", ret:%{public}d," PRIu64
         ", x:%{public}d y:%{public}d w:%{public}u h:%{public}u", screenId, ret,
         rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
@@ -391,11 +394,11 @@ DMError ScreenSession::GetScreenSupportedColorGamuts(std::vector<ScreenColorGamu
 {
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorGamuts(rsId_, colorGamuts);
     if (ret != StatusCode::SUCCESS) {
-        TLOGNE(WmsLogTag::DMS, "SCB: ScreenSession::GetScreenSupportedColorGamuts fail! rsId %{public}" PRIu64", ret:%{public}d",
+        TLOGE(WmsLogTag::DMS, "SCB: fail! rsId %{public}" PRIu64", ret:%{public}d",
             rsId_, ret);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    TLOGNI(WmsLogTag::DMS, "SCB: ScreenSession::GetScreenSupportedColorGamuts ok! rsId %{public}" PRIu64", size %{public}u",
+    TLOGI(WmsLogTag::DMS, "SCB: ok! rsId %{public}" PRIu64", size %{public}u",
         rsId_, static_cast<uint32_t>(colorGamuts.size()));
 
     return DMError::DM_OK;
@@ -937,8 +940,8 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
     {
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         if (!displayNode_) {
-            TLOGI(WmsLogTag::DMS, "update failed since null display node with rotation:%{public}d displayOrientation:%{public}u",
-                rotation, displayOrientation);
+            TLOGI(WmsLogTag::DMS, "update failed since null display node with \
+                rotation:%{public}d displayOrientation:%{public}u", rotation, displayOrientation);
             return;
         }
     }
@@ -956,8 +959,8 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
             displayNode_->SetScreenRotation(static_cast<uint32_t>(property_.GetDeviceRotation()));
         }
     }
-    TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u,\
-        foldDisplayMode:%{public}u",
+    TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,\
+        displayOrientation:%{public}u,foldDisplayMode:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation, foldDisplayMode);
@@ -978,7 +981,8 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
         property_.SetValidWidth(bounds.rect_.GetWidth());
     }
     UpdateTouchBoundsAndOffset();
-    TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,displayOrientation:%{public}u",
+    TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],\
+        rotation:%{public}d,displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
@@ -1033,7 +1037,7 @@ void ScreenSession::UpdateValidRotationToScb()
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
 {
     if (activeIdx_ < 0 || activeIdx_ >= static_cast<int32_t>(modes_.size())) {
-        TLOGW(WmsLogTag::DMS, "SCB: ScreenSession::GetActiveScreenMode active mode index is wrong: %{public}d", activeIdx_);
+        TLOGW(WmsLogTag::DMS, "SCB: active mode index is wrong: %{public}d", activeIdx_);
         return nullptr;
     }
     return modes_[activeIdx_];
@@ -1480,11 +1484,11 @@ DMError ScreenSession::GetSupportedHDRFormats(std::vector<ScreenHDRFormat>& hdrF
 #ifdef WM_SCREEN_HDR_FORMAT_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedHDRFormats(rsId_, hdrFormats);
     if (ret != StatusCode::SUCCESS) {
-        TLOGE(WmsLogTag::DMS, "SCB: ScreenSession::GetSupportedHDRFormats fail! rsId %{public}" PRIu64 ", ret:%{public}d",
+        TLOGE(WmsLogTag::DMS, "SCB: fail! rsId %{public}" PRIu64 ", ret:%{public}d",
             rsId_, ret);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    TLOGI(WmsLogTag::DMS, "SCB: ScreenSession::GetSupportedHDRFormats ok! rsId %{public}" PRIu64 ", size %{public}u",
+    TLOGI(WmsLogTag::DMS, "SCB: ok! rsId %{public}" PRIu64 ", size %{public}u",
         rsId_, static_cast<uint32_t>(hdrFormats.size()));
 #endif
     return DMError::DM_OK;
@@ -1534,11 +1538,11 @@ DMError ScreenSession::GetSupportedColorSpaces(std::vector<GraphicCM_ColorSpaceT
 #ifdef WM_SCREEN_COLOR_SPACE_ENABLE
     auto ret = RSInterfaces::GetInstance().GetScreenSupportedColorSpaces(rsId_, colorSpaces);
     if (ret != StatusCode::SUCCESS) {
-        TLOGE(WmsLogTag::DMS, "SCB: ScreenSession::GetSupportedColorSpaces fail! rsId %{public}" PRIu64 ", ret:%{public}d",
+        TLOGE(WmsLogTag::DMS, "SCB: fail! rsId %{public}" PRIu64 ", ret:%{public}d",
             rsId_, ret);
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
-    TLOGI(WmsLogTag::DMS, "SCB: ScreenSession::GetSupportedColorSpaces ok! rsId %{public}" PRIu64 ", size %{public}u",
+    TLOGI(WmsLogTag::DMS, "SCB: ok! rsId %{public}" PRIu64 ", size %{public}u",
         rsId_, static_cast<uint32_t>(colorSpaces.size()));
 #endif
     return DMError::DM_OK;
@@ -1686,8 +1690,8 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
                 break;
             }
             NodeId nodeId = displayNode->GetId();
-            TLOGNI(WmsLogTag::DMS, "mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", nodeId:%{public}" PRIu64"",
-                mirrorScreenId_, screenSession->rsId_, nodeId);
+            TLOGNI(WmsLogTag::DMS, "mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", \
+                nodeId:%{public}" PRIu64"",mirrorScreenId_, screenSession->rsId_, nodeId);
             config = {screenSession->rsId_, true, nodeId, true};
             break;
         }

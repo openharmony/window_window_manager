@@ -891,7 +891,7 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
         ss << std::hex << color;
         ss >> hexColor;
         TLOGD(WmsLogTag::DEFAULT, "Origin %{public}s, process %{public}s, final %{public}x",
-             colorStr.c_str(), color.c_str(), hexColor);
+            colorStr.c_str(), color.c_str(), hexColor);
         return hexColor;
     }
     return defaultColor;
