@@ -1272,7 +1272,7 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, Function 
 HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, Function | SmallTest | Level3)
 {
     int32_t persistentId = 10086;
-    WSError result01 = ssm_->UpdateBrightness(persistentId);
+    WSError result01 = ssm_->UpdateBrightness(persistentId, false);
     EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
 }
 

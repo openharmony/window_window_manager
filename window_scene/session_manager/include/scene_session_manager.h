@@ -811,7 +811,7 @@ private:
         REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
-    WSError UpdateBrightness(int32_t persistentId);
+    WSError UpdateBrightness(int32_t persistentId, bool onBackGround);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
     void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,

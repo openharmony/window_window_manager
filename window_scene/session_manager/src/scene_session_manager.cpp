@@ -2564,7 +2564,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (persistentId == brightnessSessionId_) {
             auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
             auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-            UpdateBrightness(focusedSessionId);
+            UpdateBrightness(focusedSessionId, true);
         }
         if (IsPcSceneSessionLifecycle(sceneSession)) {
             TLOGNI(WmsLogTag::WMS_MAIN, "Notify session background: %{public}d", persistentId);
@@ -4670,7 +4670,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
     }
 }
 
-WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
+WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackGround)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
@@ -4686,14 +4686,14 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (GetDisplayBrightness() != brightness) {
+        if (onBackGround && GetDisplayBrightness() != brightness) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             if (!isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             }
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+            brightnessSessionId_ = INVALID_WINDOW_ID;
         }
-        brightnessSessionId_ = INVALID_WINDOW_ID;
     } else {
         if (GetDisplayBrightness() != brightness) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
@@ -6269,7 +6269,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
         if (IsSessionVisibleForeground(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
         }
-        UpdateBrightness(focusGroup->GetFocusedSessionId());
+        UpdateBrightness(focusGroup->GetFocusedSessionId(), false);
         FocusIDChange(sceneSession->GetPersistentId(), sceneSession);
     }
     // notify window manager
@@ -6367,7 +6367,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
         if (isFocused) {
             SetFocusedSessionId(displayId, persistentId);
-            UpdateBrightness(focusedSessionId);
+            UpdateBrightness(focusedSessionId, false);
             FocusIDChange(persistentId, sceneSession);
         } else if (persistentId == GetFocusedSessionId()) {
             SetFocusedSessionId(displayId, INVALID_SESSION_ID);
