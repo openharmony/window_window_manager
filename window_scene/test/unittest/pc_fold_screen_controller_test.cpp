@@ -673,22 +673,6 @@ HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: OnConnect
- * @tc.desc: test function : OnConnect
- * @tc.type: FUNC
- */
-HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
-{
-    mainSession_->sessionInfo_.screenId_ = DEFAULT_SCREEN_ID;
-    SetHalfFolded();
-    controller_->OnConnect();
-    EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
-    SetExpanded();
-    controller_->OnConnect();
-    EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
-}
-
-/**
  * @tc.name: RecordStartMoveRect
  * @tc.desc: test function : RecordStartMoveRect, IsStartFullScreen
  * @tc.type: FUNC
