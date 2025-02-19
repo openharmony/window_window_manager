@@ -751,6 +751,11 @@ private:
     MouseEventFilterFunc mouseEventFilter_;
     std::mutex touchEventFilterMutex_;
     TouchEventFilterFunc touchEventFilter_;
+
+    /*
+     * Window Scene
+     */
+    WSError NotifyWindowAttachStateChange(bool isAttach) override { return WSError::WS_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS
