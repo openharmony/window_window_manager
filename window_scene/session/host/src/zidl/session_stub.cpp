@@ -214,6 +214,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
             return HandleGetStatusBarHeight(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_DOCK_HEIGHT):
+            return HandleGetDockHeight(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_FRAME_LAYOUT_FINISH):
             return HandleNotifyFrameLayoutFinish(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC):
@@ -250,6 +252,14 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
+}
+
+int SessionStub::HandleGetDockHeight(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t height = GetDockHeight();
+    TLOGD(WmsLogTag::WMS_IMMS, "DockHeight is %{public}d", height);
+    reply.WriteInt32(height);
+    return ERR_NONE;
 }
 
 int SessionStub::HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply)

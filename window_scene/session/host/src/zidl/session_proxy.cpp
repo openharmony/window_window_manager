@@ -2489,4 +2489,28 @@ WSError SessionProxy::OnContainerModalEvent(const std::string& eventName, const 
     }
     return WSError::WS_OK;
 }
+
+int32_t SessionProxy::GetDockHeight()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t height = 0;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
+        return height;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
+        return height;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_DOCK_HEIGHT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DEFAULT, "SendRequest failed");
+        return height;
+    }
+    height = reply.ReadInt32();
+    return height;
+}
 } // namespace OHOS::Rosen

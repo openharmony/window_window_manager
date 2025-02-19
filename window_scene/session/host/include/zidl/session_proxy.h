@@ -112,6 +112,7 @@ public:
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     int32_t GetStatusBarHeight() override;
+    int32_t GetDockHeight() override;
     WMError SetSystemWindowEnableDrag(bool enableDrag) override;
     void NotifyExtensionDetachToDisplay() override;
     WSError RequestFocus(bool isFocused) override;

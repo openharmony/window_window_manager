@@ -127,6 +127,22 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_16 = 16;
+sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId, int32_t persistentId)
+{
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Display is null, displayId:%{public}lu, id:%{public}d",
+            displayId, persistentId);
+        return nullptr;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "DisplayInfo is null, displayId:%{public}lu, id:%{public}d",
+            displayId, persistentId);
+        return nullptr;
+    }
+    return displayInfo;
+}
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -4512,14 +4528,22 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 
 void WindowSceneSessionImpl::UpdateDensity()
 {
-    UpdateDensityInner(nullptr);
+    bool needUpdateNewSize = true;
+    auto info = GetDisplayInfoById(GetDisplayId(), GetPersistentId());
+    if (windowSystemConfig_.IsPcWindow()) {
+        UpdateNewSizeForPCWindow(info);
+        needUpdateNewSize = false;
+    }
+    UpdateDensityInner(info, needUpdateNewSize);
 }
 
 void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
 {
     if (!userLimitsSet_) {
         UpdateWindowSizeLimits();
-        UpdateNewSize();
+        if (needUpdateNewSize) {
+            UpdateNewSize();
+        }
         WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         if (ret != WMError::WM_OK) {
             WLOGFE("update window proeprty failed! id: %{public}u.", GetWindowId());
@@ -5148,6 +5172,69 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     }
     densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info)
+{
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Fullscreen could not update new size, Id:%{public}u", GetPersistentId());
+        return;
+    }
+    DMRect availableArea;
+    DMError ret = display->GetAvailableArea(availableArea);
+    if (ret != DMError::DM_OK) {
+        return;
+    }
+    int32_t displayWidth = availableArea.width_;
+    int32_t displayHeight = availableArea.height_;
+    float currVpr = virtualPixelRatio_;
+    float newVpr = GetVirtualPixelRatio(info);
+    Rect windowRect = GetRect();
+    int32_t left = windowRect.posX_;
+    int32_t top = windowRect.posY_;
+    uint32_t width = windowRect.width_;
+    uint32_t height = windowRect.height_;
+    uint32_t statusBarHeight = GetStatusBarHeight();
+    uint32_t dockHeight = GetDockHeight();
+    bool needMove = false;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, left:%{public}u, top:%{public}u, width:%{public}u, height:%{public}u, "
+        "statusBarHeight:%{public}u, dockHeight:%{public}u, displayWidth:%{public}u, displayHeight:%{public}u, "
+        "currVpr:%{public}f, newVpr:%{public}f", GetPersistentId(), left, top, width, height, statusBarHeight,
+        dockHeight, displayWidth, displayHeight, currVpr, newVpr);
+    if (!MathHelper::NearZero(currVpr - newVpr) && !MathHelper::NearZero(currVpr)) {
+        width = width * newVpr / currVpr;
+        height = height * newVpr / currVpr;
+        if (width > displayWidth) {
+            width = displayWidth;
+        }
+        if (height > (displayHeight - statusBarHeight - dockHeight)) {
+            height = displayHeight - statusBarHeight - dockHeight;
+        }
+        if (top < statusBarHeight) {
+            top = statusBarHeight;
+            needMove = true;
+        }
+        if (left < 0) {
+            left = 0;
+            needMove = true;
+        }
+        if (top + height > (displayHeight - dockHeight)) {
+            top = displayHeight - dockHeight - height;
+            needMove = true;
+        }
+        if (left + width > displayWidth) {
+            left = displayWidth - width;
+            needMove = true;
+        }
+        Resize(width, height);
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. Id:%{public}u, width:%{public}u,"
+            " height: %{public}u", GetPersistentId(), width, height);
+        if (needMove) {
+            MoveTo(left, top);
+            TLOGI(WmsLogTag::WMS_LAYOUT, "Move window by limits. Id:%{public}u, left:%{public}u,"
+                " top:%{public}u", GetPersistentId(), left, top);
+        }
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
