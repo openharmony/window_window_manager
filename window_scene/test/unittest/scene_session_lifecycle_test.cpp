@@ -959,44 +959,6 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTe
  */
 HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Level2)
 {
-    SessionInfo info;
-    info.abilityName_ = "TerminateSession";
-    info.bundleName_ = "TerminateSession";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-
-    sptr<AAFwk::SessionInfo> info1 = nullptr;
-    WSError result = sceneSession->TerminateSession(info1);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = true;
-    result = sceneSession->TerminateSession(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
-    sceneSession->isTerminating_ = false;
-
-    result = sceneSession->TerminateSession(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: TerminateSession01
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | Level2)
-{
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
     OHOS::Rosen::Session session(info);
@@ -1008,6 +970,13 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | L
     NotifyTerminateSessionFuncNew callback =
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker){};
     session.isTerminating_ = false;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
+
+    sptr<AAFwk::SessionInfo> info1 = nullptr;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(info1));
+    sceneSession->isTerminating_ = true;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
+    sceneSession->isTerminating_ = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 
