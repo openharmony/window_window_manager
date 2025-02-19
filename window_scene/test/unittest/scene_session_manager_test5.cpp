@@ -930,7 +930,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusBasicCheck, Function | SmallTest 
     WSError ret = ssm_->RequestFocusBasicCheck(0, focusGroup);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
     ret = ssm_->RequestFocusBasicCheck(1, focusGroup);
-    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     focusGroup = sptr<FocusGroup>::MakeSptr(DEFAULT_DISPLAY_ID);
     focusGroup->SetFocusedSessionId(1);
     ret = ssm_->RequestFocusBasicCheck(1, focusGroup);

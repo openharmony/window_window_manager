@@ -5103,7 +5103,7 @@ void SceneSessionManager::DumpFocusInfo(std::ostringstream& oss)
     oss << "All Focus window: " << std::endl;
     if (allFocusedSessionList.size() > 0) {
         for (const auto& focusState : allFocusedSessionList) {
-            oss << "DisplayId: " << focusState.first << " Focus window: " << focusState.second << std::endl;
+            oss << "DisplayId: " << focusState.first << " WindowId: " << focusState.second << std::endl;
         }
     }
 }
@@ -9717,7 +9717,7 @@ void DisplayChangeListener::OnDisplayStateChange(DisplayId defaultDisplayId, spt
 
 bool CheckIfNeedMultipleFocus(const std::string& name, const ScreenType& screenType)
 {
-    if (screenType == ScreenType::VIRTUAL && (name == "HiCar" || name == "CeliaView")) {
+    if (screenType == ScreenType::VIRTUAL && name == "CeliaView") {
         return true;
     }
     return false;
