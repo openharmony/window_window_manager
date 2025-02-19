@@ -4563,6 +4563,14 @@ WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
+{
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+    windowAttachStateChangeListener_ = nullptr;
+    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    return WMError::WM_OK;
+}
+
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());

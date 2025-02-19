@@ -3198,6 +3198,16 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Unregister window scene attach or detach framenode listener.
+     *
+     * @return WM_OK means unregister success
+     */
+    virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
