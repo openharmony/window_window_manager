@@ -239,8 +239,8 @@ public:
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
-    DMError SetFoldDisplayModeInner(const FoldDisplayMode displayMode);
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override;
+    DMError SetFoldDisplayModeInner(const FoldDisplayMode displayMode, std::string reason = "");
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason = "") override;
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY,
@@ -293,6 +293,7 @@ public:
     void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
+    void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) override;
 
     void SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session);
     void SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session);
@@ -322,6 +323,9 @@ public:
     bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);
     int32_t GetCameraStatus();
     int32_t GetCameraPosition();
+    bool IsCameraBackSelfie() { return isCameraBackSelfie_; };
+    void UpdateCameraBackSelfie(bool isCameraBackSelfie);
+    void SetScreenCorrection();
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
     DMError SetVirtualScreenFlag(ScreenId screenId, VirtualScreenFlag screenFlag) override;
@@ -469,7 +473,6 @@ private:
     int NotifyPowerEventForDualDisplay(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason);
     bool IsExtendMode();
-    void SetScreenCorrection();
     bool IsScreenCasting();
     void SetScreenSkipProtectedWindowInner();
 
@@ -546,6 +549,7 @@ private:
     bool isScreenShot_ = false;
     bool isCoordinationFlag_ = false;
     bool isFoldScreenOuterScreenReady_ = false;
+    bool isCameraBackSelfie_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     uint32_t currentExpandScreenCount_ = 0;
