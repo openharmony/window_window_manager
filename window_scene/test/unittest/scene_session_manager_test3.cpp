@@ -979,24 +979,26 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch4, Function 
 }
 
 /**
- * @tc.name: NotifySwitchingUser
+ * @tc.name: HandleUserSwitch
  * @tc.desc: SceneSesionManager notify switching user
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->NotifySwitchingUser(true);
-    ssm_->NotifySwitchingUser(false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, true);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, true);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, false);
     ASSERT_EQ(ret, 0);
 }
 
 /**
- * @tc.name: NotifySwitchingUser1
+ * @tc.name: HandleUserSwitch1
  * @tc.desc: notify switching user on PC
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser1, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch1, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = true;
@@ -1014,7 +1016,8 @@ HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser1, Function | SmallTest | 
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), nullptr });
-    ssm_->NotifySwitchingUser(false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, false);
 }
 
 /**
