@@ -232,6 +232,13 @@ public:
      */
     WMError NotifyRemoveStartingWindow() override;
 
+    /*
+     * Window Scene
+     */
+    WMError RegisterWindowAttachStateChangeListener(
+        const sptr<IWindowAttachStateChangeListner>& listener) override;
+    WMError UnregisterWindowAttachStateChangeListener() override;
+
 protected:
     WMError CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
@@ -387,6 +394,13 @@ private:
      * Window Input Event
      */
     int32_t superFoldOffsetY_ = -1; // calculate the total height of the display_B area and crease area.
+
+    /*
+     * Window Scene
+     */
+    static std::mutex windowAttachStateChangeListenerMutex_;
+    sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
+    WSError NotifyWindowAttachStateChange(bool isAttach) override;
 };
 } // namespace Rosen
 } // namespace OHOS

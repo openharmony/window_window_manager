@@ -145,6 +145,17 @@ public:
 };
 
 /**
+ * @class IWindowAttachStateChangeListner
+ *
+ * @brief IWindowAttachStateChangeListner is used to observe the window attach or detach state changed.
+ */
+class IWindowAttachStateChangeListner : virtual public RefBase {
+public:
+    virtual void AfterAttached() {}
+    virtual void AfterDetached() {}
+};
+
+/**
  * @class IWindowChangeListener
  *
  * @brief IWindowChangeListener is used to observe the window size or window mode when window changed.
@@ -3184,6 +3195,27 @@ public:
      * @param want the want to update param.
      */
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
+
+    /**
+     * @brief Register window scene attach or detach framenode listener.
+     *
+     * @param listener IWindowAttachStateChangeListner.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowAttachStateChangeListener(const sptr<IWindowAttachStateChangeListner>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window scene attach or detach framenode listener.
+     *
+     * @return WM_OK means unregister success
+     */
+    virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
