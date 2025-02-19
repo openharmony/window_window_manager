@@ -624,14 +624,14 @@ HWTEST_F(SceneSessionDirtyManagerTest, AddModalExtensionWindowInfo, Function | S
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, nullptr, extensionInfo);
     EXPECT_EQ(windowInfoList.size(), 1);
     
-    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
     ASSERT_EQ(windowInfoList.size(), 2);
     EXPECT_TRUE(windowInfoList[1].defaultHotAreas.empty());
 
     Rect windowRect {1, 1, 7, 8};
     extensionInfo.windowRect = windowRect;
-    sceneSession->UpdateModalUIExtension(extensionInfo);
+    sceneSession->UpdateNormalModalUIExtension(extensionInfo);
     manager_->AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSession, extensionInfo);
     ASSERT_EQ(windowInfoList.size(), 3);
     EXPECT_EQ(windowInfoList[2].defaultHotAreas.size(), 1);
@@ -782,6 +782,81 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateSecSurfaceInfo, Function | SmallTes
     manager_->secSurfaceInfoMap_.emplace(1, secSurfaceInfoList2);
     manager_->UpdateSecSurfaceInfo(secSurfaceInfoMap);
     ASSERT_EQ(secSurfaceInfoMap.size(), manager_->secSurfaceInfoMap_.size());
+}
+
+/**
+ * @tc.name: GetLastConstrainedModalUIExtInfo
+ * @tc.desc: GetLastConstrainedModalUIExtInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetLastConstrainedModalUIExtInfo, Function | SmallTest | Level2)
+{
+    SecSurfaceInfo constrainedModalUIExtInfo;
+    bool ret = manager_->GetLastConstrainedModalUIExtInfo(nullptr, constrainedModalUIExtInfo);
+    ASSERT_EQ(ret, false);
+
+    std::vector<SecSurfaceInfo> surfaceInfoList;
+    SecSurfaceInfo secSurfaceInfo;
+    manager_->constrainedModalUIExtInfoMap_.clear();
+    manager_->constrainedModalUIExtInfoMap_[0] = surfaceInfoList;
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ret = manager_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo);
+    ASSERT_EQ(ret, false);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->SetId(1);
+    sceneSession->surfaceNode_ = surfaceNode;
+    ret = manager_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo);
+    ASSERT_EQ(ret, false);
+
+    sceneSession->surfaceNode_->SetId(0);
+    ret = manager_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo);
+    ASSERT_EQ(ret, false);
+
+    manager_->constrainedModalUIExtInfoMap_[0].emplace_back(secSurfaceInfo);
+    ret = manager_->GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo);
+    ASSERT_EQ(ret, true);
+    manager_->constrainedModalUIExtInfoMap_.clear();
+}
+
+/**
+ * @tc.name: GetModalUIExtensionInfo
+ * @tc.desc: GetModalUIExtensionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, GetModalUIExtensionInfo, Function | SmallTest | Level2)
+{
+    std::vector<MMI::WindowInfo> windowInfoList;
+    MMI::WindowInfo windowInfo;
+
+    // normal modal UIExt
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    int len = windowInfoList.size();
+    manager_->GetModalUIExtensionInfo(windowInfoList, sceneSession, windowInfo);
+    ASSERT_EQ(len, windowInfoList.size());
+
+    ExtensionWindowEventInfo extensionInfo;
+    extensionInfo.persistentId = 12345;
+    extensionInfo.pid = 1234;
+    extensionInfo.windowRect = { 1, 2, 3, 4 };
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
+    manager_->GetModalUIExtensionInfo(windowInfoList, sceneSession, windowInfo);
+    ASSERT_EQ(len + 1, windowInfoList.size());
+
+    // constrained modal UIExt
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->SetId(0);
+    sceneSession->surfaceNode_ = surfaceNode;
+    SecSurfaceInfo secSurfaceInfo;
+    manager_->constrainedModalUIExtInfoMap_.clear();
+    manager_->constrainedModalUIExtInfoMap_[0].emplace_back(secSurfaceInfo);
+    manager_->GetModalUIExtensionInfo(windowInfoList, sceneSession, windowInfo);
+    ASSERT_EQ(len + 2, windowInfoList.size());
+    manager_->constrainedModalUIExtInfoMap_.clear();
 }
 
 /**

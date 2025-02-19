@@ -3613,6 +3613,7 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
         AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
         RegisterSecSurfaceInfoListener();
+        RegisterConstrainedModalUIExtInfoListener();
         return WSError::WS_OK;
     };
     return taskScheduler_->PostSyncTask(task, "InitUserInfo");
@@ -10253,9 +10254,9 @@ bool SceneSessionManager::GetExtensionWindowIds(const sptr<IRemoteObject>& token
     return true;
 }
 
-void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession)
+void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& remoteExtSession, bool isConstrainedModal)
 {
-    auto task = [this, remoteExtSession]() {
+    auto task = [this, remoteExtSession, isConstrainedModal]() {
         auto iter = remoteExtSessionMap_.find(remoteExtSession);
         if (iter == remoteExtSessionMap_.end()) {
             TLOGI(WmsLogTag::WMS_UIEXT, "Invalid remoteExtSession or already destroyed");
@@ -10284,7 +10285,9 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             if (oldFlags.privacyModeFlag) {
                 UpdatePrivateStateAndNotify(parentId);
             }
-            sceneSession->RemoveModalUIExtension(persistentId);
+            if (!isConstrainedModal) {
+                sceneSession->RemoveNormalModalUIExtension(persistentId);
+            }
             sceneSession->RemoveUIExtSurfaceNodeId(persistentId);
             sceneSession->RemoveExtensionTokenInfo(abilityToken);
         } else {
@@ -10321,7 +10324,7 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
                 "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
                 pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
                 parentSession->GetSessionGlobalRect().ToString().c_str());
-            parentSession->UpdateModalUIExtension(extensionInfo);
+            parentSession->UpdateNormalModalUIExtension(extensionInfo);
         }
     };
     taskScheduler_->PostAsyncTask(task, "UpdateModalExtensionRect");
@@ -10352,11 +10355,11 @@ void SceneSessionManager::ProcessModalExtensionPointDown(const sptr<IRemoteObjec
 }
 
 void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId)
+    const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
 {
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    auto task = [this, sessionStage, token, surfaceNodeId, pid, callingTokenId]() {
+    auto task = [this, sessionStage, token, surfaceNodeId, isConstrainedModal, pid, callingTokenId]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
             return;
@@ -10410,17 +10413,19 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
                 .persistentId = persistentId,
                 .pid = pid,
             };
-            parentSession->AddModalUIExtension(extensionInfo);
+            if (!isConstrainedModal) {
+                parentSession->AddNormalModalUIExtension(extensionInfo);
+            }
         }
     };
     taskScheduler_->PostAsyncTask(task, "AddExtensionWindowStageToSCB");
 }
 
 void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-    const sptr<IRemoteObject>& token)
+    const sptr<IRemoteObject>& token, bool isConstrainedModal)
 {
-    TLOGI(WmsLogTag::WMS_UIEXT, "called");
-    auto task = [this, sessionStage, token]() {
+    TLOGI(WmsLogTag::WMS_UIEXT, "in");
+    auto task = [this, sessionStage, token, isConstrainedModal]() {
         if (sessionStage == nullptr || token == nullptr) {
             TLOGE(WmsLogTag::WMS_UIEXT, "input is nullptr");
             return;
@@ -10436,7 +10441,7 @@ void SceneSessionManager::RemoveExtensionWindowStageFromSCB(const sptr<ISessionS
             return;
         }
 
-        DestroyExtensionSession(remoteExtSession);
+        DestroyExtensionSession(remoteExtSession, isConstrainedModal);
     };
     taskScheduler_->PostAsyncTask(task, "RemoveExtensionWindowStageFromSCB");
 }
@@ -11444,8 +11449,12 @@ void SceneSessionManager::UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData
             currentUserId_.load(), userid);
         return;
     }
-    auto secSurfaceInfoMap = secExtensionData->GetSecData();
-    auto task = [secSurfaceInfoMap]()-> WSError {
+    if (secExtensionData == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "invalid secExtensionData");
+        return;
+    }
+    const auto& secSurfaceInfoMap = secExtensionData->GetSecData();
+    auto task = [secSurfaceInfoMap = std::move(secSurfaceInfoMap)]()-> WSError {
         SceneInputManager::GetInstance().UpdateSecSurfaceInfo(secSurfaceInfoMap);
         return WSError::WS_OK;
     };
@@ -11457,9 +11466,40 @@ void SceneSessionManager::RegisterSecSurfaceInfoListener()
     auto callBack = [this](std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userid) {
         this->UpdateSecSurfaceInfo(secExtensionData, userid);
     };
-    TLOGI(WmsLogTag::WMS_EVENT, "RegisterSecSurfaceInfoListener");
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
     if (rsInterface_.RegisterUIExtensionCallback(currentUserId_, callBack) != WM_OK) {
-        TLOGE(WmsLogTag::WMS_EVENT, "RegisterSecSurfaceInfoListener failed");
+        TLOGE(WmsLogTag::WMS_EVENT, "failed");
+    }
+}
+
+void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData,
+    uint64_t userId)
+{
+    if (currentUserId_ != static_cast<int32_t>(userId)) {
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "currentUserId_:%{public}d userId:%{public}" PRIu64,
+            currentUserId_.load(), userId);
+        return;
+    }
+    if (constrainedModalUIExtData == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "invalid constrainedModalUIExtData");
+        return;
+    }
+    const auto& constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
+    auto task = [constrainedModalUIExtInfoMap = std::move(constrainedModalUIExtInfoMap)]()-> WSError {
+        SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(constrainedModalUIExtInfoMap);
+        return WSError::WS_OK;
+    };
+    taskScheduler_->PostAsyncTask(task, "UpdateConstrainedModalUIExtInfo");
+}
+
+void SceneSessionManager::RegisterConstrainedModalUIExtInfoListener()
+{
+    auto callBack = [this](std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userid) {
+        this->UpdateConstrainedModalUIExtInfo(constrainedModalUIExtData, userid);
+    };
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
+    if (rsInterface_.RegisterUIExtensionCallback(currentUserId_, callBack, true) != WM_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "failed");
     }
 }
 
