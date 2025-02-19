@@ -236,6 +236,7 @@ public:
      */
     WMError RegisterWindowAttachStateChangeListener(
         const sptr<IWindowAttachStateChangeListner>& listener) override;
+    WMError UnregisterWindowAttachStateChangeListener() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
