@@ -890,11 +890,11 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         // get support modes configuration
         uint32_t windowModeSupportType = 0;
-        std::vector<AppExecFwk::SupportWindowMode> supportWindowModes;
-        property_->GetSupportWindowModes(supportWindowModes);
-        auto size = supportWindowModes.size();
+        std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+        property_->GetSupportedWindowModes(supportedWindowModes);
+        auto size = supportedWindowModes.size();
         if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {
-            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportWindowModes);
+            windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
         } else {
             windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(abilityInfo->windowModes);
         }
@@ -2585,6 +2585,81 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
     std::string key = bundleName + moduleName + abilityName;
     auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled);
     return ret;
+}
+
+WMError WindowSceneSessionImpl::SetSupportedWindowModes(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!(isPC || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is not PC, not supported");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    if (!WindowHelper::IsMainWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "This is not main window, not supported");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+
+    auto size = supportedWindowModes.size();
+    if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    return SetSupportedWindowModesInner(supportedWindowModes);
+}
+
+WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+{
+    uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
+    if (windowModeSupportType == 0) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is 0");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    bool onlySupportSplit = windowModeSupportType ==
+                            (WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
+                             WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY);
+    if (onlySupportSplit) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is only support split");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "winId: %{public}u, windowModeSupportType: %{public}u",
+        GetWindowId(), windowModeSupportType);
+    property_->SetWindowModeSupportType(windowModeSupportType);
+    // update windowModeSupportType to server
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    hostSession->NotifySupportWindowModesChange(supportedWindowModes);
+
+    UpdateTitleButtonVisibility();
+    bool onlySupportFullScreen =
+        WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
+        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    if (onlySupportFullScreen && !property_->IsLayoutFullScreen()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
+            onlySupportFullScreen, property_->IsLayoutFullScreen());
+        Maximize(MaximizePresentation::ENTER_IMMERSIVE);
+        return WMError::WM_OK;
+    }
+
+    bool onlySupportFloating =
+        !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
+        WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
+    if (onlySupportFloating) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFloating:%{public}d", onlySupportFloating);
+        Recover(1);
+    }
+
+    return WMError::WM_OK;
 }
 
 void WindowSceneSessionImpl::StartMove()

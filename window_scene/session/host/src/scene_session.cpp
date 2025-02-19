@@ -3585,7 +3585,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
         if (!abilitySessionInfo->supportWindowModes.empty()) {
-            info.supportWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
+            info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
     }
@@ -3601,11 +3601,11 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s, "
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
-        "needClearInNotShowRecent:%{public}u, isFromIcon:%{public}d, supportWindowModes.size:%{public}zu, "
+        "needClearInNotShowRecent:%{public}u, isFromIcon:%{public}d, supportedWindowModes.size:%{public}zu, "
         "specifiedId:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
-        info.callerPersistentId_, info.needClearInNotShowRecent_, info.isFromIcon_, info.supportWindowModes.size(),
+        info.callerPersistentId_, info.needClearInNotShowRecent_, info.isFromIcon_, info.supportedWindowModes.size(),
         info.specifiedId);
     return info;
 }
@@ -5440,6 +5440,20 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
             session->GetPersistentId());
     };
     PostTask(task, __func__);
+}
+
+void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or func is null", where);
+            return;
+        }
+        session->onSetSupportedWindowModesFunc_ = std::move(func);
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
 }
 
 bool SceneSession::SetFrameGravity(Gravity gravity)

@@ -36,6 +36,7 @@ class AxisEvent;
 namespace OHOS::AppExecFwk {
 class Configuration;
 class Ability;
+enum class SupportWindowMode;
 }
 
 namespace OHOS::AbilityRuntime {
@@ -2297,6 +2298,17 @@ public:
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError IsWindowRectAutoSave(bool& enabled) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Sets the supported window modes.
+     *
+     * @param supportedWindowModes Supported window modes of the window.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get the rect of host window.
