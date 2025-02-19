@@ -2387,8 +2387,8 @@ public:
     }
 
     /**
-     * @brief Update System Bar (include status bar and nav bar) Properties by Flag
-     * 
+     * @brief Update System Bar (include status bar and nav bar) Properties by Flags
+     *
      * @param systemBarProperties map of status bar and nav bar properties
      * @param systemBarPropertyFlags map of status bar and nav bar properties to be changed
      * @return WMError
