@@ -756,7 +756,7 @@ napi_value JsWindowStage::OnSetCustomDensity(napi_env env, napi_callback_info in
         window->GetWindowId(), window->GetWindowName().c_str(), density, ret);
     if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
-    } 
+    }
     return NapiGetUndefined(env);
 }
 
