@@ -3533,7 +3533,7 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             auto apiOrientation = static_cast<ApiOrientation>(resultValue);
             if (apiOrientation < ApiOrientation::BEGIN ||
                 apiOrientation > ApiOrientation::END) {
-                TLOGE(WmsLogTag::WMS_ROTATION, "Orientation %{public}u invalid!", 
+                TLOGE(WmsLogTag::WMS_ROTATION, "Orientation %{public}u invalid!",
                     static_cast<uint32_t>(apiOrientation));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             } else {
