@@ -248,8 +248,8 @@ private:
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /*
-    * PC Window Layout
-    */
+     * PC Window Layout
+     */
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
 
     /**
