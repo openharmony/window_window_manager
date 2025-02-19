@@ -85,6 +85,7 @@ enum class SessionInterfaceCode {
 
     // keyboard
     TRANS_ID_CHANGE_KEYBOARD_VIEW_MODE,
+    TRANS_ID_GET_DOCK_HEIGHT,
 
     // Extension
     TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
