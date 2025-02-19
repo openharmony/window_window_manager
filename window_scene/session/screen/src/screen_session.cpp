@@ -960,7 +960,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation,
         }
     }
     TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,\
-        displayOrientation:%{public}u,foldDisplayMode:%{public}u",
+        displayOrientation:%{public}u, foldDisplayMode:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation, foldDisplayMode);
@@ -982,7 +982,7 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
     }
     UpdateTouchBoundsAndOffset();
     TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],\
-        rotation:%{public}d,displayOrientation:%{public}u",
+        rotation:%{public}d, displayOrientation:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
         property_.GetBounds().rect_.GetWidth(), property_.GetBounds().rect_.GetHeight(),
         rotation, displayOrientation);
@@ -1691,7 +1691,7 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
             }
             NodeId nodeId = displayNode->GetId();
             TLOGNI(WmsLogTag::DMS, "mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", \
-                nodeId:%{public}" PRIu64"",mirrorScreenId_, screenSession->rsId_, nodeId);
+                nodeId:%{public}" PRIu64"", mirrorScreenId_, screenSession->rsId_, nodeId);
             config = {screenSession->rsId_, true, nodeId, true};
             break;
         }
