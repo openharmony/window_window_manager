@@ -58,14 +58,18 @@ sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sp
 
 sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const SessionInfo& sessionInfo)
 {
-    auto task = [this, sessionInfo]() {
+    auto task = [this, newSessionInfo = sessionInfo]() mutable -> sptr<ExtensionSession> {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "RequestExtensionSession");
-        sptr<ExtensionSession> extensionSession = new ExtensionSession(sessionInfo);
+        sptr<ExtensionSession> extensionSession = sptr<ExtensionSession>::MakeSptr(newSessionInfo);
         extensionSession->SetEventHandler(taskScheduler_->GetEventHandler(), nullptr);
         auto persistentId = extensionSession->GetPersistentId();
-        WLOGFI("persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
-            persistentId, sessionInfo.bundleName_.c_str(), sessionInfo.moduleName_.c_str(),
-            sessionInfo.abilityName_.c_str());
+        TLOGNI(WmsLogTag::WMS_UIEXT,
+            "persistentId: %{public}d, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s",
+            persistentId, newSessionInfo.bundleName_.c_str(), newSessionInfo.moduleName_.c_str(),
+            newSessionInfo.abilityName_.c_str());
+        if (persistentId == INVALID_SESSION_ID) {
+            return nullptr;
+        }
         extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
