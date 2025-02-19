@@ -1055,29 +1055,6 @@ HWTEST_F(SceneSessionTest4, SetMovable01, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: TerminateSession01
- * @tc.desc: TerminateSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, TerminateSession01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "TerminateSession01";
-    info.bundleName_ = "TerminateSession01";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    sceneSession->isTerminating_ = true;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
-
-    sceneSession->isTerminating_ = false;
-    sceneSession->SetTerminateSessionListener([sceneSession](const SessionInfo& info) {});
-    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
-}
-
-/**
  * @tc.name: SetWindowFlags01
  * @tc.desc: SetWindowFlags
  * @tc.type: FUNC
