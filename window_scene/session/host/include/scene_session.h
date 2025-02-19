@@ -543,7 +543,7 @@ public:
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
     int32_t GetStatusBarHeight() override;
-    int32_t GetDockHeight();
+    int32_t GetDockHeight() override;
     bool IsFreeMultiWindowMode() const
     {
         return systemConfig_.IsFreeMultiWindowMode();
