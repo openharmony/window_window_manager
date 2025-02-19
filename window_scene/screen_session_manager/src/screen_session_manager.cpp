@@ -2928,29 +2928,35 @@ void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateCha
 #endif
     } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
         status == ScreenPowerStatus::POWER_STATUS_DOZE || status == ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND) {
-        TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
-        if (isMultiScreenCollaboration_) {
-            TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
-        } else {
-            DmsXcollie dmsXcollie("DMS:UnsubscribeRotationSensor", XCOLLIE_TIMEOUT_10S);
-            ScreenSensorConnector::UnsubscribeRotationSensor();
-        }
-#if defined(SENSOR_ENABLE) && defined(FOLD_ABILITY_ENABLE)
-        if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
-            if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-                SecondaryFoldSensorManager::GetInstance().UnRegisterPostureCallback();
-                SecondaryFoldSensorManager::GetInstance().isPowerRectExe_ = false;
-            } else {
-                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-            }
-        } else {
-            TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
-        }
-#endif
+        UnregisterInHandlerSensorWithPowerOff(reason);
     } else {
         TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
         screenEventTracker_.RecordEvent("HandlerSensor start!");
     }
+}
+
+void ScreenSessionManager::UnregisterInHandlerSensorWithPowerOff(PowerStateChangeReason reason)
+{
+    TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
+    if (isMultiScreenCollaboration_) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
+    } else {
+        DmsXcollie dmsXcollie("DMS:UnsubscribeRotationSensor", XCOLLIE_TIMEOUT_10S);
+        ScreenSensorConnector::UnsubscribeRotationSensor();
+    }
+#if defined(SENSOR_ENABLE) && defined(FOLD_ABILITY_ENABLE)
+    if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH &&
+        !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            SecondaryFoldSensorManager::GetInstance().UnRegisterPostureCallback();
+            SecondaryFoldSensorManager::GetInstance().isPowerRectExe_ = false;
+        } else {
+            FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+        }
+    } else {
+        TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
+    }
+#endif
 }
 
 void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
