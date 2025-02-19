@@ -992,7 +992,7 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindMainWindowWithContext()
             return win;
         }
     }
-    WLOGFW("Can not find main window, not app type");
+    TLOGD(WmsLogTag::WMS_MAIN, "Can not find main window, not app type");
     return nullptr;
 }
 
@@ -2129,33 +2129,33 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     {
         std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
         if (uiContent == nullptr) {
-            WLOGFE("uiContent is nullptr, windowId: %{public}u", GetWindowId());
+            TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null, windowId: %{public}u", GetWindowId());
             return WMError::WM_ERROR_NULLPTR;
         }
         height = uiContent->GetContainerModalTitleHeight();
     }
     if (height == -1) {
         height = 0;
-        WLOGFE("Get app window decor height failed");
+        TLOGD(WmsLogTag::WMS_DECOR, "Get app window decor height failed");
         return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     if (display == nullptr) {
-        WLOGFE("get display failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get display failed displayId: %{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        WLOGFE("get display info failed displayId:%{public}" PRIu64, property_->GetDisplayId());
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get display info failed displayId: %{public}" PRIu64, property_->GetDisplayId());
         return WMError::WM_ERROR_NULLPTR;
     }
     float vpr = GetVirtualPixelRatio(displayInfo);
     if (MathHelper::NearZero(vpr)) {
-        WLOGFE("get decor height failed, because of wrong vpr: %{public}f", vpr);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get decor height failed, because of wrong vpr: %{public}f", vpr);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     height = static_cast<int32_t>(height / vpr);
-    WLOGI("Get app window decor height success, height : %{public}d", height);
+    TLOGD(WmsLogTag::WMS_DECOR, "end, height: %{public}d", height);
     return WMError::WM_OK;
 }
 

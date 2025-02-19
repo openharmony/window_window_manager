@@ -70,7 +70,7 @@ private:
     void InitScreenSessionManagerLiteProxy();
     void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
     void DeleteAllSessionListeners();
-    void ReregisterSessionListener() const;
+    void ReregisterSessionListener();
     void RegisterSMSRecoverListener();
     void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected, bool isCallbackRegistered);
     WMError InitMockSMSProxy();

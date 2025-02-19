@@ -76,7 +76,7 @@ WSError SceneSessionManagerLite::GetSessionInfoByContinueSessionId(
     return SceneSessionManager::GetInstance().GetSessionInfoByContinueSessionId(continueSessionId, sessionInfo);
 }
 
-WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener)
+WSError SceneSessionManagerLite::RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover)
 {
     WLOGFD("run RegisterSessionListener");
     return SceneSessionManager::GetInstance().RegisterSessionListener(listener);
