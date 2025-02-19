@@ -1280,7 +1280,7 @@ HWTEST_F(SessionProxyTest, NotifySubModalTypeChange, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: SetWindowCornerRadius
+ * @tc.name: GetCrossAxisState
  * @tc.desc: normal function
  * @tc.type: FUNC
  */

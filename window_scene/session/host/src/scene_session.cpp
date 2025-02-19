@@ -1252,7 +1252,7 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     WSError ret = WSError::WS_OK;
-    if (reason_ == SizeChangeReason::DRAG_END) {
+    if (reason_ != SizeChangeReason::DRAG_MOVE) {
         UpdateCrossAxisOfLayout(winRect_);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -1650,7 +1650,6 @@ WSError SceneSession::UpdateSessionRect(
         return WSError::WS_DO_NOTHING;
     }
     WSRect newRect = rect;
-    UpdateCrossAxisOfLayout(rect);
     UpdateSessionRectPosYFromClient(reason, moveConfiguration.displayId, newRect);
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
