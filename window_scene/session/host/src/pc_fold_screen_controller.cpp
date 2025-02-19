@@ -27,6 +27,8 @@ namespace {
 constexpr int32_t MOVING_RECORDS_SIZE_LIMIT = 5;
 constexpr int32_t MOVING_RECORDS_TIME_LIMIT = 100;
 constexpr float MOVING_DIRECTLY_BUFF = 2.0f;
+constexpr WSRect ZERO_RECT = { 0, 0, 0, 0 };
+constexpr WSRectF ZERO_RECTF = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 // arrange rule
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
@@ -142,6 +144,17 @@ void PcFoldScreenController::RecordStartMoveRectDirectly(const WSRect& rect, con
     isStartDirectly_ = true;
     startVelocity_ = velocity;
     startVelocity_.posY_ *= MOVING_DIRECTLY_BUFF;
+}
+
+void PcFoldScreenController::ResetRecords()
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
+    std::unique_lock<std::mutex> lock(moveMutex_);
+    startMoveRect_ = ZERO_RECT;
+    isStartFullScreen_ = false;
+    movingRectRecords_.clear();
+    isStartDirectly_ = false;
+    startVelocity_ = ZERO_RECTF;
 }
 
 bool PcFoldScreenController::IsStartFullScreen()

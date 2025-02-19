@@ -59,6 +59,7 @@ public:
     RSAnimationTimingCurve GetThrowSlipTimingCurve();
 
     ScreenSide CalculateScreenSide(const WSRect& rect);
+    bool IsCrossFoldCrease(const WSRect& rect);
 
     void ResetArrangeRule();
     void ResetArrangeRule(ScreenSide side);

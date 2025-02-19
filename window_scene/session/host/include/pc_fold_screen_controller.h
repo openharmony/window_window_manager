@@ -39,6 +39,7 @@ public:
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
     void RecordStartMoveRectDirectly(const WSRect& rect, const WSRectF& velocity, bool isStartFullScreen);
+    void ResetRecords();
     void RecordMoveRects(const WSRect& rect);
     bool ThrowSlip(DisplayId displayId, WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
     void ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect,
