@@ -1437,7 +1437,7 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent, Function | SmallTes
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("OnContainerModalEvent");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->OnContainerModalEvent("not_waterfall_window_event", ""));
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->OnContainerModalEvent("not_waterfall_window_event", ""));
 }
 
 /**
