@@ -1493,6 +1493,27 @@ HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function 
     ssm_->RemoveLifeCycleTaskByPersistentId(3, LifeCycleTaskType::START);
     ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
 }
+
+/**
+ * @tc.name: SetStatusBarAvoidHeight
+ * @tc.desc: test function : SetStatusBarAvoidHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    int32_t height = 10;
+    ssm_->SetStatusBarAvoidHeight(height);
+    WSRect barArea;
+    ssm_->GetStatusBarAvoidHeight(barArea);
+    ASSERT_EQ(barArea.height_, height);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

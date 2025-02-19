@@ -2387,6 +2387,16 @@ public:
     }
 
     /**
+     * @brief Update System Bar (include status bar and nav bar) Properties by Flag
+     * 
+     * @param systemBarProperties map of status bar and nav bar properties
+     * @param systemBarPropertyFlags map of status bar and nav bar properties to be changed
+     * @return WMError
+     */
+    virtual WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+
+    /**
      * @brief Set the single frame composer enabled flag of a window.
      *
      * @param enable true means the single frame composer is enabled, otherwise means the opposite.

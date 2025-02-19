@@ -2187,6 +2187,39 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
     return ret;
 }
 
+WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
+    const std::map<WindowType, SystemBarProperty>& systemBarProperties,
+    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+{
+    for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
+        auto property = GetSystemBarPropertyByType(systemBarType);
+        property.enable_ = systemBarPropertyFlag.enableFlag ?
+            systemBarProperties.at(systemBarType).enable_ : property.enable_;
+        property.backgroundColor_ = systemBarPropertyFlag.backgroundColorFlag ?
+            systemBarProperties.at(systemBarType).backgroundColor_ : property.backgroundColor_;
+        property.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
+            systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
+        property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
+            systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
+
+        if (systemBarPropertyFlag.enableFlag) {
+            property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+        }
+        if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) {
+            property.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
+        }
+
+        if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
+            systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
+            auto err = SetSystemBarProperty(systemBarType, property);
+            if (err != WMError::WM_OK) {
+                return err;
+            }
+        }
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
 {
     return SetSpecificBarProperty(type, property);
