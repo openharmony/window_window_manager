@@ -283,6 +283,24 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };
 
+using AsyncCallbackFunc_ = std::function<void(napi_env env, size_t argc, napi_value* argv)>;
+
+class AsyncCallback : virtual public RefBase {
+public:
+    AsyncCallbackFunc_ resolvedCallback_ = nullptr;
+    AsyncCallbackFunc_ rejectedCallback_ = nullptr;
+    AsyncCallback(AsyncCallbackFunc_ resolvedCallback, AsyncCallbackFunc_ rejectedCallback)
+        : resolvedCallback_(resolvedCallback), rejectedCallback_(rejectedCallback) {}
+};
+
+    /*
+     * Promise
+     */
+    bool CheckPromise(napi_env env, napi_value promiseObj);
+    napi_value ResolvedCallback(napi_env env, napi_callback_info info);
+    napi_value RejectedCallback(napi_env env, napi_callback_info info);
+    bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallback);
+
     napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos);
     napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info);
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);

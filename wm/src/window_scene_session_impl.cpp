@@ -2629,6 +2629,8 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
     bool terminateCloseProcess = false;
     WMError res = NotifyMainWindowClose(terminateCloseProcess);
     if (res == WMError::WM_OK) {
+        TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d, not close: %{public}d", GetPersistentId(),
+            terminateCloseProcess);
         if (!terminateCloseProcess) {
             hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
         }
@@ -2749,19 +2751,26 @@ WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
 
 WMError WindowSceneSessionImpl::Close()
 {
-    WLOGFI("id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d", GetPersistentId());
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WindowType windowType = GetType();
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isSystemSubWindow = WindowHelper::IsSystemSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
+    if (WindowHelper::IsMainWindow(windowType) || isSubWindow) {
+        WMError res = NotifyWindowWillClose(this);
+        if (res == WMError::WM_OK) {
+            TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d will close", GetPersistentId());
+            return res;
+        }
+    }
     if (WindowHelper::IsMainWindow(windowType)) {
         return MainWindowCloseInner();
     } else if (isSubWindow || isSystemSubWindow || isDialogWindow) {
-        WLOGFI("WindowSceneSessionImpl::Close subwindow or dialog");
+        TLOGI(WmsLogTag::WMS_DECOR, "subwindow or dialog");
         bool terminateCloseProcess = false;
         NotifySubWindowClose(terminateCloseProcess);
         if (!terminateCloseProcess || isDialogWindow) {
@@ -2769,6 +2778,22 @@ WMError WindowSceneSessionImpl::Close()
         }
     }
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::CloseDirectly()
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_DECOR, "id: %{public}d", GetPersistentId());
+    if (WindowHelper::IsMainWindow(GetType())) {
+        auto hostSession = GetHostSession();
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLOSE);
+        return WMError::WM_OK;
+    }
+    return Destroy(true);
 }
 
 WMError WindowSceneSessionImpl::DisableAppWindowDecor()
