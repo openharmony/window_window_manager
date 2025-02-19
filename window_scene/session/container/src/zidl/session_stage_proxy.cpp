@@ -1618,7 +1618,7 @@ void SessionStageProxy::NotifyWindowCrossAxisChange(CrossAxisState state)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC_WAKEUP_LATER);
+    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
         return;

@@ -205,7 +205,6 @@ public:
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
-    void RegisterSessionFoldStateChangeListener();
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
     /*
