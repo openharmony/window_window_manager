@@ -162,6 +162,10 @@ public:
     {
         state_ = state;
     }
+
+    /**
+     * Window Immersive
+     */
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override
@@ -170,6 +174,9 @@ public:
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+    WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
