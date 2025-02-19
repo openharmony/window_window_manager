@@ -177,6 +177,7 @@ public:
      */
     static napi_value DisableWindowDecor(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorVisible(napi_env env, napi_callback_info info);
+    static napi_value GetWindowDecorVisible(napi_env env, napi_callback_info info);
     static napi_value SetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     static napi_value SetWindowDecorHeight(napi_env env, napi_callback_info info);
     static napi_value GetWindowDecorHeight(napi_env env, napi_callback_info info);
@@ -361,6 +362,7 @@ private:
      */
     napi_value OnDisableWindowDecor(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorVisible(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowDecorVisible(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetWindowDecorHeight(napi_env env, napi_callback_info info);
     napi_value OnGetWindowDecorHeight(napi_env env, napi_callback_info info);
