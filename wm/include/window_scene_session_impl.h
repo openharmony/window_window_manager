@@ -47,7 +47,6 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WmErrorCode StartMoveWindow() override;
-    WMError Close() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError MoveToAsync(int32_t x, int32_t y) override;
@@ -188,6 +187,8 @@ public:
      * Window Decor
      */
     WMError SetWindowTitle(const std::string& title) override;
+    WMError Close() override;
+    WMError CloseDirectly() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();

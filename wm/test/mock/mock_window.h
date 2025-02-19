@@ -86,6 +86,11 @@ class MockWindowRectChangeListener : public IWindowRectChangeListener {
 public:
     MOCK_METHOD2(OnRectChange, void(Rect rect, WindowSizeChangeReason reason));
 };
+
+class MockIWindowWillCloseListener : public IWindowWillCloseListener {
+public:
+    MOCK_METHOD1(OnWindowWillClose, void(sptr<Window> window));
+};
 } // Rosen
 } // OHOS
 
