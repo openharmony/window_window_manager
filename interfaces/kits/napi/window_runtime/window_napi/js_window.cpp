@@ -3533,7 +3533,8 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             auto apiOrientation = static_cast<ApiOrientation>(resultValue);
             if (apiOrientation < ApiOrientation::BEGIN ||
                 apiOrientation > ApiOrientation::END) {
-                TLOGE(WmsLogTag::WMS_ROTATION, "Orientation %{public}u invalid!", static_cast<uint32_t>(apiOrientation));
+                TLOGE(WmsLogTag::WMS_ROTATION, "Orientation %{public}u invalid!",
+                        static_cast<uint32_t>(apiOrientation));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             } else {
                 requestedOrientation = JS_TO_NATIVE_ORIENTATION_MAP.at(apiOrientation);
@@ -3547,7 +3548,7 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, requestedOrientation, env,
             task = napiAsyncTask, where = __func__] {
         if (errCode != WmErrorCode::WM_OK) {
