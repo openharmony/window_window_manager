@@ -2208,7 +2208,6 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
         if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) {
             property.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
         }
-
         if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
             systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
             auto err = SetSystemBarProperty(systemBarType, property);
