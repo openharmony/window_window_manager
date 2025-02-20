@@ -127,22 +127,6 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_16 = 16;
-sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId, int32_t persistentId)
-{
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Display is null, displayId:%{public}lu, id:%{public}d",
-            displayId, persistentId);
-        return nullptr;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "DisplayInfo is null, displayId:%{public}lu, id:%{public}d",
-            displayId, persistentId);
-        return nullptr;
-    }
-    return displayInfo;
-}
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -4529,17 +4513,29 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 void WindowSceneSessionImpl::UpdateDensity()
 {
     bool needUpdateNewSize = true;
-    auto info = GetDisplayInfoById(GetDisplayId(), GetPersistentId());
+    DisplayId displayId = property_->GetDisplayId();
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
+            displayId, persistentId);
+        return;
+    }
+    auto displayInfo = display->GetDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "DisplayInfo is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
+            displayId, persistentId);
+        return;
+    }
     if (windowSystemConfig_.IsPcWindow()) {
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
-            SingletonContainer::Get<DisplayManager>().GetDisplayById(GetDisplayId());
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
         DMRect availableArea;
         if (display->GetAvailableArea(availableArea) == DMError::DM_OK) {
-            UpdateNewSizeForPCWindow(info, availableArea);
+            UpdateNewSizeForPCWindow(displayInfo, availableArea);
         }
         needUpdateNewSize = false;
     }
-    UpdateDensityInner(info, needUpdateNewSize);
+    UpdateDensityInner(displayInfo, needUpdateNewSize);
 }
 
 void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info, bool needUpdateNewSize)
