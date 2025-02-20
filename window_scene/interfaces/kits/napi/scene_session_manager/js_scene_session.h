@@ -201,7 +201,7 @@ private:
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeInPc(napi_env env, napi_callback_info info);
-    napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info   info);
+    napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleWindowSizeInPc(napi_env env, napi_callback_info info);
     napi_value OnSetCompatibleModeEnableInPad(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
