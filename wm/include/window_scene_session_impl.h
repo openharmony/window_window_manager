@@ -318,7 +318,7 @@ private:
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
 
     void UpdateNewSize();
-    void UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info);
+    void UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info, DMRect availableArea);
 
     /*
      * PC Window Layout
