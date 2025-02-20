@@ -347,7 +347,7 @@ HWTEST_F(WindowSessionLifecycleTest, TerminateSessionNew01, Function | SmallTest
 
     bool needStartCaller = false;
     bool isFromBroker = false;
-    sptr<AAFwk::SessionInfo> info = new (std::nothrow)AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
     session_->terminateSessionFuncNew_ = nullptr;
     session_->TerminateSessionNew(info, needStartCaller, isFromBroker);
 
