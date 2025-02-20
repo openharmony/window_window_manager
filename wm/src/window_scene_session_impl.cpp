@@ -2039,7 +2039,13 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
 
     if (IsPcOrPadFreeMultiWindowMode() && property_->GetCompatibleModeInPc()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, not suppported");
+        SetLayoutFullScreenByApiVersion(status);
+        // compatibleMode app may set statusBarColor before ignoreSafeArea
+        auto systemBarProperties = property_->GetSystemBarProperty();
+        if (status && systemBarProperties.find(WindowType::WINDOW_TYPE_STATUS_BAR) != systemBarProperties.end()) {
+            auto statusBarProperty = systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
+            HookDecorButtonStyleInCompatibleMode(statusBarProperty.contentColor_);
+        }
         return WMError::WM_OK;
     }
 
@@ -2141,12 +2147,33 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->SetStatusBarItemColor(property.contentColor_);
         }
+        if (property_->GetCompatibleModeInPc() && isIgnoreSafeArea_) {
+            HookDecorButtonStyleInCompatibleMode(property.contentColor_);
+        }
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS);
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
     }
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color)
+{
+    if (!property_->GetCompatibleModeInPc()) {
+        return;
+    }
+    auto alpha = (color >> 24) & 0xFF;
+    auto red = (color >> 16) & 0xFF;
+    auto green = (color >> 8) & 0xFF;
+    auto blue = color & 0xFF;
+    // calculate luminance, Identify whether a color is more black or more white.
+    double luminance = 0.299 * red + 0.587 * green + 0.114 * blue;
+    DecorButtonStyle style;
+    style.colorMode = ((luminance > (0xFF>>1)) || (alpha == 0x00)) ? LIGHT_COLOR_MODE : DARK_COLOR_MODE;
+    TLOGI(WmsLogTag::WMS_DECOR, "contentColor:%{public}d luminance:%{public}f colorMode:%{public}d",
+        color, luminance, style.colorMode);
+    SetDecorButtonStyle(style);
 }
 
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -4021,7 +4048,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
-    if (windowSystemConfig_.IsPcWindow()) {
+    if (windowSystemConfig_.IsPcWindow() && !property_->GetCompatibleModeInPc()) {
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             ret = SetLayoutFullScreenByApiVersion(true);
             if (ret != WMError::WM_OK) {

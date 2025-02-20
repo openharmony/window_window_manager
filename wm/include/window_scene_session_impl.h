@@ -168,6 +168,7 @@ public:
     WSError CompatibleFullScreenRecover() override;
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
+    void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
 
     /*
      * Free Multi Window

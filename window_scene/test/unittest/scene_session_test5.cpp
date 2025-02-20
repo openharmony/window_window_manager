@@ -133,6 +133,48 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: HookAvoidAreaInCompatibleMode
+ * @tc.desc: HookAvoidAreaInCompatibleMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "HookAvoidAreaInCompatibleMode";
+    info.bundleName_ = "HookAvoidAreaInCompatibleMode";
+
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    WSRect rect = {800, 100, 1000, 1000};
+    AvoidArea avoidArea;
+    avoidArea.topRect_ = {-1, -1, -1, -1};
+    avoidArea.bottomRect_ = {-1, -1, -1, -1};
+    Rect invalidRect = {-1, -1, -1, -1};
+    // hook Func only support compatibleMode
+    session->SetCompatibleModeInPc(false, true);
+    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+    EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
+    session->SetCompatibleModeInPc(true, true);
+    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+    EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
+
+    // test top system avoidArea
+    session->SetCompatibleModeInPc(true, true);
+    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+    auto vpr = 3.5f;
+    Rect targetRect = {rect.posX_, rect.posY_, 40 * vpr, rect.width_};
+    EXPECT_TRUE(avoidArea.topRect_ == targetRect);
+
+    // test buttom aiBar avoidArea
+    session->HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    targetRect = {rect.posX_, rect.posY_ + rect.height_ - 28 * vpr, rect.width_, 28 * vpr};
+    EXPECT_TRUE(avoidArea.bottomRect_ == targetRect);
+}
+
+/**
  * @tc.name: GetSystemAvoidArea01
  * @tc.desc: GetSystemAvoidArea01 function
  * @tc.type: FUNC
