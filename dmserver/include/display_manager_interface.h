@@ -197,7 +197,7 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
-    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "") { return DMError::DM_OK; }
 
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 

@@ -677,9 +677,10 @@ public:
      * @brief Change the display mode of the foldable device from js.
      *
      * @param mode target display mode to change.
+     * @param reason display mode change reason.
      * @return DM_OK means set success, others means set failed.
      */
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode);
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason = "");
 
     /**
      * @brief Set display scale.
