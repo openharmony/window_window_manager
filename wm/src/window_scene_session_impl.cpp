@@ -4537,7 +4537,7 @@ void WindowSceneSessionImpl::UpdateDensity()
     UpdateDensityInner(info, needUpdateNewSize);
 }
 
-void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
+void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info, bool needUpdateNewSize = true)
 {
     if (!userLimitsSet_) {
         UpdateWindowSizeLimits();
@@ -5174,33 +5174,28 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     return WMError::WM_OK;
 }
 
-void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info)
+void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& display)
 {
     if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Fullscreen could not update new size, Id:%{public}u", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT, "fullscreen could not update new size, Id:%{public}u", GetPersistentId());
         return;
     }
     DMRect availableArea;
-    DMError ret = display->GetAvailableArea(availableArea);
-    if (ret != DMError::DM_OK) {
+    if (display->GetAvailableArea(availableArea) != DMError::DM_OK) {
         return;
     }
     int32_t displayWidth = availableArea.width_;
     int32_t displayHeight = availableArea.height_;
     float currVpr = virtualPixelRatio_;
-    float newVpr = GetVirtualPixelRatio(info);
+    float newVpr = GetVirtualPixelRatio(display);
     Rect windowRect = GetRect();
     int32_t left = windowRect.posX_;
     int32_t top = windowRect.posY_;
-    uint32_t width = windowRect.width_;
-    uint32_t height = windowRect.height_;
-    uint32_t statusBarHeight = GetStatusBarHeight();
-    uint32_t dockHeight = GetDockHeight();
+    int32_t width = windowRect.width_;
+    int32_t height = windowRect.height_;
+    int32_t statusBarHeight = GetStatusBarHeight();
+    int32_t dockHeight = GetDockHeight();
     bool needMove = false;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, left:%{public}u, top:%{public}u, width:%{public}u, height:%{public}u, "
-        "statusBarHeight:%{public}u, dockHeight:%{public}u, displayWidth:%{public}u, displayHeight:%{public}u, "
-        "currVpr:%{public}f, newVpr:%{public}f", GetPersistentId(), left, top, width, height, statusBarHeight,
-        dockHeight, displayWidth, displayHeight, currVpr, newVpr);
     if (!MathHelper::NearZero(currVpr - newVpr) && !MathHelper::NearZero(currVpr)) {
         width = width * newVpr / currVpr;
         height = height * newVpr / currVpr;
@@ -5210,29 +5205,23 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& i
         if (height > (displayHeight - statusBarHeight - dockHeight)) {
             height = displayHeight - statusBarHeight - dockHeight;
         }
+        needMove = top < statusBarHeight || left < 0 || top + height > (displayHeight - dockHeight) ||
+            left + width > displayWidth;
         if (top < statusBarHeight) {
             top = statusBarHeight;
-            needMove = true;
         }
         if (left < 0) {
             left = 0;
-            needMove = true;
         }
         if (top + height > (displayHeight - dockHeight)) {
             top = displayHeight - dockHeight - height;
-            needMove = true;
         }
         if (left + width > displayWidth) {
             left = displayWidth - width;
-            needMove = true;
         }
         Resize(width, height);
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Resize window by limits. Id:%{public}u, width:%{public}u,"
-            " height: %{public}u", GetPersistentId(), width, height);
         if (needMove) {
             MoveTo(left, top);
-            TLOGI(WmsLogTag::WMS_LAYOUT, "Move window by limits. Id:%{public}u, left:%{public}u,"
-                " top:%{public}u", GetPersistentId(), left, top);
         }
     }
 }
