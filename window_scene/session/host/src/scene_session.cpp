@@ -3307,7 +3307,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1);
+            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
             movedSurfaceNode->SetIsCrossNode(true);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
         }
