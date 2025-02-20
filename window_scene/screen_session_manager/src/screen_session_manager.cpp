@@ -8029,11 +8029,6 @@ bool ScreenSessionManager::IsOrientationNeedChanged()
     if (GetFoldDisplayMode() == FoldDisplayMode::GLOBAL_FULL) {
         return true;
     }
-    if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
-        GetFoldDisplayMode() == FoldDisplayMode::MAIN &&
-        !GetTentMode() && !GetCameraMode()) {
-        return true;
-    }
     return false;
 }
 
