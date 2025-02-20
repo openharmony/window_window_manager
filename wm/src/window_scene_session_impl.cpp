@@ -1149,6 +1149,13 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr && type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+        if (display != nullptr) {
+            property_->SetDisplayId(display->GetId());
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "use default display id: %{public}" PRIu64, display->GetId());
+        }
+    }
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, display is null, name: %{public}s, id: %{public}d",
             property_->GetWindowName().c_str(), GetPersistentId());
