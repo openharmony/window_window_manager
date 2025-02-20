@@ -35,7 +35,7 @@ public:
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
-    MOCK_METHOD2(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority));
+    MOCK_METHOD2(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
 
@@ -434,18 +434,18 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _, _, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _, _, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetTypeNodeEnabled(false);
     ASSERT_EQ(false, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _, _, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetNavigationId("");
     ASSERT_EQ("", pipControl->pipOption_->GetNavigationId());
