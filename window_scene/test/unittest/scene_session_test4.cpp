@@ -911,7 +911,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP01, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = false;
-    auto result = sceneSession->SetAutoStartPiP(true, 0);
+    auto result = sceneSession->SetAutoStartPiP(true, 0, 1, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -931,11 +931,11 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP02, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag, uint32_t status) {
+    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag, uint32_t status, uint32_t width, uint32_t height) {
         return;
     };
     sceneSession->autoStartPiPStatusChangeFunc_ = func;
-    auto result = sceneSession->SetAutoStartPiP(true, 1);
+    auto result = sceneSession->SetAutoStartPiP(true, 1, 1, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -955,7 +955,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP03, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    auto result = sceneSession->SetAutoStartPiP(true, 0);
+    auto result = sceneSession->SetAutoStartPiP(true, 0, 1, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
