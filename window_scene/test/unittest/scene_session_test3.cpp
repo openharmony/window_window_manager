@@ -21,11 +21,13 @@
 #include "mock/mock_session_stage.h"
 #include "pointer_event.h"
 
-#define private public
-#define protected public
 #include "session/host/include/main_session.h"
 #include "session/host/include/keyboard_session.h"
+#define private public
+#define protected public
 #include "session/host/include/scene_session.h"
+#undef private
+#undef protected
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
 #include "ui/rs_surface_node.h"
@@ -795,7 +797,6 @@ HWTEST_F(SceneSessionTest3, AddExtensionTokenInfo, Function | SmallTest | Level2
     info.abilityName_ = "AddExtensionTokenInfo";
     info.bundleName_ = "AddExtensionTokenInfo";
     sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scenesession, nullptr);
     
     auto res = scenesession->extensionTokenInfos_.size();
     scenesession->AddExtensionTokenInfo(tokenInfo);
@@ -815,10 +816,9 @@ HWTEST_F(SceneSessionTest3, RemoveExtensionTokenInfo, Function | SmallTest | Lev
     info.abilityName_ = "RemoveExtensionTokenInfo";
     info.bundleName_ = "RemoveExtensionTokenInfo";
     sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(scenesession, nullptr);
+
     auto res = scenesession->extensionTokenInfos_.size();
     scenesession->RemoveExtensionTokenInfo(tokenInfo.abilityToken);
-    
     EXPECT_EQ(scenesession->extensionTokenInfos_.size() <= res, true);
 }
 
@@ -892,7 +892,6 @@ HWTEST_F(SceneSessionTest3, NotifyTargetScreenWidthAndHeight, Function | SmallTe
     info.bundleName_ = "NotifyTargetScreenWidthAndHeight";
     sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
     
-    EXPECT_NE(scenesession, nullptr);
     scenesession->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
     EXPECT_EQ(scenesession->isScreenAngleMismatch_, isScreenAngleMismatch);
     EXPECT_EQ(scenesession->targetScreenWidth_, screenWidth);
@@ -912,7 +911,6 @@ HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, Function | SmallTest | Level2
     info.bundleName_ = "SetIsStatusBarVisible";
     sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
     
-    EXPECT_NE(scenesession, nullptr);
     scenesession->SetIsStatusBarVisible(isVisible);
     EXPECT_EQ(scenesession->isStatusBarVisible_, isVisible);
 }
@@ -930,7 +928,6 @@ HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, Function | SmallTest | Level2)
     info.bundleName_ = "GetAllAvoidAreas";
     sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
     
-    EXPECT_NE(scenesession, nullptr);
     auto res = scenesession->GetAllAvoidAreas(avoidAreas);
     EXPECT_EQ(res, WSError::WS_OK);
 }
@@ -950,7 +947,6 @@ HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, Function | SmallTest | Le
     info.bundleName_ = "NotifyPipWindowSizeChange";
     sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
     
-    EXPECT_NE(scenesession, nullptr);
     auto res = scenesession->NotifyPipWindowSizeChange(width, height, scale);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
@@ -969,7 +965,6 @@ HWTEST_F(SceneSessionTest3, SendPointEventForMoveDrag, Function | SmallTest | Le
     info.bundleName_ = "SendPointEventForMoveDrag";
     sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
     
-    EXPECT_NE(scenesession, nullptr);
     auto res = scenesession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
     EXPECT_EQ(res, WSError::WS_OK);
 }
