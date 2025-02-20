@@ -658,6 +658,54 @@ HWTEST_F(PcFoldScreenManagerTest, ExecuteFoldScreenStatusChangeCallbacks, Functi
 }
 
 /**
+ * @tc.name: RegisterSystemKeyboardStatusChangeCallback
+ * @tc.desc: test function : RegisterSystemKeyboardStatusChangeCallback, UnregisterSystemKeyboardStatusChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, RegisterSystemKeyboardStatusChangeCallback, Function | SmallTest | Level2)
+{
+    auto& callbacks = manager_.systemKeyboardStatusChangeCallbacks_;
+    callbacks.clear();
+    EXPECT_EQ(callbacks.size(), 0);
+    int32_t persistentId = 100;
+    auto func = std::make_shared<SystemKeyboardStatusChangeCallback>(
+        [](DisplayId displayId, bool hasSystemKeyboard) {}
+    );
+    manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
+        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+    EXPECT_NE(callbacks.find(persistentId), callbacks.end());
+    manager_.UnregisterSystemKeyboardStatusChangeCallback(persistentId);
+    EXPECT_EQ(callbacks.find(persistentId), callbacks.end());
+}
+
+/**
+ * @tc.name: ExecuteSystemKeyboardStatusChangeCallbacks
+ * @tc.desc: test function : ExecuteSystemKeyboardStatusChangeCallbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, ExecuteSystemKeyboardStatusChangeCallbacks, Function | SmallTest | Level2)
+{
+    auto& callbacks = manager_.systemKeyboardStatusChangeCallbacks_;
+    callbacks.clear();
+    EXPECT_EQ(callbacks.size(), 0);
+    int32_t persistentId = 100;
+    DisplayId testDisplayId = 0;
+    bool testStatus = false;
+    auto func = std::make_shared<SystemKeyboardStatusChangeCallback>(
+        [&testDisplayId, &testStatus](DisplayId displayId, bool hasSystemKeyboard) {
+            testDisplayId = displayId;
+            testStatus = hasSystemKeyboard;
+        }
+    );
+    manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
+        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+    EXPECT_NE(callbacks.find(persistentId), callbacks.end());
+    manager_.ExecuteSystemKeyboardStatusChangeCallbacks(100, true);
+    EXPECT_EQ(testDisplayId, 100);
+    EXPECT_EQ(testStatus, true);
+}
+
+/**
  * @tc.name: GetVpr
  * @tc.desc: test function : GetVpr
  * @tc.type: FUNC
@@ -682,6 +730,24 @@ HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Le
     EXPECT_TRUE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
     manager_.UpdateSystemKeyboardStatus(true);
     EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+}
+
+/**
+ * @tc.name: OnConnect
+ * @tc.desc: test function : OnConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
+{
+    mainSession_->sessionInfo_.screenId_ = DEFAULT_DISPLAY_ID;
+    SetExpanded();
+    controller_->OnConnect();
+    EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
+    controller_->onFoldScreenStatusChangeCallback_ = nullptr;
+    controller_->onSystemKeyboardStatusChangeCallback_ = nullptr;
+    SetExpanded();
+    controller_->OnConnect();
+    EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
 }
 
 /**
@@ -1021,6 +1087,18 @@ HWTEST_F(PcFoldScreenControllerTest, CalculateMovingVelocity, Function | SmallTe
     // throw directly
     controller_->RecordStartMoveRectDirectly(rect0, B_VELOCITY, false);
     EXPECT_EQ(controller_->startVelocity_, controller_->CalculateMovingVelocity());
+}
+
+/**
+ * @tc.name: IsSupportEnterWaterfallMode
+ * @tc.desc: test function : IsSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, IsSupportEnterWaterfallMode, Function | SmallTest | Level2)
+{
+    EXPECT_TRUE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::HALF_FOLDED, false));
+    EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::HALF_FOLDED, true));
+    EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::EXPANDED, false));
 }
 }
 }
