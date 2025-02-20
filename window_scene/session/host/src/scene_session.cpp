@@ -5508,7 +5508,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint3
 {
     TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u width:%{public}u height:%{public}u",
         isAutoStart, priority, width, height);
-    PostTask([weakThis = wptr(this), isAutoStart, priority, width, height] {
+    PostTask([weakThis = wptr(this), isAutoStart, priority, width, height, where = __func__] {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null or is terminating", where);
