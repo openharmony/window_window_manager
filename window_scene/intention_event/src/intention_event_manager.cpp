@@ -82,11 +82,11 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
     if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "uiContent is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "gjb uiContent is null");
         return false;
     }
     if (eventHandler == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "gjb eventHandler is null");
         return false;
     }
     auto listener =

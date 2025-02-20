@@ -1344,7 +1344,8 @@ void WindowImpl::SetDefaultDisplayIdIfNeed()
 
 WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRuntime::Context>& context)
 {
-    WLOGFD("Window[%{public}s] Create", name_.c_str());
+    WLOGFI("gjb5 Window[%{public}s] Create", name_.c_str());
+    
     WMError ret = WindowCreateCheck(parentId);
     if (ret != WMError::WM_OK) {
         return ret;
