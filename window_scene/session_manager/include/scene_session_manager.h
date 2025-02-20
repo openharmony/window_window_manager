@@ -704,6 +704,8 @@ private:
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
+    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo, bool& isColdStart,
+        bool isUserSwitch = false);
 
     /*
      * Window Focus
@@ -773,8 +775,6 @@ private:
     void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
     std::string GetHighlightIdsStr();
-    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo, bool& isColdStart,
-        bool isUserSwitch = false);
 
     /*
      * PC Window
@@ -1006,7 +1006,6 @@ private:
     FocusChangeReason focusChangeReason_ = FocusChangeReason::DEFAULT;
     bool needBlockNotifyFocusStatusUntilForeground_ { false };
     bool needBlockNotifyUnfocusStatus_ { false };
-    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
 
     /*
      * DFX
@@ -1307,6 +1306,7 @@ private:
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
 
     /*
      * Window Pattern

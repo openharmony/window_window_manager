@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "session_manager/include/ffrt_queue_helper.h"
+#include "ffrt_queue_helper.h"
 #include <cstdint>
 #include "ffrt_inner.h"
 
