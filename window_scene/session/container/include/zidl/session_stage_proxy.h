@@ -78,7 +78,7 @@ public:
 
     WSError SetDragActivated(bool dragActivated) override;
     WSError SetEnableDragBySystem(bool dragEnable) override;
-
+    WSError NotifyHighlightChange(bool isHighlight) override;
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
