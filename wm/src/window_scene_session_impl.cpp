@@ -4517,13 +4517,13 @@ void WindowSceneSessionImpl::UpdateDensity()
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
-            displayId, persistentId);
+            displayId, GetPersistentId());
         return;
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "DisplayInfo is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
-            displayId, persistentId);
+            displayId, GetPersistentId());
         return;
     }
     if (windowSystemConfig_.IsPcWindow()) {
