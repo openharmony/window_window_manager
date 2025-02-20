@@ -1668,6 +1668,10 @@ uint32_t SceneSessionManager::GetLockScreenZOrder()
 WMError SceneSessionManager::CheckUIExtensionCreation(int32_t windowId, uint32_t callingTokenId,
     const AppExecFwk::ElementName& element, AppExecFwk::ExtensionAbilityType extensionAbilityType, int32_t& pid)
 {
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     auto task = [this, windowId, callingTokenId, &element, extensionAbilityType, &pid] {
         pid = INVALID_PID;
         auto sceneSession = GetSceneSession(windowId);
