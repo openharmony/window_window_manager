@@ -73,6 +73,7 @@ void WindowInspector::ConnectServer()
     setWMSCallbackFunc_ = reinterpret_cast<SetWMSCallbackFunc>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
     sendWMSMessageFunc_ = reinterpret_cast<SendWMSMessageFunc>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
     if (setWMSCallbackFunc_ == nullptr || sendWMSMessageFunc_ == nullptr) {
+        CloseConnectFromServer();
         setWMSCallbackFunc_ = nullptr;
         sendWMSMessageFunc_ = nullptr;
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load failed: %{public}s", dlerror());
@@ -85,6 +86,7 @@ void WindowInspector::ConnectServer()
         }
     });
     isConnectServerSuccess_ = true;
+    CloseConnectFromServer();
 }
 
 void WindowInspector::CloseConnectFromServer()
