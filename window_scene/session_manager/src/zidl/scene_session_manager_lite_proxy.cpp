@@ -187,7 +187,7 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToBackgroundForDelegator(con
     return static_cast<WSError>(reply.ReadInt32());
 }
 
-WSError SceneSessionManagerLiteProxy::RegisterSessionListener(const sptr<ISessionListener>& listener)
+WSError SceneSessionManagerLiteProxy::RegisterSessionListener(const sptr<ISessionListener>& listener, bool isRecover)
 {
     WLOGFD("run SceneSessionManagerLiteProxy::RegisterSessionListener");
     MessageParcel data;
