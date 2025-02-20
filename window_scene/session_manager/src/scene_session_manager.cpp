@@ -2384,7 +2384,7 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::S
     bool& isColdStart, bool isUserSwitch)
 {
     auto retCode = std::make_shared<int32_t>(0);
-    bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([abilitySessionInfo, &isColdStart, retCode, isUserSwitch]() {
+    bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([abilitySessionInfo, &isColdStart, retCode, isUserSwitch] {
         if (isUserSwitch) {
             auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
                 isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
@@ -10118,8 +10118,8 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
         auto ret = std::make_shared<int32_t>(0);
-        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, &sessionInfo, &accessTokenIDEx,
-            ret]() {
+        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, &sessionInfo, accessTokenIDEx,
+            ret] {
             auto result = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_,
                 *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
             *ret = static_cast<int32_t>(result);
