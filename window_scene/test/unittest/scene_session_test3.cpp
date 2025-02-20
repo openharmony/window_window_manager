@@ -23,7 +23,11 @@
 
 #include "session/host/include/main_session.h"
 #include "session/host/include/keyboard_session.h"
+#define private public
+#define protected public
 #include "session/host/include/scene_session.h"
+#undef private
+#undef protected
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
 #include "ui/rs_surface_node.h"
@@ -778,6 +782,191 @@ HWTEST_F(SceneSessionTest3, SetSidebarMaskColorModifier, Function | SmallTest | 
     session->SetSidebarMaskColorModifier(true);
     Rosen::RSColor colorOpen = session->maskColorValue_->Get();
     EXPECT_EQ(session->snapshotMaskColor_, colorOpen.AsArgbInt());
+}
+
+/**
+ * @tc.name: AddExtensionTokenInfo
+ * @tc.desc: AddExtensionTokenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, AddExtensionTokenInfo, Function | SmallTest | Level2)
+{
+    UIExtensionTokenInfo tokenInfo;
+    tokenInfo.abilityToken = nullptr;
+    SessionInfo info;
+    info.abilityName_ = "AddExtensionTokenInfo";
+    info.bundleName_ = "AddExtensionTokenInfo";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = scenesession->extensionTokenInfos_.size();
+    scenesession->AddExtensionTokenInfo(tokenInfo);
+    EXPECT_EQ(scenesession->extensionTokenInfos_.size(), res + 1);
+}
+
+/**
+ * @tc.name: RemoveExtensionTokenInfo
+ * @tc.desc: RemoveExtensionTokenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RemoveExtensionTokenInfo, Function | SmallTest | Level2)
+{
+    UIExtensionTokenInfo tokenInfo;
+    tokenInfo.abilityToken = nullptr;
+    SessionInfo info;
+    info.abilityName_ = "RemoveExtensionTokenInfo";
+    info.bundleName_ = "RemoveExtensionTokenInfo";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    auto res = scenesession->extensionTokenInfos_.size();
+    scenesession->RemoveExtensionTokenInfo(tokenInfo.abilityToken);
+    EXPECT_EQ(scenesession->extensionTokenInfos_.size() <= res, true);
+}
+
+/**
+ * @tc.name: OnNotifyAboveLockScreen
+ * @tc.desc: OnNotifyAboveLockScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, OnNotifyAboveLockScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnNotifyAboveLockScreen";
+    info.bundleName_ = "OnNotifyAboveLockScreen";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    scenesession->OnNotifyAboveLockScreen();
+    EXPECT_NE(scenesession, nullptr);
+    scenesession->CheckExtensionOnLockScreenToClose();
+    EXPECT_NE(scenesession, nullptr);
+}
+
+/**
+ * @tc.name: CloseExtensionSync
+ * @tc.desc: CloseExtensionSync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, CloseExtensionSync, Function | SmallTest | Level2)
+{
+    UIExtensionTokenInfo tokenInfo;
+    tokenInfo.abilityToken = nullptr;
+    SessionInfo info;
+    info.abilityName_ = "CloseExtensionSync";
+    info.bundleName_ = "CloseExtensionSync";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    scenesession->CloseExtensionSync(tokenInfo);
+    EXPECT_NE(scenesession, nullptr);
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromApp
+ * @tc.desc: NotifyFrameLayoutFinishFromApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyFrameLayoutFinishFromApp, Function | SmallTest | Level2)
+{
+    bool notifyListener = 0;
+    WSRect rect{10, 10, 10, 10};
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromApp";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromApp";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = scenesession->NotifyFrameLayoutFinishFromApp(notifyListener, rect);
+    EXPECT_EQ(scenesession->layoutRect_, rect);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyTargetScreenWidthAndHeight
+ * @tc.desc: NotifyTargetScreenWidthAndHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyTargetScreenWidthAndHeight, Function | SmallTest | Level2)
+{
+    uint32_t screenWidth = 10;
+    uint32_t screenHeight = 10;
+    bool isScreenAngleMismatch = true;
+    SessionInfo info;
+    info.abilityName_ = "NotifyTargetScreenWidthAndHeight";
+    info.bundleName_ = "NotifyTargetScreenWidthAndHeight";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    scenesession->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
+    EXPECT_EQ(scenesession->isScreenAngleMismatch_, isScreenAngleMismatch);
+    EXPECT_EQ(scenesession->targetScreenWidth_, screenWidth);
+    EXPECT_EQ(scenesession->targetScreenHeight_, screenHeight);
+}
+
+/**
+ * @tc.name: SetIsStatusBarVisible
+ * @tc.desc: SetIsStatusBarVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, Function | SmallTest | Level2)
+{
+    bool isVisible = true;
+    SessionInfo info;
+    info.abilityName_ = "SetIsStatusBarVisible";
+    info.bundleName_ = "SetIsStatusBarVisible";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    scenesession->SetIsStatusBarVisible(isVisible);
+    EXPECT_EQ(scenesession->isStatusBarVisible_, isVisible);
+}
+
+/**
+ * @tc.name: GetAllAvoidAreas
+ * @tc.desc: GetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, Function | SmallTest | Level2)
+{
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    SessionInfo info;
+    info.abilityName_ = "GetAllAvoidAreas";
+    info.bundleName_ = "GetAllAvoidAreas";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = scenesession->GetAllAvoidAreas(avoidAreas);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyPipWindowSizeChange
+ * @tc.desc: NotifyPipWindowSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, Function | SmallTest | Level2)
+{
+    uint32_t width = 10;
+    uint32_t height = 10;
+    double scale = 10;
+    SessionInfo info;
+    info.abilityName_ = "NotifyPipWindowSizeChange";
+    info.bundleName_ = "NotifyPipWindowSizeChange";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = scenesession->NotifyPipWindowSizeChange(width, height, scale);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SendPointEventForMoveDrag
+ * @tc.desc: SendPointEventForMoveDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SendPointEventForMoveDrag, Function | SmallTest | Level2)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    bool isExecuteDelayRaise = true;
+    SessionInfo info;
+    info.abilityName_ = "SendPointEventForMoveDrag";
+    info.bundleName_ = "SendPointEventForMoveDrag";
+    sptr<SceneSession> scenesession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = scenesession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
+    EXPECT_EQ(res, WSError::WS_OK);
 }
 }
 }
