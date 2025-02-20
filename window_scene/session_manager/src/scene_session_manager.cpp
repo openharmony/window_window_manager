@@ -3239,7 +3239,7 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
             return true;
         } else {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission failed");
+            TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission failed.");
             return false;
         }
     }
