@@ -169,6 +169,13 @@ ScreenSide PcFoldScreenManager::CalculateScreenSide(const WSRect& rect)
         ScreenSide::FOLD_B : ScreenSide::FOLD_C;
 }
 
+bool PcFoldScreenManager::IsCrossFoldCrease(const WSRect& rect)
+{
+    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
+    const int32_t midScreenY = defaultDisplayRect.posY_ + defaultDisplayRect.height_;
+    return rect.posY_ < midScreenY && rect.posY_ + rect.height_ > midScreenY;
+}
+
 void PcFoldScreenManager::ResetArrangeRule()
 {
     std::unique_lock<std::mutex> lock(arrangedRectsMutex_);
@@ -231,13 +238,16 @@ bool PcFoldScreenManager::NeedDoThrowSlip(const WSRect& rect, const WSRectF& vel
 
     // velocity check
     const WSRect& backtracingRect = CalculateThrowBacktracingRect(rect, velocity);
-    if (!CheckVelocityOrientation(backtracingRect, velocity)) {
+    if (!CheckVelocityOrientation(backtracingRect, velocity) && !IsCrossFoldCrease(rect)) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "orientation check failed, rect: %{public}s, velocity: %{public}s",
             backtracingRect.ToString().c_str(), velocity.ToString().c_str());
         return false;
     }
 
-    const ScreenSide startSide = CalculateScreenSide(backtracingRect);
+    ScreenSide startSide = CalculateScreenSide(backtracingRect);
+    if (IsCrossFoldCrease(rect)) {
+        startSide = MathHelper::GreatNotEqual(velocity.posY_, 0.0f) ? ScreenSide::FOLD_B : ScreenSide::FOLD_C;
+    }
     const WSRect& endRect = CalculateThrowEnd(backtracingRect, velocity);
     const ScreenSide endSide = CalculateScreenSide(endRect);
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "backtracingRect: %{public}s, endRect: %{public}s",
