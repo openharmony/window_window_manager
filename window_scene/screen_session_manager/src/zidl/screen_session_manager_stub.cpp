@@ -961,6 +961,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HOOK_INFO: {
+            int32_t uid = data.ReadInt32();
+            DMHookInfo hookInfo;
+            GetDisplayHookInfo(uid, hookInfo);
+            static_cast<void>(reply.WriteUint32(hookInfo.width_));
+            static_cast<void>(reply.WriteUint32(hookInfo.height_));
+            static_cast<void>(reply.WriteFloat(hookInfo.density_));
+            static_cast<void>(reply.WriteUint32(hookInfo.width_));
+            static_cast<void>(reply.WriteBool(hookInfo.enableHookRotation_));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION: {
             ProcGetAllDisplayPhysicalResolution(data, reply);
             break;

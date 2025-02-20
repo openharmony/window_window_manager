@@ -651,6 +651,15 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 
+void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->GetDisplayHookInfo(uid, hookInfo);
+}
+
 void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)
 {
     if (displayChangeListener_) {
