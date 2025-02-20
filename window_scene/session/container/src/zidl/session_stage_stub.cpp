@@ -176,6 +176,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleExtensionHostData(data, reply, option);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
             return HandleSetDragActivated(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
+            return HandleNotifyPipSizeChange(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -627,6 +629,25 @@ int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    uint32_t width;
+    if (!data.ReadUint32(width)) {
+        return ERR_INVALID_VALUE;
+    }
+    uint32_t height;
+    if (!data.ReadUint32(height)) {
+        return ERR_INVALID_VALUE;
+    }
+    float scale;
+    if (!data.ReadFloat(scale)) {
+        return ERR_INVALID_VALUE;
+    }
+    NotifyPipWindowSizeChange(width, height, scale);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called!");
@@ -638,4 +659,5 @@ int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessagePa
     NotifyHighlightChange(isHighlight);
     return ERR_NONE;
 }
+
 } // namespace OHOS::Rosen

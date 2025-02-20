@@ -211,12 +211,14 @@ public:
     bool GetIsUIExtensionSubWindowFlag() const;
     void SetIsUIExtensionAbilityProcess(bool isUIExtensionAbilityProcess);
     bool GetIsUIExtensionAbilityProcess() const;
+    void SetConstrainedModal(bool isConstrainedModal);
+    bool IsConstrainedModal() const;
 
     /**
      * PC Window
      */
-    void SetSupportWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes);
-    void GetSupportWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportWindowModes) const;
+    void SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void GetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const;
 
     /*
      * Keyboard
@@ -378,12 +380,13 @@ private:
     bool isUIExtensionSubWindowFlag_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isConstrainedModal_ = false;
 
     /**
      * PC Window
      */
     mutable std::mutex supportWindowModesMutex_;
-    std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
 
     /*
      * Keyboard

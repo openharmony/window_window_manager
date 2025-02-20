@@ -94,11 +94,15 @@ using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)
 using NotifyVisibleChangeFunc = std::function<void(int32_t persistentId)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
 using NotifyMainWindowTopmostChangeFunc = std::function<void(bool isTopmost)>;
+using GetConstrainedModalExtWindowInfoFunc =
+    std::function<std::optional<ExtensionWindowEventInfo>(const sptr<SceneSession>& sceneSession)>;
 using UpdateGestureBackEnabledCallback = std::function<void(int32_t persistentId)>;
 using IsLastFrameLayoutFinishedFunc = std::function<WSError(bool& isLayoutFinished)>;
 using GetStatusBarDefaultVisibilityByDisplayIdFunc = std::function<bool(DisplayId displayId)>;
 using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isNeedControl)>;
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
+using NotifySetSupportedWindowModesFunc = std::function<void(
+    std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -247,6 +251,7 @@ public:
     void SetAutoStartPiPStatusChangeCallback(const NotifyAutoStartPiPStatusChangeFunc& func);
     WSError SetPipActionEvent(const std::string& action, int32_t status);
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status);
+    WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale);
     void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
 
     void RequestHideKeyboard(bool isAppColdStart = false);
@@ -301,6 +306,7 @@ public:
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     void RegisterSubModalTypeChangeCallback(NotifySubModalTypeChangeFunc&& func);
     void RegisterMainModalTypeChangeCallback(NotifyMainModalTypeChangeFunc&& func);
+    void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
 
     /*
      * PC Window Layout
@@ -493,9 +499,9 @@ public:
     void CheckExtensionOnLockScreenToClose();
     void CloseExtensionSync(const UIExtensionTokenInfo& tokenInfo);
     void OnNotifyAboveLockScreen();
-    void AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
-    void RemoveModalUIExtension(int32_t persistentId);
-    void UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    void AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
+    void RemoveNormalModalUIExtension(int32_t persistentId);
+    void UpdateNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo);
     std::optional<ExtensionWindowEventInfo> GetLastModalUIExtensionEventInfo();
     Vector2f GetSessionGlobalPosition(bool useUIExtension);
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
@@ -521,6 +527,7 @@ public:
     bool IsImmersiveType() const;
     bool SetFrameGravity(Gravity gravity);
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
+    static void RegisterGetConstrainedModalExtWindowInfo(GetConstrainedModalExtWindowInfoFunc&& callback);
 
     /*
      * Window Focus
@@ -615,6 +622,7 @@ protected:
     NotifySetWindowRectAutoSaveFunc onSetWindowRectAutoSaveFunc_;
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
+    NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
 
     /*
      * PiP Window
@@ -634,6 +642,11 @@ protected:
     ClearCallbackMapFunc clearCallbackMapFunc_;
     UpdateAppUseControlFunc onUpdateAppUseControlFunc_;
     std::unordered_map<ControlAppType, bool> appUseControlMap_;
+
+    /*
+     * UIExtension
+     */
+    static GetConstrainedModalExtWindowInfoFunc onGetConstrainedModalExtWindowInfoFunc_;
 
     /*
      * PC Window

@@ -353,6 +353,16 @@ bool WindowOption::GetWindowTopmost() const
     return isTopmost_;
 }
 
+void WindowOption::SetConstrainedModal(bool isConstrainedModal)
+{
+    isConstrainedModal_ = (uiExtensionUsage_ == static_cast<uint32_t>(UIExtensionUsage::MODAL)) && isConstrainedModal;
+}
+
+bool WindowOption::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

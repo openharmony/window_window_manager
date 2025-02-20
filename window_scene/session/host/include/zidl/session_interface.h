@@ -263,6 +263,15 @@ public:
         const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
     
     virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
+
+    /**
+     * @brief Callback for setting the window support modes.
+     *
+     * @param supportedWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifySupportWindowModesChange(
+        const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 

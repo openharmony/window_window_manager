@@ -93,6 +93,10 @@ class WindowStage {
   isWindowRectAutoSave() {
     return this.__window_stage__.isWindowRectAutoSave();
   }
+
+  setSupportedWindowModes(supportedWindowModes) {
+    return this.__window_stage__.setSupportedWindowModes(supportedWindowModes);
+  }
 }
 
 export default WindowStage;
