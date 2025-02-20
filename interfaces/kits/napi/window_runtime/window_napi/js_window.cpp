@@ -4467,56 +4467,42 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info info)
 {
-    WMError errCode = WMError::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool dragEnabled = true;
-    if (errCode == WMError::WM_OK) {
-        if (argv[0] == nullptr) {
-            WLOGFE("Failed to convert parameter to dragEnabled");
-            errCode = WMError::WM_ERROR_INVALID_PARAM;
-        } else {
-            CHECK_NAPI_RETCODE(errCode, WMError::WM_ERROR_INVALID_PARAM,
-                napi_get_value_bool(env, argv[0], &dragEnabled));
-        }
+    if (!ConvertFromJsValue(env, argv[0], dragEnabled)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to dragEnabled");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, dragEnabled, errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            WmErrorCode wmErrorCode;
-            if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode));
-                return;
-            }
-            if (errCode != WMError::WM_OK) {
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Invalidate params."));
-                return;
-            }
-            WMError ret = weakWindow->SetResizeByDragEnabled(dragEnabled);
-            if (ret == WMError::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "set dragEnabled failed"));
-            }
-            WLOGI("Window [%{public}u, %{public}s] set dragEnabled end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-        };
-
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::SetResizeByDragEnabled",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), dragEnabled,
+                      env, task = napiAsyncTask, where = __func__] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetResizeByDragEnabled(dragEnabled));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "set dragEnabled failed"));
+        }
+        TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Window [%{public}u, %{public}s] set dragEnabled end",
+               where, window->GetWindowId(), window->GetWindowName().c_str());
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
@@ -5194,34 +5180,35 @@ napi_value JsWindow::OnSetForbidSplitMove(napi_env env, napi_callback_info info)
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, isForbidSplitMove](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "Invalidate params."));
-                return;
-            }
-            WmErrorCode ret;
-            if (isForbidSplitMove) {
-                ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                    weakWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
-            } else {
-                ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                    weakWindow->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
-            }
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window OnSetForbidSplitMove failed."));
-            }
-        };
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnSetForbidSplitMove",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, isForbidSplitMove, env] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "Invalidate params."));
+            return;
+        }
+        WmErrorCode ret;
+        if (isForbidSplitMove) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(
+                weakWindow->AddWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
+        } else {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(
+                weakWindow->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE));
+        }
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window OnSetForbidSplitMove failed."));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
@@ -6136,17 +6123,17 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1 || argc > 2) { // 2: maximum params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        WLOGFE("SetAspectRatio is not allowed since window is main window");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SetAspectRatio is not allowed since window is main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
 
@@ -6165,31 +6152,31 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    wptr<Window> weakToken(windowToken_);
-    const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, aspectRatio, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+    napi_value lastParam = (argc == 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask =
+        [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, aspectRatio, where = __func__, env] {
             auto weakWindow = weakToken.promote();
             if (weakWindow == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "OnSetAspectRatio failed."));
                 return;
             }
             WMError ret = weakWindow->SetAspectRatio(aspectRatio);
             if (ret == WMError::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
+                task->Resolve(env, NapiGetUndefined(env));
             } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
+                task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
                     "SetAspectRatio failed."));
             }
-            WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                 where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
         };
-
-    napi_value lastParam = (argc == 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::SetAspectRatio",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
@@ -6199,46 +6186,44 @@ napi_value JsWindow::OnResetAspectRatio(napi_env env, napi_callback_info info)
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > 1) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     if (windowToken_ == nullptr) {
-        WLOGFE("WindowToken_ is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WindowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        WLOGFE("ResetAspectRatio is not allowed since window is main window");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "ResetAspectRatio is not allowed since window is main window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
-
-    wptr<Window> weakToken(windowToken_);
-    const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, where](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                task.Reject(env,
-                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "OnResetAspectRatio failed."));
-                return;
-            }
-            WMError ret = weakWindow->ResetAspectRatio();
-            if (ret == WMError::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "ResetAspectRatio failed."));
-            }
-            WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
-        };
 
     napi_value lastParam = (argc == 0) ? nullptr :
         (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnResetAspectRatio",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, where = __func__, env] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "OnResetAspectRatio failed."));
+            return;
+        }
+        WMError ret = weakWindow->ResetAspectRatio();
+        if (ret == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "ResetAspectRatio failed."));
+        }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 

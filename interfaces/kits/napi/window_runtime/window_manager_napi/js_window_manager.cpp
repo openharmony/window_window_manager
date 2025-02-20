@@ -999,59 +999,48 @@ napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info inf
 /** @note @window.layout */
 napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
-    WmErrorCode errCode = WmErrorCode::WM_OK;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "set window layout mode permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: minimum params num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    WindowLayoutMode winLayoutMode = WindowLayoutMode::CASCADE;
-    if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "set window layout mode permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    uint32_t winLayoutModeValue = 0;
+    if (!ConvertFromJsValue(env, argv[0], winLayoutModeValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to winLayoutModeValue");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (errCode == WmErrorCode::WM_OK) {
-        napi_value nativeMode = argv[0];
-        if (nativeMode == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to windowLayoutMode");
-            errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-        } else {
-            uint32_t resultValue = 0;
-            napi_get_value_uint32(env, nativeMode, &resultValue);
-            winLayoutMode = static_cast<WindowLayoutMode>(resultValue);
-        }
-    }
+    WindowLayoutMode winLayoutMode = static_cast<WindowLayoutMode>(winLayoutModeValue);
     if (winLayoutMode != WindowLayoutMode::CASCADE && winLayoutMode != WindowLayoutMode::TILE) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid winLayoutMode: %{public}u", winLayoutMode);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "failed, Invalidate params.");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
-    }
-
-    WLOGI("LayoutMode=%{public}u, err=%{public}d", winLayoutMode, errCode);
-    const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode));
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-                WLOGD("%{public}s success", where);
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "SetWindowLayoutMode failed"));
-            }
-        };
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winLayoutMode: %{public}u", winLayoutMode);
     // 1: maximum params num; 1: index of callback
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowManager::OnSetWindowLayoutMode",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [env, task = napiAsyncTask, winLayoutMode, where = __func__] {
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().SetWindowLayoutMode(winLayoutMode));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: success", where);
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetWindowLayoutMode failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
