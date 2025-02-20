@@ -319,7 +319,6 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
 WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
-    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     Destroy(true, false);
 }
 
@@ -675,6 +674,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         WLOGFW("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     if (auto hostSession = GetHostSession()) {
         hostSession->Disconnect();
     }
