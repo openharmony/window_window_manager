@@ -4537,7 +4537,7 @@ void WindowSceneSessionImpl::UpdateDensity()
     UpdateDensityInner(info, needUpdateNewSize);
 }
 
-void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info, bool needUpdateNewSize = true)
+void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info, bool needUpdateNewSize)
 {
     if (!userLimitsSet_) {
         UpdateWindowSizeLimits();
@@ -5191,10 +5191,10 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& d
     Rect windowRect = GetRect();
     int32_t left = windowRect.posX_;
     int32_t top = windowRect.posY_;
-    int32_t width = windowRect.width_;
-    int32_t height = windowRect.height_;
-    int32_t statusBarHeight = GetStatusBarHeight();
-    int32_t dockHeight = GetDockHeight();
+    uint32_t width = windowRect.width_;
+    uint32_t height = windowRect.height_;
+    uint32_t statusBarHeight = GetStatusBarHeight();
+    uint32_t dockHeight = GetDockHeight();
     bool needMove = false;
     if (!MathHelper::NearZero(currVpr - newVpr) && !MathHelper::NearZero(currVpr)) {
         width = width * newVpr / currVpr;
