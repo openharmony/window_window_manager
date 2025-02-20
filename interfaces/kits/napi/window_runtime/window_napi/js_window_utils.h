@@ -86,6 +86,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
     TYPE_HANDWRITE,
+    TYPE_WALLET_SWIPE_CARD,
     TYPE_END
 };
 
@@ -122,6 +123,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
     { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
     { WindowType::WINDOW_TYPE_HANDWRITE,           ApiWindowType::TYPE_HANDWRITE         },
+    { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -147,6 +149,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
     { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
     { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
+    { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
 };
 
 enum class ApiWindowMode : uint32_t {

@@ -44,6 +44,7 @@ private:
     void ChangeScreenDisplayModeInner(sptr<ScreenSession> screenSession, ScreenId offScreenId, ScreenId onScreenId);
     void ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSession> screenSession, ScreenId screenId);
     void ChangeScreenDisplayModeToCoordination();
+    void ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession, FoldDisplayMode displayMode);
     void RecoverWhenBootAnimationExit();
     void ReportFoldDisplayModeChange(FoldDisplayMode displayMode);
     void ReportFoldStatusChangeBegin(int32_t offScreen, int32_t onScreen);

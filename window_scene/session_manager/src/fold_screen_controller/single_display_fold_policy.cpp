@@ -89,12 +89,6 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     }
     TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
         displayMode, getFoldingElapsedMs());
-    
-    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "default screenSession is null");
-        return;
-    }
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
     {
@@ -104,7 +98,22 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
             return;
         }
     }
+    ChangeScreenDisplayModeInner(displayMode, reason);
+    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+}
+
+void SingleDisplayFoldPolicy::ChangeScreenDisplayModeInner(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
+{
+    sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screenSession is null");
+        return;
+    }
     SetdisplayModeChangeStatus(true);
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        lastDisplayMode_ = displayMode;
+    }
     ReportFoldDisplayModeChange(displayMode);
     switch (displayMode) {
         case FoldDisplayMode::MAIN: {
@@ -127,9 +136,7 @@ void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMod
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
-        lastDisplayMode_ = displayMode;
     }
-    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
 }
 
 void SingleDisplayFoldPolicy::SendSensorResult(FoldStatus foldStatus)
