@@ -285,6 +285,7 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+    void SetColorSpace(ColorSpace colorSpace);
 
     /*
      * Window Hierarchy
@@ -630,7 +631,7 @@ protected:
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
-    
+
     /*
      * Window Layout
      */
@@ -875,7 +876,7 @@ private:
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
-    
+
     /**
      * Window Animation
      */
