@@ -658,7 +658,7 @@ WSError SceneSession::SyncSessionEvent(SessionEvent event)
 }
 
 WSError SceneSession::StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
-                                                    int32_t pointerPosX, int32_t pointerPosY)
+    int32_t pointerPosX, int32_t pointerPosY)
 {
     return PostSyncTask([weakThis = wptr(this), offsetX, offsetY, pointerPosX, pointerPosY, where = __func__] {
         auto session = weakThis.promote();
