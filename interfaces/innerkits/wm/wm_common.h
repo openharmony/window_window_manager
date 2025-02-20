@@ -834,6 +834,7 @@ struct ExtensionWindowEventInfo {
     Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
     Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
     bool hasUpdatedRect = false;
+    bool isConstrainedModal = false;
 };
 
 /**
@@ -1134,6 +1135,12 @@ struct PiPTemplateInfo {
     std::vector<uint32_t> controlGroup;
     std::vector<PiPControlStatusInfo> pipControlStatusInfoList;
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
+};
+
+struct PiPWindowSize {
+    uint32_t width;
+    uint32_t height;
+    double scale;
 };
 
 using OnCallback = std::function<void(int64_t, int64_t)>;

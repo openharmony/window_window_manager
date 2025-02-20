@@ -70,6 +70,7 @@ public:
     MOCK_METHOD1(SetEnableDragBySystem, WSError(bool enableDrag));
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD1(NotifyHighlightChange, WSError(bool isHighlight));
+    MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(uint32_t width, uint32_t height, double scale));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -231,6 +231,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
+    property_->SetConstrainedModal(option->IsConstrainedModal());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     property_->SetIsUIExtensionSubWindowFlag(option->GetIsUIExtensionSubWindowFlag());
     isMainHandlerAvailable_ = option->GetMainHandlerAvailable();
@@ -314,7 +315,7 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(std::string name, 
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
     }
-    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType);
+    return RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal());
 }
 
 WindowSessionImpl::~WindowSessionImpl()
@@ -3455,6 +3456,16 @@ WSError WindowSessionImpl::SetPiPControlEvent(WsPiPControlType controlType, WsPi
             static_cast<PiPControlStatus>(status));
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_SetPiPControlEvent");
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}u, height: %{public}u scale: %{public}f", width, height, scale);
+    auto task = [width, height, scale]() {
+        PictureInPictureManager::PipSizeChange(width, height, scale);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyPipWindowSizeChange");
     return WSError::WS_OK;
 }
 

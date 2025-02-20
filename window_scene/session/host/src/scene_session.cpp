@@ -82,6 +82,7 @@ std::mutex SceneSession::enterSessionMutex_;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint32_t, WSRect> SceneSession::windowDragHotAreaMap_;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
+GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
 
 SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : Session(info)
@@ -1917,7 +1918,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type)
     return false;
 }
 
-void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+void SceneSession::AddNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d, pid=%{public}d", GetPersistentId(),
         extensionInfo.persistentId, extensionInfo.pid);
@@ -1928,7 +1929,7 @@ void SceneSession::AddModalUIExtension(const ExtensionWindowEventInfo& extension
     NotifySessionInfoChange();
 }
 
-void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
+void SceneSession::UpdateNormalModalUIExtension(const ExtensionWindowEventInfo& extensionInfo)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "persistentId=%{public}d,pid=%{public}d,"
         "Rect:[%{public}d %{public}d %{public}d %{public}d]",
@@ -1950,7 +1951,7 @@ void SceneSession::UpdateModalUIExtension(const ExtensionWindowEventInfo& extens
     NotifySessionInfoChange();
 }
 
-void SceneSession::RemoveModalUIExtension(int32_t persistentId)
+void SceneSession::RemoveNormalModalUIExtension(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "parentId=%{public}d, persistentId=%{public}d", GetPersistentId(), persistentId);
     {
@@ -1967,8 +1968,21 @@ void SceneSession::RemoveModalUIExtension(int32_t persistentId)
     NotifySessionInfoChange();
 }
 
+void SceneSession::RegisterGetConstrainedModalExtWindowInfo(GetConstrainedModalExtWindowInfoFunc&& callback)
+{
+    onGetConstrainedModalExtWindowInfoFunc_ = std::move(callback);
+}
+
 std::optional<ExtensionWindowEventInfo> SceneSession::GetLastModalUIExtensionEventInfo()
 {
+    // Priority query constrained modal UIExt, if unavailable, then query normal modal UIExt
+    if (onGetConstrainedModalExtWindowInfoFunc_) {
+        if (auto constrainedExtEventInfo = onGetConstrainedModalExtWindowInfoFunc_(this)) {
+            TLOGD(WmsLogTag::WMS_UIEXT, "get constrained UIExt eventInfo, id: %{public}d",
+                constrainedExtEventInfo->persistentId);
+            return constrainedExtEventInfo;
+        }
+    }
     std::shared_lock<std::shared_mutex> lock(modalUIExtensionInfoListMutex_);
     return modalUIExtensionInfoList_.empty() ? std::nullopt :
         std::make_optional<ExtensionWindowEventInfo>(modalUIExtensionInfoList_.back());
@@ -2137,6 +2151,15 @@ WSError SceneSession::SetPiPControlEvent(WsPiPControlType controlType, WsPiPCont
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->SetPiPControlEvent(controlType, status);
+}
+
+WSError SceneSession::NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "width: %{public}u, height: %{public}u scale: %{public}f", width, height, scale);
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyPipWindowSizeChange(width, height, scale);
 }
 
 void SceneSession::RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback)
@@ -3597,7 +3620,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
         if (!abilitySessionInfo->supportWindowModes.empty()) {
-            info.supportWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
+            info.supportedWindowModes.assign(abilitySessionInfo->supportWindowModes.begin(),
                 abilitySessionInfo->supportWindowModes.end());
         }
     }
@@ -3613,11 +3636,11 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s, "
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
-        "needClearInNotShowRecent:%{public}u, isFromIcon:%{public}d, supportWindowModes.size:%{public}zu, "
+        "needClearInNotShowRecent:%{public}u, isFromIcon:%{public}d, supportedWindowModes.size:%{public}zu, "
         "specifiedId:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
-        info.callerPersistentId_, info.needClearInNotShowRecent_, info.isFromIcon_, info.supportWindowModes.size(),
+        info.callerPersistentId_, info.needClearInNotShowRecent_, info.isFromIcon_, info.supportedWindowModes.size(),
         info.specifiedId);
     return info;
 }
@@ -5466,6 +5489,20 @@ void SceneSession::SetWindowRectAutoSaveCallback(NotifySetWindowRectAutoSaveFunc
             session->GetPersistentId());
     };
     PostTask(task, __func__);
+}
+
+void SceneSession::RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session || !func) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or func is null", where);
+            return;
+        }
+        session->onSetSupportedWindowModesFunc_ = std::move(func);
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d", where, session->GetPersistentId());
+    }, __func__);
 }
 
 bool SceneSession::SetFrameGravity(Gravity gravity)

@@ -85,6 +85,7 @@ enum class ListenerFuncType : uint32_t {
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_VIEW_MODE_CHANGE_CB,
     HIGHLIGHT_CHANGE_CB,
+    SET_SUPPORT_WINDOW_MODES_CB,
 };
 
 class SceneSession;
@@ -129,6 +130,7 @@ private:
     static napi_value SetWaterMarkFlag(napi_env env, napi_callback_info info);
     static napi_value SetPipActionEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyPipOcclusionChange(napi_env env, napi_callback_info info);
+    static napi_value NotifyPipSizeChange(napi_env env, napi_callback_info info);
     static napi_value SetPiPControlEvent(napi_env env, napi_callback_info info);
     static napi_value NotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
@@ -192,6 +194,7 @@ private:
     napi_value OnSetPipActionEvent(napi_env env, napi_callback_info info);
     napi_value OnSetPiPControlEvent(napi_env env, napi_callback_info info);
     napi_value OnNotifyPipOcclusionChange(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPipSizeChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyDisplayStatusBarTemporarily(napi_env env, napi_callback_info info);
     napi_value OnSetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
@@ -278,6 +281,11 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
 
+    /*
+     * PC Window Layout
+     */
+    void ProcessSetSupportedWindowModesRegister();
+
     void ChangeSessionVisibilityWithStatusBar(SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
     sptr<SceneSession> GenSceneSession(SessionInfo& info);
@@ -332,6 +340,12 @@ private:
     void NotifyFrameLayoutFinish();
     void OnSetWindowRectAutoSave(bool enabled);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl);
+
+    /*
+     * PC Window Layout
+     */
+    void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
+
     void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
