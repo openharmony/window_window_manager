@@ -4531,7 +4531,12 @@ void WindowSceneSessionImpl::UpdateDensity()
     bool needUpdateNewSize = true;
     auto info = GetDisplayInfoById(GetDisplayId(), GetPersistentId());
     if (windowSystemConfig_.IsPcWindow()) {
-        UpdateNewSizeForPCWindow(info);
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(GetDisplayId());
+        DMRect availableArea;
+        if (display->GetAvailableArea(availableArea) == DMError::DM_OK) {
+            UpdateNewSizeForPCWindow(info, availableArea);
+        }
         needUpdateNewSize = false;
     }
     UpdateDensityInner(info, needUpdateNewSize);
@@ -5174,20 +5179,16 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     return WMError::WM_OK;
 }
 
-void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& display)
+void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& displayInfo, DMRect availableArea)
 {
     if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "fullscreen could not update new size, Id:%{public}u", GetPersistentId());
         return;
     }
-    DMRect availableArea;
-    if (display->GetAvailableArea(availableArea) != DMError::DM_OK) {
-        return;
-    }
     int32_t displayWidth = availableArea.width_;
     int32_t displayHeight = availableArea.height_;
     float currVpr = virtualPixelRatio_;
-    float newVpr = GetVirtualPixelRatio(display);
+    float newVpr = GetVirtualPixelRatio(displayInfo);
     Rect windowRect = GetRect();
     int32_t left = windowRect.posX_;
     int32_t top = windowRect.posY_;
