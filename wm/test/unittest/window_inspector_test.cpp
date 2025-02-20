@@ -51,6 +51,18 @@ HWTEST_F(WindowInspetorTest, InitConnectServer, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: CloseConnectServer01
+ * @tc.desc: CloseConnectServer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowInspetorTest, CloseConnectServer01, Function | SmallTest | Level2)
+{
+    WindowInspector::GetInstance().ConnectServer();
+    WindowInspector::GetInstance().CloseConnectFromServer();
+    EXPECT_EQ(nullptr, WindowInspector::GetInstance().handlerConnectServerSo_);
+}
+
+/**
  * @tc.name: ProcessArkUIInspectorMessage01
  * @tc.desc: ProcessArkUIInspectorMessage
  * @tc.type: FUNC

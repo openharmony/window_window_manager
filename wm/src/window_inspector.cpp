@@ -65,7 +65,6 @@ WindowInspector::WindowInspector()
 
 void WindowInspector::ConnectServer()
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "start connect");
     handlerConnectServerSo_ = dlopen(ARK_CONNECT_LIB_PATH, RTLD_NOW);
     if (handlerConnectServerSo_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "can't open %{public}s", ARK_CONNECT_LIB_PATH);
@@ -86,7 +85,12 @@ void WindowInspector::ConnectServer()
         }
     });
     isConnectServerSuccess_ = true;
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "end connect");
+}
+
+void WindowInspector::CloseConnectFromServer()
+{
+    dlclose(handlerConnectServerSo_);
+    handlerConnectServerSo_ = nullptr;
 }
 
 bool WindowInspector::IsConnectServerSuccess() const
