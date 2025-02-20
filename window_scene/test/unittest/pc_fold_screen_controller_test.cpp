@@ -253,6 +253,18 @@ HWTEST_F(PcFoldScreenManagerTest, CalculateScreenSide, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: IsCrossFoldCrease
+ * @tc.desc: test function : IsCrossFoldCrease
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, IsCrossFoldCrease, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    EXPECT_FALSE(manager_.IsCrossFoldCrease(B_RECT));
+    EXPECT_TRUE(manager_.IsCrossFoldCrease(B_ACROSS_RECT));
+}
+
+/**
  * @tc.name: ResetArrangeRule
  * @tc.desc: test function : ResetArrangeRule, including overload functions
  * @tc.type: FUNC

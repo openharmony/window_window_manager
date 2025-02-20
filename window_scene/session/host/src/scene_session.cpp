@@ -3094,6 +3094,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
+        pcFoldScreenController_->ResetRecords();
         return false;
     }
 
@@ -3132,6 +3133,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
     OnThrowSlipAnimationStateChange(true);
     rect = endRect;
+    pcFoldScreenController_->ResetRecords();
     return true;
 }
 
