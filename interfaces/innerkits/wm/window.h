@@ -2227,7 +2227,7 @@ public:
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
      * @param priority 1 means height priority, 0 means low priority.
      */
-    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
+    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
