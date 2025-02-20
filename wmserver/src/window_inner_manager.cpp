@@ -263,6 +263,7 @@ void WindowInnerManager::SetInputEventConsumer()
     if (moveDragController_ == nullptr) {
         return;
     }
+    WLOGFI("gjb4 WindowInnerManager::SetInputEventConsumer");
     moveDragController_->SetInputEventConsumer();
 }
 

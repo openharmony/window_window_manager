@@ -186,9 +186,10 @@ void DragInputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> poi
 void MoveDragController::SetInputEventConsumer()
 {
     if (!inputListener_ || !inputEventHandler_) {
-        WLOGFE("InputListener or inputEventHandler is nullptr");
+        WLOGFE("gjb2 InputListener or inputEventHandler is nullptr");
         return;
     }
+    WLOGFI("gjb3 SetInputEventConsumer");
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, inputEventHandler_);
 }
 

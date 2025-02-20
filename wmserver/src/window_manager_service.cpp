@@ -114,6 +114,7 @@ void WindowManagerService::OnStart()
     AddSystemAbilityListener(RENDER_SERVICE);
     AddSystemAbilityListener(ABILITY_MGR_SERVICE_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(MULTIMODAL_INPUT_SERVICE_ID);
     sptr<WindowManagerService> wms = this;
     wms->IncStrongRef(nullptr);
     if (!Publish(sptr<WindowManagerService>(this))) {
@@ -1210,6 +1211,7 @@ void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
          * Set 'InnerInputManager Listener' to MMI, ensure that the listener
          * for move/drag won't be replaced by freeze-display-window
          */
+        WLOGI("gjb5 NotifyDisplayStateChange");
         WindowInnerManager::GetInstance().SetInputEventConsumer();
     } else {
         auto task = [this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {

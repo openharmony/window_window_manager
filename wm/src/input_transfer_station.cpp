@@ -139,6 +139,9 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
                     AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
             }
         }
+        if (eventHandler_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_EVENT, "gjb1 eventHandler is null");
+        }
         MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
         TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, windowid:%{public}u", windowId);
         inputListener_ = listener;
