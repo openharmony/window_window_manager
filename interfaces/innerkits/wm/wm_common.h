@@ -318,9 +318,10 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
     return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 
-inline SystemBarSettingFlag operator|=(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
+inline SystemBarSettingFlag& operator|=(SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs)
 {
-    return lhs | rhs;
+    lhs = lhs | rhs;
+    return lhs;
 }
 
 /**
