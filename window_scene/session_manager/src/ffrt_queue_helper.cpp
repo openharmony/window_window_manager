@@ -29,7 +29,7 @@ FfrtQueueHelper::FfrtQueueHelper()
 bool FfrtQueueHelper::SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout)
 {
     auto winFuture = std::make_shared<FfrtFuture<bool>>();
-    ffrtQueue_->submit([localTask = std::move(task), winFuture]() {
+    ffrtQueue_->submit([localTask = std::move(task), winFuture] {
         localTask();
         winFuture->FutureCall(true);
     });
