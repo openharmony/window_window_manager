@@ -74,6 +74,7 @@ private:
     int HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int HandleSetDragActivated(MessageParcel& data, MessageParcel& reply);
     int HandleSetEnableDragBySystem(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen

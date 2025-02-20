@@ -647,4 +647,17 @@ int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParc
     NotifyPipWindowSizeChange(width, height, scale);
     return ERR_NONE;
 }
+
+int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called!");
+    bool isHighlight = false;
+    if (!data.ReadBool(isHighlight)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Read isHighlight failed.");
+        return ERR_INVALID_DATA;
+    }
+    NotifyHighlightChange(isHighlight);
+    return ERR_NONE;
+}
+
 } // namespace OHOS::Rosen

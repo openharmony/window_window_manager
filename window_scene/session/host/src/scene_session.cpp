@@ -3215,6 +3215,18 @@ bool SceneSession::IsSystemSessionAboveApp() const
     return false;
 }
 
+/** @note @window.focus */
+bool SceneSession::IsSameMainSession(const sptr<SceneSession>& prevSession)
+{
+    if (prevSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "prevSession is nullptr");
+        return false;
+    }
+    int32_t currSessionId = GetMainSessionId();
+    int32_t prevSessionId = prevSession->GetMainSessionId();
+    return currSessionId == prevSessionId && prevSessionId != INVALID_SESSION_ID;
+}
+
 void SceneSession::NotifyIsCustomAnimationPlaying(bool isPlaying)
 {
     WLOGFI("id %{public}d %{public}u", GetPersistentId(), isPlaying);
@@ -3764,7 +3776,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
-        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}u", action);
+        TLOGE(WmsLogTag::DEFAULT, "permission denied! action: %{public}" PRIu64, action);
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     property->SetSystemCalling(isSystemCalling);
@@ -3775,7 +3787,7 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             TLOGE(WmsLogTag::DEFAULT, "the session is nullptr");
             return WMError::WM_DO_NOTHING;
         }
-        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}u", sceneSession->GetPersistentId(), action);
+        TLOGD(WmsLogTag::DEFAULT, "Id: %{public}d, action: %{public}" PRIu64, sceneSession->GetPersistentId(), action);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession:UpdateProperty");
         return sceneSession->HandleUpdatePropertyByAction(property, sceneSession, action);
     };
@@ -3899,6 +3911,8 @@ WMError SceneSession::ProcessUpdatePropertyByAction(const sptr<WindowSessionProp
             return HandleActionUpdateMainWindowTopmost(property, action);
         case static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO):
             return HandleActionUpdateWindowModeSupportType(property, sceneSession, action);
+        case static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED):
+            return HandleActionUpdateExclusivelyHighlighted(property, action);
         default:
             TLOGE(WmsLogTag::DEFAULT, "Failed to find func handler!");
             return WMError::WM_DO_NOTHING;
@@ -4194,6 +4208,18 @@ WMError SceneSession::HandleActionUpdateMainWindowTopmost(const sptr<WindowSessi
     return WMError::WM_OK;
 }
 
+WMError SceneSession::HandleActionUpdateExclusivelyHighlighted(const sptr<WindowSessionProperty>& property,
+    WSPropertyChangeAction action)
+{
+    auto sessionProperty = GetSessionProperty();
+    if (!sessionProperty) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "property is null");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    sessionProperty->SetExclusivelyHighlighted(property->GetExclusivelyHighlighted());
+    return WMError::WM_OK;
+}
+
 void SceneSession::HandleSpecificSystemBarProperty(WindowType type,
     const sptr<WindowSessionProperty>& property, const sptr<SceneSession>& sceneSession)
 {
@@ -4243,7 +4269,7 @@ void SceneSession::SetWindowFlags(const sptr<SceneSession>& sceneSession,
 void SceneSession::NotifySessionChangeByActionNotifyManager(const sptr<SceneSession>& sceneSession,
     const sptr<WindowSessionProperty>& property, WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "id: %{public}d, action: %{public}" PRIu64,
         GetPersistentId(), action);
     if (sessionChangeByActionNotifyManagerFunc_ == nullptr) {
         TLOGW(WmsLogTag::DEFAULT, "func is null");
@@ -5522,5 +5548,11 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             "parentTransY: %{public}d", where, session->GetPersistentId(), globalRect.ToString().c_str(),
             parentTransX, parentTransY);
     }, __func__);
+}
+
+void SceneSession::SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func)
+{
+    std::lock_guard lock(highlightChangeFuncMutex_);
+    highlightChangeFunc_ = func;
 }
 } // namespace OHOS::Rosen

@@ -83,6 +83,8 @@ const std::map<uint32_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
+        &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
 };
 
 const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -142,6 +144,8 @@ const std::map<uint32_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateWindowModeSupportType),
     std::make_pair(static_cast<uint32_t>(WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST),
         &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
+        &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -1074,7 +1078,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAppSupportPhoneInPc_) &&
         parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_)  &&
-        parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_));;
+        parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) && parcel.WriteBool(isExclusivelyHighlighted_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1151,6 +1155,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsPcAppInPad(parcel.ReadBool());
     property->SetCompatibleModeEnableInPad(parcel.ReadBool());
     property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
+    property->SetExclusivelyHighlighted(parcel.ReadBool());
     return property;
 }
 
@@ -1203,6 +1208,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     windowMask_ = property->windowMask_;
     isShaped_ = property->isShaped_;
     keyboardViewMode_ = property->keyboardViewMode_;
+    isExclusivelyHighlighted_ = property->isExclusivelyHighlighted_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1336,6 +1342,11 @@ bool WindowSessionProperty::WriteActionUpdateMainWindowTopmost(Parcel& parcel)
 bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parcel)
 {
     return parcel.WriteUint32(windowModeSupportType_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted(Parcel& parcel)
+{
+    return parcel.WriteBool(isExclusivelyHighlighted_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
@@ -1472,6 +1483,11 @@ void WindowSessionProperty::ReadActionUpdateMainWindowTopmost(Parcel& parcel)
 void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel)
 {
     SetWindowModeSupportType(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parcel)
+{
+    SetExclusivelyHighlighted(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -1662,6 +1678,16 @@ void WindowSessionProperty::SetConstrainedModal(bool isConstrained)
 bool WindowSessionProperty::IsConstrainedModal() const
 {
     return isConstrainedModal_;
+}
+
+void WindowSessionProperty::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    isExclusivelyHighlighted_ = isExclusivelyHighlighted;
+}
+
+bool WindowSessionProperty::GetExclusivelyHighlighted() const
+{
+    return isExclusivelyHighlighted_;
 }
 } // namespace Rosen
 } // namespace OHOS

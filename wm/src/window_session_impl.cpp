@@ -132,6 +132,7 @@ std::map<int32_t, sptr<ISubWindowCloseListener>> WindowSessionImpl::subWindowClo
 std::map<int32_t, sptr<IMainWindowCloseListener>> WindowSessionImpl::mainWindowCloseListeners_;
 std::unordered_map<int32_t, std::vector<sptr<IWindowWillCloseListener>>> WindowSessionImpl::windowWillCloseListeners_;
 std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessionImpl::switchFreeMultiWindowListeners_;
+std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
@@ -150,6 +151,7 @@ std::mutex WindowSessionImpl::subWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::mainWindowCloseListenersMutex_;
 std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
+std::mutex WindowSessionImpl::highlightChangeListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
@@ -1573,6 +1575,65 @@ WindowState WindowSessionImpl::GetRequestWindowState() const
     return requestState_;
 }
 
+/** @note @window.focus */
+WMError WindowSessionImpl::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d",
+        property_->GetPersistentId(), isExclusivelyHighlighted);
+    if (WindowHelper::IsMainWindow(GetType()) || WindowHelper::IsDialogWindow(GetType()) ||
+        WindowHelper::IsModalWindow(property_->GetWindowFlags())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "unsupport window, type: %{public}u, windowFlags: %{public}u ",
+            GetType(), property_->GetWindowFlags());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (property_->GetExclusivelyHighlighted() == isExclusivelyHighlighted) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "already exclusivelyHighlighted");
+        return WMError::WM_OK;
+    }
+    property_->SetExclusivelyHighlighted(isExclusivelyHighlighted);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED);
+}
+
+/** @note @window.focus */
+bool WindowSessionImpl::GetExclusivelyHighlighted() const
+{
+    bool isExclusivelyHighlighted = property_->GetExclusivelyHighlighted();
+    TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isExclusivelyHighlighted: %{public}d",
+        property_->GetPersistentId(), isExclusivelyHighlighted);
+    return isExclusivelyHighlighted;
+}
+
+/** @note @window.focus */
+WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
+    isHighlighted_ = isHighlight;
+    std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
+    auto highlightChangeListeners = GetListeners<IWindowHighlightChangeListener>();
+    for (const auto& listener : highlightChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowHighlightChange(isHighlight);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+/** @note @window.focus */
+WMError WindowSessionImpl::IsWindowHighlighted(bool& highlighted) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    highlighted = isHighlighted_.load();
+    TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isWindowHighlighted: %{public}d",
+        GetPersistentId(), isHighlighted_.load());
+    return WMError::WM_OK;
+}
+
 WMError WindowSessionImpl::SetFocusable(bool isFocusable)
 {
     if (IsWindowSessionInvalid()) {
@@ -2404,6 +2465,32 @@ WMError WindowSessionImpl::UnregisterSubWindowCloseListeners(const sptr<ISubWind
 }
 
 template<typename T>
+EnableIfSame<T, IWindowHighlightChangeListener, std::vector<sptr<IWindowHighlightChangeListener>>>
+    WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IWindowHighlightChangeListener>> highlightChangeListeners;
+    for (auto& listener : highlightChangeListeners_[GetPersistentId()]) {
+        highlightChangeListeners.push_back(listener);
+    }
+    return highlightChangeListeners;
+}
+
+WMError WindowSessionImpl::RegisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
+    return RegisterListener(highlightChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterWindowHighlightChangeListeners(
+    const sptr<IWindowHighlightChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "name=%{public}s, id=%{public}u", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
+    return UnregisterListener(highlightChangeListeners_[GetPersistentId()], listener);
+}
+
+template<typename T>
 EnableIfSame<T, IMainWindowCloseListener, sptr<IMainWindowCloseListener>> WindowSessionImpl::GetListeners()
 {
     return mainWindowCloseListeners_[GetPersistentId()];
@@ -2732,6 +2819,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
         ClearUselessListeners(occupiedAreaChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
+        ClearUselessListeners(highlightChangeListeners_, persistentId);
     }
     ClearSwitchFreeMultiWindowListenersById(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Clear success, id: %{public}d.", GetPersistentId());
@@ -3913,7 +4004,7 @@ void WindowSessionImpl::FlushFrameRate(uint32_t rate, int32_t animatorExpectedFr
 
 WMError WindowSessionImpl::UpdateProperty(WSPropertyChangeAction action)
 {
-    TLOGD(WmsLogTag::DEFAULT, "action:%{public}u", action);
+    TLOGD(WmsLogTag::DEFAULT, "action:%{public}" PRIu64, action);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::DEFAULT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
