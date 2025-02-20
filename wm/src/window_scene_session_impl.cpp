@@ -306,6 +306,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         if (createSystemWindowRet != WMError::WM_OK) {
             return createSystemWindowRet;
         }
+        auto parentSession =FindParentSessionByParentId(property_->GetParentPersistentId());
+        if (parentSession != nullptr){
+            property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
+        }
         PreProcessCreate();
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
