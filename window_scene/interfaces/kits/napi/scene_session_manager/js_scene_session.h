@@ -362,7 +362,7 @@ private:
         const RectAnimationConfig& rectAnimationConfig = {});
     void OnSessionDisplayIdChange(uint64_t displayId);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
-    void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority);
+    void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height);
     void OnRaiseToTop();
     void OnRaiseToTopForPointDown();
     void OnClickModalWindowOutside();
