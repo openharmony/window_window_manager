@@ -279,14 +279,14 @@ napi_value JsWindow::GetWindowPropertiesSync(napi_env env, napi_callback_info in
 
 napi_value JsWindow::RegisterWindowCallback(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "Enter");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Enter");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnRegisterWindowCallback(env, info) : nullptr;
 }
 
 napi_value JsWindow::UnregisterWindowCallback(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "Enter");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Enter");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnUnregisterWindowCallback(env, info) : nullptr;
 }
