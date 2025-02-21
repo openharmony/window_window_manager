@@ -54,7 +54,7 @@ void WindowStatusChangeTest::SetUp()
 }
 
 void WindowStatusChangeTest::TearDown()
-{  
+{
     abilityContext_ = nullptr;
 }
 
