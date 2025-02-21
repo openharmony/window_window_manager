@@ -254,14 +254,6 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
     }
 }
 
-int SessionStub::HandleGetDockHeight(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t height = GetDockHeight();
-    TLOGD(WmsLogTag::WMS_IMMS, "DockHeight is %{public}d", height);
-    reply.WriteInt32(height);
-    return ERR_NONE;
-}
-
 int SessionStub::HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply)
 {
     WLOGFD("HandleSetWindowAnimationFlag!");
@@ -1318,6 +1310,14 @@ int SessionStub::HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& re
 {
     int32_t height = GetStatusBarHeight();
     TLOGD(WmsLogTag::WMS_IMMS, "StatusBarVectorHeight is %{public}d", height);
+    reply.WriteInt32(height);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetDockHeight(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t height = GetDockHeight();
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "DockHeight is %{public}d", height);
     reply.WriteInt32(height);
     return ERR_NONE;
 }

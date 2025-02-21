@@ -139,7 +139,6 @@ public:
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
-    virtual int32_t GetDockHeight() { return 0; }
 
     /**
      * @brief Sets the global maximization mode of window.
@@ -294,6 +293,7 @@ public:
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual void NotifyExtensionDetachToDisplay() {}
     virtual int32_t GetStatusBarHeight() { return 0; }
+    virtual int32_t GetDockHeight() { return 0; }
     /**
      * @brief Request to get focus or lose focus.
      *

@@ -519,13 +519,12 @@ protected:
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
 
-    uint32_t GetDockHeight();
-
     /*
      * Window Immersive
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() override;
+    uint32_t GetDockHeight();
 
     /*
      * PC Fold Screen
