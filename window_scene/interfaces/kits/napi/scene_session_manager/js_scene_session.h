@@ -86,6 +86,7 @@ enum class ListenerFuncType : uint32_t {
     KEYBOARD_VIEW_MODE_CHANGE_CB,
     HIGHLIGHT_CHANGE_CB,
     SET_SUPPORT_WINDOW_MODES_CB,
+    SESSION_LOCK_STATE_CHANGE_CB,
 };
 
 class SceneSession;
@@ -282,6 +283,8 @@ private:
     void ProcessKeyboardStateChangeRegister();
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
+    void ProcessSessionLockStateChangeRegister();
+    void OnSessionLockStateChange(bool isLockedState);
 
     /*
      * PC Window Layout
