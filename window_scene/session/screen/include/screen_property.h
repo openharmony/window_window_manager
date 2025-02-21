@@ -164,6 +164,14 @@ public:
     void SetScreenShape(ScreenShape screenShape);
     ScreenShape GetScreenShape() const;
 
+    void SetX(int32_t x);
+    int32_t GetX() const;
+
+    void SetY(int32_t y);
+    int32_t GetY() const;
+
+    void SetXYPosition(int32_t x, int32_t y);
+
     DMRect GetAvailableArea()
     {
         return availableArea_;
@@ -270,6 +278,9 @@ private:
 
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
+
+    int32_t x_ { 0 };
+    int32_t y_ { 0 };
 
     uint32_t validWidth_ { UINT32_MAX };
     uint32_t validHeight_ { UINT32_MAX };

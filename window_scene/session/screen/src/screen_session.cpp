@@ -1324,6 +1324,37 @@ ScreenCombination ScreenSession::GetScreenCombination() const
     return combination_;
 }
 
+DisplaySourceMode ScreenSession::GetDisplaySourceMode() const
+{
+    if (!isPcUse_ && screenId_ == defaultScreenId_) {
+        return DisplaySourceMode::MAIN;
+    }
+    ScreenCombination combination = GetScreenCombination();
+    switch (combination) {
+        case ScreenCombination::SCREEN_MAIN: {
+            return DisplaySourceMode::MAIN;
+        }
+        case ScreenCombination::SCREEN_MIRROR: {
+            return DisplaySourceMode::MIRROR;
+        }
+        case ScreenCombination::SCREEN_EXPAND: {
+            return DisplaySourceMode::EXTEND;
+        }
+        case ScreenCombination::SCREEN_EXTEND: {
+            return DisplaySourceMode::EXTEND;
+        }
+        case ScreenCombination::SCREEN_UNIQUE: {
+            return DisplaySourceMode::ALONE;
+        }
+        case ScreenCombination::SCREEN_ALONE: {
+            return DisplaySourceMode::NONE;
+        }
+        default: {
+            return DisplaySourceMode::NONE;
+        }
+    }
+}
+
 void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
 {
     if (info == nullptr) {
@@ -1970,6 +2001,11 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
 void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
 {
     property_.SetStartPosition(startX, startY);
+}
+
+void ScreenSession::SetXYPosition(int32_t x, int32_t y)
+{
+    property_.SetXYPosition(x, y);
 }
 
 void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)

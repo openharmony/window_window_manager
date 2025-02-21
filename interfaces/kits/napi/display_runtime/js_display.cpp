@@ -786,6 +786,12 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
     napi_set_named_property(env, objValue, "availableWidth", CreateJsValue(env, info->GetAvailableWidth()));
     napi_set_named_property(env, objValue, "availableHeight", CreateJsValue(env, info->GetAvailableHeight()));
     napi_set_named_property(env, objValue, "screenShape", CreateJsValue(env, info->GetScreenShape()));
+    if (info->GetDisplaySourceMode() == DisplaySourceMode::MAIN ||
+        info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
+        napi_set_named_property(env, objValue, "x", CreateJsValue(env, info->GetX()));
+        napi_set_named_property(env, objValue, "y", CreateJsValue(env, info->GetY()));
+    }
+    napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetDisplaySourceMode()));
 }
 
 napi_value CreateJsDisplayObject(napi_env env, sptr<Display>& display)
