@@ -1678,7 +1678,7 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
         case ScreenCombination::SCREEN_MIRROR: {
             if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
                 TLOGI(WmsLogTag::DMS, "SCREEN_MIRROR, config is not mirror");
-                break; 
+                break;
             }
             if (defaultScreenSession == nullptr) {
                 TLOGE(WmsLogTag::DMS, "defaultScreenSession is nullptr");
