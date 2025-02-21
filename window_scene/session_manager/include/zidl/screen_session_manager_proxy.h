@@ -83,6 +83,8 @@ public:
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     DMError DisableMirror(bool disableOrNot) override;
 

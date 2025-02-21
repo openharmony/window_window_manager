@@ -358,6 +358,12 @@ enum class FoldStatus: uint32_t {
     EXPAND = 1,
     FOLDED = 2,
     HALF_FOLD = 3,
+    FOLD_STATE_EXPAND_WITH_SECOND_EXPAND = 11,
+    FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED = 21,
+    FOLD_STATE_FOLDED_WITH_SECOND_EXPAND = 12,
+    FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED = 22,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND = 13,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED = 23,
 };
 
 /**
@@ -369,6 +375,7 @@ enum class FoldDisplayMode: uint32_t {
     MAIN = 2,
     SUB = 3,
     COORDINATION = 4,
+    GLOBAL_FULL = 5,
 };
 
 enum class DisplayType : uint32_t {
@@ -380,6 +387,7 @@ enum class ScreenCombination : uint32_t {
     SCREEN_EXPAND,
     SCREEN_MIRROR,
     SCREEN_UNIQUE,
+    SCREEN_MAIN,
 };
 
 struct Point {

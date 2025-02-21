@@ -29,6 +29,7 @@ enum class DisplayDeviceType :uint32_t {
     SINGLE_DISPLAY_DEVICE,
     DOUBLE_DISPLAY_DEVICE,
     SINGLE_DISPLAY_POCKET_DEVICE,
+    SECONDARY_DISPLAY_DEVICE,
 };
 
 class FoldScreenController : public RefBase {
@@ -44,6 +45,7 @@ public:
     bool IsFoldable();
     FoldStatus GetFoldStatus();
     bool GetTentMode();
+    FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
     void OnTentModeChanged(bool isTentMode);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
@@ -53,6 +55,7 @@ public:
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    void SetMainScreenRegion(DMRect& mainScreenRegion);
     /*
      *    Avoid fold to expand process queues public interface
      */

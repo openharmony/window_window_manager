@@ -390,27 +390,15 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateDefaultHotAreas, Function | SmallTe
 HWTEST_F(SceneSessionDirtyManagerTest, ConvertDegreeToMMIRotation, Function | SmallTest | Level2)
 {
     MMI::Direction dirction = MMI::DIRECTION0;
-    dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(0.0);
     ASSERT_EQ(dirction, MMI::DIRECTION0);
-    dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(90.0);
     ASSERT_EQ(dirction, MMI::DIRECTION90);
-    dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(180.0);
     ASSERT_EQ(dirction, MMI::DIRECTION180);
-    dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(270.0);
     ASSERT_EQ(dirction, MMI::DIRECTION270);
-    if (g_screenRotationOffset != 0) {
-        dirction = ConvertDegreeToMMIRotation(0.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION90);
-        dirction = ConvertDegreeToMMIRotation(90.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION180);
-        dirction = ConvertDegreeToMMIRotation(180.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION270);
-        dirction = ConvertDegreeToMMIRotation(270.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION0);
-        dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::FULL);
-        ASSERT_EQ(dirction, MMI::DIRECTION90);
-    }
-    dirction = ConvertDegreeToMMIRotation(30.0, MMI::DisplayMode::UNKNOWN);
+    dirction = ConvertDegreeToMMIRotation(30.0);
     ASSERT_EQ(dirction, MMI::DIRECTION0);
 }
 

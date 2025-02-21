@@ -109,6 +109,8 @@ public:
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
     DMError DisableMirror(bool disableOrNot) override;
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint,
@@ -159,7 +161,8 @@ public:
     bool HandleFoldScreenSessionCreate(ScreenId screenId);
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
-        const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination);
+             const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,
+             DMRect mainScreenRegion = DMRect::NONE());
 
     bool RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup);
 
@@ -168,7 +171,7 @@ public:
         std::map<ScreenId, bool>& removeChildResMap);
     bool CheckScreenInScreenGroup(sptr<ScreenSession> screen) const;
 
-    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens);
+    DMError SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion);
     DMError StopScreens(const std::vector<ScreenId>& screenIds, ScreenCombination stopCombination);
 
     void NotifyScreenConnected(sptr<ScreenInfo> screenInfo);
@@ -233,6 +236,7 @@ public:
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
+    void TriggerFoldStatusChange(FoldStatus foldStatus);
     void NotifyFoldStatusChanged(FoldStatus foldStatus);
     void NotifyFoldAngleChanged(std::vector<float> foldAngles);
     int NotifyFoldStatusChanged(const std::string& statusParam);
@@ -339,6 +343,7 @@ private:
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
         ScreenProperty property);
+    sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId, ScreenId defScreenId, ScreenProperty property);
     void FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession);
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();
@@ -354,6 +359,8 @@ private:
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void NotifyCaptureStatusChanged();
+    DMError DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        DMRect mainScreenRegion, ScreenId& screenGroupId);
     bool OnMakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint);
     bool OnRemoteDied(const sptr<IRemoteObject>& agent);
     std::string TransferTypeToString(ScreenType type) const;
@@ -366,6 +373,7 @@ private:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
+    void RefreshMirrorScreenRegion(ScreenId screenId);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
