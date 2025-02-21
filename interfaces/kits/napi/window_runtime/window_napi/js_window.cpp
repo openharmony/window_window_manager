@@ -2947,7 +2947,8 @@ napi_value JsWindow::OnSetWindowLayoutFullScreen(napi_env env, napi_callback_inf
                     "Invalidate params."));
                 return;
             }
-            if (window->IsPcOrPadFreeMultiWindowMode()) {
+            // compatibleModeInPc need apply avoidArea method
+            if (window->IsPcOrPadFreeMultiWindowMode() && !window->GetCompatibleModeInPc()) {
                 TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device not support", where);
                 task.Resolve(env, NapiGetUndefined(env));
                 return;

@@ -3513,6 +3513,40 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
     }
 }
 
+void ScreenSessionManagerProxy::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+
+    MessageOption option;
+    MessageParcel reply;
+    MessageParcel data;
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!data.WriteInt32(uid)) {
+        TLOGE(WmsLogTag::DMS, "Write uid failed");
+        return;
+    }
+
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HOOK_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+    hookInfo.width_ = reply.ReadUint32();
+    hookInfo.height_ = reply.ReadUint32();
+    hookInfo.density_ = reply.ReadFloat();
+    hookInfo.rotation_ = reply.ReadUint32();
+    hookInfo.enableHookRotation_ = reply.ReadBool();
+}
+
 DMError ScreenSessionManagerProxy::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
     std::vector<uint64_t>& windowIdList)
 {
