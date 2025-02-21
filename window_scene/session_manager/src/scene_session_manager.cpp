@@ -914,7 +914,7 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             TLOGI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId = %{public}d", sessionId);
             sceneSession->NotifySessionExceptionInner(scnSessionInfo, false);
         }
-        removeFailRecoveredSession();
+        RemoveFailRecoveredSession();
     };
     return taskScheduler_->PostAsyncTask(task);
 }
@@ -10920,7 +10920,7 @@ int32_t SceneSessionManager::GetCustomDecorHeight(int32_t persistentId)
     return height;
 }
 
-void SceneSessionManager::removeFailRecoveredSession()
+void SceneSessionManager::RemoveFailRecoveredSession()
 {
     for (const auto& persistentId : failRecoveredPersistentIdSet_) {
         auto sceneSession = GetSceneSession(persistentId);
