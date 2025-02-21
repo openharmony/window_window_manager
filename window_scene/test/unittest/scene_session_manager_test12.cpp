@@ -53,7 +53,7 @@ sptr<SceneSessionManager> SceneSessionManagerTest12::ssm_ = nullptr;
 
 void SceneSessionManagerTest12::SetUpTestCase()
 {
-    ssm_ = &SceneSessionManager::GetInstance;
+    ssm_ = &SceneSessionManager::GetInstance();
 }
 
 void SceneSessionManagerTest12::TearDownTestCase()
@@ -65,7 +65,7 @@ void SceneSessionManagerTest12::SetUp()
 {
 }
 
-void ScenenSessionManagerTest12::TearDown()
+void SceneSessionManagerTest12::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
 }
