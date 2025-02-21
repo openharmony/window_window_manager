@@ -291,4 +291,9 @@ WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteO
     return SceneSessionManager::GetInstance().HasFloatingWindowForeground(abilityToken,
         hasOrNot);
 }
+
+WMError SceneSessionManagerLite::LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock)
+{
+    return SceneSessionManager::GetInstance().LockSessionByAbilityInfo(abilityInfo, isLock);
+}
 } // namespace OHOS::Rosen

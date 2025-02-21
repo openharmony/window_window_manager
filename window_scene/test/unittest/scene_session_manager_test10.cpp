@@ -759,6 +759,24 @@ HWTEST_F(SceneSessionManagerTest10, MinimizeMainSession, Function | SmallTest | 
     result = ssm_->MinimizeMainSession(sessionInfo.bundleName_, sessionInfo.appIndex_, 1);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
 }
+
+/**
+ * @tc.name: LockSessionByAbilityInfo
+ * @tc.desc: SceneSesionManager test LockSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest10, LockSessionByAbilityInfo, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AbilityInfoBase abilityInfo;
+    abilityInfo.bundleName = "LockSessionByAbilityInfoBundle";
+    abilityInfo.moduleName = "LockSessionByAbilityInfoModule";
+    abilityInfo.abilityName = "LockSessionByAbilityInfoAbility";
+    abilityInfo.appIndex = 0;
+
+    auto result = ssm_->LockSessionByAbilityInfo(abilityInfo, true);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
 }  // namespace
 }
 }
