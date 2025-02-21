@@ -263,6 +263,8 @@ public:
      *
      * @param isAutoStart Indicates the {@link bool}
      * @param priority Indicates the {@link uint32_t} priority of pip window
+     * @param width Indicates the {@link uint32_t} width of the video content
+     * @param height Indicates the {@link uint32_t} height of the video content
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height)
