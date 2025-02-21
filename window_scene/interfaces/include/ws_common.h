@@ -737,6 +737,8 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
     SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
+    SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
+    SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 
