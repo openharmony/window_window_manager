@@ -4514,7 +4514,8 @@ void WindowSceneSessionImpl::UpdateDensity()
 {
     bool needUpdateNewSize = true;
     DisplayId displayId = property_->GetDisplayId();
-    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "display is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
             displayId, GetPersistentId());
@@ -4522,13 +4523,11 @@ void WindowSceneSessionImpl::UpdateDensity()
     }
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "DisplayInfo is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
             displayId, GetPersistentId());
         return;
     }
     if (windowSystemConfig_.IsPcWindow()) {
-        auto display = SingletonContainer::IsDestroyed() ? nullptr :
-            SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
         DMRect availableArea;
         if (display->GetAvailableArea(availableArea) == DMError::DM_OK) {
             UpdateNewSizeForPCWindow(displayInfo, availableArea);
@@ -5178,7 +5177,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
 void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& displayInfo, DMRect availableArea)
 {
     if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "fullscreen could not update new size, Id:%{public}u", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "fullscreen could not update new size, Id: %{public}u", GetPersistentId());
         return;
     }
     int32_t displayWidth = availableArea.width_;
@@ -5218,6 +5217,8 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& d
         }
         Resize(width, height);
         if (needMove) {
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "MoveTo left: %{public}u, top: %{public}u, Id: %{public}u", left, top,
+                GetPersistentId());
             MoveTo(left, top);
         }
     }

@@ -277,6 +277,8 @@ private:
     WMError UpdateWindowModeImmediately(WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
+    void UpdateNewSize();
+    void UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info, DMRect availableArea);
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
@@ -316,9 +318,6 @@ private:
      * Window Layout
      */
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
-
-    void UpdateNewSize();
-    void UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info, DMRect availableArea);
 
     /*
      * PC Window Layout

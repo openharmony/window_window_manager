@@ -89,7 +89,6 @@ private:
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
-    int HandleGetDockHeight(MessageParcel& data, MessageParcel& reply);
 
     // extension extension
     int HandleTransferAbilityResult(MessageParcel& data, MessageParcel& reply);
@@ -115,6 +114,7 @@ private:
     int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);
     int HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleContainerModalEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleGetDockHeight(MessageParcel& data, MessageParcel& reply);
 
     // Keyboard
     int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
