@@ -5176,6 +5176,9 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
 
 void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& displayInfo, DMRect availableArea)
 {
+    if (availableArea.IsUninitializedRect()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "availableArea is uninitialized");
+    }
     if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "fullscreen could not update new size, Id: %{public}u", GetPersistentId());
         return;
@@ -5190,7 +5193,6 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& d
     uint32_t width = windowRect.width_;
     uint32_t height = windowRect.height_;
     uint32_t statusBarHeight = GetStatusBarHeight();
-    uint32_t dockHeight = GetDockHeight();
     bool needMove = false;
     if (!MathHelper::NearZero(currVpr - newVpr) && !MathHelper::NearZero(currVpr)) {
         width = width * newVpr / currVpr;
@@ -5198,10 +5200,10 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& d
         if (width > displayWidth) {
             width = displayWidth;
         }
-        if (height > (displayHeight - statusBarHeight - dockHeight)) {
-            height = displayHeight - statusBarHeight - dockHeight;
+        if (height > (displayHeight - statusBarHeight)) {
+            height = displayHeight - statusBarHeight;
         }
-        needMove = top < statusBarHeight || left < 0 || top + height > (displayHeight - dockHeight) ||
+        needMove = top < statusBarHeight || left < 0 || top + height > displayHeight ||
             left + width > displayWidth;
         if (top < statusBarHeight) {
             top = statusBarHeight;
@@ -5209,8 +5211,8 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& d
         if (left < 0) {
             left = 0;
         }
-        if (top + height > (displayHeight - dockHeight)) {
-            top = displayHeight - dockHeight - height;
+        if (top + height > displayHeight) {
+            top = displayHeight - height;
         }
         if (left + width > displayWidth) {
             left = displayWidth - width;
