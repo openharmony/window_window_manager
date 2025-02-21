@@ -1471,6 +1471,14 @@ void ScreenSessionManager::UpdateDisplayHookInfo(int32_t uid, bool enable, const
     }
 }
 
+void ScreenSessionManager::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
+{
+    std::shared_lock<std::shared_mutex> lock(hookInfoMutex_);
+    if (displayHookMap_.find(uid) != displayHookMap_.end()) {
+        hookInfo = displayHookMap_[uid];
+    }
+}
+
 bool ScreenSessionManager::IsFreezed(const int32_t& agentPid, const DisplayManagerAgentType& agentType)
 {
     std::lock_guard<std::mutex> lock(freezedPidListMutex_);

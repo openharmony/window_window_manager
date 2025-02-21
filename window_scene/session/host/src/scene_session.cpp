@@ -72,6 +72,8 @@ constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 constexpr WSRectF VELOCITY_RELOCATION_TO_TOP = {0.0f, -10.0f, 0.0f, 0.0f};
 constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
 constexpr int32_t API_VERSION_16 = 16;
+constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
+constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -2026,6 +2028,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
         return;
     }
+    if (sessionProperty->GetCompatibleModeInPc()) {
+        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
+        return;
+    }
     WindowMode windowMode = Session::GetWindowMode();
     bool isWindowFloatingOrSplit = windowMode == WindowMode::WINDOW_MODE_FLOATING ||
                                    windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
@@ -2171,6 +2177,11 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
         TLOGD(WmsLogTag::WMS_IMMS, "window mode pip return");
         return;
     }
+    // compatibleMode app need to hook avoidArea in pc
+    if (GetSessionProperty()->GetCompatibleModeInPc()) {
+        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        return;
+    }
     WSRect barArea;
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
@@ -2178,6 +2189,42 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s AI bar %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
+}
+
+void SceneSession::HookAvoidAreaInCompatibleMode(WSRect& rect, AvoidArea& avoidArea, AvoidAreaType avoidAreaType) const
+{
+    WindowMode mode = GetWindowMode();
+    if (!GetSessionProperty()->GetCompatibleModeInPc() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        TLOGE(WmsLogTag::WMS_PC, "only support compatibleMode app in pc");
+        return;
+    }
+
+    float vpr = 3.5f; // 3.5f: default pixel ratio
+    DMHookInfo hookInfo;
+    ScreenSessionManagerClient::GetInstance().GetDisplayHookInfo(GetCallingUid(), hookInfo);
+    if (hookInfo.density_) {
+        vpr = hookInfo.density_;
+    }
+    switch (avoidAreaType) {
+        case AvoidAreaType::TYPE_SYSTEM: {
+            avoidArea.topRect_.posX_ = rect.posX_;
+            avoidArea.topRect_.posY_ = rect.posY_;
+            avoidArea.topRect_.height_ = HOOK_SYSTEM_BAR_HEIGHT * vpr;
+            avoidArea.topRect_.width_ = rect.width_;
+            return;
+        }
+        case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
+            avoidArea.bottomRect_.posX_ = rect.posX_;
+            avoidArea.bottomRect_.posY_ = rect.posY_ + rect.height_ - HOOK_AI_BAR_HEIGHT * vpr;
+            avoidArea.bottomRect_.width_ = rect.width_;
+            avoidArea.bottomRect_.height_ = HOOK_AI_BAR_HEIGHT * vpr;
+            return;
+        }
+        default: {
+            TLOGE(WmsLogTag::WMS_IMMS, "cannot find win %{public}d type %{public}u", GetPersistentId(), avoidAreaType);
+            return;
+        }
+    }
 }
 
 bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVersion)
@@ -2204,6 +2251,11 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVer
         TLOGE(WmsLogTag::WMS_IMMS, "session rect not equal to parent session rect");
     }
     if (WindowHelper::IsMainWindow(winType)) {
+        // compatibleMode app in pc,need use avoid Area
+        if (GetSessionProperty()->GetCompatibleModeInPc()) {
+            return true;
+        }
+
         if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
             return false;
         }
