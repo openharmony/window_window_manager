@@ -507,6 +507,9 @@ private:
     void CalcDisplayNodeTranslateOnFoldableRotation(sptr<ScreenSession>& session, const float& scaleX,
                                                    const float& scaleY, const float& pivotX, const float& pivotY,
                                                    float& translateX, float& translateY);
+    void CalcDisplayNodeTranslateOnPocketFoldRotation(sptr<ScreenSession>& session, const float& scaleX,
+                                                   const float& scaleY, const float& pivotX, const float& pivotY,
+                                                   float& translateX, float& translateY);
     void CalcDisplayNodeTranslateOnRotation(sptr<ScreenSession>& session, const float& scaleX, const float& scaleY,
                                             const float& pivotX, const float& pivotY, float& translateX,
                                             float& translateY);
