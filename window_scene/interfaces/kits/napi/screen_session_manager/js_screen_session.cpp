@@ -28,6 +28,7 @@
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
 namespace {
+constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSession" };
 const std::string ON_CONNECTION_CALLBACK = "connect";
 const std::string ON_DISCONNECTION_CALLBACK = "disconnect";
 const std::string ON_PROPERTY_CHANGE_CALLBACK = "propertyChange";
