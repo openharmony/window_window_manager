@@ -1789,6 +1789,14 @@ enum class KeyboardViewMode: uint32_t {
     DARK_IMMERSIVE_MODE,
     VIEW_MODE_END,
 };
+
+/*
+ * Multi User
+ */
+enum class UserSwitchEventType: uint32_t {
+    SWITCHING,
+    SWITCHED,
+};
 }
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
