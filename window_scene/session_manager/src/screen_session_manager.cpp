@@ -56,6 +56,7 @@
 #include "connection/screen_cast_connection.h"
 #include "publish/screen_session_publish.h"
 #include "dms_xcollie.h"
+#include "fold_screen_controller/secondary_fold_sensor_manager.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -93,7 +94,6 @@ static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
 static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
-const unsigned int XCOLLIE_TIMEOUT_5S = 5;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
@@ -320,11 +320,19 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
             return;
         }
         if (GetDisplayState(foldScreenController_->GetCurrentScreenId()) == DisplayState::ON) {
-            FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+                SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+            } else {
+                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+            }
             TLOGI(WmsLogTag::DMS, "Recover Posture sensor finished");
         }
 
-        FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
+        } else {
+            FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+        }
         TLOGI(WmsLogTag::DMS, "Recover Hall sensor finished");
         screenEventTracker_.RecordEvent("Dms recover Posture and Hall sensor finished.");
 #endif
@@ -624,6 +632,13 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
+    }
+
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+        SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
+        SetSensorSubscriptionEnabled();
+        screenEventTracker_.RecordEvent("secondary device: Dms subscribed to sensor successfully.");
     }
 
     if (foldScreenController_ != nullptr) {
@@ -1250,6 +1265,35 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
     return screenSession->SetScreenColorTransform();
 }
 
+sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId screenId, ScreenId defScreenId,
+    ScreenProperty property)
+{
+    sptr<ScreenSession> screenSession = nullptr;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> defaultScreen = GetDefaultScreenSession();
+    if (defaultScreen == nullptr || defaultScreen->GetDisplayNode() == nullptr) {
+        TLOGE(WmsLogTag::DMS, "default screen null");
+        return screenSession;
+    }
+    NodeId nodeId = defaultScreen->GetDisplayNode()->GetId();
+    TLOGI(WmsLogTag::DMS, "physical mirror screen nodeId: %{public}" PRIu64, nodeId);
+    config = {
+        .screenId = screenId,
+        .defaultScreenId = defScreenId,
+        .mirrorNodeId = nodeId,
+        .property = property,
+    };
+    screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    screenSession->SetIsPhysicalMirrorSwitch(true);
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        DMRect mainScreenRegion = {0, 0, 0, 0};
+        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+        screenSession->SetMirrorScreenRegion(screenId, mainScreenRegion);
+        screenSession->EnableMirrorScreenRegion();
+    }
+    return screenSession;
+}
+
 sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defScreenId,
     ScreenProperty property)
 {
@@ -1258,20 +1302,7 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         TLOGW(WmsLogTag::DMS, "mirror disabled by edm!");
         return screenSession;
     }
-    sptr<ScreenSession> defaultScreen = GetDefaultScreenSession();
-    if (defaultScreen == nullptr || defaultScreen->GetDisplayNode() == nullptr) {
-        TLOGE(WmsLogTag::DMS, "default screen null");
-        return screenSession;
-    }
-    NodeId nodeId = defaultScreen->GetDisplayNode()->GetId();
-    TLOGI(WmsLogTag::DMS, "physical mirror screen nodeId: %{public}" PRIu64 "", nodeId);
-    ScreenSessionConfig config = {
-        .screenId = screenId,
-        .defaultScreenId = defScreenId,
-        .mirrorNodeId = nodeId,
-        .property = property,
-    };
-    screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
+    screenSession = GetPhysicalScreenSession(screenId, defScreenId, property);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return nullptr;
@@ -1283,8 +1314,9 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         screenSession->SetName("CastEngine");
     }
     screenSession->SetIsExtend(true);
-    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    screenSession->SetMirrorScreenType(MirrorScreenType::PHYSICAL_MIRROR);
+    screenSession->SetIsRealScreen(true);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::SCREEN_SWITCH_CHANGE);
     hdmiScreenCount_ = hdmiScreenCount_ + 1;
     NotifyCaptureStatusChanged();
@@ -1311,6 +1343,8 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
     sptr<ScreenSession> screenSession = nullptr;
     screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
     screenSession->SetIsExtend(false);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    screenSession->SetIsRealScreen(true);
     return screenSession;
 }
 
@@ -1958,37 +1992,49 @@ void ScreenSessionManager::SetKeyguardDrawnDoneFlag(bool flag)
 
 void ScreenSessionManager::HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
-    if (ScreenSceneConfig::IsSupportRotateWithSensor()) {
-        if (status == ScreenPowerStatus::POWER_STATUS_ON) {
-            DmsXcollie dmsXcollie("DMS:SubscribeRotationSensor", XCOLLIE_TIMEOUT_5S);
-            TLOGI(WmsLogTag::DMS, "subscribe rotation and posture sensor when phone turn on");
-            ScreenSensorConnector::SubscribeRotationSensor();
+    if (!ScreenSceneConfig::IsSupportRotateWithSensor()) {
+        TLOGW(WmsLogTag::DMS, "not supportRotateWithSensor.");
+        return;
+    }
+    if (status == ScreenPowerStatus::POWER_STATUS_ON) {
+        DmsXcollie dmsXcollie("DMS:SubscribeRotationSensor", XCOLLIE_TIMEOUT_10S);
+        TLOGI(WmsLogTag::DMS, "subscribe rotation and posture sensor when phone turn on");
+        ScreenSensorConnector::SubscribeRotationSensor();
 #ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+        if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+            if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+                SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+                SecondaryFoldSensorManager::GetInstance().PowerKeySetScreenActiveRect();
+            } else {
                 FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-            } else {
-                TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
             }
-#endif
-        } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
-            TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
-            if (isMultiScreenCollaboration_) {
-                TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
-            } else {
-                DmsXcollie dmsXcollie("DMS:UnsubscribeRotationSensor", XCOLLIE_TIMEOUT_5S);
-                ScreenSensorConnector::UnsubscribeRotationSensor();
-            }
-#ifdef SENSOR_ENABLE
-            if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
-                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
-            } else {
-                TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
-            }
-#endif
         } else {
-            TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
-            screenEventTracker_.RecordEvent("HandlerSensor start!");
+            TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed register posture.");
         }
+#endif
+    } else if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_SUSPEND) {
+        TLOGI(WmsLogTag::DMS, "unsubscribe rotation and posture sensor when phone turn off");
+        if (isMultiScreenCollaboration_) {
+            TLOGI(WmsLogTag::DMS, "[UL_POWER]MultiScreenCollaboration, not unsubscribe rotation sensor");
+        } else {
+            DmsXcollie dmsXcollie("DMS:UnsubscribeRotationSensor", XCOLLIE_TIMEOUT_10S);
+            ScreenSensorConnector::UnsubscribeRotationSensor();
+        }
+#ifdef SENSOR_ENABLE
+        if (g_foldScreenFlag && reason != PowerStateChangeReason::STATE_CHANGE_REASON_DISPLAY_SWITCH) {
+            if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+                SecondaryFoldSensorManager::GetInstance().UnRegisterPostureCallback();
+                SecondaryFoldSensorManager::GetInstance().isPowerRectExe_ = false;
+            } else {
+                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+            }
+        } else {
+            TLOGI(WmsLogTag::DMS, "not fold product, switch screen reason, failed unregister posture.");
+        }
+#endif
+    } else {
+        TLOGI(WmsLogTag::DMS, "SetScreenPower state not support");
+        screenEventTracker_.RecordEvent("HandlerSensor start!");
     }
 }
 
@@ -2239,7 +2285,7 @@ void ScreenSessionManager::UpdateScreenDirectionInfo(ScreenId screenId, float sc
     }
     screenSession->SetPhysicalRotation(phyRotation);
     screenSession->SetScreenComponentRotation(screenComponentRotation);
-    screenSession->UpdateRotationOrientation(rotation);
+    screenSession->UpdateRotationOrientation(rotation, GetFoldDisplayMode());
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", rotation: %{public}f, screenComponentRotation: %{public}f",
         screenId, rotation, screenComponentRotation);
 }
@@ -2392,8 +2438,13 @@ void ScreenSessionManager::SetPostureAndHallSensorEnabled()
         TLOGI(WmsLogTag::DMS, "current device is not fold phone.");
         return;
     }
-    FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
-    FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
+        SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
+    } else {
+        FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+        FoldScreenSensorManager::GetInstance().RegisterHallCallback();
+    }
     TLOGI(WmsLogTag::DMS, "subscribe Posture and Hall sensor successful");
     screenEventTracker_.RecordEvent("Dms subscribe Posture and Hall sensor finished.");
 #endif
@@ -2958,8 +3009,8 @@ void ScreenSessionManager::MirrorSwitchNotify(ScreenId screenId)
     }
 }
 
-DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
-                                         ScreenId& screenGroupId)
+DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+    DMRect mainScreenRegion, ScreenId& screenGroupId)
 {
     TLOGI(WmsLogTag::DMS, "enter!");
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -2989,8 +3040,11 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     for (ScreenId screenId : allMirrorScreenIds) {
         OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     }
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+    }
     DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
-        allMirrorScreenIds, screenGroupId);
+        allMirrorScreenIds, mainScreenRegion, screenGroupId);
     if (makeResult != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "MakeMirror set mirror failed.");
         return makeResult;
@@ -3002,6 +3056,18 @@ DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<Scre
     TLOGI(WmsLogTag::DMS, "make mirror notify scb end makeResult=%{public}d", makeResult);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror end");
     return makeResult;
+}
+
+DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+    ScreenId& screenGroupId)
+{
+    return DoMakeMirror(mainScreenId, mirrorScreenIds, DMRect::NONE(), screenGroupId);
+}
+
+DMError ScreenSessionManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+                                         DMRect mainScreenRegion, ScreenId& screenGroupId)
+{
+    return DoMakeMirror(mainScreenId, mirrorScreenIds, mainScreenRegion, screenGroupId);
 }
 
 void ScreenSessionManager::RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds)
@@ -3675,7 +3741,7 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
     return true;
 }
 
-DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens)
+DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion)
 {
     TLOGI(WmsLogTag::DMS, "SetMirror, screenId:%{public}" PRIu64"", screenId);
     sptr<ScreenSession> screen = GetScreenSession(screenId);
@@ -3699,7 +3765,8 @@ DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId>
     bool filterMirroredScreen =
         group->combination_ == ScreenCombination::SCREEN_MIRROR && group->mirrorScreenId_ == screen->screenId_;
     group->mirrorScreenId_ = screen->screenId_;
-    ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR);
+    ChangeScreenGroup(group, screens, startPoints, filterMirroredScreen, ScreenCombination::SCREEN_MIRROR,
+        mainScreenRegion);
     TLOGI(WmsLogTag::DMS, "SetMirror success");
     return DMError::DM_OK;
 }
@@ -3729,23 +3796,32 @@ bool ScreenSessionManager::CheckScreenInScreenGroup(sptr<ScreenSession> screen) 
 }
 
 void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
-    const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination)
+    const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination, DMRect mainScreenRegion)
 {
     std::map<ScreenId, bool> removeChildResMap;
     std::vector<ScreenId> addScreens;
     std::vector<Point> addChildPos;
     for (uint64_t i = 0; i != screens.size(); i++) {
         ScreenId screenId = screens[i];
-        TLOGI(WmsLogTag::DMS, "ChangeScreenGroup ScreenId: %{public}" PRIu64"", screenId);
+        TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64"", screenId);
         auto screen = GetScreenSession(screenId);
         if (screen == nullptr) {
-            TLOGE(WmsLogTag::DMS, "ChangeScreenGroup screen:%{public}" PRIu64" is nullptr", screenId);
+            TLOGE(WmsLogTag::DMS, "screen:%{public}" PRIu64" is nullptr", screenId);
             continue;
         }
-        TLOGI(WmsLogTag::DMS, "ChangeScreenGroup Screen->groupSmsId_: %{public}" PRIu64"", screen->groupSmsId_);
+        TLOGI(WmsLogTag::DMS, "Screen->groupSmsId_: %{public}" PRIu64"", screen->groupSmsId_);
         screen->groupSmsId_ = 1;
         if (filterScreen && screen->groupSmsId_ == group->screenId_ && group->HasChild(screen->screenId_)) {
-            continue;
+            // screen already in group
+            if (combination != ScreenCombination::SCREEN_MIRROR ||
+                screen->GetMirrorScreenRegion().second == mainScreenRegion) {
+                continue;
+            }
+            // mirror mode and mirror area change
+            TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64
+                ", apply new region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
+                screenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
+                mainScreenRegion.width_, mainScreenRegion.height_);
         }
         if (CheckScreenInScreenGroup(screen)) {
             NotifyDisplayDestroy(screenId);
@@ -3754,6 +3830,20 @@ void ScreenSessionManager::ChangeScreenGroup(sptr<ScreenSessionGroup> group, con
         addChildPos.emplace_back(startPoints[i]);
         removeChildResMap[screenId] = originGroup != nullptr;
         addScreens.emplace_back(screenId);
+        if (combination == ScreenCombination::SCREEN_MIRROR) {
+            auto mirrorScreenId = group->mirrorScreenId_;
+            ScreenId rsScreenId = SCREEN_ID_INVALID;
+            if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+                TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", mirrorScreenId);
+            } else {
+                screen->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
+                screen->SetIsPhysicalMirrorSwitch(false);
+                TLOGI(WmsLogTag::DMS, "Screen: %{public}" PRIu64" mirror to %{public}"
+                    PRIu64" with region, x:%{public}d y:%{public}d w:%{public}u h:%{public}u",
+                    screenId, mirrorScreenId, mainScreenRegion.posX_, mainScreenRegion.posY_,
+                    mainScreenRegion.width_, mainScreenRegion.height_);
+            }
+        }
     }
     group->combination_ = combination;
     AddScreenToGroup(group, addScreens, addChildPos, removeChildResMap);
@@ -3872,7 +3962,6 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         TLOGE(WmsLogTag::DMS, "screenId is invalid or displayNode is null!");
         return nullptr;
     }
-
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
     RSSurfaceCaptureConfig config;
     config.useDma = isUseDma;
@@ -3888,13 +3977,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     } else {
         TLOGI(WmsLogTag::DMS, "Sucess to get pixelmap from RS!");
     }
-
     // notify dm listener
     sptr<ScreenshotInfo> snapshotInfo = new ScreenshotInfo();
     snapshotInfo->SetTrigger(SysCapUtil::GetClientName());
     snapshotInfo->SetDisplayId(displayId);
     OnScreenshot(snapshotInfo);
-
     return screenshot;
 }
 
@@ -4919,6 +5006,26 @@ void ScreenSessionManager::NotifyDisplayChangeInfoChanged(const sptr<DisplayChan
     }
 }
 
+void ScreenSessionManager::RefreshMirrorScreenRegion(ScreenId screenId)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "can not get screen session");
+        return;
+    }
+    if (screenSession->GetName() == "CastEngine" || screenSession->GetName() == "Cooperation") {
+        DMRect mainScreenRegion = {0, 0, 0, 0};
+        foldScreenController_->SetMainScreenRegion(mainScreenRegion);
+        ScreenId rsScreenId = SCREEN_ID_INVALID;
+        if (!ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+            TLOGE(WmsLogTag::DMS, "Screen: %{public}" PRIu64" convert to rs id failed", screenId);
+        } else {
+            screenSession->SetMirrorScreenRegion(rsScreenId, mainScreenRegion);
+            screenSession->EnableMirrorScreenRegion();
+        }
+    }
+}
+
 void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
     TLOGI(WmsLogTag::DMS, "DisplayMode:%{public}d", displayMode);
@@ -4933,6 +5040,12 @@ void ScreenSessionManager::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
         if (!IsFreezed(agentPid,
             DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER)) {
             agent->NotifyDisplayModeChanged(displayMode);
+        }
+    }
+    if (foldScreenController_ != nullptr && FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        auto screenIds = GetAllScreenIds();
+        for (auto screenId : screenIds) {
+            RefreshMirrorScreenRegion(screenId);
         }
     }
 }
@@ -5112,14 +5225,14 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
         delayTime = SWITCH_USER_DISPLAYMODE_CHANGE_DELAY;
         auto foldStatus = GetFoldStatus();
         TLOGE(WmsLogTag::DMS, "old mode: %{public}u, cur mode: %{public}u", oldScbDisplayMode_, GetFoldDisplayMode());
-        if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
+        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            screenSession->UpdatePropertyByFoldControl(screenSession->GetScreenProperty());
+            screenSession->PropertyChange(screenSession->GetScreenProperty(),
+                ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
+        } else if (foldStatus == FoldStatus::EXPAND || foldStatus == FoldStatus::HALF_FOLD) {
             screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_FULL));
             screenSession->PropertyChange(screenSession->GetScreenProperty(),
                 ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND);
-        } else if (foldStatus == FoldStatus::FOLDED) {
-            screenSession->UpdatePropertyByFoldControl(GetPhyScreenProperty(SCREEN_ID_MAIN));
-            screenSession->PropertyChange(screenSession->GetScreenProperty(),
-                ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING);
         } else {
             TLOGE(WmsLogTag::DMS, "unsupport foldStatus: %{public}u", foldStatus);
         }
@@ -5313,6 +5426,18 @@ int ScreenSessionManager::Dump(int fd, const std::vector<std::u16string>& args)
     return 0;
 }
 
+void ScreenSessionManager::TriggerFoldStatusChange(FoldStatus foldStatus)
+{
+    TLOGI(WmsLogTag::DMS, "enter foldStatus = %{public}d.", foldStatus);
+    if (foldScreenController_ == nullptr) {
+        return;
+    }
+    foldScreenController_->SetFoldStatus(foldStatus);
+    FoldDisplayMode displayMode = foldScreenController_->GetModeMatchStatus();
+    SetFoldDisplayMode(displayMode);
+    NotifyFoldStatusChanged(foldStatus);
+}
+
 int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam)
 {
     TLOGI(WmsLogTag::DMS, "NotifyFoldStatusChanged is dump log");
@@ -5401,7 +5526,8 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+    if (!FoldScreenStateInternel::IsDualDisplayFoldDevice() &&
+        !FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         SetDisplayNodeScreenId(SCREEN_ID_FULL, foldToExpand ? SCREEN_ID_FULL : SCREEN_ID_MAIN);
     }
     /* Avoid fold to expand process queues */
@@ -5541,7 +5667,9 @@ void ScreenSessionManager::RegisterApplicationStateObserver()
 {
 #ifdef SENSOR_ENABLE
     std::string identify = IPCSkeleton::ResetCallingIdentity();
-    FoldScreenSensorManager::GetInstance().RegisterApplicationStateObserver();
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        FoldScreenSensorManager::GetInstance().RegisterApplicationStateObserver();
+    }
     IPCSkeleton::SetCallingIdentity(identify);
 #endif
 }
@@ -5636,6 +5764,12 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
         defaultSize.physicalWidth_ = defaultScreenProperty.GetPhyBounds().rect_.width_;
         defaultSize.physicalHeight_ = defaultScreenProperty.GetPhyBounds().rect_.height_;
         allDisplayPhysicalResolution_.emplace_back(defaultSize);
+    }
+    for (auto& info : allDisplayPhysicalResolution_) {
+        if (info.foldDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+            info.foldDisplayMode_ = FoldDisplayMode::FULL;
+            break;
+        }
     }
     return allDisplayPhysicalResolution_;
 }

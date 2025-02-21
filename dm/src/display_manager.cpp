@@ -58,6 +58,7 @@ public:
     bool IsCaptured();
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
+    FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
     DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
@@ -1001,9 +1002,23 @@ FoldDisplayMode DisplayManager::GetFoldDisplayMode()
     return pImpl_->GetFoldDisplayMode();
 }
 
+FoldDisplayMode DisplayManager::GetFoldDisplayModeForExternal()
+{
+    return pImpl_->GetFoldDisplayModeForExternal();
+}
+
 FoldDisplayMode DisplayManager::Impl::GetFoldDisplayMode()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetFoldDisplayMode();
+}
+
+FoldDisplayMode DisplayManager::Impl::GetFoldDisplayModeForExternal()
+{
+    FoldDisplayMode displayMode = SingletonContainer::Get<DisplayManagerAdapter>().GetFoldDisplayMode();
+    if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+        return FoldDisplayMode::FULL;
+    }
+    return displayMode;
 }
 
 void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
