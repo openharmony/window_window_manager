@@ -4111,7 +4111,7 @@ void SceneSessionManager::HandleUserSwitched(bool isUserActive)
 
 void SceneSessionManager::HandleUserSwitch(const UserSwitchEventType type, const bool isUserActive)
 {
-    auto task = [this, type, isUserActive, where = __func__] {
+    taskScheduler_->PostSyncTask([this, type, isUserActive, where = __func__] {
         TLOGNI(WmsLogTag::WMS_MULTI_USER,
                "%{public}s: currentUserId: %{public}d, switchEventType: %{public}u, isUserActive: %{public}u",
                where, currentUserId_.load(), type, isUserActive);
@@ -4121,8 +4121,7 @@ void SceneSessionManager::HandleUserSwitch(const UserSwitchEventType type, const
             HandleUserSwitched(isUserActive);
         }
         return WSError::WS_OK;
-    };
-    taskScheduler_->PostSyncTask(task, __func__);
+    }, __func__);
 }
 
 sptr<AppExecFwk::IBundleMgr> SceneSessionManager::GetBundleManager()
