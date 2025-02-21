@@ -199,7 +199,7 @@ public:
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
     void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
-    void Resize(uint32_t width, uint32_t height);
+    void Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync = true);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
