@@ -337,6 +337,7 @@ enum class DisplayStateChangeType : uint32_t {
     DISPLAY_COMPRESS,
     UPDATE_SCALE,
     UNKNOWN,
+    RESOLUTION_CHANGE,
 };
 
 /**
