@@ -48,7 +48,7 @@ constexpr size_t ARGC_ONE = 1;
 
 napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
 {
-    TLOGND(WmsLogTag::DMS, "Create.");
+    TLOGD(WmsLogTag::DMS, "Create.");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -78,7 +78,7 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
 
 void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGND(WmsLogTag::DMS, "Finalizer.");
+    TLOGD(WmsLogTag::DMS, "Finalizer.");
     std::unique_ptr<JsScreenSession>(static_cast<JsScreenSession*>(data));
 }
 
@@ -117,7 +117,7 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
 
 JsScreenSession::~JsScreenSession()
 {
-    TLOGNI(WmsLogTag::DMS, "~JsScreenSession");
+    TLOGI(WmsLogTag::DMS, "~JsScreenSession");
 }
 
 napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
@@ -193,7 +193,7 @@ napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_
 
 napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
-    TLOGNI(WmsLogTag::DMS, "JsScreenSession::OnSetScreenRotationLocked is called");
+    TLOGI(WmsLogTag::DMS, "Called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -609,7 +609,7 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     PowerStateChangeReason reason)
 {
     const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
-    TLOGND(WmsLogTag::DMS, "[UL_POWER]%{public}s.", callbackType.c_str());
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]%{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
         TLOGW(WmsLogTag::DMS, "[UL_POWER]%{public}s is unregistered!", callbackType.c_str());
         return;
@@ -653,7 +653,7 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
 void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ROTATION_LOCKED_CHANGE;
-    TLOGND(WmsLogTag::DMS, "Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
     if (mCallback_.count(callbackType) == 0) {
         TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
