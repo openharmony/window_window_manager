@@ -121,6 +121,7 @@ constexpr bool REMOVE_VOTE = false;
 constexpr uint32_t OLED_60_HZ = 60;
 #endif
 constexpr uint32_t FOUR_K_WIDTH = 3840;
+constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
@@ -1374,6 +1375,7 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
                 sessionIt.first);
             continue;
         }
+        CalculateXYPosition(screenSession);
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
         if (displayInfo == nullptr) {
             TLOGE(WmsLogTag::DMS, "error, displayInfo is nullptr.");
@@ -1394,6 +1396,43 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
         }
     }
     return res;
+}
+
+void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> screenSession)
+{
+    if (screenSession == nullptr) {
+        TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && !screenSession->isInternal_) {
+        screenSession->SetXYPosition(0, 0);
+    } else {
+        ScreenId internalScreenId = GetInternalScreenId();
+        sptr<ScreenSession> internalSession = GetScreenSession(internalScreenId);
+        if (internalSession == nullptr) {
+            TLOGI(WmsLogTag::DMS, "internalSession is nullptr");
+            return;
+        }
+        ScreenProperty internalScreenProperty = internalSession->GetScreenProperty();
+        ScreenProperty secondaryScreenProperty = screenSession->GetScreenProperty();
+        int32_t internalX = internalScreenProperty.GetStartX();
+        int32_t internalY = internalScreenProperty.GetStartY();
+        int32_t secondaryX = secondaryScreenProperty.GetStartX();
+        int32_t secondaryY = secondaryScreenProperty.GetStartY();
+        secondaryX = secondaryX + ~internalX + 1;
+        secondaryY = secondaryY + ~internalY + 1;
+        screenSession->SetXYPosition(secondaryX, secondaryY);
+    }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->GetScreenProperty().GetIsFakeInUse()) {
+        sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
+        if (fakeScreenSession == nullptr) {
+            TLOGI(WmsLogTag::DMS, "fakeScreenSession is nullptr");
+            return;
+        }
+        int32_t secondaryX = fakeScreenSession->GetScreenProperty().GetStartX();
+        fakeScreenSession->SetXYPosition(secondaryX, DISPLAY_B_HEIGHT);
+        fakeScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    }
 }
 
 sptr<ScreenInfo> ScreenSessionManager::GetScreenInfoById(ScreenId screenId)
@@ -7420,6 +7459,7 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
     screenSession->UpdatePropertyByFakeBounds(screenWidth, fakeScreenHeight);
     screenSession->SetFakeScreenSession(fakeScreenSession);
     screenSession->SetIsFakeInUse(true);
+    CalculateXYPosition(screenSession);
 }
 
 DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
@@ -7527,9 +7567,11 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     firstScreenSession->SetStartPosition(mainScreenOptions.startX_, mainScreenOptions.startY_);
+    CalculateXYPosition(firstScreenSession);
     firstScreenSession->PropertyChange(firstScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     secondScreenSession->SetStartPosition(secondScreenOption.startX_, secondScreenOption.startY_);
+    CalculateXYPosition(secondScreenSession);
     secondScreenSession->PropertyChange(secondScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     std::shared_ptr<RSDisplayNode> firstDisplayNode = firstScreenSession->GetDisplayNode();
@@ -7560,6 +7602,7 @@ void ScreenSessionManager::SetRelativePositionForDisconnect(MultiScreenPositionO
         return;
     }
     defaultScreenSession->SetStartPosition(defaultScreenOptions.startX_, defaultScreenOptions.startY_);
+    CalculateXYPosition(defaultScreenSession);
     defaultScreenSession->PropertyChange(defaultScreenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
     std::shared_ptr<RSDisplayNode> defaultDisplayNode = defaultScreenSession->GetDisplayNode();
