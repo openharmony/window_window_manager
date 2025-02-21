@@ -524,7 +524,6 @@ protected:
      */
     std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMap_;
     uint32_t GetStatusBarHeight() override;
-    uint32_t GetDockHeight();
 
     /*
      * PC Fold Screen

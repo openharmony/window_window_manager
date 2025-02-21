@@ -1673,6 +1673,63 @@ HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, Function | Small
     ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(false, ret);
 }
+
+/**
+ * @tc.name: UpdateNewSizeForPCWindow01
+ * @tc.desc: UpdateNewSizeForPCWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSizeForPCWindow01, Function | SmallTest | Level2)
+{
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    auto displayInfo = display->GetDisplayInfo();
+    DMRect availableArea;
+    if (display->GetAvailableArea(availableArea) != DMError::DM_OK) {
+        return;
+    }
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateNewSizeForPCWindow01Window");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1008);
+    SessionInfo sessionInfo = {"CreateSubTestBundle", "CreateSubTestModule", "CreateSubTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
+    Rect windowRect = { 0, 0, 0, 0 };
+    Rect rect;
+    WindowLimits windowLimits = { 0, 0, 0, 0, 0.0, 0, 0 };
+    window->property_->SetRequestRect(windowRect);
+    window->property_->SetWindowRect(windowRect);
+    window->property_->SetWindowLimits(windowLimits);
+    window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
+    rect = window->property_->GetWindowRect();
+    ASSERT_EQ(windowRect, rect);
+
+    windowRect.width_ = 0;
+    windowRect.height_ = 0;
+    ASSERT_NE(nullptr, window->property_);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
+    rect = window->property_->GetWindowRect();
+    ASSERT_EQ(windowRect, rect);
+
+    Rect windowRect1 = { 10, 10, 10, 10 };
+    WindowLimits windowLimits1 = { 100, 100, 100, 100, 0.0, 0, 0 };
+    window->property_->SetRequestRect(windowRect1);
+    window->property_->SetWindowLimits(windowLimits1);
+    window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
+    rect = window->property_->GetWindowRect();
+    Rect eqRect1 = { 10, 10, 100, 100 };
+    ASSERT_EQ(eqRect1, rect);
+
+    Rect windowRect2 = { 200, 200, 200, 200 };
+    window->property_->SetRequestRect(windowRect2);
+    window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
+    rect = window->property_->GetWindowRect();
+    Rect eqRect2 = { 10, 10, 100, 100 };
+    ASSERT_EQ(eqRect2, rect);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

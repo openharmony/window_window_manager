@@ -5122,15 +5122,5 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
     return state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
         state < static_cast<int32_t>(CrossAxisState::STATE_END);
 }
-
-uint32_t WindowSessionImpl::GetDockHeight()
-{
-    uint32_t height = 0;
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, height);
-    height = static_cast<uint32_t>(hostSession->GetDockHeight());
-    TLOGI(WmsLogTag::WMS_IMMS, "height %{public}u", height);
-    return height;
-}
 } // namespace Rosen
 } // namespace OHOS

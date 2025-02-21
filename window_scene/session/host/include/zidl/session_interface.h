@@ -293,7 +293,6 @@ public:
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual void NotifyExtensionDetachToDisplay() {}
     virtual int32_t GetStatusBarHeight() { return 0; }
-    virtual int32_t GetDockHeight() { return 0; }
     /**
      * @brief Request to get focus or lose focus.
      *
