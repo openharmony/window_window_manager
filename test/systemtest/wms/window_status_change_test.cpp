@@ -19,7 +19,6 @@
 #include "window_scene_session_impl.h"
 #include "ability_context_impl.h"
 #include "mock_session.h"
-#include "mock_uicontent.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -36,9 +35,6 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    std::vector<sptr<Window>> activeWindows_;
-    Utils::TestWindowInfo windowInfo_;
-
 private:
     static constexpr uint32_t TEST_SLEEP_S = 1; // test sleep time
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
@@ -54,29 +50,11 @@ void WindowStatusChangeTest::TearDownTestCase() {
 
 void WindowStatusChangeTest::SetUp()
 {
-    windowInfo_ = {
-        .name = "",
-        .rect = Utils::customAppRect_,
-        .type = WindowType::WINDOW_TYPE_FLOAT,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = false,
-        .parentLimit = false,
-        .showWhenLocked = true,
-        .parentId = INVALID_WINDOW_ID,
-    };
-
-    activeWindows_.clear();
     abilityContext_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
 }
 
 void WindowStatusChangeTest::TearDown()
-{
-    while (!activeWindows_.empty())
-    {
-        ASSERT_EQ(WMError::WM_OK, activeWindows_.back()->Destroy());
-        activeWindows_.pop_back();
-    }
-    
+{  
     abilityContext_ = nullptr;
 }
 
@@ -356,17 +334,17 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus06, Function | MediumTest | L
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->Minimize());
     ASSERT_EQ(WindowState::STATE_SHOWN, window->GetWindowState());
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING), window->Restore());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Restore());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->Minimize());
     ASSERT_EQ(WindowState::STATE_SHOWN, window->GetWindowState());
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING), window->Restore());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Restore());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->Minimize());
     ASSERT_EQ(WindowState::STATE_SHOWN, window->GetWindowState());
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING), window->Restore());
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->Restore());
 
     window->Destroy(true, true);
 }
