@@ -331,7 +331,6 @@ private:
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
     napi_value OnStopMoving(napi_env env, napi_callback_info info);
-    napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
 
     /**
      * Sub Window
@@ -348,6 +347,11 @@ private:
      * Window Decor
      */
     napi_value OnSetWindowTitle(napi_env env, napi_callback_info info);
+
+    /*
+     * PC Window Layout
+     */
+    napi_value OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, napi_value* argv);
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
