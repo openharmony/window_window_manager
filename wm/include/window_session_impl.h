@@ -349,8 +349,8 @@ public:
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
-    WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
 
     /*

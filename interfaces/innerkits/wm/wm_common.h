@@ -320,8 +320,7 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
 
 inline SystemBarSettingFlag& operator|=(SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs)
 {
-    lhs = lhs | rhs;
-    return lhs;
+    return lhs = lhs | rhs;
 }
 
 /**

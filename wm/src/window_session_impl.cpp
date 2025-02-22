@@ -4522,8 +4522,8 @@ WMError WindowSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
 }
 
 WMError WindowSessionImpl::UpdateSystemBarProperties(
-    const std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+    const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+    const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
 {
     return WMError::WM_OK;
 }
