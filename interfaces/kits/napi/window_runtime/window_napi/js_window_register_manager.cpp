@@ -387,6 +387,17 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
     return false;
 }
 
+static void CleanUp(void* data) {
+    auto reference = reinterpret_cast<NativeReference*>(data);
+    uint32_t refCount = reference->GetRefCount();
+    if (refCount > 0  || reference->GetFinalRun()) {
+        delete reference;
+        reference = nullptr;
+    } else {
+        reference->SetDeleteSelf();
+    }
+}
+
 WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::string type,
     CaseType caseType, napi_env env, napi_value callback, napi_value parameter)
 {
@@ -408,6 +419,7 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
+    napi_add_env_cleanup_hook(env, CleanUp, result);
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef, caseType);
     if (windowManagerListener == nullptr) {
         WLOGFE("New JsWindowListener failed");
