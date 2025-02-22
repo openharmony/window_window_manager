@@ -453,7 +453,7 @@ void SessionManagerLite::RegisterSMSRecoverListener()
             return;
         }
         recoverListenerRegistered_ = true;
-        TLOGI(WmsLogTag::WMS_RECOVER, "Register recover listener");
+        TLOGD(WmsLogTag::WMS_RECOVER, "Register recover listener");
         smsRecoverListener_ = sptr<SessionManagerServiceLiteRecoverListener>::MakeSptr();
         std::string identity = IPCSkeleton::ResetCallingIdentity();
         mockSessionManagerServiceProxy_->RegisterSMSLiteRecoverListener(smsRecoverListener_);

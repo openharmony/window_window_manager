@@ -367,7 +367,7 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
 
 int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run");
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
     int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
         TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
@@ -421,7 +421,7 @@ int SceneSessionManagerStub::HandleUnregisterWindowManagerAgent(MessageParcel& d
 
 int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFD("run HandleGetFocusSessionInfo!");
+    TLOGD(WmsLogTag::WMS_FOCUS, "Run");
     FocusChangeInfo focusInfo;
     uint64_t displayId = 0;
     if (!data.ReadUint64(displayId)) {
@@ -717,7 +717,7 @@ int SceneSessionManagerStub::HandleCheckWindowId(MessageParcel& data, MessagePar
 
 int SceneSessionManagerStub::HandleSetGestureNavigationEnabled(MessageParcel& data, MessageParcel& reply)
 {
-    WLOGFI("run HandleSetGestureNavigationEnabled!");
+    TLOGD(WmsLogTag::DEFAULT, "Run");
     bool enable = false;
     if (!data.ReadBool(enable)) {
         return ERR_INVALID_DATA;
@@ -777,7 +777,7 @@ int SceneSessionManagerStub::HandleGetSessionDump(MessageParcel& data, MessagePa
     std::string dumpInfo;
     WSError errCode = GetSessionDumpInfo(params, dumpInfo);
     uint32_t infoSize = static_cast<uint32_t>(dumpInfo.length());
-    WLOGFI("HandleGetSessionDump, infoSize: %{public}d", infoSize);
+    TLOGD(WmsLogTag::DEFAULT, "HandleGetSessionDump, infoSize: %{public}d", infoSize);
     reply.WriteUint32(infoSize);
     if (infoSize != 0) {
         if (!reply.WriteRawData(dumpInfo.c_str(), infoSize)) {
@@ -876,7 +876,7 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel& data, Message
 
 int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "In!");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     uint32_t vectorSize;
     if (!data.ReadUint32(vectorSize)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read vectorSize");

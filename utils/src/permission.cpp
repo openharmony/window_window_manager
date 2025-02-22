@@ -74,7 +74,7 @@ bool Permission::CheckCallingPermission(const std::string& permission)
 
     if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetCallingTokenID(), permission) !=
         AppExecFwk::Constants::PERMISSION_GRANTED) {
-        WLOGW("permission denied!");
+        TLOGD(WmsLogTag::DEFAULT, "Permission denied!");
         return false;
     }
     WLOGFD("permission ok!");
@@ -166,10 +166,10 @@ bool Permission::CheckIsCallingBundleName(const std::string name)
     int uid = IPCSkeleton::GetCallingUid();
     // reset ipc identity
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    WLOGFI("resetCallingIdentity:%{public}s", identity.c_str());
+    TLOGD(WmsLogTag::DEFAULT, "resetCallingIdentity:%{public}s", identity.c_str());
     std::string callingBundleName;
     bundleManagerServiceProxy_->GetNameForUid(uid, callingBundleName);
-    WLOGFI("get the bundle name:%{public}s", callingBundleName.c_str());
+    TLOGD(WmsLogTag::DEFAULT, "get the bundle name:%{public}s", callingBundleName.c_str());
     IPCSkeleton::SetCallingIdentity(identity);
     std::string::size_type idx = callingBundleName.find(name);
     if (idx != std::string::npos) {

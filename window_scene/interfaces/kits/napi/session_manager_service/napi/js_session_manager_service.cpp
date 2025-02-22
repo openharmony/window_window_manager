@@ -40,7 +40,7 @@ public:
 
     static void Finalizer(napi_env env, void* data, void* hint)
     {
-        WLOGI("Finalizer is called");
+        WLOGD("Finalizer is called");
         std::unique_ptr<JsSessionManagerService>(static_cast<JsSessionManagerService*>(data));
     }
 
