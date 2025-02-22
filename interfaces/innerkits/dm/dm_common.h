@@ -135,6 +135,17 @@ enum class ScreenShape : uint32_t {
 };
 
 /**
+ * @brief displayed soure mode
+ */
+enum class DisplaySourceMode : uint32_t {
+    NONE = 0,
+    MAIN = 1,
+    MIRROR = 2,
+    EXTEND = 3,
+    ALONE = 4,
+};
+
+/**
  * @brief Enumerates the state of the display.
  */
 enum class DisplayState : uint32_t {

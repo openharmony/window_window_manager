@@ -237,6 +237,8 @@ public:
     int32_t GetValidHeight() const;
     int32_t GetValidWidth() const;
     float GetSensorRotation() const;
+    DisplaySourceMode GetDisplaySourceMode() const;
+    void SetXYPosition(int32_t x, int32_t y);
 
     bool isPrimary_ { false };
     bool isInternal_ { false };
