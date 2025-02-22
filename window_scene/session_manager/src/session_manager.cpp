@@ -129,9 +129,9 @@ void SessionManager::OnWMSConnectionChanged(
             isWMSConnected_ = isConnected;
         }
     }
-    TLOGI(WmsLogTag::WMS_MULTI_USER,
-        "curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d", userId, lastUserId,
-        screenId, isConnected);
+    TLOGD(WmsLogTag::WMS_MULTI_USER,
+          "curUserId=%{public}d, oldUserId=%{public}d, screenId=%{public}d, isConnected=%{public}d",
+          userId, lastUserId, screenId, isConnected);
     if (isConnected && lastUserId > INVALID_USER_ID && lastUserId != userId) {
         // Notify the user that the old wms has been disconnected.
         OnWMSConnectionChangedCallback(lastUserId, lastScreenId, false, isCallbackRegistered);
@@ -294,7 +294,7 @@ void SessionManager::OnUserSwitch(const sptr<ISessionManagerService>& sessionMan
         }
     }
     if (userSwitchCallbackFunc_) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "User switch callback");
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "User switch callback");
         userSwitchCallbackFunc_();
     }
 }
@@ -309,7 +309,7 @@ void SessionManager::Clear()
 
 WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "in");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "in");
     if (callbackFunc == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "callbackFunc is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -343,7 +343,7 @@ WMError SessionManager::RegisterWMSConnectionChangedListener(const WMSConnection
 
 void SessionManager::RegisterUserSwitchListener(const UserSwitchCallbackFunc& callbackFunc)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "enter");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "enter");
     userSwitchCallbackFunc_ = callbackFunc;
 }
 
