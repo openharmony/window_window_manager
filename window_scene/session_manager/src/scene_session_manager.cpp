@@ -5625,7 +5625,9 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
         return WSError::WS_OK;
     }
-
+    if (nextSession && !nextSession->IsSessionForeground()) {
+        focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
+    }
     return ShiftFocus(displayId, nextSession, true, reason);
 }
 
@@ -7036,7 +7038,7 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const s
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
     auto conditionFunc =  [this, focusedSessionId](const sptr<SceneSession>& iter) {
-        return iter && iter->GetPersistentId() == focusedSessionId; 
+        return iter && iter->GetPersistentId() == focusedSessionId;
     };
     if (std::find_if(topmostVec.begin(), topmostVec.end(), std::move(conditionFunc)) != topmostVec.end()) {
         TLOGD(WmsLogTag::WMS_SUB, "modal topmost subwindow id: %{public}d has been focused!", focusedSessionId);
@@ -7071,7 +7073,7 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(const sptr<Sc
     std::vector<sptr<Session>> dialogVec = mainSession->GetDialogVector();
     auto displayId = mainSession->GetSessionProperty()->GetDisplayId();
     auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-    auto conditionFunc =  [this, focusedSessionId](const sptr<Session>& iter) { 
+    auto conditionFunc =  [this, focusedSessionId](const sptr<Session>& iter) {
         return iter && iter->GetPersistentId() == focusedSessionId;
     };
     if (std::find_if(dialogVec.begin(), dialogVec.end(), std::move(conditionFunc)) != dialogVec.end()) {
@@ -9171,7 +9173,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
     AppExecFwk::RunningProcessInfo info;
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
     if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
-        WLOGFE("permission denied!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     return taskScheduler_->PostSyncTask([this, &element, where = __func__, displayId]() {
@@ -10896,7 +10898,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
             }
-            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {   
+            if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {
                 windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
             }
             infos.emplace_back(windowInfo);

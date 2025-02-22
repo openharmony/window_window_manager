@@ -2650,6 +2650,8 @@ WSError Session::NotifyFocusStatus(bool isFocused)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Session stage is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_->UpdateFocus(isFocused);
