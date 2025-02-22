@@ -356,7 +356,7 @@ bool JsScreenSessionManager::OnTakeOverShutdown(const PowerMgr::TakeOverInfo& in
     std::shared_ptr<NativeReference> callback_ = shutdownCallback_;
     auto asyncTask = [callback_, info, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenSessionManager::OnTakeOverShutdown");
-        napi_value argv[] = {CreateJsValue(env, info.intfParam_)};
+        napi_value argv[] = {CreateJsValue(env, info.reason_), CreateJsValue(env, info.intfParam_)};
         napi_value method = callback_->GetNapiValue();
         if (method == nullptr) {
             TLOGNE(WmsLogTag::DMS, "Failed to get method callback from object!");
