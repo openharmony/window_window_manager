@@ -193,6 +193,7 @@ void SceneInputManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&
 auto SceneInputManager::GetFullWindowInfoList() ->
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
+    sceneSessionDirty_->ResetSessionDirty();
     return sceneSessionDirty_->GetFullWindowInfoList();
 }
 
@@ -559,7 +560,6 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
             TLOGNE(WmsLogTag::WMS_EVENT, "sceneSessionDirty_ is nullptr");
             return;
         }
-        sceneSessionDirty_->ResetSessionDirty();
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
