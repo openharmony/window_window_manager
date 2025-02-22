@@ -500,13 +500,13 @@ void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& di
 
 void SceneInputManager::SetUserBackground(bool userBackground)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground=%{public}d", userBackground);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "userBackground=%{public}d", userBackground);
     isUserBackground_.store(userBackground);
 }
 
 void SceneInputManager::SetCurrentUserId(int32_t userId)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "Current userId=%{public}d", userId);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "Current userId=%{public}d", userId);
     currentUserId_ = userId;
     MMI::InputManager::GetInstance()->SetCurrentUser(userId);
 }
