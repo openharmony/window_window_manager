@@ -163,6 +163,7 @@ public:
     WSError CompatibleFullScreenRecover() override;
     WSError CompatibleFullScreenMinimize() override;
     WSError CompatibleFullScreenClose() override;
+    void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
 
     /*
      * Free Multi Window
@@ -227,6 +228,13 @@ public:
      */
     WMError NotifyRemoveStartingWindow() override;
 
+    /*
+     * Window Scene
+     */
+    WMError RegisterWindowAttachStateChangeListener(
+        const sptr<IWindowAttachStateChangeListner>& listener) override;
+    WMError UnregisterWindowAttachStateChangeListener() override;
+    
     /*
      * Window Immersive
      */
@@ -394,6 +402,13 @@ private:
      * Window Input Event
      */
     int32_t superFoldOffsetY_ = -1; // calculate the total height of the display_B area and crease area.
+
+    /*
+     * Window Scene
+     */
+    static std::mutex windowAttachStateChangeListenerMutex_;
+    sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
+    WSError NotifyWindowAttachStateChange(bool isAttach) override;
 };
 } // namespace Rosen
 } // namespace OHOS

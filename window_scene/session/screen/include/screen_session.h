@@ -52,6 +52,7 @@ public:
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) = 0;
     virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
+    virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) = 0;
     virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
     virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
 };
@@ -170,6 +171,7 @@ public:
 
     void HandleSensorRotation(float sensorRotation);
     void HandleHoverStatusChange(int32_t hoverStatus, bool needRotate = true);
+    void HandleCameraBackSelfieChange(bool isCameraBackSelfie);
     float ConvertRotationToFloat(Rotation sensorRotation);
 
     bool HasPrivateSessionForeground() const;
@@ -190,14 +192,15 @@ public:
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
-    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
+    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
+        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
     void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
-    void Resize(uint32_t width, uint32_t height);
+    void Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync = true);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
@@ -235,6 +238,8 @@ public:
     int32_t GetValidHeight() const;
     int32_t GetValidWidth() const;
     float GetSensorRotation() const;
+    DisplaySourceMode GetDisplaySourceMode() const;
+    void SetXYPosition(int32_t x, int32_t y);
 
     bool isPrimary_ { false };
     bool isInternal_ { false };
@@ -262,6 +267,7 @@ public:
     void SensorRotationChange(float sensorRotation);
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
+    void CameraBackSelfieChange(bool isCameraBackSelfie);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
     void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);

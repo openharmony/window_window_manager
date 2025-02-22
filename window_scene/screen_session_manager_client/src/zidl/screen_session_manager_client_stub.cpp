@@ -108,6 +108,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnSecondaryReflexionChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnCameraBackSelfieChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -322,6 +326,15 @@ int ScreenSessionManagerClientStub::HandleScreenCaptureNotify(MessageParcel& dat
     auto clientName = data.ReadString();
     WLOGI("notify scb capture screenId=%{public}" PRIu64", uid=%{public}d.", screenId, uid);
     ScreenCaptureNotify(screenId, uid, clientName);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnCameraBackSelfieChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnCameraBackSelfieChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    bool isCameraBackSelfie = data.ReadBool();
+    OnCameraBackSelfieChanged(screenId, isCameraBackSelfie);
     return ERR_NONE;
 }
 

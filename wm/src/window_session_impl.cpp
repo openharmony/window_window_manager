@@ -319,7 +319,6 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
 WindowSessionImpl::~WindowSessionImpl()
 {
     WLOGFD("[WMSCom] id: %{public}d", GetPersistentId());
-    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     Destroy(true, false);
 }
 
@@ -675,6 +674,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         WLOGFW("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     if (auto hostSession = GetHostSession()) {
         hostSession->Disconnect();
     }
@@ -1228,6 +1228,16 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     const std::shared_ptr<RSTransaction>& rsTransaction, const sptr<DisplayInfo>& info,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    // update avoid areas to listeners
+    for (const auto& [type, avoidArea] : avoidAreas) {
+        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
+            type, avoidArea.ToString().c_str());
+        if (lastAvoidAreaMap_[type] != avoidArea) {
+            lastAvoidAreaMap_[type] = avoidArea;
+            NotifyAvoidAreaChange(new AvoidArea(avoidArea), type);
+        }
+    }
+
     sptr<DisplayInfo> displayInfo;
     if (info == nullptr) {
         auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -1259,14 +1269,6 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
         return;
-    }
-    for (const auto& [type, avoidArea] : avoidAreas) {
-        TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
-            type, avoidArea.ToString().c_str());
-        if (lastAvoidAreaMap_[type] != avoidArea) {
-            lastAvoidAreaMap_[type] = avoidArea;
-            NotifyAvoidAreaChange(sptr<AvoidArea>::MakeSptr(avoidArea), type);
-        }
     }
     uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_);
 
@@ -1431,6 +1433,11 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     {
         std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
+        // compatibleMode app in pc, need change decor title to float title bar
+        if (property_->GetCompatibleModeInPc()) {
+            uiContent_->SetContainerModalTitleVisible(false, true);
+            uiContent_->EnableContainerModalCustomGesture(true);
+        }
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
@@ -1535,6 +1542,11 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         // uiContent may be nullptr when notify focus status, need to notify again when uiContent is not empty.
         NotifyUIContentFocusStatus();
         shouldReNotifyFocus_ = false;
+    }
+    if (shouldReNotifyHighlight_) {
+        // uiContent may be nullptr when notify highlight status, need to notify again when uiContent is not empty.
+        NotifyUIContentHighlightStatus(isHighlighted_);
+        shouldReNotifyHighlight_ = false;
     }
     if (aceRet != OHOS::Ace::UIContentErrorCode::NO_ERRORS) {
         WLOGFE("failed to init or restore uicontent with file %{public}s. errorCode: %{public}d",
@@ -1720,10 +1732,10 @@ WSError WindowSessionImpl::NotifyHighlightChange(bool isHighlight)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlight: %{public}u,", GetPersistentId(), isHighlight);
     isHighlighted_ = isHighlight;
-    if (isHighlighted_) {
-        CALL_UI_CONTENT(ActiveWindow);
+    if (GetUIContentSharedPtr() != nullptr) {
+        NotifyUIContentHighlightStatus(isHighlighted_);
     } else {
-        CALL_UI_CONTENT(UnActiveWindow);
+        shouldReNotifyHighlight_ = true;
     }
     std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
     auto highlightChangeListeners = GetListeners<IWindowHighlightChangeListener>();
@@ -2231,6 +2243,25 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     }
     uiContent->SetContainerModalTitleVisible(isVisible, true);
     TLOGD(WmsLogTag::WMS_DECOR, "end");
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetDecorVisible(bool& isVisible)
+{
+    TLOGD(WmsLogTag::WMS_DECOR, "%{public}u in", GetWindowId());
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcOrPadCapabilityEnabled()) {
+        TLOGE(WmsLogTag::WMS_DECOR, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_DECOR, "uicontent is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    isVisible = uiContent->GetContainerModalTitleVisible(GetImmersiveModeEnabledState());
     return WMError::WM_OK;
 }
 
@@ -3304,6 +3335,15 @@ void WindowSessionImpl::NotifyWindowAfterUnfocused()
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     // use needNotifyUinContent to separate ui content callbacks
     CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+}
+
+void WindowSessionImpl::NotifyUIContentHighlightStatus(bool isHighlighted)
+{
+    if (isHighlighted) {
+        CALL_UI_CONTENT(ActiveWindow);
+    } else {
+        CALL_UI_CONTENT(UnActiveWindow);
+    }
 }
 
 void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
@@ -4647,14 +4687,14 @@ void WindowSessionImpl::UpdatePiPControlStatus(PiPControlType controlType, PiPCo
         static_cast<WsPiPControlStatus>(status));
 }
 
-void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
+void WindowSessionImpl::SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height)
 {
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
         return;
     }
     if (auto hostSession = GetHostSession()) {
-        hostSession->SetAutoStartPiP(isAutoStart, priority);
+        hostSession->SetAutoStartPiP(isAutoStart, priority, width, height);
     }
 }
 

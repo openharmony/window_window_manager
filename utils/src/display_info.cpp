@@ -42,7 +42,9 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteFloat(scaleY_) && parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
         parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) &&
         parcel.WriteUint32(static_cast<uint32_t>(screenShape_)) &&
-        parcel.WriteUint32(static_cast<uint32_t>(originRotation_));
+        parcel.WriteUint32(static_cast<uint32_t>(originRotation_)) &&
+        parcel.WriteInt32(x_) && parcel.WriteInt32(y_) &&
+        parcel.WriteUint32(static_cast<uint32_t>(displaySourceMode_));
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
@@ -58,6 +60,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     uint32_t displayState;
     uint32_t displayOrientation;
     uint32_t screenShape;
+    uint32_t displaySourceMode;
     bool res = parcel.ReadString(displayInfo->name_) &&
         parcel.ReadUint64(displayInfo->id_) && parcel.ReadUint32(type) &&
         parcel.ReadInt32(displayInfo->width_) && parcel.ReadInt32(displayInfo->height_) &&
@@ -78,7 +81,8 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadFloat(displayInfo->scaleY_) && parcel.ReadFloat(displayInfo->pivotX_) &&
         parcel.ReadFloat(displayInfo->pivotY_) && parcel.ReadFloat(displayInfo->translateX_) &&
         parcel.ReadFloat(displayInfo->translateY_) && parcel.ReadUint32(screenShape) &&
-        parcel.ReadUint32(originRotation);
+        parcel.ReadUint32(originRotation) && parcel.ReadInt32(displayInfo->x_) &&
+        parcel.ReadInt32(displayInfo->y_) && parcel.ReadUint32(displaySourceMode);
     if (!res) {
         delete displayInfo;
         return nullptr;
@@ -90,6 +94,7 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
     displayInfo->displayOrientation_ = static_cast<DisplayOrientation>(displayOrientation);
     displayInfo->screenShape_ = static_cast<ScreenShape>(screenShape);
     displayInfo->originRotation_ = static_cast<Rotation>(originRotation);
+    displayInfo->displaySourceMode_ = static_cast<DisplaySourceMode>(displaySourceMode);
     return displayInfo;
 }
 } // namespace OHOS::Rosen

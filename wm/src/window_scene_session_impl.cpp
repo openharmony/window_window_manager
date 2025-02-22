@@ -131,6 +131,7 @@ constexpr int32_t API_VERSION_16 = 16;
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
+std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -1148,6 +1149,13 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+    if (display == nullptr && type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+        if (display != nullptr) {
+            property_->SetDisplayId(display->GetId());
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "use default display id: %{public}" PRIu64, display->GetId());
+        }
+    }
     if (display == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Window show failed, display is null, name: %{public}s, id: %{public}d",
             property_->GetWindowName().c_str(), GetPersistentId());
@@ -2039,7 +2047,13 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreen(bool status)
     }
 
     if (IsPcOrPadFreeMultiWindowMode() && property_->GetCompatibleModeInPc()) {
-        TLOGI(WmsLogTag::WMS_IMMS, "isCompatibleModeInPc, not suppported");
+        SetLayoutFullScreenByApiVersion(status);
+        // compatibleMode app may set statusBarColor before ignoreSafeArea
+        auto systemBarProperties = property_->GetSystemBarProperty();
+        if (status && systemBarProperties.find(WindowType::WINDOW_TYPE_STATUS_BAR) != systemBarProperties.end()) {
+            auto statusBarProperty = systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR];
+            HookDecorButtonStyleInCompatibleMode(statusBarProperty.contentColor_);
+        }
         return WMError::WM_OK;
     }
 
@@ -2141,12 +2155,33 @@ WMError WindowSceneSessionImpl::NotifySpecificWindowSessionProperty(WindowType t
         if (auto uiContent = GetUIContentSharedPtr()) {
             uiContent->SetStatusBarItemColor(property.contentColor_);
         }
+        if (property_->GetCompatibleModeInPc() && isIgnoreSafeArea_) {
+            HookDecorButtonStyleInCompatibleMode(property.contentColor_);
+        }
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_BAR) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_PROPS);
     } else if (type == WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR) {
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_NAVIGATION_INDICATOR_PROPS);
     }
     return WMError::WM_OK;
+}
+
+void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color)
+{
+    if (!property_->GetCompatibleModeInPc()) {
+        return;
+    }
+    auto alpha = (color >> 24) & 0xFF;
+    auto red = (color >> 16) & 0xFF;
+    auto green = (color >> 8) & 0xFF;
+    auto blue = color & 0xFF;
+    // calculate luminance, Identify whether a color is more black or more white.
+    double luminance = 0.299 * red + 0.587 * green + 0.114 * blue;
+    DecorButtonStyle style;
+    style.colorMode = ((luminance > (0xFF>>1)) || (alpha == 0x00)) ? LIGHT_COLOR_MODE : DARK_COLOR_MODE;
+    TLOGI(WmsLogTag::WMS_DECOR, "contentColor:%{public}d luminance:%{public}f colorMode:%{public}d",
+        color, luminance, style.colorMode);
+    SetDecorButtonStyle(style);
 }
 
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
@@ -2376,10 +2411,6 @@ WMError WindowSceneSessionImpl::Maximize()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
-        return WMError::WM_OK;
-    }
     if (WindowHelper::IsMainWindow(GetType())) {
         SetLayoutFullScreen(enableImmersiveMode_);
     }
@@ -2402,10 +2433,6 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
     // The device is not supported
     if (!IsPcOrPadFreeMultiWindowMode()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
-        return WMError::WM_OK;
-    }
-    if (GetTargetAPIVersion() >= 15 && state_ == WindowState::STATE_HIDDEN) { // 15: isolated version
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "window is hidden, id:%{public}d", GetPersistentId());
         return WMError::WM_OK;
     }
     titleHoverShowEnabled_ = true;
@@ -4053,7 +4080,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
-    if (windowSystemConfig_.IsPcWindow()) {
+    if (windowSystemConfig_.IsPcWindow() && !property_->GetCompatibleModeInPc()) {
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
             ret = SetLayoutFullScreenByApiVersion(true);
             if (ret != WMError::WM_OK) {
@@ -4588,6 +4615,43 @@ WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
     }
 
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
+    const sptr<IWindowAttachStateChangeListner>& listener)
+{
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d, listener is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    windowAttachStateChangeListener_ = listener;
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
+{
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+    windowAttachStateChangeListener_ = nullptr;
+    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    return WMError::WM_OK;
+}
+
+WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    if (!windowAttachStateChangeListener_) {
+        TLOGW(WmsLogTag::WMS_SUB, "listener is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    if (isAttach) {
+        windowAttachStateChangeListener_->AfterAttached();
+    } else {
+        windowAttachStateChangeListener_->AfterDetached();
+    }
+    return WSError::WS_OK;
 }
 
 WMError WindowSceneSessionImpl::UnregisterKeyboardPanelInfoChangeListener(

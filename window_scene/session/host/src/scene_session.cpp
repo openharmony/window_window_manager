@@ -72,6 +72,8 @@ constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 constexpr WSRectF VELOCITY_RELOCATION_TO_TOP = {0.0f, -10.0f, 0.0f, 0.0f};
 constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
 constexpr int32_t API_VERSION_16 = 16;
+constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
+constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -1252,7 +1254,7 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
         return WSError::WS_ERROR_REPEAT_OPERATION;
     }
     WSError ret = WSError::WS_OK;
-    if (reason_ == SizeChangeReason::DRAG_END) {
+    if (reason_ != SizeChangeReason::DRAG_MOVE) {
         UpdateCrossAxisOfLayout(winRect_);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
@@ -1630,7 +1632,9 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             PcFoldScreenManager::GetInstance().GetDisplayRects();
         auto lowerScreenPosY =
             defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
-        rect.posY_ += lowerScreenPosY;
+        if (rect.posY_ < lowerScreenPosY) {
+            rect.posY_ += lowerScreenPosY;
+        }
     } else {
         rect.posY_ += winRect_.posY_;
     }
@@ -1648,7 +1652,6 @@ WSError SceneSession::UpdateSessionRect(
         return WSError::WS_DO_NOTHING;
     }
     WSRect newRect = rect;
-    UpdateCrossAxisOfLayout(rect);
     UpdateSessionRectPosYFromClient(reason, moveConfiguration.displayId, newRect);
     if (isGlobal && WindowHelper::IsSubWindow(Session::GetWindowType()) &&
         (systemConfig_.IsPhoneWindow() ||
@@ -1905,9 +1908,7 @@ WSError SceneSession::SetIsStatusBarVisibleInner(bool isVisible)
         return ret;
     }
     if (isLayoutFinished) {
-        UpdateAvoidArea(
-            sptr<AvoidArea>::MakeSptr(GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM)),
-            AvoidAreaType::TYPE_SYSTEM);
+        UpdateAvoidArea(new AvoidArea(GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM)), AvoidAreaType::TYPE_SYSTEM);
     } else {
         MarkAvoidAreaAsDirty();
     }
@@ -2025,6 +2026,10 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea)
     if (isNeedAvoid && WindowHelper::IsAppWindow(GetWindowType())) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u flag %{public}d",
             GetPersistentId(), static_cast<uint32_t>(GetWindowType()), sessionProperty->GetWindowFlags());
+        return;
+    }
+    if (sessionProperty->GetCompatibleModeInPc()) {
+        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_SYSTEM);
         return;
     }
     WindowMode windowMode = Session::GetWindowMode();
@@ -2172,6 +2177,11 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
         TLOGD(WmsLogTag::WMS_IMMS, "window mode pip return");
         return;
     }
+    // compatibleMode app need to hook avoidArea in pc
+    if (GetSessionProperty()->GetCompatibleModeInPc()) {
+        HookAvoidAreaInCompatibleMode(rect, avoidArea, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+        return;
+    }
     WSRect barArea;
     if (specificCallback_ != nullptr && specificCallback_->onGetAINavigationBarArea_) {
         barArea = specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
@@ -2179,6 +2189,42 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}s AI bar %{public}s",
           rect.ToString().c_str(), barArea.ToString().c_str());
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
+}
+
+void SceneSession::HookAvoidAreaInCompatibleMode(WSRect& rect, AvoidArea& avoidArea, AvoidAreaType avoidAreaType) const
+{
+    WindowMode mode = GetWindowMode();
+    if (!GetSessionProperty()->GetCompatibleModeInPc() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        TLOGE(WmsLogTag::WMS_PC, "only support compatibleMode app in pc");
+        return;
+    }
+
+    float vpr = 3.5f; // 3.5f: default pixel ratio
+    DMHookInfo hookInfo;
+    ScreenSessionManagerClient::GetInstance().GetDisplayHookInfo(GetCallingUid(), hookInfo);
+    if (hookInfo.density_) {
+        vpr = hookInfo.density_;
+    }
+    switch (avoidAreaType) {
+        case AvoidAreaType::TYPE_SYSTEM: {
+            avoidArea.topRect_.posX_ = rect.posX_;
+            avoidArea.topRect_.posY_ = rect.posY_;
+            avoidArea.topRect_.height_ = HOOK_SYSTEM_BAR_HEIGHT * vpr;
+            avoidArea.topRect_.width_ = rect.width_;
+            return;
+        }
+        case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
+            avoidArea.bottomRect_.posX_ = rect.posX_;
+            avoidArea.bottomRect_.posY_ = rect.posY_ + rect.height_ - HOOK_AI_BAR_HEIGHT * vpr;
+            avoidArea.bottomRect_.width_ = rect.width_;
+            avoidArea.bottomRect_.height_ = HOOK_AI_BAR_HEIGHT * vpr;
+            return;
+        }
+        default: {
+            TLOGE(WmsLogTag::WMS_IMMS, "cannot find win %{public}d type %{public}u", GetPersistentId(), avoidAreaType);
+            return;
+        }
+    }
 }
 
 bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVersion)
@@ -2205,6 +2251,11 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVer
         TLOGE(WmsLogTag::WMS_IMMS, "session rect not equal to parent session rect");
     }
     if (WindowHelper::IsMainWindow(winType)) {
+        // compatibleMode app in pc,need use avoid Area
+        if (GetSessionProperty()->GetCompatibleModeInPc()) {
+            return true;
+        }
+
         if (mode == WindowMode::WINDOW_MODE_FLOATING && type != AvoidAreaType::TYPE_SYSTEM) {
             return false;
         }
@@ -2218,7 +2269,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVer
          static_cast<uint32_t>(AvoidAreaOption::ENABLE_SYSTEM_WINDOW))) {
         return systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     }
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u "
+    TLOGD(WmsLogTag::WMS_IMMS, "win %{public}d type %{public}u "
         "avoidAreaType %{public}u windowMode %{public}u, return default avoid area.",
         GetPersistentId(), static_cast<uint32_t>(winType), static_cast<uint32_t>(type), static_cast<uint32_t>(mode));
     return false;
@@ -3095,6 +3146,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, GetStatusBarHeight(), GetDockHeight());
     if (!ret) {
         TLOGD(WmsLogTag::WMS_LAYOUT_PC, "no throw slip");
+        pcFoldScreenController_->ResetRecords();
         return false;
     }
 
@@ -3133,6 +3185,7 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
     SetSurfaceBoundsWithAnimation(throwSlipPair, endRect, finishCallback);
     OnThrowSlipAnimationStateChange(true);
     rect = endRect;
+    pcFoldScreenController_->ResetRecords();
     return true;
 }
 
@@ -3306,7 +3359,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 continue;
             }
             movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1);
+            screenSession->GetDisplayNode()->AddCrossScreenChild(movedSurfaceNode, -1, true);
             movedSurfaceNode->SetIsCrossNode(true);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64, displayId);
         }
@@ -5505,10 +5558,11 @@ WSError SceneSession::UpdatePiPControlStatus(WsPiPControlType controlType, WsPiP
     return WSError::WS_OK;
 }
 
-WSError SceneSession::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
+WSError SceneSession::SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u", isAutoStart, priority);
-    PostTask([weakThis = wptr(this), isAutoStart, priority, where = __func__] {
+    TLOGI(WmsLogTag::WMS_PIP, "isAutoStart:%{public}u priority:%{public}u width:%{public}u height:%{public}u",
+        isAutoStart, priority, width, height);
+    PostTask([weakThis = wptr(this), isAutoStart, priority, width, height, where = __func__] {
         auto session = weakThis.promote();
         if (!session || session->isTerminating_) {
             TLOGNE(WmsLogTag::WMS_PIP, "%{public}s session is null or is terminating", where);
@@ -5516,7 +5570,7 @@ WSError SceneSession::SetAutoStartPiP(bool isAutoStart, uint32_t priority)
         }
         if (session->autoStartPiPStatusChangeFunc_) {
             HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetAutoStartPiP");
-            session->autoStartPiPStatusChangeFunc_(isAutoStart, priority);
+            session->autoStartPiPStatusChangeFunc_(isAutoStart, priority, width, height);
         }
     }, __func__);
     return WSError::WS_OK;

@@ -82,6 +82,7 @@ void DisplayManagerService::OnStart()
     if (!Publish(sptr<DisplayManagerService>(this))) {
         WLOGFE("Publish failed");
     }
+    SetDisplayState(DisplayState::ON);
     WLOGFI("end");
 }
 

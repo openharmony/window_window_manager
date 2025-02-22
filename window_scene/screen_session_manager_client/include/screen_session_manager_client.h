@@ -89,6 +89,7 @@ public:
     bool IsFoldable();
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo);
+    void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo);
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func);
     void SwitchingCurrentUser();
@@ -115,6 +116,7 @@ private:
     void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
+    void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override;
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;

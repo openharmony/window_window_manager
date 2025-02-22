@@ -37,6 +37,7 @@ public:
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override {}
     void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override {}
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {}
+    void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) override {}
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
 };
@@ -2668,6 +2669,66 @@ HWTEST_F(ScreenSessionTest, GetIsPhysicalMirrorSwitch02, Function | SmallTest | 
     session->SetIsPhysicalMirrorSwitch(false);
     ASSERT_EQ(session->GetIsPhysicalMirrorSwitch(), false);
 }
+/**
+ * @tc.name: GetDisplaySourceMode01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, GetDisplaySourceMode01, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetSourceMode start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->screenId_ = session->defaultScreenId_;
+    DisplaySourceMode mode = session->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::MAIN);
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    mode = screenSession->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::NONE);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXPAND);
+    mode = screenSession->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::EXTEND);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    mode = screenSession->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::MIRROR);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_UNIQUE);
+    mode = screenSession->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::ALONE);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplaySourceMode01 end";
+}
+ 
+/**
+* @tc.name: GetDisplaySourceMode02
+* @tc.desc: normal function
+* @tc.type: FUNC
+*/
+HWTEST_F(ScreenSessionTest, GetDisplaySourceMode02, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplaySourceMode02 start";
+    sptr<ScreenSession> session = new(std::nothrow) ScreenSession();
+    session->screenId_ = session->defaultScreenId_;
+    DisplaySourceMode mode = session->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::MAIN);
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
+    mode = screenSession->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::MAIN);
+    screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    mode = screenSession->GetDisplaySourceMode();
+    ASSERT_EQ(mode, DisplaySourceMode::EXTEND);
+    GTEST_LOG_(INFO) << "ScreenSessionTest: GetDisplaySourceMode02 end";
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
