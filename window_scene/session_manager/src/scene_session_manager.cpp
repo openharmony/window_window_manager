@@ -11081,6 +11081,7 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
+        SceneInputManager::GetInstance().ResetSessionDirty();
         auto [windowInfoList, pixelMapList] = SceneInputManager::GetInstance().GetFullWindowInfoList();
         TLOGND(WmsLogTag::WMS_EVENT, "windowInfoList size: %{public}d", static_cast<int32_t>(windowInfoList.size()));
         SceneInputManager::GetInstance().
