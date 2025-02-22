@@ -112,6 +112,10 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnCameraBackSelfieChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnExtendScreenConnectStatusChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -355,6 +359,16 @@ int ScreenSessionManagerClientStub::HandleOnSecondaryReflexionChanged(MessagePar
     WLOGI("secondary reflexion screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
         screenId, static_cast<uint32_t>(isSecondaryReflexion));
     OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnExtendScreenConnectStatusChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto extendScreenConnectStatus = static_cast<ExtendScreenConnectStatus>(data.ReadUint32());
+    WLOGI("extendScreenConnectStatus screenId=%{public}" PRIu64", extendScreenConnectStatus=%{public}d.",
+        screenId, static_cast<uint32_t>(extendScreenConnectStatus));
+    OnExtendScreenConnectStatusChanged(screenId, extendScreenConnectStatus);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

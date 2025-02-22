@@ -55,6 +55,8 @@ public:
     virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) = 0;
     virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
     virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
+    virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -293,6 +295,7 @@ public:
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
+    void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
 
 private:
     ScreenProperty property_;

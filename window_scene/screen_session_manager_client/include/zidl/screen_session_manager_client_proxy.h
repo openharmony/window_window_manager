@@ -53,6 +53,8 @@ public:
     void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override;
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
+    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;

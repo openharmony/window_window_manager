@@ -164,6 +164,7 @@ public:
 
     FoldStatus GetFoldStatus() override { return FoldStatus::UNKNOWN; };
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; };
+    virtual ExtendScreenConnectStatus GetExtendScreenConnectStatus() { return ExtendScreenConnectStatus::UNKNOWN; }
 
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override { return nullptr; };
 

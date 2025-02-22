@@ -156,7 +156,7 @@ public:
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
-
+    ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
