@@ -238,18 +238,17 @@ public:
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true);
-    Task saveSnapshotCallback_ = []() {};
-    void SetSaveSnapshotCallback(const Task& task)
+    void SetSaveSnapshotCallback(Task&& task)
     {
         if (task) {
-            saveSnapshotCallback_ = task;
+            saveSnapshotCallback_ = std::move(task);
         }
     };
-    Task removeSnapshotCallback_ = []() {};
-    void SetRemoveSnapshotCallback(const Task& task)
+
+    void SetRemoveSnapshotCallback(Task&& task)
     {
         if (task) {
-            removeSnapshotCallback_ = task;
+            removeSnapshotCallback_ = std::move(task);
         }
     };
     
@@ -940,6 +939,12 @@ private:
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
 
+    /*
+     * Window Scene Snapshot
+     */
+    Task saveSnapshotCallback_ = []() {};
+    Task removeSnapshotCallback_ = []() {};
+    
     /*
      * Window Layout
      */
