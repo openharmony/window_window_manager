@@ -82,6 +82,7 @@ const std::string UPDATE_SESSION_LABEL_AND_ICON_CB = "updateSessionLabelAndIcon"
 const std::string KEYBOARD_STATE_CHANGE_CB = "keyboardStateChange";
 const std::string KEYBOARD_VIEW_MODE_CHANGE_CB = "keyboardViewModeChange";
 const std::string HIGHLIGHT_CHANGE_CB = "highlightChange";
+const std::string SESSION_LOCK_STATE_CHANGE_CB = "sessionLockStateChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -151,6 +152,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {KEYBOARD_VIEW_MODE_CHANGE_CB,          ListenerFuncType::KEYBOARD_VIEW_MODE_CHANGE_CB},
     {HIGHLIGHT_CHANGE_CB,                   ListenerFuncType::HIGHLIGHT_CHANGE_CB},
     {SET_SUPPORT_WINDOW_MODES_CB,           ListenerFuncType::SET_SUPPORT_WINDOW_MODES_CB},
+    {SESSION_LOCK_STATE_CHANGE_CB,          ListenerFuncType::SESSION_LOCK_STATE_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -374,6 +376,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetUseStartingWindowAboveLocked);
     BindNativeFunction(env, objValue, "setFreezeImmediately", moduleName,
         JsSceneSession::SetFreezeImmediately);
+    BindNativeFunction(env, objValue, "setColorSpace", moduleName, JsSceneSession::SetColorSpace);
     BindNativeFunction(env, objValue, "setSnapshotSkip", moduleName, JsSceneSession::SetSnapshotSkip);
 }
 
@@ -2091,6 +2094,13 @@ napi_value JsSceneSession::SetFreezeImmediately(napi_env env, napi_callback_info
     return (me != nullptr) ? me->OnSetFreezeImmediately(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SetColorSpace(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetColorSpace(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetSnapshotSkip(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
@@ -2336,6 +2346,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::HIGHLIGHT_CHANGE_CB):
             ProcessSetHighlightChangeRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SESSION_LOCK_STATE_CHANGE_CB):
+            ProcessSessionLockStateChangeRegister();
             break;
         default:
             break;
@@ -5302,6 +5315,33 @@ napi_value JsSceneSession::OnSetFreezeImmediately(napi_env env, napi_callback_in
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetColorSpace(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ColorSpace colorSpace = ColorSpace::COLOR_SPACE_DEFAULT;
+    if (!ConvertFromJsValue(env, argv[0], colorSpace)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to ColorSpace");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetColorSpace(colorSpace);
+    return NapiGetUndefined(env);
+}
+
 void JsSceneSession::ProcessUpdateSessionLabelAndIconRegister()
 {
     TLOGD(WmsLogTag::WMS_MAIN, "in");
@@ -5518,5 +5558,44 @@ void JsSceneSession::NotifyHighlightChange(bool isHighlight)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "NotifyHighlightChange");
+}
+
+void JsSceneSession::ProcessSessionLockStateChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterSessionLockStateChangeCallback([weakThis = wptr(this), where = __func__](bool isLockedState) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnSessionLockStateChange(isLockedState);
+    });
+    TLOGI(WmsLogTag::WMS_MAIN, "success");
+}
+
+void JsSceneSession::OnSessionLockStateChange(bool isLockedState)
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, isLockedState, env = env_, where = __func__] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed.",
+                where, persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SESSION_LOCK_STATE_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsSessionLockState = CreateJsValue(env, isLockedState);
+        napi_value argv[] = { jsSessionLockState };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
 }
 } // namespace OHOS::Rosen

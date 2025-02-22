@@ -702,7 +702,7 @@ HWTEST_F(SceneSessionManagerTest, HideNonSecureFloatingWindows, Function | Small
     ssm_->combinedExtWindowFlags_.hideNonSecureWindowsFlag = true;
     ssm_->systemConfig_.uiType_ = UI_TYPE_PC;
     ssm_->HideNonSecureFloatingWindows();
-    EXPECT_FALSE(floatSession->GetSessionProperty()->GetForceHide());
+    EXPECT_TRUE(floatSession->GetSessionProperty()->GetForceHide());
     ssm_->systemConfig_.uiType_ = UI_TYPE_PHONE;
 
     ssm_->shouldHideNonSecureFloatingWindows_.store(false);

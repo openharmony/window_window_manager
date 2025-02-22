@@ -502,6 +502,9 @@ public:
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     void SetUserAuthPassed(bool isUserAuthPassed);
     bool IsUserAuthPassed() const;
+    void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
+        std::vector<sptr<SceneSession>>& mainSessions) const;
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
 
     /*
      * Window Pattern
@@ -714,7 +717,7 @@ private:
     void NotifySessionAINavigationBarChange(int32_t persistentId);
     void ReportWindowProfileInfos();
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
-    void removeFailRecoveredSession();
+    void RemoveFailRecoveredSession();
     void GetAllSceneSessionForAccessibility(std::vector<sptr<SceneSession>>& sceneSessionList);
     void FillAccessibilityInfo(std::vector<sptr<SceneSession>>& sceneSessionList,
         std::vector<sptr<AccessibilityWindowInfo>>& accessibilityInfo);
@@ -1016,6 +1019,7 @@ private:
      * Window Lifecycle
      */
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
+    std::unordered_set<std::string> sessionLockedStateCacheSet_;
 
     /*
      * Window Pattern

@@ -205,8 +205,8 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    window->windowSystemConfig_.uiType = UI_TYPE_PC;
-    window->preperty_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     WMError res = window->SetMainWindowTopmost(true);
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
 }
@@ -687,7 +687,7 @@ HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     window->ConsumePointerEvent(pointerEvent);
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->ConsumeKeyEvent(keyEvent);
     ASSERT_EQ(nullptr, window->GetUIContentSharedPtr());
     ASSERT_EQ(false, window->PreNotifyKeyEvent(keyEvent));
