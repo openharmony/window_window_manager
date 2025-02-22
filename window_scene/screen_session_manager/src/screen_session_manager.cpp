@@ -869,6 +869,11 @@ void ScreenSessionManager::SetMultiScreenDefaultRelativePosition()
     if (extendSession != nullptr && mainSession != nullptr) {
         ScreenProperty mainProperty = mainSession->GetScreenProperty();
         int32_t mainWidth = mainProperty.GetBounds().rect_.GetWidth();
+        int32_t mainHeight = mainProperty.GetBounds().rect_.GetHeight();
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetIsExtendScreenConnected() &&
+            mainHeight > mainWidth) {
+            mainWidth = mainHeight;
+        }
         mainOptions = { mainSession->GetScreenId(), 0, 0 };
         extendOptions = { extendSession->GetScreenId(), mainWidth, 0 };
         auto ret = SetMultiScreenRelativePosition(mainOptions, extendOptions);
@@ -1048,6 +1053,37 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
     }
+    HandlePCScreenDisconnect(screenSession);
+#ifdef WM_MULTI_SCREEN_ENABLE
+        HandleExtendScreenDisconnect(screenId);
+#endif
+    if (clientProxy_) {
+        TLOGW(WmsLogTag::DMS, "screen disconnect and notify to scb.");
+        clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
+            screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMap_.erase(screenId);
+    }
+    if (g_isPcDevice) {
+        ScreenCombination screenCombination = screenSession->GetScreenCombination();
+        ReportHandleScreenEvent(ScreenEvent::DISCONNECTED, screenCombination);
+        SetMultiScreenFrameControl();
+    }
+    if (!(screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) {
+        std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+        phyScreenPropMap_.erase(screenId);
+    }
+    if (phyMirrorEnable) {
+        NotifyScreenDisconnected(screenSession->GetScreenId());
+        isPhyScreenConnected_ = false;
+    }
+    TLOGW(WmsLogTag::DMS, "disconnect success. ScreenId: %{public}" PRIu64 "", screenId);
+}
+
+void ScreenSessionManager::HandlePCScreenDisconnect(sptr<ScreenSession> screenSession)
+{
     ScreenCombination screenCombination = screenSession->GetScreenCombination();
     if (g_isPcDevice) {
         if (screenCombination == ScreenCombination::SCREEN_MAIN ||
@@ -1070,28 +1106,6 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         SetRelativePositionForDisconnect(defaultOptions);
         FreeDisplayMirrorNodeInner(screenSession);
     }
-    if (clientProxy_) {
-        TLOGW(WmsLogTag::DMS, "screen disconnect and notify to scb.");
-        clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::DISCONNECTED,
-            screenSession->GetRSScreenId(), screenSession->GetName(), screenSession->GetIsExtend());
-    }
-    {
-        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-        screenSessionMap_.erase(screenId);
-    }
-    if (g_isPcDevice) {
-        ReportHandleScreenEvent(ScreenEvent::DISCONNECTED, screenCombination);
-        SetMultiScreenFrameControl();
-    }
-    if (!(screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) {
-        std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
-        phyScreenPropMap_.erase(screenId);
-    }
-    if (phyMirrorEnable) {
-        NotifyScreenDisconnected(screenSession->GetScreenId());
-        isPhyScreenConnected_ = false;
-    }
-    TLOGW(WmsLogTag::DMS, "disconnect success. ScreenId: %{public}" PRIu64 "", screenId);
 }
 
 void ScreenSessionManager::OnHgmRefreshRateChange(uint32_t refreshRate)
@@ -1856,6 +1870,7 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         return nullptr;
     }
     MultiScreenManager::GetInstance().MultiScreenReportDataToRss(SCREEN_EXTEND, MULTI_SCREEN_ENTER_STR);
+    HandleExtendScreenConnect(screenId);
     if (g_isPcDevice) {
         // pc is none, pad&&phone is mirror
         InitExtendScreenProperty(screenId, screenSession, property);
@@ -6287,6 +6302,46 @@ SuperFoldStatus ScreenSessionManager::GetSuperFoldStatus()
 #endif
 }
 
+ExtendScreenConnectStatus ScreenSessionManager::GetExtendScreenConnectStatus()
+{
+#ifdef WM_MULTI_SCREEN_ENABLE
+    DmsXcollie dmsXcollie("DMS:GetExtendScreenConnectStatus", XCOLLIE_TIMEOUT_10S);
+    return extendScreenConnectStatus_.load();
+#else
+    return ExtendScreenConnectStatus::UNKNOWN;
+#endif
+}
+
+bool ScreenSessionManager::GetIsExtendScreenConnected()
+{
+    return isExtendScreenConnected_;
+}
+
+void ScreenSessionManager::SetIsExtendScreenConnected(bool isExtendScreenConnected)
+{
+    isExtendScreenConnected_ = isExtendScreenConnected;
+}
+
+void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    SetIsExtendScreenConnected(true);
+    SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
+    OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
+    extendScreenConnectStatus_.store(ExtendScreenConnectStatus::CONNECT);
+#endif
+}
+
+void ScreenSessionManager::HandleExtendScreenDisconnect(ScreenId screenId)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    SetIsExtendScreenConnected(false);
+    SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
+    OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::DISCONNECT);
+    extendScreenConnectStatus_.store(ExtendScreenConnectStatus::DISCONNECT);
+#endif
+}
+
 bool ScreenSessionManager::GetTentMode()
 {
 #ifdef FOLD_ABILITY_ENABLE
@@ -6842,6 +6897,10 @@ void ScreenSessionManager::SetClientInner()
 void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSession)
 {
     ScreenId screenId = screenSession->GetScreenId();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null!");
+        return;
+    }
     SetExtendedScreenFallbackPlan(screenId);
     if (!RecoverRestoredMultiScreenMode(screenSession)) {
         clientProxy_->OnScreenConnectionChanged(screenId, ScreenEvent::CONNECTED,
@@ -7564,7 +7623,8 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         TLOGE(WmsLogTag::DMS, "ScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    if (!MultiScreenManager::GetInstance().AreScreensTouching(firstScreenSession, secondScreenSession,
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        !MultiScreenManager::GetInstance().AreScreensTouching(firstScreenSession, secondScreenSession,
         mainScreenOptions, secondScreenOption)) {
         TLOGE(WmsLogTag::DMS, "Options incorrect!");
         return DMError::DM_ERROR_INVALID_PARAM;
@@ -7880,6 +7940,18 @@ void ScreenSessionManager::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldS
         return;
     }
     clientProxy_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
+}
+
+void ScreenSessionManager::OnExtendScreenConnectStatusChange(ScreenId screenId,
+    ExtendScreenConnectStatus extendScreenConnectStatus)
+{
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 ", extendScreenConnectStatus: %{public}d", screenId,
+        static_cast<uint32_t>(extendScreenConnectStatus));
+    if (!clientProxy_) {
+        TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnExtendScreenConnectStatusChanged(screenId, extendScreenConnectStatus);
 }
 
 void ScreenSessionManager::OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)

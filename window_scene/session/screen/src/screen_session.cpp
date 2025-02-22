@@ -2048,6 +2048,22 @@ void ScreenSession::SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus sup
     }
 }
 
+void ScreenSession::ExtendScreenConnectStatusChange(ScreenId screenId,
+    ExtendScreenConnectStatus extendScreenConnectStatus)
+{
+    if (screenChangeListenerList_.empty()) {
+        WLOGFE("screenChangeListenerList is empty.");
+        return;
+    }
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
+        listener->OnExtendScreenConnectStatusChange(screenId, extendScreenConnectStatus);
+    }
+}
+
 void ScreenSession::SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
 {
     if (screenChangeListenerList_.empty()) {

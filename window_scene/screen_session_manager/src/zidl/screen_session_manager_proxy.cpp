@@ -2508,6 +2508,29 @@ SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
     return static_cast<SuperFoldStatus>(reply.ReadUint32());
 }
 
+ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatus()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return ExtendScreenConnectStatus::UNKNOWN;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ExtendScreenConnectStatus::UNKNOWN;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_EXTEND_SCREEN_CONNECT_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return ExtendScreenConnectStatus::UNKNOWN;
+    }
+    return static_cast<ExtendScreenConnectStatus>(reply.ReadUint32());
+}
+
 sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()
 {
     sptr<IRemoteObject> remote = Remote();
