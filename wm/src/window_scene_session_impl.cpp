@@ -2188,8 +2188,8 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
 }
 
 WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
-    const std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+    const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+    const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
 {
     for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
         auto property = GetSystemBarPropertyByType(systemBarType);

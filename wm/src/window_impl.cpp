@@ -869,8 +869,9 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
     SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
 
-WMError WindowImpl::UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+WMError WindowImpl::UpdateSystemBarProperties(
+    const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+    const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
 {
     for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
         auto property = GetSystemBarPropertyByType(systemBarType);

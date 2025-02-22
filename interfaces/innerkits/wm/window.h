@@ -2393,8 +2393,9 @@ public:
      * @param systemBarPropertyFlags map of status bar and nav bar properties to be changed
      * @return WMError
      */
-    virtual WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+    virtual WMError UpdateSystemBarProperties(
+        const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
     {
         return WMError::WM_OK;
     }
