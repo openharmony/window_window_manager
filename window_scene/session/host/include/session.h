@@ -938,12 +938,6 @@ private:
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
-
-    /*
-     * Window Scene Snapshot
-     */
-    Task saveSnapshotCallback_ = []() {};
-    Task removeSnapshotCallback_ = []() {};
     
     /*
      * Window Layout
@@ -956,6 +950,12 @@ private:
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };
+
+    /*
+     * Window Scene Snapshot
+     */
+    Task saveSnapshotCallback_ = []() {};
+    Task removeSnapshotCallback_ = []() {};
 };
 } // namespace OHOS::Rosen
 
