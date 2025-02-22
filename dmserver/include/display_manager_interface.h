@@ -43,6 +43,7 @@ public:
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) {};
+    virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
@@ -197,7 +198,7 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
-    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "") { return DMError::DM_OK; }
 
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 

@@ -145,6 +145,17 @@ public:
 };
 
 /**
+ * @class IWindowAttachStateChangeListner
+ *
+ * @brief IWindowAttachStateChangeListner is used to observe the window attach or detach state changed.
+ */
+class IWindowAttachStateChangeListner : virtual public RefBase {
+public:
+    virtual void AfterAttached() {}
+    virtual void AfterDetached() {}
+};
+
+/**
  * @class IWindowChangeListener
  *
  * @brief IWindowChangeListener is used to observe the window size or window mode when window changed.
@@ -1448,7 +1459,7 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 
     /**
-     * @brief Update Configuration.
+     * @brief Update configuration for specified window.
      *
      * @param configuration Window configuration.
      * @param resourceManager The resource manager
@@ -2215,8 +2226,10 @@ public:
      *
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
      * @param priority 1 means height priority, 0 means low priority.
+     * @param width width means width of the video content.
+     * @param height height means height of the video content.
      */
-    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
+    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
@@ -2415,6 +2428,14 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the visibility of window decor.
+     *
+     * @param isVisible whether the window decor is visible.
+     * @return Errorcode of window.
+     */
+    virtual WMError GetDecorVisible(bool& isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Enable or disable move window by title bar.
@@ -3190,6 +3211,27 @@ public:
      * @param want the want to update param.
      */
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
+
+    /**
+     * @brief Register window scene attach or detach framenode listener.
+     *
+     * @param listener IWindowAttachStateChangeListner.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowAttachStateChangeListener(const sptr<IWindowAttachStateChangeListner>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window scene attach or detach framenode listener.
+     *
+     * @return WM_OK means unregister success
+     */
+    virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

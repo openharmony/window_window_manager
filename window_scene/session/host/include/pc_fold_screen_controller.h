@@ -39,6 +39,7 @@ public:
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
     void RecordStartMoveRectDirectly(const WSRect& rect, const WSRectF& velocity, bool isStartFullScreen);
+    void ResetRecords();
     void RecordMoveRects(const WSRect& rect);
     bool ThrowSlip(DisplayId displayId, WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
     void ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect,
@@ -66,6 +67,8 @@ private:
     DisplayId GetDisplayId();
     int32_t GetTitleHeight() const;
     WSRectF CalculateMovingVelocity();
+    void ThrowSlipHiSysEvent(const std::string& bundleName, ScreenSide startSide,
+        ThrowSlipWindowMode startWindowMode, ThrowSlipMode throwMode) const;
 
     wptr<SceneSession> weakSceneSession_ = nullptr;
     int32_t persistentId_;
@@ -74,6 +77,7 @@ private:
     mutable std::mutex moveMutex_;
     WSRect startMoveRect_;
     bool isStartFullScreen_ { false };
+    bool isStartWaterfallMode_ { false };
     RectRecordsVector movingRectRecords_;
     bool isStartDirectly_ { false };
     WSRectF startVelocity_;

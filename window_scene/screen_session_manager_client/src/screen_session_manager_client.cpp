@@ -270,6 +270,16 @@ void ScreenSessionManagerClient::OnScreenRotationLockedChanged(ScreenId screenId
     screenSession->SetScreenRotationLocked(isLocked);
 }
 
+void ScreenSessionManagerClient::OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->HandleCameraBackSelfieChange(isCameraBackSelfie);
+}
+
 void ScreenSessionManagerClient::RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener)
 {
     displayChangeListener_ = listener;
@@ -649,6 +659,15 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
         return;
     }
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
+}
+
+void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->GetDisplayHookInfo(uid, hookInfo);
 }
 
 void ScreenSessionManagerClient::OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo)

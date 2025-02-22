@@ -178,7 +178,7 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
 void KeyboardSession::UpdateKeyboardAvoidArea()
 {
     if (!IsSessionForeground() || !IsVisibleForeground()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
+        TLOGD(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, no need update avoid Area");
         return;
     }
     if (specificCallback_ != nullptr && specificCallback_->onUpdateAvoidArea_ != nullptr) {
@@ -737,7 +737,7 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     }
     bool isLandscape = screenHeight < screenWidth;
     int32_t height_ = isLandscape ? params.landscapeAvoidHeight_ : params.portraitAvoidHeight_;
-    panelRect.posY_ += height_ - params.portraitAvoidHeight_;
+    panelRect.posY_ += panelRect.height_ - height_;
     panelRect.height_ = height_;
     TLOGI(WmsLogTag::WMS_KEYBOARD, "isLandscape %{public}d, avoidHeight %{public}d", isLandscape, panelRect.height_);
 }

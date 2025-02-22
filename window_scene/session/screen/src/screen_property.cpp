@@ -548,6 +548,32 @@ ScreenShape ScreenProperty::GetScreenShape() const
     return screenShape_;
 }
 
+void ScreenProperty::SetX(int32_t x)
+{
+    x_ = x;
+}
+
+int32_t ScreenProperty::GetX() const
+{
+    return x_;
+}
+
+void ScreenProperty::SetY(int32_t y)
+{
+    y_ = y;
+}
+
+int32_t ScreenProperty::GetY() const
+{
+    return y_;
+}
+
+void ScreenProperty::SetXYPosition(int32_t x, int32_t y)
+{
+    x_ = x;
+    y_ = y;
+}
+
 RRect ScreenProperty::GetPhysicalTouchBounds()
 {
     return physicalTouchBounds_;

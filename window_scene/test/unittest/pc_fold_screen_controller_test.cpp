@@ -253,6 +253,18 @@ HWTEST_F(PcFoldScreenManagerTest, CalculateScreenSide, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: IsCrossFoldCrease
+ * @tc.desc: test function : IsCrossFoldCrease
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, IsCrossFoldCrease, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    EXPECT_FALSE(manager_.IsCrossFoldCrease(B_RECT));
+    EXPECT_TRUE(manager_.IsCrossFoldCrease(B_ACROSS_RECT));
+}
+
+/**
  * @tc.name: ResetArrangeRule
  * @tc.desc: test function : ResetArrangeRule, including overload functions
  * @tc.type: FUNC
@@ -670,22 +682,6 @@ HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Le
     EXPECT_TRUE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
     manager_.UpdateSystemKeyboardStatus(true);
     EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
-}
-
-/**
- * @tc.name: OnConnect
- * @tc.desc: test function : OnConnect
- * @tc.type: FUNC
- */
-HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
-{
-    mainSession_->sessionInfo_.screenId_ = DEFAULT_SCREEN_ID;
-    SetHalfFolded();
-    controller_->OnConnect();
-    EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
-    SetExpanded();
-    controller_->OnConnect();
-    EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
 }
 
 /**

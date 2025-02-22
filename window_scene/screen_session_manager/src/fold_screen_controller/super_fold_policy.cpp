@@ -45,11 +45,11 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
-    std::vector<DMRect> creaseRects = screenProperty.GetCreaseRects();
+    DMRect creaseRect = screenProperty.GetCreaseRect();
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
     if (displayId == DISPLAY_ID_FAKE) {
         if (fakeInfo != nullptr) {
-            snapshotRect = {0, defaultInfo->GetHeight() + creaseRects[0].height_, screenWidth, screenHeight};
+            snapshotRect = {0, defaultInfo->GetHeight() + creaseRect.height_, screenWidth, screenHeight};
         }
     } else {
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
@@ -81,11 +81,11 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
-    std::vector<DMRect> creaseRects = screenProperty.GetCreaseRects();
+    DMRect creaseRect = screenProperty.GetCreaseRect();
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
     if (displayId == DISPLAY_ID_FAKE) {
         if (fakeInfo != nullptr) {
-            recordRect = {0, defaultInfo->GetHeight() + creaseRects[0].height_, defaultInfo->GetWidth(),
+            recordRect = {0, defaultInfo->GetHeight() + creaseRect.height_, defaultInfo->GetWidth(),
                 fakeInfo->GetHeight()};
         }
     } else {

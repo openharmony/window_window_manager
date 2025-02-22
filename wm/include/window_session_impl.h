@@ -260,7 +260,7 @@ public:
     WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
-    void SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
+    void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -273,6 +273,7 @@ public:
      * Window Decor
      */
     WMError SetDecorVisible(bool isVisible) override;
+    WMError GetDecorVisible(bool& isVisible) override;
     WMError SetWindowTitleMoveEnabled(bool enable) override;
     WMError SetDecorHeight(int32_t decorHeight) override;
     WMError GetDecorHeight(int32_t& height) override;
@@ -467,6 +468,7 @@ protected:
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
     std::atomic_bool isHighlighted_ = false;
+    std::atomic_bool shouldReNotifyHighlight_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -592,6 +594,7 @@ private:
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
     void NotifyAfterPaused();
+    void NotifyUIContentHighlightStatus(bool isHighlighted);
 
     /*
      * Window Decor listener
@@ -750,6 +753,11 @@ private:
     MouseEventFilterFunc mouseEventFilter_;
     std::mutex touchEventFilterMutex_;
     TouchEventFilterFunc touchEventFilter_;
+
+    /*
+     * Window Scene
+     */
+    WSError NotifyWindowAttachStateChange(bool isAttach) override { return WSError::WS_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

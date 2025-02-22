@@ -291,9 +291,9 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     displayInfo->name_ = name_;
     displayInfo->SetWidth(bounds.rect_.GetWidth());
     if (isBScreenHalf_) {
-        std::vector<DMRect> creaseRects = property_.GetCreaseRects();
-        if (creaseRects.size() > 0) {
-            displayInfo->SetHeight(creaseRects[0].posY_);
+        DMRect creaseRect = property_.GetCreaseRect();
+        if (creaseRect.posY_ > 0) {
+            displayInfo->SetHeight(creaseRect.posY_);
         } else {
             displayInfo->SetHeight(bounds.rect_.GetHeight() / HALF_SCREEN_PARAM);
         }
@@ -579,11 +579,19 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
-ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty)
+ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
+    FoldDisplayMode foldDisplayMode)
 {
     property_.SetDpiPhyBounds(updatedProperty.GetPhyWidth(), updatedProperty.GetPhyHeight());
     property_.SetPhyBounds(updatedProperty.GetPhyBounds());
     property_.SetBounds(updatedProperty.GetBounds());
+    OptimizeSecondaryDisplayMode(updatedProperty.GetBounds(), foldDisplayMode);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        DisplayOrientation deviceOrientation =
+            CalcDeviceOrientation(property_.GetScreenRotation(), foldDisplayMode, true);
+        property_.SetDisplayOrientation(deviceOrientation);
+        property_.SetDeviceOrientation(deviceOrientation);
+    }
     UpdateTouchBoundsAndOffset();
     return property_;
 }
@@ -762,6 +770,22 @@ void ScreenSession::HoverStatusChange(int32_t hoverStatus, bool needRotate)
             continue;
         }
         listener->OnHoverStatusChange(hoverStatus, needRotate, screenId_);
+    }
+}
+
+void ScreenSession::HandleCameraBackSelfieChange(bool isCameraBackSelfie)
+{
+    CameraBackSelfieChange(isCameraBackSelfie);
+}
+
+void ScreenSession::CameraBackSelfieChange(bool isCameraBackSelfie)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
+        listener->OnCameraBackSelfieChange(isCameraBackSelfie, screenId_);
     }
 }
 
@@ -1308,6 +1332,37 @@ ScreenCombination ScreenSession::GetScreenCombination() const
     return combination_;
 }
 
+DisplaySourceMode ScreenSession::GetDisplaySourceMode() const
+{
+    if (!isPcUse_ && screenId_ == defaultScreenId_) {
+        return DisplaySourceMode::MAIN;
+    }
+    ScreenCombination combination = GetScreenCombination();
+    switch (combination) {
+        case ScreenCombination::SCREEN_MAIN: {
+            return DisplaySourceMode::MAIN;
+        }
+        case ScreenCombination::SCREEN_MIRROR: {
+            return DisplaySourceMode::MIRROR;
+        }
+        case ScreenCombination::SCREEN_EXPAND: {
+            return DisplaySourceMode::EXTEND;
+        }
+        case ScreenCombination::SCREEN_EXTEND: {
+            return DisplaySourceMode::EXTEND;
+        }
+        case ScreenCombination::SCREEN_UNIQUE: {
+            return DisplaySourceMode::ALONE;
+        }
+        case ScreenCombination::SCREEN_ALONE: {
+            return DisplaySourceMode::NONE;
+        }
+        default: {
+            return DisplaySourceMode::NONE;
+        }
+    }
+}
+
 void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
 {
     if (info == nullptr) {
@@ -1813,24 +1868,26 @@ void ScreenSession::SetExtendProperty(RRect bounds, bool isPhysicalTouchBounds, 
     property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
 }
 
-void ScreenSession::Resize(uint32_t width, uint32_t height)
+void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync)
 {
-    sptr<SupportedScreenModes> screenMode = GetActiveScreenMode();
-    if (screenMode != nullptr) {
-        screenMode->width_ = width;
-        screenMode->height_ = height;
-        UpdatePropertyByActiveMode();
-        {
-            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            if (displayNode_ == nullptr) {
-                WLOGFE("displayNode_ is null, resize failed");
-                return;
-            }
-            displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
-            displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+    if (isFreshBoundsSync) {
+        sptr<SupportedScreenModes> screenMode = GetActiveScreenMode();
+        if (screenMode != nullptr) {
+            screenMode->width_ = width;
+            screenMode->height_ = height;
+            UpdatePropertyByActiveMode();
         }
-        RSTransaction::FlushImplicitTransaction();
     }
+    {
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            WLOGFE("displayNode_ is null, resize failed");
+            return;
+        }
+        displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
+        displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+    }
+    RSTransaction::FlushImplicitTransaction();
 }
 
 bool ScreenSession::UpdateAvailableArea(DMRect area)
@@ -1954,6 +2011,11 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
 void ScreenSession::SetStartPosition(uint32_t startX, uint32_t startY)
 {
     property_.SetStartPosition(startX, startY);
+}
+
+void ScreenSession::SetXYPosition(int32_t x, int32_t y)
+{
+    property_.SetXYPosition(x, y);
 }
 
 void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)

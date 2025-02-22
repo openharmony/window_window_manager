@@ -672,7 +672,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS: {
             FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
-            DMError ret = SetFoldDisplayModeFromJs(displayMode);
+            std::string reason = data.ReadString();
+            DMError ret = SetFoldDisplayModeFromJs(displayMode, reason);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
@@ -959,6 +960,17 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             hookInfo.rotation_ = data.ReadUint32();
             hookInfo.enableHookRotation_ = data.ReadBool();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_HOOK_INFO: {
+            int32_t uid = data.ReadInt32();
+            DMHookInfo hookInfo;
+            GetDisplayHookInfo(uid, hookInfo);
+            static_cast<void>(reply.WriteUint32(hookInfo.width_));
+            static_cast<void>(reply.WriteUint32(hookInfo.height_));
+            static_cast<void>(reply.WriteFloat(hookInfo.density_));
+            static_cast<void>(reply.WriteUint32(hookInfo.width_));
+            static_cast<void>(reply.WriteBool(hookInfo.enableHookRotation_));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_PHYSICAL_DISPLAY_RESOLUTION: {

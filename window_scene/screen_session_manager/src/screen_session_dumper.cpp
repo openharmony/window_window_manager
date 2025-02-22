@@ -66,6 +66,8 @@ const std::string ARG_SET_POSTURE_HALL = "-posture";
 const std::string ARG_SET_POSTURE_HALL_STATUS = "-registerhall"; // 关闭开合sensor报值
 const std::string ARG_SET_SECONDARY_FOLD_STATUS = "-secondary";
 const std::string ARG_CHANGE_OUTER_CMD = "outer";
+const std::string ANGLE_STR = "angle";
+const std::string HALL_STR = "hall";
 #ifdef FOLD_ABILITY_ENABLE
 constexpr int SUPER_FOLD_STATUS_MAX = 2;
 const char SECONDARY_DUMPER_VALUE_BOUNDARY[] = "mfg";
@@ -1033,8 +1035,8 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
         .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
     };
     TLOGI(WmsLogTag::DMS, "mock secondary sensor: %{public}s, %{public}s",
-        FoldScreenStateInternel::TransVec2Str(postures, "angle").c_str(),
-        FoldScreenStateInternel::TransVec2Str(halls, "hall").c_str());
+        FoldScreenStateInternel::TransVec2Str(postures, ANGLE_STR).c_str(),
+        FoldScreenStateInternel::TransVec2Str(halls, HALL_STR).c_str());
     SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(&hallEvent);
     SecondaryFoldSensorManager::GetInstance().HandlePostureData(&postureEvent);
 }

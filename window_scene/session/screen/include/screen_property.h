@@ -164,6 +164,14 @@ public:
     void SetScreenShape(ScreenShape screenShape);
     ScreenShape GetScreenShape() const;
 
+    void SetX(int32_t x);
+    int32_t GetX() const;
+
+    void SetY(int32_t y);
+    int32_t GetY() const;
+
+    void SetXYPosition(int32_t x, int32_t y);
+
     DMRect GetAvailableArea()
     {
         return availableArea_;
@@ -184,14 +192,14 @@ public:
         expandAvailableArea_ = area;
     }
 
-    std::vector<DMRect> GetCreaseRects()
+    DMRect GetCreaseRect()
     {
-        return creaseRects_;
+        return creaseRect_;
     }
 
-    void SetCreaseRects(std::vector<DMRect> creaseRects)
+    void SetCreaseRect(DMRect creaseRect)
     {
-        creaseRects_ = creaseRects;
+        creaseRect_ = creaseRect;
     }
 
     RRect GetPhysicalTouchBounds();
@@ -271,6 +279,9 @@ private:
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
 
+    int32_t x_ { 0 };
+    int32_t y_ { 0 };
+
     uint32_t validWidth_ { UINT32_MAX };
     uint32_t validHeight_ { UINT32_MAX };
 
@@ -283,7 +294,7 @@ private:
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
     DMRect availableArea_;
     DMRect expandAvailableArea_;
-    std::vector<DMRect> creaseRects_;
+    DMRect creaseRect_;
 
     RRect physicalTouchBounds_;
     int32_t inputOffsetX_ { 0 };
