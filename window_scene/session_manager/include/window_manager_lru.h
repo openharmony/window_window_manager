@@ -18,6 +18,7 @@
 
 #include <list>
 #include <unordered_map>
+#include <mutex>
 
 namespace OHOS::Rosen {
 namespace {
@@ -29,11 +30,13 @@ public:
 
     bool Visit(int32_t key);
     int32_t Put(int32_t key);
+    void Remove(int32_t key);
 
 private:
     const std::size_t capacity_;
     std::list<int32_t> cacheList_;
     std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
+    mutable std::mutex LRUCacheMutex_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_LRUCACHE_H
