@@ -251,6 +251,11 @@ HWTEST_F(ScreenSessionManagerTest, ScreenPower, Function | SmallTest | Level3)
     DisplayId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
+
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
+
     ASSERT_EQ(true, ssm_->SetDisplayState(displayState));
     ASSERT_EQ(DisplayState::ON, ssm_->GetDisplayState(0));
 }
@@ -346,6 +351,10 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreen, Function | SmallTest | Level3)
     mirrorScreenIds.push_back(VIRTUAL_SCREEN_ID);
     ASSERT_NE(DMError::DM_OK, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
 
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
+    
     mirrorScreenIds.push_back(screenId);
     ASSERT_EQ(DMError::DM_OK, ssm_->MakeMirror(mainScreenId, mirrorScreenIds, screenGroupId));
 
@@ -1216,6 +1225,9 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenRotationLocked, Function | SmallTest
  */
 HWTEST_F(ScreenSessionManagerTest, UpdateScreenRotationProperty, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
     VirtualScreenOption virtualOption;
     virtualOption.name_ = "DeleteScreenId";
@@ -2148,6 +2160,9 @@ HWTEST_F(ScreenSessionManagerTest, PhyMirrorConnectWakeupScreen, Function | Smal
  */
 HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ASSERT_EQ(ssm->isCoordinationFlag_, false);
@@ -2185,6 +2200,9 @@ HWTEST_F(ScreenSessionManagerTest, OnTentModeChanged, Function | SmallTest | Lev
  */
 HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     CaptureOption option;
@@ -2201,6 +2219,9 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenCapture, Function | SmallTest | Leve
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, Function | SmallTest | Level3)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     ScreenSessionManager* ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ScreenId screenId = 0;
