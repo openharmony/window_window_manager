@@ -1020,13 +1020,13 @@ HWTEST_F(SceneSessionManagerLifecycleTest, SubmitTaskAndWait, Function | SmallTe
     auto timeoutTask = []() {
         std::cout << "===enter timeoutTask begin sleep 4 sec===" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(4));
-    }
-    ASSERT_EQ(ffrtQueueHelper->SubmitTaskAndWait(std::move(timeoutTask, timeout)), true);
+    };
+    ASSERT_EQ(ffrtQueueHelper->SubmitTaskAndWait(std::move(timeoutTask), timeout), true);
     auto task = []() {
         std::cout << "===enter task begin sleep 1 sec===" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    ASSERT_EQ(ffrtQueueHelper->SubmitTaskAndWait(std::move(task, timeout)), false);
+    };
+    ASSERT_EQ(ffrtQueueHelper->SubmitTaskAndWait(std::move(task), timeout), false);
 }
 }
 } // namespace Rosen
