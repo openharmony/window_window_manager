@@ -1857,7 +1857,7 @@ void JsSceneSession::NotifyPrivacyModeChange(bool isPrivacyMode)
 
 void JsSceneSession::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "Finalizer");
     auto jsSceneSession = static_cast<JsSceneSession*>(data);
     if (jsSceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "JsSceneSession is nullptr");
@@ -2004,7 +2004,7 @@ napi_value JsSceneSession::NotifyTargetScreenWidthAndHeight(napi_env env, napi_c
 
 napi_value JsSceneSession::SetShowRecent(napi_env env, napi_callback_info info)
 {
-    WLOGFI("[NAPI]");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetShowRecent(env, info) : nullptr;
 }
@@ -3468,7 +3468,7 @@ void JsSceneSession::OnSessionFocusableChange(bool isFocusable)
 
 void JsSceneSession::OnSessionTouchableChange(bool touchable)
 {
-    WLOGFI("state: %{public}u", touchable);
+    TLOGI(WmsLogTag::DEFAULT, "%{public}u", touchable);
     auto task = [weakThis = wptr(this), persistentId = persistentId_, touchable, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {

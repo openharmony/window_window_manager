@@ -50,11 +50,11 @@ constexpr size_t ARGC_ONE = 1;
 
 napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession)
 {
-    WLOGD("Create.");
+    TLOGD(WmsLogTag::DMS, "Create.");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -80,7 +80,7 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
 
 void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGD("Finalizer.");
+    TLOGD(WmsLogTag::DMS, "Finalizer.");
     std::unique_ptr<JsScreenSession>(static_cast<JsScreenSession*>(data));
 }
 
@@ -119,7 +119,7 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
 
 JsScreenSession::~JsScreenSession()
 {
-    WLOGI("~JsScreenSession");
+    TLOGI(WmsLogTag::DMS, "~JsScreenSession");
 }
 
 napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
@@ -130,12 +130,12 @@ napi_value JsScreenSession::LoadContent(napi_env env, napi_callback_info info)
 
 napi_value JsScreenSession::OnLoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGD("[NAPI]JsScreenSession::OnLoadContent");
+    TLOGD(WmsLogTag::DMS, "[NAPI]JsScreenSession::OnLoadContent");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) {  // 2: params num
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -144,14 +144,14 @@ napi_value JsScreenSession::OnLoadContent(napi_env env, napi_callback_info info)
     napi_value context = argv[1];
     napi_value storage = argc < 3 ? nullptr : argv[2];
     if (!ConvertFromJsValue(env, argv[0], contentUrl)) {
-        WLOGFE("[NAPI]Failed to convert parameter to content url");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to content url");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
     if (context == nullptr) {
-        WLOGFE("[NAPI]Failed to get context object");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to get context object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -159,7 +159,7 @@ napi_value JsScreenSession::OnLoadContent(napi_env env, napi_callback_info info)
     napi_unwrap(env, context, &pointerResult);
     auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(pointerResult);
     if (contextNativePointer == nullptr) {
-        WLOGFE("[NAPI]Failed to get context pointer from js object");
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to get context pointer from js object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -179,7 +179,7 @@ napi_value JsScreenSession::ScheduleLoadContentTask(napi_env env, const std::str
     std::weak_ptr<Context> contextWeakPtr, std::shared_ptr<NativeReference> contentStorage)
 {
     if (screenScene_ == nullptr) {
-        WLOGFE("[NAPI]screenScene is nullptr");
+        TLOGE(WmsLogTag::DMS, "[NAPI]screenScene is nullptr");
         return NapiGetUndefined(env);
     }
     napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
@@ -195,25 +195,25 @@ napi_value JsScreenSession::SetScreenRotationLocked(napi_env env, napi_callback_
 
 napi_value JsScreenSession::OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
 {
-    WLOGI("JsScreenSession::OnSetScreenRotationLocked is called");
+    TLOGI(WmsLogTag::DMS, "Called");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     bool isLocked = true;
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
-        WLOGFE("ConvertNativeValueTo isLocked failed!");
+        TLOGE(WmsLogTag::DMS, "ConvertNativeValueTo isLocked failed!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
     napi_get_value_bool(env, nativeVal, &isLocked);
     if (screenSession_ == nullptr) {
-        WLOGFE("Failed to register screen change listener, session is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to register screen change listener, session is null!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
@@ -281,60 +281,60 @@ napi_value JsScreenSession::OnSetTouchEnabled(napi_env env, napi_callback_info i
 void JsScreenSession::RegisterScreenChangeListener()
 {
     if (screenSession_ == nullptr) {
-        WLOGFE("Failed to register screen change listener, session is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to register screen change listener, session is null!");
         return;
     }
 
     screenSession_->RegisterScreenChangeListener(this);
-    WLOGFI("register screen change listener success.");
+    TLOGI(WmsLogTag::DMS, "register screen change listener success.");
 }
 
 void JsScreenSession::UnRegisterScreenChangeListener()
 {
     if (screenSession_ == nullptr) {
-        WLOGFE("Failed to unregister screen change listener, session is null!");
+        TLOGE(WmsLogTag::DMS, "Failed to unregister screen change listener, session is null!");
         return;
     }
 
     screenSession_->UnregisterScreenChangeListener(this);
-    WLOGFI("unregister screen change listener success.");
+    TLOGI(WmsLogTag::DMS, "unregister screen change listener success.");
 }
 
 napi_value JsScreenSession::RegisterCallback(napi_env env, napi_callback_info info)
 {
-    WLOGD("Register callback.");
+    TLOGD(WmsLogTag::DMS, "Register callback.");
     JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
     return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
 }
 
 napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info info)
 {
-    WLOGI("On register callback.");
+    TLOGI(WmsLogTag::DMS, "On register callback.");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
 
     std::string callbackType;
     if (!ConvertFromJsValue(env, argv[0], callbackType)) {
-        WLOGFE("Failed to convert parameter to callback type.");
+        TLOGE(WmsLogTag::DMS, "Failed to convert parameter to callback type.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
 
     napi_value callback = argv[1];
     if (!NapiIsCallable(env, callback)) {
-        WLOGFE("Failed to register callback, callback is not callable!");
+        TLOGE(WmsLogTag::DMS, "Failed to register callback, callback is not callable!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
 
     if (mCallback_.count(callbackType)) {
-        WLOGFE("Failed to register callback, callback is already existed!");
+        TLOGE(WmsLogTag::DMS, "Failed to register callback, callback is already existed!");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_REPEAT_OPERATION)));
         return NapiGetUndefined(env);
     }
@@ -356,46 +356,46 @@ napi_value JsScreenSession::GetScreenUIContext(napi_env env, napi_callback_info 
 
 napi_value JsScreenSession::OnGetScreenUIContext(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]OnGetScreenUIContext");
+    TLOGI(WmsLogTag::DMS, "[NAPI]OnGetScreenUIContext");
     size_t argc = 1;
     napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > 0) { // 0: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::DMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
 
     if (screenScene_ == nullptr) {
-        WLOGFE("screenScene_ is nullptr");
+        TLOGE(WmsLogTag::DMS, "screenScene_ is nullptr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
     const auto& uiContent = screenScene_->GetUIContent();
     if (uiContent == nullptr) {
-        WLOGFE("uiContent is nullptr");
+        TLOGE(WmsLogTag::DMS, "uiContent is nullptr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
     napi_value uiContext = uiContent->GetUINapiContext();
     if (uiContext == nullptr) {
-        WLOGFE("uiContext obtained from jsEngine is nullptr");
+        TLOGE(WmsLogTag::DMS, "uiContext obtained from jsEngine is nullptr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
-    WLOGI("success");
+    TLOGI(WmsLogTag::DMS, "success");
     return uiContext;
 }
 
 void JsScreenSession::CallJsCallback(const std::string& callbackType)
 {
-    WLOGI("Call js callback: %{public}s.", callbackType.c_str());
+    TLOGI(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback is unregistered!");
+        TLOGE(WmsLogTag::DMS, "Callback is unregistered!");
         return;
     }
     if (callbackType == ON_DISCONNECTION_CALLBACK) {
-        WLOGFE("Call js callback %{public}s start", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Call js callback %{public}s start", callbackType.c_str());
         UnRegisterScreenChangeListener();
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -430,10 +430,10 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("CallJsCallback: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "CallJsCallback: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("CallJsCallback: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "CallJsCallback: env is nullptr");
     }
 }
 
@@ -451,7 +451,7 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId scre
 {
     const std::string callbackType = ON_SENSOR_ROTATION_CHANGE_CALLBACK;
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -479,19 +479,19 @@ void JsScreenSession::OnSensorRotationChange(float sensorRotation, ScreenId scre
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnSensorRotationChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnSensorRotationChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnSensorRotationChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnSensorRotationChange: env is nullptr");
     }
 }
 
 void JsScreenSession::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ORIENTATION_CHANGE_CALLBACK;
-    WLOGI("Call js callback: %{public}s.", callbackType.c_str());
+    TLOGI(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -519,10 +519,10 @@ void JsScreenSession::OnScreenOrientationChange(float screenOrientation, ScreenI
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenConnected: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnScreenConnected: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenConnected: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnScreenConnected: env is nullptr");
     }
 }
 
@@ -530,9 +530,9 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
     ScreenId screenId)
 {
     const std::string callbackType = ON_PROPERTY_CHANGE_CALLBACK;
-    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -560,19 +560,19 @@ void JsScreenSession::OnPropertyChange(const ScreenProperty& newProperty, Screen
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnPropertyChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnPropertyChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnPropertyChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnPropertyChange: env is nullptr");
     }
 }
 
 void JsScreenSession::OnScreenDensityChange()
 {
     const std::string callbackType = ON_SCREEN_DENSITY_CHANGE;
-    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -600,10 +600,10 @@ void JsScreenSession::OnScreenDensityChange()
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenDensityChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnScreenDensityChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenDensityChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnScreenDensityChange: env is nullptr");
     }
 }
 
@@ -611,9 +611,9 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     PowerStateChangeReason reason)
 {
     const std::string callbackType = ON_POWER_STATUS_CHANGE_CALLBACK;
-    WLOGD("[UL_POWER]%{public}s.", callbackType.c_str());
+    TLOGD(WmsLogTag::DMS, "[UL_POWER]%{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFW("[UL_POWER]%{public}s is unregistered!", callbackType.c_str());
+        TLOGW(WmsLogTag::DMS, "[UL_POWER]%{public}s is unregistered!", callbackType.c_str());
         return;
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -643,21 +643,21 @@ void JsScreenSession::OnPowerStatusChange(DisplayPowerEvent event, EventStatus e
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_vip);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnPowerStatusChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnPowerStatusChange: Failed to SendEvent.");
         } else {
-            WLOGFI("OnPowerStatusChange: Sucess to SendEvent.");
+            TLOGI(WmsLogTag::DMS, "OnPowerStatusChange: Sucess to SendEvent.");
         }
     } else {
-        WLOGFE("OnPowerStatusChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnPowerStatusChange: env is nullptr");
     }
 }
 
 void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId screenId)
 {
     const std::string callbackType = ON_SCREEN_ROTATION_LOCKED_CHANGE;
-    WLOGD("Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s isLocked:%{public}u.", callbackType.c_str(), isLocked);
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -679,10 +679,10 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId scree
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenRotationLockedChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnScreenRotationLockedChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenRotationLockedChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnScreenRotationLockedChange: env is nullptr");
     }
 }
 
@@ -690,7 +690,7 @@ void JsScreenSession::OnScreenExtendChange(ScreenId mainScreenId, ScreenId exten
 {
     const std::string callbackType = ON_SCREEN_EXTEND_CHANGE;
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFW("Callback is unregistered!");
+        TLOGW(WmsLogTag::DMS, "Callback is unregistered!");
         return;
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -714,19 +714,19 @@ void JsScreenSession::OnScreenExtendChange(ScreenId mainScreenId, ScreenId exten
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenExtendChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnScreenExtendChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenExtendChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnScreenExtendChange: env is nullptr");
     }
 }
 
 void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId)
 {
     const std::string callbackType = ON_HOVER_STATUS_CHANGE_CALLBACK;
-    WLOGI("Call js callback: %{public}s.", callbackType.c_str());
+    TLOGI(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
 
@@ -754,10 +754,10 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, 
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnHoverStatusChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnHoverStatusChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnHoverStatusChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnHoverStatusChange: env is nullptr");
     }
 }
 
@@ -765,7 +765,7 @@ void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, 
 {
     const std::string callbackType = ON_SCREEN_CAPTURE_NOTIFY;
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFW("Callback is unregistered!");
+        TLOGW(WmsLogTag::DMS, "Callback is unregistered!");
         return;
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -789,10 +789,10 @@ void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, 
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnScreenCaptureNotify: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnScreenCaptureNotify: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnScreenCaptureNotify: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnScreenCaptureNotify: env is nullptr");
     }
 }
 
@@ -839,9 +839,9 @@ void JsScreenSession::OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId
 void JsScreenSession::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
     const std::string callbackType = ON_SUPER_FOLD_STATUS_CHANGE_CALLBACK;
-    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -864,19 +864,19 @@ void JsScreenSession::OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnSuperFoldStatusChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnSuperFoldStatusChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnSuperFoldStatusChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnSuperFoldStatusChange: env is nullptr");
     }
 }
 
 void JsScreenSession::OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion)
 {
     const std::string callbackType = ON_SECONDARY_REFLEXION_CHANGE_CALLBACK;
-    WLOGD("Call js callback: %{public}s.", callbackType.c_str());
+    TLOGD(WmsLogTag::DMS, "Call js callback: %{public}s.", callbackType.c_str());
     if (mCallback_.count(callbackType) == 0) {
-        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        TLOGE(WmsLogTag::DMS, "Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
     auto jsCallbackRef = mCallback_[callbackType];
@@ -899,10 +899,10 @@ void JsScreenSession::OnSecondaryReflexionChange(ScreenId screenId, bool isSecon
     if (env_ != nullptr) {
         napi_status ret = napi_send_event(env_, asyncTask, napi_eprio_immediate);
         if (ret != napi_status::napi_ok) {
-            WLOGFE("OnSecondaryReflexionChange: Failed to SendEvent.");
+            TLOGE(WmsLogTag::DMS, "OnSecondaryReflexionChange: Failed to SendEvent.");
         }
     } else {
-        WLOGFE("OnSecondaryReflexionChange: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "OnSecondaryReflexionChange: env is nullptr");
     }
 }
 
