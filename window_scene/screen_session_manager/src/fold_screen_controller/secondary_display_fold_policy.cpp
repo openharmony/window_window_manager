@@ -226,7 +226,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     } else {
         TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_);
+    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
