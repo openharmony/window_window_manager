@@ -234,7 +234,7 @@ public:
     WMError RegisterWindowAttachStateChangeListener(
         const sptr<IWindowAttachStateChangeListner>& listener) override;
     WMError UnregisterWindowAttachStateChangeListener() override;
-    
+
     /*
      * Window Immersive
      */
@@ -246,6 +246,8 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& SystemBarProperty) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();

@@ -2184,6 +2184,14 @@ void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color
     SetDecorButtonStyle(style);
 }
 
+void WindowSceneSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+    SystemBarProperty& SystemBarProperty)
+{
+    property.enable_ = systemBarEnable;
+    property.enableAnimation_ = systemBarEnableAnimation;
+    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+}
+
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
     if (IsWindowSessionInvalid()) {

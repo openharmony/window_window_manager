@@ -321,9 +321,7 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
 }
 
 inline SystemBarSettingFlag& operator|=(SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs)
-{
-    return lhs = lhs | rhs;
-}
+{ return lhs = lhs | rhs; }
 
 /**
  * @brief Enumerates flag of ControlAppType.

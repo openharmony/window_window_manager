@@ -955,6 +955,14 @@ WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarPropert
     return WMError::WM_OK;
 }
 
+void WindowImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+    SystemBarProperty& SystemBarProperty)
+{
+    property.enable_ = systemBarEnable;
+    property.enableAnimation_ = systemBarEnableAnimation;
+    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+}
+
 WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
     return WMError::WM_OK;

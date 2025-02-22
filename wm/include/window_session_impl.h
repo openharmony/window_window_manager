@@ -352,6 +352,8 @@ public:
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& SystemBarProperty) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
 
     /*

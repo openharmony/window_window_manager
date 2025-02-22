@@ -2364,6 +2364,16 @@ public:
     }
 
     /**
+     * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
+     *
+     * @param systemBarEnable is system bar enabled
+     * @param systemBarEnableAnimation is animation enabled
+     * @param SystemBarProperty WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
+     */
+    virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& SystemBarProperty) = 0;
+
+    /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
      *
      * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
