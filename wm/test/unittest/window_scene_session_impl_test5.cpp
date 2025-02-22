@@ -692,8 +692,8 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, Function | Smal
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
+    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     ASSERT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
 }
 }
