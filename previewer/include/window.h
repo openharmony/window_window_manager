@@ -171,7 +171,7 @@ public:
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
         { return WMError::WM_OK; }
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& SystemBarProperty) = 0;
+        SystemBarProperty& property) = 0;
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
