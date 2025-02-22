@@ -873,7 +873,7 @@ WMError WindowImpl::UpdateSystemBarProperties(
     const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
     const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
 {
-    for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
+    for (auto& [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
         auto property = GetSystemBarPropertyByType(systemBarType);
         property.enable_ = systemBarPropertyFlag.enableFlag ?
             systemBarProperties.at(systemBarType).enable_ : property.enable_;
