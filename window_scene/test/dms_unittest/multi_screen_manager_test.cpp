@@ -58,6 +58,8 @@ public:
     void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override {}
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
+    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override {}
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };

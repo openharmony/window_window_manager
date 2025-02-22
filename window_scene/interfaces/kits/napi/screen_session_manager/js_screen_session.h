@@ -65,6 +65,8 @@ private:
     void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) override;
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
+    void OnExtendScreenConnectStatusChange(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override;
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

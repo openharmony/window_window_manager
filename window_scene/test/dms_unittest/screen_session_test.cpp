@@ -40,6 +40,8 @@ public:
     void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) override {}
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override {}
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override {}
+    void OnExtendScreenConnectStatusChange(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override {}
 };
 class ScreenSessionTest : public testing::Test {
   public:

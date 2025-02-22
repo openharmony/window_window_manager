@@ -49,6 +49,7 @@ public:
         TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED,
         TRANS_ID_ON_SECONDARY_REFLEXION_CHANGED,
         TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED,
+        TRANS_ID_ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
@@ -78,6 +79,8 @@ public:
     virtual void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) = 0;
     virtual void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
     virtual void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) = 0;
+    virtual void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
 };
 } // namespace OHOS::Rosen
 

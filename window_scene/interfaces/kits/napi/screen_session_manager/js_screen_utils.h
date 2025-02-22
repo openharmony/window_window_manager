@@ -37,6 +37,7 @@ public:
     static napi_value CreateJsFoldStatus(napi_env env);
     static napi_value CreateJsScreenPropertyChangeType(napi_env env);
     static napi_value CreateJsSuperFoldStatus(napi_env env);
+    static napi_value CreateJsExtendScreenConnectStatus(napi_env env);
 };
 } // namespace OHOS::Rosen
 

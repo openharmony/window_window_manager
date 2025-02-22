@@ -589,6 +589,15 @@ SuperFoldStatus ScreenSessionManagerClient::GetSuperFoldStatus()
     return screenSessionManager_->GetSuperFoldStatus();
 }
 
+ExtendScreenConnectStatus ScreenSessionManagerClient::GetExtendScreenConnectStatus()
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return ExtendScreenConnectStatus::UNKNOWN;
+    }
+    return screenSessionManager_->GetExtendScreenConnectStatus();
+}
+
 std::shared_ptr<Media::PixelMap> ScreenSessionManagerClient::GetScreenSnapshot(ScreenId screenId,
     float scaleX, float scaleY)
 {
@@ -733,5 +742,18 @@ void ScreenSessionManagerClient::OnSecondaryReflexionChanged(ScreenId screenId, 
     }
     WLOGI("screenId=%{public}" PRIu64 " isSecondaryReflexion=%{public}d", screenId, isSecondaryReflexion);
     screenSession->SecondaryReflexionChange(screenId, isSecondaryReflexion);
+}
+
+void ScreenSessionManagerClient::OnExtendScreenConnectStatusChanged(ScreenId screenId,
+    ExtendScreenConnectStatus extendScreenConnectStatus)
+{
+    auto screenSession = GetScreenSession(GetDefaultScreenId());
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    WLOGI("screenId=%{public}" PRIu64 " extendScreenConnectStatus=%{public}d", screenId,
+        static_cast<uint32_t>(extendScreenConnectStatus));
+    screenSession->ExtendScreenConnectStatusChange(screenId, extendScreenConnectStatus);
 }
 } // namespace OHOS::Rosen
