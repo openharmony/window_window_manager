@@ -412,7 +412,10 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
         return;
     }
     uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
-    mainWindow_->SetAutoStartPiP(enable, priority);
+    uint32_t contentWidth = 0;
+    uint32_t contentHeight = 0;
+    pipOption_->GetContentSize(contentWidth, contentHeight);
+    mainWindow_->SetAutoStartPiP(enable, priority, contentWidth, contentHeight);
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
         if (!IsPullPiPAndHandleNavigation()) {

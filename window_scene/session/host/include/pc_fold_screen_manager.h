@@ -37,6 +37,18 @@ enum class ScreenSide : uint8_t {
     FOLD_C = 2,
 };
 
+enum class ThrowSlipWindowMode : int32_t {
+    FLOAT = 0,
+    FULLSCREEN = 1,
+    FULLSCREEN_WATERFALLMODE = 2,
+};
+
+enum class ThrowSlipMode : int32_t {
+    MOVE = 0,
+    GESTURE = 1,
+    BUTTON = 2,
+};
+
 class PcFoldScreenManager {
 WM_DECLARE_SINGLE_INSTANCE(PcFoldScreenManager);
 public:

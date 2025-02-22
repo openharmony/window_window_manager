@@ -244,6 +244,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.huawei.hmos.security.privacycenter", "PermDisabledReminderAbility", "superprivacy"),
         std::make_tuple("com.huawei.hmos.audioaccessorymanager", "NearbyAbility", "phone"),
         std::make_tuple("com.huawei.hmos.wallet", "WalletDialogUIExtensionAbility", "entry"),
+        std::make_tuple("com.huawei.hmos.settings", "WifiWindowSettingsAbility", "pc_settings"),
     };
 
     if (extensionAbilityTypeWhitelist.find(extensionAbilityType) != extensionAbilityTypeWhitelist.end()) {
@@ -2568,7 +2569,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (persistentId == brightnessSessionId_) {
             auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
             auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
-            UpdateBrightness(focusedSessionId);
+            UpdateBrightness(focusedSessionId, true);
         }
         if (IsPcSceneSessionLifecycle(sceneSession)) {
             TLOGNI(WmsLogTag::WMS_MAIN, "Notify session background: %{public}d", persistentId);
@@ -4066,41 +4067,64 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::NotifySwitchingUser(const bool isUserActive)
+void SceneSessionManager::ProcessUIAbilityOnUserSwitch(bool isUserActive)
 {
-    taskScheduler_->PostSyncTask([this, isUserActive, where = __func__]() {
-        TLOGNI(WmsLogTag::WMS_MULTI_USER, "%{public}s: IsUserActive=%{public}u, currentUserId=%{public}d", where,
-            isUserActive, currentUserId_.load());
-        isUserBackground_ = !isUserActive;
-        SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
-        if (isUserActive) { // switch to current user
-            SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
-            if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
-                MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
-            }
-            AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
-            // notify screenSessionManager to recover current user
-            ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
-            FlushWindowInfoToMMI(true);
-            NotifyAllAccessibilityInfo();
-            rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
-            UpdatePrivateStateAndNotifyForAllScreens();
-        } else { // switch to another user
-            SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
-            rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+    int32_t pid = GetPid();
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_MULTI_USER, "session is null");
+            continue;
         }
+        // Change app life cycle in pc when user switch, do app freeze or unfreeze
+        if (IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid)) {
+            StartOrMinimizeUIAbilityBySCB(sceneSession, isUserActive);
+        }
+    }
+}
 
-        // Change app life cycle in pc when user switch, do app freeze
-        int32_t pid = GetPid();
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession == nullptr) {
-                TLOGNE(WmsLogTag::WMS_MULTI_USER, "%{public}s: session is null", where);
-                continue;
-            }
-            if (IsNeedChangeLifeCycleOnUserSwitch(sceneSession, pid)) {
-                StartOrMinimizeUIAbilityBySCB(sceneSession, isUserActive);
-            }
+void SceneSessionManager::HandleUserSwitching(bool isUserActive)
+{
+    isUserBackground_ = !isUserActive;
+    SceneInputManager::GetInstance().SetUserBackground(!isUserActive);
+    if (isUserActive) { // switch to current user
+        SceneInputManager::GetInstance().SetCurrentUserId(currentUserId_);
+        if (MultiInstanceManager::IsSupportMultiInstance(systemConfig_)) {
+            MultiInstanceManager::GetInstance().SetCurrentUserId(currentUserId_);
+        }
+        AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
+        // notify screenSessionManager to recover current user
+        ScreenSessionManagerClient::GetInstance().SwitchingCurrentUser();
+        FlushWindowInfoToMMI(true);
+        NotifyAllAccessibilityInfo();
+        rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        UpdatePrivateStateAndNotifyForAllScreens();
+    } else { // switch to another user
+        SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
+        rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
+        // minimized UI abilities when the user is switching and inactive
+        ProcessUIAbilityOnUserSwitch(isUserActive);
+    }
+}
+
+void SceneSessionManager::HandleUserSwitched(bool isUserActive)
+{
+    if (isUserActive) {
+        // start UI abilities only after the user has switched and become active
+        ProcessUIAbilityOnUserSwitch(isUserActive);
+    }
+}
+
+void SceneSessionManager::HandleUserSwitch(const UserSwitchEventType type, const bool isUserActive)
+{
+    taskScheduler_->PostSyncTask([this, type, isUserActive, where = __func__] {
+        TLOGNI(WmsLogTag::WMS_MULTI_USER,
+               "%{public}s: currentUserId: %{public}d, switchEventType: %{public}u, isUserActive: %{public}u",
+               where, currentUserId_.load(), type, isUserActive);
+        if (type == UserSwitchEventType::SWITCHING) {
+            HandleUserSwitching(isUserActive);
+        } else {
+            HandleUserSwitched(isUserActive);
         }
         return WSError::WS_OK;
     }, __func__);
@@ -4199,7 +4223,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::st
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetStartupPage");
     if (GetStartingWindowInfoFromCache(sessionInfo, path, bgColor)) {
-        TLOGI(WmsLogTag::WMS_PATTERN, "Found in cache: %{public}s, %{public}x", path.c_str(), bgColor);
+        TLOGW(WmsLogTag::WMS_PATTERN, "Found in cache: %{public}s, %{public}x", path.c_str(), bgColor);
         return;
     }
     AAFwk::Want want;
@@ -4214,7 +4238,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::st
     if (GetStartupPageFromResource(abilityInfo, path, bgColor)) {
         CacheStartingWindowInfo(abilityInfo, path, bgColor);
     }
-    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}d, %{public}s, %{public}x",
+    TLOGW(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}d, %{public}s, %{public}x",
         abilityInfo.startWindowIconId, abilityInfo.startWindowBackgroundId, path.c_str(), bgColor);
 }
 
@@ -4675,7 +4699,7 @@ void SceneSessionManager::PostBrightnessTask(float brightness)
     }
 }
 
-WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
+WSError SceneSessionManager::UpdateBrightness(int32_t persistentId, bool onBackGround)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
@@ -4691,14 +4715,14 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
     bool isPC = systemConfig_.IsPcWindow();
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
-        if (GetDisplayBrightness() != brightness) {
+        if (onBackGround && GetDisplayBrightness() != brightness) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
             if (!isPC) {
                 DisplayPowerMgr::DisplayPowerMgrClient::GetInstance().RestoreBrightness();
             }
             SetDisplayBrightness(UNDEFINED_BRIGHTNESS); // UNDEFINED_BRIGHTNESS means system default brightness
+            brightnessSessionId_ = INVALID_WINDOW_ID;
         }
-        brightnessSessionId_ = INVALID_WINDOW_ID;
     } else {
         if (GetDisplayBrightness() != brightness) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with value");
@@ -6273,7 +6297,7 @@ void SceneSessionManager::NotifyFocusStatus(const sptr<SceneSession>& sceneSessi
         if (IsSessionVisibleForeground(sceneSession)) {
             NotifyWindowInfoChange(persistentId, WindowUpdateType::WINDOW_UPDATE_FOCUSED);
         }
-        UpdateBrightness(focusGroup->GetFocusedSessionId());
+        UpdateBrightness(focusGroup->GetFocusedSessionId(), false);
         FocusIDChange(sceneSession->GetPersistentId(), sceneSession);
     }
     // notify window manager
@@ -6371,7 +6395,7 @@ WSError SceneSessionManager::UpdateFocus(int32_t persistentId, bool isFocused)
         auto focusedSessionId = windowFocusController_->GetFocusedSessionId(displayId);
         if (isFocused) {
             SetFocusedSessionId(displayId, persistentId);
-            UpdateBrightness(focusedSessionId);
+            UpdateBrightness(focusedSessionId, false);
             FocusIDChange(persistentId, sceneSession);
         } else if (persistentId == GetFocusedSessionId()) {
             SetFocusedSessionId(displayId, INVALID_SESSION_ID);
