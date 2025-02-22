@@ -3519,22 +3519,23 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     } else {
         if (argv[0] == nullptr) {
             errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-            WLOGFE("Failed to convert parameter to Orientation");
+            TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to Orientation");
         } else {
             uint32_t resultValue = 0;
             if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], resultValue)) {
-                WLOGFE("Failed to convert parameter to orientation");
+                TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to orientation");
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             }
             auto apiOrientation = static_cast<ApiOrientation>(resultValue);
             if (apiOrientation < ApiOrientation::BEGIN ||
                 apiOrientation > ApiOrientation::END) {
-                WLOGFE("Orientation %{public}u invalid!", static_cast<uint32_t>(apiOrientation));
+                TLOGE(WmsLogTag::WMS_ROTATION, "Orientation %{public}u invalid!",
+                    static_cast<uint32_t>(apiOrientation));
                 errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
             } else {
                 requestedOrientation = JS_TO_NATIVE_ORIENTATION_MAP.at(apiOrientation);
@@ -3545,28 +3546,33 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    wptr<Window> weakToken(windowToken_);
-    const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, requestedOrientation, where](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "OnSetPreferredOrientation failed"));
-                return;
-            }
-            weakWindow->SetRequestedOrientation(requestedOrientation);
-            task.Resolve(env, NapiGetUndefined(env));
-            WLOGI("%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
-                static_cast<uint32_t>(requestedOrientation));
-        };
-
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnSetPreferredOrientation",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, requestedOrientation, env,
+            task = napiAsyncTask, where = __func__] {
+        if (errCode != WmErrorCode::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: invalid param", where);
+            return;
+        }
+        auto weakWindow = windowToken.promote();
+        if (weakWindow == nullptr) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "OnSetPreferredOrientation failed"));
+            return;
+        }
+        weakWindow->SetRequestedOrientation(requestedOrientation);
+        task->Resolve(env, NapiGetUndefined(env));
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
+            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+            static_cast<uint32_t>(requestedOrientation));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+    }
     return result;
 }
 
