@@ -82,6 +82,7 @@ public:
     void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
+    ExtendScreenConnectStatus GetExtendScreenConnectStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
     DeviceScreenConfig GetDeviceScreenConfig();
     sptr<ScreenSession> GetScreenSessionById(const ScreenId id);
@@ -120,6 +121,8 @@ private:
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
+    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;

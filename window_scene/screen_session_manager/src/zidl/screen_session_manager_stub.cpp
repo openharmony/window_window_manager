@@ -714,6 +714,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_EXTEND_SCREEN_CONNECT_STATUS: {
+            static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetExtendScreenConnectStatus())));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION: {
             reply.WriteStrongParcelable(GetCurrentFoldCreaseRegion());
             break;

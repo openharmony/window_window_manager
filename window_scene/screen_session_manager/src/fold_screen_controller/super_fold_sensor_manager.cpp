@@ -210,7 +210,31 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents events)
 {
     // trigger events
+    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+        return;
+    }
     SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
+}
+
+void SuperFoldSensorManager::HandleScreenConnectChange()
+{
+    TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
+    if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::HALF_FOLDED) {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    } else if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    }
+}
+
+void SuperFoldSensorManager::HandleScreenDisconnectChange()
+{
+    TLOGI(WmsLogTag::DMS, "Screen disconnect to stop statemachine.");
+    NotifyHallChanged(curHall_);
+    NotifyFoldAngleChanged(curAngle_);
 }
 
 float SuperFoldSensorManager::GetCurAngle()

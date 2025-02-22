@@ -60,6 +60,7 @@ private:
     static napi_value GetSuperFoldStatus(napi_env env, napi_callback_info info);
     static napi_value GetScreenSnapshot(napi_env env, napi_callback_info info);
     static napi_value GetDeviceScreenConfig(napi_env env, napi_callback_info info);
+    static napi_value GetExtendScreenConnectStatus(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
@@ -80,6 +81,7 @@ private:
     napi_value OnGetSuperFoldStatus(napi_env env, const napi_callback_info info);
     napi_value OnGetScreenSnapshot(napi_env env, const napi_callback_info info);
     napi_value OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info);
+    napi_value OnGetExtendScreenConnectStatus(napi_env env, napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;

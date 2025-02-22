@@ -426,6 +426,15 @@ enum class SuperFoldStatus : uint32_t {
 };
 
 /**
+ * @brief Enumerates the extend screen connect status.
+ */
+enum class ExtendScreenConnectStatus: uint32_t {
+    UNKNOWN = 0,
+    CONNECT,
+    DISCONNECT,
+};
+
+/**
  * @brief Enumerates the fold display mode.
  */
 enum class FoldDisplayMode: uint32_t {
