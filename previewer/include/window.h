@@ -168,7 +168,7 @@ public:
     virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
     virtual WMError UpdateSystemBarProperties(
         const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
-        const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
         { return WMError::WM_OK; }
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
