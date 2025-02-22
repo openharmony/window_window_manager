@@ -719,6 +719,7 @@ WSError SceneSession::InitializeMoveInputBar()
     return WSError::WS_OK;
 }
 
+/** @note @window.drag */
 WSError SceneSession::OnSessionEvent(SessionEvent event)
 {
     PostTask([weakThis = wptr(this), event, where = __func__] {
@@ -2594,6 +2595,7 @@ void SceneSession::NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEven
     }
 }
 
+/** @note @window.drag */
 WSError SceneSession::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool needNotifyClient, bool isExecuteDelayRaise)
 {
@@ -3042,6 +3044,7 @@ void SceneSession::SetMoveDragCallback()
     }
 }
 
+/** @note @window.drag */
 void SceneSession::InitializeCrossMoveDrag()
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
@@ -3269,6 +3272,7 @@ void SceneSession::ThrowSlipDirectly(const WSRectF& velocity)
     }, __func__);
 }
 
+/** @note @window.drag */
 void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
 {
     if (!moveDragController_) {
