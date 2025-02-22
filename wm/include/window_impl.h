@@ -156,21 +156,21 @@ public:
         state_ = state;
     }
 
-    /**
+    /*
      * Window Immersive
      */
-    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
-    virtual bool IsFullScreen() const override;
-    virtual bool IsLayoutFullScreen() const override;
+    SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
+    bool IsFullScreen() const override;
+    bool IsLayoutFullScreen() const override;
     virtual WMError UpdateSystemBarProperty(bool status);
-    virtual WMError SetLayoutFullScreen(bool status) override;
-    virtual WMError SetFullScreen(bool status) override;
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetFullScreen(bool status) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
