@@ -15,10 +15,13 @@
 
 #include <gtest/gtest.h>
 #include <regex>
+#include <chrono>
+#include <thread>
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
 #include "screen_fold_data.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -976,6 +979,54 @@ HWTEST_F(SceneSessionManagerLifecycleTest, VisibilityChangedDetectFunc, Function
 
     sceneSession2->visibilityChangedDetectFunc_(pid, true, false);
     EXPECT_EQ(0, ssm_->visibleWindowCountMap_[pid]);
+}
+
+/**
+ * @tc.name: StartUIAbilityBySCBTimeoutCheck
+ * @tc.desc: StartUIAbilityBySCBTimeoutCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest, StartUIAbilityBySCBTimeoutCheck, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "accessibilityNotifyTesterBundleName";
+    sessionInfo.abilityName_ = "accessibilityNotifyTesterAbilityName";
+    sessionInfo.ancoSceneState = AncoSceneState::NOTIFY_FOREGROUND;
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetScbCoreEnabled(true);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo = ssm_->SetAbilitySessionInfo(sceneSession);
+    ASSERT_NE(abilitySessionInfo, nullptr);
+    bool isColdStart = true;
+    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo, isColdStart), 2097202);
+    bool isUserSwitch = true;
+    ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo, isColdStart, isUserSwitch), 2097202);
+}
+
+/**
+ * @tc.name: SubmitTaskAndWait
+ * @tc.desc: SubmitTaskAndWait
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLifecycleTest, SubmitTaskAndWait, Function | SmallTest | Level3)
+{
+    uint64_t timeout = 3000;
+    auto ffrtQueueHelper = std::make_shared<FfrtQueueHelper>();
+    ASSERT_NE(ffrtQueueHelper, nullptr);
+    auto timeoutTask = []() {
+        std::cout << "===enter timeoutTask begin sleep 4 sec===" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(4));
+    }
+    ASSERT_EQ(ffrtQueueHelper->SubmitTaskAndWait(std::move(timeoutTask, timeout)), true);
+    auto task = []() {
+        std::cout << "===enter task begin sleep 1 sec===" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    ASSERT_EQ(ffrtQueueHelper->SubmitTaskAndWait(std::move(task, timeout)), false);
 }
 }
 } // namespace Rosen
