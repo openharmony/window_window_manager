@@ -4175,9 +4175,11 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
     if (iter != allMirrorScreenIds.end()) {
         allMirrorScreenIds.erase(iter);
     }
-    if (allMirrorScreenIds.empty()) {
-        TLOGW(WmsLogTag::DMS, "make mirror screen id empty");
-        return DMError::DM_ERROR_INVALID_PARAM;
+    auto mainScreen = GetScreenSession(mainScreenId);
+    if (mainScreen == nullptr || allMirrorScreenIds.empty()) {
+        TLOGE(WmsLogTag::DMS, "MakeMirror fail. mainScreen :%{public}" PRIu64", screens size:%{public}u",
+            mainScreenId, static_cast<uint32_t>(allMirrorScreenIds.size()));
+        return DMError::DM_ERROR_NULLPTR;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror start");
     for (ScreenId screenId : allMirrorScreenIds) {
@@ -4190,6 +4192,10 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
 #endif
     DMError makeResult = MultiScreenManager::GetInstance().MirrorSwitch(mainScreenId,
         allMirrorScreenIds, mainScreenRegion, screenGroupId);
+    if (makeResult != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "MakeMirror set mirror failed.");
+        return makeResult;
+    }
     for (ScreenId screenId : allMirrorScreenIds) {
         MirrorSwitchNotify(screenId);
     }
