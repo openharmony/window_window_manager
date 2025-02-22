@@ -387,7 +387,8 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
     return false;
 }
 
-static void CleanUp(void* data) {
+static void CleanUp(void* data)
+{
     auto reference = reinterpret_cast<NativeReference*>(data);
     uint32_t refCount = reference->GetRefCount();
     if (refCount > 0  || reference->GetFinalRun()) {
