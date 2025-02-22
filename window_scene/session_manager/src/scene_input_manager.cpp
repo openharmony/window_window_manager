@@ -190,10 +190,14 @@ void SceneInputManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&
     sceneSessionDirty_->RegisterFlushWindowInfoCallback(std::move(callback));
 }
 
+void SceneInputManager::ResetSessionDirty()
+{
+    sceneSessionDirty_->ResetSessionDirty();
+}
+
 auto SceneInputManager::GetFullWindowInfoList() ->
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
-    sceneSessionDirty_->ResetSessionDirty();
     return sceneSessionDirty_->GetFullWindowInfoList();
 }
 
