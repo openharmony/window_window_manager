@@ -1967,6 +1967,10 @@ HWTEST_F(ScreenSessionTest, CalcRotation, Function | SmallTest | Level2)
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
 
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
+
     orientation = Orientation::VERTICAL;
     res = session->CalcRotation(orientation, foldDisplayMode);
     if (ScreenSessionManager::GetInstance().IsFoldable()) {

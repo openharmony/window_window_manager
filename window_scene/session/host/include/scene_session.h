@@ -103,6 +103,7 @@ using UpdateAppUseControlFunc = std::function<void(ControlAppType type, bool isN
 using NotifySetWindowRectAutoSaveFunc = std::function<void(bool enabled)>;
 using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
+using NotifySessionLockStateChangeCallback = std::function<void(bool isLockedState)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -285,6 +286,7 @@ public:
     void SetCollaboratorType(int32_t collaboratorType);
     void SetLastSafeRect(WSRect rect);
     void SetOriPosYBeforeRaisedByKeyboard(int32_t posY);
+    void SetColorSpace(ColorSpace colorSpace);
 
     /*
      * Window Hierarchy
@@ -436,6 +438,8 @@ public:
     void RegisterUpdateAppUseControlCallback(UpdateAppUseControlFunc&& callback);
     void NotifyUpdateAppUseControl(ControlAppType type, bool isNeedControl);
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
+    virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
+    virtual void NotifySessionLockStateChange(bool isLockedState) {}
 
     void ClearSpecificSessionCbMap();
     void RegisterShowWhenLockedCallback(NotifyShowWhenLockedFunc&& callback);
@@ -628,7 +632,7 @@ protected:
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
-    
+
     /*
      * Window Layout
      */
@@ -873,7 +877,7 @@ private:
      * Window Rotation
      */
     NotifyReqOrientationChangeFunc onRequestedOrientationChange_;
-    
+
     /**
      * Window Animation
      */

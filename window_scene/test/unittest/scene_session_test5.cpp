@@ -1614,7 +1614,7 @@ HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     session->MarkSystemSceneUIFirst(true, true);
- 
+
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     session->surfaceNode_ = surfaceNode;
@@ -1623,6 +1623,28 @@ HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level
     session->leashWinSurfaceNode_ = surfaceNode;
     session->MarkSystemSceneUIFirst(true, true);
     EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
+}
+
+/**
+ * @tc.name: SetColorSpace
+ * @tc.desc: SetColorSpace function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetColorSpace, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetColorSpace";
+    info.bundleName_ = "SetColorSpace";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    session->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
 }
 
 /**
@@ -1689,7 +1711,7 @@ HWTEST_F(SceneSessionTest5, IsSameMainSession, Function | SmallTest | Level2)
     ASSERT_EQ(true, currSceneSession->IsSameMainSession(preSceneSession));
     currSceneSession->persistentId_ = 2;
     ASSERT_EQ(false, currSceneSession->IsSameMainSession(preSceneSession));
- 
+
     sptr<SceneSession> subSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     sptr<SceneSession> subSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     subSession1->SetParentSession(preSceneSession);
@@ -1701,7 +1723,7 @@ HWTEST_F(SceneSessionTest5, IsSameMainSession, Function | SmallTest | Level2)
     currSceneSession->persistentId_ = 2;
     ASSERT_EQ(false, subSession1->IsSameMainSession(subSession2));
 }
- 
+
 /**
  * @tc.name: HandleActionUpdateExclusivelyHighlighted
  * @tc.desc: test HandleActionUpdateExclusivelyHighlighted
@@ -1722,7 +1744,7 @@ HWTEST_F(SceneSessionTest5, HandleActionUpdateExclusivelyHighlighted, Function |
     auto res = session->HandleActionUpdateExclusivelyHighlighted(property, action);
     EXPECT_EQ(WMError::WM_OK, res);
 }
- 
+
 /**
  * @tc.name: SetHighlightChangeNotifyFunc
  * @tc.desc: SetHighlightChangeNotifyFunc Test

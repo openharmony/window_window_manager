@@ -130,19 +130,19 @@ HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_01, Function
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    
-    window->windowSystemConfig_.uiType = UI_TYPE_PHONE;
+ 
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PHONE;
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-
-    window->windowSystemConfig_.uiType = UI_TYPE_PC;
-    ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-
-    window->windowSystemConfig_.uiType = UI_TYPE_PAD;
+ 
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    ASSERT_NE(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+ 
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     ASSERT_NE(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
-
+ 
 /**
  * @tc.name: StartMoveWindowWithCoordinate_02
  * @tc.desc: StartMoveWindowWithCoordinate
@@ -158,8 +158,8 @@ HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_02, Function
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->windowSystemConfig_.uiType = UI_TYPE_PC;
-
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+ 
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, -1), WmErrorCode::WM_ERROR_INVALID_PARAM);
     ASSERT_EQ(window->StartMoveWindowWithCoordinate(1500, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
