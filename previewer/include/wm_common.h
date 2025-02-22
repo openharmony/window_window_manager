@@ -262,8 +262,8 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
     return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 
-inline SystemBarSettingFlag& operator|=(SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs)
-{ return lhs = lhs | rhs; }
+inline SystemBarSettingFlag& operator|=
+    (SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs) { return lhs = lhs | rhs; }
 
 /**
  * @brief Enumerates flag of window.
