@@ -229,11 +229,30 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+
+    /*
+     * Window Scene Snapshot
+     */
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true);
+    Task saveSnapshotCallback_ = []() {};
+    void SetSaveSnapshotCallback(const Task& task)
+    {
+        if (task) {
+            saveSnapshotCallback_ = task;
+        }
+    };
+    Task removeSnapshotCallback_ = []() {};
+    void SetRemoveSnapshotCallback(const Task& task)
+    {
+        if (task) {
+            removeSnapshotCallback_ = task;
+        }
+    };
+    
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
