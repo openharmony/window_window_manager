@@ -1833,24 +1833,26 @@ void ScreenSession::SetExtendProperty(RRect bounds, bool isPhysicalTouchBounds, 
     property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
 }
 
-void ScreenSession::Resize(uint32_t width, uint32_t height)
+void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync)
 {
-    sptr<SupportedScreenModes> screenMode = GetActiveScreenMode();
-    if (screenMode != nullptr) {
-        screenMode->width_ = width;
-        screenMode->height_ = height;
-        UpdatePropertyByActiveMode();
-        {
-            std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-            if (displayNode_ == nullptr) {
-                TLOGE(WmsLogTag::DMS, "displayNode_ is null, resize failed");
-                return;
-            }
-            displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
-            displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+    if (isFreshBoundsSync) {
+        sptr<SupportedScreenModes> screenMode = GetActiveScreenMode();
+        if (screenMode != nullptr) {
+            screenMode->width_ = width;
+            screenMode->height_ = height;
+            UpdatePropertyByActiveMode();
         }
-        RSTransaction::FlushImplicitTransaction();
     }
+    {
+        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "displayNode_ is null, resize failed");
+            return;
+        }
+        displayNode_->SetFrame(0, 0, static_cast<float>(width), static_cast<float>(height));
+        displayNode_->SetBounds(0, 0, static_cast<float>(width), static_cast<float>(height));
+    }
+    RSTransaction::FlushImplicitTransaction();
 }
 
 bool ScreenSession::UpdateAvailableArea(DMRect area)

@@ -14,6 +14,7 @@
  */
 
 #include "session/host/include/pc_fold_screen_controller.h"
+#include <hisysevent.h>
 #include <parameters.h>
 #include "session/host/include/scene_session.h"
 #include "window_manager_hilog.h"
@@ -130,6 +131,7 @@ void PcFoldScreenController::RecordStartMoveRect(const WSRect& rect, bool isStar
     std::unique_lock<std::mutex> lock(moveMutex_);
     startMoveRect_ = rect;
     isStartFullScreen_ = isStartFullScreen;
+    isStartWaterfallMode_ = isFullScreenWaterfallMode_;
     movingRectRecords_.clear();
     isStartDirectly_ = false;
 }
@@ -152,6 +154,7 @@ void PcFoldScreenController::ResetRecords()
     std::unique_lock<std::mutex> lock(moveMutex_);
     startMoveRect_ = ZERO_RECT;
     isStartFullScreen_ = false;
+    isStartWaterfallMode_ = false;
     movingRectRecords_.clear();
     isStartDirectly_ = false;
     startVelocity_ = ZERO_RECTF;
@@ -194,12 +197,14 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     }
     WSRect startRect;
     bool startFullScreen;
+    bool startWaterfallMode;
     bool startDirectly;
     {
         std::unique_lock<std::mutex> lock(moveMutex_);
         manager.ResetArrangeRule(startMoveRect_);
         startRect = startMoveRect_;
         startFullScreen = isStartFullScreen_;
+        startWaterfallMode = isStartWaterfallMode_;
         startDirectly = isStartDirectly_;
     }
     WSRect titleRect = { rect.posX_, rect.posY_, rect.width_, startDirectly ? rect.height_ : GetTitleHeight() };
@@ -216,14 +221,41 @@ bool PcFoldScreenController::ThrowSlip(DisplayId displayId, WSRect& rect,
     }
 
     // correct to start rect and throw
-    if (!isStartFullScreen_) {
+    if (!startFullScreen) {
         rect.posX_ = startRect.posX_;
         rect.posY_ = startRect.posY_;
     }
     manager.ThrowSlipToOppositeSide(throwSide, rect, topAvoidHeight, botAvoidHeight, GetTitleHeight());
     manager.ResetArrangeRule(throwSide);
-    TLOGI(WmsLogTag::WMS_PC, "throw to rect: %{public}s", rect.ToString().c_str());
+
+    // hisysevent
+    ThrowSlipWindowMode startWindowMode = ThrowSlipWindowMode::FLOAT;
+    if (startFullScreen) {
+        startWindowMode = startWaterfallMode ? ThrowSlipWindowMode::FULLSCREEN :
+                                               ThrowSlipWindowMode::FULLSCREEN_WATERFALLMODE;
+    }
+    ThrowSlipMode throwMode = startDirectly ? ThrowSlipMode::GESTURE : ThrowSlipMode::MOVE;
+    auto sceneSession = weakSceneSession_.promote();
+    std::string bundleName = sceneSession == nullptr ? "" : sceneSession->GetSessionInfo().bundleName_;
+    ThrowSlipHiSysEvent(bundleName, throwSide, startWindowMode, throwMode);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "throw to rect: %{public}s", rect.ToString().c_str());
     return true;
+}
+
+void PcFoldScreenController::ThrowSlipHiSysEvent(const std::string& bundleName, ScreenSide startSide,
+    ThrowSlipWindowMode startWindowMode, ThrowSlipMode throwMode) const
+{
+    int32_t ret = HiSysEventWrite(
+        HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "THROW_SLIP",
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "BUNDLE_NAME", bundleName,
+        "START_SIDE", static_cast<int32_t>(startSide),
+        "START_WINDOW_MODE", static_cast<int32_t>(startWindowMode),
+        "THROW_MODE", static_cast<int32_t>(throwMode));
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "write hisysevent error, ret: %{public}d", ret);
+    }
 }
 
 void PcFoldScreenController::ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect,

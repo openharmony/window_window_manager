@@ -294,7 +294,7 @@ public:
      * Multi User
      */
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
-    void NotifySwitchingUser(const bool isUserActive);
+    void HandleUserSwitch(const UserSwitchEventType type, const bool isUserActive);
     int32_t GetCurrentUserId() const;
 
     void StartWindowInfoReportLoop();
@@ -810,7 +810,7 @@ private:
         REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
-    WSError UpdateBrightness(int32_t persistentId);
+    WSError UpdateBrightness(int32_t persistentId, bool onBackGround);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
     void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
@@ -899,6 +899,9 @@ private:
     bool IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession);
     bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
     WSError StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive);
+    void ProcessUIAbilityOnUserSwitch(bool isUserActive);
+    void HandleUserSwitching(bool isUserActive);
+    void HandleUserSwitched(bool isUserActive);
 
     /*
      * Window Recover
