@@ -295,6 +295,7 @@ public:
     void SetSystemSceneOcclusionAlpha(double alpha);
     void ResetOcclusionAlpha();
     void SetSystemSceneForceUIFirst(bool forceUIFirst);
+    void SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch);
     void MarkSystemSceneUIFirst(bool isForced, bool isUIFirstEnabled);
     void SetRequestedOrientation(Orientation orientation);
     WSError SetDefaultRequestedOrientation(Orientation orientation);
