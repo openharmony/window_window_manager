@@ -664,8 +664,8 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
 }
 
 bool GetSystemBarStatus(napi_env env, napi_callback_info info,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -898,7 +898,8 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
 }
 
 bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto statusProperty = properties[WindowType::WINDOW_TYPE_STATUS_BAR];
     napi_value jsStatusContentColor = nullptr;
@@ -926,7 +927,8 @@ bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
 }
 
 bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto navProperty = properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR];
     napi_value jsNavigationContentColor = nullptr;
@@ -954,8 +956,8 @@ bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
 }
 
 bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
         GetColorFromJs(env, jsObject, "statusBarColor",

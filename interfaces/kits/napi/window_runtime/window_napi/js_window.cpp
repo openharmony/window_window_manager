@@ -1109,42 +1109,6 @@ napi_value JsWindow::IsWindowHighlighted(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnIsWindowHighlighted(env, info) : nullptr;
 }
 
-static WMError UpdateSystemBarProperties(const std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, const sptr<Window>& window)
-{
-    for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
-        auto property = window->GetSystemBarPropertyByType(systemBarType);
-        property.enable_ = systemBarPropertyFlag.enableFlag ?
-            systemBarProperties.at(systemBarType).enable_ : property.enable_;
-        property.backgroundColor_ = systemBarPropertyFlag.backgroundColorFlag ?
-            systemBarProperties.at(systemBarType).backgroundColor_ : property.backgroundColor_;
-        property.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
-            systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
-        property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
-            systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
-
-        if (systemBarPropertyFlag.enableFlag) {
-            property.settingFlag_ =
-                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
-                static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING));
-        }
-        if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) {
-            property.settingFlag_ =
-                static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
-                static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-        }
-
-        if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
-            systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
-            auto err = window->SetSystemBarProperty(systemBarType, property);
-            if (err != WMError::WM_OK) {
-                return err;
-            }
-        }
-    }
-    return WMError::WM_OK;
-}
-
 WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t contentColor)
 {
     if (window == nullptr) {
@@ -2984,8 +2948,8 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
+    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (argc > ARG_COUNT_TWO || !GetSystemBarStatus(env, info, systemBarProperties, systemBarPropertyFlags)) {
         TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to systemBarProperties");
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_INVALID_PARAM,
@@ -3001,7 +2965,7 @@ napi_value JsWindow::OnSetSystemBarEnable(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
             return;
         }
-        auto errCode = UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
+        auto errCode = window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags);
         if (errCode == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -3020,8 +2984,8 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
+    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (argc < ARG_COUNT_ONE || !GetSystemBarStatus(env, info, systemBarProperties, systemBarPropertyFlags)) {
         TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to systemBarProperties");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -3044,7 +3008,7 @@ napi_value JsWindow::OnSetWindowSystemBarEnable(napi_env env, napi_callback_info
             return;
         }
         auto errCode = WM_JS_TO_ERROR_CODE_MAP.at(
-            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window));
+            window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -3092,8 +3056,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
             return;
         }
         auto property = window->GetSystemBarPropertyByType(systemBarType);
-        property.enable_ = systemBarEnable;
-        property.enableAnimation_ = systemBarEnableAnimation;
+        window->UpdateSpecificSystemBarEnabled(systemBarEnable, systemBarEnableAnimation, property);
         auto errCode =
             WM_JS_TO_ERROR_CODE_MAP.at(window->SetSpecificBarProperty(systemBarType, property));
         if (errCode == WmErrorCode::WM_OK) {
@@ -3121,8 +3084,8 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
+    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (argc < ARG_COUNT_ONE || argc > ARG_COUNT_TWO || argv[INDEX_ZERO] == nullptr ||
         !GetSystemBarPropertiesFromJs(env, argv[INDEX_ZERO], systemBarProperties, systemBarPropertyFlags)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
@@ -3138,7 +3101,7 @@ napi_value JsWindow::OnSetSystemBarProperties(napi_env env, napi_callback_info i
             task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
             return;
         }
-        auto errCode = UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window);
+        auto errCode = window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags);
         if (errCode == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -3161,8 +3124,8 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
         (GetType(env, argv[INDEX_ONE]) == napi_function ? argv[INDEX_ONE] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    std::map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
+    std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
+    std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     if (argc < ARG_COUNT_ONE || argv[INDEX_ZERO] == nullptr ||
         !GetSystemBarPropertiesFromJs(env, argv[INDEX_ZERO], systemBarProperties, systemBarPropertyFlags)) {
         TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid or failed to convert parameter");
@@ -3178,7 +3141,7 @@ napi_value JsWindow::OnSetWindowSystemBarProperties(napi_env env, napi_callback_
             return;
         }
         auto errCode = WM_JS_TO_ERROR_CODE_MAP.at(
-            UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags, window));
+            window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {

@@ -60,12 +60,7 @@ public:
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
-        int32_t apiVersion = API_VERSION_INVALID) override;
-    SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
-    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
-    WMError SetLayoutFullScreen(bool status) override;
-    WMError SetFullScreen(bool status) override;
+
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
@@ -239,6 +234,20 @@ public:
     WMError RegisterWindowAttachStateChangeListener(
         const sptr<IWindowAttachStateChangeListner>& listener) override;
     WMError UnregisterWindowAttachStateChangeListener() override;
+
+    /*
+     * Window Immersive
+     */
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) override;
+    SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetFullScreen(bool status) override;
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
