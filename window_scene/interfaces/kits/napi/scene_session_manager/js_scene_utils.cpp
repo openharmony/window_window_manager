@@ -1194,6 +1194,29 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsRSUIFirstSwitch(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::NONE)));
+    napi_set_named_property(env, objValue, "MODAL_WINDOW_CLOSE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::MODAL_WINDOW_CLOSE)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE_LIMIT)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE_NONFOCUS", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS)));
+    return objValue;
+}
+
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue)
 {
     napi_set_named_property(env, objValue, "PIP_START", CreateJsValue(env,
