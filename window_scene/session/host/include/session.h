@@ -229,11 +229,29 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+
+    /*
+     * Window Scene Snapshot
+     */
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true);
+    void SetSaveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            saveSnapshotCallback_ = std::move(task);
+        }
+    };
+
+    void SetRemoveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            removeSnapshotCallback_ = std::move(task);
+        }
+    };
+    
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -920,7 +938,7 @@ private:
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
-
+    
     /*
      * Window Layout
      */
@@ -932,6 +950,12 @@ private:
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };
+
+    /*
+     * Window Scene Snapshot
+     */
+    Task saveSnapshotCallback_ = []() {};
+    Task removeSnapshotCallback_ = []() {};
 };
 } // namespace OHOS::Rosen
 
