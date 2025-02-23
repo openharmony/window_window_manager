@@ -5712,7 +5712,9 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
         return WSError::WS_OK;
     }
-
+    if (nextSession && !nextSession->IsSessionForeground()) {
+        focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
+    }
     return ShiftFocus(displayId, nextSession, true, reason);
 }
 
@@ -9285,7 +9287,7 @@ WSError SceneSessionManager::GetFocusSessionElement(AppExecFwk::ElementName& ele
     AppExecFwk::RunningProcessInfo info;
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
     if (!info.isTestProcess && !SessionPermission::IsSystemCalling()) {
-        WLOGFE("permission denied!");
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied!");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
     return taskScheduler_->PostSyncTask([this, &element, where = __func__, displayId]() {
