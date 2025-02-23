@@ -2364,6 +2364,16 @@ public:
     }
 
     /**
+     * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
+     *
+     * @param systemBarEnable is system bar enabled
+     * @param systemBarEnableAnimation is animation enabled
+     * @param SystemBarProperty WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
+     */
+    virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) {}
+
+    /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
      *
      * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
@@ -2395,6 +2405,20 @@ public:
      * @return WMError
      */
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Update System Bar (include status bar and nav bar) Properties by Flags
+     *
+     * @param systemBarProperties map of status bar and nav bar properties
+     * @param systemBarPropertyFlags map of status bar and nav bar properties to be changed
+     * @return WMError
+     */
+    virtual WMError UpdateSystemBarProperties(
+        const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
     {
         return WMError::WM_OK;
     }

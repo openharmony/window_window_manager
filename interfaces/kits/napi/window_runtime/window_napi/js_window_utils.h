@@ -317,17 +317,17 @@ public:
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool GetSystemBarStatus(napi_env env, napi_callback_info info,
-        std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
     napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window);
     bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue);
     bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr);

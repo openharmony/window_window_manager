@@ -141,9 +141,6 @@ public:
     {
         return notifyNativefunc_;
     }
-    virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
-    virtual bool IsFullScreen() const override;
-    virtual bool IsLayoutFullScreen() const override;
     virtual WMError SetWindowType(WindowType type) override;
     virtual WMError SetWindowMode(WindowMode mode) override;
     virtual WMError SetAlpha(float alpha) override;
@@ -151,10 +148,6 @@ public:
     virtual WMError AddWindowFlag(WindowFlag flag) override;
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
-    virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
-    virtual WMError UpdateSystemBarProperty(bool status);
-    virtual WMError SetLayoutFullScreen(bool status) override;
-    virtual WMError SetFullScreen(bool status) override;
     virtual const Transform& GetTransform() const override;
     virtual const Transform& GetZoomTransform() const;
     virtual WMError UpdateSurfaceNodeAfterCustomAnimation(bool isAdd) override;
@@ -162,14 +155,29 @@ public:
     {
         state_ = state;
     }
-    virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
+
+    /*
+     * Window Immersive
+     */
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
     WMError SetAvoidAreaOption(uint32_t avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) override
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
+    bool IsFullScreen() const override;
+    bool IsLayoutFullScreen() const override;
+    virtual WMError UpdateSystemBarProperty(bool status);
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetFullScreen(bool status) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) override;
     
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);

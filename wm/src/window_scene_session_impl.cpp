@@ -2184,6 +2184,14 @@ void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color
     SetDecorButtonStyle(style);
 }
 
+void WindowSceneSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+    SystemBarProperty& property)
+{
+    property.enable_ = systemBarEnable;
+    property.enableAnimation_ = systemBarEnableAnimation;
+    property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+}
+
 WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const SystemBarProperty& property)
 {
     if (IsWindowSessionInvalid()) {
@@ -2220,6 +2228,42 @@ WMError WindowSceneSessionImpl::SetSpecificBarProperty(WindowType type, const Sy
             GetWindowId(), static_cast<int32_t>(ret));
     }
     return ret;
+}
+
+WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
+    const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+    const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+{
+    for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
+        if (systemBarProperties.find(systemBarType) == systemBarProperties.end()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "system bar type is invalid");
+            return WMError::WM_DO_NOTHING;
+        }
+        auto property = GetSystemBarPropertyByType(systemBarType);
+        property.enable_ = systemBarPropertyFlag.enableFlag ?
+            systemBarProperties.at(systemBarType).enable_ : property.enable_;
+        property.backgroundColor_ = systemBarPropertyFlag.backgroundColorFlag ?
+            systemBarProperties.at(systemBarType).backgroundColor_ : property.backgroundColor_;
+        property.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
+            systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
+        property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
+            systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
+
+        if (systemBarPropertyFlag.enableFlag) {
+            property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+        }
+        if (systemBarPropertyFlag.backgroundColorFlag || systemBarPropertyFlag.contentColorFlag) {
+            property.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
+        }
+        if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
+            systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
+            auto err = SetSystemBarProperty(systemBarType, property);
+            if (err != WMError::WM_OK) {
+                return err;
+            }
+        }
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetSystemBarProperty(WindowType type, const SystemBarProperty& property)
