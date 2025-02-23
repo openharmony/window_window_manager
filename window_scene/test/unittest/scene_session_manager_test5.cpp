@@ -1766,6 +1766,73 @@ HWTEST_F(SceneSessionManagerTest5, RequestFocusStatusBySCB01, Function | SmallTe
     ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
 }
 
+/**
+ * @tc.name: RequestSessionUnfocus01
+ * @tc.desc: RequestSessionUnfocus01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus01, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "RequestSessionUnfocus01";
+    info.bundleName_ = "RequestSessionUnfocus01";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 1;
+    sceneSession->zOrder_ = 1;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_DISCONNECT;
+    sceneSession->SetFocusable(true);
+    sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession1->persistentId_ = 2;
+    sceneSession1->zOrder_ = 2;
+    sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession1->isVisible_ = true;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->SetFocusedSessionId(2, DEFAULT_DISPLAY_ID);
+    ssm_->RequestSessionUnfocus(2, FocusChangeReason::DEFAULT);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
+    ASSERT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), true);
+}
+
+/**
+ * @tc.name: RequestSessionUnfocus02
+ * @tc.desc: RequestSessionUnfocus02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RequestSessionUnfocus02, Function | SmallTest | Level3)
+{
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "RequestSessionUnfocus02";
+    info.bundleName_ = "RequestSessionUnfocus02";
+
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->persistentId_ = 1;
+    sceneSession->zOrder_ = 1;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
+    sceneSession->SetFocusable(true);
+    sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession1->persistentId_ = 2;
+    sceneSession1->zOrder_ = 2;
+    sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    sceneSession1->isVisible_ = true;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    ssm_->sceneSessionMap_.insert({sceneSession1->GetPersistentId(), sceneSession1});
+    ssm_->SetFocusedSessionId(2, DEFAULT_DISPLAY_ID);
+    ssm_->RequestSessionUnfocus(2, FocusChangeReason::DEFAULT);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    ASSERT_EQ(focusGroup->GetFocusedSessionId(), 1);
+    ASSERT_EQ(focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground(), false);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
