@@ -2371,7 +2371,7 @@ public:
      * @param SystemBarProperty WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
      */
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& property) {};
+        SystemBarProperty& property) {}
 
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
