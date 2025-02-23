@@ -2235,6 +2235,10 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
     const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
 {
     for (auto [systemBarType, systemBarPropertyFlag] : systemBarPropertyFlags) {
+        if (systemBarProperties.find(systemBarType) == systemBarProperties.end()) {
+            TLOGE(WmsLogTag::WMS_IMMS, "system bar type is invalid");
+            return WMError::WM_DO_NOTHING;
+        }
         auto property = GetSystemBarPropertyByType(systemBarType);
         property.enable_ = systemBarPropertyFlag.enableFlag ?
             systemBarProperties.at(systemBarType).enable_ : property.enable_;
