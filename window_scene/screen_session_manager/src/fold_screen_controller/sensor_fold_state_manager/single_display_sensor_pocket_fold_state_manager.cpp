@@ -286,7 +286,7 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent,
         ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus::TENT_STATUS);
     } else {
         if (hall == HALL_FOLDED_THRESHOLD) {
-            currentAngle_ = ANGLE_MIN_VAL;
+            currentAngle = ANGLE_MIN_VAL;
         }
         FoldStatus nextState = FoldStatus::UNKNOWN;
         if (hall == -1) {
