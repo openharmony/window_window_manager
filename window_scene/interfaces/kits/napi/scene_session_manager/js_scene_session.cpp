@@ -355,10 +355,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "resetOcclusionAlpha", moduleName, JsSceneSession::ResetOcclusionAlpha);
     BindNativeFunction(env, objValue, "setSystemSceneForceUIFirst",
         moduleName, JsSceneSession::SetSystemSceneForceUIFirst);
-
-    BindNativeFunction(env, objValue, "setUIFirstSwitch",
-        moduleName, JsSceneSession::SetUIFirstSwitch);
-        
+    BindNativeFunction(env, objValue, "setUIFirstSwitch", moduleName, JsSceneSession::SetUIFirstSwitch);
     BindNativeFunction(env, objValue, "markSystemSceneUIFirst",
         moduleName, JsSceneSession::MarkSystemSceneUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
