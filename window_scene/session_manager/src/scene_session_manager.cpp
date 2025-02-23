@@ -335,20 +335,6 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
 
-    const static std::unordered_map<WindowUIType, std::size_t> SNAPSHOT_CACHE_CAPACITY_MAP = {
-        {WindowUIType::PC_WINDOW,      MAX_SNAPSHOT_IN_RECENT_PC},
-        {WindowUIType::PAD_WINDOW,     MAX_SNAPSHOT_IN_RECENT_PAD},
-        {WindowUIType::PHONE_WINDOW,   MAX_SNAPSHOT_IN_RECENT_PHONE},
-        {WindowUIType::INVALID_WINDOW, MAX_SNAPSHOT_IN_RECENT_PHONE},
-    };
-    std::size_t snapCapacity = SNAPSHOT_CACHE_CAPACITY_MAP.at(WindowUIType::INVALID_WINDOW);
-    if (SNAPSHOT_CACHE_CAPACITY_MAP.find(systemConfig_.windowUIType_) != SNAPSHOT_CACHE_CAPACITY_MAP.end()) {
-        snapCapacity = SNAPSHOT_CACHE_CAPACITY_MAP.at(systemConfig_.windowUIType_);
-    } else {
-        TLOGI(WmsLogTag::WMS_PATTERN, "invalid type: %{public}hhu", systemConfig_.windowUIType_);
-    }
-    snapshotLRUCache_ = std::make_unique<LRUCache>(snapCapacity);
-
     listenerController_ = std::make_shared<SessionListenerController>();
     windowFocusController_ = sptr<WindowFocusController>::MakeSptr();
 }
@@ -425,6 +411,8 @@ void SceneSessionManager::Init()
         std::bind(&SceneSessionManager::UpdateSessionCrossAxisState, this, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3));
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, callback);
+
+    InitSnapshotCache();
 }
 
 void SceneSessionManager::RegisterFlushWindowInfoCallback()
@@ -2512,6 +2500,24 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
     return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
 }
 
+void SceneSessionManager::InitSnapshotCache()
+{
+    const static std::unordered_map<WindowUIType, std::size_t> SNAPSHOT_CACHE_CAPACITY_MAP = {
+        {WindowUIType::PC_WINDOW,      MAX_SNAPSHOT_IN_RECENT_PC},
+        {WindowUIType::PAD_WINDOW,     MAX_SNAPSHOT_IN_RECENT_PAD},
+        {WindowUIType::PHONE_WINDOW,   MAX_SNAPSHOT_IN_RECENT_PHONE},
+        {WindowUIType::INVALID_WINDOW, MAX_SNAPSHOT_IN_RECENT_PHONE},
+    };
+
+    auto uiType = systemConfig_.windowUIType_;
+    snapCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(WindowUIType::INVALID_WINDOW);
+    if (SNAPSHOT_CACHE_CAPACITY_MAP.find(uiType) != SNAPSHOT_CACHE_CAPACITY_MAP.end()) {
+        snapCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(uiType);
+    }
+    TLOGI(WmsLogTag::WMS_PATTERN, "type: %{public}hhu, capacity: %{public}u", uiType, snapCapacity_);
+    snapshotLRUCache_ = std::make_unique<LRUCache>(snapCapacity_);
+}
+
 void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
@@ -2528,13 +2534,19 @@ void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    taskScheduler_->PostAsyncTask([this, persistentId](){
-        if (!snapshotLRUCache_->Visit(persistentId)) {
-            TLOGND(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
-        }
-    }, __func__);
+    if (!snapshotLRUCache_->Visit(persistentId)) {
+        TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
+    }
 }
 
+void SceneSessionManager::RemoveSnapshotFromCache(int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
+    snapshotLRUCache_->Remove(persistentId);
+    if (auto sceneSession = GetSceneSession(persistentId)) {
+        sceneSession->ResetSnapshot();
+    }
+}
 
 WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSession>& sceneSession,
     const bool isDelegator, const bool isToDesktop, const bool isSaveSnapshot)
@@ -2557,10 +2569,9 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             sceneSession->EditSessionInfo().callingTokenId_ = 0;
         }
 
-        if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            PutSnapshotToCache(persistentId);
-        }
-
+        sceneSession->SetSaveSnapshotCallback([this, persistentId]() {
+            this->PutSnapshotToCache(persistentId);
+        });
         sceneSession->BackgroundTask(isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Request background session invalid by %{public}d", persistentId);
@@ -2797,6 +2808,9 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         }
         WindowDestroyNotifyVisibility(sceneSession);
         NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::SINGLE_CLOSE);
+        sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
+            this->RemoveSnapshotFromCache(persistentId);
+        });
         sceneSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
