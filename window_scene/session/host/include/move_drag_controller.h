@@ -112,6 +112,8 @@ public:
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
     void SetInputBarCrossAttr(MoveDirection moveDirection, DisplayId targetDisplayId);
     void SetOriginalDisplayOffset(int32_t offsetX, int32_t offsetY);
+    void SetOriginalPositionZ(float originalPositionZ) { originalPositionZ_ = originalPositionZ; }
+    float GetOriginalPositionZ() const { return originalPositionZ_; }
 
     /*
      * Monitor screen connection status
@@ -320,6 +322,7 @@ private:
     DisplayId hotAreaDisplayId_ = 0;
     int32_t originalDisplayOffsetX_ = 0;
     int32_t originalDisplayOffsetY_ = 0;
+    float originalPositionZ_ = 0.0f;
     std::mutex displayIdSetDuringMoveDragMutex_;
     std::set<uint64_t> displayIdSetDuringMoveDrag_;
     DMRect moveAvailableArea_ = {0, 0, 0, 0};

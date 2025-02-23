@@ -3056,6 +3056,8 @@ void SceneSession::InitializeCrossMoveDrag()
     if (!property) {
         return;
     }
+    auto originalPositionZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
+    moveDragController_->SetOriginalPositionZ(originalPositionZ);
     moveDragController_->InitCrossDisplayProperty(property->GetDisplayId(), parentNode->GetId());
 }
 
@@ -3380,6 +3382,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGD(WmsLogTag::WMS_LAYOUT, "virtual screen, no need to remove cross parent child");
                 continue;
             }
+            movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
             screenSession->GetDisplayNode()->RemoveCrossScreenChild(movedSurfaceNode);
             movedSurfaceNode->SetIsCrossNode(false);
             TLOGD(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64, displayId);
