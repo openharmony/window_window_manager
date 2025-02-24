@@ -2889,14 +2889,10 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
         TryToRecoverFoldDisplayMode(status);
     } else {
-        for (auto screenId : screenIds) {
-            CallRsSetScreenPowerStatusSync(screenId, status);
-        }
+        SetRsSetScreenPowerStatusSync(screenIds, status);
     }
 #else
-    for (auto screenId : screenIds) {
-        CallRsSetScreenPowerStatusSync(screenId, status);
-    }
+    SetRsSetScreenPowerStatusSync(screenIds, status);
 #endif
     HandlerSensor(status, reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
@@ -2909,6 +2905,27 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
     }
 
     return NotifyDisplayPowerEvent(notifyEvent, EventStatus::END, reason);
+}
+
+void ScreenSessionManager::SetRsSetScreenPowerStatusSync(const std::vector<ScreenId>& screenIds,
+    ScreenPowerStatus status)
+{
+    if (!g_isPcDevice) {
+        for (auto screenId : screenIds) {
+            CallRsSetScreenPowerStatusSync(screenId, status);
+        }
+    } else {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER] isPcDevice");
+        for (auto screenId : screenIds) {
+            if (screenId == SCREEN_ID_DEFAULT) {
+                TLOGI(WmsLogTag::DMS, "[UL_POWER] screen id is 0, pass");
+                continue;
+            }
+            CallRsSetScreenPowerStatusSync(screenId, status);
+        }
+        TLOGI(WmsLogTag::DMS, "[UL_POWER] screen 0 power off");
+        CallRsSetScreenPowerStatusSync(SCREEN_ID_DEFAULT, status);
+    }
 }
 
 void ScreenSessionManager::CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds,
