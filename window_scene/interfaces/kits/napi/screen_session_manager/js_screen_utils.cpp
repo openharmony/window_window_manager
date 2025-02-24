@@ -274,7 +274,10 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 
 bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenDirectionInfo& directionInfo)
 {
-    napi_value jsNotifyRotation = nullptr, jsScreenRotation = nullptr, jsRotation = nullptr, jsPhyRotation = nullptr;
+    napi_value jsNotifyRotation = nullptr;
+    napi_value jsScreenRotation = nullptr;
+    napi_value jsRotation = nullptr;
+    napi_value jsPhyRotation = nullptr;
     napi_get_named_property(env, jsObject, "notifyRotation", &jsNotifyRotation);
     napi_get_named_property(env, jsObject, "screenRotation", &jsScreenRotation);
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);
