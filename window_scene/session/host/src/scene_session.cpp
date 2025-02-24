@@ -3116,6 +3116,7 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
     });
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
 {
     if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
@@ -3336,6 +3337,7 @@ bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
