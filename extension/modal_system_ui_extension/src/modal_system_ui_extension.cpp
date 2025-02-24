@@ -112,7 +112,7 @@ bool ModalSystemUiExtension::DialogAbilityConnection::SendWant(const sptr<IRemot
         TLOGE(WmsLogTag::WMS_UIEXT, "write uri failed");
         return false;
     }
-    if (!data.WriteString16(u"flags") || !data.WriteInt32(want_.GetFlags())) {
+    if (!data.WriteString16(u"flags") || !data.WriteUint32(want_.GetFlags())) {
         TLOGE(WmsLogTag::WMS_UIEXT, "write flags failed");
         return false;
     }
