@@ -39,6 +39,7 @@ const std::string ON_SCREEN_DENSITY_CHANGE = "screenDensityChange";
 const std::string ON_HOVER_STATUS_CHANGE_CALLBACK = "hoverStatusChange";
 const std::string ON_SCREEN_CAPTURE_NOTIFY = "screenCaptureNotify";
 const std::string ON_CAMERA_FOLD_STATUS_CHANGE_CALLBACK = "cameraStatusChange";
+const std::string ON_CAMERA_BACKSELFIE_CHANGE_CALLBACK = "cameraBackSelfieChange";
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
@@ -626,7 +627,7 @@ void JsScreenSession::OnScreenRotationLockedChange(bool isLocked, ScreenId scree
         std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
-void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId)
+void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId)
 {
     const std::string callbackType = ON_HOVER_STATUS_CHANGE_CALLBACK;
     WLOGI("Call js callback: %{public}s.", callbackType.c_str());
@@ -637,7 +638,7 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId
  
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
-    auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, env = env_]() {
+    auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, needRotate, env = env_]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnHoverStatusChange");
         if (jsCallbackRef == nullptr) {
             WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
@@ -653,7 +654,7 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId
             WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
             return;
         }
-        napi_value argv[] = { CreateJsValue(env, hoverStatus) };
+        napi_value argv[] = { CreateJsValue(env, hoverStatus), CreateJsValue(env, needRotate) };
         napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
     };
     if (env_ != nullptr) {
@@ -698,6 +699,46 @@ void JsScreenSession::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, 
         }
     } else {
         WLOGFE("OnScreenCaptureNotify: env is nullptr");
+    }
+}
+
+void JsScreenSession::OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId)
+{
+    const std::string callbackType = ON_CAMERA_BACKSELFIE_CHANGE_CALLBACK;
+    WLOGI("Call js callback: %{public}s.", callbackType.c_str());
+    if (mCallback_.count(callbackType) == 0) {
+        WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
+        return;
+    }
+
+    auto jsCallbackRef = mCallback_[callbackType];
+    wptr<ScreenSession> screenSessionWeak(screenSession_);
+    auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, isCameraBackSelfie, env = env_]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "jsScreenSession::OnCameraBackSelfieChange");
+        if (jsCallbackRef == nullptr) {
+            WLOGFE("Call js callback %{public}s failed, jsCallbackRef is null!", callbackType.c_str());
+            return;
+        }
+        auto method = jsCallbackRef->GetNapiValue();
+        if (method == nullptr) {
+            WLOGFE("Call js callback %{public}s failed, method is null!", callbackType.c_str());
+            return;
+        }
+        auto screenSession = screenSessionWeak.promote();
+        if (screenSession == nullptr) {
+            WLOGFE("Call js callback %{public}s failed, screenSession is null!", callbackType.c_str());
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, isCameraBackSelfie) };
+        napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
+    };
+    if (env_ != nullptr) {
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate);
+        if (ret != napi_status::napi_ok) {
+            WLOGFE("OnCameraBackSelfieChange: Failed to SendEvent.");
+        }
+    } else {
+        WLOGFE("OnCameraBackSelfieChange: env is nullptr");
     }
 }
 } // namespace OHOS::Rosen

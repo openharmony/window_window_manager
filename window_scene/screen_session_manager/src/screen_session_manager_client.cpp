@@ -197,14 +197,14 @@ void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, floa
     screenSession->SensorRotationChange(sensorRotation);
 }
 
-void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus)
+void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate)
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");
         return;
     }
-    screenSession->HandleHoverStatusChange(hoverStatus);
+    screenSession->HandleHoverStatusChange(hoverStatus, needRotate);
 }
 
 void ScreenSessionManagerClient::OnScreenOrientationChanged(ScreenId screenId, float screenOrientation)
@@ -225,6 +225,16 @@ void ScreenSessionManagerClient::OnScreenRotationLockedChanged(ScreenId screenId
         return;
     }
     screenSession->SetScreenRotationLocked(isLocked);
+}
+
+void ScreenSessionManagerClient::OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->HandleCameraBackSelfieChange(isCameraBackSelfie);
 }
 
 void ScreenSessionManagerClient::RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener)
