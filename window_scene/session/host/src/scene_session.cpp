@@ -3837,7 +3837,7 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
     }
 }
 
-void SceneSession::SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch)
+void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetUIFirstSwitch");
     auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
