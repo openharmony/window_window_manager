@@ -26,15 +26,17 @@ FfrtQueueHelper::FfrtQueueHelper()
         ffrt::queue_attr().qos(ffrt_qos_user_interactive).max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
 }
 
+FfrtQueueHelper::~FfrtQueueHelper() = default;
+
 bool FfrtQueueHelper::SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout)
 {
-    auto winFuture = std::make_shared<FfrtFuture<bool>>();
-    ffrtQueue_->submit([localTask = std::move(task), winFuture] {
+    auto timeoutFuture = std::make_shared<TimeoutFuture<bool>>();
+    ffrtQueue_->submit([localTask = std::move(task), timeoutFuture] {
         localTask();
-        winFuture->FutureCall(true);
+        timeoutFuture->FutureCall(true);
     });
     bool isTimeout = false;
-    winFuture->GetResult(timeout, isTimeout);
+    timeoutFuture->GetResult(timeout, isTimeout);
     return isTimeout;
 }
 } // namespace OHOS::Rosen

@@ -16,13 +16,17 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
 #define OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
 
-#include "ffrt_future.h"
+#include "timeout_future.h"
+
+namespace ffrt {
+class queue;
+} // namespace ffrt
 
 namespace OHOS::Rosen {
 class FfrtQueueHelper {
 public:
     FfrtQueueHelper();
-    ~FfrtQueueHelper() = default;
+    ~FfrtQueueHelper();
     bool SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout);
 
 private:
