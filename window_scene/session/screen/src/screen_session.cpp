@@ -551,19 +551,35 @@ float ScreenSession::GetValidSensorRotation()
     return currentValidSensorRotation_;
 }
 
-void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus)
+void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
-    HoverStatusChange(hoverStatus);
+    HoverStatusChange(hoverStatus, needRotate);
 }
 
-void ScreenSession::HoverStatusChange(int32_t hoverStatus)
+void ScreenSession::HoverStatusChange(int32_t hoverStatus, bool needRotate)
 {
     for (auto& listener : screenChangeListenerList_) {
         if (!listener) {
             WLOGFE("screenChangeListener is null.");
             continue;
         }
-        listener->OnHoverStatusChange(hoverStatus, screenId_);
+        listener->OnHoverStatusChange(hoverStatus, needRotate, screenId_);
+    }
+}
+
+void ScreenSession::HandleCameraBackSelfieChange(bool isCameraBackSelfie)
+{
+    CameraBackSelfieChange(isCameraBackSelfie);
+}
+
+void ScreenSession::CameraBackSelfieChange(bool isCameraBackSelfie)
+{
+    for (auto& listener : screenChangeListenerList_) {
+        if (!listener) {
+            WLOGFE("screenChangeListener is null.");
+            continue;
+        }
+        listener->OnCameraBackSelfieChange(isCameraBackSelfie, screenId_);
     }
 }
 

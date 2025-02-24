@@ -191,6 +191,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             bool isForShot = data.ReadBool();
             std::vector<uint64_t> missionIds;
             data.ReadUInt64Vector(&missionIds);
+            VirtualScreenType virtualScreenType = static_cast<VirtualScreenType>(data.ReadUint32());
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -207,7 +208,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .surface_ = surface,
                 .flags_ = flags,
                 .isForShot_ = isForShot,
-                .missionIds_ = missionIds
+                .missionIds_ = missionIds,
+                .virtualScreenType_ = virtualScreenType
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
@@ -589,7 +591,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS: {
             FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
-            DMError ret = SetFoldDisplayModeFromJs(displayMode);
+            std::string reason = data.ReadString();
+            DMError ret = SetFoldDisplayModeFromJs(displayMode, reason);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }

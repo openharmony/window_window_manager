@@ -131,7 +131,8 @@ public:
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) {}
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override {}
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override { return DMError::DM_OK; }
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode,
+        std::string reason = "") override { return DMError::DM_OK; }
 
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) override {}
 
