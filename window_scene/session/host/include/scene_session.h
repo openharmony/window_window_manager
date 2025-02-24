@@ -144,7 +144,6 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
-        NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
 
     // func for change window scene pattern property
