@@ -292,6 +292,7 @@ public:
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -640,6 +641,12 @@ private:
     void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
     std::string GetHighlightIdsStr();
+
+    /*
+     * PC Window
+     */
+    WMError ShiftAppWindowPointerEventInner(
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
 
     /**
      * Window Immersive
