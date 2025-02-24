@@ -888,10 +888,10 @@ private:
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
 
-    /*
-     * PC Window Layout
+    /**
+     * Window LayoutFullScreen
      */
-    bool isLayoutFullScreen_ { false };
+     NotifyLayoutFullScreenChangeFunc OnLayoutFullScreenChangeFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
