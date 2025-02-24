@@ -1,0 +1,66 @@
+import("//build/ohos.gni")
+import("//build/ohos/idlize/arkts_idlize.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+
+template("generate_and_build") {
+  forward_variables_from(invoker, "*")
+
+  # input-file
+  # idlize_idl2peer(target_name) {
+  #   input_dir = "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani/idl/"
+  #   output = "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani"
+  #   dirmode = "delete"
+  #   default_package = "window_manager"
+  #   mode = "idl2peer"
+  # }
+
+  ohos_source_set("displayani_sourceset") {
+    include_dirs = [
+     "./src",
+      "./generated/native/",
+      "../../../../../utils/include",
+      "../../../../../interfaces/innerkits/dm"
+    ]
+    deps = [
+      "../../../../../dm:libdm",
+      "../../../../../utils:libwmutil",
+      "../../../../../utils:libwmutil_base",
+    ]
+    external_deps = [
+      "ability_runtime:runtime",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
+      "napi:ace_napi",
+    ]
+    sources = [ "./src/display_ani.cc" ]
+    subsystem_name = "window"
+    part_name = "window_manager"
+  }
+
+  idlize_shared_library(target_name) {
+    generated = "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani/generated"
+    classpath_prefix = "@ohos/display/DISPLAYNativeModule/"
+    relative_install_dir = "module/application"
+    module_install_dir = "module/application"
+    deps =
+       [ "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani:displayani_sourceset" ]
+    subsystem_name = "window"
+    part_name = "window_manager"
+  }
+}
+
+generate_and_build("display_manager_idl") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      cfi_vcall_icall_only = true
+      debug = false
+    }
+}
+
+generate_static_abc("ets2abc_buffer") {
+  arktsconfig = "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani/arktsconfig.json"
+  dst_file = "$target_out_dir/display_test.abc"
+  out_puts = ["$target_out_dir/display_test.abc"]
+}
