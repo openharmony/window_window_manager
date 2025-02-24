@@ -21,6 +21,7 @@
 #include "wm_common_inner.h"
 #include "gtx_input_event_sender.h"
 #include <hitrace_meter.h>
+#include <chrono>
 
 namespace OHOS {
 namespace Rosen {
@@ -29,6 +30,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "InputTr
 }
 WM_IMPLEMENT_SINGLE_INSTANCE(InputTransferStation)
 
+const std::string ADD_INPUT_WINDOW_THREAD = "OS_AddInputWindowThread";
 InputTransferStation::~InputTransferStation()
 {
     std::lock_guard<std::mutex> lock(mtx_);
@@ -139,11 +141,28 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
                     AppExecFwk::EventRunner::Create(INPUT_AND_VSYNC_THREAD));
             }
         }
-        if (eventHandler_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_EVENT, "gjb1 eventHandler is null");
-        }
-        MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
-        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, windowid:%{public}u", windowId);
+        // RK problems because of MMI SA setup after WMS
+        // different codes between Bzone and YZone
+        auto task = [windowId, listener, eventHandler = eventHandler_] () {
+            auto ret = -1;
+            int32_t retryTimes = 0;
+            auto waitMMISaTime = std::chrono::milliseconds(50);
+            while (ret < 0) {
+                ret = MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
+                if (ret < 0) {
+                    TLOGE(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer failed");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(waitMMISaTime));
+                }
+                retryTimes++;
+                if (retryTimes > 200) {
+                    TLOGE(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer failed must be turn");
+                    break;
+                }
+            }
+            TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success, windowid:%{public}u", windowId);
+            
+        };
+        eventHandler_->PostTask(task, "addInputWindow");
         inputListener_ = listener;
     }
 }
