@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_WINDOW_SCENE_FFRT_FUTURE_H
-#define OHOS_ROSEN_WINDOW_SCENE_FFRT_FUTURE_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_TIMEOUT_FUTURE_H
+#define OHOS_ROSEN_WINDOW_SCENE_TIMEOUT_FUTURE_H
 
-#include "ffrt.h"
+#include <condition_variable>
 
 namespace OHOS::Rosen {
 template<class T>
-class FfrtFuture {
+class TimeoutFuture {
 public:
     T GetResult(long timeout, bool &isTimeout)
     {
-        std::unique_lock<ffrt::mutex> lock(mutex_);
+        std::unique_lock<std::mutex> lock(mutex_);
         isTimeout = !conditionVariable_.wait_for(lock,
             std::chrono::milliseconds(timeout), [this] { return IsReady(); });
         return result_;
@@ -37,18 +37,18 @@ public:
 
     void FutureCall(T t)
     {
-        std::unique_lock<ffrt::mutex> lock(mutex_);
+        std::unique_lock<std::mutex> lock(mutex_);
         result_ = t;
         isReady_ = true;
         conditionVariable_.notify_one();
     }
 
 private:
-    ffrt::condition_variable conditionVariable_;
-    ffrt::mutex mutex_;
+    std::condition_variable conditionVariable_;
+    std::mutex mutex_;
     bool isReady_ = false;
     T result_;
 };
 } // namespace OHOS::Rosen
 
-#endif // OHOS_ROSEN_WINDOW_SCENE_FFRT_FUTURE_H
+#endif // OHOS_ROSEN_WINDOW_SCENE_TIMEOUT_FUTURE_H
