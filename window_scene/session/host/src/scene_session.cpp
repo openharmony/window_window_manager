@@ -4879,6 +4879,7 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
         }
         TLOGI(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
         if (session->onLayoutFullScreenChangeFunc_) {
+            session->SetIsLayoutFullScreen(isLayoutFullScreen);
             session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
         }
         return WSError::WS_OK;
