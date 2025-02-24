@@ -288,6 +288,11 @@ private:
     bool gestureBackEnabled_ = true;
 
     /*
+     * Move Drag
+     */
+    bool CalcWindowShouldMove();
+    
+    /*
      * Window Property
      */
     void InitSystemSessionDragEnable();

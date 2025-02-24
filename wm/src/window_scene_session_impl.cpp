@@ -2730,6 +2730,7 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
     return WMError::WM_OK;
 }
 
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
     auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;

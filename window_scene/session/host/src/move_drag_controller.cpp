@@ -99,17 +99,47 @@ WSRect MoveDragController::GetTargetRect() const
 
 void MoveDragController::InitMoveDragProperty()
 {
-    moveDragProperty_ = { -1, -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
+    moveDragProperty_ = { -1, -1, -1, -1, -1, -1, { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
 }
 
-void MoveDragController::SetOriginalValue(int32_t pointerId, int32_t pointerType,
-    int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect)
+void MoveDragController::SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
+    int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY, const WSRect& winRect)
 {
     moveDragProperty_.pointerId_ = pointerId;
     moveDragProperty_.pointerType_ = pointerType;
     moveDragProperty_.originalPointerPosX_ = pointerPosX;
     moveDragProperty_.originalPointerPosY_ = pointerPosY;
+    moveDragProperty_.originalPointerWindowX_ = pointerWindowX;
+    moveDragProperty_.originalPointerWindowY_ = pointerWindowY;
     moveDragProperty_.originalRect_ = winRect;
+}
+
+void MoveDragController::SetMoveInputBarStartDisplayId(DisplayId displayId)
+{
+    moveInputBarStartDisplayId_ = displayId;
+}
+
+DisplayId MoveDragController::GetMoveInputBarStartDisplayId()
+{
+    return moveInputBarStartDisplayId_;
+}
+
+void MoveDragController::SetMoveAvailableArea(const DMRect& area)
+{
+    moveAvailableArea_.posX_ = area.posX_;
+    moveAvailableArea_.posY_ = area.posY_;
+    moveAvailableArea_.width_ = area.width_;
+    moveAvailableArea_.height_ = area.height_;
+}
+
+bool MoveDragController::GetMoveInputBarFlag()
+{
+    return moveInputBarFlag_;
+}
+
+void MoveDragController::SetMoveInputBarFlag(bool moveInputBarFlag)
+{
+    moveInputBarFlag_ = moveInputBarFlag;
 }
 
 WSRect MoveDragController::GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect)
@@ -213,6 +243,10 @@ bool MoveDragController::ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEven
         }
         default:
             break;
+    }
+    if (moveInputBarFlag_ && CalcMoveInputBarRect(pointerEvent, originalRect)) {
+        ProcessSessionRectChange(reason);
+        return ret;
     }
     if (CalcMoveTargetRect(pointerEvent, originalRect)) {
         ProcessSessionRectChange(reason);
@@ -358,6 +392,92 @@ bool MoveDragController::CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEv
             moveDragProperty_.targetRect_.width_, moveDragProperty_.targetRect_.height_);
         return true;
     }
+}
+
+void MoveDragController::AdjustTargetPositionByAvailableArea(int32_t& moveDragFinalX, int32_t& moveDragFinalY)
+{
+    moveDragFinalX = std::max(moveAvailableArea_.posX_, moveDragFinalX);
+    moveDragFinalY = std::max(moveAvailableArea_.posY_, moveDragFinalY);
+
+    int32_t rightBoundsLimit = moveAvailableArea_.posX_ + static_cast<int32_t>(moveAvailableArea_.width_) -
+                               moveDragProperty_.originalRect_.width_;
+    int32_t bottomBoundsLimit = moveAvailableArea_.posY_ + static_cast<int32_t>(moveAvailableArea_.height_) -
+                                moveDragProperty_.originalRect_.height_;
+
+    if (moveDragFinalX >= rightBoundsLimit) {
+        moveDragFinalX = rightBoundsLimit;
+    }
+    if (moveDragFinalY >= bottomBoundsLimit) {
+        moveDragFinalY = bottomBoundsLimit;
+    }
+}
+
+void MoveDragController::CalcMoveForSameDisplay(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                                int32_t& moveDragFinalX, int32_t& moveDragFinalY)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointerId = pointerEvent->GetPointerId();
+    pointerEvent->GetPointerItem(pointerId, pointerItem);
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+    moveDragFinalX = pointerDisplayX - moveDragProperty_.originalPointerWindowX_;
+    moveDragFinalY = pointerDisplayY - moveDragProperty_.originalPointerWindowY_;
+    AdjustTargetPositionByAvailableArea(moveDragFinalX, moveDragFinalY);
+}
+
+void MoveDragController::InitializeMoveDragPropertyNotValid(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                                            const WSRect& originalRect)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointerId = pointerEvent->GetPointerId();
+    pointerEvent->GetPointerItem(pointerId, pointerItem);
+
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+    moveDragProperty_.pointerId_ = pointerId;
+    moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
+    moveDragProperty_.originalPointerPosX_ = pointerDisplayX;
+    moveDragProperty_.originalPointerPosY_ = pointerDisplayY;
+    int32_t pointerWindowX = pointerItem.GetWindowX();
+    int32_t pointerWindowY = pointerItem.GetWindowY();
+    moveDragProperty_.originalRect_ = originalRect;
+    moveDragProperty_.originalRect_.posX_ = pointerDisplayX - pointerWindowX;
+    moveDragProperty_.originalRect_.posY_ = pointerDisplayY - pointerWindowY;
+}
+
+bool MoveDragController::CheckAndInitializeMoveDragProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                                            const WSRect& originalRect)
+{
+    if (moveDragProperty_.isEmpty()) {
+        InitializeMoveDragPropertyNotValid(pointerEvent, originalRect);
+        return false;
+    }
+    return true;
+}
+
+bool MoveDragController::CalcMoveInputBarRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                              const WSRect& originalRect)
+{
+    if (!CheckAndInitializeMoveDragProperty(pointerEvent, originalRect)) {
+        return false;
+    }
+
+    MMI::PointerEvent::PointerItem pointerItem;
+    int32_t pointerId = pointerEvent->GetPointerId();
+    pointerEvent->GetPointerItem(pointerId, pointerItem);
+    DisplayId targetDisplayId = static_cast<DisplayId>(pointerEvent->GetTargetDisplayId());
+    int32_t moveDragFinalX = 0;
+    int32_t moveDragFinalY = 0;
+    int32_t pointerDisplayX = pointerItem.GetDisplayX();
+    int32_t pointerDisplayY = pointerItem.GetDisplayY();
+
+    if (targetDisplayId == moveInputBarStartDisplayId_) {
+        CalcMoveForSameDisplay(pointerEvent, moveDragFinalX, moveDragFinalY);
+    }
+
+    moveDragProperty_.targetRect_ = { moveDragFinalX, moveDragFinalY, originalRect.width_, originalRect.height_ };
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "move rect: %{public}s", moveDragProperty_.targetRect_.ToString().c_str());
+    return true;
 }
 
 bool MoveDragController::EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -783,8 +903,13 @@ void MoveDragController::CalcFirstMoveTargetRect(const WSRect& windowRect, bool 
         originalRect.posX_ = windowRect.posX_;
         originalRect.posY_ = windowRect.posY_;
     }
-    SetOriginalValue(moveTempProperty_.pointerId_, moveTempProperty_.pointerType_,
-        moveTempProperty_.lastDownPointerPosX_, moveTempProperty_.lastDownPointerPosY_, originalRect);
+    SetOriginalMoveDragPos(moveTempProperty_.pointerId_,
+                           moveTempProperty_.pointerType_,
+                           moveTempProperty_.lastDownPointerPosX_,
+                           moveTempProperty_.lastDownPointerPosY_,
+                           moveTempProperty_.lastDownPointerWindowX_,
+                           moveTempProperty_.lastDownPointerWindowY_,
+                           originalRect);
 
     int32_t offsetX = moveTempProperty_.lastMovePointerPosX_ - moveTempProperty_.lastDownPointerPosX_;
     int32_t offsetY = moveTempProperty_.lastMovePointerPosY_ - moveTempProperty_.lastDownPointerPosY_;
