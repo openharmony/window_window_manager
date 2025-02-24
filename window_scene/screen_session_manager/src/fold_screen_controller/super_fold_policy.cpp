@@ -49,7 +49,8 @@ Drawing::Rect SuperFoldPolicy::GetSnapshotRect(DisplayId displayId)
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
     if (displayId == DISPLAY_ID_FAKE) {
         if (fakeInfo != nullptr) {
-            snapshotRect = {0, defaultInfo->GetHeight() + creaseRect.height_, screenWidth, screenHeight};
+            snapshotRect = {0, defaultInfo->GetHeight() + static_cast<int32_t>(creaseRect.height_),
+                screenWidth, screenHeight};
         }
     } else {
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
@@ -85,8 +86,8 @@ DMRect SuperFoldPolicy::GetRecordRect(DisplayId displayId)
     auto fakeInfo =  ScreenSessionManager::GetInstance().GetDisplayInfoById(DISPLAY_ID_FAKE);
     if (displayId == DISPLAY_ID_FAKE) {
         if (fakeInfo != nullptr) {
-            recordRect = {0, defaultInfo->GetHeight() + creaseRect.height_, defaultInfo->GetWidth(),
-                fakeInfo->GetHeight()};
+            recordRect = {0, defaultInfo->GetHeight() + static_cast<int32_t>(creaseRect.height_),
+                defaultInfo->GetWidth(), fakeInfo->GetHeight()};
         }
     } else {
         SuperFoldStatus status = SuperFoldStateManager::GetInstance().GetCurrentStatus();
