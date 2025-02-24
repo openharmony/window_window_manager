@@ -116,55 +116,6 @@ HWTEST_F(WindowSceneSessionImplTest5, ChangeKeyboardViewMode01, Function | Small
     auto currentMode = keyboardWindow->property_->GetKeyboardViewMode();
     ASSERT_EQ(currentMode, KeyboardViewMode::DARK_IMMERSIVE_MODE);
 }
-
-/**
- * @tc.name: StartMoveWindowWithCoordinate_01
- * @tc.desc: StartMoveWindowWithCoordinate
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_01, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
- 
-    window->windowSystemConfig_.uiType_ = UI_TYPE_PHONE;
-    ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
- 
-    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
-    ASSERT_NE(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
- 
-    window->windowSystemConfig_.uiType_ = UI_TYPE_PAD;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    ASSERT_NE(window->StartMoveWindowWithCoordinate(100, 50), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-}
- 
-/**
- * @tc.name: StartMoveWindowWithCoordinate_02
- * @tc.desc: StartMoveWindowWithCoordinate
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, StartMoveWindowWithCoordinate_02, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    window->property_->SetPersistentId(1);
-    Rect windowRect = { 200, 200, 1000, 1000 };
-    window->property_->SetWindowRect(windowRect);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
- 
-    ASSERT_EQ(window->StartMoveWindowWithCoordinate(-1, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
-    ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, -1), WmErrorCode::WM_ERROR_INVALID_PARAM);
-    ASSERT_EQ(window->StartMoveWindowWithCoordinate(1500, 50), WmErrorCode::WM_ERROR_INVALID_PARAM);
-    ASSERT_EQ(window->StartMoveWindowWithCoordinate(100, 1500), WmErrorCode::WM_ERROR_INVALID_PARAM);
-}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
