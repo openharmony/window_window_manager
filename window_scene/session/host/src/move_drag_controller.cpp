@@ -225,6 +225,7 @@ void MoveDragController::InitCrossDisplayProperty(DisplayId displayId, uint64_t 
         moveDragStartDisplayId_, originalDisplayOffsetX_, originalDisplayOffsetY_);
 }
 
+/** @note @window.drag */
 void MoveDragController::ResetCrossMoveDragProperty()
 {
     moveDragProperty_ = {-1, -1, -1, -1, -1, -1, {0, 0, 0, 0}, {0, 0, 0, 0}};
