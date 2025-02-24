@@ -1673,6 +1673,7 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
 
 void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 {
+    sptr<SessionLifeCycleTask> firstLifeCycleTask;
     {
         std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
         if (lifeCycleTaskQueue_.empty()) {
@@ -1691,12 +1692,14 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
         if (lifeCycleTaskQueue_.empty()) {
             return;
         }
+        firstLifeCycleTask = lifeCycleTaskQueue_.front();
     }
-    StartLifeCycleTask(lifeCycleTaskQueue_.front());
+    StartLifeCycleTask(firstLifeCycleTask);
 }
 
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
 {
+    sptr<SessionLifeCycleTask> lifeCycleTask = nullptr;
     {
         std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
         if (!lifeCycleTaskQueue_.empty()) {
@@ -1717,17 +1720,12 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
             TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
             return;
         }
-        sptr<SessionLifeCycleTask> lifeCycleTask =
-            sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
+        lifeCycleTask = sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
         lifeCycleTaskQueue_.push_back(lifeCycleTask);
         TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
             name.c_str(), persistentId_);
-        if (lifeCycleTaskQueue_.size() == 1) {
-            StartLifeCycleTask(lifeCycleTask);
-            return;
-        }
     }
-    StartLifeCycleTask(lifeCycleTaskQueue_.front());
+    StartLifeCycleTask(lifeCycleTask);
 }
 
 void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
