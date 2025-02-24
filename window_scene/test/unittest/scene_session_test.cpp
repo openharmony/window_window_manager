@@ -571,9 +571,7 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info1.bundleName_ = "IsSystemSessionAboveApp01";
     info1.windowType_ = 2122;
 
-    sptr<SceneSession> sceneSession1;
-    sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    EXPECT_NE(sceneSession1, nullptr);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_EQ(true, sceneSession1->IsSystemSessionAboveApp());
 
     SessionInfo info2;
@@ -581,9 +579,7 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info2.bundleName_ = "IsSystemSessionAboveApp02";
     info2.windowType_ = 2104;
 
-    sptr<SceneSession> sceneSession2;
-    sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    EXPECT_NE(sceneSession2, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     ASSERT_EQ(true, sceneSession2->IsSystemSessionAboveApp());
 
     SessionInfo info3;
@@ -591,9 +587,7 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info3.bundleName_ = "SCBDropdownPanel13";
     info3.windowType_ = 2109;
 
-    sptr<SceneSession> sceneSession3;
-    sceneSession3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
-    EXPECT_NE(sceneSession3, nullptr);
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
     ASSERT_EQ(true, sceneSession3->IsSystemSessionAboveApp());
 
     SessionInfo info4;
@@ -601,10 +595,16 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info4.bundleName_ = "IsSystemSessionAboveApp04";
     info4.windowType_ = 2109;
 
-    sptr<SceneSession> sceneSession4;
-    sceneSession4 = sptr<SceneSession>::MakeSptr(info4, nullptr);
-    EXPECT_NE(sceneSession4, nullptr);
+    sptr<SceneSession> sceneSession4 = sptr<SceneSession>::MakeSptr(info4, nullptr);
     ASSERT_EQ(false, sceneSession4->IsSystemSessionAboveApp());
+
+    SessionInfo info5;
+    info5.abilityName_ = "HighZOrderGestureDock";
+    info5.bundleName_ = "SCBGestureDock21";
+    info5.windowType_ = 2106;
+
+    sptr<SceneSession> sceneSession5 = sptr<SceneSession>::MakeSptr(info5, nullptr);
+    ASSERT_EQ(true, sceneSession5->IsSystemSessionAboveApp());
 }
 
 /**
