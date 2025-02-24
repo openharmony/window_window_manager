@@ -4512,36 +4512,27 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 
 void WindowSceneSessionImpl::UpdateDensity()
 {
-    bool needUpdateNewSize = true;
-    DisplayId displayId = property_->GetDisplayId();
-    auto display = SingletonContainer::IsDestroyed() ? nullptr :
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
-    if (display == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "display is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
-            displayId, GetPersistentId());
-        return;
-    }
-    auto displayInfo = display->GetDisplayInfo();
-    if (displayInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "displayInfo is null, displayId: %{public}" PRIu64 ", persistentId: %{public}d",
-            displayId, GetPersistentId());
-        return;
-    }
-    if (windowSystemConfig_.IsPcWindow()) {
-        DMRect availableArea;
-        if (display->GetAvailableArea(availableArea) == DMError::DM_OK) {
-            UpdateNewSizeForPCWindow(displayInfo, availableArea);
-        }
-        needUpdateNewSize = false;
-    }
-    UpdateDensityInner(displayInfo, needUpdateNewSize);
+    UpdateDensityInner(nullptr);
 }
 
-void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info, bool needUpdateNewSize)
+void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
 {
+    if (info == nullptr && windowSystemConfig_.IsPcWindow()) {
+        DisplayId displayId = property_->GetDisplayId();
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+        if (display != nullptr) {
+            if (auto displayInfo = display->GetDisplayInfo()) {
+                DMRect availableArea;
+                display->GetAvailableArea(availableArea);
+                UpdateNewSizeForPCWindow(displayInfo, availableArea);
+            }
+        }
+    }
+
     if (!userLimitsSet_) {
         UpdateWindowSizeLimits();
-        if (needUpdateNewSize) {
+        if (!windowSystemConfig_.IsPcWindow()) {
             UpdateNewSize();
         }
         WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
