@@ -3060,6 +3060,7 @@ void SceneSession::InitializeCrossMoveDrag()
     moveDragController_->InitCrossDisplayProperty(property->GetDisplayId(), parentNode->GetId());
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason)
 {
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
