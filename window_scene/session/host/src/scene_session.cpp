@@ -74,6 +74,7 @@ constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
 constexpr int32_t API_VERSION_16 = 16;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
+constexpr uint32_t DEFAULT_VERSION = 0;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -6850,5 +6851,12 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
     } else {
         maskColorValue_->Set(Rosen::RSColor::FromArgbInt(snapshotMaskColor_));
     }
+uint32_t SceneSession::GetTargetAPIVersion()
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sessionStage_ is nullptr, id: %{public}d", GetPersistentId());
+        return DEFAULT_API_VERSION;
+    }
+    return sessionStage_->GetTargetAPIVersion();
 }
 } // namespace OHOS::Rosen

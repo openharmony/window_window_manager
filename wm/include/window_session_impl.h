@@ -125,7 +125,7 @@ public:
     WMError SetSubWindowModal(bool isModal, ModalityType modalityType = ModalityType::WINDOW_MODALITY) override;
     WMError SetWindowModal(bool isModal) override;
     void SetTargetAPIVersion(uint32_t targetAPIVersion);
-    uint32_t GetTargetAPIVersion() const;
+    uint32_t GetTargetAPIVersion() override;
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
@@ -513,6 +513,7 @@ protected:
      */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
+    bool isDidForeground_ = false;
 
     /*
      * Window Layout
