@@ -18,8 +18,9 @@
 #include <thread>
 #include <chrono>
 #include "mock/mock_session_stage.h"
-#include "session/host/include/pc_fold_screen_controller.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/pc_fold_screen_controller.h"
+#include "session/host/include/sub_session.h"
 #include "wm_math.h"
 
 using namespace testing;
@@ -730,6 +731,22 @@ HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Le
     EXPECT_TRUE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
     manager_.UpdateSystemKeyboardStatus(true);
     EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+
+    // sub session
+    SetHalfFolded();
+    manager_.UpdateSystemKeyboardStatus(false);
+    SessionInfo subInfo;
+    subInfo.abilityName_ = "SubSession";
+    subInfo.bundleName_ = "SubSession";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(subInfo, nullptr);
+    ASSERT_NE(subSession, nullptr);
+    ASSERT_NE(subSession->pcFoldScreenController_, nullptr);
+    subSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    const auto& subController = subSession->pcFoldScreenController_;
+    subSession->property_->SetDecorEnable(true);
+    EXPECT_TRUE(subController->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+    subSession->property_->SetDecorEnable(false);
+    EXPECT_FALSE(subController->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
 }
 
 /**
