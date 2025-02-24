@@ -30,6 +30,8 @@ static const std::string DEFAULT_OFFSET = "0";
 static const std::string SINGLE_DISPLAY = "1";
 static const std::string DUAL_DISPLAY = "2";
 static const std::string SINGLE_POCKET_DISPLAY = "4";
+static const std::string SECONDARY_FOLD_DISPLAY = "6";
+static const size_t THIRD_ANGLE = 2;
 }
 class FoldScreenStateInternel {
 public:
@@ -61,7 +63,7 @@ public:
     static bool IsSingleDisplayFoldDevice()
     {
         // ALTB ccm property conflict with the chip, waiting for chip conflict resolution
-        return !IsDualDisplayFoldDevice() && !IsSingleDisplayPocketFoldDevice();
+        return !IsDualDisplayFoldDevice() && !IsSingleDisplayPocketFoldDevice() && !IsSecondaryDisplayFoldDevice();
     }
 
     static bool IsSingleDisplayPocketFoldDevice()
@@ -117,6 +119,11 @@ public:
         return false;
     }
 
+    static bool IsSecondaryDisplayFoldDevice()
+    {
+        return getFoldType() == SECONDARY_FOLD_DISPLAY;
+    }
+
     static std::vector<std::string> StringSplit(const std::string& str, char delim)
     {
         std::size_t previous = 0;
@@ -139,6 +146,26 @@ public:
     {
         std::regex reg("^([0-9],){3}[0-9]{1}$");
         return std::regex_match(foldTypeStr, reg);
+    }
+
+    template<typename T>
+    static std::string TransVec2Str(const std::vector<T> &vec, const std::string &name)
+    {
+        std::stringstream strs;
+        for (uint32_t i = 0; i < vec.size(); i++) {
+            auto str = vec[i];
+            strs << name;
+            if (i == 0) {
+                strs << "_bc";
+            } else if (i == 1) {
+                strs << "_ab";
+            } else if (i == THIRD_ANGLE) {
+                strs << "_ab_anti";
+            }
+            strs << ": ";
+            strs << std::to_string(str) << " ";
+        }
+        return strs.str();
     }
 };
 } // Rosen

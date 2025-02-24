@@ -482,7 +482,23 @@ DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> m
         return DMError::DM_ERROR_INVALID_PARAM;
     }
     DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
-                                                                             screenGroupId);
+        screenGroupId);
+    if (screenGroupId == SCREEN_ID_INVALID) {
+        WLOGFE("create mirror failed");
+    }
+    return ret;
+}
+
+DMError ScreenManager::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, DMRect mainScreenRegion,
+    ScreenId& screenGroupId)
+{
+    WLOGFI("Make mirror with region for screen: %{public}" PRIu64"", mainScreenId);
+    if (mirrorScreenId.size() > MAX_SCREEN_SIZE) {
+        WLOGFW("Make Mirror failed. MirrorScreenId size bigger than %{public}u.", MAX_SCREEN_SIZE);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(mainScreenId, mirrorScreenId,
+        mainScreenRegion, screenGroupId);
     if (screenGroupId == SCREEN_ID_INVALID) {
         WLOGFE("create mirror failed");
     }
