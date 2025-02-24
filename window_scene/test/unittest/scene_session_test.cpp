@@ -2024,6 +2024,24 @@ HWTEST_F(SceneSessionTest, SetFingerPointerDownStatus, Function | SmallTest | Le
     fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
     EXPECT_EQ(fingerPointerDownStatusList.size(), 0);
 }
+
+/**
+ * @tc.name: SetUIFirstSwitch
+ * @tc.desc: SetUIFirstSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetUIFirstSwitch, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetUIFirstSwitch";
+    info.bundleName_ = "SetUIFirstSwitch";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS);
+}
 } // namespace
 } // Rosen
 } // OHOS
