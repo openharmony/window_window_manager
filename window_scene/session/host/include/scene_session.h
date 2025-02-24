@@ -891,7 +891,7 @@ private:
     /**
      * Window LayoutFullScreen
      */
-     NotifyLayoutFullScreenChangeFunc OnLayoutFullScreenChangeFunc_;
+    NotifyLayoutFullScreenChangeFunc OnLayoutFullScreenChangeFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
