@@ -17,6 +17,7 @@
 #include <hisysevent.h>
 #include <parameters.h>
 #include "session/host/include/scene_session.h"
+#include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
 #include "wm_math.h"
@@ -170,7 +171,12 @@ bool PcFoldScreenController::IsHalfFolded(DisplayId displayId)
 
 bool PcFoldScreenController::IsAllowThrowSlip(DisplayId displayId)
 {
-    return PcFoldScreenManager::GetInstance().IsHalfFolded(displayId) &&
+    auto sceneSession = weakSceneSession_.promote();
+    if (sceneSession == nullptr) {
+        return false;
+    }
+    bool sessionValid = WindowHelper::IsMainWindow(sceneSession->GetWindowType()) || sceneSession->IsDecorEnable();
+    return sessionValid && PcFoldScreenManager::GetInstance().IsHalfFolded(displayId) &&
            !PcFoldScreenManager::GetInstance().HasSystemKeyboard();
 }
 

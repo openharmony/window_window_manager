@@ -1250,6 +1250,18 @@ HWTEST_F(MoveDragControllerTest, GetOriginalPointerPosY, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: GetPointerType
+ * @tc.desc: GetPointerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetPointerType, Function | SmallTest | Level1)
+{
+    int32_t testType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    moveDragController->moveDragProperty_.pointerType_ = testType;
+    ASSERT_EQ(testType, moveDragController->GetPointerType());
+}
+
+/**
  * @tc.name: GetNewAddedDisplayIdsDuringMoveDrag
  * @tc.desc: test function : GetNewAddedDisplayIdsDuringMoveDrag
  * @tc.type: FUNC

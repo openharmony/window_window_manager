@@ -34,7 +34,7 @@ constexpr float VEL_C_THRESHOLD = 1.345; // 1345 dp/s
 constexpr float THROW_BACKTRACING_DURATION = 100.0f;
 constexpr int32_t THROW_BACKTRACING_THRESHOLD = 200;
 constexpr float THROW_SLIP_TIME = 416.0f;
-constexpr float THROW_SLIP_DAMPING_RATIO = 0.9934f; // stiffness = 228, damping = 30
+constexpr float THROW_SLIP_DAMPING_RATIO = 0.7947f; // stiffness = 228, damping = 24
 constexpr float THROW_SLIP_DECELERATION_RATE = 0.002;
 const RSAnimationTimingProtocol THROW_SLIP_TIMING_PROTOCOL(std::round(THROW_SLIP_TIME)); // animation time
 const RSAnimationTimingCurve THROW_SLIP_CURVE =
@@ -382,19 +382,26 @@ bool PcFoldScreenManager::ThrowSlipToOppositeSide(ScreenSide startSide, WSRect& 
     const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] = GetDisplayRects();
     int32_t topLimit = 0;
     int32_t botLimit = 0;
-    if (startSide == ScreenSide::FOLD_B) {
-        // C side
-        rect.posY_ = rect.posY_ + virtualDisplayRect.posY_ - defaultDisplayRect.posY_;
-        topLimit = virtualDisplayRect.posY_;
-        botLimit = virtualDisplayRect.posY_ + virtualDisplayRect.height_ - rect.height_ - botAvoidHeight;
+    const WSRect defaultLimitRect = {
+        defaultDisplayRect.posX_, defaultDisplayRect.posY_ + topAvoidHeight,
+        defaultDisplayRect.width_, defaultDisplayRect.height_ - topAvoidHeight };
+    const WSRect virtualLimitRect = {
+        virtualDisplayRect.posX_, virtualDisplayRect.posY_,
+        virtualDisplayRect.width_, virtualDisplayRect.height_ - botAvoidHeight };
+    const WSRect& startLimitRect = startSide == ScreenSide::FOLD_B ? defaultLimitRect : virtualLimitRect;
+    const WSRect& endLimitRect = startSide == ScreenSide::FOLD_B ? virtualLimitRect : defaultLimitRect;
+    if (rect.height_ < startLimitRect.height_ && rect.height_ < endLimitRect.height_ &&
+        rect.posY_ > startLimitRect.posY_) {
+        float ratio = static_cast<float>(endLimitRect.height_ - rect.height_) /
+            static_cast<float>(startLimitRect.height_ - rect.height_);
+        rect.posY_ = MathHelper::Floor(ratio * static_cast<float>(rect.posY_ - startLimitRect.posY_)) +
+            endLimitRect.posY_;
     } else {
-        // B side
-        rect.posY_ = rect.posY_ + defaultDisplayRect.posY_ - virtualDisplayRect.posY_;
-        topLimit = topAvoidHeight;
-        botLimit = foldCreaseRect.posY_ - rect.height_;
+        rect.posY_ = rect.posY_ + endLimitRect.posY_ - startLimitRect.posY_;
     }
     // top limit first
-    rect.posY_ = std::max(std::min(rect.posY_, botLimit), topLimit);
+    rect.posY_ = std::max(std::min(rect.posY_, endLimitRect.posY_ + endLimitRect.height_ - rect.height_),
+                          endLimitRect.posY_);
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "end posY: %{public}d", rect.posY_);
     return true;
 }

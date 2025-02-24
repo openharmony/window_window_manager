@@ -1393,6 +1393,11 @@ int32_t MoveDragController::GetOriginalPointerPosY()
     return moveDragProperty_.originalPointerPosY_;
 }
 
+int32_t MoveDragController::GetPointerType() const
+{
+    return moveDragProperty_.pointerType_;
+}
+
 void MoveDragController::SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func)
 {
     windowDragHotAreaFunc_ = func;
