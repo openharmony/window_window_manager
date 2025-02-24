@@ -315,6 +315,8 @@ public:
      */
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
     bool IsLayoutFullScreen() const;
+    WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) override;
 
     /**
      * Window Immersive
