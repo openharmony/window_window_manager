@@ -3840,16 +3840,14 @@ void SceneSession::SetSystemSceneForceUIFirst(bool forceUIFirst)
 void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::SetUIFirstSwitch");
-    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    auto surfaceNode = GetSurfaceNode();
-    if (leashWinSurfaceNode == nullptr && surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
+    auto rsTransaction = RSTransactionProxy::GetInstance();
+    if (rsTransaction == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "rsTransaction is nullptr");
         return;
     }
-    auto rsTransaction = RSTransactionProxy::GetInstance();
-    if (rsTransaction != nullptr) {
-        rsTransaction->Begin();
-    }
+    rsTransaction->Begin();
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    auto surfaceNode = GetSurfaceNode();
     if (leashWinSurfaceNode != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " uiFirstSwitch=%{public}d",
             leashWinSurfaceNode->GetName().c_str(), leashWinSurfaceNode->GetId(), uiFirstSwitch);
@@ -3858,12 +3856,10 @@ void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
         TLOGI(WmsLogTag::DEFAULT, "%{public}s %{public}" PRIu64 " uiFirstSwitch=%{public}d",
             surfaceNode->GetName().c_str(), surfaceNode->GetId(), uiFirstSwitch);
         surfaceNode->SetUIFirstSwitch(uiFirstSwitch);
-    }
-    if (rsTransaction != nullptr) {
-        rsTransaction->Commit();
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "rsTransaction is nullptr");
+        TLOGE(WmsLogTag::DEFAULT, "leashWindow and surfaceNode are nullptr");
     }
+    rsTransaction->Commit();
 }
 
 void SceneSession::CloneWindow(NodeId surfaceNodeId)
