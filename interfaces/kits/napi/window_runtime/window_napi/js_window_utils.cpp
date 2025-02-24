@@ -445,18 +445,21 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
 {
     WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr.");
+        return objValue;
+    }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-
     Rect windowRect = window->GetRect();
     napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
     if (windowRectObj == nullptr) {
-        WLOGFE("GetWindowRect failed!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowRect failed!");
     }
     napi_set_named_property(env, objValue, "windowRect", windowRectObj);
 
     napi_value drawableRectObj = GetRectAndConvertToJsValue(env, drawableRect);
     if (drawableRectObj == nullptr) {
-        WLOGFE("GetDrawableRect failed!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetDrawableRect failed!");
     }
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
