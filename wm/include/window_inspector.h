@@ -56,7 +56,6 @@ private:
 
     void ConnectServer();
     bool IsConnectServerSuccess() const;
-    void CloseConnectFromServer();
     bool ProcessArkUIInspectorMessage(const std::string& message, std::string& jsonStr);
     void SendMessageToIDE(const std::string& jsonStr);
 };

@@ -674,7 +674,6 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
         WLOGFW("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     if (auto hostSession = GetHostSession()) {
         hostSession->Disconnect();
     }
