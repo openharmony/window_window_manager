@@ -1211,7 +1211,6 @@ void WindowManagerService::NotifyDisplayStateChange(DisplayId defaultDisplayId, 
          * Set 'InnerInputManager Listener' to MMI, ensure that the listener
          * for move/drag won't be replaced by freeze-display-window
          */
-        WLOGI("gjb5 NotifyDisplayStateChange");
         WindowInnerManager::GetInstance().SetInputEventConsumer();
     } else {
         auto task = [this, defaultDisplayId, displayInfo, displayInfoMap, type]() mutable {
