@@ -894,7 +894,7 @@ private:
     NotifyLayoutFullScreenChangeFunc OnLayoutFullScreenChangeFunc_;
     
     /*
-     PC Window Layout
+     * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
 };
