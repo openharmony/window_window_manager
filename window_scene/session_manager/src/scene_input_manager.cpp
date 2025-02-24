@@ -191,28 +191,20 @@ void SceneInputManager::Init()
 void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& displayInfos)
 {
     std::map<ScreenId, ScreenProperty> screensProperties =
-        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
-    for (auto& iter: screensProperties) {
-        auto screenId = iter.first;
-        auto& screenProperty = iter.second;
-        auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
-        MMI::Direction displayRotation;
-        if (screenSession && screenSession->GetDisplayNode()) {
-            displayRotation = ConvertDegreeToMMIRotation(
-                screenSession->GetDisplayNode()->GetStagingProperties().GetRotation(),
-                static_cast<MMI::DisplayMode>(displayMode));
-        } else {
-            displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-                static_cast<MMI::DisplayMode>(displayMode));
-        }
-        auto screenWidth = screenProperty.GetBounds().rect_.GetWidth();
-        auto screenHeight = screenProperty.GetBounds().rect_.GetHeight();
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.empty()) {
+        TLOGE(WmsLogTag::WMS_EVENT, "screensProperties is empty");
+        return;
+    }
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    for (auto& [screenId, screenProperty] : screensProperties) {
+        auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(screenId);
+        auto screenWidth = screenProperty.GetPhysicalTouchBounds().rect_.GetWidth();
+        auto screenHeight = screenProperty.GetPhysicalTouchBounds().rect_.GetHeight();
         auto transform = Matrix3f::IDENTITY;
         Vector2f scale(screenProperty.GetScaleX(), screenProperty.GetScaleY());
         transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
-            screenProperty.GetPivotY() * screenHeight);
-        transform = transform.Inverse();
+            screenProperty.GetPivotY() * screenHeight).Inverse();
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
@@ -223,9 +215,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .dpi = screenProperty.GetDensity() *  DOT_PER_INCH,
             .name = "display" + std::to_string(screenId),
             .uniq = "default" + std::to_string(screenId),
-            .direction = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-                static_cast<MMI::DisplayMode>(displayMode)),
-            .displayDirection = displayRotation,
+            .direction = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation()),
+            .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
             .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
@@ -455,6 +446,26 @@ void SceneInputManager::PrintWindowInfo(const std::vector<MMI::WindowInfo>& wind
     }
 }
 
+void SceneInputManager::PrintDisplayInfo(const std::vector<MMI::DisplayInfo>& displayInfos)
+{
+    int displayListSize = static_cast<int>(displayInfos.size());
+    std::ostringstream displayListStream;
+    static std::string lastDisplayList = "";
+    for (auto& displayInfo : displayInfos) {
+        displayListStream << displayInfo.id << "|" << displayInfo.x << "|" << displayInfo.y << "|"
+                          << displayInfo.width << "|" << displayInfo.height << "|"
+                          << static_cast<int32_t>(displayInfo.direction) << "|"
+                          << static_cast<int32_t>(displayInfo.displayDirection) << "|"
+                          << static_cast<int32_t>(displayInfo.displayMode) << ",";
+    }
+
+    std::string displayList = displayListStream.str();
+    if (lastDisplayList != displayList) {
+        TLOGI(WmsLogTag::WMS_EVENT, "num:%{public}d,list:%{public}s", displayListSize, displayList.c_str());
+        lastDisplayList = displayList;
+    }
+}
+
 void SceneInputManager::SetUserBackground(bool userBackground)
 {
     TLOGI(WmsLogTag::WMS_MULTI_USER, "userBackground = %{public}d", userBackground);
@@ -525,6 +536,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(const bool forceFlush)
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }
+        PrintDisplayInfo(displayInfos);
         PrintWindowInfo(windowInfoList);
         if (windowInfoList.size() == 0) {
             FlushFullInfoToMMI(displayInfos, windowInfoList);

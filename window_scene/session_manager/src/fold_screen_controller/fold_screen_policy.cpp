@@ -72,8 +72,6 @@ void FoldScreenPolicy::ClearState()
 
 void FoldScreenPolicy::ExitCoordination() {};
 
-void FoldScreenPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) {};
-
 void FoldScreenPolicy::ChangeOnTentMode(FoldStatus currentState) {}
 
 void FoldScreenPolicy::ChangeOffTentMode() {}
@@ -113,4 +111,8 @@ int64_t FoldScreenPolicy::getFoldingElapsedMs()
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(endTimePoint_ - startTimePoint_).count();
     return static_cast<int64_t>(elapsed);
 }
+
+void FoldScreenPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) {};
+
+void FoldScreenPolicy::SetMainScreenRegion(DMRect& mainScreenRegion) {}
 } // namespace OHOS::Rosen

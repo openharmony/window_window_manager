@@ -124,6 +124,8 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, DMRect mainScreenRegion,
+        ScreenId& screenGroupId);
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId);
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds);
