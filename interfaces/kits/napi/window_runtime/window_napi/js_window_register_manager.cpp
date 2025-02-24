@@ -414,8 +414,8 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     RegisterListenerType listenerType = iterCallbackType->second;
     napi_ref result = nullptr;
     napi_create_reference(env, callback, 1, &result);
-    std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
-    napi_add_env_cleanup_hook(env, CleanUp, result);
+    NativeReference* callbackRef(reinterpret_cast<NativeReference*>(result));
+    napi_add_env_cleanup_hook(env, CleanUp, callbackRef);
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef, caseType);
     if (windowManagerListener == nullptr) {
         WLOGFE("New JsWindowListener failed");
