@@ -134,6 +134,7 @@ constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 24;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -2565,6 +2566,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             "isToDesktop:%{public}d isSaveSnapshot:%{public}d",
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
+
+        if (sceneSession->GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+            TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
+            sceneSession->UpdateInteractiveInner(false);
+        }
         sceneSession->SetActive(false);
 
         if (isToDesktop) {
@@ -2816,6 +2822,10 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
             this->RemoveSnapshotFromCache(persistentId);
         });
+        if (sceneSession->GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+            TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
+            sceneSession->UpdateInteractiveInner(false);
+        }
         sceneSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
@@ -4062,6 +4072,10 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         bool isFromUser = false;
+        if (sceneSession->GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+            TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
+            sceneSession->UpdateInteractiveInner(false);
+        }
         int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
             abilitySessionInfo, isFromUser, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode == ERR_OK) {

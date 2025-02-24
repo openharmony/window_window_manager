@@ -1206,6 +1206,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, true);
         NotifyAfterDidForeground(reason);
+        NotifyPcModeResume();
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
@@ -1229,6 +1230,25 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
     }
     property_->SetKeyboardViewMode(mode);
     return Show();
+}
+
+void WindowSceneSessionImpl::NotifyPcModeResume()
+{
+    if (GetTargetAPIVersion() >= API_VERSION_16 && IsPcOrPadFreeMultiWindowMode() && !isColdStart_) {
+        isDidForeground_ = true;
+        NotifyForegroundInteractiveStatus(true);
+    }
+    return;
+}
+
+void WindowSceneSessionImpl::Resume()
+{
+    if (GetTargetAPIVersion() >= API_VERSION_16) {
+        isDidForeground_ = true;
+        isColdStart_ = false;
+        NotifyForegroundInteractiveStatus(true);
+    }
+    return;
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
