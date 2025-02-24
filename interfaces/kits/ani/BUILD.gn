@@ -1,0 +1,10 @@
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+group("ani_packages") {
+  deps = [
+    "display_runtime:ani_display_kit",
+  ]
+}
