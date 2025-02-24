@@ -5128,7 +5128,7 @@ void SceneSession::RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreen
         }
         session->onLayoutFullScreenChangeFunc_ = std::move(callback);
     };
-    PostTask(task,__func__);
+    PostTask(task, __func__);
 }
 
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
