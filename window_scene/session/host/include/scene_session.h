@@ -892,6 +892,11 @@ private:
      * Window LayoutFullScreen
      */
     NotifyLayoutFullScreenChangeFunc OnLayoutFullScreenChangeFunc_;
+    
+    /*
+     PC Window Layout
+     */
+    bool isLayoutFullScreen_ { false };
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
