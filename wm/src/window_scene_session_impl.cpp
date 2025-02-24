@@ -4523,9 +4523,10 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
             SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
         if (display != nullptr) {
             if (auto displayInfo = display->GetDisplayInfo()) {
-                DMRect availableArea;
-                display->GetAvailableArea(availableArea);
-                UpdateNewSizeForPCWindow(displayInfo, availableArea);
+                DMRect availableArea = { 0, 0, 0, 0 };
+                if (display->GetAvailableArea(availableArea) == DMError::DM_OK) {
+                    UpdateNewSizeForPCWindow(displayInfo, availableArea);
+                }
             }
         }
     }
