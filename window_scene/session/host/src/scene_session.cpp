@@ -572,11 +572,11 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
 DMRect SceneSession::CalcRectForStatusBar()
 {
     DMRect statusBarRect = {0, 0, 0, 0};
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback is null");
         return statusBarRect;
     }
-    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
+    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
         if (statusBar == nullptr) {
@@ -611,7 +611,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     }
 
     DMRect statusBarRect = CalcRectForStatusBar();
-    if (systemConfig_.IsPadWindow() || systemConfig_.IsPhoneWindow()) {
+    if (windowSystemConfig_.uiType_ == UI_TYPE_PAD || windowSystemConfig_.uiType_ == UI_TYPE_PHONE) {
         uint32_t statusBarHeight = statusBarRect.height_;
         if (static_cast<int32_t>(statusBarHeight) > availableArea.posY_) {
             availableArea.posY_ = static_cast<int32_t>(statusBarHeight);
