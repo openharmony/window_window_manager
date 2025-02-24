@@ -134,7 +134,7 @@ HWTEST_F(ModalSystemUiExtensionTest, DialogAbilityConnectionSendWant, Function |
     EXPECT_FALSE(connection->SendWant(remoteObject));
     MockMessageParcel::ClearAllErrorFlag();
 
-    MockMessageParcel::SetWriteUInt32ErrorFlag(true);
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
     EXPECT_FALSE(connection->SendWant(remoteObject));
     MockMessageParcel::ClearAllErrorFlag();
 
