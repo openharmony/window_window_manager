@@ -891,7 +891,7 @@ private:
     /**
      * Window LayoutFullScreen
      */
-    NotifyLayoutFullScreenChangeFunc OnLayoutFullScreenChangeFunc_;
+    NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     
     /*
      * PC Window Layout
