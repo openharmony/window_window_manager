@@ -302,7 +302,7 @@ private:
         WindowLimits& newLimits, WindowLimits& customizedLimits, float& virtualPixelRatio);
     void CalculateNewLimitsByRatio(WindowLimits& newLimits, WindowLimits& customizedLimits);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
-    void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr, bool needUpdateNewSize = true);
+    void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);
 
     /*
      * Window Input Event
