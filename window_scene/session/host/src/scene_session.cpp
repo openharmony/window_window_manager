@@ -3861,6 +3861,8 @@ void SceneSession::SetUIFirstSwitch(RSUIFirstSwitch uiFirstSwitch)
     }
     if (rsTransaction != nullptr) {
         rsTransaction->Commit();
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "rsTransaction is nullptr");
     }
 }
 
