@@ -5174,7 +5174,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     return WMError::WM_OK;
 }
 
-void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& displayInfo, DMRect availableArea)
+void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info, const DMRect& availableArea)
 {
     if (availableArea.IsUninitializedRect()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "availableArea is uninitialized");
@@ -5186,7 +5186,7 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& d
     int32_t displayWidth = availableArea.width_;
     int32_t displayHeight = availableArea.height_;
     float currVpr = virtualPixelRatio_;
-    float newVpr = GetVirtualPixelRatio(displayInfo);
+    float newVpr = GetVirtualPixelRatio(info);
     Rect windowRect = GetRect();
     int32_t left = windowRect.posX_;
     int32_t top = windowRect.posY_;
