@@ -37,6 +37,7 @@
 #include "window_adapter.h"
 #include "window_agent.h"
 #include "window_helper.h"
+#include "window_inspector.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "wm_common_inner.h"
@@ -1442,6 +1443,7 @@ WMError WindowImpl::Create(uint32_t parentId, const std::shared_ptr<AbilityRunti
     state_ = WindowState::STATE_CREATED;
     InputTransferStation::GetInstance().AddInputWindow(self);
     needRemoveWindowInputChannel_ = true;
+    RegisterWindowInspectorCallback();
     return ret;
 }
 
@@ -1603,6 +1605,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener)
     }
 
     WLOGI("Window %{public}u Destroy", property_->GetWindowId());
+    WindowInspector::GetInstance().UnregisterGetWMSWindowListCallback(GetWindowId());
     WMError ret = WMError::WM_OK;
     if (needNotifyServer) {
         NotifyBeforeDestroy(GetWindowName());
@@ -4424,6 +4427,21 @@ WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double text
     property_->SetTextFieldHeight(textFieldHeight);
     UpdateProperty(PropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     return WMError::WM_OK;
+}
+
+void WindowImpl::RegisterWindowInspectorCallback()
+{
+    auto getWMSWindowListCallback = [weakThis = wptr(this)]() -> std::optional<WindowListInfo> {
+        if (auto window = weakThis.promote()) {
+            return std::make_optional<WindowListInfo>({
+                window->GetWindowName(), window->GetWindowId(),
+                static_cast<uint32_t>(window->GetType()), window->GetRect()
+            });
+        } else {
+            return std::nullopt;
+        }
+    };
+    WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
 } // namespace Rosen
 } // namespace OHOS
