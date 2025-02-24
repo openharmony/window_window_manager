@@ -3938,6 +3938,10 @@ bool SceneSession::IsSystemSessionAboveApp() const
         sessionInfo_.bundleName_.find("SCBDropdownPanel") != std::string::npos) {
         return true;
     }
+    if (windowType == WindowType::WINDOW_TYPE_FLOAT &&
+        sessionInfo_.bundleName_.find("SCBGestureDock") != std::string::npos) {
+        return true;
+    }
     return false;
 }
 
