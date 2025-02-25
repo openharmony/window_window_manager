@@ -58,7 +58,7 @@ public:
 
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
-    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1) override;
     void RegisterApplicationStateObserver() override;
 
 private:
