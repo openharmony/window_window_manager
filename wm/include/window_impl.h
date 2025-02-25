@@ -295,6 +295,7 @@ public:
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void PerformBack() override;
     void NotifyForegroundInteractiveStatus(bool interactive);
+    void NotifyMMIServiceOnline(uint32_t winId);
     virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
@@ -408,6 +409,7 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     void NotifyDragEvent(const PointInfo& point, DragEvent event);
+    void ResetInputWindow(uint32_t winId);
     void DestroyDialogWindow();
     void DestroyFloatingWindow();
     void DestroySubWindow();
