@@ -543,9 +543,9 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
         rectChangeReason = JS_SIZE_CHANGE_REASON.at(reason);
     }
-    if (rectChangeReason == RectChangeReason::DRAG_END && currentReason_ == RectChangeReason::MOVE) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event: last change reason: %{public}d, "
-            "this window change reason: %{public}d", currentReason_, reason);
+    if (rectChangeReason == RectChangeReason::DRAG_END &&
+        currentReason_ != RectChangeReason::DRAG_START && currentReason_ != RectChangeReason::DRAG) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event");
         rectChangeReason = RectChangeReason::MOVE;
     }
     // js callback should run in js thread
