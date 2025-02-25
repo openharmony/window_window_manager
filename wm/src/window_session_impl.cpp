@@ -3252,7 +3252,7 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
         handler_->PostTask([weak = wptr(this), where] {
             auto window = weak.promote();
             if (window == nullptr) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
                 return;
             }
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);

@@ -1234,11 +1234,12 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
 
 void WindowSceneSessionImpl::NotifyPcModeResume()
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "api version %{public}d, IsPcMode {public}d, isColdStart %{public}d",
+        GetTargetAPIVersion(), IsPcOrPadFreeMultiWindowMode, isColdStart_);
     if (GetTargetAPIVersion() >= API_VERSION_16 && IsPcOrPadFreeMultiWindowMode() && !isColdStart_) {
         isDidForeground_ = true;
         NotifyForegroundInteractiveStatus(true);
     }
-    return;
 }
 
 void WindowSceneSessionImpl::Resume()
@@ -1246,9 +1247,9 @@ void WindowSceneSessionImpl::Resume()
     if (GetTargetAPIVersion() >= API_VERSION_16) {
         isDidForeground_ = true;
         isColdStart_ = false;
+        TLOGI(WmsLogTag::WMS_LIFE, "in");
         NotifyForegroundInteractiveStatus(true);
     }
-    return;
 }
 
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
