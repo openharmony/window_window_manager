@@ -203,6 +203,7 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
+    void SetLowTemp(LowTempMode lowTemp);
 
     /**
      * On/Off screen
@@ -591,6 +592,9 @@ private:
     void SetExtendPixelRatio(const float& dpi);
     void CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
+
+    LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
+    std::mutex lowTempMutex_;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

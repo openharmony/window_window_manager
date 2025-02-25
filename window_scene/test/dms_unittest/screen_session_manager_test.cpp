@@ -3581,6 +3581,20 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
         EXPECT_EQ(FoldStatus::UNKNOWN, status);
     }
 }
+
+/**
+ * @tc.name: SetLowTemp
+ * @tc.desc: SetLowTemp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetLowTemp, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetLowTemp(LowTempMode::LowTempOff);
+    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LowTempOff);
+    ssm_->SetLowTemp(LowTempMode::LowTempOn);
+    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LowTempOn);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

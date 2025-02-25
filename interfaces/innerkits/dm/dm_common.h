@@ -435,6 +435,15 @@ enum class MultiScreenMode : uint32_t {
     SCREEN_EXTEND = 1,
 };
 
+/**
+ * @brief Enumerates the low temp mode.
+ */
+enum class LowTempMode: int32_t {
+    UNKNOWN = -1,
+    LowTempOff = 0,
+    LowTempOn = 1,
+};
+
 struct Point {
     int32_t posX_;
     int32_t posY_;
