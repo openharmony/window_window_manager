@@ -99,6 +99,8 @@ constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
 constexpr int32_t RES_FAILURE_FOR_PRIVACY_WINDOW = -2;
 constexpr int32_t REMOVE_DISPLAY_MODE = 0;
 constexpr int32_t IRREGULAR_REFRESH_RATE_SKIP_THRETHOLD = 10;
+constexpr uint32_t MAX_RETRY_NUM = 3;
+constexpr uint32_t RETRY_WAIT_MS = 100;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
@@ -2197,6 +2199,48 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
     std::ostringstream oss;
     oss << "GetScreenPower state:" << static_cast<uint32_t>(state) << " screenId:" << static_cast<uint64_t>(screenId);
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    screenEventTracker_.RecordEvent(oss.str());
+    return state;
+}
+
+ScreenPowerState ScreenSessionManager::GetScreenPower()
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return ScreenPowerState::INVALID_STATE;
+    }
+    ScreenPowerState state = ScreenPowerState::INVALID_STATE;
+
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetScreenPower");
+    if (!g_foldScreenFlag || FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance()
+            .GetScreenPowerStatus(GetDefaultScreenId()));
+    } else {
+        uint32_t retryTimes = 0;
+        bool res = false;
+        while (retryTimes < MAX_RETRY_NUM) {
+            if (foldScreenController_->GetCurrentScreenId() != SCREEN_ID_INVALID) {
+                TLOGI(WmsLogTag::DMS, "current screenId is %{public}" PRIu64"",
+                    foldScreenController_->GetCurrentScreenId());
+                res = true;
+                break;
+            }
+            retryTimes++;
+            TLOGI(WmsLogTag::DMS, "not find screen, retry %{public}u times", retryTimes);
+            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
+        }
+        if (retryTimes >= MAX_RETRY_NUM || !res) {
+            TLOGE(WmsLogTag::DMS, "retryTimes overflow, failed!");
+            return ScreenPowerState::INVALID_STATE;
+        }
+        state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance()
+            .GetScreenPowerStatus(foldScreenController_->GetCurrentScreenId()));
+    }
+
+    std::ostringstream oss;
+    oss << "GetScreenPower state:" << static_cast<uint32_t>(state);
+    TLOGW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     screenEventTracker_.RecordEvent(oss.str());
     return state;
 }
