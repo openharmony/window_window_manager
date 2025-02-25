@@ -5175,46 +5175,44 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& i
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "fullscreen could not update new size, Id: %{public}u", GetPersistentId());
         return;
     }
-    int32_t displayWidth = availableArea.width_;
-    int32_t displayHeight = availableArea.height_;
     float currVpr = virtualPixelRatio_;
     float newVpr = GetVirtualPixelRatio(info);
-    Rect windowRect = GetRect();
+    const Rect& windowRect = GetRect();
     int32_t left = windowRect.posX_;
     int32_t top = windowRect.posY_;
     uint32_t width = windowRect.width_;
     uint32_t height = windowRect.height_;
-    uint32_t statusBarHeight = GetStatusBarHeight();
-    bool needMove = false;
+    const uint32_t statusBarHeight = GetStatusBarHeight();
     if (!MathHelper::NearZero(currVpr - newVpr) && !MathHelper::NearZero(currVpr)) {
-        width = width * newVpr / currVpr;
-        height = height * newVpr / currVpr;
-        if (width > displayWidth) {
-            width = displayWidth;
+        width = static_cast<uint32_t>(width * newVpr / currVpr);
+        height = static_cast<uint32_t>(height * newVpr / currVpr);
+        if (width > availableArea.width_) {
+            width = availableArea.width_;
         }
-        if (height > (displayHeight - statusBarHeight)) {
-            height = displayHeight - statusBarHeight;
+        if (height > (availableArea.height_ - statusBarHeight)) {
+            height = availableArea.height_ - statusBarHeight;
         }
-        needMove = top < statusBarHeight || left < 0 || top + height > displayHeight ||
-            left + width > displayWidth;
-        if (top < statusBarHeight) {
-            top = statusBarHeight;
+        bool needMove = top < static_cast<int32_t>(statusBarHeight) || left < 0 ||
+            top > static_cast<int32_t>(availableArea.height_ - height) ||
+            left > static_cast<int32_t>(availableArea.width_ - width);
+        if (top < static_cast<int32_t>(statusBarHeight)) {
+            top = static_cast<int32_t>(statusBarHeight);
         }
         if (left < 0) {
             left = 0;
         }
-        if (top + height > displayHeight) {
-            top = displayHeight - height;
+        if (top > static_cast<int32_t>(availableArea.height_ - height)) {
+            top = static_cast<int32_t>(availableArea.height_ - height);
         }
-        if (left + width > displayWidth) {
-            left = displayWidth - width;
+        if (left > static_cast<int32_t>(availableArea.width_ - width)) {
+            left = static_cast<int32_t>(availableArea.width_ - width);
         }
         Resize(width, height);
         if (needMove) {
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "MoveTo left: %{public}u, top: %{public}u, Id: %{public}u", left, top,
-                GetPersistentId());
             MoveTo(left, top);
         }
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, height: %{public}u, Id: %{public}u", left, top,
+            GetPersistentId());
     }
 }
 } // namespace Rosen
