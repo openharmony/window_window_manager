@@ -1700,7 +1700,6 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSizeForPCWindow01, Function | Sma
     window->property_->SetRequestRect(windowRect);
     window->property_->SetWindowRect(windowRect);
     window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
-    window->UpdateDensityInner(displayInfo);
     Rect result = window->property_->GetRequestRect();
     windowRect = { 10, 10, 400, 300 };
     ASSERT_EQ(windowRect, result);
@@ -1713,7 +1712,6 @@ HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSizeForPCWindow01, Function | Sma
     window->property_->SetRequestRect(windowRect);
     window->property_->SetWindowRect(windowRect);
     window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
-    window->UpdateDensityInner(displayInfo);
     result = window->property_->GetRequestRect();
     windowRect = { 0, 0, 1000, 800 };
     ASSERT_EQ(windowRect, result);
