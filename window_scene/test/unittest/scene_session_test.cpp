@@ -1391,6 +1391,42 @@ HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: CalcRectForStatusBar
+ * @tc.desc: CalcRectForStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CalcRectForStatusBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalcRectForStatusBar";
+    info.bundleName_ = "CalcRectForStatusBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t width = sceneSession->CalcRectForStatusBar().width_;
+    uint32_t height = sceneSession->CalcRectForStatusBar().height_;
+    EXPECT_EQ(width, 0);
+    EXPECT_EQ(height, 0);
+}
+
+/**
+ * @tc.name: InitializeMoveInputBar
+ * @tc.desc: InitializeMoveInputBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, InitializeMoveInputBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "InitializeMoveInputBar";
+    info.bundleName_ = "InitializeMoveInputBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto property = sceneSession->GetSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    property->SetDisplayId(1);
+
+    auto result = sceneSession->InitializeMoveInputBar();
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: OnSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC

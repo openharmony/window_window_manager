@@ -51,8 +51,9 @@ public:
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
     WSRect GetTargetRect() const;
     void InitMoveDragProperty();
-    void SetOriginalValue(int32_t pointerId, int32_t pointerType,
-        int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
+    void SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
+        int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
+        const WSRect& winRect);
     void SetAspectRatio(float ratio);
     bool ConsumeMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
@@ -65,6 +66,11 @@ public:
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
+    bool GetMoveInputBarFlag();
+    DisplayId GetMoveInputBarStartDisplayId();
+    void SetMoveInputBarStartDisplayId(DisplayId displayId);
+    void SetMoveAvailableArea(const DMRect& area);
+    void SetMoveInputBarFlag(bool moveInputBarFlag);
 
     /*
      * PC Window Layout
@@ -79,6 +85,10 @@ private:
         int32_t pointerType_ = -1;
         int32_t originalPointerPosX_ = -1;
         int32_t originalPointerPosY_ = -1;
+        // the x coordinate of the pointer related to the active window
+        int32_t originalPointerWindowX_ = -1;
+        // the y coordinate of the pointer related to the active window
+        int32_t originalPointerWindowY_ = -1;
         WSRect originalRect_ = { 0, 0, 0, 0 };
         WSRect targetRect_ = { 0, 0, 0, 0 };
 
@@ -108,6 +118,14 @@ private:
     constexpr static float NEAR_ZERO = 0.001f;
 
     bool CalcMoveTargetRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    bool CalcMoveInputBarRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    void AdjustTargetPositionByAvailableArea(int32_t& moveDragFinalX, int32_t& moveDragFinalY);
+    void InitializeMoveDragPropertyNotValid(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                            const WSRect& originalRect);
+    bool CheckAndInitializeMoveDragProperty(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                            const WSRect& originalRect);
+    void CalcMoveForSameDisplay(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+                                int32_t& moveDragFinalX, int32_t& moveDragFinalY);
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect,
         const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
     AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY, int32_t sourceType, const WSRect& rect);
@@ -169,6 +187,9 @@ private:
     uint32_t mouseStyleID_ = 0;
     DragType dragType_ = DragType::DRAG_UNDEFINED;
     MoveTempProperty moveTempProperty_;
+    DMRect moveAvailableArea_ = {0, 0, 0, 0};
+    DisplayId moveInputBarStartDisplayId_ = DISPLAY_ID_INVALID;
+    bool moveInputBarFlag_ = false;
 
     void UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ProcessWindowDragHotAreaFunc(bool flag, const SizeChangeReason& reason);

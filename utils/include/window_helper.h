@@ -164,6 +164,12 @@ public:
             ((type == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) && (mode == WindowMode::WINDOW_MODE_FULLSCREEN));
     }
 
+    static inline bool IsInputWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+                type == WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    }
+    
     static inline bool IsFullScreenWindow(WindowMode mode)
     {
         return mode == WindowMode::WINDOW_MODE_FULLSCREEN;
