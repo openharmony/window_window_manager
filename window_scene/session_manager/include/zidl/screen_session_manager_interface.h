@@ -90,6 +90,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override { return false; }
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override { return false; }
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override { return ScreenPowerState::INVALID_STATE; }
+    virtual ScreenPowerState GetScreenPower() override { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) override { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) override {return DisplayState::UNKNOWN; }
     virtual bool TryToCancelScreenOff() override { return false; }

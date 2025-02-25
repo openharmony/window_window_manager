@@ -30,6 +30,7 @@ static const std::string DEFAULT_OFFSET = "0";
 static const std::string SINGLE_DISPLAY = "1";
 static const std::string DUAL_DISPLAY = "2";
 static const std::string SINGLE_POCKET_DISPLAY = "4";
+static const std::string SUPER_FOLD_DISPLAY = "5";
 static const std::string SECONDARY_FOLD_DISPLAY = "6";
 static const size_t THIRD_ANGLE = 2;
 }
@@ -76,6 +77,18 @@ public:
             return false;
         }
         return foldTypes[0] == SINGLE_POCKET_DISPLAY;
+    }
+
+    static bool IsSuperFoldDisplayDevice()
+    {
+        if (!IsValidFoldType(g_foldScreenType)) {
+            return false;
+        }
+        std::vector<std::string> foldTypes = StringSplit(g_foldScreenType, ',');
+        if (foldTypes.empty()) {
+            return false;
+        }
+        return foldTypes[0] == SUPER_FOLD_DISPLAY;
     }
 
     static std::vector<std::string> GetPhyRotationOffset()
