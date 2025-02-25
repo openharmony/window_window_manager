@@ -27,8 +27,7 @@ namespace OHOS {
 namespace Rosen {
 using Utils = WindowTestUtils;
 
-class WindowStatusChangeTest : public testing::Test
-{
+class WindowStatusChangeTest : public testing::Test {
 public:
     void SetUp() override;
     void TearDown() override;
