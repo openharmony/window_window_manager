@@ -611,7 +611,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     }
 
     DMRect statusBarRect = CalcRectForStatusBar();
-    if (windowSystemConfig_.uiType_ == UI_TYPE_PAD || windowSystemConfig_.uiType_ == UI_TYPE_PHONE) {
+    if (systemConfig_.uiType_ == UI_TYPE_PAD || systemConfig_.uiType_ == UI_TYPE_PHONE) {
         uint32_t statusBarHeight = statusBarRect.height_;
         if (static_cast<int32_t>(statusBarHeight) > availableArea.posY_) {
             availableArea.posY_ = static_cast<int32_t>(statusBarHeight);
@@ -628,7 +628,7 @@ WSError SceneSession::SetMoveAvailableArea(DisplayId displayId)
     }
 
     bool isFoldable = ScreenSessionManagerClient::GetInstance().IsFoldable();
-    if (systemConfig_.IsPhoneWindow() && isFoldable && statusBarRect.width_) {
+    if (systemConfig_.uiType_ == UI_TYPE_PHONE && isFoldable && statusBarRect.width_) {
         availableArea.width_ = statusBarRect.width_;
     }
     TLOGD(WmsLogTag::WMS_KEYBOARD,
@@ -2548,7 +2548,7 @@ bool SceneSession::IsMovable()
         return false;
     }
 
-    bool windowIsMovable = moveDragController_ && moveDragController_->GetStartDragFlag() &&
+    bool windowIsMovable = moveDragController_ && !moveDragController_->GetStartDragFlag() &&
                            isMovableWindowType() && moveDragController_->HasPointDown();
     auto property = GetSessionProperty();
     if (property->GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR &&
@@ -2557,9 +2557,9 @@ bool SceneSession::IsMovable()
     }
     if (!windowIsMovable) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Window is not movable, id: %{public}d, startDragFlag: %{public}d, "
-            "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d, movable: %{public}d",
+            "isFocused: %{public}d, movableWindowType: %{public}d, hasPointDown: %{public}d",
             GetPersistentId(), moveDragController_->GetStartDragFlag(), IsFocused(), IsMovableWindowType(),
-            moveDragController_->HasPointDown(), moveDragController_->GetMovable());
+            moveDragController_->HasPointDown());
         return false;
     }
     return true;
