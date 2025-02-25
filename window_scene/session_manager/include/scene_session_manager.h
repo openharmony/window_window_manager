@@ -632,7 +632,8 @@ private:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(int32_t persistentId);
     WMError UpdateTopmostProperty(const sptr<WindowSessionProperty>& property, const sptr<SceneSession>& sceneSession);
-    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
+    std::vector<sptr<SceneSession>> GetSceneSessionVectorByTypeAndDisplayId(WindowType type, uint64_t displayId);
+    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
     void UpdateOccupiedAreaIfNeed(const int32_t& persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
     void UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,

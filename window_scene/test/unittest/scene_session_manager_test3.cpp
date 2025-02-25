@@ -525,17 +525,17 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionByName, Function | SmallTest |
 }
 
 /**
- * @tc.name: GetSceneSessionVectorByType
+ * @tc.name: GetSceneSessionVectorByTypeAndDisplayId
  * @tc.desc: SceneSesionManager get scene session vector by type
  * @tc.type: FUNC
 */
-HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByType, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByTypeAndDisplayId, Function | SmallTest | Level3)
 {
     int ret = 0;
     uint64_t displayId = -1ULL;
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
+    ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     displayId = 1;
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
+    ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     SessionInfo info;
     info.abilityName_ = "test1";
     info.bundleName_ = "test2";
@@ -546,15 +546,15 @@ HWTEST_F(SceneSessionManagerTest3, GetSceneSessionVectorByType, Function | Small
         return;
     }
     ssm_->sceneSessionMap_.insert({1, sceneSession});
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
+    ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
     ASSERT_NE(nullptr, property);
     sceneSession->SetSessionProperty(property);
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
+    ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
+    ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     property->SetDisplayId(1);
-    ssm_->GetSceneSessionVectorByType(WindowType::APP_MAIN_WINDOW_BASE, displayId);
+    ssm_->GetSceneSessionVectorByTypeAndDisplayId(WindowType::APP_MAIN_WINDOW_BASE, displayId);
     ssm_->sceneSessionMap_.erase(1);
     ASSERT_EQ(ret, 0);
 }
