@@ -1398,6 +1398,13 @@ void WindowSceneSessionImpl::SetDefaultProperty()
             property_->SetFocusable(false);
             break;
         }
+        case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetTouchable(false);
+            property_->SetFocusable(false);
+            SetAlpha(0);
+            break;
+        }
         default:
             break;
     }
