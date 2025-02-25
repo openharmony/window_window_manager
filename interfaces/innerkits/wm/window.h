@@ -1062,6 +1062,13 @@ public:
                          bool withFocus = true) { return WMError::WM_OK; }
 
     /**
+     * @brief resume window
+     *
+     * @return WMError
+     */
+    virtual WMError Resume() { return WMError::WM_OK; }
+
+    /**
      * @brief Hide window
      *
      * @param reason Reason for window state change.
