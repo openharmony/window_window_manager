@@ -60,8 +60,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
     const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
 
-    bool isRegisteredMMI_ { false };  
-    bool firstTimeRegister_ { true };  
+    bool isRegisteredMMI_ { false };
 };
 
 class InputEventListener : public MMI::IInputEventConsumer {
