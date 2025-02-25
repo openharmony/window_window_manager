@@ -6851,6 +6851,8 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
     } else {
         maskColorValue_->Set(Rosen::RSColor::FromArgbInt(snapshotMaskColor_));
     }
+}
+
 uint32_t SceneSession::GetTargetAPIVersion()
 {
     if (!sessionStage_) {
