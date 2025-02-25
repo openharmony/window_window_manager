@@ -4915,11 +4915,10 @@ WSError SceneSession::OnLayoutFullScreenChange(bool isLayoutFullScreen)
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT, "OnLayoutFullScreenChange, isLayoutFullScreen: %{public}d",
-            isLayoutFullScreen);
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "isLayoutFullScreen: %{public}d", isLayoutFullScreen);
+        if (session->onLayoutFullScreenChangeFunc_) {
             session->SetIsLayoutFullScreen(isLayoutFullScreen);
-            session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
+            session->onLayoutFullScreenChangeFunc_(isLayoutFullScreen);
         }
         return WSError::WS_OK;
     };
@@ -5158,6 +5157,19 @@ void SceneSession::RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimat
     PostTask(task, __func__);
 }
 
+void SceneSession::RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback)
+{
+    auto task = [weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "session is null");
+            return;
+        }
+        session->onLayoutFullScreenChangeFunc_ = std::move(callback);
+    };
+    PostTask(task, __func__);
+}
+
 WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config)
 {
     if (forceSplitFunc_ == nullptr) {
@@ -5214,7 +5226,6 @@ void SceneSession::UnregisterSessionChangeListeners()
             session->sessionChangeCallback_->OnSessionEvent_ = nullptr;
             session->sessionChangeCallback_->onRaiseAboveTarget_ = nullptr;
             session->sessionChangeCallback_->onSetLandscapeMultiWindowFunc_ = nullptr;
-            session->sessionChangeCallback_->onLayoutFullScreenChangeFunc_ = nullptr;
         }
         session->Session::UnregisterSessionChangeListeners();
     };

@@ -146,7 +146,6 @@ public:
         NotifySessionEventFunc OnSessionEvent_;
         NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
         NotifyLandscapeMultiWindowSessionFunc onSetLandscapeMultiWindowFunc_;
-        NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
     };
 
     // func for change window scene pattern property
@@ -431,7 +430,12 @@ public:
     void RegisterIsCustomAnimationPlayingCallback(NotifyIsCustomAnimationPlayingCallback&& callback);
     void RegisterDefaultAnimationFlagChangeCallback(NotifyWindowAnimationFlagChangeFunc&& callback);
 
-    /*
+    /**
+     * Window layoutFullScreen
+     */
+    void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
+
+    /**
      * Window Visibility
      */
     void SetNotifyVisibleChangeFunc(const NotifyVisibleChangeFunc& func);
@@ -888,6 +892,11 @@ private:
     NotifyIsCustomAnimationPlayingCallback onIsCustomAnimationPlaying_;
     NotifyWindowAnimationFlagChangeFunc onWindowAnimationFlagChange_;
 
+    /**
+     * Window LayoutFullScreen
+     */
+    NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+    
     /*
      * PC Window Layout
      */
