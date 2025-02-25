@@ -251,7 +251,8 @@ void SingleDisplaySensorPocketFoldStateManager::RegisterApplicationStateObserver
     }
 }
 
-void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy)
+void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent,
+    sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall)
 {
     bool isNotRepeated = isTent ^ IsTentMode();
     if (!isNotRepeated) {
@@ -270,7 +271,12 @@ void SingleDisplaySensorPocketFoldStateManager::HandleTentChange(bool isTent, sp
         HandleSensorChange(FoldStatus::FOLDED, currentAngle_, foldScreenPolicy);
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
     } else {
-        FoldStatus nextState = GetNextFoldState(currentAngle_, currentHall_);
+        FoldStatus nextState = FoldStatus::UNKNOWN;
+        if (hall == -1) {
+            nextState = GetNextFoldState(currentAngle_, currentHall_);
+        } else {
+            nextState = GetNextFoldState(currentAngle_, hall);
+        }
         HandleSensorChange(nextState, currentAngle_, foldScreenPolicy);
         ReportTentStatusChange(ReportTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();

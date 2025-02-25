@@ -193,13 +193,13 @@ bool FoldScreenController::GetTentMode()
     return sensorFoldStateManager_->IsTentMode();
 }
 
-void FoldScreenController::OnTentModeChanged(bool isTentMode)
+void FoldScreenController::OnTentModeChanged(bool isTentMode, int32_t hall)
 {
     if (sensorFoldStateManager_ == nullptr) {
         TLOGW(WmsLogTag::DMS, "OnTentModeChanged: sensorFoldStateManager_ is null");
         return;
     }
-    return sensorFoldStateManager_->HandleTentChange(isTentMode, foldScreenPolicy_);
+    return sensorFoldStateManager_->HandleTentChange(isTentMode, foldScreenPolicy_, hall);
 }
 
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
