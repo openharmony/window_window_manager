@@ -1720,7 +1720,8 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
             TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
             return;
         }
-        sptr<SessionLifeCycleTask> lifeCycleTask = sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
+        sptr<SessionLifeCycleTask> lifeCycleTask =
+            sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
         lifeCycleTaskQueue_.push_back(lifeCycleTask);
         TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
             name.c_str(), persistentId_);
