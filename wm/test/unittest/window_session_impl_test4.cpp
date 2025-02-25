@@ -1710,6 +1710,28 @@ HWTEST_F(WindowSessionImplTest4, NotifySystemDensityChange01, Function | SmallTe
 }
 
 /**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetIsMidScene, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetIsMidScene");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    bool isMidScene = false;
+    auto ret = window->GetIsMidScene(isMidScene);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ASSERT_EQ(false, isMidScene);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
  * @tc.name: GetLayoutTransform
  * @tc.desc: GetLayoutTransform
  * @tc.type: FUNC
