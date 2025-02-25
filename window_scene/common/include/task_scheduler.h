@@ -22,20 +22,21 @@
 
 namespace OHOS::Rosen {
 
-void StartTraceForSyncTask(std::string name);
+void StartTraceForSyncTask(const std::string& name);
 void FinishTraceForSyncTask();
 
-class TaskScheduler : public std::enable_shared_from_this<TaskScheduler> {
+class TaskScheduler {
 public:
     explicit TaskScheduler(const std::string& threadName);
     ~TaskScheduler() = default;
 
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler();
+
     using Task = std::function<void()>;
-    void PostAsyncTask(Task&& task, const std::string& name = "ssmTask", int64_t delayTime = 0);
-    void PostVoidSyncTask(Task&& task, const std::string& name = "ssmTask");
+    void PostAsyncTask(Task&& task, const std::string& name, int64_t delayTime = 0);
     void PostTask(Task&& task, const std::string& name, int64_t delayTime = 0);
     void RemoveTask(const std::string& name);
+    void PostVoidSyncTask(Task&& task, const std::string& name = "ssmTask");
     template<typename SyncTask, typename Return = std::invoke_result_t<SyncTask>>
     Return PostSyncTask(SyncTask&& task, const std::string& name = "ssmTask")
     {
@@ -46,13 +47,11 @@ public:
             FinishTraceForSyncTask();
             return ret;
         }
-        auto syncTask = [weak = weak_from_this(), &ret, &task, name]() {
+        auto syncTask = [this, &ret, &task, &name] {
             StartTraceForSyncTask(name);
             ret = task();
             FinishTraceForSyncTask();
-            if (auto self = weak.lock()) {
-                self->ExecuteExportTask();
-            }
+            ExecuteExportTask();
         };
         AppExecFwk::EventQueue::Priority priority = AppExecFwk::EventQueue::Priority::IMMEDIATE;
         static pid_t pid = getpid();
@@ -65,17 +64,16 @@ public:
 
     void SetExportHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler);
     /*
-     * add export task, will be executed after a task OS_SceneSession,
-     * same name means same task, will be only executed once
+     * Add export task, which will be executed after a task OS_SceneSession,
+     * same name means same task, will be only executed once.
      */
-    void AddExportTask(std::string taskName, Task task);
+    void AddExportTask(std::string taskName, Task&& task);
 
 private:
     void ExecuteExportTask();
-    std::unordered_map<std::string, Task> exportFuncMap_; // will used in OS_SceneSession
+    std::unordered_map<std::string, Task> exportFuncMap_; // ONLY Accessed in OS_SceneSession
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
     std::shared_ptr<AppExecFwk::EventHandler> exportHandler_;
-    pid_t ssmTid_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_TASK_SCHEDULER_H

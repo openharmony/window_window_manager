@@ -513,7 +513,7 @@ void DisplayManagerAgentProxy::NotifyScreenMagneticStateChanged(bool isMagneticS
     }
 }
 
-void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
+void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area, DisplayId displayId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -528,12 +528,65 @@ void DisplayManagerAgentProxy::NotifyAvailableAreaChanged(DMRect area)
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
+    if (!data.WriteUint64(displayId)) {
+        WLOGFE("Write DisplayId failed");
+        return;
+    }
     if (!data.WriteInt32(area.posX_) || !data.WriteInt32(area.posY_) || !data.WriteUint32(area.width_)
         ||!data.WriteUint32(area.height_)) {
         WLOGFE("Write rect failed");
         return;
     }
     if (remote->SendRequest(TRANS_ID_ON_AVAILABLE_AREA_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerAgentProxy::NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyScreenModeChange: remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+
+    if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+        WLOGFE("Write screenInfos failed");
+        return;
+    }
+
+    if (remote->SendRequest(TRANS_ID_ON_SCREEN_MODE_CHANGED, data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+    }
+}
+
+void DisplayManagerAgentProxy::NotifyAbnormalScreenConnectChange(ScreenId screenId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("NotifyAbnormalScreenConnectChange: remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (remote->SendRequest(TRANS_ID_NOTIFY_ABNORMAL_SCREEN_CONNECT_CHANGED, data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
     }
 }

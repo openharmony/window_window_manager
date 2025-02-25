@@ -19,24 +19,16 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":ws_dual_display_fold_policy_test",
-    ":ws_dual_display_sensor_fold_state_manager_test",
-    ":ws_fold_screen_controller_test",
-    ":ws_fold_screen_sensor_manager_test",
-    ":ws_fold_screen_state_machine_test",
-    ":ws_multi_screen_manager_test",
     ":ws_screen_cutout_controller_test",
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
-    ":ws_screen_session_ability_connection_test",
     ":ws_screen_session_manager_client_proxy_test",
     ":ws_screen_session_manager_client_stub_test",
     ":ws_screen_session_manager_client_test",
     ":ws_screen_session_manager_lite_proxy_test",
     ":ws_screen_session_manager_lite_stub_test",
     ":ws_screen_session_manager_lite_test",
-    ":ws_screen_session_manager_proxy_test",
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_manager_test",
     ":ws_screen_session_manager_test2",
@@ -44,15 +36,46 @@ group("unittest") {
     ":ws_screen_session_test",
     ":ws_screen_setting_helper_test",
     ":ws_screen_snapshot_picker_connection_test",
-    ":ws_sensor_fold_state_manager_test",
     ":ws_session_display_power_controller_test",
     ":ws_setting_observer_test",
     ":ws_setting_provider_test",
-    ":ws_single_display_fold_policy_test",
-    ":ws_single_display_pocket_fold_policy_test",
-    ":ws_single_display_sensor_fold_state_manager_test",
-    ":ws_single_display_sensor_pocket_fold_state_manager_test",
   ]
+
+  if (!window_manager_use_sceneboard) {
+    deps += [ ":ws_screen_session_manager_proxy_ut_test" ]
+  } else {
+    deps += [ ":ws_screen_session_manager_proxy_test" ]
+  }
+
+  if (!window_manager_use_sceneboard) {
+    deps += [ ":ws_screen_session_ability_connection_ut_test" ]
+  } else {
+    deps += [ ":ws_screen_session_ability_connection_test" ]
+  }
+
+  if (window_manager_fold_ability) {
+    deps += [
+      ":ws_dual_display_fold_policy_test",
+      ":ws_dual_display_sensor_fold_state_manager_test",
+      ":ws_fold_screen_controller_test",
+      ":ws_fold_screen_sensor_manager_test",
+      ":ws_fold_screen_state_machine_test",
+      ":ws_secondary_display_fold_policy_test",
+      ":ws_secondary_display_sensor_fold_state_manager_test",
+      ":ws_secondary_fold_sensor_manager_test",
+      ":ws_sensor_fold_state_manager_test",
+      ":ws_single_display_fold_policy_test",
+      ":ws_single_display_pocket_fold_policy_test",
+      ":ws_single_display_sensor_fold_state_manager_test",
+      ":ws_single_display_sensor_pocket_fold_state_manager_test",
+      ":ws_super_fold_sensor_manager_test",
+      ":ws_super_fold_state_manager_test",
+    ]
+  }
+
+  if (window_manager_feature_multi_screen) {
+    deps += [ ":ws_multi_screen_manager_test" ]
+  }
 }
 
 ohos_unittest("ws_setting_observer_test") {
@@ -82,103 +105,6 @@ ohos_unittest("ws_setting_provider_test") {
     "data_share:datashare_consumer",
     "hilog:libhilog",
   ]
-}
-
-ohos_unittest("ws_single_display_fold_policy_test") {
-  module_out_path = module_out_path
-
-  sources = [ "single_display_fold_policy_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("ws_single_display_pocket_fold_policy_test") {
-  module_out_path = module_out_path
-
-  sources = [ "single_display_pocket_fold_policy_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("ws_sensor_fold_state_manager_test") {
-  module_out_path = module_out_path
-
-  sources = [ "sensor_fold_state_manager_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
-}
-
-ohos_unittest("ws_dual_display_fold_policy_test") {
-  module_out_path = module_out_path
-
-  sources = [ "dual_display_fold_policy_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
-}
-
-ohos_unittest("ws_dual_display_sensor_fold_state_manager_test") {
-  module_out_path = module_out_path
-
-  sources = [ "dual_display_sensor_fold_state_manager_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
-}
-
-ohos_unittest("ws_fold_screen_sensor_manager_test") {
-  module_out_path = module_out_path
-
-  sources = [ "fold_screen_sensor_manager_test.cpp" ]
-
-  deps = [
-    ":ws_unittest_common",
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-  ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
-
-  defines = []
-  if (defined(global_parts_info) && defined(global_parts_info.sensors_sensor)) {
-    external_deps += [ "sensor:sensor_interface_native" ]
-    defines += [ "SENSOR_ENABLE" ]
-  }
 }
 
 ohos_unittest("ws_screen_session_publish_test") {
@@ -237,6 +163,12 @@ ohos_unittest("ws_screen_session_manager_lite_test") {
 ohos_unittest("ws_multi_screen_manager_test") {
   module_out_path = module_out_path
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   sources = [ "multi_screen_manager_test.cpp" ]
 
   deps = [ ":ws_unittest_common" ]
@@ -261,6 +193,43 @@ ohos_unittest("ws_screen_session_test") {
   ]
 
   external_deps = [ "c_utils:utils" ]
+
+  defines = []
+
+  if (window_manager_fold_ability) {
+    defines += [ "FOLD_ABILITY_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_active_mode) {
+    defines += [ "WM_SCREEN_ACTIVE_MODE_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_gamut) {
+    defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_hdr_format) {
+    defines += [ "WM_SCREEN_HDR_FORMAT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_space) {
+    defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_screen) {
+    defines += [ "WM_MULTI_SCREEN_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_screen_frame_ctl) {
+    defines += [ "WM_MULTI_SCREEN_CTL_ABILITY_ENABLE" ]
+  }
+  if (window_manager_feature_cam_mode) {
+    defines += [ "WM_CAM_MODE_ABILITY_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_usr) {
+    defines += [ "WM_MULTI_USR_ABILITY_ENABLE" ]
+  }
 }
 
 ohos_unittest("ws_screen_session_ability_connection_test") {
@@ -268,6 +237,28 @@ ohos_unittest("ws_screen_session_ability_connection_test") {
 
   include_dirs = [ "${window_base_path}/window_scene/session/screen/include" ]
   sources = [ "screen_session_ability_connection_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "${window_base_path}/window_scene/session:screen_session",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:extension_manager",
+    "c_utils:utils",
+    "ipc:ipc_core",
+  ]
+}
+
+ohos_unittest("ws_screen_session_ability_connection_ut_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/window_scene/session/screen/include" ]
+  sources = [ "screen_session_ability_connection_ut_test.cpp" ]
 
   deps = [
     ":ws_unittest_common",
@@ -321,6 +312,12 @@ ohos_unittest("ws_screen_property_test") {
 
 ohos_unittest("ws_screen_cutout_controller_test") {
   module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
 
   sources = [ "screen_cutout_controller_test.cpp" ]
 
@@ -437,8 +434,31 @@ ohos_unittest("ws_screen_session_manager_proxy_test") {
   ]
 }
 
+ohos_unittest("ws_screen_session_manager_proxy_ut_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_session_manager_proxy_ut_test.cpp" ]
+
+  deps = [
+    ":ws_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = [
+    "ability_runtime:app_manager",
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("ws_screen_session_manager_test") {
   module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
 
   sources = [ "screen_session_manager_test.cpp" ]
 
@@ -453,7 +473,45 @@ ohos_unittest("ws_screen_session_manager_test") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
   ]
+
+  defines = []
+
+  if (window_manager_fold_ability) {
+    defines += [ "FOLD_ABILITY_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_active_mode) {
+    defines += [ "WM_SCREEN_ACTIVE_MODE_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_gamut) {
+    defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_hdr_format) {
+    defines += [ "WM_SCREEN_HDR_FORMAT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_space) {
+    defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_screen) {
+    defines += [ "WM_MULTI_SCREEN_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_screen_frame_ctl) {
+    defines += [ "WM_MULTI_SCREEN_CTL_ABILITY_ENABLE" ]
+  }
+  if (window_manager_feature_cam_mode) {
+    defines += [ "WM_CAM_MODE_ABILITY_ENABLE" ]
+  }
+
+  if (window_manager_feature_multi_usr) {
+    defines += [ "WM_MULTI_USR_ABILITY_ENABLE" ]
+  }
 }
 
 ohos_unittest("ws_screen_session_manager_test2") {
@@ -467,20 +525,6 @@ ohos_unittest("ws_screen_session_manager_test2") {
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
-  ]
-}
-
-ohos_unittest("ws_fold_screen_controller_test") {
-  module_out_path = module_out_path
-
-  sources = [ "fold_screen_controller_test.cpp" ]
-
-  deps = [ ":ws_unittest_common" ]
-
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
   ]
 }
 
@@ -513,6 +557,7 @@ ohos_unittest("ws_screen_session_dumper_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
   ]
 }
 
@@ -530,51 +575,255 @@ ohos_unittest("ws_session_display_power_controller_test") {
   ]
 }
 
-ohos_unittest("ws_fold_screen_state_machine_test") {
-  module_out_path = module_out_path
+if (window_manager_fold_ability) {
+  ohos_unittest("ws_single_display_fold_policy_test") {
+    module_out_path = module_out_path
 
-  sources = [ "fold_screen_state_machine_test.cpp" ]
+    sources = [ "single_display_fold_policy_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+    deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
 
-ohos_unittest("ws_single_display_sensor_fold_state_manager_test") {
-  module_out_path = module_out_path
+  ohos_unittest("ws_single_display_pocket_fold_policy_test") {
+    module_out_path = module_out_path
 
-  sources = [ "single_display_sensor_fold_state_manager_test.cpp" ]
+    sources = [ "single_display_pocket_fold_policy_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+    deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+    ]
+  }
 
-ohos_unittest("ws_single_display_sensor_pocket_fold_state_manager_test") {
-  module_out_path = module_out_path
+  ohos_unittest("ws_sensor_fold_state_manager_test") {
+    module_out_path = module_out_path
 
-  sources = [ "single_display_sensor_pocket_fold_state_manager_test.cpp" ]
+    sources = [ "sensor_fold_state_manager_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+    deps = [ ":ws_unittest_common" ]
 
-  external_deps = [
-    "ability_runtime:app_manager",
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+    ]
+  }
+
+  ohos_unittest("ws_dual_display_fold_policy_test") {
+    module_out_path = module_out_path
+
+    sources = [ "dual_display_fold_policy_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+    ]
+  }
+
+  ohos_unittest("ws_dual_display_sensor_fold_state_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "dual_display_sensor_fold_state_manager_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+    ]
+  }
+
+  ohos_unittest("ws_fold_screen_sensor_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "fold_screen_sensor_manager_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+    ]
+
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
+  }
+
+  ohos_unittest("ws_fold_screen_controller_test") {
+    module_out_path = module_out_path
+
+    sources = [ "fold_screen_controller_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+
+  ohos_unittest("ws_fold_screen_state_machine_test") {
+    module_out_path = module_out_path
+
+    sources = [ "fold_screen_state_machine_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+
+  ohos_unittest("ws_single_display_sensor_fold_state_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "single_display_sensor_fold_state_manager_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+
+  ohos_unittest("ws_single_display_sensor_pocket_fold_state_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "single_display_sensor_pocket_fold_state_manager_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+
+  ohos_unittest("ws_super_fold_state_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "super_fold_state_manager_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+
+  ohos_unittest("ws_super_fold_sensor_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "super_fold_sensor_manager_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+      "sensor:sensor_interface_native",
+    ]
+  }
+
+  ohos_unittest("ws_secondary_display_sensor_fold_state_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "secondary_display_sensor_fold_state_manager_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
+  }
+
+  ohos_unittest("ws_secondary_fold_sensor_manager_test") {
+    module_out_path = module_out_path
+
+    sources = [ "secondary_fold_sensor_manager_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+      "sensor:sensor_interface_native",
+    ]
+
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
+  }
+
+  ohos_unittest("ws_secondary_display_fold_policy_test") {
+    module_out_path = module_out_path
+
+    sources = [ "secondary_display_fold_policy_test.cpp" ]
+
+    deps = [ ":ws_unittest_common" ]
+
+    external_deps = [
+      "ability_runtime:app_manager",
+      "c_utils:utils",
+      "hilog:libhilog",
+      "init:libbegetutil",
+    ]
+  }
 }
 
 ## Build ws_unittest_common.a {{{
 config("ws_unittest_common_public_config") {
   include_dirs = [
     "${window_base_path}/test/common/mock",
+    "${window_base_path}/test/common/utils/include",
 
     # for WMError Code
     "${window_base_path}/dm/include",
@@ -656,6 +905,7 @@ ohos_static_library("ws_unittest_common") {
     "${graphic_base_path}/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
+    "../../../test/common/utils:libtestutil",
   ]
 
   external_deps = [

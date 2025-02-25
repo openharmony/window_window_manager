@@ -58,12 +58,13 @@ public:
     static sptr<Window> GetTopWindowWithContext(const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     static sptr<Window> GetTopWindowWithId(uint32_t mainWinId);
     static std::vector<sptr<Window>> GetSubWindow(uint32_t parantId);
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     virtual std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const override;
     virtual Rect GetRect() const override;
     virtual Rect GetRequestRect() const override;
     virtual WindowType GetType() const override;
-    virtual WindowMode GetMode() const override;
+    virtual WindowMode GetWindowMode() const override;
     virtual float GetAlpha() const override;
     virtual WindowState GetWindowState() const override;
     virtual WMError SetFocusable(bool isFocusable) override;
@@ -74,7 +75,7 @@ public:
     virtual uint32_t GetWindowId() const override;
     uint64_t GetDisplayId() const override;
     virtual uint32_t GetWindowFlags() const override;
-    uint32_t GetRequestModeSupportInfo() const override;
+    uint32_t GetRequestWindowModeSupportType() const override;
     bool IsMainHandlerAvailable() const override;
     virtual SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
     virtual bool IsFullScreen() const override;
@@ -102,8 +103,10 @@ public:
     virtual WMError Destroy() override;
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false, bool isFromInnerkits = true) override;
-    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
-    virtual WMError Resize(uint32_t width, uint32_t height) override;
+    virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) override;
+    virtual WMError Resize(uint32_t width, uint32_t height,
+        const RectAnimationConfig& rectAnimationConfig = {}) override;
     virtual WMError SetWindowGravity(WindowGravity gravity, uint32_t percent) override;
     virtual WMError SetKeepScreenOn(bool keepScreenOn) override;
     virtual bool IsKeepScreenOn() const override;
@@ -147,8 +150,8 @@ public:
     virtual WMError RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) override;
     virtual WMError UnregisterWindowChangeListener(const sptr<IWindowChangeListener>& listener) override;
-    virtual WMError RegisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
-    virtual WMError UnregisterAvoidAreaChangeListener(sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    virtual WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
     virtual WMError RegisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual WMError UnregisterDragListener(const sptr<IWindowDragListener>& listener) override;
     virtual WMError RegisterDisplayMoveListener(sptr<IDisplayMoveListener>& listener) override;
@@ -167,15 +170,18 @@ public:
     virtual void RegisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void UnregisterDialogDeathRecipientListener(const sptr<IDialogDeathRecipientListener>& listener) override;
     virtual void SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler) override;
-    virtual void SetRequestModeSupportInfo(uint32_t modeSupportInfo) override;
+    virtual void SetRequestWindowModeSupportType(uint32_t windowModeSupportType) override;
     virtual void ConsumeKeyEvent(const std::shared_ptr<MMI::KeyEvent>& inputEvent) override;
     virtual void ConsumePointerEvent(const std::shared_ptr<MMI::PointerEvent>& inputEvent) override;
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     virtual int64_t GetVSyncPeriod() override;
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void NotifyTouchDialogTarget(int32_t posX = 0, int32_t posY = 0) override;
-
+    WMError SetUIContentByName(const std::string& contentInfo, napi_env env, napi_value storage,
+        AppExecFwk::Ability* ability) override;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
     virtual std::string GetContentInfo(BackupAndRestoreType type = BackupAndRestoreType::CONTINUATION) override;
@@ -231,6 +237,12 @@ public:
     virtual WMError UpdateSystemBarProperty(bool status);
     virtual WMError SetImmersiveModeEnabledState(bool enable) override;
     virtual bool GetImmersiveModeEnabledState() const override;
+
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
 private:
     static sptr<Window> FindWindowById(uint32_t windowId);

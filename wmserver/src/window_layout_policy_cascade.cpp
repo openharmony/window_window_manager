@@ -66,7 +66,8 @@ void WindowLayoutPolicyCascade::Reorder()
                 continue;
             }
             // if window don't support floating mode, or default rect of cascade is not satisfied with limits
-            if (!WindowHelper::IsWindowModeSupported(node->GetModeSupportInfo(), WindowMode::WINDOW_MODE_FLOATING) ||
+            if (!WindowHelper::IsWindowModeSupported(node->GetWindowModeSupportType(),
+                                                     WindowMode::WINDOW_MODE_FLOATING) ||
                 !WindowHelper::IsRectSatisfiedWithSizeLimits(rect, node->GetWindowUpdatedSizeLimits())) {
                 MinimizeApp::AddNeedMinimizeApp(node, MinimizeReason::LAYOUT_CASCADE);
                 continue;
@@ -315,7 +316,7 @@ void WindowLayoutPolicyCascade::ComputeRectByAspectRatio(const sptr<WindowNode>&
 {
     float aspectRatio = node->GetAspectRatio();
     if (!WindowHelper::IsMainFloatingWindow(node->GetWindowType(), node->GetWindowMode()) ||
-        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE || MathHelper::NearZero(aspectRatio)) {
+        IsMoveToOrDragMove(node->GetWindowSizeChangeReason()) || MathHelper::NearZero(aspectRatio)) {
         return;
     }
 
@@ -380,7 +381,7 @@ void WindowLayoutPolicyCascade::ComputeDecoratedRequestRect(const sptr<WindowNod
     }
 
     if (!property->GetDecorEnable() || property->GetDecoStatus() ||
-        node->GetWindowSizeChangeReason() == WindowSizeChangeReason::MOVE) {
+        IsMoveToOrDragMove(node->GetWindowSizeChangeReason())) {
         return;
     }
 

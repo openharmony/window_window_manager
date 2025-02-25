@@ -16,7 +16,6 @@
 #include "session/host/include/scb_system_session.h"
 
 #include <hisysevent.h>
-#include "key_event.h"
 #include "pointer_event.h"
 #include <ui/rs_surface_node.h>
 #include "window_manager_hilog.h"
@@ -37,6 +36,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         config.SurfaceNodeName = name;
         config.surfaceWindowType = SurfaceWindowType::SYSTEM_SCB_WINDOW;
         surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+        SetIsUseControlSession(info.isUseControlSession);
     }
     WLOGFD("Create SCBSystemSession");
 }
@@ -48,9 +48,9 @@ SCBSystemSession::~SCBSystemSession()
 
 WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
-    const auto& id = GetPersistentId();
-    const auto& type = GetWindowType();
-    WLOGFI("id: %{public}d, type: %{public}d", id, type);
+    const auto id = GetPersistentId();
+    const auto type = GetWindowType();
+    TLOGD(WmsLogTag::WMS_INPUT_KEY_FLOW, "id: %{public}d, type: %{public}d", id, type);
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
 }
@@ -58,7 +58,7 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -79,8 +79,7 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             session->keyboardPanelRectUpdateCallback_();
         }
         return ret;
-    };
-    PostTask(task, "NotifyClientToUpdateRect");
+    }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
 
@@ -116,8 +115,8 @@ void SCBSystemSession::PresentFocusIfPointDown()
     if (!isFocused_ && GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::CLICK;
         NotifyRequestFocusStatusNotifyManager(true, false, reason);
-        NotifyClick();
     }
+    NotifyClick();
 }
 
 WSError SCBSystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -139,8 +138,8 @@ void SCBSystemSession::PresentFoucusIfNeed(int32_t pointerAction)
         if (!isFocused_ && GetFocusable()) {
             FocusChangeReason reason = FocusChangeReason::CLICK;
             NotifyRequestFocusStatusNotifyManager(true, false, reason);
-            NotifyClick();
         }
+        NotifyClick();
     }
 }
 
@@ -159,7 +158,8 @@ WSError SCBSystemSession::UpdateFocus(bool isFocused)
             OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
             "PID", getpid(),
             "UID", getuid(),
-            "BUNDLE_NAME", sessionInfo_.bundleName_);
+            "BUNDLE_NAME", sessionInfo_.bundleName_,
+            "WINDOW_TYPE", static_cast<uint32_t>(GetWindowType()));
         NotifyUIRequestFocus();
     } else {
         NotifyUILostFocus();
@@ -191,7 +191,7 @@ void SCBSystemSession::UpdatePointerArea(const WSRect& rect)
 void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 {
     TLOGD(WmsLogTag::WMS_SCB, "Set Skip Self, isSkip: %{public}d", isSkip);
-    auto task = [weakThis = wptr(this), isSkip]() {
+    PostTask([weakThis = wptr(this), isSkip]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_SCB, "session is null");
@@ -207,17 +207,7 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
         }
         return WSError::WS_OK;
-    };
-    PostTask(task, "SetSkipSelf");
-}
-
-std::shared_ptr<RSSurfaceNode> SCBSystemSession::GetSurfaceNode()
-{
-    if (!surfaceNode_) {
-        TLOGE(WmsLogTag::WMS_SCB, "surfaceNode_ is null");
-        return nullptr;
-    }
-    return surfaceNode_;
+    }, "SetSkipSelf");
 }
 
 bool SCBSystemSession::IsVisibleForeground() const
@@ -239,5 +229,15 @@ void SCBSystemSession::SyncScenePanelGlobalPosition(bool needSync)
     TLOGI(WmsLogTag::WMS_PIPELINE, "change isNeedSyncGlobalPos from %{public}d to %{public}d",
         isNeedSyncGlobalPos_, needSync);
     isNeedSyncGlobalPos_ = needSync;
+}
+
+bool SCBSystemSession::GetIsUseControlSession() const
+{
+    return isUseControlSession_;
+}
+
+void SCBSystemSession::SetIsUseControlSession(bool isUseControlSession)
+{
+    isUseControlSession_ = isUseControlSession;
 }
 } // namespace OHOS::Rosen

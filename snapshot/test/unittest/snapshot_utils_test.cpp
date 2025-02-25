@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <fcntl.h>
 #include <gtest/gtest.h>
 #include "display.h"
@@ -335,7 +336,6 @@ HWTEST_F(SnapshotUtilsTest, Write10, Function | MediumTest | Level3)
     };
     ASSERT_FALSE(SnapShotUtils::WriteToJpeg(1, param));
 }
-
 
 /**
  * @tc.name: CheckWHValid

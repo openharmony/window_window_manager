@@ -67,6 +67,16 @@ public:
         virtual void OnDisplayModeChanged([[maybe_unused]]FoldDisplayMode displayMode) {}
     };
 
+    class IScreenMagneticStateListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify listeners when screen magnetic state changed.
+         *
+         * @param screenMagneticState ScreenMagneticState.
+         */
+        virtual void OnScreenMagneticStateChanged([[maybe_unused]]bool isMagneticState) {}
+    };
+
     /**
      * @brief Register a display listener.
      *
@@ -116,6 +126,22 @@ public:
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
 
     /**
+     * @brief Register a listener for the event of screen magnetic state changed.
+     *
+     * @param listener IScreenMagneticStateListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+
+    /**
+     * @brief Unregister an existed listener for the event of screen magnetic state changed.
+     *
+     * @param listener IScreenMagneticStateListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+
+    /**
      * @brief Get the default display object.
      *
      * @return Default display object.
@@ -142,6 +168,13 @@ public:
      * @return display mode of the foldable device.
      */
     FoldDisplayMode GetFoldDisplayMode();
+
+    /**
+     * @brief Get the display mode of the foldable device for external.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayModeForExternal();
 
     /**
      * @brief Change the display mode of the foldable device.
@@ -225,7 +258,7 @@ public:
      * @return State of display.
      */
     DisplayState GetDisplayState(DisplayId displayId);
-    
+
     /**
      * @brief Try to cancel screenoff action before display power off.
      *
@@ -263,6 +296,14 @@ public:
      * @return All display IDs.
      */
     std::vector<DisplayId> GetAllDisplayIds();
+
+    /**
+     * @brief Get virtual screen flag.
+     *
+     * @param screenId virtual screen id.
+     * @return virtual screen flag
+     */
+    VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
 private:
     DisplayManagerLite();
     ~DisplayManagerLite();

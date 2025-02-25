@@ -1,11 +1,11 @@
 # Code owners for window_window_manager
 [zidl]
-window_scene/session_manager/src/zidl/ @wambers
-window_scene/session_manager/include/zidl/ @wambers
-window_scene/session/host/src/zidl/ @wambers
-window_scene/session/host/include/zidl/ @wambers
-window_scene/session/container/src/zidl/ @wambers
-window_scene/session/container/include/zidl/ @wambers
+window_scene/session_manager/src/zidl/
+window_scene/session_manager/include/zidl/
+window_scene/session/host/src/zidl/
+window_scene/session/host/include/zidl/
+window_scene/session/container/src/zidl/
+window_scene/session/container/include/zidl/
 
 [Interfaces]
-interfaces/innerkits/wm/wm_common.h @wambers
+interfaces/innerkits/wm/wm_common.h

@@ -415,11 +415,14 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateScreenRotationProperty, Function 
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
-    float rotation = 90;
     float scaleX = 1.0;
     float scaleY = 1.0;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.notifyRotation_ = 90;
+    directionInfo.screenRotation_ = 90;
+    directionInfo.rotation_ = 90;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
-    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, directionInfo,
         screenPropertyChangeType);
     screenSessionManagerClient_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);
@@ -445,9 +448,12 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSnapshot, Function | SmallTest
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
-    float rotation = 90;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.notifyRotation_ = 90;
+    directionInfo.screenRotation_ = 90;
+    directionInfo.rotation_ = 90;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
-    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, directionInfo,
         screenPropertyChangeType);
     screenSessionManagerClient_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
     std::shared_ptr<Media::PixelMap> res = screenSessionManagerClient_->GetScreenSnapshot(screenId, scaleX, scaleY);
@@ -631,6 +637,20 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenRotationLockedChanged02, Functi
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->OnScreenRotationLockedChanged(screenId, isLocked);
+}
+
+/**
+ * @tc.name: OnSuperFoldStatusChanged
+ * @tc.desc: OnSuperFoldStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnSuperFoldStatusChanged, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->OnSuperFoldStatusChanged(screenId, superFoldStatus);
 }
 
 /**
@@ -930,6 +950,17 @@ HWTEST_F(ScreenSessionManagerClientTest, GetFoldStatus, Function | SmallTest | L
 {
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->GetFoldStatus();
+}
+
+/**
+ * @tc.name: GetSuperFoldStatus
+ * @tc.desc: GetSuperFoldStatus test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetSuperFoldStatus, Function | SmallTest | Level2)
+{
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->GetSuperFoldStatus();
 }
 
 /**
@@ -1270,11 +1301,14 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateScreenRotationProperty02, Functio
     RRect bounds;
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
-    float rotation = 90;
     float scaleX = 1.0;
     float scaleY = 1.0;
+    ScreenDirectionInfo directionInfo;
+    directionInfo.notifyRotation_ = 90;
+    directionInfo.screenRotation_ = 90;
+    directionInfo.rotation_ = 90;
     ScreenPropertyChangeType screenPropertyChangeType = ScreenPropertyChangeType::ROTATION_BEGIN;
-    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+    screenSessionManagerClient_->UpdateScreenRotationProperty(screenId, bounds, directionInfo,
         screenPropertyChangeType);
     screenSessionManagerClient_->SetDisplayNodeScreenId(screenId, displayNodeScreenId);
     screenSessionManagerClient_->GetPhyScreenProperty(screenId);

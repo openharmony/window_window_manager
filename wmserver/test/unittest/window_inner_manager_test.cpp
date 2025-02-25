@@ -127,6 +127,7 @@ HWTEST_F(WindowInnerManagerTest, NotifyWindowEndUpMovingOrDragging, Function | S
     windowInnerManager.NotifyWindowEndUpMovingOrDragging(windowId);
     ASSERT_EQ(windowInnerManager.moveDragController_->activeWindowId_, INVALID_WINDOW_ID);
 }
+
 /**
  * @tc.name: NotifyWindowRemovedOrDestroyed
  * @tc.desc: test WindowInnerManager NotifyWindowRemovedOrDestroyed

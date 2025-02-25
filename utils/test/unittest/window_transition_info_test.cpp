@@ -88,6 +88,7 @@ HWTEST_F(WindowTransitionInfoTest, WindowTransitionInfo01, Function | SmallTest 
     ASSERT_EQ(1, winTransitionInfo2->supportWindowModes_.size());
     ASSERT_EQ(AppExecFwk::SupportWindowMode::SPLIT, winTransitionInfo2->supportWindowModes_[0]);
 }
+
 /**
  * @tc.name: Marshalling
  * @tc.desc: WindowTransitionInfo::Marshalling test

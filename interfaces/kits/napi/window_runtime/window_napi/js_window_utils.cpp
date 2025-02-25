@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_window_utils.h"
 #include <iomanip>
 #include <regex>
@@ -27,7 +28,16 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsUtils"};
+constexpr size_t INDEX_ZERO = 0;
+constexpr size_t INDEX_ONE = 1;
+constexpr size_t INDEX_TWO = 2;
+constexpr size_t FOUR_PARAMS_SIZE = 4;
+constexpr size_t ARG_COUNT_ZERO = 0;
+constexpr size_t ARG_COUNT_TWO = 2;
+constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+const std::string RESOLVED_CALLBACK = "resolvedCallback";
+const std::string REJECTED_CALLBACK = "rejectedCallback";
 }
 
 napi_value WindowTypeInit(napi_env env)
@@ -85,6 +95,8 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_HANDWRITE)));
     napi_set_named_property(env, objValue, "TYPE_SCREEN_CONTROL", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
+    napi_set_named_property(env, objValue, "TYPE_WALLET_SWIPE_CARD", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_WALLET_SWIPE_CARD)));
 
     return objValue;
 }
@@ -536,12 +548,26 @@ static napi_value CreateJsSystemBarRegionTintObject(napi_env env, const SystemBa
     return objValue;
 }
 
+napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "arrayValue is null");
+        return nullptr;
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        napi_set_element(env, arrayValue, i, CreateJsWindowLayoutInfoObject(env, infos[i]));
+    }
+    return arrayValue;
+}
+
 napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos)
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, infos.size(), &arrayValue);
     if (arrayValue == nullptr) {
-        WLOGFE("[NAPI]Failed to convert windowVisibilityInfo to jsArrayObject");
+        WLOGFE("Failed to convert windowVisibilityInfo to jsArrayObject");
         return nullptr;
     }
     uint32_t index = 0;
@@ -555,6 +581,54 @@ napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<Wi
     return arrayValue;
 }
 
+napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButtonStyle)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "colorMode", CreateJsValue(env, decorButtonStyle.colorMode));
+    napi_set_named_property(env, objValue, "buttonBackgroundSize",
+        CreateJsValue(env, decorButtonStyle.buttonBackgroundSize));
+    napi_set_named_property(env, objValue, "spacingBetweenButtons",
+        CreateJsValue(env, decorButtonStyle.spacingBetweenButtons));
+    napi_set_named_property(env, objValue, "closeButtonRightMargin",
+        CreateJsValue(env, decorButtonStyle.closeButtonRightMargin));
+    return objValue;
+}
+
+bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& style)
+{
+    int32_t colorMode;
+    bool emptyParam = true;
+    if (ParseJsValue(jsObject, env, "colorMode", colorMode)) {
+        style.colorMode = colorMode;
+        emptyParam = false;
+    }
+    uint32_t buttonBackgroundSize;
+    if (ParseJsValue(jsObject, env, "buttonBackgroundSize", buttonBackgroundSize)) {
+        style.buttonBackgroundSize = buttonBackgroundSize;
+        emptyParam = false;
+    }
+    uint32_t spacingBetweenButtons;
+    if (ParseJsValue(jsObject, env, "spacingBetweenButtons", spacingBetweenButtons)) {
+        style.spacingBetweenButtons = spacingBetweenButtons;
+        emptyParam = false;
+    }
+    uint32_t closeButtonRightMargin;
+    if (ParseJsValue(jsObject, env, "closeButtonRightMargin", closeButtonRightMargin)) {
+        style.closeButtonRightMargin = closeButtonRightMargin;
+        emptyParam = false;
+    }
+    return !emptyParam;
+}
+
+napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "rect", GetRectAndConvertToJsValue(env, info->rect));
+    return objValue;
+}
+
 napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& info)
 {
     napi_value objValue = nullptr;
@@ -565,6 +639,7 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
     napi_set_named_property(env, objValue, "windowStatusType",
         CreateJsValue(env, static_cast<int32_t>(info->GetWindowStatus())));
+    napi_set_named_property(env, objValue, "isFocused", CreateJsValue(env, info->IsFocused()));
     return objValue;
 }
 
@@ -588,35 +663,26 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
     return objValue;
 }
 
-bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-                        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
-                        napi_env env, napi_callback_info info, sptr<Window>& window)
+bool GetSystemBarStatus(napi_env env, napi_callback_info info,
+    std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
-    napi_value nativeArray = nullptr;
-    uint32_t size = 0;
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc > 0 && GetType(env, argv[0]) != napi_function) {
-        nativeArray = argv[0];
+    uint32_t size = INDEX_ZERO;
+    napi_value nativeArray = nullptr;
+    if (argc > ARG_COUNT_ZERO && GetType(env, argv[INDEX_ZERO]) != napi_function) {
+        nativeArray = argv[INDEX_ZERO];
         if (nativeArray == nullptr) {
             TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to SystemBarArray");
             return false;
         }
         napi_get_array_length(env, nativeArray, &size);
     }
-    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    auto navIndicatorProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-    statusProperty.enable_ = false;
-    navProperty.enable_ = false;
-    navIndicatorProperty.enable_ = false;
-    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = navIndicatorProperty;
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
-    systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR] = SystemBarPropertyFlag();
+    systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = false;
+    systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = false;
     for (uint32_t i = 0; i < size; i++) {
         std::string name;
         napi_value getElementValue = nullptr;
@@ -636,6 +702,61 @@ bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProper
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableFlag = true;
     systemBarpropertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableFlag = true;
     return true;
+}
+
+napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    SystemBarProperty statusBarProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    napi_set_named_property(env, objValue, "contentColor",
+        CreateJsValue(env, GetHexColor(statusBarProperty.contentColor_)));
+    return objValue;
+}
+
+static bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType)
+{
+    napi_valuetype valueType = napi_undefined;
+    if (napi_typeof(env, param, &valueType) != napi_ok) {
+        return false;
+    }
+    return valueType == expectType;
+}
+
+bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue)
+{
+    if (!CheckTypeForNapiValue(env, value, napi_object)) {
+        return false;
+    }
+    napi_value jsToNumeric = nullptr;
+    napi_get_named_property(env, value, "toNumeric", &jsToNumeric);
+    if (!CheckTypeForNapiValue(env, jsToNumeric, napi_function)) {
+        return false;
+    }
+    napi_value jsColor;
+    if (napi_call_function(env, value, jsToNumeric, 0, nullptr, &jsColor) != napi_ok) {
+        return false;
+    }
+    if (!CheckTypeForNapiValue(env, jsColor, napi_number)) {
+        return false;
+    }
+    return napi_get_value_uint32(env, jsColor, &colorValue) == napi_ok;
+}
+
+bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_string) {
+        return ConvertFromJsValue(env, value, colorStr);
+    }
+    uint32_t colorValue = 0;
+    if (ParseColorMetrics(env, value, colorValue)) {
+        colorStr = GetHexColor(colorValue);
+        return true;
+    }
+    return false;
 }
 
 bool ParseAndCheckRect(napi_env env, napi_value jsObject,
@@ -728,58 +849,18 @@ WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info,
     return errCode;
 }
 
-void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
-    std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties)
+bool GetSpecificBarStatus(napi_env env, napi_callback_info info, bool& systemBarEnable, bool& systemBarEnableAnimation)
 {
-    auto type = (name.compare("status") == 0) ? WindowType::WINDOW_TYPE_STATUS_BAR :
-                (name.compare("navigation") == 0) ? WindowType::WINDOW_TYPE_NAVIGATION_BAR :
-                WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
-    auto property = window->GetSystemBarPropertyByType(type);
-    systemBarProperties[type] = property;
-    systemBarProperties[type].enable_ = newSystemBarProperties[type].enable_;
-    systemBarProperties[type].enableAnimation_ = newSystemBarProperties[type].enableAnimation_;
-    systemBarProperties[type].settingFlag_ = systemBarProperties[type].settingFlag_ |
-        SystemBarSettingFlag::ENABLE_SETTING;
-}
-
-bool GetSpecificBarStatus(napi_env env, napi_callback_info info,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties)
-{
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    uint32_t paramNumber = 2;
-    if (argc < paramNumber) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+    if (argc < ARG_COUNT_TWO || !ConvertFromJsValue(env, argv[INDEX_ONE], systemBarEnable)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu or Failed to convert enable parameter to bool", argc);
         return false;
     }
-    std::string name;
-    if (!ConvertFromJsValue(env, argv[0], name)) {
-        WLOGFE("Failed to convert parameter to SystemBarName");
+    if (argc >= ARG_COUNT_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], systemBarEnableAnimation)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert enableAnimation parameter to bool");
         return false;
-    }
-    bool enable = false;
-    if (!ConvertFromJsValue(env, argv[1], enable)) {
-        WLOGFE("Failed to convert enable parameter to bool");
-        return NapiGetUndefined(env);
-    }
-    bool enableAnimation = false;
-    if (argc >= 3) {    // 3: min param num when using enableAnimation
-        if (!ConvertFromJsValue(env, argv[2], enableAnimation)) {   // 2: index of param enableAnimation
-            WLOGFE("Failed to convert enableAnimation parameter to bool");
-            return false;
-        }
-    }
-    if (name.compare("status") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableAnimation;
-    } else if (name.compare("navigation") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].enableAnimation_ = enableAnimation;
-    } else if (name.compare("navigationIndicator") == 0) {
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enable_ = enable;
-        systemBarProperties[WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR].enableAnimation_ = enableAnimation;
     }
     return true;
 }
@@ -809,7 +890,7 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
         uint32_t hexColor;
         ss << std::hex << color;
         ss >> hexColor;
-        WLOGI("Origin %{public}s, process %{public}s, final %{public}x",
+        TLOGD(WmsLogTag::DEFAULT, "Origin %{public}s, process %{public}s, final %{public}x",
             colorStr.c_str(), color.c_str(), hexColor);
         return hexColor;
     }
@@ -817,7 +898,8 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
 }
 
 bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto statusProperty = properties[WindowType::WINDOW_TYPE_STATUS_BAR];
     napi_value jsStatusContentColor = nullptr;
@@ -845,7 +927,8 @@ bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
 }
 
 bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto navProperty = properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR];
     napi_value jsNavigationContentColor = nullptr;
@@ -872,47 +955,23 @@ bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
     return true;
 }
 
-void GetSystemBarPropertiesFromJs(sptr<Window>& window,
-    std::map<WindowType, SystemBarProperty>& newProperties,
-    std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
-    std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
-    for (auto type : {WindowType::WINDOW_TYPE_STATUS_BAR, WindowType::WINDOW_TYPE_NAVIGATION_BAR}) {
-        auto property = window->GetSystemBarPropertyByType(type);
-        properties[type] = property;
-        propertyFlags[type] = SystemBarPropertyFlag();
-
-        properties[type].backgroundColor_ = newProperties[type].backgroundColor_;
-        properties[type].contentColor_ = newProperties[type].contentColor_;
-        properties[type].enableAnimation_ = newProperties[type].enableAnimation_;
-        propertyFlags[type].backgroundColorFlag = newPropertyFlags[type].backgroundColorFlag;
-        propertyFlags[type].contentColorFlag = newPropertyFlags[type].contentColorFlag;
-        propertyFlags[type].enableAnimationFlag = newPropertyFlags[type].enableAnimationFlag;
-    }
-}
-
-bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject, sptr<Window>& window,
-    std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
-{
-    auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = navProperty;
-    propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR] = SystemBarPropertyFlag();
-    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR] = SystemBarPropertyFlag();
-    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ = GetColorFromJs(env, jsObject, "statusBarColor",
-        statusProperty.backgroundColor_, propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
-    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ = GetColorFromJs(env,
-        jsObject, "navigationBarColor", navProperty.backgroundColor_,
-        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
+    properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
+        GetColorFromJs(env, jsObject, "statusBarColor",
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColorFlag);
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_ =
+        GetColorFromJs(env, jsObject, "navigationBarColor",
+            properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColor_,
+            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].backgroundColorFlag);
 
     if (!SetWindowStatusBarContentColor(env, jsObject, properties, propertyFlags) ||
         !SetWindowNavigationBarContentColor(env, jsObject, properties, propertyFlags)) {
         return false;
     }
-
     bool enableStatusBarAnimation = false;
     if (ParseJsValue(jsObject, env, "enableStatusBarAnimation", enableStatusBarAnimation)) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].enableAnimation_ = enableStatusBarAnimation;
@@ -970,6 +1029,20 @@ napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& 
     napi_set_named_property(env, objValue, "top", CreateJsValue(env, titleButtonRect.posY_));
     napi_set_named_property(env, objValue, "width", CreateJsValue(env, titleButtonRect.width_));
     napi_set_named_property(env, objValue, "height", CreateJsValue(env, titleButtonRect.height_));
+    return objValue;
+}
+
+napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityInfo& windowDensityInfo)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(
+        env, objValue, "systemDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.systemDensity)));
+    napi_set_named_property(
+        env, objValue, "defaultDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.defaultDensity)));
+    napi_set_named_property(
+        env, objValue, "customDensity", CreateJsValue(env, static_cast<double>(windowDensityInfo.customDensity)));
     return objValue;
 }
 
@@ -1042,6 +1115,75 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
     return true;
 }
 
+bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "jsObject is null");
+        return false;
+    }
+    napi_value jsConfig = nullptr;
+    napi_get_named_property(env, jsObject, "displayId", &jsConfig);
+    if (GetType(env, jsConfig) != napi_undefined) {
+        int64_t displayId = DISPLAY_ID_INVALID;
+        if (!ConvertFromJsValue(env, jsConfig, displayId)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to displayId");
+            return false;
+        }
+        moveConfiguration.displayId = static_cast<DisplayId>(displayId);
+    }
+    napi_get_named_property(env, jsObject, "rectAnimationConfig", &jsConfig);
+    if (GetType(env, jsConfig) != napi_undefined) {
+        RectAnimationConfig rectAnimationConfig;
+        if (!ParseRectAnimationConfig(env, jsConfig, rectAnimationConfig)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to rectAnimationConfig");
+            return false;
+        }
+        moveConfiguration.rectAnimationConfig = rectAnimationConfig;
+    }
+    return true;
+}
+
+bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig)
+{
+    uint32_t duration = 0;
+    if (ParseJsValue(jsObject, env, "duration", duration)) {
+        if (duration <= 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "RectAnimationConfig duration invalid");
+            return false;
+        }
+        rectAnimationConfig.duration = duration;
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig duration");
+        return false;
+    }
+    double coordinate = 0.0;
+    if (ParseJsValue(jsObject, env, "x1", coordinate)) {
+        rectAnimationConfig.x1 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x1");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "y1", coordinate)) {
+        rectAnimationConfig.y1 = static_cast<float>(coordinate);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y1");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "x2", coordinate)) {
+        rectAnimationConfig.x2 = static_cast<float>(std::clamp(coordinate, 0.0, 1.0));
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig x2");
+        return false;
+    }
+    if (ParseJsValue(jsObject, env, "y2", coordinate)) {
+        rectAnimationConfig.y2 = static_cast<float>(coordinate);
+    } else {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to rectAnimationConfig y2");
+        return false;
+    }
+    return true;
+}
+
 napi_value ExtensionWindowAttributeInit(napi_env env)
 {
     if (env == nullptr) {
@@ -1076,6 +1218,27 @@ std::unique_ptr<NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastPara
         napi_ref callbackRef = nullptr;
         napi_create_reference(env, lastParam, 1, &callbackRef);
         return std::make_unique<NapiAsyncTask>(callbackRef, std::move(execute), std::move(complete));
+    }
+}
+
+std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env,
+    napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef,
+            std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
     }
 }
 
@@ -1127,6 +1290,45 @@ static bool ParseModalityParam(napi_env env, napi_value jsObject, const sptr<Win
             return false;
         }
     }
+    TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
+        isModal, isTopmost, windowOption->GetWindowFlags());
+    return true;
+}
+
+static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
+{
+    napi_value windowRect = nullptr;
+    napi_get_named_property(env, jsObject, "windowRect", &windowRect);
+    if (windowRect == nullptr || GetType(env, windowRect) != napi_object) {
+        return true;
+    }
+    int32_t width = 0;
+    if (!ParseJsValue(windowRect, env, "width", width)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to width");
+        return false;
+    }
+    int32_t height = 0;
+    if (!ParseJsValue(windowRect, env, "height", height)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to height");
+        return false;
+    }
+    if (width <= 0 || height <= 0) {
+        TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
+        return false;
+    }
+    int32_t left = 0;
+    if (!ParseJsValue(windowRect, env, "left", left)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to left");
+        return false;
+    }
+    int32_t top = 0;
+    if (!ParseJsValue(windowRect, env, "top", top)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to top");
+        return false;
+    }
+    Rect rect = { left, top, static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+    windowOption->SetWindowRect(rect);
+    TLOGI(WmsLogTag::WMS_SUB, "windowRect: %{public}s", rect.ToString().c_str());
     return true;
 }
 
@@ -1149,8 +1351,109 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
 
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
+    if (!ParseRectParam(env, jsObject, windowOption)) {
+        return false;
+    }
     return ParseModalityParam(env, jsObject, windowOption);
 }
 
+bool CheckPromise(napi_env env, napi_value promiseObj)
+{
+    if (promiseObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj is nullptr");
+        return false;
+    }
+    bool isPromise = false;
+    napi_is_promise(env, promiseObj, &isPromise);
+    return isPromise;
+}
+
+napi_value ResolvedCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    void* returnValue = nullptr;
+    if (napi_get_cb_info(env, info, &argc, argv, nullptr, &returnValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to get returnValue");
+        return nullptr;
+    }
+    auto* asyncCallback = static_cast<AsyncCallback*>(returnValue);
+    if (asyncCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
+        return nullptr;
+    }
+    if (asyncCallback->resolvedCallback_ != nullptr) {
+        asyncCallback->resolvedCallback_(env, argc, argv);
+    } else {
+        TLOGW(WmsLogTag::WMS_PC, "resolvedCallback is nullptr");
+    }
+    returnValue = nullptr;
+    return nullptr;
+}
+
+napi_value RejectedCallback(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    void* returnValue = nullptr;
+    if (napi_get_cb_info(env, info, &argc, argv, nullptr, &returnValue) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to get returnValue");
+        return nullptr;
+    }
+    auto* asyncCallback = static_cast<AsyncCallback*>(returnValue);
+    if (asyncCallback == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "asyncCallback is nullptr");
+        return nullptr;
+    }
+    if (asyncCallback->rejectedCallback_ != nullptr) {
+        asyncCallback->rejectedCallback_(env, argc, argv);
+    } else {
+        TLOGW(WmsLogTag::WMS_PC, "rejectedCallback is nullptr");
+    }
+    returnValue = nullptr;
+    return nullptr;
+}
+
+bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallback)
+{
+    if (!CheckPromise(env, promiseObj)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj not is promise");
+        return false;
+    }
+
+    napi_value promiseThen = nullptr;
+    napi_get_named_property(env, promiseObj, "then", &promiseThen);
+    if (promiseThen == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj then property is nullptr");
+        return false;
+    }
+    if (!NapiIsCallable(env, promiseThen)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseThen not is callable");
+        return false;
+    }
+    napi_value resolvedCallback = nullptr;
+    napi_create_function(env, RESOLVED_CALLBACK.c_str(), RESOLVED_CALLBACK.size(),
+        ResolvedCallback, asyncCallback, &resolvedCallback);
+    napi_value thenArgv[] = { resolvedCallback };
+    napi_call_function(env, promiseObj, promiseThen, ArraySize(thenArgv), thenArgv, nullptr);
+
+    napi_value promiseCatch = nullptr;
+    napi_get_named_property(env, promiseObj, "catch", &promiseCatch);
+    if (promiseCatch == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseObj catch property is nullptr");
+        return false;
+    }
+    if (!NapiIsCallable(env, promiseCatch)) {
+        TLOGE(WmsLogTag::WMS_PC, "promiseCatch not is callable");
+        return false;
+    }
+    napi_value rejectedCallback = nullptr;
+    napi_create_function(env, REJECTED_CALLBACK.c_str(), REJECTED_CALLBACK.size(),
+        RejectedCallback, asyncCallback, &rejectedCallback);
+    napi_value catchArgv[] = { rejectedCallback };
+    napi_call_function(env, promiseObj, promiseCatch, ArraySize(catchArgv), catchArgv, nullptr);
+
+    return true;
+}
 } // namespace Rosen
 } // namespace OHOS

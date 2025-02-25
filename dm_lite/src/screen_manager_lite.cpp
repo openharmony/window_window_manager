@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_manager_lite.h"
 #include <cinttypes>
 #include "display_manager_adapter_lite.h"
@@ -37,6 +38,12 @@ public:
     DMError UnregisterScreenListener(sptr<IScreenListener> listener);
     DMError RegisterDisplayManagerAgent();
     DMError UnregisterDisplayManagerAgent();
+    DMError RegisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener);
+    DMError UnregisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener);
+    DMError RegisterScreenModeChangeManagerAgent();
+    DMError UnregisterScreenModeChangeManagerAgent();
+    DMError RegisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
+    DMError UnregisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
     void OnRemoteDied();
 
 private:
@@ -48,6 +55,14 @@ private:
     sptr<ScreenManagerListener> screenManagerListener_;
     std::mutex mutex_;
     std::set<sptr<IScreenListener>> screenListeners_;
+
+    class ScreenManagerScreenModeChangeAgent;
+    std::set<sptr<IScreenModeChangeListener>> screenModeChangeListeners_;
+    sptr<ScreenManagerScreenModeChangeAgent> screenModeChangeListenerAgent_;
+
+    class ScreenManagerAbnormalScreenConnectChangeAgent;
+    std::set<sptr<IAbnormalScreenConnectChangeListener>> abnormalScreenConnectChangeListeners_;
+    sptr<ScreenManagerAbnormalScreenConnectChangeAgent> abnormalScreenConnectChangeListenerAgent_;
 };
 
 class ScreenManagerLite::Impl::ScreenManagerListener : public DisplayManagerAgentDefault {
@@ -104,6 +119,42 @@ public:
             listener->OnChange(screenInfo->GetScreenId());
         }
     };
+private:
+    sptr<Impl> pImpl_;
+};
+
+class ScreenManagerLite::Impl::ScreenManagerScreenModeChangeAgent : public DisplayManagerAgentDefault {
+public:
+    explicit ScreenManagerScreenModeChangeAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~ScreenManagerScreenModeChangeAgent() = default;
+
+    virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override
+    {
+        std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+        for (auto listener: pImpl_->screenModeChangeListeners_) {
+            listener->NotifyScreenModeChange(screenInfos);
+        }
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class ScreenManagerLite::Impl::ScreenManagerAbnormalScreenConnectChangeAgent : public DisplayManagerAgentDefault {
+public:
+    explicit ScreenManagerAbnormalScreenConnectChangeAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~ScreenManagerAbnormalScreenConnectChangeAgent() = default;
+
+    virtual void NotifyAbnormalScreenConnectChange(ScreenId screenId) override
+    {
+        std::lock_guard<std::mutex> lock(pImpl_->mutex_);
+        for (auto listener: pImpl_->abnormalScreenConnectChangeListeners_) {
+            listener->NotifyAbnormalScreenConnectChange(screenId);
+        }
+    }
 private:
     sptr<Impl> pImpl_;
 };
@@ -196,6 +247,141 @@ DMError ScreenManagerLite::UnregisterScreenListener(sptr<IScreenListener> listen
     return pImpl_->UnregisterScreenListener(listener);
 }
 
+DMError ScreenManagerLite::Impl::RegisterScreenModeChangeManagerAgent()
+{
+    DMError regSucc = DMError::DM_OK;
+    if (screenModeChangeListenerAgent_ == nullptr) {
+        screenModeChangeListenerAgent_ = new ScreenManagerScreenModeChangeAgent(this);
+        regSucc = SingletonContainer::Get<ScreenManagerAdapterLite>().RegisterDisplayManagerAgent(
+            screenModeChangeListenerAgent_, DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
+        if (regSucc != DMError::DM_OK) {
+            screenModeChangeListenerAgent_ = nullptr;
+            WLOGFW("RegisterDisplayManagerAgent failed !");
+        }
+    }
+    return regSucc;
+}
+
+DMError ScreenManagerLite::Impl::UnregisterScreenModeChangeManagerAgent()
+{
+    DMError unRegSucc = DMError::DM_OK;
+    if (screenModeChangeListenerAgent_ != nullptr) {
+        unRegSucc = SingletonContainer::Get<ScreenManagerAdapterLite>().UnregisterDisplayManagerAgent(
+            screenModeChangeListenerAgent_, DisplayManagerAgentType::SCREEN_MODE_CHANGE_EVENT_LISTENER);
+        screenModeChangeListenerAgent_ = nullptr;
+        if (unRegSucc != DMError::DM_OK) {
+            WLOGFW("UnregisterDisplayManagerAgent failed!");
+        }
+    }
+    return unRegSucc;
+}
+
+DMError ScreenManagerLite::Impl::RegisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    DMError regSucc = RegisterScreenModeChangeManagerAgent();
+    if (regSucc == DMError::DM_OK) {
+        screenModeChangeListeners_.insert(listener);
+    }
+    return regSucc;
+}
+
+DMError ScreenManagerLite::RegisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("RegisterScreenListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterScreenModeChangeListener(listener);
+}
+
+DMError ScreenManagerLite::Impl::UnregisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = std::find(screenModeChangeListeners_.begin(), screenModeChangeListeners_.end(), listener);
+    if (iter == screenModeChangeListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    screenModeChangeListeners_.erase(iter);
+    return UnregisterScreenModeChangeManagerAgent();
+}
+
+DMError ScreenManagerLite::UnregisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterScreenListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterScreenModeChangeListener(listener);
+}
+
+DMError ScreenManagerLite::RegisterAbnormalScreenConnectChangeListener(
+    sptr<IAbnormalScreenConnectChangeListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterAbnormalScreenConnectChangeListener(listener);
+}
+
+DMError ScreenManagerLite::Impl::RegisterAbnormalScreenConnectChangeListener(
+    sptr<IAbnormalScreenConnectChangeListener> listener)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    DMError regSucc = DMError::DM_OK;
+    if (abnormalScreenConnectChangeListenerAgent_ == nullptr) {
+        abnormalScreenConnectChangeListenerAgent_ =
+            new (std::nothrow) ScreenManagerAbnormalScreenConnectChangeAgent(this);
+        regSucc = SingletonContainer::Get<ScreenManagerAdapterLite>().RegisterDisplayManagerAgent(
+            abnormalScreenConnectChangeListenerAgent_,
+            DisplayManagerAgentType::ABNORMAL_SCREEN_CONNECT_CHANGE_LISTENER);
+        if (regSucc != DMError::DM_OK) {
+            abnormalScreenConnectChangeListenerAgent_ = nullptr;
+            WLOGFW("RegisterDisplayManagerAgent failed !");
+        }
+    }
+    if (regSucc == DMError::DM_OK) {
+        abnormalScreenConnectChangeListeners_.insert(listener);
+    }
+    return regSucc;
+}
+
+DMError ScreenManagerLite::UnregisterAbnormalScreenConnectChangeListener(
+    sptr<IAbnormalScreenConnectChangeListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterAbnormalScreenConnectChangeListener(listener);
+}
+
+DMError ScreenManagerLite::Impl::UnregisterAbnormalScreenConnectChangeListener(
+    sptr<IAbnormalScreenConnectChangeListener> listener)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = std::find(abnormalScreenConnectChangeListeners_.begin(),
+        abnormalScreenConnectChangeListeners_.end(), listener);
+    if (iter == abnormalScreenConnectChangeListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    abnormalScreenConnectChangeListeners_.erase(iter);
+    DMError unregSucc = DMError::DM_OK;
+    if (abnormalScreenConnectChangeListenerAgent_ != nullptr) {
+        unregSucc = SingletonContainer::Get<ScreenManagerAdapterLite>().UnregisterDisplayManagerAgent(
+            abnormalScreenConnectChangeListenerAgent_,
+            DisplayManagerAgentType::ABNORMAL_SCREEN_CONNECT_CHANGE_LISTENER);
+        abnormalScreenConnectChangeListenerAgent_ = nullptr;
+        if (unregSucc != DMError::DM_OK) {
+            WLOGFW("UnregisterDisplayManagerAgent failed !");
+        }
+    }
+    return unregSucc;
+}
+
 bool ScreenManagerLite::SetSpecifiedScreenPower(ScreenId screenId,
     ScreenPowerState state, PowerStateChangeReason reason)
 {
@@ -214,11 +400,35 @@ ScreenPowerState ScreenManagerLite::GetScreenPower(ScreenId dmsScreenId)
     return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower(dmsScreenId);
 }
 
+ScreenPowerState ScreenManagerLite::GetScreenPower()
+{
+    return SingletonContainer::Get<ScreenManagerAdapterLite>().GetScreenPower();
+}
+
+DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<uint64_t>& screenIds)
+{
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(screenInfos);
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+
+    for (const auto& screenInfo : screenInfos) {
+        auto id = screenInfo->GetScreenId();
+        if (screenInfo->GetType() == ScreenType::REAL && id != SCREEN_ID_INVALID) {
+            screenIds.push_back(id);
+        }
+    }
+    return DMError::DM_OK;
+}
+
 void ScreenManagerLite::Impl::OnRemoteDied()
 {
     WLOGFD("dms is died");
     std::lock_guard<std::mutex> lock(mutex_);
     screenManagerListener_ = nullptr;
+    screenModeChangeListenerAgent_ = nullptr;
+    abnormalScreenConnectChangeListenerAgent_ = nullptr;
 }
 
 void ScreenManagerLite::OnRemoteDied()

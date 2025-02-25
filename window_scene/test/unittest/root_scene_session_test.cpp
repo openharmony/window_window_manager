@@ -98,6 +98,88 @@ HWTEST_F(RootSceneSessionTest, LoadContent, Function | SmallTest | Level1)
     ASSERT_FALSE(rootSceneSession.IsVisible());
 }
 
+/**
+ * @tc.name: GetSystemAvoidAreaForRoot
+ * @tc.desc: test function : GetSystemAvoidAreaForRoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetSystemAvoidAreaForRoot, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    WSRect rect;
+    rootSceneSession.GetSystemAvoidAreaForRoot(rect, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+}
+
+/**
+ * @tc.name: GetKeyboardAvoidAreaForRoot
+ * @tc.desc: test function : GetKeyboardAvoidAreaForRoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetKeyboardAvoidAreaForRoot, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    WSRect rect;
+    rootSceneSession.GetKeyboardAvoidAreaForRoot(rect, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+}
+
+/**
+ * @tc.name: GetAINavigationBarAreaForRoot
+ * @tc.desc: test function : GetAINavigationBarAreaForRoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetAINavigationBarAreaForRoot, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    WSRect rect;
+    rootSceneSession.GetAINavigationBarAreaForRoot(rect, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+}
+
+/**
+ * @tc.name: GetCutoutAvoidAreaForRoot
+ * @tc.desc: test function : GetCutoutAvoidAreaForRoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, GetCutoutAvoidAreaForRoot, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    WSRect rect;
+    rootSceneSession.GetCutoutAvoidAreaForRoot(rect, avoidArea);
+    EXPECT_TRUE(avoidArea.isEmptyAvoidArea());
+}
+
+/**
+ * @tc.name: SetRootSessionRect
+ * @tc.desc: test function : SetRootSessionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, SetRootSessionRect, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    WSRect rect;
+    rootSceneSession.SetRootSessionRect(rect);
+    ASSERT_EQ(rootSceneSession.winRect_, rect);
+}
+
+/**
+ * @tc.name: UpdateAvoidArea
+ * @tc.desc: test function : UpdateAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
+{
+    RootSceneSession rootSceneSession;
+    AvoidArea avoidArea;
+    auto ret = rootSceneSession.UpdateAvoidArea(sptr<AvoidArea>::MakeSptr(avoidArea), AvoidAreaType::TYPE_SYSTEM);
+    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+}
 }
 }
 }

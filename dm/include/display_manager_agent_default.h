@@ -45,8 +45,10 @@ public:
     void NotifyCaptureStatusChanged(bool isCapture) override {};
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override {};
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override {};
-    void NotifyAvailableAreaChanged(DMRect area) override {};
+    void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId) override {};
     void NotifyScreenMagneticStateChanged(bool isMagneticState) override {};
+    void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override {};
+    void NotifyAbnormalScreenConnectChange(ScreenId screenId) override {};
 };
 }
 }

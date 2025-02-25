@@ -16,9 +16,6 @@
 #ifndef OHOS_OCCUPIED_AREA_CHANGE_INFO_H
 #define OHOS_OCCUPIED_AREA_CHANGE_INFO_H
 
-#include <cstdint>
-#include <parcel.h>
-
 #include "wm_common.h"
 
 namespace OHOS::Rosen {

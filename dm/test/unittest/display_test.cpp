@@ -154,6 +154,7 @@ HWTEST_F(DisplayTest, SetWaterfallCompression02, Function | SmallTest | Level1)
     DisplayCutoutController::SetIsWaterfallDisplay(isWaterfallDisplayOrigin);
     ASSERT_EQ(isWaterfallDisplayOrigin, DisplayCutoutController::IsWaterfallDisplay());
 }
+
 /**
  * @tc.name: GetName01
  * @tc.desc: GetName function cover

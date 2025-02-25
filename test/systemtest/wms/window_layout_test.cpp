@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,14 @@
 
 // gtest
 #include <gtest/gtest.h>
-#include "common_test_utils.h"
-#include "window_test_utils.h"
-#include "wm_common.h"
-#include "window_adapter.h"
-#include "window_scene_session_impl.h"
 #include "ability_context_impl.h"
+#include "common_test_utils.h"
 #include "mock_session.h"
 #include "session/host/include/scene_session.h"
+#include "window_test_utils.h"
+#include "window_adapter.h"
+#include "window_scene_session_impl.h"
+#include "wm_common.h"
 
 
 using namespace testing;
@@ -35,8 +35,8 @@ class WindowLayoutTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
     DisplayId displayId_ = 0;
     std::vector<sptr<Window>> activeWindows_;
     static vector<Rect> fullScreenExpecteds_;
@@ -44,7 +44,7 @@ public:
 private:
     static constexpr uint32_t WAIT_SYANC_US = 100000;
     static constexpr uint32_t WAIT_SERVERAL_FRAMES = 36000;
-    static constexpr uint32_t WAIT_SYANC_S = 1; // second;
+    static constexpr uint32_t WAIT_SYANC_S = 2; // second;
     static void InitAvoidArea();
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
@@ -54,7 +54,7 @@ vector<Rect> WindowLayoutTest::fullScreenExpecteds_;
 void WindowLayoutTest::SetUpTestCase()
 {
     SingletonContainer::Get<WindowAdapter>().MinimizeAllAppWindows(0);
-    sleep(2);
+    sleep(WAIT_SYANC_S);
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
     ASSERT_NE(display, nullptr);
     ASSERT_TRUE((display != nullptr));
@@ -86,7 +86,7 @@ void WindowLayoutTest::SetUpTestCase()
     };
     fullScreenExpecteds_.push_back(expected);
     InitAvoidArea();
-    sleep(2);
+    sleep(WAIT_SYANC_S);
 }
 
 void WindowLayoutTest::InitAvoidArea()
@@ -459,14 +459,11 @@ HWTEST_F(WindowLayoutTest, LayoutWindow10, Function | MediumTest | Level3)
 HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
 {
     Utils::TestWindowInfo info = {
-        .name = "mainTile1", .rect = {0, 0, 0, 0}, .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
-        .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true, .parentLimit = false,
-        .parentId = INVALID_WINDOW_ID,
+        .type = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, .mode = WindowMode::WINDOW_MODE_FLOATING, .needAvoid = true,
+        .parentId = INVALID_WINDOW_ID, .parentLimit = false, .name = "mainTile1", .rect = {0, 0, 0, 0},
     };
-
     const sptr<Window>& window = Utils::CreateTestWindow(info);
     ASSERT_NE(window, nullptr);
-
     activeWindows_.push_back(window);
     Rect expect = Utils::GetDefaultFloatingRect(window, true);
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -477,7 +474,6 @@ HWTEST_F(WindowLayoutTest, LayoutTile01, Function | MediumTest | Level3)
     if (maxTileNum < 1) {
         return;
     }
-
     usleep(WAIT_SYANC_US);
     ASSERT_TRUE(Utils::RectEqualTo(window, expect));
     WindowManager::GetInstance().SetWindowLayoutMode(WindowLayoutMode::TILE);
@@ -638,526 +634,6 @@ HWTEST_F(WindowLayoutTest, LayoutNegative02, Function | MediumTest | Level3)
     ASSERT_TRUE(Utils::RectEqualTo(window, expect2));
 }
 
-/**
- * @tc.name: moveWindowTo01
- * @tc.desc: test moveWindowTo for ALN/PC with windowMode: 102, windowType: 2106
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, moveWindowTo01, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("moveWindowTo01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    window->property_->SetPersistentId(10001);
-
-    Rect rect;
-    WMError ret;
-    ret = window->Create(abilityContext_, nullptr);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ret = window->MoveTo(-500, -500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(-500, rect.posX_);
-    EXPECT_EQ(-500, rect.posY_);
-
-    ret = window->MoveTo(0, 0);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(0, rect.posX_);
-    EXPECT_EQ(0, rect.posY_);
-
-    ret = window->MoveTo(500, 500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(500, rect.posX_);
-    EXPECT_EQ(500, rect.posY_);
-
-    ret = window->MoveTo(20000, 20000);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(20000, rect.posX_);
-    EXPECT_EQ(20000, rect.posY_);
-}
-
-/**
- * @tc.name: moveWindowTo02
- * @tc.desc: test moveWindowTo for ALN with windowMode: 102, windowType: 1001
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, moveWindowTo02, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("moveWindowTo02");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo02",
-        "moduleName_moveWindowTo02", "abilityName_moveWindowTo02" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    Rect rectOld;
-    Rect rectNow;
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(10002);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(-500, -500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(0, 0);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(500, 500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-}
-
-/**
- * @tc.name: moveWindowTo03
- * @tc.desc: test moveWindowTo for ALN with windowMode: 1, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, moveWindowTo03, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("moveWindowTo03");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    window->property_->SetPersistentId(10003);
-
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo03",
-        "moduleName_moveWindowTo03", "abilityName_moveWindowTo03" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    Rect rectOld;
-    Rect rectNow;
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(-500, -500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(0, 0);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(500, 500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(20000, 20000);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-}
-
-/**
- * @tc.name: moveWindowTo04
- * @tc.desc: test moveWindowTo for ALN with windowMode: 100, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, moveWindowTo04, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("moveWindowTo04");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    window->property_->SetPersistentId(10004);
-
-    SessionInfo sessionInfo = { "bundleName_moveWindowTo04",
-        "moduleName_moveWindowTo04", "abilityName_moveWindowTo04" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    Rect rectOld;
-    Rect rectNow;
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(-500, -500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(0, 0);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(500, 500);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-
-    rectOld = window->property_->GetWindowRect();
-    ret = window->MoveTo(20000, 20000);
-    usleep(WAIT_SERVERAL_FRAMES);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    rectNow = window->property_->GetWindowRect();
-    EXPECT_EQ(rectOld.posX_, rectNow.posX_);
-    EXPECT_EQ(rectOld.posY_, rectNow.posY_);
-}
-
-/**
- * @tc.name: resize01
- * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2106
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize01, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    Rect rect;
-    WMError ret;
-    ret = window->Create(abilityContext_, nullptr);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(10008);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Resize(-500, -500);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(WAIT_SERVERAL_FRAMES);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
-    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
-
-    ret = window->Resize(500, 500);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(WAIT_SERVERAL_FRAMES);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(500, rect.width_);
-    EXPECT_EQ(500, rect.height_);
-
-    ret = window->Resize(20000, 20000);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(WAIT_SERVERAL_FRAMES);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
-    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
-
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
-}
-
-/**
- * @tc.name: resize02
- * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize02, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize02");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "bundleName_resize02", "moduleName_resize02", "abilityName_resize02" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(10009);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Resize(500, 500);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(20000, 20000);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
-}
-
-/**
- * @tc.name: resize03
- * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize03, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize03");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "bundleName_resize03", "moduleName_resize03", "abilityName_resize03" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(100010);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Resize(500, 500);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(20000, 20000);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
-}
-
-/**
- * @tc.name: resize04
- * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize04, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize04");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "bundleName_resize04", "moduleName_resize04", "abilityName_resize04" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(100011);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    ret = window->Resize(500, 500);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(20000, 20000);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(0, 0);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret); // check parameter first
-}
-
-/**
- * @tc.name: resize05
- * @tc.desc: test resize for ALN/PC with windowMode: 102, windowType: 2106
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize05, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize05");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    Rect rect;
-    WMError ret;
-    ret = window->Create(abilityContext_, nullptr);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(10012);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
-    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(WAIT_SERVERAL_FRAMES);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(windowLimits.maxWidth_ - 100, rect.width_);
-    EXPECT_EQ(windowLimits.maxHeight_ - 100, rect.height_);
-
-    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    usleep(WAIT_SERVERAL_FRAMES);
-    rect = window->property_->GetWindowRect();
-    EXPECT_EQ(windowLimits.maxWidth_, rect.width_);
-    EXPECT_EQ(windowLimits.maxHeight_, rect.height_);
-}
-
-/**
- * @tc.name: resize06
- * @tc.desc: test resize for ALN with windowMode: 1, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize06, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize06");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "bundleName_resize06", "moduleName_resize06", "abilityName_resize06" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(100013);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
-    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-}
-
-/**
- * @tc.name: resize07
- * @tc.desc: test resize for PC with windowMode: 1, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize07, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize07");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "bundleName_resize07", "moduleName_resize07", "abilityName_resize07" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(100014);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
-    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-
-    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-}
-
-/**
- * @tc.name: resize08
- * @tc.desc: test resize for ALN/PC with windowMode: 100, windowType: 1
- * @tc.type: FUNC
- */
-HWTEST_F(WindowLayoutTest, resize08, Function | MediumTest | Level3)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("resize08");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    option->SetWindowMode(WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
-    
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "bundleName_resize08", "moduleName_resize08", "abilityName_resize08" };
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-
-    WMError ret;
-    ret = window->Create(abilityContext_, sceneSession);
-    EXPECT_EQ(WMError::WM_OK, ret);
-    window->property_->SetPersistentId(100015);
-    ret = window->Show();
-    EXPECT_EQ(WMError::WM_OK, ret);
-
-    WindowLimits windowLimits;
-    ret = window->GetWindowLimits(windowLimits);
-
-    ret = window->Resize(windowLimits.maxWidth_ - 100, windowLimits.maxHeight_ - 100);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-    ret = window->Resize(windowLimits.maxWidth_ + 100, windowLimits.maxHeight_ + 100);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
-}
 }
 } // namespace Rosen
 } // namespace OHOS

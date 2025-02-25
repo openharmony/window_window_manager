@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "mock_message_parcel.h"
 #include "iremote_object.h"
 #include "message_parcel.h"
@@ -26,6 +27,7 @@ bool g_setWriteFloatErrorFlag = false;
 bool g_setWriteString16ErrorFlag = false;
 bool g_setWriteParcelableErrorFlag = false;
 bool g_setWriteInterfaceTokenErrorFlag = false;
+bool g_setReadUint32ErrorFlag = false;
 bool g_setReadInt32ErrorFlag = false;
 bool g_setReadInt64ErrorFlag = false;
 bool g_setReadStringVectorErrorFlag = false;
@@ -50,6 +52,7 @@ void MockMessageParcel::ClearAllErrorFlag()
     g_setWriteString16ErrorFlag = false;
     g_setWriteParcelableErrorFlag = false;
     g_setWriteInterfaceTokenErrorFlag = false;
+    g_setReadUint32ErrorFlag = false;
     g_setReadInt32ErrorFlag = false;
     g_setReadInt64ErrorFlag = false;
     g_setReadStringVectorErrorFlag = false;
@@ -93,6 +96,11 @@ void MockMessageParcel::SetWriteParcelableErrorFlag(bool flag)
 void MockMessageParcel::SetWriteInterfaceTokenErrorFlag(bool flag)
 {
     g_setWriteInterfaceTokenErrorFlag = flag;
+}
+
+void MockMessageParcel::SetReadUint32ErrorFlag(bool flag)
+{
+    g_setReadUint32ErrorFlag = flag;
 }
 
 void MockMessageParcel::SetReadInt32ErrorFlag(bool flag)
@@ -186,6 +194,16 @@ bool Parcel::WriteString16(const std::u16string& value)
     (void)value;
     return !g_setWriteString16ErrorFlag;
 }
+
+#ifdef ENABLE_MOCK_READ_UINT32
+bool Parcel::ReadUint32(uint32_t& value)
+{
+    if (g_setReadUint32ErrorFlag) {
+        return false;
+    }
+    return true;
+}
+#endif
 
 #ifdef ENABLE_MOCK_READ_INT32
 bool Parcel::ReadInt32(int32_t& value)

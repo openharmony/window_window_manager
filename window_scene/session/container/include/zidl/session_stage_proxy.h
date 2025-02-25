@@ -32,7 +32,8 @@ public:
 
     WSError SetActive(bool active) override;
     WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) override;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
     void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
@@ -59,9 +60,11 @@ public:
     WSError NotifyDensityFollowHost(bool isFollowHost, float densityValue) override;
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifyTransformChange(const Transform& transform) override;
+    void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     WSError SetPipActionEvent(const std::string& action, int32_t status) override;
     WSError SetPiPControlEvent(WsPiPControlType controlType, WsPiPControlStatus status) override;
+    WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) override;
     WSError UpdateDisplayId(uint64_t displayId) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
     WSError SwitchFreeMultiWindow(bool enable) override;
@@ -73,15 +76,22 @@ public:
     WSError NotifyCompatibleModeEnableInPad(bool enable) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
     void NotifySessionFullScreen(bool fullScreen) override;
+
+    // UIExtension
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+
+    WSError SetDragActivated(bool dragActivated) override;
     WSError SetSplitButtonVisible(bool isVisible) override;
     WSError SetEnableDragBySystem(bool dragEnable) override;
+    WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
+    WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
+    WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError NotifyHighlightChange(bool isHighlight) override;
+    void NotifyWindowCrossAxisChange(CrossAxisState state) override;
+    WSError NotifyWindowAttachStateChange(bool isAttach) override;
 
 private:
-    bool ReadSmallStringVectorFromParcel(
-        MessageParcel& reply, std::vector<std::string>& infos);
-    bool ReadBigStringVectorFromParcel(
-        MessageParcel& reply, std::vector<std::string>& infos);
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
 } // namespace OHOS::Rosen

@@ -190,9 +190,13 @@ void SessionListenerController::OnListenerDied(const wptr<IRemoteObject>& remote
 template<typename F, typename... Args>
 void SessionListenerController::CallListeners(F func, Args&&... args)
 {
-    std::lock_guard guard(listenerLock_);
-    WLOGFD("size:%{public}d", static_cast<int32_t>(sessionListeners_.size()));
-    for (auto listener : sessionListeners_) {
+    std::vector<sptr<ISessionListener>> sessionListenersTemp;
+    {
+        std::lock_guard guard(listenerLock_);
+        WLOGFD("size:%{public}d", static_cast<int32_t>(sessionListeners_.size()));
+        sessionListenersTemp = sessionListeners_;
+    }
+    for (auto listener : sessionListenersTemp) {
         if (listener) {
             (listener->*func)(std::forward<Args>(args)...);
         }

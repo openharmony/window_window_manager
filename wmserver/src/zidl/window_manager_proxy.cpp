@@ -197,7 +197,7 @@ WMError WindowManagerProxy::RequestFocus(uint32_t windowId)
     return static_cast<WMError>(ret);
 }
 
-AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
+AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, const Rect& rect)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -216,6 +216,12 @@ AvoidArea WindowManagerProxy::GetAvoidAreaByType(uint32_t windowId, AvoidAreaTyp
 
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         WLOGFE("Write AvoidAreaType failed");
+        return avoidArea;
+    }
+
+    if (!data.WriteInt32(rect.posX_) || !data.WriteInt32(rect.posY_) ||
+        !data.WriteUint32(rect.width_) || !data.WriteUint32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "write rect error");
         return avoidArea;
     }
 
@@ -364,7 +370,6 @@ void WindowManagerProxy::NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<W
         WLOGFE("Failed to write moveDragProperty!");
         return;
     }
-    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -393,7 +398,6 @@ void WindowManagerProxy::ProcessPointDown(uint32_t windowId, bool isPointDown)
         WLOGFE("Write isPointDown failed");
         return;
     }
-    
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -1256,7 +1260,7 @@ MaximizeMode WindowManagerProxy::GetMaximizeMode()
     return static_cast<MaximizeMode>(ret);
 }
 
-void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1265,7 +1269,10 @@ void WindowManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "write displayId failed");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");

@@ -20,6 +20,7 @@
 
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
 #include "ws_common.h"
 
 typedef struct napi_env__* napi_env;
@@ -35,7 +36,11 @@ class UIContent;
 
 namespace OHOS {
 namespace Rosen {
-using GetSessionRectCallback = std::function<WSRect(AvoidAreaType)>;
+class RSNode;
+using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)>;
+using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
+using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
+using NotifyWatchFocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
 
 class RootScene : public Window {
 public:
@@ -45,69 +50,85 @@ public:
     void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
         AbilityRuntime::Context* context);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
-    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
+    void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
 
     void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback) override;
     int64_t GetVSyncPeriod() override;
     void FlushFrameRate(uint32_t rate, int32_t animatorExpectedFrameRate, uint32_t rateType = 0) override;
 
-    /**
+    /*
      * Window Immersive
      */
     bool IsLastFrameLayoutFinished();
     void OnFlushUIParams();
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) override;
+    void RegisterGetSessionAvoidAreaByTypeCallback(GetSessionAvoidAreaByTypeCallback&& callback);
+    void RegisterUpdateRootSceneRectCallback(UpdateRootSceneRectCallback&& callback);
+    WMError RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    WMError UnregisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener) override;
+    void NotifyAvoidAreaChangeForRoot(const sptr<AvoidArea>& avoidArea, AvoidAreaType type);
+    void RegisterUpdateRootSceneAvoidAreaCallback(UpdateRootSceneAvoidAreaCallback&& callback);
+    std::string GetClassType() const override { return "RootScene"; }
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+
+    /*
+     * Keyboard Window
+     */
+    WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    void NotifyOccupiedAreaChangeForRoot(const sptr<OccupiedAreaChangeInfo>& info);
+
+    /*
+     * watch
+     */
+    void RegisterNotifyWatchFocusActiveChangeCallback(NotifyWatchFocusActiveChangeCallback&& callback);
+
+    const std::shared_ptr<AbilityRuntime::Context> GetContext() const override { return context_.lock(); }
 
     void OnBundleUpdated(const std::string& bundleName);
     static void SetOnConfigurationUpdatedCallback(
         const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback);
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback);
 
-    void SetGetSessionRectCallback(GetSessionRectCallback&& callback)
-    {
-        getSessionRectCallback_ = std::move(callback);
-    }
+    void SetDisplayDensity(float density) { density_ = density; }
 
-    void SetDisplayDensity(float density)
-    {
-        density_ = density;
-    }
+    void SetDisplayId(DisplayId displayId) { displayId_ = displayId; }
+
+    DisplayId GetDisplayId() const override { return displayId_; }
 
     void SetDisplayOrientation(int32_t orientation);
 
-    float GetDisplayDensity()
-    {
-        return density_;
-    }
+    float GetDisplayDensity() { return density_; }
 
-    WindowState GetWindowState() const override
-    {
-        return WindowState::STATE_SHOWN;
-    }
+    WindowState GetWindowState() const override { return WindowState::STATE_SHOWN; }
 
-    WindowType GetType() const override
-    {
-        return type_;
-    }
+    WindowType GetType() const override { return type_; }
 
-    const std::string& GetWindowName() const override
-    {
-        return name_;
-    }
+    const std::string& GetWindowName() const override { return name_; }
 
-    uint32_t GetWindowId() const override
-    {
-        return 1; // 1 for root
-    }
+    uint32_t GetWindowId() const override { return 1; } // 1 for root
 
-    Ace::UIContent* GetUIContent() const override
-    {
-        return uiContent_.get();
-    }
+    Ace::UIContent* GetUIContent() const override { return uiContent_.get(); }
     
     void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
 
-    WMError GetSessionRectByType(AvoidAreaType type, WSRect& rect);
+    /*
+     * Window Layout
+     */
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId);
+    void SetTopWindowBoundaryByID(const std::string& stringId);
+
+    /*
+     * Window Property
+     */
+    static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+    void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
 
     static sptr<RootScene> staticRootScene_;
 
@@ -118,6 +139,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
     int32_t orientation_ = 0;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
@@ -125,8 +147,29 @@ private:
     static std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)> configurationUpdatedCallback_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+    std::weak_ptr<AbilityRuntime::Context> context_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 
-    GetSessionRectCallback getSessionRectCallback_ = nullptr;
+    /*
+     * Window Immersive
+     */
+    GetSessionAvoidAreaByTypeCallback getSessionAvoidAreaByTypeCallback_ = nullptr;
+    UpdateRootSceneRectCallback updateRootSceneRectCallback_ = nullptr;
+    UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
+    mutable std::mutex mutex_;
+    std::unordered_set<sptr<IAvoidAreaChangedListener>, SptrHash<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
+
+    /*
+     * Keyboard Window
+     */
+    mutable std::mutex occupiedAreaMutex_;
+    std::unordered_set<sptr<IOccupiedAreaChangeListener>, SptrHash<IOccupiedAreaChangeListener>>
+        occupiedAreaChangeListeners_;
+
+    /*
+     * watch
+     */
+    NotifyWatchFocusActiveChangeCallback notifyWatchFocusActiveChangeCallback_ = nullptr;
 };
 } // namespace Rosen
 } // namespace OHOS

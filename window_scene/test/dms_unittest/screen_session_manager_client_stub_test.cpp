@@ -459,6 +459,30 @@ HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest18, Function | Small
 }
 
 /**
+ * @tc.name: OnRemoteRequest19
+ * @tc.desc: TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest19, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    SuperFoldStatus superFoldStatus = SuperFoldStatus::UNKNOWN;
+    data.WriteInt32(static_cast<uint32_t>(superFoldStatus));
+
+    uint32_t code = static_cast<uint32_t>(
+        IScreenSessionManagerClient::ScreenSessionManagerClientMessage::TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED);
+    int res = screenSessionManagerClientStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: HandleOnScreenConnectionChanged
  * @tc.desc: HandleOnScreenConnectionChanged test
  * @tc.type: FUNC
@@ -501,6 +525,28 @@ HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnPropertyChanged, Function |
     data.WriteUint32(static_cast<uint32_t>(reason));
 
     int ret = screenSessionManagerClientStub_->HandleOnPropertyChanged(data, reply);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: HandleOnSuperFoldStatusChanged
+ * @tc.desc: HandleOnSuperFoldStatusChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientStubTest, HandleOnSuperFoldStatusChanged, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
+    ScreenId screenId = 0;
+    data.WriteUint64(screenId);
+    ScreenProperty property;
+    RSMarshallingHelper::Marshalling(data, property);
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    data.WriteUint32(static_cast<uint32_t>(reason));
+
+    int ret = screenSessionManagerClientStub_->HandleOnSuperFoldStatusChanged(data, reply);
     EXPECT_EQ(ret, 0);
 }
 

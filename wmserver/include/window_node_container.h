@@ -57,7 +57,8 @@ public:
     uint32_t ToOverrideBrightness(float brightness);
     void UpdateBrightness(uint32_t id, bool byRemoved);
     void HandleKeepScreenOn(const sptr<WindowNode>& node, bool requireLock);
-    AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const;
+    AvoidArea GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType,
+        const Rect& rect = Rect::EMPTY_RECT) const;
     WMError MinimizeStructuredAppWindowsExceptSelf(const sptr<WindowNode>& node);
     void TraverseContainer(std::vector<sptr<WindowNode>>& windowNodes) const;
     std::unordered_map<WindowType, SystemBarProperty> GetExpectImmersiveProperty(DisplayId id,
@@ -171,7 +172,7 @@ private:
     void UpdateRSTreeWhenShowingDisplaysChange(sptr<WindowNode>& node,
         const std::vector<DisplayId>& lastShowingDisplays);
     bool CheckWindowNodeWhetherInWindowTree(const sptr<WindowNode>& node) const;
-    void UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
+    void UpdateWindowModeSupportTypeWhenKeyguardChange(const sptr<WindowNode>& node, bool up);
     void RemoveFromRsTreeWhenRemoveWindowNode(sptr<WindowNode>& node, bool fromAnimation);
     void UpdateSizeChangeReason(sptr<WindowNode>& node, WindowMode srcMode, WindowMode dstMode);
     void UpdatePrivateWindowCount();

@@ -59,6 +59,7 @@ private:
     int HandleRegisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterWindowManagerAgent(MessageParcel& data, MessageParcel& reply);
     int HandleCheckWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleCheckUIExtensionCreation(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowModeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWinodowInfo(MessageParcel& data, MessageParcel& reply);
@@ -74,6 +75,10 @@ private:
     int HandleGetCurrentPiPWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetRootMainWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyAppUseControlList(MessageParcel& data, MessageParcel& reply);
+    int HandleMinimizeMainSession(MessageParcel& data, MessageParcel& reply);
+    int HandleLockSessionByAbilityInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

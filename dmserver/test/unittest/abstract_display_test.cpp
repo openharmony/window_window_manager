@@ -85,6 +85,7 @@ HWTEST_F(AbstractDisplayTest, BindAbstractScreen01, Function | SmallTest | Level
     sptr<AbstractScreen> abstractScreen = nullptr;
     ASSERT_EQ(false, absDisplay->BindAbstractScreen(abstractScreen));
 }
+
 /**
  * @tc.name: BindAbstractScreen
  * @tc.desc: BindAbstractScreen test
@@ -96,6 +97,7 @@ HWTEST_F(AbstractDisplayTest, BindAbstractScreen02, Function | SmallTest | Level
     abstractScreen->activeIdx_ = -1;
     ASSERT_EQ(false, absDisplay->BindAbstractScreen(abstractScreen));
 }
+
 /**
  * @tc.name: CalculateXYDpi
  * @tc.desc: CalculateXYDpi test
@@ -114,6 +116,7 @@ HWTEST_F(AbstractDisplayTest, CalculateXYDpi, Function | SmallTest | Level3)
     absDisplay->CalculateXYDpi(phyWidth, phyHeight);
     ASSERT_EQ(1, absDisplay->phyHeight_);
 }
+
 /**
  * @tc.name: GetRefreshRate
  * @tc.desc: GetRefreshRate test
@@ -126,6 +129,7 @@ HWTEST_F(AbstractDisplayTest, GetRefreshRate, Function | SmallTest | Level3)
     absDisplay->GetRefreshRate();
     ASSERT_EQ(1, absDisplay->refreshRate_);
 }
+
 /**
  * @tc.name: GetOffsetX
  * @tc.desc: GetOffsetX test
@@ -137,6 +141,7 @@ HWTEST_F(AbstractDisplayTest, GetOffsetX, Function | SmallTest | Level3)
     absDisplay->SetOffsetX(offsetX);
     ASSERT_EQ(1, absDisplay->GetOffsetX());
 }
+
 /**
  * @tc.name: GetOffsetY
  * @tc.desc: GetOffsetX test
@@ -148,6 +153,7 @@ HWTEST_F(AbstractDisplayTest, GetOffsetY, Function | SmallTest | Level3)
     absDisplay->SetOffsetY(offsetY);
     ASSERT_EQ(1, absDisplay->GetOffsetY());
 }
+
 /**
  * @tc.name: UpdateXDpi
  * @tc.desc: UpdateXDpi test
@@ -161,6 +167,7 @@ HWTEST_F(AbstractDisplayTest, UpdateXDpi, Function | SmallTest | Level3)
     absDisplay->UpdateXDpi();
     ASSERT_EQ(UINT32_MAX, absDisplay->phyWidth_);
 }
+
 /**
  * @tc.name: UpdateYDpi
  * @tc.desc: UpdateYDpi test
@@ -174,6 +181,7 @@ HWTEST_F(AbstractDisplayTest, UpdateYDpi, Function | SmallTest | Level3)
     absDisplay->UpdateYDpi();
     ASSERT_EQ(UINT32_MAX, absDisplay->phyHeight_);
 }
+
 /**
  * @tc.name: SetId
  * @tc.desc: SetId test
@@ -185,6 +193,7 @@ HWTEST_F(AbstractDisplayTest, SetId, Function | SmallTest | Level3)
     absDisplay->SetId(id);
     ASSERT_EQ(1, absDisplay->GetId());
 }
+
 /**
  * @tc.name: SetDisplayOrientation
  * @tc.desc: SetDisplayOrientation test
@@ -196,6 +205,7 @@ HWTEST_F(AbstractDisplayTest, SetDisplayOrientation, Function | SmallTest | Leve
     absDisplay->SetDisplayOrientation(displayOrientation);
     ASSERT_EQ(DisplayOrientation::PORTRAIT, absDisplay->GetDisplayOrientation());
 }
+
 /**
  * @tc.name: GetRotationAndGetOrientation
  * @tc.desc: GetRotationAndGetOrientation test
@@ -209,6 +219,7 @@ HWTEST_F(AbstractDisplayTest, GetRotationAndGetOrientation, Function | SmallTest
     absDisplay->GetOrientation();
     ASSERT_EQ(1, absDisplay->GetId());
 }
+
 /**
  * @tc.name: SetFreezeFlag
  * @tc.desc: SetFreezeFlag test

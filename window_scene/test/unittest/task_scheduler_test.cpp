@@ -73,13 +73,12 @@ HWTEST_F(TaskSchedulerTest, PostTask, Function | SmallTest | Level2)
         GTEST_LOG_(INFO) << "START_TASK";
         resultValue = 1;
     };
-    taskScheduler->PostAsyncTask(taskFunc);
+    taskScheduler->PostAsyncTask(taskFunc, "ssmTask");
     EXPECT_NE(taskScheduler->handler_, nullptr);
     EXPECT_EQ(resultValue, 0);
 
-    std::string name = "ssmTask";
     int64_t delayTime = 1;
-    taskScheduler->PostAsyncTask(taskFunc, name, delayTime);
+    taskScheduler->PostAsyncTask(taskFunc, "ssmTask", delayTime);
     EXPECT_EQ(resultValue, 0);
 }
 
@@ -95,7 +94,6 @@ HWTEST_F(TaskSchedulerTest, AddExportTask1, Function | SmallTest | Level2)
     };
     ASSERT_NE(taskScheduler, nullptr);
     ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
-    ASSERT_NE(taskScheduler->ssmTid_, 0);
     taskScheduler->AddExportTask(funcName, taskFunc);
     ASSERT_EQ(taskTid, gettid());
     ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
@@ -114,9 +112,11 @@ HWTEST_F(TaskSchedulerTest, AddExportTask2, Function | SmallTest | Level2)
     };
     ASSERT_NE(taskScheduler, nullptr);
     ASSERT_EQ(taskScheduler->exportFuncMap_.size(), 0);
-    ASSERT_NE(taskScheduler->ssmTid_, 0);
-    taskScheduler->ssmTid_ = gettid();
-    taskScheduler->AddExportTask(funcName, taskFunc);
+    auto testTask = [taskScheduler, funcName, taskFunc] {
+        taskScheduler->AddExportTask(funcName, taskFunc);
+        return 0;
+    };
+    taskScheduler->PostSyncTask(testTask);
     ASSERT_EQ(taskTid, 0);
     ASSERT_NE(taskScheduler->exportFuncMap_.size(), 0);
 }

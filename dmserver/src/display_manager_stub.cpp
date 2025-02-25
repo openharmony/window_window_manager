@@ -51,6 +51,12 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
             reply.WriteParcelable(info);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            auto info = GetVisibleAreaDisplayInfoById(displayId);
+            reply.WriteParcelable(info);
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_SCREEN: {
             ScreenId screenId = data.ReadUint64();
             auto info = GetDisplayInfoByScreen(screenId);
@@ -439,7 +445,9 @@ int32_t DisplayManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, 
                 WLOGFE("failed to receive unique screens in stub");
                 break;
             }
-            DMError ret = MakeUniqueScreen(uniqueScreenIds);
+            std::vector<DisplayId> displayIds;
+            DMError ret = MakeUniqueScreen(uniqueScreenIds, displayIds);
+            reply.WriteUInt64Vector(displayIds);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }

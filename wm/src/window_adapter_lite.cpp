@@ -81,7 +81,7 @@ WMError WindowAdapterLite::UnregisterWindowManagerAgent(WindowManagerAgentType t
 
     std::lock_guard<std::mutex> lock(windowManagerLiteAgentMapMutex_);
     if (windowManagerLiteAgentMap_.find(type) == windowManagerLiteAgentMap_.end()) {
-        TLOGW(WmsLogTag::WMS_MULTI_USER, "WindowManagerAgentType = %{public}d not found", type);
+        TLOGW(WmsLogTag::WMS_MULTI_USER, "WindowManagerAgentType=%{public}d not found", type);
         return ret;
     }
     auto& agentSet = windowManagerLiteAgentMap_[type];
@@ -162,7 +162,7 @@ bool WindowAdapterLite::InitSSMProxy()
 
 void WindowAdapterLite::OnUserSwitch()
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "User switched lite");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "User switched lite");
     ClearWindowAdapter();
     InitSSMProxy();
     ReregisterWindowManagerLiteAgent();
@@ -195,14 +195,18 @@ void WMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     SingletonContainer::Get<SessionManagerLite>().ClearSessionManagerProxy();
 }
 
-void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowAdapterLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     INIT_PROXY_CHECK_RETURN();
     WLOGFD("use Foucus window info proxy");
 
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_IF_NULL(wmsProxy);
-    wmsProxy->GetFocusWindowInfo(focusInfo);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        wmsProxy->GetFocusWindowInfo(focusInfo, displayId);
+    } else {
+        wmsProxy->GetFocusWindowInfo(focusInfo);
+    }
 }
 
 WMError WindowAdapterLite::GetWindowModeType(WindowModeType& windowModeType)

@@ -28,6 +28,7 @@
 #include "singleton_container.h"
 #include "surface_utils.h"
 #include "window_manager_hilog.h"
+#include "pixel_map_napi.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -81,6 +82,12 @@ static napi_value MakeMirror(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMakeMirror(env, info) : nullptr;
 }
 
+static napi_value MakeMirrorWithRegion(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnMakeMirrorWithRegion(env, info) : nullptr;
+}
+
 static napi_value SetMultiScreenMode(napi_env env, napi_callback_info info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
@@ -129,6 +136,12 @@ static napi_value SetVirtualScreenSurface(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetVirtualScreenSurface(env, info) : nullptr;
 }
 
+static napi_value SetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnSetScreenPrivacyMaskImage(env, info) : nullptr;
+}
+
 static napi_value IsScreenRotationLocked(napi_env env, napi_callback_info info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
@@ -140,6 +153,13 @@ static napi_value SetScreenRotationLocked(napi_env env, napi_callback_info info)
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
     return (me != nullptr) ? me->OnSetScreenRotationLocked(env, info) : nullptr;
 }
+
+static napi_value MakeUnique(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnMakeUnique(env, info) : nullptr;
+}
+
 private:
 std::map<std::string, std::map<std::unique_ptr<NativeReference>, sptr<JsScreenListener>>> jsCbMap_;
 std::mutex mtx_;
@@ -176,6 +196,21 @@ napi_value OnGetAllScreens(napi_env env, napi_callback_info info)
     };
     NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
     return result;
+}
+
+napi_value CreateJsDisplayIdVectorObject(napi_env env, std::vector<DisplayId>& displayIds)
+{
+    napi_value arrayValue = nullptr;
+    napi_create_array_with_length(env, displayIds.size(), &arrayValue);
+    if (arrayValue == nullptr) {
+        WLOGFE("Failed to get screens");
+        return NapiGetUndefined(env);
+    }
+    size_t i = 0;
+    for (auto& displayId : displayIds) {
+        napi_set_element(env, arrayValue, i++, CreateJsValue(env, static_cast<uint32_t>(displayId)));
+    }
+    return arrayValue;
 }
 
 napi_value CreateJsScreenVectorObject(napi_env env, std::vector<sptr<Screen>>& screens)
@@ -447,6 +482,58 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value OnMakeMirrorWithRegion(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnMakeMirrorWithRegion is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_THREE) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need 3 args at least!");
+    }
+    int64_t mainScreenId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], mainScreenId)) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to mainScreenId");
+    }
+    napi_value array = argv[INDEX_ONE];
+    if (array == nullptr) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get mirrorScreen, is nullptr");
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, array, &size);
+    std::vector<ScreenId> mirrorScreenIds;
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t screenId;
+        napi_value value = nullptr;
+        napi_get_element(env, array, i, &value);
+        if (!ConvertFromJsValue(env, value, screenId)) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
+        }
+        mirrorScreenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    DMRect mainScreenRegion;
+    if (GetRectFromJs(env, argv[INDEX_TWO], mainScreenRegion) == -1) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert to mainScreenRegion");
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [mainScreenId, mirrorScreenIds, mainScreenRegion, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeMirrorWithRegion");
+        ScreenId screenGroupId = INVALID_SCREEN_ID;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<ScreenManager>().MakeMirror(mainScreenId,
+            mirrorScreenIds, mainScreenRegion, screenGroupId));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsValue(env, static_cast<uint32_t>(screenGroupId)));
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeMirrorWithRegion failed."));
+        }
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
 napi_value OnSetMultiScreenMode(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -686,6 +773,57 @@ napi_value OnStopExpand(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value OnMakeUnique(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnMakeUnique is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("Invalid args count, need one arg at least!");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need one arg at least!");
+    }
+    napi_value array = argv[0];
+    if (array == nullptr) {
+        WLOGFE("Failed to get options, options is nullptr");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get options, options is nullptr");
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, array, &size);
+    std::vector<ScreenId> screenIds;
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t screenId;
+        napi_value value = nullptr;
+        napi_get_element(env, array, i, &value);
+        if (!ConvertFromJsValue(env, value, screenId)) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
+        }
+        if (static_cast<int32_t>(screenId) < 0) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "ScreenId cannot be a negative number");
+        }
+        screenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [this, screenIds, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnMakeUnique");
+        std::vector<DisplayId> displayIds;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().MakeUniqueScreen(screenIds, displayIds));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsDisplayIdVectorObject(env, displayIds));
+            WLOGI("makeUnique success");
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeUnique failed."));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
 static int32_t GetExpandOptionFromJs(napi_env env, napi_value optionObject, ExpandOption& option)
 {
     napi_value screedIdValue = nullptr;
@@ -741,6 +879,40 @@ static int32_t GetMultiScreenPositionOptionsFromJs(napi_env env, napi_value opti
     return 0;
 }
 
+static int32_t GetRectFromJs(napi_env env, napi_value optionObject, DMRect& rect)
+{
+    napi_value leftValue = nullptr;
+    napi_value topValue = nullptr;
+    napi_value widthValue = nullptr;
+    napi_value heightValue = nullptr;
+    int32_t left;
+    int32_t top;
+    uint32_t width;
+    uint32_t height;
+    napi_get_named_property(env, optionObject, "left", &leftValue);
+    napi_get_named_property(env, optionObject, "top", &topValue);
+    napi_get_named_property(env, optionObject, "width", &widthValue);
+    napi_get_named_property(env, optionObject, "height", &heightValue);
+    if (!ConvertFromJsValue(env, leftValue, left)) {
+        WLOGFE("Failed to convert leftValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, topValue, top)) {
+        WLOGFE("Failed to convert topValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, widthValue, width)) {
+        WLOGFE("Failed to convert widthValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, heightValue, height)) {
+        WLOGFE("Failed to convert heightValue to callbackType");
+        return -1;
+    }
+    rect = {left, top, width, height};
+    return 0;
+}
+
 napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
 {
     WLOGI("JsScreenManager::OnCreateVirtualScreen is called");
@@ -783,10 +955,10 @@ napi_value OnCreateVirtualScreen(napi_env env, napi_callback_info info)
             }
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret), "CreateVirtualScreen failed."));
             WLOGFE("ScreenManager::CreateVirtualScreen failed.");
-            return;
+        } else {
+            task->Resolve(env, CreateJsScreenObject(env, screen));
+            WLOGI("JsScreenManager::OnCreateVirtualScreen success");
         }
-        task->Resolve(env, CreateJsScreenObject(env, screen));
-        WLOGI("JsScreenManager::OnCreateVirtualScreen success");
         delete task;
     };
     NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
@@ -892,6 +1064,7 @@ napi_value OnDestroyVirtualScreen(napi_env env, napi_callback_info info)
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(res),
                 "ScreenManager::DestroyVirtualScreen failed."));
             WLOGFE("ScreenManager::DestroyVirtualScreen failed.");
+            delete task;
             return;
         }
         task->Resolve(env, NapiGetUndefined(env));
@@ -945,6 +1118,58 @@ napi_value OnSetVirtualScreenSurface(napi_env env, napi_callback_info info)
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(res),
                 "ScreenManager::SetVirtualScreenSurface failed."));
             WLOGFE("ScreenManager::SetVirtualScreenSurface failed.");
+        } else {
+            task->Resolve(env, NapiGetUndefined(env));
+        }
+        delete task;
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
+napi_value OnSetScreenPrivacyMaskImage(napi_env env, napi_callback_info info)
+{
+    WLOGI("JsScreenManager::OnSetScreenPrivacyMaskImage is called");
+    DmErrorCode errCode = DmErrorCode::DM_OK;
+    int64_t screenId = -1LL;
+    size_t argc = 4;
+    std::string errMsg = "";
+    napi_value argv[4] = {nullptr};
+    std::shared_ptr<Media::PixelMap> privacyMaskImg;
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        WLOGFE("[NAPI]Argc is invalid: %{public}zu", argc);
+        errMsg = "Invalid args count, need 1 args at least!";
+        errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+    } else {
+        if (!ConvertFromJsValue(env, argv[0], screenId)) {
+            errMsg = "Failed to convert parameter to screen id.";
+            errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+        }
+        if (argc > ARGC_ONE && GetType(env, argv[1]) == napi_object) {
+            privacyMaskImg = OHOS::Media::PixelMapNapi::GetPixelMap(env, argv[1]);
+            if (privacyMaskImg == nullptr) {
+                errMsg = "Failed to convert parameter to pixelmap.";
+                errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
+            }
+        }
+    }
+    if (errCode != DmErrorCode::DM_OK) {
+        WLOGFE("JsScreenManager::OnSetScreenPrivacyMaskImage failed, Invalidate params.");
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+    }
+    napi_value lastParam = nullptr;
+    lastParam = (argc >= ARGC_THREE && GetType(env, argv[ARGC_THREE - 1]) ==
+        napi_function) ? argv[ARGC_THREE - 1] : argv[ARGC_TWO - 1];
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [screenId, privacyMaskImg, env, task = napiAsyncTask.get()]() {
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsScreenManager::OnSetScreenPrivacyMaskImage");
+        auto res = DM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<ScreenManager>().SetScreenPrivacyMaskImage(screenId, privacyMaskImg));
+        if (res != DmErrorCode::DM_OK) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(res), "OnSetScreenPrivacyMaskImage failed."));
+            WLOGFE("OnSetScreenPrivacyMaskImage failed.");
         } else {
             task->Resolve(env, NapiGetUndefined(env));
         }
@@ -1233,6 +1458,7 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenManager::RegisterScreenManagerCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(env, exportObj, "makeMirror", moduleName, JsScreenManager::MakeMirror);
+    BindNativeFunction(env, exportObj, "makeMirrorWithRegion", moduleName, JsScreenManager::MakeMirrorWithRegion);
     BindNativeFunction(env, exportObj, "setMultiScreenMode", moduleName, JsScreenManager::SetMultiScreenMode);
     BindNativeFunction(env, exportObj, "setMultiScreenRelativePosition", moduleName,
         JsScreenManager::SetMultiScreenRelativePosition);
@@ -1243,10 +1469,13 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "destroyVirtualScreen", moduleName, JsScreenManager::DestroyVirtualScreen);
     BindNativeFunction(env, exportObj, "setVirtualScreenSurface", moduleName,
         JsScreenManager::SetVirtualScreenSurface);
+    BindNativeFunction(env, exportObj, "setScreenPrivacyMaskImage", moduleName,
+        JsScreenManager::SetScreenPrivacyMaskImage);
     BindNativeFunction(env, exportObj, "setScreenRotationLocked", moduleName,
         JsScreenManager::SetScreenRotationLocked);
     BindNativeFunction(env, exportObj, "isScreenRotationLocked", moduleName,
         JsScreenManager::IsScreenRotationLocked);
+    BindNativeFunction(env, exportObj, "makeUnique", moduleName, JsScreenManager::MakeUnique);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen

@@ -68,6 +68,7 @@ HWTEST_F(PermissionTest, IsSystemServiceCalling, Function | SmallTest | Level2)
     bool result = Permission::IsSystemServiceCalling(true, true);
     ASSERT_EQ(true, result);
 }
+
 /**
  * @tc.name: IsSystemCallingOrStartByHdcd
  * @tc.desc: test fuction : IsSystemCallingOrStartByHdcd
@@ -80,6 +81,7 @@ HWTEST_F(PermissionTest, IsSystemCallingOrStartByHdcd, Function | SmallTest | Le
     bool result2 = Permission::IsSystemCallingOrStartByHdcd(true);
     ASSERT_EQ(true, result2);
 }
+
 /**
  * @tc.name: IsStartByInputMethod
  * @tc.desc: test fuction : IsStartByInputMethod
@@ -90,6 +92,7 @@ HWTEST_F(PermissionTest, IsStartByInputMethod, Function | SmallTest | Level2)
     bool result = Permission::IsStartByInputMethod();
     ASSERT_EQ(false, result);
 }
+
 /**
  * @tc.name: CheckIsCallingBundleName
  * @tc.desc: test fuction : CheckIsCallingBundleName

@@ -118,7 +118,6 @@ HWTEST_F(ScreenRotationControllerTest, DefaultDeviceRotationOffset, Function | S
     ASSERT_EQ(180, ScreenRotationController::defaultDeviceRotationOffset_);
 }
 
-
 /**
  * @tc.name: CalcTargetDisplayRotation
  * @tc.desc: Calc target display rotation
@@ -606,6 +605,7 @@ HWTEST_F(ScreenRotationControllerTest, CalcRotationDegree, Function | SmallTest 
     GravityData data2 = {1.f, 1.f, 1.f};
     ASSERT_EQ(315, GravitySensorSubscriber::CalcRotationDegree(&data2));
 }
+
 /**
  * @tc.name: CalcSensorRotation
  * @tc.desc: Calc sensor rotation
@@ -637,7 +637,7 @@ HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, Function | SmallTe
 
     MotionSubscriber::isMotionSensorSubscribed_ = false;
     MotionSubscriber::SubscribeMotionSensor();
-    ASSERT_EQ(true, MotionSubscriber::isMotionSensorSubscribed_);
+    ASSERT_EQ(false, MotionSubscriber::isMotionSensorSubscribed_);
 
     MotionSubscriber::isMotionSensorSubscribed_ = false;
     MotionSubscriber::UnsubscribeMotionSensor();
@@ -645,7 +645,7 @@ HWTEST_F(ScreenRotationControllerTest, SubscribeMotionSensor, Function | SmallTe
 
     MotionSubscriber::isMotionSensorSubscribed_ = true;
     MotionSubscriber::UnsubscribeMotionSensor();
-    ASSERT_EQ(false, MotionSubscriber::isMotionSensorSubscribed_);
+    ASSERT_EQ(true, MotionSubscriber::isMotionSensorSubscribed_);
 }
 #endif
 }

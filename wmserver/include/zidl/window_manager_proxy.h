@@ -38,7 +38,7 @@ public:
         bool isFromClient = false) override;
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
-    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override;
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, const Rect& rect = Rect::EMPTY_RECT) override;
     WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) override;
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override;
@@ -79,7 +79,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets) override;
     void SetMaximizeMode(MaximizeMode maximizeMode) override;
     MaximizeMode GetMaximizeMode() override;
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
 private:
     static inline BrokerDelegator<WindowManagerProxy> delegator_;
 };

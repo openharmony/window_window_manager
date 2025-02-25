@@ -55,11 +55,12 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfoByScreenId(ScreenId scree
     return  displayManagerServiceProxy_->GetDisplayInfoByScreen(screenId);
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma)
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
 
-    return displayManagerServiceProxy_->GetDisplaySnapshot(displayId, errorCode);
+    return displayManagerServiceProxy_->GetDisplaySnapshot(displayId, errorCode, isUseDma);
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode)
@@ -235,6 +236,14 @@ DMError ScreenManagerAdapter::SetVirtualScreenSurface(ScreenId screenId, sptr<Su
     return displayManagerServiceProxy_->SetVirtualScreenSurface(screenId, surface->GetProducer());
 }
 
+DMError ScreenManagerAdapter::SetScreenPrivacyMaskImage(ScreenId screenId,
+    const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    WLOGFI("DisplayManagerAdapter::SetScreenPrivacyMaskImage");
+    return displayManagerServiceProxy_->SetScreenPrivacyMaskImage(screenId, privacyMaskImg);
+}
+
 DMError ScreenManagerAdapter::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -286,6 +295,12 @@ ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
 {
     INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
+}
+
+ScreenPowerState ScreenManagerAdapter::GetScreenPower()
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+    return displayManagerServiceProxy_->GetScreenPower();
 }
 
 DMError ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
@@ -461,7 +476,7 @@ void DMSDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapter::~BaseAdapter()
 {
-    WLOGFI("BaseAdapter destory!");
+    WLOGFI("destory!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     Clear();
     displayManagerServiceProxy_ = nullptr;
@@ -469,7 +484,7 @@ BaseAdapter::~BaseAdapter()
 
 void BaseAdapter::Clear()
 {
-    WLOGFD("BaseAdapter Clear!");
+    WLOGFD("Clear!");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);
@@ -478,11 +493,27 @@ void BaseAdapter::Clear()
 }
 
 DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-                                         ScreenId& screenGroupId)
+    ScreenId& screenGroupId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+}
+
+DMError ScreenManagerAdapter::MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+    ScreenId& screenGroupId)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->MakeMirrorForRecord(mainScreenId, mirrorScreenId, screenGroupId);
+}
+
+DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+    DMRect mainScreenRegion, ScreenId& screenGroupId)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion, screenGroupId);
 }
 
 DMError ScreenManagerAdapter::SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
@@ -568,6 +599,18 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     return displayManagerServiceProxy_->GetDisplayInfoById(displayId);
 }
 
+sptr<DisplayInfo> DisplayManagerAdapter::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    WLOGFD("enter, displayId: %{public}" PRIu64" ", displayId);
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("display id is invalid");
+        return nullptr;
+    }
+    INIT_PROXY_CHECK_RETURN(nullptr);
+
+    return displayManagerServiceProxy_->GetVisibleAreaDisplayInfoById(displayId);
+}
+
 sptr<CutoutInfo> DisplayManagerAdapter::GetCutoutInfo(DisplayId displayId)
 {
     WLOGFD("DisplayManagerAdapter::GetCutoutInfo");
@@ -636,11 +679,11 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
-DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode);
+    return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode, reason);
 }
 
 void DisplayManagerAdapter::SetDisplayScale(ScreenId screenId,
@@ -755,11 +798,12 @@ DMError ScreenManagerAdapter::ResizeVirtualScreen(ScreenId screenId, uint32_t wi
     return displayManagerServiceProxy_->ResizeVirtualScreen(screenId, width, height);
 }
 
-DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& screenIds)
+DMError ScreenManagerAdapter::MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+    std::vector<DisplayId>& displayIds)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->MakeUniqueScreen(screenIds);
+    return displayManagerServiceProxy_->MakeUniqueScreen(screenIds, displayIds);
 }
 
 DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& area)
@@ -771,6 +815,17 @@ DMError DisplayManagerAdapter::GetAvailableArea(DisplayId displayId, DMRect& are
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->GetAvailableArea(displayId, area);
+}
+
+DMError DisplayManagerAdapter::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId id is invalid");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetExpandAvailableArea(displayId, area);
 }
 
 VirtualScreenFlag ScreenManagerAdapter::GetVirtualScreenFlag(ScreenId screenId)
@@ -804,10 +859,11 @@ DMError ScreenManagerAdapter::SetVirtualScreenRefreshRate(ScreenId screenId, uin
     return displayManagerServiceProxy_->SetVirtualScreenRefreshRate(screenId, refreshInterval);
 }
 
-void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
 {
     INIT_PROXY_CHECK_RETURN();
-    displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList);
+    displayManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
 }
 
 void DisplayManagerAdapter::DisablePowerOffRenderControl(ScreenId screenId)
@@ -864,6 +920,23 @@ std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetScreenCapture(const C
 sptr<DisplayInfo> DisplayManagerAdapter::GetPrimaryDisplayInfo()
 {
     INIT_PROXY_CHECK_RETURN(nullptr);
-    return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return displayManagerServiceProxy_->GetPrimaryDisplayInfo();
+    } else {
+        return displayManagerServiceProxy_->GetDefaultDisplayInfo();
+    }
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManagerAdapter::GetDisplaySnapshotWithOption(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    INIT_PROXY_CHECK_RETURN(nullptr);
+    return displayManagerServiceProxy_->GetDisplaySnapshotWithOption(captureOption, errorCode);
+}
+
+DMError ScreenManagerAdapter::SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    return displayManagerServiceProxy_->SetScreenSkipProtectedWindow(screenIds, isEnable);
 }
 } // namespace OHOS::Rosen

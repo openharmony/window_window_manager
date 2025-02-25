@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_CONTROLLER_H
 #define OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_CONTROLLER_H
 
@@ -29,6 +30,7 @@ enum class DisplayDeviceType :uint32_t {
     SINGLE_DISPLAY_DEVICE,
     DOUBLE_DISPLAY_DEVICE,
     SINGLE_DISPLAY_POCKET_DEVICE,
+    SECONDARY_DISPLAY_DEVICE,
 };
 
 class FoldScreenController : public RefBase {
@@ -39,18 +41,23 @@ public:
 
     void BootAnimationFinishPowerInit();
     void SetDisplayMode(const FoldDisplayMode displayMode);
+    void RecoverDisplayMode();
     FoldDisplayMode GetDisplayMode();
     bool IsFoldable();
     FoldStatus GetFoldStatus();
     bool GetTentMode();
+    FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
-    void OnTentModeChanged(bool isTentMode);
+    void OnTentModeChanged(bool isTentMode, int32_t hall = -1);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
     void SetOnBootAnimation(bool onBootAnimation);
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
+    Drawing::Rect GetScreenSnapshotRect();
+    void SetMainScreenRegion(DMRect& mainScreenRegion);
+    bool GetCameraMode();
     /*
      *    Avoid fold to expand process queues public interface
      */

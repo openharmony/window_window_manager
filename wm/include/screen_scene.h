@@ -20,6 +20,8 @@
 
 #include "vsync_station.h"
 #include "window.h"
+#include "window_helper.h"
+
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 namespace OHOS::AppExecFwk {
@@ -53,8 +55,11 @@ public:
 
     void SetDisplayOrientation(int32_t orientation);
 
-    uint64_t GetDisplayId() const override;
+    DisplayId GetDisplayId() const override;
     void SetDisplayId(DisplayId displayId);
+
+    bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
+    bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
 
     WindowState GetWindowState() const override
     {
@@ -76,19 +81,17 @@ public:
         return 1; // 1 for root and screen
     }
 
-    Ace::UIContent* GetUIContent() const override
-    {
-        return uiContent_.get();
-    }
-
+    Ace::UIContent* GetUIContent() const override;
     WMError Destroy() override;
 
+    std::string GetClassType() const override { return "ScreenScene"; }
+
 private:
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
     std::unique_ptr<Ace::UIContent> uiContent_;
     float density_ = 1.0f;
     int32_t orientation_;
-    uint64_t displayId_;
+    DisplayId displayId_;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_;
     std::function<void()> frameLayoutFinishCb_ = nullptr;

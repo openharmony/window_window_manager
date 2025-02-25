@@ -67,9 +67,15 @@ sptr<Window> Window::GetTopWindowWithContext(const std::shared_ptr<AbilityRuntim
     return nullptr;
 }
 
-void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
-    return WindowImpl::UpdateConfigurationForAll(configuration);
+    return WindowImpl::UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+}
+
+void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    return WindowImpl::UpdateConfigurationSyncForAll(configuration);
 }
 
 bool OccupiedAreaChangeInfo::Marshalling(Parcel& parcel) const

@@ -143,13 +143,10 @@ HWTEST_F(WindowSessionTest3, NotifyContextTransparent, Function | SmallTest | Le
 HWTEST_F(WindowSessionTest3, SetFocusable04, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = nullptr;
     auto result = session_->SetFocusable(false);
-    ASSERT_EQ(result, WSError::WS_ERROR_NULLPTR);
+    ASSERT_EQ(result, WSError::WS_OK);
 
     session_->isFocused_ = true;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(session_->property_, nullptr);
     session_->property_->SetFocusable(false);
 
     result = session_->SetFocusable(false);
@@ -221,11 +218,6 @@ HWTEST_F(WindowSessionTest3, SetTouchable03, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest3, GetTouchable02, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
-    EXPECT_EQ(true, session_->GetTouchable());
-
-    session_->property_ = nullptr;
     EXPECT_EQ(true, session_->GetTouchable());
 }
 
@@ -267,82 +259,6 @@ HWTEST_F(WindowSessionTest3, UpdateOrientation, Function | SmallTest | Level2)
     session_->sessionStage_ = mockSessionStage;
     result = session_->UpdateOrientation();
     EXPECT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: HandleDialogBackground
- * @tc.desc: HandleDialogBackground Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleDialogBackground, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
-    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    session_->HandleDialogBackground();
-
-    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<Session> session01 = nullptr;
-
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> session02 = sptr<Session>::MakeSptr(info);
-    sptr<Session> session03 = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(session02, nullptr);
-    EXPECT_NE(session03, nullptr);
-
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
-    session02->sessionStage_ = mockSessionStage;
-    session03->sessionStage_ = nullptr;
-
-    session_->dialogVec_.push_back(session01);
-    session_->dialogVec_.push_back(session02);
-    session_->dialogVec_.push_back(session03);
-    session_->HandleDialogBackground();
-    session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
- * @tc.name: HandleDialogForeground
- * @tc.desc: HandleDialogForeground Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleDialogForeground, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
-    session_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
-    session_->HandleDialogForeground();
-
-    session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<Session> session01 = nullptr;
-
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> session02 = sptr<Session>::MakeSptr(info);
-    sptr<Session> session03 = sptr<Session>::MakeSptr(info);
-    EXPECT_NE(session02, nullptr);
-    EXPECT_NE(session03, nullptr);
-
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
-    session02->sessionStage_ = mockSessionStage;
-    session03->sessionStage_ = nullptr;
-
-    session_->dialogVec_.push_back(session01);
-    session_->dialogVec_.push_back(session02);
-    session_->dialogVec_.push_back(session03);
-    session_->HandleDialogForeground();
-    session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
 
 /**
@@ -401,55 +317,6 @@ HWTEST_F(WindowSessionTest3, SetActive03, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: IsTopDialog02
- * @tc.desc: IsTopDialog Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, IsTopDialog02, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->SetParentSession(nullptr);
-    EXPECT_EQ(false, session_->IsTopDialog());
-
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> parentSession = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(parentSession, nullptr);
-    parentSession->dialogVec_.clear();
-    session_->SetParentSession(parentSession);
-    auto result = session_->IsTopDialog();
-    EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.name: IsTopDialog03
- * @tc.desc: IsTopDialog Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, IsTopDialog03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    session_->dialogVec_.clear();
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> dialogSession1 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession2 = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession1, nullptr);
-    ASSERT_NE(dialogSession2, nullptr);
-    dialogSession1->SetParentSession(session_);
-    dialogSession2->SetParentSession(session_);
-    session_->dialogVec_.push_back(dialogSession1);
-    session_->dialogVec_.push_back(dialogSession2);
-    dialogSession1->SetSessionState(SessionState::STATE_INACTIVE);
-    dialogSession2->SetSessionState(SessionState::STATE_INACTIVE);
-    EXPECT_EQ(false, dialogSession1->IsTopDialog());
-}
-
-/**
  * @tc.name: PresentFocusIfPointDown
  * @tc.desc: PresentFocusIfPointDown Test
  * @tc.type: FUNC
@@ -461,81 +328,10 @@ HWTEST_F(WindowSessionTest3, PresentFocusIfPointDown, Function | SmallTest | Lev
     session_->PresentFocusIfPointDown();
 
     session_->isFocused_ = false;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(session_->property_, nullptr);
     session_->property_->SetFocusable(false);
     session_->PresentFocusIfPointDown();
     session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
     EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
- * @tc.name: HandlePointDownDialog
- * @tc.desc: HandlePointDownDialog Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandlePointDownDialog, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> dialogSession1 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession2 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession3 = sptr<Session>::MakeSptr(info);
-    sptr<Session> dialogSession4 = nullptr;
-    ASSERT_NE(dialogSession1, nullptr);
-    ASSERT_NE(dialogSession2, nullptr);
-    ASSERT_NE(dialogSession3, nullptr);
-    dialogSession1->SetSessionState(SessionState::STATE_FOREGROUND);
-    dialogSession2->SetSessionState(SessionState::STATE_ACTIVE);
-    dialogSession2->SetSessionState(SessionState::STATE_INACTIVE);
-    session_->dialogVec_.push_back(dialogSession1);
-    session_->dialogVec_.push_back(dialogSession2);
-    session_->dialogVec_.push_back(dialogSession3);
-    session_->dialogVec_.push_back(dialogSession4);
-    session_->HandlePointDownDialog();
-    session_->SetPendingSessionToBackgroundForDelegatorListener(nullptr);
-    EXPECT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
-}
-
-/**
- * @tc.name: HandleSubWindowClick01
- * @tc.desc: parentSession and property is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleSubWindowClick01, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    EXPECT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: HandleSubWindowClick03
- * @tc.desc: parentSession->dialogVec_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, HandleSubWindowClick03, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "testSession1";
-    info.moduleName_ = "testSession2";
-    info.bundleName_ = "testSession3";
-    sptr<Session> dialogSession = sptr<Session>::MakeSptr(info);
-    ASSERT_NE(dialogSession, nullptr);
-    session_->SetParentSession(dialogSession);
-
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
-
-    auto result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_DOWN);
-    EXPECT_EQ(result, WSError::WS_OK);
-
-    result = session_->HandleSubWindowClick(MMI::PointerEvent::POINTER_ACTION_MOVE);
-    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**
@@ -575,8 +371,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent07, Function | SmallTest | Leve
     session_->SetSessionState(SessionState::STATE_CONNECT);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     auto result = session_->TransferPointerEvent(pointerEvent);
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
@@ -593,9 +387,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent08, Function | SmallTest | Leve
     session_->SetSessionState(SessionState::STATE_CONNECT);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
 
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     SessionInfo info;
@@ -621,9 +412,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent09, Function | SmallTest | Leve
     session_->SetSessionState(SessionState::STATE_FOREGROUND);
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
-
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
 
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
     SessionInfo info;
@@ -653,8 +441,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent10, Function | SmallTest | Leve
     ASSERT_NE(pointerEvent, nullptr);
     pointerEvent->pointerAction_ = MMI::PointerEvent::POINTER_ACTION_DOWN;
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
 
     SessionInfo info;
@@ -689,8 +475,6 @@ HWTEST_F(WindowSessionTest3, TransferPointerEvent11, Function | SmallTest | Leve
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     ASSERT_NE(pointerEvent, nullptr);
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(session_->property_, nullptr);
     session_->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
 
     session_->windowEventChannel_ = nullptr;
@@ -745,7 +529,6 @@ HWTEST_F(WindowSessionTest3, Snapshot, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     session_->SetSessionState(SessionState::STATE_CONNECT);
     session_->SetSessionStateChangeNotifyManagerListener(nullptr);
 
@@ -754,28 +537,10 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallT
 
     int resultValue = 0;
     NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetBufferAvailableChangeListener(func);
-    EXPECT_EQ(resultValue, 1);
-}
-
-/**
- * @tc.name: SetLeashWindowSurfaceNodeChangedListener
- * @tc.desc: SetLeashWindowSurfaceNodeChangedListener Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetLeashWindowSurfaceNodeChangedListener, Function | SmallTest | Level2)
-{
-    ASSERT_NE(session_, nullptr);
-    int resultValue = 0;
-    NotifyLeashWindowSurfaceNodeChangedFunc func = [&resultValue]() {
-        resultValue = 1;
-    };
-    session_->SetLeashWindowSurfaceNodeChangedListener(func);
-    session_->SetLeashWinSurfaceNode(nullptr);
-    EXPECT_EQ(resultValue, 1);
-    session_->SetLeashWindowSurfaceNodeChangedListener(nullptr);
+    ASSERT_EQ(resultValue, 1);
 }
 
 /**
@@ -785,17 +550,13 @@ HWTEST_F(WindowSessionTest3, SetLeashWindowSurfaceNodeChangedListener, Function 
  */
 HWTEST_F(WindowSessionTest3, NotifySessionFocusableChange, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     NotifySessionFocusableChangeFunc func = [&resultValue](const bool isFocusable) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetSessionFocusableChangeListener(func);
     session_->NotifySessionFocusableChange(true);
-
-    session_->sessionFocusableChangeFunc_ = nullptr;
-    session_->NotifySessionFocusableChange(true);
-    EXPECT_EQ(resultValue, 1);
+    ASSERT_EQ(resultValue, 2);
 }
 
 /**
@@ -840,12 +601,10 @@ HWTEST_F(WindowSessionTest3, NotifyUIRequestFocus, Function | SmallTest | Level2
  */
 HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level2)
 {
-    session_->property_ = nullptr;
     auto enable = true;
     auto isSupportDragInPcCompatibleMode = true;
-    ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
+    ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeInPc(enable, isSupportDragInPcCompatibleMode));
 
     enable = false;
@@ -859,14 +618,13 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionTest3, NotifySessionTouchableChange, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     NotifySessionTouchableChangeFunc func = [&resultValue](const bool touchable) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetSessionTouchableChangeListener(func);
     session_->NotifySessionTouchableChange(true);
-    EXPECT_EQ(resultValue, 1);
+    ASSERT_EQ(resultValue, 2);
 }
 
 /**
@@ -879,14 +637,17 @@ HWTEST_F(WindowSessionTest3, NotifyClick, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     bool hasRequestFocus = true;
-    NotifyClickFunc func = [&resultValue, &hasRequestFocus](bool requestFocus) {
+    bool hasIsClick = true;
+    NotifyClickFunc func = [&resultValue, &hasRequestFocus, &hasIsClick](bool requestFocus, bool isClick) {
         resultValue = 1;
         hasRequestFocus = requestFocus;
+        hasIsClick = isClick;
     };
     session_->SetClickListener(func);
-    session_->NotifyClick(false);
+    session_->NotifyClick(false, false);
     EXPECT_EQ(resultValue, 1);
     EXPECT_EQ(hasRequestFocus, false);
+    EXPECT_EQ(hasIsClick, false);
 }
 
 /**
@@ -896,11 +657,10 @@ HWTEST_F(WindowSessionTest3, NotifyClick, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest3, NotifyRequestFocusStatusNotifyManager, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     NotifyRequestFocusStatusNotifyManagerFunc func = [&resultValue](int32_t persistentId,
         const bool isFocused, const bool byForeground, FocusChangeReason reason) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetRequestFocusStatusNotifyManagerListener(func);
     FocusChangeReason reason = FocusChangeReason::SCB_SESSION_REQUEST;
@@ -1035,11 +795,9 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     session_->isVisible_ = true;
-    session_->property_ = nullptr;
     session_->RectCheckProcess();
 
     session_->state_ = SessionState::STATE_FOREGROUND;
-    session_->property_ = nullptr;
     session_->RectCheckProcess();
     EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
 }
@@ -1054,16 +812,14 @@ HWTEST_F(WindowSessionTest3, RectCheckProcess01, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_INACTIVE;
     session_->isVisible_ = false;
-    session_->property_ = nullptr;
     session_->RectCheckProcess();
 
     session_->state_ = SessionState::STATE_ACTIVE;
     session_->isVisible_ = true;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     session_->RectCheckProcess();
 
     session_->property_->displayId_ = 0;
-    sptr<ScreenSession> screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(0, ScreenProperty(), 0);
     ASSERT_NE(screenSession, nullptr);
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
     ASSERT_NE(&screenProperty, nullptr);
@@ -1130,12 +886,8 @@ HWTEST_F(WindowSessionTest3, SetIsPcAppInPad, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     bool isPcAppInPad = false;
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
     auto result = session_->SetIsPcAppInPad(isPcAppInPad);
     EXPECT_EQ(result, WSError::WS_OK);
-
-    session_->property_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetIsPcAppInPad(isPcAppInPad));
 }
 
 /**
@@ -1180,13 +932,12 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeEnableInPad, Function | SmallTest 
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_FOREGROUND;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    EXPECT_NE(nullptr, mockSessionStage);
-    session_->sessionStage_ = mockSessionStage;
-    session_->property_ = nullptr;
     bool enable = true;
+    session_->sessionStage_ = nullptr;
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, session_->SetCompatibleModeEnableInPad(enable));
 
-    session_->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, mockSessionStage);
+    session_->sessionStage_ = mockSessionStage;
     ASSERT_EQ(WSError::WS_OK, session_->SetCompatibleModeEnableInPad(enable));
 
     enable = false;
@@ -1353,6 +1104,37 @@ HWTEST_F(WindowSessionTest3, SetStartingBeforeVisible, Function | SmallTest | Le
     session_->SetStartingBeforeVisible(false);
     ASSERT_EQ(false, session_->isStartingBeforeVisible_);
     ASSERT_EQ(false, session_->GetStartingBeforeVisible());
+}
+
+/**
+ * @tc.name: GetScreenId
+ * @tc.desc: test func: GetScreenId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, GetScreenId, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.screenId_ = 100;
+    ASSERT_EQ(session_->GetScreenId(), 100);
+}
+
+/**
+ * @tc.name: SetFreezeImmediately
+ * @tc.desc: SetFreezeImmediately Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest3, SetFreezeImmediately, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    struct RSSurfaceNodeConfig config;
+    session_->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(session_->surfaceNode_, nullptr);
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
+    session_->surfaceNode_->bufferAvailable_ = true;
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true, 1.0f));
+    session_->surfaceNode_ = nullptr;
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
 }
 }
 } // namespace Rosen

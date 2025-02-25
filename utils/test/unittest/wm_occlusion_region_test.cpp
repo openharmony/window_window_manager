@@ -127,6 +127,7 @@ HWTEST_F(WmOcclusionRegionTest, Update01, Function | SmallTest | Level2)
 
     delete rootNode;
 }
+
 /**
  * @tc.name: Node::GetAndRange01
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetAndRange
@@ -171,6 +172,7 @@ HWTEST_F(WmOcclusionRegionTest, GetAndRange01, Function | SmallTest | Level2)
 
     delete rootNode;
 }
+
 /**
  * @tc.name: Node::GetOrRange01
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetOrRange
@@ -225,6 +227,7 @@ HWTEST_F(WmOcclusionRegionTest, GetOrRange01, Function | SmallTest | Level2)
 
     delete rootNode;
 }
+
 /**
  * @tc.name: Node::GetXOrRange01
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetXOrRange
@@ -277,6 +280,7 @@ HWTEST_F(WmOcclusionRegionTest, GetXOrRange01, Function | SmallTest | Level2)
 
     delete rootNode;
 }
+
 /**
  * @tc.name: Node::GetSubRange01
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Node::GetSubRange
@@ -326,6 +330,7 @@ HWTEST_F(WmOcclusionRegionTest, GetSubRange01, Function | SmallTest | Level2)
 
     delete rootNode;
 }
+
 /**
  * @tc.name: Region::UpdateRects01
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::UpdateRects
@@ -365,6 +370,7 @@ HWTEST_F(WmOcclusionRegionTest, UpdateRects01, Function | SmallTest | Level2)
     }
     delete region;
 }
+
 /**
  * @tc.name: Region::MakeBound01
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::MakeBound
@@ -396,6 +402,7 @@ HWTEST_F(WmOcclusionRegionTest, MakeBound01, Function | SmallTest | Level2)
 
     delete region;
 }
+
 /**
  * @tc.name: Region::RegionOpLocal01
  * @tc.desc: test WmOcclusionRegion WmOcclusion::Region::RegionOpLocal

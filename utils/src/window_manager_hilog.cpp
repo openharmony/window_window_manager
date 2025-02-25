@@ -40,6 +40,13 @@ const std::unordered_map<WmsLogTag, const char *> DOMAIN_CONTENTS_MAP = {
     { WmsLogTag::WMS_INPUT_KEY_FLOW, "InputKeyFlow" },
     { WmsLogTag::WMS_PIPELINE, "WMSPipeLine" },
     { WmsLogTag::WMS_HIERARCHY, "WMSHierarchy" },
+    { WmsLogTag::WMS_PATTERN, "WMSPattern" },
+    { WmsLogTag::WMS_ATTRIBUTE, "WMSAttribute" },
+    { WmsLogTag::WMS_PC, "WMSPc" },
+    { WmsLogTag::WMS_DECOR, "WMSDecor" },
+    { WmsLogTag::WMS_LAYOUT_PC, "WMSLayoutPc" },
+    { WmsLogTag::WMS_STARTUP_PAGE, "WMSStartupPage" },
+    { WmsLogTag::WMS_COMPAT, "WMSCompat" },
 };
 } // namespace OHOS
 }

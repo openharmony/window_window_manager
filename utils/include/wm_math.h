@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WM_MATH_H
 #define OHOS_ROSEN_WM_MATH_H
 
+#include <chrono>
 #include <cmath>
 #include <limits>
 
@@ -30,6 +31,8 @@ inline bool NearZero(float val)
 {
     return val < POS_ZERO && val > NAG_ZERO;
 }
+
+inline bool NearEqual(float left, float right) { return std::abs(left - right) < POS_ZERO; }
 
 inline float ToRadians(float degrees)
 {
@@ -82,7 +85,33 @@ T Clamp(const T& value, const T& lower, const T& upper)
 {
     return Min(upper, Max(lower, value));
 }
+
+inline float NonZero(float val)
+{
+    if (!NearZero(val)) {
+        return val;
+    }
+    return val > 0 ? POS_ZERO : NAG_ZERO;
+}
+
+inline int32_t Floor(float val)
+{
+    return static_cast<int32_t>(std::floor(val));
+}
+
+inline int32_t Ceil(float val)
+{
+    return static_cast<int32_t>(std::ceil(val));
+}
 } // namespace MathHelper
+
+namespace TimeHelper {
+inline float GetDuration(std::chrono::time_point<std::chrono::high_resolution_clock> t0,
+    std::chrono::time_point<std::chrono::high_resolution_clock> t1)
+{
+    return static_cast<float>(std::chrono::duration<float, std::milli>(t1 - t0).count());
+}
+}
 
 namespace TransformHelper {
 struct Vector2 {

@@ -33,7 +33,8 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Displa
 const static uint32_t MAX_RETRY_NUM = 6;
 const static uint32_t RETRY_WAIT_MS = 500;
 const static uint32_t MAX_DISPLAY_SIZE = 32;
-const static uint32_t MAX_INTERVAL_US = 25000;
+const static uint32_t SCB_GET_DISPLAY_INTERVAL_US = 5000;
+const static uint32_t APP_GET_DISPLAY_INTERVAL_US = 25000;
 std::atomic<bool> g_dmIsDestroyed = false;
 std::mutex snapBypickerMutex;
 }
@@ -51,14 +52,17 @@ public:
     sptr<Display> GetDefaultDisplaySync();
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
+    DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     bool IsFoldable();
     bool IsCaptured();
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
+    FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "");
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
     DMError SetFoldStatusLockedFromJs(bool locked);
@@ -86,6 +90,8 @@ public:
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+    DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
+    DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
     DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     sptr<Display> GetDisplayByScreenId(ScreenId screenId);
@@ -115,10 +121,10 @@ private:
     void NotifyCaptureStatusChanged(bool isCapture);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info);
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
-    void NotifyAvailableAreaChanged(DMRect rect);
+    void NotifyAvailableAreaChanged(DMRect rect, DisplayId displayId);
     void Clear();
     std::string GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo);
-
+    std::atomic<bool> needUpdateDisplayFromDMS_ = false;
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId primaryDisplayId_ = DISPLAY_ID_INVALID;
     std::map<DisplayId, sptr<Display>> displayMap_;
@@ -136,6 +142,7 @@ private:
     std::set<sptr<IDisplayUpdateListener>> displayUpdateListeners_;
     std::set<sptr<IDisplayModeListener>> displayModeListeners_;
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners_;
+    std::map<DisplayId, std::set<sptr<IAvailableAreaListener>>> availableAreaListenersMap_;
     class DisplayManagerListener;
     sptr<DisplayManagerListener> displayManagerListener_;
     class DisplayManagerAgent;
@@ -401,9 +408,9 @@ public:
     }
     ~DisplayManagerAvailableAreaAgent() = default;
 
-    virtual void NotifyAvailableAreaChanged(DMRect area) override
+    virtual void NotifyAvailableAreaChanged(DMRect area, DisplayId displayId) override
     {
-        pImpl_->NotifyAvailableAreaChanged(area);
+        pImpl_->NotifyAvailableAreaChanged(area, displayId);
     }
 private:
     sptr<Impl> pImpl_;
@@ -526,7 +533,7 @@ void DisplayManager::Impl::ClearDisplayModeCallback()
 
 void DisplayManager::Impl::Clear()
 {
-    WLOGFI("Clear displaymanager listener");
+    WLOGFI("Clear listener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     DMError res = DMError::DM_OK;
     if (displayManagerListener_ != nullptr) {
@@ -560,13 +567,13 @@ DisplayManager::Impl::~Impl()
 
 DisplayManager::DisplayManager() : pImpl_(new Impl(mutex_))
 {
-    WLOGFD("Create displaymanager instance");
+    WLOGFD("Create instance");
     g_dmIsDestroyed = false;
 }
 
 DisplayManager::~DisplayManager()
 {
-    WLOGFI("Destroy displaymanager instance");
+    WLOGFI("Destroy instance");
     g_dmIsDestroyed = true;
 }
 
@@ -599,7 +606,7 @@ sptr<Display> DisplayManager::Impl::GetDefaultDisplaySync()
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
-    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+    if (defaultDisplayId_ != DISPLAY_ID_INVALID && interval < APP_GET_DISPLAY_INTERVAL_US) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(defaultDisplayId_);
         if (iter != displayMap_.end()) {
@@ -641,10 +648,12 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto lastRequestIter = displayUptateTimeMap_.find(displayId);
+        static uint32_t getDisplayIntervalUs_ = (std::string(program_invocation_name) != "com.ohos.sceneboard")
+             ? APP_GET_DISPLAY_INTERVAL_US : SCB_GET_DISPLAY_INTERVAL_US;
         if (displayId != DISPLAY_ID_INVALID && lastRequestIter != displayUptateTimeMap_.end()) {
             auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestIter->second)
                 .count();
-            if (interval < MAX_INTERVAL_US) {
+            if (interval < getDisplayIntervalUs_ && !needUpdateDisplayFromDMS_) {
                 auto iter = displayMap_.find(displayId);
                 if (iter != displayMap_.end()) {
                     return displayMap_[displayId];
@@ -652,7 +661,6 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
             }
         }
     }
-    WLOGFI("update displayId: %{public}" PRIu64" ", displayId);
     sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
     if (displayInfo == nullptr) {
         WLOGFW("display null id : %{public}" PRIu64" ", displayId);
@@ -666,9 +674,21 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
         displayUptateTimeMap_.erase(displayId);
         return nullptr;
     }
-
+    needUpdateDisplayFromDMS_ = false;
     displayUptateTimeMap_[displayId] = currentTime;
     return displayMap_[displayId];
+}
+
+sptr<DisplayInfo> DisplayManager::Impl::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    WLOGFD("start, displayId: %{public}" PRIu64" ", displayId);
+    sptr<DisplayInfo> displayInfo =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetVisibleAreaDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        WLOGFW("display null id : %{public}" PRIu64" ", displayId);
+        return nullptr;
+    }
+    return displayInfo;
 }
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
@@ -679,6 +699,26 @@ sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     return pImpl_->GetDisplayById(displayId);
+}
+
+sptr<DisplayInfo> DisplayManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    if (g_dmIsDestroyed) {
+        WLOGFI("DM has been destructed");
+        return nullptr;
+    }
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    return pImpl_->GetVisibleAreaDisplayInfoById(displayId);
+}
+
+DMError DisplayManager::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    return pImpl_->GetExpandAvailableArea(displayId, area);
+}
+
+DMError DisplayManager::Impl::GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetExpandAvailableArea(displayId, area);
 }
 
 sptr<Display> DisplayManager::GetDisplayByScreen(ScreenId screenId)
@@ -715,14 +755,15 @@ sptr<Display> DisplayManager::Impl::GetDisplayByScreenId(ScreenId screenId)
     return displayMap_[displayId];
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         WLOGFE("displayId invalid!");
         return nullptr;
     }
     std::shared_ptr<Media::PixelMap> screenShot =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode);
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshot(displayId, errorCode, isUseDma);
     if (screenShot == nullptr) {
         WLOGFE("DisplayManager::GetScreenshot failed!");
         return nullptr;
@@ -763,6 +804,43 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetSnapshotByPicker(Media::Rect
         return nullptr;
     }
     return pixelMap;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotwithConfig(const SnapShotConfig &snapShotConfig,
+    DmErrorCode* errorCode, bool isUseDma)
+{
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshot(snapShotConfig.displayId_, errorCode, isUseDma);
+    if (screenShot == nullptr) {
+        WLOGFE("DisplayManager::GetScreenshot failed!");
+        return nullptr;
+    }
+    // check parameters
+    int32_t oriHeight = screenShot->GetHeight();
+    int32_t oriWidth = screenShot->GetWidth();
+    if (!pImpl_->CheckRectValid(snapShotConfig.imageRect_, oriHeight, oriWidth)) {
+        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+            snapShotConfig.imageRect_.left, snapShotConfig.imageRect_.top,
+            snapShotConfig.imageRect_.width, snapShotConfig.imageRect_.height);
+        return nullptr;
+    }
+    if (!pImpl_->CheckSizeValid(snapShotConfig.imageSize_, oriHeight, oriWidth)) {
+        WLOGFE("size invalid! w %{public}d, h %{public}d", snapShotConfig.imageSize_.width,
+            snapShotConfig.imageSize_.height);
+        return nullptr;
+    }
+    // create crop dest pixelmap
+    Media::InitializationOptions opt;
+    opt.size.width = snapShotConfig.imageSize_.width;
+    opt.size.height = snapShotConfig.imageSize_.height;
+    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    opt.editable = false;
+    auto pixelMap = Media::PixelMap::Create(*screenShot, snapShotConfig.imageRect_, opt);
+    if (pixelMap == nullptr) {
+        WLOGFE("Media::PixelMap::Create failed!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
+    return dstScreenshot;
 }
 
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId displayId, const Media::Rect &rect,
@@ -824,7 +902,7 @@ void DisplayManager::AddDisplayIdFromAms(DisplayId displayId, const wptr<IRemote
     } else {
         displayIdList_.push_back(std::make_pair(abilityToken, displayId));
     }
-    ShowDisplayIdList(true);
+    ShowDisplayIdList(false);
 }
 
 void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityToken)
@@ -845,7 +923,7 @@ void DisplayManager::RemoveDisplayIdFromAms(const wptr<IRemoteObject>& abilityTo
     if (iter != displayIdList_.end()) {
         displayIdList_.erase(iter);
     }
-    ShowDisplayIdList(true);
+    ShowDisplayIdList(false);
 }
 
 DisplayId DisplayManager::GetCallingAbilityDisplayId()
@@ -878,9 +956,9 @@ void DisplayManager::ShowDisplayIdList(bool isShowLog)
         oss << iter.second << ",";
     }
     if (isShowLog) {
-        WLOGFD("%{public}s]", oss.str().c_str());
-    } else {
         WLOGFI("%{public}s]", oss.str().c_str());
+    } else {
+        WLOGFD("%{public}s]", oss.str().c_str());
     }
 }
 
@@ -890,7 +968,7 @@ sptr<Display> DisplayManager::GetDefaultDisplaySync(bool isFromNapi)
         sptr<Display> display = nullptr;
         DisplayId displayId = GetCallingAbilityDisplayId();
         if (displayId != DISPLAY_ID_INVALID) {
-            WLOGFI("displayId:%{public}" PRIu64, displayId);
+            WLOGFD("displayId:%{public}" PRIu64, displayId);
             display = pImpl_->GetDisplayById(displayId);
         }
         if (display != nullptr) {
@@ -978,9 +1056,23 @@ FoldDisplayMode DisplayManager::GetFoldDisplayMode()
     return pImpl_->GetFoldDisplayMode();
 }
 
+FoldDisplayMode DisplayManager::GetFoldDisplayModeForExternal()
+{
+    return pImpl_->GetFoldDisplayModeForExternal();
+}
+
 FoldDisplayMode DisplayManager::Impl::GetFoldDisplayMode()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetFoldDisplayMode();
+}
+
+FoldDisplayMode DisplayManager::Impl::GetFoldDisplayModeForExternal()
+{
+    FoldDisplayMode displayMode = SingletonContainer::Get<DisplayManagerAdapter>().GetFoldDisplayMode();
+    if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+        return FoldDisplayMode::FULL;
+    }
+    return displayMode;
 }
 
 void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
@@ -988,9 +1080,9 @@ void DisplayManager::SetFoldDisplayMode(const FoldDisplayMode mode)
     pImpl_->SetFoldDisplayMode(mode);
 }
 
-DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+DMError DisplayManager::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
-    return pImpl_->SetFoldDisplayModeFromJs(mode);
+    return pImpl_->SetFoldDisplayModeFromJs(mode, reason);
 }
 
 void DisplayManager::SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY)
@@ -1009,9 +1101,9 @@ void DisplayManager::Impl::SetFoldDisplayMode(const FoldDisplayMode mode)
     SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayMode(mode);
 }
 
-DMError DisplayManager::Impl::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+DMError DisplayManager::Impl::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayModeFromJs(mode);
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetFoldDisplayModeFromJs(mode, reason);
 }
 
 void DisplayManager::SetFoldStatusLocked(bool locked)
@@ -1654,7 +1746,7 @@ void DisplayManager::Impl::NotifyScreenMagneticStateChanged(bool isMagneticState
     }
 }
 
-void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect)
+void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect, DisplayId displayId)
 {
     std::set<sptr<IAvailableAreaListener>> availableAreaListeners;
     {
@@ -1663,6 +1755,16 @@ void DisplayManager::Impl::NotifyAvailableAreaChanged(DMRect rect)
     }
     for (auto& listener : availableAreaListeners) {
         listener->OnAvailableAreaChanged(rect);
+    }
+    std::map<DisplayId, std::set<sptr<IAvailableAreaListener>>> availableAreaListenersMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        availableAreaListenersMap = availableAreaListenersMap_;
+    }
+    if (availableAreaListenersMap_.find(displayId) != availableAreaListenersMap_.end()) {
+        for (auto& listener : availableAreaListenersMap[displayId]) {
+            listener->OnAvailableAreaChanged(rect);
+        }
     }
 }
 
@@ -1809,6 +1911,35 @@ DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaL
     return ret;
 }
 
+DMError DisplayManager::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
+{
+    if (listener == nullptr) {
+        WLOGFE("RegisterAvailableAreaListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterAvailableAreaListener(listener, displayId);
+}
+
+DMError DisplayManager::Impl::RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (availableAreaListenerAgent_ == nullptr) {
+        availableAreaListenerAgent_ = new DisplayManagerAvailableAreaAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().RegisterDisplayManagerAgent(
+            availableAreaListenerAgent_,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterAvailableAreaListener failed !");
+        availableAreaListenerAgent_ = nullptr;
+    } else {
+        WLOGD("IAvailableAreaListener register success");
+        availableAreaListenersMap_[displayId].insert(listener);
+    }
+    return ret;
+}
+
 DMError DisplayManager::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener)
 {
     if (listener == nullptr) {
@@ -1828,7 +1959,46 @@ DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAre
     }
     availableAreaListeners_.erase(iter);
     DMError ret = DMError::DM_OK;
-    if (availableAreaListeners_.empty() && availableAreaListenerAgent_ != nullptr) {
+    if (availableAreaListeners_.empty() && availableAreaListenersMap_.empty() &&
+        availableAreaListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
+            availableAreaListenerAgent_,
+            DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
+        availableAreaListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+DMError DisplayManager::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterPrivateWindowListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterAvailableAreaListener(listener, displayId);
+}
+
+DMError DisplayManager::Impl::UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener,
+    DisplayId displayId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (availableAreaListenersMap_.find(displayId) == availableAreaListenersMap_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    auto iter = std::find(availableAreaListenersMap_[displayId].begin(), availableAreaListenersMap_[displayId].end(),
+        listener);
+    if (iter == availableAreaListenersMap_[displayId].end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    availableAreaListenersMap_[displayId].erase(iter);
+    if (availableAreaListenersMap_[displayId].empty()) {
+        availableAreaListenersMap_.erase(displayId);
+    }
+    DMError ret = DMError::DM_OK;
+    if (availableAreaListeners_.empty() && availableAreaListenersMap_.empty() &&
+        availableAreaListenerAgent_ != nullptr) {
         ret = SingletonContainer::Get<DisplayManagerAdapter>().UnregisterDisplayManagerAgent(
             availableAreaListenerAgent_,
             DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER);
@@ -1884,7 +2054,7 @@ void DisplayManager::Impl::NotifyDisplayStateChanged(DisplayId id, DisplayState 
 void DisplayManager::Impl::NotifyDisplayCreate(sptr<DisplayInfo> info)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(info);
+    needUpdateDisplayFromDMS_ = true;
 }
 
 void DisplayManager::Impl::NotifyDisplayDestroy(DisplayId displayId)
@@ -1897,7 +2067,7 @@ void DisplayManager::Impl::NotifyDisplayDestroy(DisplayId displayId)
 void DisplayManager::Impl::NotifyDisplayChange(sptr<DisplayInfo> displayInfo)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    UpdateDisplayInfoLocked(displayInfo);
+    needUpdateDisplayFromDMS_ = true;
 }
 
 bool DisplayManager::Impl::UpdateDisplayInfoLocked(sptr<DisplayInfo> displayInfo)
@@ -2130,9 +2300,10 @@ bool DisplayManager::Impl::ConvertScreenIdToRsScreenId(ScreenId screenId, Screen
     return res;
 }
 
-void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList)
+void DisplayManager::SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+    std::vector<uint64_t> surfaceIdList)
 {
-    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList);
+    SingletonContainer::Get<DisplayManagerAdapter>().SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList);
 }
 
 void DisplayManager::DisablePowerOffRenderControl(ScreenId screenId)
@@ -2183,7 +2354,7 @@ sptr<Display> DisplayManager::Impl::GetPrimaryDisplaySync()
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
-    if (primaryDisplayId_ != DISPLAY_ID_INVALID && interval < MAX_INTERVAL_US) {
+    if (primaryDisplayId_ != DISPLAY_ID_INVALID && interval < APP_GET_DISPLAY_INTERVAL_US) {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(primaryDisplayId_);
         if (iter != displayMap_.end()) {
@@ -2233,6 +2404,57 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenCapture(const CaptureO
         return nullptr;
     }
     return screenCapture;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    DmErrorCode* errorCode)
+{
+    if (captureOption.displayId_ == DISPLAY_ID_INVALID) {
+        WLOGFE("displayId invalid!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> screenShot =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplaySnapshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("get snapshot with option failed!");
+        return nullptr;
+    }
+    return screenShot;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
+    const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode)
+{
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        WLOGFE("set snapshot with option failed!");
+        return nullptr;
+    }
+    // check parameters
+    int32_t oriHeight = screenShot->GetHeight();
+    int32_t oriWidth = screenShot->GetWidth();
+    if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
+        WLOGFE("rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
+            rect.left, rect.top, rect.width, rect.height);
+        return nullptr;
+    }
+    if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
+        WLOGFE("size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        return nullptr;
+    }
+    // create crop dest pixelmap
+    Media::InitializationOptions opt;
+    opt.size.width = size.width;
+    opt.size.height = size.height;
+    opt.scaleMode = Media::ScaleMode::FIT_TARGET_SIZE;
+    opt.editable = false;
+    auto pixelMap = Media::PixelMap::Create(*screenShot, rect, opt);
+    if (pixelMap == nullptr) {
+        WLOGFE("Media::PixelMap::Create failed!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
+    return dstScreenshot;
 }
 } // namespace OHOS::Rosen
 

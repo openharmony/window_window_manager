@@ -22,6 +22,7 @@
 #include "session_manager.h"
 #include "session_display_power_controller.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -34,7 +35,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    std::recursive_mutex mutex_;
 };
 
 void SessionDisplayPowerControllerTest::SetUpTestCase()
@@ -63,7 +63,7 @@ namespace {
 HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, Function | SmallTest | Level1)
 {
     DisplayEvent event = DisplayEvent::UNLOCK;
-    SessionDisplayPowerController controller(mutex_, [](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
+    SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
         sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
         EXPECT_EQ(id, DISPLAY_ID_INVALID);
         EXPECT_EQ(info, nullptr);
@@ -81,13 +81,13 @@ HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, Function 
     HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_KeyguardDrawn, Function | SmallTest | Level1)
     {
         DisplayEvent event = DisplayEvent::KEYGUARD_DRAWN;
-        SessionDisplayPowerController controller(mutex_,
-            [](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
+        SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
         sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
         EXPECT_TRUE(true);
     });
     controller.NotifyDisplayEvent(event);
 }
+
 /**
  * @tc.name: SetDisplayState
  * @tc.desc: SetDisplayState func
@@ -96,7 +96,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, NotifyDisplayEvent_Unlock, Function 
 HWTEST_F(SessionDisplayPowerControllerTest, SetDisplayState, Function | SmallTest | Level1)
 {
     DisplayState state = DisplayState::UNKNOWN;
-    SessionDisplayPowerController controller(mutex_, [](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
+    SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
         sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
         EXPECT_TRUE(true);
     });
@@ -108,6 +108,40 @@ HWTEST_F(SessionDisplayPowerControllerTest, SetDisplayState, Function | SmallTes
     state = DisplayState::OFF;
     result = controller.SetDisplayState(state);
     EXPECT_TRUE(result);
+    state = DisplayState::DOZE;
+    result = controller.SetDisplayState(state);
+    EXPECT_TRUE(result);
+    state = DisplayState::DOZE_SUSPEND;
+    result = controller.SetDisplayState(state);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleSetDisplayStateOff
+ * @tc.desc: HandleSetDisplayStateOff func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionDisplayPowerControllerTest, HandleSetDisplayStateOff, Function | SmallTest | Level1)
+{
+    DisplayState state = DisplayState::UNKNOWN;
+    SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
+        sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
+        EXPECT_TRUE(true);
+    });
+    state = DisplayState::OFF;
+    bool result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_FALSE(result);
+    controller.needCancelNotify_ = true;
+    result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_TRUE(result);
+    controller.needCancelNotify_ = false;
+    controller.canceledSuspend_ = true;
+    result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_TRUE(result);
+    controller.isSuspendBegin_ = true;
+    controller.canceledSuspend_ = false;
+    result = controller.HandleSetDisplayStateOff(state);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -118,7 +152,7 @@ HWTEST_F(SessionDisplayPowerControllerTest, SetDisplayState, Function | SmallTes
 HWTEST_F(SessionDisplayPowerControllerTest, SuspendBegin, Function | SmallTest | Level1)
 {
     PowerStateChangeReason reason = PowerStateChangeReason::POWER_BUTTON;
-    SessionDisplayPowerController controller(mutex_, [](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
+    SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
         sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
         EXPECT_TRUE(true);
     });
@@ -133,11 +167,8 @@ HWTEST_F(SessionDisplayPowerControllerTest, SuspendBegin, Function | SmallTest |
 HWTEST_F(SessionDisplayPowerControllerTest, WaitScreenOffNotify, Function | SmallTest | Level1)
 {
     DisplayState state = DisplayState::ON_SUSPEND;
-    SessionDisplayPowerController controller(mutex_, [](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
-        sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
-        EXPECT_TRUE(true);
-    });
-    EXPECT_EQ(state, DisplayState::ON_SUSPEND);
+    ScreenSessionManager::GetInstance().sessionDisplayPowerController_->WaitScreenOffNotify(state);
+    EXPECT_NE(state, DisplayState::UNKNOWN);
 }
 
 }

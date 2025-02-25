@@ -30,6 +30,16 @@
 #include "display_change_info.h"
 
 namespace OHOS::Rosen {
+/**
+ * @brief snapShot config
+ */
+struct SnapShotConfig {
+    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    Media::Size imageSize_;
+    Media::Rect imageRect_;
+    int rotation_;
+};
+
 class DisplayManager {
 WM_DECLARE_SINGLE_INSTANCE_BASE(DisplayManager);
 friend class DMSDeathRecipient;
@@ -201,6 +211,23 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
 
     /**
+     * @brief Get the display object by id.Only for PC.
+     *
+     * @param displayId Id of the target display.
+     * @return Default display object.
+     */
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
+
+    /**
+     * @brief get available area of the display.(the screen area without dock and statusbar)
+     *
+     * @param displayId Id of the target display.
+     * @param area available area of the screen.
+     * @return DMError
+     */
+    DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
+
+    /**
      * @brief Get the display object by corresponding screenId.
      *
      * @param screenId The id of the target screen.
@@ -231,7 +258,8 @@ public:
      * @param errorCode error code.
      * @return PixelMap object of screenshot.
      */
-    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, DmErrorCode* errorCode = nullptr);
+    std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
      * @brief Get screenshot by user select area.
@@ -254,6 +282,16 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetScreenshot(DisplayId displayId, const Media::Rect &rect,
         const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get screenshot with option.
+     *
+     * @param snapShotConfig Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotwithConfig(const SnapShotConfig &snapShotConfig,
+        DmErrorCode* errorCode = nullptr, bool isUseDma = false);
 
     /**
      * @brief Begin to wake up screen.
@@ -552,12 +590,28 @@ public:
     DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
 
     /**
+     * @brief Register a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError RegisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
+
+    /**
      * @brief UnRegister a listener for the event of available  area changed.
      *
      * @param listener IAvailableAreaListener.
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener);
+
+    /**
+     * @brief UnRegister a listener for the event of available  area changed.
+     *
+     * @param listener IAvailableAreaListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterAvailableAreaListener(sptr<IAvailableAreaListener> listener, DisplayId displayId);
 
     /**
      * @brief Add a surface node to the target display.
@@ -606,6 +660,13 @@ public:
     FoldDisplayMode GetFoldDisplayMode();
 
     /**
+     * @brief Get the display mode of the foldable device for external.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayModeForExternal();
+
+    /**
      * @brief Change the display mode of the foldable device.
      *
      * @param mode target display mode to change.
@@ -616,9 +677,10 @@ public:
      * @brief Change the display mode of the foldable device from js.
      *
      * @param mode target display mode to change.
+     * @param reason display mode change reason.
      * @return DM_OK means set success, others means set failed.
      */
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode);
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason = "");
 
     /**
      * @brief Set display scale.
@@ -668,8 +730,10 @@ public:
      *
      * @param screenId ScreenId used in virtual screen.
      * @param windowIdList The windowId list to shield on cast screen.
+     * @param surfaceIdList The surfaceId list to shield on cast screen.
     */
-    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList);
+    void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
+        std::vector<uint64_t> surfaceIdList = {});
 
     /**
      * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
@@ -742,6 +806,28 @@ public:
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
 
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        DmErrorCode* errorCode = nullptr);
+
+    /**
+     * @brief Get screenshot with capture option.
+     *
+     * @param captureOption  screen capture option.
+     * @param rect Rect of screenshot.
+     * @param size Size of screenshot.
+     * @param rotation Parameter of rotation.
+     * @param errorCode error code.
+     * @return PixelMap object of screenshot.
+     */
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOption(const CaptureOption& captureOption,
+        const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
 private:
     DisplayManager();
     ~DisplayManager();

@@ -38,8 +38,9 @@ public:
     MOCK_METHOD2(Background, WSError(bool isFromClient, const std::string& identityToken));
     MOCK_METHOD2(Disconnect, WSError(bool isFromClient, const std::string& identityToken));
 
-    MOCK_METHOD4(UpdateSessionRect, WSError(const WSRect& rect, const SizeChangeReason reason,
-        bool isGlobal, bool isFromMoveToGlobal));
+    MOCK_METHOD6(UpdateSessionRect, WSError(const WSRect& rect, SizeChangeReason reason,
+        bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
+        const RectAnimationConfig& rectAnimationConfig));
     MOCK_METHOD1(UpdateClientRect, WSError(const WSRect& rect));
 
     MOCK_METHOD0(Recover, WSError(void));
@@ -49,7 +50,7 @@ public:
     MOCK_METHOD1(OnSessionEvent, WSError(SessionEvent event));
     MOCK_METHOD1(RequestSessionBack, WSError(bool needMoveToBackground));
     MOCK_METHOD0(RaiseToAppTop, WSError(void));
-    MOCK_METHOD1(GetAvoidAreaByType, AvoidArea(AvoidAreaType type));
+    MOCK_METHOD3(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect, int32_t apiVersion));
     MOCK_METHOD1(SetAspectRatio, WSError(float ratio));
     MOCK_METHOD1(ResetAspectRatio, WSError(float ratio));
     MOCK_METHOD1(OnNeedAvoid, WSError(bool status));

@@ -86,6 +86,7 @@ public:
     void OnStart() override;
     void OnStop() override;
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void SetWindowInputEventConsumer();
     int Dump(int fd, const std::vector<std::u16string>& args) override;
 
     WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
@@ -98,7 +99,8 @@ public:
     void NotifyAnimationAbilityDied(sptr<WindowTransitionInfo> info);
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override;
     WMError RequestFocus(uint32_t windowId) override;
-    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType) override;
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType avoidAreaType,
+        const Rect& rect = Rect::EMPTY_RECT) override;
     void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) override;
     void ProcessPointDown(uint32_t windowId, bool isPointDown) override;
@@ -150,7 +152,7 @@ public:
     void PostAsyncTask(Task task, const std::string& taskName = "WMSTask", uint32_t delay = 0);
     void SetMaximizeMode(MaximizeMode maximizeMode) override;
     MaximizeMode GetMaximizeMode() override;
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override;
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
 
 protected:
     WindowManagerService();
@@ -164,7 +166,7 @@ private:
     void OnWindowEvent(Event event, const sptr<IRemoteObject>& remoteObject);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
-    WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken);
+    WMError GetFocusWindowInfo(sptr<IRemoteObject>& abilityToken, DisplayId displayId = DEFAULT_DISPLAY_ID);
     bool CheckSystemWindowPermission(const sptr<WindowProperty>& property) const;
     bool CheckAnimationPermission(const sptr<WindowProperty>& property) const;
     void LoadWindowParameter();

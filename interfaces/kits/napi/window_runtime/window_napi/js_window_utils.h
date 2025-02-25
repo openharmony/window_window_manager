@@ -87,6 +87,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_GLOBAL_SEARCH,
     TYPE_HANDWRITE,
     TYPE_SCREEN_CONTROL,
+    TYPE_WALLET_SWIPE_CARD,
     TYPE_END
 };
 
@@ -124,6 +125,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
     { WindowType::WINDOW_TYPE_HANDWRITE,           ApiWindowType::TYPE_HANDWRITE         },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,      ApiWindowType::TYPE_SCREEN_CONTROL    },
+    { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -150,6 +152,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
     { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
     { ApiWindowType::TYPE_SCREEN_CONTROL,      WindowType::WINDOW_TYPE_SCREEN_CONTROL      },
+    { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -260,6 +263,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::ROTATION,              RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::DRAG,                  RectChangeReason::DRAG       },
     { WindowSizeChangeReason::DRAG_START,            RectChangeReason::DRAG_START },
+    { WindowSizeChangeReason::DRAG_MOVE,             RectChangeReason::MOVE       },
     { WindowSizeChangeReason::DRAG_END,              RectChangeReason::DRAG_END   },
     { WindowSizeChangeReason::RESIZE,                RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::MOVE,                  RectChangeReason::MOVE       },
@@ -270,6 +274,8 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
@@ -285,36 +291,51 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };
 
+using AsyncCallbackFunc_ = std::function<void(napi_env env, size_t argc, napi_value* argv)>;
+
+class AsyncCallback : virtual public RefBase {
+public:
+    AsyncCallbackFunc_ resolvedCallback_ = nullptr;
+    AsyncCallbackFunc_ rejectedCallback_ = nullptr;
+    AsyncCallback(AsyncCallbackFunc_ resolvedCallback, AsyncCallbackFunc_ rejectedCallback)
+        : resolvedCallback_(resolvedCallback), rejectedCallback_(rejectedCallback) {}
+};
+
+    /*
+     * Promise
+     */
+    bool CheckPromise(napi_env env, napi_value promiseObj);
+    napi_value ResolvedCallback(napi_env env, napi_callback_info info);
+    napi_value RejectedCallback(napi_env env, napi_callback_info info);
+    bool CallPromise(napi_env env, napi_value promiseObj, AsyncCallback* asyncCallback);
+
+    napi_value CreateJsWindowLayoutInfoArrayObject(napi_env env, const std::vector<sptr<WindowLayoutInfo>>& infos);
+    napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutInfo>& info);
     napi_value CreateJsWindowInfoArrayObject(napi_env env, const std::vector<sptr<WindowVisibilityInfo>>& infos);
     napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInfo>& window);
     napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
-    void GetSystemBarPropertiesFromJs(sptr<Window>& window,
-        std::map<WindowType, SystemBarProperty>& newProperties,
-        std::map<WindowType, SystemBarPropertyFlag>& newPropertyFlags,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
-    bool SetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject, sptr<Window>& window,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+    bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
-    bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
-        napi_env env, napi_callback_info info, sptr<Window>& window);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+    bool GetSystemBarStatus(napi_env env, napi_callback_info info,
+        std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
+    napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window);
+    bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue);
+    bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr);
     bool ParseAndCheckRect(napi_env env, napi_value jsObject, const Rect& windowRect, Rect& touchableRect);
     WmErrorCode ParseTouchableAreas(napi_env env, napi_callback_info info, const Rect& windowRect,
         std::vector<Rect>& touchableAreas);
-    void GetSpecificBarStatus(sptr<Window>& window, const std::string& name,
-        std::map<WindowType, SystemBarProperty>& newSystemBarProperties,
-        std::map<WindowType, SystemBarProperty>& systemBarProperties);
     bool GetSpecificBarStatus(napi_env env, napi_callback_info info,
-        std::map<WindowType, SystemBarProperty>& systemBarProperties);
+        bool& systemBarEnable, bool& systemBarEnableAnimation);
     napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env,
         const SystemBarRegionTints& tints);
     napi_value ConvertAvoidAreaToJsValue(napi_env env, const AvoidArea& avoidArea, AvoidAreaType type);
@@ -338,15 +359,22 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     napi_value ConvertTitleButtonAreaToJsValue(napi_env env, const TitleButtonRect& titleButtonRect);
     napi_value ExtensionWindowAttributeInit(napi_env env);
     napi_value ModalityTypeInit(napi_env env);
+    napi_value CreateJsDecorButtonStyleObj(napi_env env, DecorButtonStyle decorButtonStyle);
+    napi_value ConvertWindowDensityInfoToJsValue(napi_env env, const WindowDensityInfo& windowDensityInfo);
+    bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& decorButtonStyle);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
+    bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration);
+    bool ParseRectAnimationConfig(napi_env env, napi_value jsObject, RectAnimationConfig& rectAnimationConfig);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,
         std::map<WindowType, SystemBarProperty>& properties,
         std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateAsyncTask(napi_env env, napi_value lastParam,
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::ExecuteCallback>&& execute,
         std::unique_ptr<AbilityRuntime::NapiAsyncTask::CompleteCallback>&& complete, napi_value* result);
-    bool ParseSubWindowOptions(napi_env env, napi_value JsObject, const sptr<WindowOption>& WindowOption);
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask> CreateEmptyAsyncTask(
+        napi_env env, napi_value lastParam, napi_value* result);
+    bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption);
     template<class T>
     bool ParseJsValue(napi_value jsObject, napi_env env, const std::string& name, T& data)
     {

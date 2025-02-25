@@ -14,8 +14,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "window_stub.h"
 #include "window_agent.h"
+#include "window_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,13 +30,9 @@ public:
     sptr<WindowStub> windowStub_;
 };
 
-void WindowStubTest::SetUpTestCase()
-{
-}
+void WindowStubTest::SetUpTestCase() {}
 
-void WindowStubTest::TearDownTestCase()
-{
-}
+void WindowStubTest::TearDownTestCase() {}
 
 void WindowStubTest::SetUp()
 {
@@ -45,9 +41,7 @@ void WindowStubTest::SetUp()
     windowStub_ = new WindowAgent(window);
 }
 
-void WindowStubTest::TearDown()
-{
-}
+void WindowStubTest::TearDown() {}
 
 namespace {
 /**
@@ -195,7 +189,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest06, Function | SmallTest | Level2)
     EXPECT_EQ(res, 0);
 }
 
-
 /**
  * @tc.name: OnRemoteRequest07
  * @tc.desc: test TRANS_ID_NOTIFY_CLIENT_POINT_UP success
@@ -269,9 +262,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
-
-    IWindow::WindowMessage msgId = IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT;
-    EXPECT_EQ(msgId, IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
 }
 
 /**
@@ -309,7 +299,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest11, Function | SmallTest | Level2)
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_OCCUPIED_AREA_AND_RECT);
     windowStub_->OnRemoteRequest(code, data, reply, option);
     code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_ACTIVE_STATUS);
-    
+
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE(res, 10);
 }
@@ -353,7 +343,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest12, Function | SmallTest | Level2)
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_NE(res, 10);
 }
-
 
 /**
  * @tc.name: OnRemoteRequest13
@@ -457,6 +446,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest18, Function | SmallTest | Level2)
     MessageOption option(MessageOption::TF_ASYNC);
 
     data.WriteInterfaceToken(WindowStub::GetDescriptor());
+    data.WriteUint32(1);
 
     uint32_t code = static_cast<uint32_t>(IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_STATE);
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
@@ -792,6 +782,6 @@ HWTEST_F(WindowStubTest, OnRemoteRequest36, Function | SmallTest | Level2)
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 5);
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

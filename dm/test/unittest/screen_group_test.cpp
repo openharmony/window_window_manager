@@ -101,6 +101,7 @@ HWTEST_F(ScreenGroupTest, UpdateScreenGroupInfo03, Function | SmallTest | Level2
     std::vector<Point> pos = screenGroup->GetChildPositions();
     ASSERT_EQ(position.size(), pos.size());
 }
+
 /**
  * @tc.name: GetChildIds
  * @tc.desc: for interface coverage & check GetChildIds

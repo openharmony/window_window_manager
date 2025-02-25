@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "zidl/display_manager_agent_stub.h"
 
 #include <vector>
@@ -93,6 +94,24 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
         }
         case TRANS_ID_ON_SCREEN_MAGNETIC_STATE_CHANGED: {
             return ProcScreenMagneticStatechanged(data);
+        }
+        case TRANS_ID_ON_SCREEN_MODE_CHANGED: {
+            std::vector<sptr<ScreenInfo>> screenInfos;
+            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+                WLOGFE("Read ScreenInfo failed");
+                return -1;
+            }
+            NotifyScreenModeChange(screenInfos);
+            break;
+        }
+        case TRANS_ID_NOTIFY_ABNORMAL_SCREEN_CONNECT_CHANGED: {
+            ScreenId screenId;
+            if (!data.ReadUint64(screenId)) {
+                WLOGFE("Read screenId failed");
+                return -1;
+            }
+            NotifyAbnormalScreenConnectChange(screenId);
+            break;
         }
         default: {
             WLOGFW("unknown transaction code %{public}d", code);
@@ -277,11 +296,12 @@ int32_t DisplayManagerAgentStub::ProcDisplayModechanged(MessageParcel& data)
 int32_t DisplayManagerAgentStub::ProcAvailableAreaChanged(MessageParcel& data)
 {
     DMRect rect;
+    DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
     rect.posX_ = data.ReadInt32();
     rect.posY_ = data.ReadInt32();
     rect.width_ = data.ReadUint32();
     rect.height_ = data.ReadUint32();
-    NotifyAvailableAreaChanged(rect);
+    NotifyAvailableAreaChanged(rect, displayId);
     return 0;
 }
 

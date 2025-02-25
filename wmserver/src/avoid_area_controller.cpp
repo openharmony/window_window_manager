@@ -176,9 +176,9 @@ void AvoidAreaController::UpdateOverlayWindowIfNeed(const sptr<WindowNode>& node
             WLOGD("window: %{public}u is not in avoidAreaListenerNodes, don't update avoid area.", node->GetWindowId());
             return;
         }
-        uint32_t start = static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM);
-        uint32_t end = static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD);
-        for (uint32_t type = start; type <= end; type++) {
+        using T = std::underlying_type_t<AvoidAreaType>;
+        for (T type = static_cast<T>(AvoidAreaType::TYPE_START);
+            type < static_cast<T>(AvoidAreaType::TYPE_END); type++) {
             AvoidArea systemAvoidArea = GetAvoidAreaByType(node, static_cast<AvoidAreaType>(type));
             bool res = UpdateAvoidAreaIfNeed(systemAvoidArea, node, static_cast<AvoidAreaType>(type));
             if (res && type == static_cast<uint32_t>(AvoidAreaType::TYPE_KEYBOARD)) {

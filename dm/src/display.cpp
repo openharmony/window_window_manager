@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "display.h"
 
 #include <cstdint>
@@ -206,7 +207,7 @@ sptr<DisplayInfo> Display::GetDisplayInfo() const
     return pImpl_->GetDisplayInfo();
 }
 
-sptr<DisplayInfo> Display::GetDisplayInfoByJs() const
+sptr<DisplayInfo> Display::GetDisplayInfoWithCache() const
 {
     if (pImpl_ == nullptr || pImpl_->GetDisplayInfo() == nullptr) {
         WLOGFE("pImpl_ or pImpl_->GetDisplayInfo is nullptr");

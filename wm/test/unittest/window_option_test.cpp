@@ -30,10 +30,10 @@ const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_TEST = {
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_2 },
 };
 const std::unordered_map<WindowType, SystemBarProperty>& SYS_BAR_PROPS_DEFAULT = {
-    { WindowType::WINDOW_TYPE_STATUS_BAR,     SYS_BAR_PROP_DEFAULT },
+    { WindowType::WINDOW_TYPE_STATUS_BAR, SYS_BAR_PROP_DEFAULT },
     { WindowType::WINDOW_TYPE_NAVIGATION_BAR, SYS_BAR_PROP_DEFAULT },
 };
-}
+} // namespace
 class WindowOptionTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -41,21 +41,13 @@ public:
     virtual void SetUp() override;
     virtual void TearDown() override;
 };
-void WindowOptionTest::SetUpTestCase()
-{
-}
+void WindowOptionTest::SetUpTestCase() {}
 
-void WindowOptionTest::TearDownTestCase()
-{
-}
+void WindowOptionTest::TearDownTestCase() {}
 
-void WindowOptionTest::SetUp()
-{
-}
+void WindowOptionTest::SetUp() {}
 
-void WindowOptionTest::TearDown()
-{
-}
+void WindowOptionTest::TearDown() {}
 
 namespace {
 /**
@@ -66,7 +58,7 @@ namespace {
 HWTEST_F(WindowOptionTest, WindowRect01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new WindowOption();
-    struct Rect rect = {1, 2, 3u, 4u};
+    struct Rect rect = { 1, 2, 3u, 4u };
     option->SetWindowRect(rect);
 
     ASSERT_EQ(1, option->GetWindowRect().posX_);
@@ -159,6 +151,7 @@ HWTEST_F(WindowOptionTest, WindowMode06, Function | SmallTest | Level2)
     option->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     ASSERT_EQ(WindowMode::WINDOW_MODE_PIP, option->GetWindowMode());
 }
+
 /**
  * @tc.name: Focusable01
  * @tc.desc: SetFocusable/GetFocusable
@@ -315,7 +308,7 @@ HWTEST_F(WindowOptionTest, HitOffset, Function | SmallTest | Level3)
 {
     sptr<WindowOption> option = new WindowOption();
     option->SetHitOffset(1, 1);
-    PointInfo point = {1, 1};
+    PointInfo point = { 1, 1 };
     ASSERT_EQ(point.x, option->GetHitOffset().x);
     ASSERT_EQ(point.y, option->GetHitOffset().y);
 }
@@ -516,6 +509,64 @@ HWTEST_F(WindowOptionTest, SetWindowTopmost, Function | SmallTest | Level3)
     option->SetWindowTopmost(false);
     ASSERT_EQ(false, option->GetWindowTopmost());
 }
+
+/**
+ * @tc.name: SetAndIsSystemKeyboard
+ * @tc.desc: test SetIsSystemKeyboard and IsSystemKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetAndIsSystemKeyboard, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_EQ(false, option->IsSystemKeyboard());
+    option->SetIsSystemKeyboard(true);
+    ASSERT_EQ(true, option->IsSystemKeyboard());
 }
+
+/**
+ * @tc.name: SetDensity
+ * @tc.desc: test SetDensity and GetDensity
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetDensity, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    ASSERT_EQ(1.0f, option->GetDensity());
+    float density = 5.0f;
+    option->SetDensity(density);
+    ASSERT_EQ(density, option->GetDensity());
+}
+
+/**
+ * @tc.name: SetIsDensityFollowHost
+ * @tc.desc: test SetIsDensityFollowHost and GetIsDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    ASSERT_EQ(false, option->GetIsDensityFollowHost());
+    option->SetIsDensityFollowHost(true);
+    ASSERT_EQ(true, option->GetIsDensityFollowHost());
+}
+
+/**
+ * @tc.name: SetConstrainedModal
+ * @tc.desc: test SetConstrainedModal and GetIsDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetConstrainedModal, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_EQ(false, option->IsConstrainedModal());
+    option->SetConstrainedModal(true);
+    ASSERT_EQ(false, option->IsConstrainedModal());
+    option->SetUIExtensionUsage(static_cast<uint32_t>(UIExtensionUsage::MODAL));
+    option->SetConstrainedModal(true);
+    ASSERT_EQ(false, option->IsConstrainedModal());
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

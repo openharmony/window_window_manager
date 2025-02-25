@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "extension_window_impl.h"
+#include "mock_window_extension_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,6 +39,123 @@ HWTEST_F(ExtensionWindowImplTest, GetAvoidAreaByType, Function | SmallTest | Lev
     AvoidArea avoidArea;
     ASSERT_EQ(WMError::WM_OK, extensionWindowImpl.GetAvoidAreaByType(type, avoidArea));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetWindow
+ * @tc.desc: GetWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, GetWindow, Function | SmallTest | Level2)
+{
+    sptr<Window> window = new (std::nothrow) Window();
+    ASSERT_NE(nullptr, window);
+    ExtensionWindowImpl extensionWindowImpl(window);
+
+    EXPECT_EQ(window, extensionWindowImpl.GetWindow());
+}
+
+/**
+ * @tc.name: HideNonSecureWindows
+ * @tc.desc: HideNonSecureWindows Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, HideNonSecureWindows, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HideNonSecureWindows(true));
+    EXPECT_TRUE(window->extensionWindowFlags_.hideNonSecureWindowsFlag);
+
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HideNonSecureWindows(false));
+    EXPECT_FALSE(window->extensionWindowFlags_.hideNonSecureWindowsFlag);
+}
+
+/**
+ * @tc.name: SetWaterMarkFlag
+ * @tc.desc: SetWaterMarkFlag Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, SetWaterMarkFlag, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.SetWaterMarkFlag(true));
+    EXPECT_TRUE(window->extensionWindowFlags_.waterMarkFlag);
+
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.SetWaterMarkFlag(false));
+    EXPECT_FALSE(window->extensionWindowFlags_.waterMarkFlag);
+}
+
+/**
+ * @tc.name: IsPcWindow
+ * @tc.desc: IsPcWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, IsPcWindow, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<MockWindowExtensionSessionImpl> window = sptr<MockWindowExtensionSessionImpl>::MakeSptr(option);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(extensionWindowImpl.IsPcWindow(), window->IsPcWindow());
+}
+
+/**
+ * @tc.name: IsPcOrPadFreeMultiWindowMode
+ * @tc.desc: IsPcOrPadFreeMultiWindowMode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, IsPcOrPadFreeMultiWindowMode, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(extensionWindowImpl.IsPcOrPadFreeMultiWindowMode(), window->IsPcOrPadFreeMultiWindowMode());
+}
+
+/**
+ * @tc.name: HidePrivacyContentForHost
+ * @tc.desc: HidePrivacyContentForHost Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, HidePrivacyContentForHost, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = new (std::nothrow) WindowOption();
+    ASSERT_NE(nullptr, option);
+    sptr<MockWindowExtensionSessionImpl> window = new (std::nothrow) MockWindowExtensionSessionImpl(option);
+    ASSERT_NE(nullptr, window);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HidePrivacyContentForHost(true));
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.HidePrivacyContentForHost(false));
+}
+
+/**
+ * @tc.name: OccupyEvents
+ * @tc.desc: OccupyEvents Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionWindowImplTest, OccupyEvents, Function | SmallTest | Level2)
+{
+    auto option = sptr<WindowOption>::MakeSptr();
+    auto window = sptr<MockWindowExtensionSessionImpl>::MakeSptr(option);
+    ExtensionWindowImpl extensionWindowImpl(window);
+   
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, extensionWindowImpl.OccupyEvents(0));
+    window->mockHandler_ = std::make_shared<MockDataHandler>();
+    EXPECT_EQ(WMError::WM_OK, extensionWindowImpl.OccupyEvents(0));
 }
 } // namespace
 } // namespace Rosen

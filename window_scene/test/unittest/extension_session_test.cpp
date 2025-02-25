@@ -53,16 +53,16 @@ void ExtensionSessionTest::SetUp()
     SessionInfo info;
     info.abilityName_ = "ExtensionSessionTest";
     info.bundleName_ = "ExtensionSessionTest";
-    extensionSession_ = new (std::nothrow) ExtensionSession(info);
+    extensionSession_ = sptr<ExtensionSession>::MakeSptr(info);
     ASSERT_NE(extensionSession_, nullptr);
 
-    mockSessionStage_ = new (std::nothrow) SessionStageMocker();
+    mockSessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage_, nullptr);
 
-    mockEventChannel_ = new (std::nothrow) WindowEventChannelMocker(mockSessionStage_);
+    mockEventChannel_ = sptr<WindowEventChannelMocker>::MakeSptr(mockSessionStage_);
     ASSERT_NE(mockEventChannel_, nullptr);
 
-    extSessionEventCallback_ = new (std::nothrow) ExtensionSession::ExtensionSessionEventCallback();
+    extSessionEventCallback_ = sptr<ExtensionSession::ExtensionSessionEventCallback>::MakeSptr();
     ASSERT_NE(extSessionEventCallback_, nullptr);
 }
 
@@ -308,7 +308,6 @@ HWTEST_F(ExtensionSessionTest, NotifyDensityFollowHost03, Function | SmallTest |
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
 
-
 /**
  * @tc.name: UpdateSessionViewportConfig1
  * @tc.desc: normal test
@@ -525,7 +524,7 @@ HWTEST_F(ExtensionSessionTest, TransferAccessibilityDumpChildInfo02, Function | 
 HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed01, Function | SmallTest | Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
     EXPECT_CALL(*mockEventChannel_, TransferKeyEventForConsumedAsync)
         .WillOnce([](const std::shared_ptr<MMI::KeyEvent>& keyEvent,
@@ -555,7 +554,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed02, Function | SmallTe
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
     EXPECT_CALL(*mockEventChannel_, TransferKeyEventForConsumedAsync);
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
 
     auto keyEvent = MMI::KeyEvent::Create();
@@ -628,7 +627,7 @@ HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed05, Function | SmallTe
 HWTEST_F(ExtensionSessionTest, TransferKeyEventForConsumed06, Function | SmallTest | Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
     EXPECT_CALL(*mockEventChannel_, TransferKeyEventForConsumedAsync).WillOnce(Return(WSError::WS_DO_NOTHING));
 
@@ -687,13 +686,13 @@ HWTEST_F(ExtensionSessionTest, WindowEventChannelListenerOnRemoteRequest02, Func
  */
 HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, Function | SmallTest | Level1)
 {
-    sptr<WindowEventChannelListener> listener = new (std::nothrow) WindowEventChannelListener();
+    sptr<WindowEventChannelListener> listener = sptr<WindowEventChannelListener>::MakeSptr();
     EXPECT_NE(nullptr, listener);
     sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
-    deathRecipient = new (std::nothrow) ChannelDeathRecipient(listener);
+    deathRecipient = sptr<ChannelDeathRecipient>::MakeSptr(listener);
     EXPECT_NE(nullptr, deathRecipient);
     sptr<IRemoteObject> wptrDeath = nullptr;
-    wptrDeath = new (std::nothrow) WindowEventChannel(nullptr);
+    wptrDeath = sptr<WindowEventChannel>::MakeSptr(nullptr);
     ASSERT_NE(nullptr, wptrDeath);
     deathRecipient->OnRemoteDied(wptrDeath);
     EXPECT_NE(nullptr, deathRecipient);
@@ -706,10 +705,10 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied01, Function | S
  */
 HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | SmallTest | Level1)
 {
-    sptr<WindowEventChannelListener> listener = new (std::nothrow) WindowEventChannelListener();
+    sptr<WindowEventChannelListener> listener = sptr<WindowEventChannelListener>::MakeSptr();
     EXPECT_NE(nullptr, listener);
     sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
-    deathRecipient = new (std::nothrow) ChannelDeathRecipient(listener);
+    deathRecipient = sptr<ChannelDeathRecipient>::MakeSptr(listener);
     EXPECT_NE(nullptr, deathRecipient);
     deathRecipient->OnRemoteDied(nullptr);
     EXPECT_NE(nullptr, deathRecipient);
@@ -723,7 +722,7 @@ HWTEST_F(ExtensionSessionTest, ChannelDeathRecipientOnRemoteDied02, Function | S
 HWTEST_F(ExtensionSessionTest, TransferKeyEventAsync, Function | SmallTest | Level1)
 {
     extensionSession_->windowEventChannel_ = mockEventChannel_;
-    extensionSession_->channelListener_ = new (std::nothrow) WindowEventChannelListener();
+    extensionSession_->channelListener_ = sptr<WindowEventChannelListener>::MakeSptr();
     ASSERT_NE(extensionSession_->channelListener_, nullptr);
 
     auto keyEvent = MMI::KeyEvent::Create();
@@ -754,7 +753,7 @@ HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
     extensionSession_->sessionStage_ = mockSessionStage_;
 
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
-    sptr<AvoidArea> avoidArea = new (std::nothrow) AvoidArea();
+    sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
     ASSERT_NE(avoidArea, nullptr);
     AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
     EXPECT_CALL(*mockSessionStage_, UpdateAvoidArea).Times(0);
@@ -774,7 +773,7 @@ HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
  */
 HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1)
 {
-    MockFunction<AvoidArea(AvoidAreaType type)> mockNotifyGetAvoidAreaByTypeFunc;
+    MockFunction<AvoidArea(AvoidAreaType type, int32_t apiVersion)> mockNotifyGetAvoidAreaByTypeFunc;
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = mockNotifyGetAvoidAreaByTypeFunc.AsStdFunction();
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     AvoidAreaType typeSystem = AvoidAreaType::TYPE_SYSTEM;
@@ -784,7 +783,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
     AvoidAreaType typeNavigationIndicator = AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     AvoidArea expectedAvoidArea;
     expectedAvoidArea.topRect_ = {10, 20, 30, 40};
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
     auto res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, expectedAvoidArea);
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -798,7 +797,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
 
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(0);
     res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, AvoidArea());
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -812,7 +811,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(0);
     res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, AvoidArea());
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -900,6 +899,52 @@ HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
     extensionSession_->sessionStage_ = nullptr;
     res = extensionSession_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
+}
+
+/**
+ * @tc.name: GetStatusBarHeight
+ * @tc.desc: test function : GetStatusBarHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
+{
+    ASSERT_NE(nullptr, extSessionEventCallback_);
+    MockFunction<uint32_t()> mockGetStatusBarHeightFunc;
+    extSessionEventCallback_->getStatusBarHeightFunc_ = mockGetStatusBarHeightFunc.AsStdFunction();
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(1);
+    extensionSession_->GetStatusBarHeight();
+
+    extSessionEventCallback_->getStatusBarHeightFunc_ = nullptr;
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
+    extensionSession_->GetStatusBarHeight();
+
+    extSessionEventCallback_ = nullptr;
+    extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
+    EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
+    extensionSession_->GetStatusBarHeight();
+}
+
+/**
+ * @tc.name: TryUpdateExtensionPersistentId
+ * @tc.desc: test function : TryUpdateExtensionPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ExtensionSessionTest";
+    info.bundleName_ = "ExtensionSessionTest";
+    info.persistentId_ = INVALID_SESSION_ID;
+    sptr<ExtensionSession> extensionSessionA = sptr<ExtensionSession>::MakeSptr(info);
+    info.persistentId_ = extensionSessionA->GetPersistentId();
+    sptr<ExtensionSession> extensionSessionB = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_EQ(info.persistentId_ + 1, extensionSessionB->GetPersistentId());
+    extensionSessionA.clear();
+    info.persistentId_ += 4096;
+    sptr<ExtensionSession> extensionSessionC = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_EQ(info.persistentId_, extensionSessionC->GetPersistentId());
 }
 }
 }

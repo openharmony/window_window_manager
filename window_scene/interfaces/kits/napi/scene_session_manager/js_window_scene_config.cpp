@@ -26,17 +26,19 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWind
 
 napi_value JsWindowSceneConfig::CreateWindowSceneConfig(napi_env env, const AppWindowSceneConfig& config)
 {
-    WLOGI("[NAPI]CreateWindowSceneConfig");
+    WLOGFI("[NAPI]");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
     napi_set_named_property(env, objValue, "floatCornerRadius", CreateJsValue(env, config.floatCornerRadius_));
     napi_set_named_property(env, objValue, "focusedShadow", CreateShadowValue(env, config, true));
     napi_set_named_property(env, objValue, "unfocusedShadow", CreateShadowValue(env, config, false));
+    napi_set_named_property(env, objValue, "focusedShadowDark", CreateShadowDarkValue(env, config, true));
+    napi_set_named_property(env, objValue, "unfocusedShadowDark", CreateShadowDarkValue(env, config, false));
     napi_set_named_property(env, objValue, "keyboardAnimationIn",
         CreateKeyboardAnimationValue(env, config.keyboardAnimationIn_));
     napi_set_named_property(env, objValue, "keyboardAnimationOut",
@@ -62,7 +64,7 @@ napi_value JsWindowSceneConfig::CreateShadowValue(napi_env env, const AppWindowS
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -78,12 +80,34 @@ napi_value JsWindowSceneConfig::CreateShadowValue(napi_env env, const AppWindowS
     return objValue;
 }
 
+napi_value JsWindowSceneConfig::CreateShadowDarkValue(napi_env env, const AppWindowSceneConfig& config,
+    bool focused)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Object is null!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "offsetX", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.offsetX_ : config.unfocusedShadowDark_.offsetX_));
+    napi_set_named_property(env, objValue, "offsetY", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.offsetY_ : config.unfocusedShadowDark_.offsetY_));
+    napi_set_named_property(env, objValue, "radius", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.radius_ : config.unfocusedShadowDark_.radius_));
+    napi_set_named_property(env, objValue, "color", CreateJsValue(env,
+        focused ? config.focusedShadowDark_.color_ : config.unfocusedShadowDark_.color_));
+
+    return objValue;
+}
+
 napi_value JsWindowSceneConfig::CreateWindowAnimationValue(napi_env env, const AppWindowSceneConfig& config)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "duration", CreateJsValue(env, config.windowAnimation_.duration_));
@@ -110,7 +134,7 @@ napi_value JsWindowSceneConfig::CreateKeyboardAnimationValue(napi_env env,
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
 
@@ -130,7 +154,7 @@ napi_value JsWindowSceneConfig::CreateSystemUIStatusBarValue(napi_env env,
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "showInLandscapeMode", CreateJsValue(env, config.showInLandscapeMode_));
@@ -145,13 +169,13 @@ napi_value JsWindowSceneConfig::CreateWindowStatusBar(napi_env env,
     const StatusBarConfig& config)
 {
     if (config.backgroundColor_.empty() || config.contentColor_.empty()) {
-        WLOGFE("[NAPI]WindowStatusBar is null!");
+        WLOGFE("WindowStatusBar is null!");
         return NapiGetUndefined(env);
     }
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        WLOGFE("[NAPI]Object is null!");
+        WLOGFE("Object is null!");
         return NapiGetUndefined(env);
     }
     napi_set_named_property(env, objValue, "showHide", CreateJsValue(env, config.showHide_));
@@ -172,11 +196,11 @@ JsWindowSceneConfig::~JsWindowSceneConfig()
 
 napi_value JsWindowSceneConfig::CreateFreeMultiWindowConfig(napi_env env, const SystemSessionConfig& config)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[NAPI]CreateFreeMultiWindowConfig");
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[NAPI]Object is null!");
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Object is null!");
         return NapiGetUndefined(env);
     }
 

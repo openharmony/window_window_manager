@@ -949,7 +949,6 @@ HWTEST_F(DisplayManagerTest, UnregisterCaptureStatusListener03, Function | Small
     listener.clear();
 }
 
-
 /**
  * @tc.name: RegisterDisplayUpdateListener01
  * @tc.desc: RegisterDisplayUpdateListener01 fun
@@ -1240,6 +1239,7 @@ HWTEST_F(DisplayManagerTest, NotifyCaptureStatusChanged01, Function | SmallTest 
     DisplayManager::GetInstance().pImpl_->NotifyCaptureStatusChanged(isCapture);
     ASSERT_EQ(DisplayManager::GetInstance().pImpl_->powerEventListenerAgent_, nullptr);
 }
+
 /**
  * @tc.name: RegisterFoldAngleListener03
  * @tc.desc: RegisterFoldAngleListener03 fun
@@ -1397,7 +1397,6 @@ HWTEST_F(DisplayManagerTest, UnregisterCaptureStatusListener06, Function | Small
     ASSERT_EQ(ret, DMError::DM_OK);
     listener.clear();
 }
-
 
 /**
  * @tc.name: RegisterDisplayUpdateListener02

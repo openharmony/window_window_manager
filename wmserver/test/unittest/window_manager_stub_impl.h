@@ -44,7 +44,7 @@ WMError RequestFocus(uint32_t windowId)
 {
     return WMError::WM_OK;
 };
-AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type)
+AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, const Rect& rect)
 {
     AvoidArea area;
     return area;
@@ -157,7 +157,7 @@ MaximizeMode GetMaximizeMode() override
 {
     return MaximizeMode::MODE_FULL_FILL;
 }
-void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
+void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
 };
 }
 }

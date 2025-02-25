@@ -82,6 +82,7 @@ void DisplayManagerService::OnStart()
     if (!Publish(sptr<DisplayManagerService>(this))) {
         WLOGFE("Publish failed");
     }
+    SetDisplayState(DisplayState::ON);
     WLOGFI("end");
 }
 
@@ -209,6 +210,16 @@ sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
     return display->ConvertToDisplayInfo();
 }
 
+sptr<DisplayInfo> DisplayManagerService::GetVisibleAreaDisplayInfoById(DisplayId displayId)
+{
+    sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
+    if (display == nullptr) {
+        WLOGFE("fail to get displayInfo by id: invalid display");
+        return nullptr;
+    }
+    return display->ConvertToDisplayInfo();
+}
+
 sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoByScreen(ScreenId screenId)
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplayByScreen(screenId);
@@ -294,7 +305,8 @@ bool DisplayManagerService::SetRotationFromWindow(ScreenId screenId, Rotation ta
     return abstractScreenController_->SetRotation(screenId, targetRotation, true, withAnimation);
 }
 
-std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId, DmErrorCode* errorCode)
+std::shared_ptr<Media::PixelMap> DisplayManagerService::GetDisplaySnapshot(DisplayId displayId,
+    DmErrorCode* errorCode, bool isUseDma)
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:GetDisplaySnapshot(%" PRIu64")", displayId);
     if ((Permission::IsSystemCalling() && Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION)) ||
@@ -494,6 +506,10 @@ bool DisplayManagerService::TryToCancelScreenOff()
 
 bool DisplayManagerService::SetScreenBrightness(uint64_t screenId, uint32_t level)
 {
+    if (!Permission::IsSystemServiceCalling()) {
+        TLOGE(WmsLogTag::DMS, "set screen brightness permission denied!");
+        return false;
+    }
     RSInterfaces::GetInstance().SetScreenBacklight(screenId, level);
     return true;
 }

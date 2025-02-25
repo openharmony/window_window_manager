@@ -17,16 +17,18 @@
 #define OHOS_ROSEN_SCREEN_EVENT_TRACKER_H
 
 #include <iomanip>
-#include <vector>
+#include <list>
 #include <mutex>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
 const int32_t OUTPUT_FREQ = 1; // 1Hz
+const int32_t MAX_CAPACITY = 6;
 
 struct TrackInfo {
     std::string info;
@@ -41,10 +43,20 @@ public:
         recordInfos_.push_back({info, std::chrono::system_clock::now()});
     }
 
+    void RecordBoundsEvent(std::string info = "")
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (recordBoundsInfos_.size() >= MAX_CAPACITY) {
+            recordBoundsInfos_.pop_front();
+        }
+        recordBoundsInfos_.push_back({info, std::chrono::system_clock::now()});
+    }
+
     void ClearAllRecordedEvents()
     {
         std::lock_guard<std::mutex> lock(mutex_);
         recordInfos_.clear();
+        recordBoundsInfos_.clear();
     }
 
     void LogWarningAllInfos() const
@@ -57,6 +69,11 @@ public:
         
         std::lock_guard<std::mutex> lock(mutex_);
         for (const auto& info : recordInfos_) {
+            TLOGW(WmsLogTag::DMS, "[%{public}s]: %{public}s",
+                formatTimestamp(info.timestamp).c_str(), info.info.c_str());
+        }
+
+        for (const auto& info : recordBoundsInfos_) {
             TLOGW(WmsLogTag::DMS, "[%{public}s]: %{public}s",
                 formatTimestamp(info.timestamp).c_str(), info.info.c_str());
         }
@@ -85,16 +102,22 @@ public:
         return oss.str();
     }
 
-    const std::vector<TrackInfo>& GetRecordInfos() const
+    const std::vector<TrackInfo>& GetRecordInfos()
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        return recordInfos_;
+        allRecordInfos_ = recordInfos_;
+        for (auto info : recordBoundsInfos_) {
+            allRecordInfos_.emplace_back(info);
+        }
+        return allRecordInfos_;
     }
 
 private:
     mutable std::mutex mutex_;
     mutable std::chrono::system_clock::time_point lastOutputTime_;
     std::vector<TrackInfo> recordInfos_;
+    std::list<TrackInfo> recordBoundsInfos_;
+    std::vector<TrackInfo> allRecordInfos_;
 };
 
 

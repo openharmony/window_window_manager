@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "screen_scene_config.h"
 
 #include <climits>
@@ -60,7 +61,9 @@ enum XmlNodeElement {
     CAST_ABILITY_NAME,
     PHYSICAL_DISPLAY_RESOLUTION,
     SCROLLABLE_PARAM,
-    IS_SUPPORT_CAPTURE
+    IS_SUPPORT_CAPTURE,
+    IS_SUPPORT_OFFSCREEN_RENDERING,
+    OFF_SCREEN_PPI_THRESHOLD
 };
 }
 
@@ -75,7 +78,9 @@ std::vector<DMRect> ScreenSceneConfig::subCutoutBoundaryRect_;
 bool ScreenSceneConfig::isWaterfallDisplay_ = false;
 bool ScreenSceneConfig::isSupportCapture_ = false;
 bool ScreenSceneConfig::isScreenCompressionEnableInLandscape_ = false;
+bool ScreenSceneConfig::isSupportOffScreenRendering_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
+uint32_t ScreenSceneConfig::offScreenPPIThreshold_ = 0;
 std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {DPI, "dpi"},
     {SUB_DPI, "subDpi"},
@@ -100,7 +105,9 @@ std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
     {CAST_ABILITY_NAME, "castAbilityName"},
     {PHYSICAL_DISPLAY_RESOLUTION, "physicalDisplayResolution"},
     {SCROLLABLE_PARAM, "scrollableParam"},
-    {IS_SUPPORT_CAPTURE, "isSupportCapture"}
+    {IS_SUPPORT_CAPTURE, "isSupportCapture"},
+    {IS_SUPPORT_OFFSCREEN_RENDERING, "isSupportOffScreenRendering"},
+    {OFF_SCREEN_PPI_THRESHOLD, "offScreenPPIThreshold"}
 };
 
 
@@ -183,13 +190,15 @@ void ScreenSceneConfig::ParseNodeConfig(const xmlNodePtr& currNode)
         (xmlNodeMap_[IS_CURVED_COMPRESS_ENABLED] == nodeName) ||
         (xmlNodeMap_[IS_RIGHT_POWER_BUTTON] == nodeName) ||
         (xmlNodeMap_[IS_SUPPORT_CAPTURE] == nodeName) ||
-        (xmlNodeMap_[SUPPORT_ROTATE_WITH_SCREEN] == nodeName);
+        (xmlNodeMap_[SUPPORT_ROTATE_WITH_SCREEN] == nodeName)||
+        (xmlNodeMap_[IS_SUPPORT_OFFSCREEN_RENDERING] == nodeName);
     bool numberConfigCheck = (xmlNodeMap_[DPI] == nodeName) ||
         (xmlNodeMap_[SUB_DPI] == nodeName) ||
         (xmlNodeMap_[CURVED_SCREEN_BOUNDARY] == nodeName) ||
         (xmlNodeMap_[CURVED_AREA_IN_LANDSCAPE] == nodeName) ||
         (xmlNodeMap_[BUILD_IN_DEFAULT_ORIENTATION] == nodeName) ||
-        (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName);
+        (xmlNodeMap_[DEFAULT_DEVICE_ROTATION_OFFSET] == nodeName)||
+        (xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD] == nodeName);
     bool stringConfigCheck = (xmlNodeMap_[DEFAULT_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[SUB_DISPLAY_CUTOUT_PATH] == nodeName) ||
         (xmlNodeMap_[ROTATION_POLICY] == nodeName) ||
@@ -285,6 +294,8 @@ void ScreenSceneConfig::ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode
         physicalSize.foldDisplayMode_ = FoldDisplayMode::MAIN;
     } else if (!xmlStrcmp(displayMode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_SUB"))) {
         physicalSize.foldDisplayMode_ = FoldDisplayMode::SUB;
+    } else if (!xmlStrcmp(displayMode, reinterpret_cast<const xmlChar*>("FOLD_DISPLAY_MODE_GLOBAL_FULL"))) {
+        physicalSize.foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
     } else {
         physicalSize.foldDisplayMode_ = FoldDisplayMode::UNKNOWN;
     }
@@ -369,6 +380,8 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
             isScreenCompressionEnableInLandscape_ = true;
         } else if (xmlNodeMap_[IS_SUPPORT_CAPTURE] == nodeName) {
             isSupportCapture_ = true;
+        } else if (xmlNodeMap_[IS_SUPPORT_OFFSCREEN_RENDERING] == nodeName) {
+            isSupportOffScreenRendering_ = true;
         }
     } else {
         enableConfig_[nodeName] = false;
@@ -560,4 +573,19 @@ std::string ScreenSceneConfig::GetExternalScreenDefaultMode()
     return "";
 }
 
+uint32_t ScreenSceneConfig::GetOffScreenPPIThreshold()
+{
+    if (intNumbersConfig_[xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD]].size() != 0) {
+        return static_cast<uint32_t>(intNumbersConfig_[xmlNodeMap_[OFF_SCREEN_PPI_THRESHOLD]][0]);
+    }
+    return offScreenPPIThreshold_;
+}
+
+bool ScreenSceneConfig::IsSupportOffScreenRendering()
+{
+    if (enableConfig_.count("isSupportOffScreenRendering") != 0) {
+        return static_cast<bool>(enableConfig_["isSupportOffScreenRendering"]);
+    }
+    return false;
+}
 } // namespace OHOS::Rosen

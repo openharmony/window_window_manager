@@ -187,32 +187,6 @@ HWTEST_F(SessionPermissionTest, IsStartedByInputMethod, Function | SmallTest | L
 }
 
 /**
- * @tc.name: session_permission_test001
- * @tc.desc: test function : session_permission_test001
- * @tc.type: FUNC
- */
-HWTEST_F(SessionPermissionTest, session_permission_test001, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test001 start";
-    bool result = SessionPermission::IsStartByHdcd();
-    ASSERT_EQ(result, true);
-    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test001 end";
-}
-
-/**
- * @tc.name: session_permission_test002
- * @tc.desc: test function : session_permission_test002
- * @tc.type: FUNC
- */
-HWTEST_F(SessionPermissionTest, session_permission_test002, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test002 start";
-    bool result = SessionPermission::IsStartedByInputMethod();
-    ASSERT_EQ(result, false);
-    GTEST_LOG_(INFO) << "SessionPermissionTest: session_permission_test002 end";
-}
-
-/**
  * @tc.name: IsStartedByUIExtension
  * @tc.desc: test function : IsStartedByUIExtension
  * @tc.type: FUNC

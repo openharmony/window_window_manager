@@ -30,7 +30,7 @@ constexpr const char* WM_ERROR_MSG_NOT_SYSTEM_APP = "not system app";
 constexpr const char* WM_ERROR_MSG_NO_REMOTE_ANIMATION = "no remote animation";
 constexpr const char* WM_ERROR_MSG_INVALID_DISPLAY = "invalid display";
 constexpr const char* WM_ERROR_MSG_INVALID_PARENT = "invalid parent";
-constexpr const char* WM_ERROR_MSG_OPER_FULLSCREEN_FAILED = "oper fullscreen failed";
+constexpr const char* WM_ERROR_MSG_INVALID_OP_IN_CUR_STATUS = "invalid operation in the current window status";
 constexpr const char* WM_ERROR_MSG_REPEAT_OPERATION = "repeat operation";
 constexpr const char* WM_ERROR_MSG_INVALID_SESSION = "invalid session";
 constexpr const char* WM_ERROR_MSG_INVALID_CALLING = "invalid calling";
@@ -62,7 +62,7 @@ static std::map<WMError, const char*> WM_ERROR_TO_ERROR_MSG_MAP {
     {WMError::WM_ERROR_NO_REMOTE_ANIMATION,             WM_ERROR_MSG_NO_REMOTE_ANIMATION         },
     {WMError::WM_ERROR_INVALID_DISPLAY,                 WM_ERROR_MSG_INVALID_DISPLAY             },
     {WMError::WM_ERROR_INVALID_PARENT,                  WM_ERROR_MSG_INVALID_PARENT              },
-    {WMError::WM_ERROR_OPER_FULLSCREEN_FAILED,          WM_ERROR_MSG_OPER_FULLSCREEN_FAILED      },
+    {WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS,        WM_ERROR_MSG_INVALID_OP_IN_CUR_STATUS    },
     {WMError::WM_ERROR_REPEAT_OPERATION,                WM_ERROR_MSG_REPEAT_OPERATION            },
     {WMError::WM_ERROR_INVALID_SESSION,                 WM_ERROR_MSG_INVALID_SESSION             },
     {WMError::WM_ERROR_INVALID_CALLING,                 WM_ERROR_MSG_INVALID_CALLING             },
@@ -102,7 +102,8 @@ constexpr const char* WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY = "This window contex
 constexpr const char* WM_ERROR_CODE_MSG_START_ABILITY_FAILED = "Failed to start the ability.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_DISPLAY = "The display device is abnormal.";
 constexpr const char* WM_ERROR_CODE_MSG_INVALID_PARENT = "The parent window is invalid.";
-constexpr const char* WM_ERROR_CODE_MSG_OPER_FULLSCREEN_FAILED = "The operation is not supported in full-screen mode.";
+constexpr const char* WM_ERROR_CODE_MSG_INVALID_OP_IN_CUR_STATUS =
+    "The operation in the current window status is invalid.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED = "Failed to destroy the PiP window.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY = "The PiP window state is abnormal.";
 constexpr const char* WM_ERROR_CODE_MSG_PIP_CREATE_FAILED = "Failed to create the PiP window.";
@@ -110,26 +111,26 @@ constexpr const char* WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR = "PiP internal error
 constexpr const char* WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION = "Repeated PiP operation.";
 
 static std::map<WmErrorCode, const char*> WM_ERROR_CODE_TO_ERROR_MSG_MAP {
-    {WmErrorCode::WM_OK,                              WM_ERROR_CODE_MSG_OK                     },
-    {WmErrorCode::WM_ERROR_NO_PERMISSION,             WM_ERROR_CODE_MSG_NO_PERMISSION          },
-    {WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,            WM_ERROR_CODE_MSG_NOT_SYSTEM_APP         },
-    {WmErrorCode::WM_ERROR_INVALID_PARAM,             WM_ERROR_CODE_MSG_INVALID_PARAM          },
-    {WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,        WM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT     },
-    {WmErrorCode::WM_ERROR_REPEAT_OPERATION,          WM_ERROR_CODE_MSG_REPEAT_OPERATION       },
-    {WmErrorCode::WM_ERROR_STATE_ABNORMALLY,          WM_ERROR_CODE_MSG_STATE_ABNORMALLY       },
-    {WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,         WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY      },
-    {WmErrorCode::WM_ERROR_INVALID_CALLING,           WM_ERROR_CODE_MSG_INVALID_CALLING        },
-    {WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,          WM_ERROR_CODE_MSG_STAGE_ABNORMALLY       },
-    {WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY,        WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY     },
-    {WmErrorCode::WM_ERROR_START_ABILITY_FAILED,      WM_ERROR_CODE_MSG_START_ABILITY_FAILED   },
-    {WmErrorCode::WM_ERROR_INVALID_DISPLAY,           WM_ERROR_CODE_MSG_INVALID_DISPLAY        },
-    {WmErrorCode::WM_ERROR_INVALID_PARENT,            WM_ERROR_CODE_MSG_INVALID_PARENT         },
-    {WmErrorCode::WM_ERROR_OPER_FULLSCREEN_FAILED,    WM_ERROR_CODE_MSG_OPER_FULLSCREEN_FAILED },
-    {WmErrorCode::WM_ERROR_PIP_DESTROY_FAILED,        WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED     },
-    {WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY,      WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY   },
-    {WmErrorCode::WM_ERROR_PIP_CREATE_FAILED,         WM_ERROR_CODE_MSG_PIP_CREATE_FAILED      },
-    {WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR,        WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR     },
-    {WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION,      WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION   },
+    {WmErrorCode::WM_OK,                              WM_ERROR_CODE_MSG_OK                       },
+    {WmErrorCode::WM_ERROR_NO_PERMISSION,             WM_ERROR_CODE_MSG_NO_PERMISSION            },
+    {WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,            WM_ERROR_CODE_MSG_NOT_SYSTEM_APP           },
+    {WmErrorCode::WM_ERROR_INVALID_PARAM,             WM_ERROR_CODE_MSG_INVALID_PARAM            },
+    {WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,        WM_ERROR_CODE_MSG_DEVICE_NOT_SUPPORT       },
+    {WmErrorCode::WM_ERROR_REPEAT_OPERATION,          WM_ERROR_CODE_MSG_REPEAT_OPERATION         },
+    {WmErrorCode::WM_ERROR_STATE_ABNORMALLY,          WM_ERROR_CODE_MSG_STATE_ABNORMALLY         },
+    {WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,         WM_ERROR_CODE_MSG_SYSTEM_ABNORMALLY        },
+    {WmErrorCode::WM_ERROR_INVALID_CALLING,           WM_ERROR_CODE_MSG_INVALID_CALLING          },
+    {WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,          WM_ERROR_CODE_MSG_STAGE_ABNORMALLY         },
+    {WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY,        WM_ERROR_CODE_MSG_CONTEXT_ABNORMALLY       },
+    {WmErrorCode::WM_ERROR_START_ABILITY_FAILED,      WM_ERROR_CODE_MSG_START_ABILITY_FAILED     },
+    {WmErrorCode::WM_ERROR_INVALID_DISPLAY,           WM_ERROR_CODE_MSG_INVALID_DISPLAY          },
+    {WmErrorCode::WM_ERROR_INVALID_PARENT,            WM_ERROR_CODE_MSG_INVALID_PARENT           },
+    {WmErrorCode::WM_ERROR_INVALID_OP_IN_CUR_STATUS,  WM_ERROR_CODE_MSG_INVALID_OP_IN_CUR_STATUS },
+    {WmErrorCode::WM_ERROR_PIP_DESTROY_FAILED,        WM_ERROR_CODE_MSG_PIP_DESTROY_FAILED       },
+    {WmErrorCode::WM_ERROR_PIP_STATE_ABNORMALLY,      WM_ERROR_CODE_MSG_PIP_STATE_ABNORMALLY     },
+    {WmErrorCode::WM_ERROR_PIP_CREATE_FAILED,         WM_ERROR_CODE_MSG_PIP_CREATE_FAILED        },
+    {WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR,        WM_ERROR_CODE_MSG_PIP_INTERNAL_ERROR       },
+    {WmErrorCode::WM_ERROR_PIP_REPEAT_OPERATION,      WM_ERROR_CODE_MSG_PIP_REPEAT_OPERATION     },
 };
 
 constexpr const char* DM_ERROR_MSG_OK = "ok";

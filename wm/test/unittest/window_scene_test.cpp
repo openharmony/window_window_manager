@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <configuration.h>
 #include <gtest/gtest.h>
-#include "window_scene.h"
 #include "ability_context_impl.h"
 #include "mock_static_call.h"
 #include "singleton_mocker.h"
 #include "window_impl.h"
-#include <configuration.h>
+#include "window_scene.h"
 
 #include "window_scene_session_impl.h"
 
@@ -38,13 +39,9 @@ public:
     sptr<WindowScene> scene_ = nullptr;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
-void WindowSceneTest::SetUpTestCase()
-{
-}
+void WindowSceneTest::SetUpTestCase() {}
 
-void WindowSceneTest::TearDownTestCase()
-{
-}
+void WindowSceneTest::TearDownTestCase() {}
 
 void WindowSceneTest::SetUp()
 {
@@ -162,9 +159,8 @@ HWTEST_F(WindowSceneTest, Init06, Function | SmallTest | Level2)
     sptr<IWindowLifeCycle> listener = nullptr;
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR,
-        scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
+              scene->Init(displayId, abilityContext, listener, optionTest, iSession, identityToken));
 }
-
 
 /**
  * @tc.name: Create01
@@ -342,6 +338,26 @@ HWTEST_F(WindowSceneTest, UpdateConfiguration02, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
     std::shared_ptr<AppExecFwk::Configuration> configuration = std::make_shared<AppExecFwk::Configuration>();
     scene->UpdateConfiguration(configuration);
+}
+
+/**
+ * @tc.name: UpdateConfigurationForSpecified
+ * @tc.desc: UpdateConfigurationForSpecified Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, UpdateConfigurationForSpecified, Function | SmallTest | Level2)
+{
+    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
+    sptr<WindowOption> optionTest = new WindowOption();
+    EXPECT_CALL(m->Mock(), CreateWindow(_, _, _)).Times(1).WillOnce(Return(new WindowImpl(optionTest)));
+    DisplayId displayId = 0;
+    sptr<IWindowLifeCycle> listener = nullptr;
+    sptr<WindowScene> scene = new WindowScene();
+    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
+    ASSERT_EQ(WMError::WM_OK, scene->Init(displayId, abilityContext, listener));
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager;
+    scene->UpdateConfigurationForSpecified(configuration, resourceManager);
 }
 
 /**
@@ -541,6 +557,6 @@ HWTEST_F(WindowSceneTest, NotifyMemoryLevel03, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, scene->NotifyMemoryLevel(0)); // ui content is null
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

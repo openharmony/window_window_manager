@@ -96,6 +96,8 @@ public:
         TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
         TRANS_ID_UPDATE_WINDOW_VISIBILITY_LISTENER,
         TRANS_ID_SHIFT_APP_WINDOW_FOCUS,
+        TRANS_ID_LIST_WINDOW_INFO,
+        TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ADD_EXTENSION_WINDOW_STAGE_TO_SCB,
         TRANS_ID_REMOVE_EXTENSION_WINDOW_STAGE_FROM_SCB,
@@ -116,9 +118,18 @@ public:
         TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES,
         TRANS_ID_SET_PROCESS_WATERMARK,
         TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
-        TRANS_ID_RELEASE_SESSION_SCREEN_LOCK,
+        TRANS_ID_UPDATE_SESSION_SCREEN_LOCK,
+        TRANS_ID_IS_PC_WINDOW,
         TRANS_ID_IS_PC_OR_PAD_FREE_MULTI_WINDOW_MODE,
         TRANS_ID_GET_DISPLAYID_BY_WINDOWID,
+        TRANS_ID_IS_WINDOW_RECT_AUTO_SAVE,
+        TRANS_ID_SET_GLOBAL_DRAG_RESIZE_TYPE,
+        TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE,
+        TRANS_ID_SET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_GET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
+        TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
+        TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -127,8 +138,9 @@ public:
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true) = 0;
-    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token) = 0;
-    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element) = 0;
+    virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
+    virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element,
+        DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
 
     virtual WSError RegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
     virtual WSError UnRegisterSessionListener(const sptr<ISessionListener>& listener) = 0;
@@ -165,6 +177,29 @@ public:
         return WSError::WS_OK;
     }
 
+    /**
+     * @brief notify watch gesture event consumption results
+     *
+     * This function provides the ability for notifying watch gesture event consumption results
+     *
+     * @param keycode keyEvent codes
+     * @param isConsumed consume result
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
+    WMError NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed) override { return WMError::WM_OK; }
+
+    /**
+     * @brief notify watch focus active change
+     *
+     * This function provides the ability for notifying watch focus active change
+     *
+     * @param isActive focus status
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission Make sure the caller has system permission.
+     */
+    WMError NotifyWatchFocusActiveChange(bool isActive) override { return WMError::WM_OK; }
+
     virtual WSError RegisterIAbilityManagerCollaborator(int32_t type,
         const sptr<AAFwk::IAbilityManagerCollaborator>& impl) = 0;
     virtual WSError UnregisterIAbilityManagerCollaborator(int32_t type) = 0;
@@ -176,7 +211,8 @@ public:
     WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) override { return WMError::WM_OK; }
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
-    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type) override { return {}; }
+    AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
+        const Rect& rect = Rect::EMPTY_RECT) override { return {}; }
 
     /**
      * @brief get top window information by id of main window.
@@ -215,6 +251,10 @@ public:
     {
         return WMError::WM_OK;
     }
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetAllWindowLayoutInfo(DisplayId displayId,
+        std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override { return WMError::WM_OK; }
     WMError SetWindowAnimationController(const sptr<RSIWindowAnimationController>& controller) override
     {
@@ -241,7 +281,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets) override { return WMError::WM_OK; }
     void SetMaximizeMode(MaximizeMode maximizeMode) override {}
     MaximizeMode GetMaximizeMode() override { return MaximizeMode::MODE_AVOID_SYSTEM_BAR; }
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override {}
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override {}
 
     /**
      * @brief Raise a window to screen top by id of window.
@@ -258,9 +298,9 @@ public:
         return WSError::WS_OK;
     }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) override {}
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal) override {}
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token) override {}
+        const sptr<IRemoteObject>& token, bool isConstrainedModal) override {}
     void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) override {}
     void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) override {}
     WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide) override
@@ -305,12 +345,26 @@ public:
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber, int32_t x, int32_t y,
         std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 
-    WMError ReleaseForegroundSessionScreenLock() override { return WMError::WM_OK; }
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName,
+        bool isRelease) override { return WMError::WM_OK; }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
+    WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override { return WMError::WM_OK; }
+
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
+
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override { return WMError::WM_OK; }
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError SetAppDragResizeType(const std::string& bundleName,
+        DragResizeType dragResizeType) override { return WMError::WM_OK; }
+    WMError GetAppDragResizeType(const std::string& bundleName,
+        DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
+        int32_t targetPersistentId) override { return WMError::WM_OK; }
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

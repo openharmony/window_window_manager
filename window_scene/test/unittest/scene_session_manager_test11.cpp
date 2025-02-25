@@ -153,7 +153,7 @@ HWTEST_F(SceneSessionManagerTest11, GetMainWindowStatesByPid03, Function | Small
     int32_t callingPid = 1001;
     SessionInfo sessionInfo;
     int32_t persistentId = 1005;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     EXPECT_NE(sceneSession, nullptr);
     sceneSession->SetSessionState(sessionState);
     sceneSession->SetRSVisible(isVisible);
@@ -238,15 +238,12 @@ HWTEST_F(SceneSessionManagerTest11, UpdateOccupiedAreaIfNeed, Function | SmallTe
     info.bundleName_ = "test2";
     info.moduleName_ = "test3";
     info.persistentId_ = 1;
-    sptr<SceneSession> sceneSession = new (std::nothrow) SceneSession(info, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert({1, sceneSession});
     ssm_->UpdateOccupiedAreaIfNeed(persistentId);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
-    ASSERT_NE(nullptr, property);
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    sceneSession->SetSessionProperty(property);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     ssm_->UpdateOccupiedAreaIfNeed(persistentId);
 
     persistentId = 1;
@@ -267,7 +264,7 @@ HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, Function | Smal
     info1.abilityName_ = "GetAllSessionDumpDetailInfo1";
     info1.bundleName_ = "GetAllSessionDumpDetailInfo1";
     info1.persistentId_ = 1;
-    sptr<SceneSession> sceneSession1 = new (std::nothrow) SceneSession(info1, nullptr);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_NE(sceneSession1, nullptr);
     sceneSession1->UpdateNativeVisibility(true);
 
@@ -275,7 +272,7 @@ HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, Function | Smal
     info2.abilityName_ = "GetAllSessionDumpDetailInfo2";
     info2.bundleName_ = "GetAllSessionDumpDetailInfo2";
     info2.persistentId_ = 2;
-    sptr<SceneSession> sceneSession2 = new (std::nothrow) SceneSession(info2, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     ASSERT_NE(sceneSession2, nullptr);
     sceneSession2->UpdateNativeVisibility(false);
 
@@ -284,6 +281,266 @@ HWTEST_F(SceneSessionManagerTest11, GetAllSessionDumpDetailInfo, Function | Smal
     ssm_->sceneSessionMap_.insert({2, sceneSession2});
     std::string dumpInfo;
     ASSERT_EQ(ssm_->GetAllSessionDumpDetailInfo(dumpInfo), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: GetAbilityInfo
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo, Function | SmallTest | Level1)
+{
+    ssm_->bundleMgr_ = nullptr;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetAbilityInfo02
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo02, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce(Return(1));
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetAbilityInfo03
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo03, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
+        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+        bundleInfo.hapModuleInfos = {};
+        return 0;
+    });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetAbilityInfo04
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo04, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
+        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+        AppExecFwk::AbilityInfo abilityInfo;
+        abilityInfo.moduleName = "moduleName";
+        abilityInfo.name = "abilityName";
+        AppExecFwk::HapModuleInfo hapModuleInfo;
+        hapModuleInfo.abilityInfos = { abilityInfo };
+        bundleInfo.hapModuleInfos = { hapModuleInfo };
+        bundleInfo.applicationInfo.codePath = "testCodePath";
+        return 0;
+    });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_OK);
+    ASSERT_EQ(scbAbilityInfo.codePath_, "testCodePath");
+}
+
+/**
+ * @tc.name: GetAbilityInfo05
+ * @tc.desc: SceneSesionManager test GetAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetAbilityInfo05, Function | SmallTest | Level1)
+{
+    sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
+    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _)).WillOnce([](
+        const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
+        AppExecFwk::AbilityInfo abilityInfo;
+        abilityInfo.moduleName = "moduleName2";
+        abilityInfo.name = "abilityName2";
+        AppExecFwk::HapModuleInfo hapModuleInfo;
+        hapModuleInfo.abilityInfos = { abilityInfo };
+        bundleInfo.hapModuleInfos = { hapModuleInfo };
+        return 0;
+    });
+    ssm_->bundleMgr_ = bundleMgrMocker;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    SCBAbilityInfo scbAbilityInfo;
+    WSError ret = ssm_->GetAbilityInfo(bundleName, moduleName, abilityName, userId, scbAbilityInfo);
+    ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LockSessionByAbilityInfo
+ * @tc.desc: SceneSesionManager test LockSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, LockSessionByAbilityInfo, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AbilityInfoBase abilityInfo;
+    abilityInfo.bundleName = "LockSessionByAbilityInfoBundle";
+    abilityInfo.moduleName = "LockSessionByAbilityInfoModule";
+    abilityInfo.abilityName = "LockSessionByAbilityInfoAbility";
+    abilityInfo.appIndex = 0;
+
+    auto result = ssm_->LockSessionByAbilityInfo(abilityInfo, true);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, result);
+}
+
+/**
+ * @tc.name: NotifyWatchGestureConsumeResult
+ * @tc.desc: SceneSesionManager test NotifyWatchGestureConsumeResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, NotifyWatchGestureConsumeResult, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t keyCode = 0;
+    bool isConsumed = true;
+    ssm_->onWatchGestureConsumeResultFunc_ = [](int32_t keyCode, bool isConsumed) {};
+    auto ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ssm_->onWatchGestureConsumeResultFunc_ = nullptr;
+    ret = ssm_->NotifyWatchGestureConsumeResult(keyCode, isConsumed);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyWatchFocusActiveChange
+ * @tc.desc: SceneSesionManager test NotifyWatchFocusActiveChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, NotifyWatchFocusActiveChange, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    bool isActive = true;
+    ssm_->onWatchFocusActiveChangeFunc_ = [](bool isActive) {};
+    auto ret = ssm_->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_EQ(ret, WMError::WM_OK);
+
+    ssm_->onWatchFocusActiveChangeFunc_ = nullptr;
+    ret = ssm_->NotifyWatchFocusActiveChange(isActive);
+    ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: DestroyUIServiceExtensionSubWindow
+ * @tc.desc: SceneSesionManager test DestroyUIServiceExtensionSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, DestroyUIServiceExtensionSubWindow, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->DestroyUIServiceExtensionSubWindow(sceneSession);
+    SessionInfo sessionInfo = { "bundleName", "moduleName", "abilityName" };
+    sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->DestroyUIServiceExtensionSubWindow(sceneSession);
+
+    sptr<WindowSessionProperty> property_ = sptr<WindowSessionProperty>::MakeSptr();
+    property_->isUIExtFirstSubWindow_ = true;
+    ASSERT_EQ(property_->isUIExtAnySubWindow_, false);
+    ssm_->DestroyUIServiceExtensionSubWindow(sceneSession);
+}
+
+/**
+ * @tc.name: FilterForGetAllWindowLayoutInfo
+ * @tc.desc: SceneSesionManager test FilterForGetAllWindowLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, FilterForGetAllWindowLayoutInfo, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    DisplayId displayId = 0;
+    bool isVirtualDisplay = true;
+    std::vector<sptr<SceneSession>> filteredSessions{};
+    SessionInfo info;
+    info.bundleName_ = BUNDLE_NAME;
+    info.appInstanceKey_ = "instanceKey";
+    info.isNewAppInstance_ = true;
+    sptr<SceneSession::SpecificSessionCallback> specificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCb);
+    ssm_->sceneSessionMap_.clear();
+    auto ret = ssm_->sceneSessionMap_.size();
+    ASSERT_EQ(ret, 0);
+    ssm_->FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
+}
+
+/**
+ * @tc.name: ShiftAppWindowPointerEvent
+ * @tc.desc: SceneSesionManager test ShiftAppWindowPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, ShiftAppWindowPointerEvent, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    int32_t sourcePersistentId = 0;
+    int32_t targetPersistentId = 0;
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    auto ret = ssm_->systemConfig_.IsPcWindow();
+    ASSERT_EQ(ret, false);
+
+    auto res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    ASSERT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->systemConfig_.freeMultiWindowEnable_ = true;
+    ssm_->systemConfig_.freeMultiWindowSupport_ = true;
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+
+    sourcePersistentId = 1;
+    ssm_->sceneSessionMap_.clear();
+    res = ssm_->ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_SESSION);
+}
+
+/**
+ * @tc.name: HasFloatingWindowForeground
+ * @tc.desc: SceneSesionManager test HasFloatingWindowForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, HasFloatingWindowForeground, Function | SmallTest | Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IRemoteObject> abilityToken = nullptr;
+    bool hasOrNot = true;
+    auto ret = ssm_->HasFloatingWindowForeground(abilityToken, hasOrNot);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 }  // namespace
 }

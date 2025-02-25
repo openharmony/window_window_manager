@@ -19,6 +19,7 @@
 #include <refbase.h>
 #include "dm_common.h"
 #include "wm_single_instance.h"
+#include "screen_info.h"
 
 namespace OHOS::Rosen {
 class ScreenManagerLite : public RefBase {
@@ -45,6 +46,55 @@ public:
          */
         virtual void OnChange(ScreenId) = 0;
     };
+
+    class IScreenModeChangeListener : public virtual RefBase {
+    public:
+
+        /**
+         * @brief Notify when state of the screenMode is changed.
+         */
+        virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>&) = 0;
+    };
+
+    class IAbnormalScreenConnectChangeListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify when a screen connection occurs due to an system exception.
+         */
+        virtual void NotifyAbnormalScreenConnectChange(ScreenId screenId) = 0;
+    };
+
+    /**
+     * @brief Register screen connect change listener(Only for scenarios where system exceptions occur).
+     *
+     * @param listener IAbnormalScreenConnectChangeListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
+
+    /**
+     * @brief Unregister screen connect change listener(Only for scenarios where system exceptions occur).
+     *
+     * @param listener IAbnormalScreenConnectChangeListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterAbnormalScreenConnectChangeListener(sptr<IAbnormalScreenConnectChangeListener> listener);
+
+    /**
+     * @brief Register screen mode change listener.
+     *
+     * @param listener IScreenModeChangeListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener);
+
+    /**
+     * @brief Unregister screen listener.
+     *
+     * @param listener IScreenModeChangeListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnregisterScreenModeChangeListener(sptr<IScreenModeChangeListener> listener);
 
     /**
      * @brief Register screen listener.
@@ -88,6 +138,21 @@ public:
      * @return Power state of screen.
      */
     ScreenPowerState GetScreenPower(ScreenId screenId);
+
+    /**
+     * @brief Get screen power state.
+     *
+     * @return Power state of screen.
+     */
+    ScreenPowerState GetScreenPower();
+
+    /**
+     * @brief Get all physical screen ids.
+     *
+     * @param screenIds Store physical screen ids.
+     * @return DM_OK means getting ids success, others means getting ids failed.
+     */
+    DMError GetPhysicalScreenIds(std::vector<uint64_t>& screenIds);
 private:
     ScreenManagerLite();
     ~ScreenManagerLite();

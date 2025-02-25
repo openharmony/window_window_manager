@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_window_register_manager.h"
 #include "singleton_container.h"
 #include "window_manager.h"
@@ -45,9 +46,13 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_STATUS_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_CHANGE_CB},
     {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
+    {WINDOW_DISPLAYID_CHANGE_CB, RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB},
+    {SYSTEM_DENSITY_CHANGE_CB, RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB},
     {WINDOW_NO_INTERACTION_DETECT_CB, RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB},
     {WINDOW_RECT_CHANGE_CB, RegisterListenerType::WINDOW_RECT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
+    {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
+    {WINDOW_WILL_CLOSE_CB, RegisterListenerType::WINDOW_WILL_CLOSE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
@@ -74,7 +79,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowChangeRegister(sptr<JsWindowLi
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowChangeListener> thisListener(listener);
@@ -91,11 +96,11 @@ WmErrorCode JsWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<J
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]Window is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[NAPI]listener is nullptr");
+        TLOGE(WmsLogTag::WMS_IMMS, "listener is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     listener->SetIsDeprecatedInterface(true);
@@ -113,7 +118,7 @@ WmErrorCode JsWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<JsWindo
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IAvoidAreaChangedListener> thisListener(listener);
@@ -130,7 +135,7 @@ WmErrorCode JsWindowRegisterManager::ProcessLifeCycleEventRegister(sptr<JsWindow
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowLifeCycle> thisListener(listener);
@@ -147,7 +152,7 @@ WmErrorCode JsWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<JsWi
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IOccupiedAreaChangeListener> thisListener(listener);
@@ -238,6 +243,34 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowVisibilityChangeRegister(sptr<
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessDisplayIdChangeRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    IDisplayIdChangeListenerSptr thisListener(listener);
+    WmErrorCode ret = isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessSystemDensityChangeRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "in");
+    if (window == nullptr || listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window or listener is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    return isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterSystemDensityChangeListener(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterSystemDensityChangeListener(listener));
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -323,7 +356,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(
 {
     WLOGD("called");
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowTitleButtonRectChangedListener> thisListener(listener);
@@ -339,7 +372,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(
 bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGI("[NAPI]Method %{public}s has not been registerted", type.c_str());
+        WLOGI("Method %{public}s has not been registerted", type.c_str());
         return false;
     }
 
@@ -347,7 +380,7 @@ bool JsWindowRegisterManager::IsCallbackRegistered(napi_env env, std::string typ
         bool isEquals = false;
         napi_strict_equals(env, jsListenerObject, iter->first->GetNapiValue(), &isEquals);
         if (isEquals) {
-            WLOGFE("[NAPI]Method %{public}s has already been registered", type.c_str());
+            WLOGFE("Method %{public}s has already been registered", type.c_str());
             return true;
         }
     }
@@ -363,12 +396,12 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     }
     auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
     if (iterCaseType == LISTENER_CODE_MAP.end()) {
-        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        WLOGFE("CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto iterCallbackType = iterCaseType->second.find(type);
     if (iterCallbackType == iterCaseType->second.end()) {
-        WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
+        WLOGFE("Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     RegisterListenerType listenerType = iterCallbackType->second;
@@ -377,18 +410,18 @@ WmErrorCode JsWindowRegisterManager::RegisterListener(sptr<Window> window, std::
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(result));
     sptr<JsWindowListener> windowManagerListener = new(std::nothrow) JsWindowListener(env, callbackRef, caseType);
     if (windowManagerListener == nullptr) {
-        WLOGFE("[NAPI]New JsWindowListener failed");
+        WLOGFE("New JsWindowListener failed");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     windowManagerListener->SetMainEventHandler();
     WmErrorCode ret = ProcessListener(listenerType, caseType, windowManagerListener, window, true,
         env, parameter);
     if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("[NAPI]Register type %{public}s failed", type.c_str());
+        WLOGFE("Register type %{public}s failed", type.c_str());
         return ret;
     }
     jsCbMap_[type][callbackRef] = windowManagerListener;
-    WLOGI("[NAPI]Register type %{public}s success! callback map size: %{public}zu",
+    WLOGI("Register type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     return WmErrorCode::WM_OK;
 }
@@ -407,7 +440,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
             case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
-                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported",
+                WLOGFE("RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
                 return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
@@ -440,14 +473,22 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                     parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB):
                 return ProcessWindowVisibilityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_DISPLAYID_CHANGE_CB):
+                return ProcessDisplayIdChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::SYSTEM_DENSITY_CHANGE_CB):
+                return ProcessSystemDensityChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_NO_INTERACTION_DETECT_CB):
                 return ProcessWindowNoInteractionRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_RECT_CHANGE_CB):
                 return ProcessWindowRectChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB):
+                return ProcessWindowHighlightChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_WILL_CLOSE_CB):
+                return ProcessWindowWillCloseRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
-                WLOGFE("[NAPI]RegisterListenerType %{public}u is not supported",
+                WLOGFE("RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
                 return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
@@ -458,7 +499,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
             case RegisterListenerType::WINDOW_STAGE_CLOSE_CB:
                 return ProcessMainWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
-                TLOGE(WmsLogTag::DEFAULT, "[NAPI]RegisterListenerType %{public}u is not supported",
+                TLOGE(WmsLogTag::DEFAULT, "RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
                 return WmErrorCode::WM_ERROR_INVALID_PARAM;
         }
@@ -471,26 +512,29 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
 {
     std::lock_guard<std::mutex> lock(mtx_);
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGFW("[NAPI]Type %{public}s was not registerted", type.c_str());
+        WLOGFW("Type %{public}s was not registerted", type.c_str());
         return WmErrorCode::WM_OK;
     }
     auto iterCaseType = LISTENER_CODE_MAP.find(caseType);
     if (iterCaseType == LISTENER_CODE_MAP.end()) {
-        WLOGFE("[NAPI]CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
+        WLOGFE("CaseType %{public}u is not supported", static_cast<uint32_t>(caseType));
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     auto iterCallbackType = iterCaseType->second.find(type);
     if (iterCallbackType == iterCaseType->second.end()) {
-        WLOGFE("[NAPI]Type %{public}s is not supported", type.c_str());
+        WLOGFE("Type %{public}s is not supported", type.c_str());
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     RegisterListenerType listenerType = iterCallbackType->second;
     if (value == nullptr) {
         for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end();) {
+            if (it->second->CanCancelUnregister(type) != WmErrorCode::WM_OK) {
+                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            }
             WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window,
                 false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
-                WLOGFE("[NAPI]Unregister type %{public}s failed, no value", type.c_str());
+                WLOGFE("Unregister type %{public}s failed, no value", type.c_str());
                 return ret;
             }
             jsCbMap_[type].erase(it++);
@@ -503,22 +547,25 @@ WmErrorCode JsWindowRegisterManager::UnregisterListener(sptr<Window> window, std
             if (!isEquals) {
                 continue;
             }
+            if (it->second->CanCancelUnregister(type) != WmErrorCode::WM_OK) {
+                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            }
             findFlag = true;
             WmErrorCode ret = ProcessListener(listenerType, caseType, it->second, window,
                 false, env, nullptr);
             if (ret != WmErrorCode::WM_OK) {
-                WLOGFE("[NAPI]Unregister type %{public}s failed", type.c_str());
+                WLOGFE("Unregister type %{public}s failed", type.c_str());
                 return ret;
             }
             jsCbMap_[type].erase(it);
             break;
         }
         if (!findFlag) {
-            WLOGFW("[NAPI]Unregister type %{public}s failed because not found callback!", type.c_str());
+            WLOGFW("Unregister type %{public}s failed because not found callback!", type.c_str());
             return WmErrorCode::WM_OK;
         }
     }
-    WLOGI("[NAPI]Unregister type %{public}s success! callback map size: %{public}zu",
+    WLOGI("Unregister type %{public}s success! callback map size: %{public}zu",
         type.c_str(), jsCbMap_[type].size());
     // erase type when there is no callback in one type
     if (jsCbMap_[type].empty()) {
@@ -531,7 +578,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWi
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        WLOGFE("[NAPI]Window is nullptr");
+        WLOGFE("Window is nullptr");
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowStatusChangeListener> thisListener(listener);
@@ -582,11 +629,36 @@ WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<J
     if (window == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
+    WmErrorCode ret = isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowWillCloseRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    WmErrorCode ret = isRegister ?
+        WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowWillCloseListeners(listener)) :
+        WM_JS_TO_ERROR_CODE_MAP.at(window->UnRegisterWindowWillCloseListeners(listener));
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessWindowHighlightChangeRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowHighlightChangeListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterMainWindowCloseListeners(listener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowHighlightChangeListeners(thisListener));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterMainWindowCloseListeners(listener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowHighlightChangeListeners(thisListener));
     }
     return ret;
 }

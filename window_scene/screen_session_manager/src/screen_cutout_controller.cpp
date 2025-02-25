@@ -63,7 +63,8 @@ void ScreenCutoutController::ConvertBoundaryRectsByRotation(std::vector<DMRect>&
     Rotation currentRotation = screenProperty.GetScreenRotation();
     std::vector<DMRect> displayBoundaryRects;
     if (ScreenSessionManager::GetInstance().IsFoldable() &&
-        (ScreenSessionManager::GetInstance().GetFoldStatus() == FoldStatus::FOLDED)) {
+        (ScreenSessionManager::GetInstance().GetFoldDisplayMode() == FoldDisplayMode::MAIN ||
+        ScreenSessionManager::GetInstance().GetFoldDisplayMode() == FoldDisplayMode::GLOBAL_FULL)) {
         displayBoundaryRects = ScreenSceneConfig::GetSubCutoutBoundaryRect();
     } else {
         displayBoundaryRects = ScreenSceneConfig::GetCutoutBoundaryRect(displayId);

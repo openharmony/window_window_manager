@@ -180,7 +180,8 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, c
 WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
 {
     if (node->currentVisibility_) {
-        WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "current window is visible, windowId: %{public}u",
+            node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -193,7 +194,7 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
     StartingWindow::AddNodeOnRSTree(node, layoutPolicy_->IsMultiDisplay());
     AssignZOrder();
     layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-    WLOGI("ShowStartingWindow windowId: %{public}u end", node->GetWindowId());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -725,16 +726,19 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
      */
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AddAppSurfaceNodeOnRSTree(%u)", node->GetWindowId());
     if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
-        WLOGFE("id:%{public}u not main app window but has start window", node->GetWindowId());
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "id:%{public}u not main app window but has start window",
+            node->GetWindowId());
         return false;
     }
     if (!node->leashWinSurfaceNode_ || !node->surfaceNode_) {
-        WLOGFE("id:%{public}u leashWinSurfaceNode or surfaceNode is null but has start window!", node->GetWindowId());
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "id:%{public}u leashWinSurfaceNode or surfaceNode is null "
+            "but has start window!", node->GetWindowId());
         return false;
     }
-    WLOGI("AddAppSurfaceNodeOnRSTree Id: %{public}d", node->GetWindowId());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Id: %{public}d", node->GetWindowId());
     if (!node->currentVisibility_) {
-        WLOGI("id: %{public}d is invisible, no need update RS tree", node->GetWindowId());
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "id: %{public}d is invisible, no need update RS tree",
+            node->GetWindowId());
         return false;
     }
     node->leashWinSurfaceNode_->AddChild(node->surfaceNode_, -1);
@@ -1624,7 +1628,8 @@ void WindowNodeContainer::TraverseWindowNode(sptr<WindowNode>& node, std::vector
     }
 }
 
-AvoidArea WindowNodeContainer::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType) const
+AvoidArea WindowNodeContainer::GetAvoidAreaByType(const sptr<WindowNode>& node, AvoidAreaType avoidAreaType,
+    const Rect& rect) const
 {
     if (CheckWindowNodeWhetherInWindowTree(node)) {
         return avoidController_->GetAvoidAreaByType(node, avoidAreaType);
@@ -2213,22 +2218,23 @@ WMError WindowNodeContainer::SwitchLayoutPolicy(WindowLayoutMode dstMode, Displa
     return WMError::WM_OK;
 }
 
-void WindowNodeContainer::UpdateModeSupportInfoWhenKeyguardChange(const sptr<WindowNode>& node, bool up)
+void WindowNodeContainer::UpdateWindowModeSupportTypeWhenKeyguardChange(const sptr<WindowNode>& node, bool up)
 {
-    if (!WindowHelper::IsWindowModeSupported(node->GetWindowProperty()->GetRequestModeSupportInfo(),
+    if (!WindowHelper::IsWindowModeSupported(node->GetWindowProperty()->GetRequestWindowModeSupportType(),
                                              WindowMode::WINDOW_MODE_SPLIT_PRIMARY)) {
         WLOGFD("window doesn't support split mode, winId: %{public}d", node->GetWindowId());
         return;
     }
-    uint32_t modeSupportInfo;
+    uint32_t windowModeSupportType;
     if (up) {
-        modeSupportInfo = node->GetModeSupportInfo() & (~WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+        windowModeSupportType = node->GetWindowModeSupportType() &
+            (~WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
     } else {
-        modeSupportInfo = node->GetModeSupportInfo() | WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
+        windowModeSupportType = node->GetWindowModeSupportType() | WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY;
     }
-    node->SetModeSupportInfo(modeSupportInfo);
+    node->SetWindowModeSupportType(windowModeSupportType);
     if (node->GetWindowToken() != nullptr) {
-        node->GetWindowToken()->UpdateWindowModeSupportInfo(modeSupportInfo);
+        node->GetWindowToken()->UpdateWindowModeSupportType(windowModeSupportType);
     }
 }
 
@@ -2300,7 +2306,7 @@ void WindowNodeContainer::ReZOrderShowWhenLockedWindows(bool up)
             }
         }
 
-        UpdateModeSupportInfoWhenKeyguardChange(needReZOrderNode, up);
+        UpdateWindowModeSupportTypeWhenKeyguardChange(needReZOrderNode, up);
 
         parentNode->children_.insert(position, needReZOrderNode);
         if (up && WindowHelper::IsSplitWindowMode(needReZOrderNode->GetWindowMode())) {

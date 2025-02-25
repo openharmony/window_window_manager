@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef WINDOW_MANAGER_IMPL_H
 #define WINDOW_MANAGER_IMPL_H
  
@@ -35,6 +36,8 @@ public:
     static int32_t MinimizeAll(int64_t displayId);
     static int32_t FindWindow(std::string name, int64_t& windowId);
     static int32_t GetLastWindow(OHOS::AbilityRuntime::Context* ctx, int64_t& id);
+    static int32_t ShiftAppWindowFocus(int32_t sourceWindowId, int32_t targetWindowId);
+    
 private:
 };
 }

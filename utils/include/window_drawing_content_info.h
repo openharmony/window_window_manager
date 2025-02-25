@@ -41,6 +41,7 @@ public:
      * @brief Default construct of WindowDrawingContentInfo.
      */
     WindowDrawingContentInfo() = default;
+
     /**
      * @brief Construct of WindowDrawingContentInfo.
      *
@@ -53,6 +54,7 @@ public:
     WindowDrawingContentInfo(uint32_t winId, int32_t pid, int32_t uid, bool drawingContentState,
         WindowType winType) : windowId_(winId), pid_(pid), uid_(uid),
         drawingContentState_(drawingContentState), windowType_(winType) {};
+
     /**
      * @brief Deconstruct of WindowDrawingContentInfo.
      */
@@ -65,6 +67,7 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
+
     /**
      * @brief Unmarshalling WindowDrawingContentInfo.
      *

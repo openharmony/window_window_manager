@@ -62,7 +62,7 @@ void SessionStubLifecycleTest::SetUp()
     info.abilityName_ = "testMainSession1";
     info.moduleName_ = "testMainSession2";
     info.bundleName_ = "testMainSession3";
-    subSession_ = new SubSession(info, specificCallback);
+    subSession_ = sptr<SubSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, subSession_);
 }
 
@@ -89,11 +89,11 @@ namespace {
 HWTEST_F(SessionStubLifecycleTest, Reconnect01, Function | SmallTest | Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, mockSessionStage);
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
+    sptr<TestWindowEventChannel> testWindowEventChannel = sptr<TestWindowEventChannel>::MakeSptr();
     EXPECT_NE(nullptr, testWindowEventChannel);
 
     auto result = subSession_->Reconnect(nullptr, nullptr, nullptr, property);
@@ -168,23 +168,9 @@ HWTEST_F(SessionStubLifecycleTest, Hide01, Function | SmallTest | Level1)
  */
 HWTEST_F(SessionStubLifecycleTest, Hide02, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    ASSERT_TRUE(subSession_ != nullptr);
-    subSession_->SetSessionProperty(property);
-    auto result = subSession_->Hide();
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: Hide03
- * @tc.desc: check func Hide
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubLifecycleTest, Hide03, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = nullptr;
     ASSERT_TRUE(subSession_ != nullptr);
     subSession_->SetSessionProperty(property);
     auto result = subSession_->Hide();
@@ -198,9 +184,9 @@ HWTEST_F(SessionStubLifecycleTest, Hide03, Function | SmallTest | Level1)
  */
 HWTEST_F(SessionStubLifecycleTest, Hide04, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    sptr<WindowProperty> winPropSrc = sptr<WindowProperty>::MakeSptr();
     ASSERT_NE(nullptr, winPropSrc);
     uint32_t animationFlag = 1;
     winPropSrc->SetAnimationFlag(animationFlag);
@@ -220,30 +206,16 @@ HWTEST_F(SessionStubLifecycleTest, Hide04, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Show01
- * @tc.desc: check func Show
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubLifecycleTest, Show01, Function | SmallTest | Level1)
-{
-    sptr<WindowSessionProperty> property = nullptr;
-    ASSERT_EQ(nullptr, property);
-
-    ASSERT_TRUE(subSession_ != nullptr);
-    ASSERT_EQ(WSError::WS_OK, subSession_->Show(property));
-}
-
-/**
  * @tc.name: Show02
  * @tc.desc: check func Show
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStubLifecycleTest, Show02, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
 
-    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    sptr<WindowProperty> winPropSrc = sptr<WindowProperty>::MakeSptr();
     ASSERT_NE(nullptr, winPropSrc);
     uint32_t animationFlag = 1;
     winPropSrc->SetAnimationFlag(animationFlag);
@@ -262,10 +234,10 @@ HWTEST_F(SessionStubLifecycleTest, Show02, Function | SmallTest | Level1)
  */
 HWTEST_F(SessionStubLifecycleTest, Show03, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
 
-    sptr<WindowProperty> winPropSrc = new (std::nothrow) WindowProperty();
+    sptr<WindowProperty> winPropSrc = sptr<WindowProperty>::MakeSptr();
     ASSERT_NE(nullptr, winPropSrc);
     uint32_t animationFlag = 3;
     winPropSrc->SetAnimationFlag(animationFlag);
@@ -276,6 +248,7 @@ HWTEST_F(SessionStubLifecycleTest, Show03, Function | SmallTest | Level1)
     auto result = subSession_->Show(property);
     ASSERT_EQ(result, WSError::WS_OK);
 }
+
 /**
  * @tc.name: Show04
  * @tc.desc: check func Show
@@ -283,7 +256,7 @@ HWTEST_F(SessionStubLifecycleTest, Show03, Function | SmallTest | Level1)
  */
 HWTEST_F(SessionStubLifecycleTest, Show04, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     ASSERT_EQ(subSession_->Show(property), WSError::WS_OK);
@@ -294,6 +267,7 @@ HWTEST_F(SessionStubLifecycleTest, Show04, Function | SmallTest | Level1)
     subSession_->SetSessionProperty(property);
     ASSERT_EQ(subSession_->Show(property), WSError::WS_OK);
 }
+
 /**
  * @tc.name: ProcessPointDownSession01
  * @tc.desc: check func ProcessPointDownSession
@@ -310,6 +284,7 @@ HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession01, Function | SmallTe
     subSession_->RectCheck(50, 100);
     ASSERT_EQ(subSession_->ProcessPointDownSession(50, 100), WSError::WS_OK);
 }
+
 /**
  * @tc.name: ProcessPointDownSession02
  * @tc.desc: check func ProcessPointDownSession

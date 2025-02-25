@@ -37,12 +37,7 @@ struct VirtualScreenOption {
     int32_t flags_;
     bool isForShot_ {true};
     std::vector<uint64_t> missionIds_ {};
-};
-
-enum class VirtualScreenFlag : uint32_t {
-    DEFAULT = 0,
-    CAST = 1,
-    MAX = 2,
+    VirtualScreenType virtualScreenType_ {VirtualScreenType::UNKNOWN};
 };
 
 class Screen : public RefBase {
@@ -125,6 +120,13 @@ public:
      * @return Screen parent id.
      */
     ScreenId GetParentId() const;
+
+    /**
+     * @brief Get screen serial number.
+     *
+     * @return Screen serial number.
+     */
+    std::string GetSerialNumber() const;
 
     /**
      * @brief Get screen mode id.

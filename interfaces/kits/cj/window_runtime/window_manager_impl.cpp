@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_manager_impl.h"
 #include "ability.h"
 #include "ability_context.h"
@@ -163,6 +164,17 @@ int32_t WindowManagerImpl::GetLastWindow(OHOS::AbilityRuntime::Context* ctx, int
         return static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return FindWindow(window->GetWindowName(), id);
+}
+
+int32_t WindowManagerImpl::ShiftAppWindowFocus(int32_t sourceWindowId,
+                                               int32_t targetWindowId)
+{
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Shift application window focus failed");
+    }
+    return static_cast<int32_t>(ret);
 }
 }
 }

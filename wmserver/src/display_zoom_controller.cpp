@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "display_zoom_controller.h"
 #include "display_group_info.h"
 #include "window_helper.h"

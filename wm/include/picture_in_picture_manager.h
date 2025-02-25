@@ -51,10 +51,14 @@ public:
     static void DoLocateSource();
     static void DoActionEvent(const std::string& actionName, int32_t status);
     static void DoControlEvent(PiPControlType controlType, PiPControlStatus status);
+    static void PipSizeChange(uint32_t width, uint32_t height, double scale);
     static void AutoStartPipWindow();
     static void DoDestroy();
     static std::shared_ptr<NativeReference> innerCallbackRef_;
+
 private:
+    static sptr<PictureInPictureController> GetActiveController() { return activeController_; }
+    
     // controller in use
     static sptr<PictureInPictureController> activeController_;
     static wptr<PictureInPictureController> autoStartController_;

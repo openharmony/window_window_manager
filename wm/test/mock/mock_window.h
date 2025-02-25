@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef MOCK_WINDOW_H
 #define MOCK_WINDOW_H
 
@@ -128,9 +129,19 @@ public:
     MOCK_METHOD1(OnMainWindowClose, void(bool&));
 };
 
+class MockIWindowWillCloseListener : public IWindowWillCloseListener {
+public:
+    MOCK_METHOD1(OnWindowWillClose, void(sptr<Window> window));
+};
+
 class MockISwitchFreeMultiWindowListener : public ISwitchFreeMultiWindowListener {
 public:
     MOCK_METHOD1(OnSwitchFreeMultiWindow, void(bool));
+};
+
+class MockIWindowCrossAxisListener : public IWindowCrossAxisListener {
+public:
+    MOCK_METHOD1(OnCrossAxisChange, void(CrossAxisState));
 };
 } // Rosen
 } // OHOS

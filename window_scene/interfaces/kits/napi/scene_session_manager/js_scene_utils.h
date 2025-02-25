@@ -66,7 +66,8 @@ enum class JsSessionType : uint32_t {
     TYPE_KEYBOARD_PANEL,
     TYPE_DIVIDER,
     TYPE_TRANSPARENT_VIEW,
-    TYPE_SCREEN_CONTROL
+    TYPE_SCREEN_CONTROL,
+    TYPE_WALLET_SWIPE_CARD
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
@@ -107,6 +108,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DOCK_SLICE,               JsSessionType::TYPE_DIVIDER                 },
     { WindowType::WINDOW_TYPE_TRANSPARENT_VIEW,         JsSessionType::TYPE_TRANSPARENT_VIEW        },
     { WindowType::WINDOW_TYPE_SCREEN_CONTROL,           JsSessionType::TYPE_SCREEN_CONTROL          },
+    { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,        JsSessionType::TYPE_WALLET_SWIPE_CARD       },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -147,6 +149,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_DIVIDER,                  WindowType::WINDOW_TYPE_DOCK_SLICE              },
     { JsSessionType::TYPE_TRANSPARENT_VIEW,         WindowType::WINDOW_TYPE_TRANSPARENT_VIEW        },
     { JsSessionType::TYPE_SCREEN_CONTROL,           WindowType::WINDOW_TYPE_SCREEN_CONTROL          },
+    { JsSessionType::TYPE_WALLET_SWIPE_CARD,        WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD       },
 };
 
 JsSessionType GetApiType(WindowType type);
@@ -160,6 +163,8 @@ bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::stri
 bool ConvertProcessOptionFromJs(napi_env env, napi_value jsObject,
     std::shared_ptr<AAFwk::ProcessOptions> processOptions);
 napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo);
+napi_value CreateSupportWindowModes(napi_env env,
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property);
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue);
@@ -170,11 +175,15 @@ napi_value CreateJsSessionProcessMode(napi_env env);
 napi_value GetWindowRectIntValue(napi_env env, int val);
 napi_value CreateJsSessionState(napi_env env);
 napi_value CreateJsSessionSizeChangeReason(napi_env env);
+napi_value CreateJsRSUIFirstSwitch(napi_env env);
 napi_value CreateJsSessionPiPControlType(napi_env env);
 napi_value CreateJsSessionPiPControlStatus(napi_env env);
+napi_value CreateJsSessionGravity(napi_env env);
+napi_value CreateJsSessionDragResizeType(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
 template<typename T>
 napi_value CreateJsSessionRect(napi_env env, const T& rect);
+napi_value CreateJsRectAnimationConfig(napi_env env, const RectAnimationConfig& rectAnimationConfig);
 napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& param);
 napi_value SubWindowModalTypeInit(napi_env env);
 napi_value CreateJsSystemBarPropertyArrayObject(
@@ -183,12 +192,14 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
 napi_value SessionTypeInit(napi_env env);
 napi_value SceneTypeInit(napi_env env);
 napi_value KeyboardGravityInit(napi_env env);
+napi_value KeyboardViewModeInit(napi_env env);
 napi_value NapiGetUndefined(napi_env env);
 napi_valuetype GetType(napi_env env, napi_value value);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo);
 bool ConvertRotateAnimationConfigFromJs(napi_env env, napi_value value, RotateAnimationConfig& config);
+bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType& dragResizeType);
 WSError GetIntValueFromString(const std::string& str, uint32_t& value);
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -205,6 +216,7 @@ public:
 private:
     void GetMainEventHandler();
     napi_env env_;
+    std::shared_ptr<int> envChecker_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS::Rosen

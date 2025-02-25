@@ -81,11 +81,16 @@ napi_value AttachWindowExtensionContext(napi_env env, void* value, void *)
         WLOGFE("Failed to get window extension context");
         return nullptr;
     }
-    napi_wrap(env, contextObj, workContext,
-              [](napi_env, void* data, void *) {
-                WLOGI("Finalizer for weak_ptr service extension context is called");
-                delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
-              }, nullptr, nullptr);
+    napi_status status = napi_wrap(env, contextObj, workContext,
+        [](napi_env, void* data, void *) {
+            WLOGI("Finalizer for weak_ptr service extension context is called");
+            delete static_cast<std::weak_ptr<WindowExtensionContext> *>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok) {
+        WLOGFE("Failed to call napi_wrap");
+        delete workContext;
+        return nullptr;
+    }
     return contextObj;
 }
 
@@ -173,11 +178,16 @@ void JsWindowExtension::BindContext(napi_env env, napi_value obj)
     WLOGI("JsWindowExtension::SetProperty.");
     napi_set_named_property(env, obj, "context", contextObj);
 
-    napi_wrap(env, contextObj, workContext,
-              [](napi_env, void* data, void *) {
-                WLOGI("Finalizer for weak_ptr extension context is called");
-                delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
-              }, nullptr, nullptr);
+    napi_status status = napi_wrap(env, contextObj, workContext,
+        [](napi_env, void* data, void *) {
+            WLOGI("Finalizer for weak_ptr extension context is called");
+            delete static_cast<std::weak_ptr<WindowExtensionContext>*>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok) {
+        WLOGFE("Failed to call napi_wrap");
+        delete workContext;
+        return;
+    }
     WLOGI("JsWindowExtension::Init end.");
 }
 
