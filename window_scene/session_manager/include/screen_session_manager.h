@@ -95,6 +95,7 @@ public:
     void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
     bool TryToCancelScreenOff() override;
     void ForceSkipScreenOffAnimation();
+    ScreenPowerState GetScreenPower() override;
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
