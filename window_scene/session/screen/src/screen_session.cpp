@@ -998,7 +998,6 @@ void ScreenSession::UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMo
 
 void ScreenSession::UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged)
 {
-    OptimizeSecondaryDisplayMode(property_.GetBounds(), foldDisplayMode);
     Rotation targetRotation = ConvertIntToRotation(rotation);
     DisplayOrientation deviceOrientation = CalcDeviceOrientation(targetRotation, foldDisplayMode, isChanged);
     property_.UpdateDeviceRotation(targetRotation);
