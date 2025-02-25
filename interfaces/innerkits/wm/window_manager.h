@@ -68,6 +68,7 @@ public:
      * @param screenId ID of the screen that is connected to the WMS, screenId is currently always 0.
      */
     virtual void OnConnected(int32_t userId, int32_t screenId) = 0;
+
     /**
      * @brief Notify caller when WMS disconnected
      *
@@ -91,6 +92,7 @@ public:
      * @param focusChangeInfo Window info while its focus status changed.
      */
     virtual void OnFocused(const sptr<FocusChangeInfo>& focusChangeInfo) = 0;
+
     /**
      * @brief Notify caller when window lose focus
      *
@@ -113,7 +115,6 @@ public:
      */
     virtual void OnWindowModeUpdate(WindowModeType mode) = 0;
 };
-
 
 /**
  * @class ISystemBarChangedListener
@@ -218,6 +219,7 @@ public:
      * @brief Default construct of AccessibilityWindowInfo.
      */
     AccessibilityWindowInfo() = default;
+
     /**
      * @brief Default deconstruct of AccessibilityWindowInfo.
      */
@@ -230,6 +232,7 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
+
     /**
      * @brief Unmarshalling AccessibilityWindowInfo.
      *
@@ -256,6 +259,103 @@ public:
 };
 
 /**
+ * @class AppUseControlInfo
+ *
+ * @brief Window info used for AppUseControlInfo.
+ */
+struct AppUseControlInfo : public Parcelable {
+    /**
+     * @brief Marshalling AppUseControlInfo.
+     *
+     * @param parcel Package of AppUseControlInfo.
+     * @return True means marshall success, false means marshall failed.
+     */
+    virtual bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteString(bundleName_) &&
+               parcel.WriteInt32(appIndex_) &&
+               parcel.WriteBool(isNeedControl_);
+    }
+
+    /**
+     * @brief Unmarshalling AppUseControlInfo.
+     *
+     * @param parcel Package of AppUseControlInfo.
+     * @return AppUseControlInfo object.
+     */
+    static AppUseControlInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new AppUseControlInfo();
+        if (!parcel.ReadString(info->bundleName_) ||
+            !parcel.ReadInt32(info->appIndex_) ||
+            !parcel.ReadBool(info->isNeedControl_)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    std::string bundleName_ = "";
+    int32_t appIndex_ = 0;
+    bool isNeedControl_ = false;
+};
+
+/**
+ * @struct AbilityInfoBase
+ *
+ * @brief ability info.
+ */
+struct AbilityInfoBase : public Parcelable {
+    /**
+     * @brief Marshalling AbilityInfoBase.
+     *
+     * @param parcel Package of AbilityInfoBase.
+     * @return True means marshall success, false means marshall failed.
+     */
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteString(bundleName) &&
+               parcel.WriteString(moduleName) &&
+               parcel.WriteString(abilityName) &&
+               parcel.WriteInt32(appIndex);
+    }
+
+    /**
+     * @brief Unmarshalling AbilityInfoBase.
+     *
+     * @param parcel Package of AbilityInfoBase.
+     * @return AbilityInfoBase object.
+     */
+    static AbilityInfoBase* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new AbilityInfoBase();
+        if (!parcel.ReadString(info->bundleName) ||
+            !parcel.ReadString(info->moduleName) ||
+            !parcel.ReadString(info->abilityName) ||
+            !parcel.ReadInt32(info->appIndex)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    bool IsValid() const
+    {
+        return !bundleName.empty() && !moduleName.empty() && !abilityName.empty() && appIndex >= 0;
+    }
+
+    std::string ToKeyString() const
+    {
+        return bundleName + "_" + moduleName + "_" + abilityName + "_" + std::to_string(appIndex);
+    }
+
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+    int32_t appIndex = 0;
+};
+
+/**
  * @class UnreliableWindowInfo
  *
  * @brief Unreliable Window Info.
@@ -266,6 +366,7 @@ public:
      * @brief Default construct of UnreliableWindowInfo.
      */
     UnreliableWindowInfo() = default;
+
     /**
      * @brief Default deconstruct of UnreliableWindowInfo.
      */
@@ -278,6 +379,7 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
+
     /**
      * @brief Unmarshalling UnreliableWindowInfo.
      *
@@ -428,6 +530,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
+
     /**
      * @brief Unregister WMS connection status changed listener.
      * @attention Callable only by u0 system user.
@@ -435,6 +538,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWMSConnectionChangedListener();
+
     /**
      * @brief Register focus changed listener.
      *
@@ -442,6 +546,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+
     /**
      * @brief Unregister focus changed listener.
      *
@@ -449,6 +554,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener);
+
     /**
      * @brief Register window mode listener.
      *
@@ -456,6 +562,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+
     /**
      * @brief Unregister window mode listener.
      *
@@ -463,6 +570,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+
     /**
      * @brief Get window mode type.
      *
@@ -470,6 +578,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetWindowModeType(WindowModeType& windowModeType) const;
+
     /**
      * @brief Register system bar changed listener.
      *
@@ -477,6 +586,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+
     /**
      * @brief Unregister system bar changed listener.
      *
@@ -484,6 +594,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterSystemBarChangedListener(const sptr<ISystemBarChangedListener>& listener);
+
     /**
      * @brief Register window updated listener.
      *
@@ -491,6 +602,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+
     /**
      * @brief Unregister window updated listener.
      *
@@ -498,6 +610,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowUpdateListener(const sptr<IWindowUpdateListener>& listener);
+
     /**
      * @brief Register visibility changed listener.
      *
@@ -505,6 +618,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+
     /**
      * @brief Unregister visibility changed listener.
      *
@@ -512,6 +626,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterVisibilityChangedListener(const sptr<IVisibilityChangedListener>& listener);
+
     /**
      * @brief Register drawingcontent changed listener.
      *
@@ -535,6 +650,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+
     /**
      * @brief Unregister camera float window changed listener.
      *
@@ -542,6 +658,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterCameraFloatWindowChangedListener(const sptr<ICameraFloatWindowChangedListener>& listener);
+
     /**
      * @brief Register water mark flag changed listener.
      *
@@ -549,6 +666,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
+
     /**
      * @brief Unregister water mark flag changed listener.
      *
@@ -556,6 +674,7 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
+
     /**
      * @brief Register gesture navigation enabled changed listener.
      *
@@ -564,6 +683,7 @@ public:
      */
     WMError RegisterGestureNavigationEnabledChangedListener(
         const sptr<IGestureNavigationEnabledChangedListener>& listener);
+
     /**
      * @brief Unregister gesture navigation enabled changed listener.
      *
@@ -632,12 +752,14 @@ public:
      * @return WM_OK means minimize success, others means minimize failed.
      */
     WMError MinimizeAllAppWindows(DisplayId displayId);
+
     /**
      * @brief Toggle all app windows to the foreground.
      *
      * @return WM_OK means toggle success, others means toggle failed.
      */
     WMError ToggleShownStateForAllAppWindows();
+
     /**
      * @brief Set window layout mode.
      *
@@ -645,6 +767,7 @@ public:
      * @return WM_OK means set success, others means set failed.
      */
     WMError SetWindowLayoutMode(WindowLayoutMode mode);
+
     /**
      * @brief Get accessibility window info.
      *
@@ -652,6 +775,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) const;
+
     /**
      * @brief Get unreliable window info.
      *
@@ -660,6 +784,25 @@ public:
      */
     WMError GetUnreliableWindowInfo(int32_t windowId,
         std::vector<sptr<UnreliableWindowInfo>>& infos) const;
+
+    /**
+     * @brief List window info.
+     *
+     * @param windowInfoOption Option for selecting window info.
+     * @param infos Window info.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) const;
+
+    /**
+     * @brief Get window layout info.
+     *
+     * @param displayId DisplayId of which display to get window layout infos.
+     * @param infos Window layout infos.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
+
     /**
      * @brief Get visibility window info.
      *
@@ -667,6 +810,7 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
+
     /**
      * @brief Set gesture navigation enabled.
      *
@@ -681,7 +825,7 @@ public:
      * @param focusInfo Focus window info.
      * @return FocusChangeInfo object about focus window.
      */
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
 
     /**
      * @brief Dump all session info
@@ -751,6 +895,7 @@ public:
      * @return WM_OK means register success, others means register failed.
      */
     WMError RegisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener);
+
     /**
      * @brief Unregister visible main window num changed listener.
      *
@@ -816,11 +961,13 @@ public:
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) const;
 
     /**
-     * @brief Release screen lock of foreground sessions.
+     * @brief Update screen lock status for app.
      *
-     * @return WM_OK means release success, others means failed.
+     * @param bundleName BundleName of specific app
+     * @param isRelease True means screen lock, false means reLock screen lock
+     * @return WM_OK means update success, others means failed.
      */
-    WMError ReleaseForegroundSessionScreenLock();
+    WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
 
     /**
      * @brief Get displayId by windowId.
@@ -831,6 +978,56 @@ public:
      */
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
+
+    /**
+     * @brief Set global drag resize type.
+     * this priority is highest.
+     *
+     * @param dragResizeType global drag resize type to set
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetGlobalDragResizeType(DragResizeType dragResizeType);
+
+    /**
+     * @brief Get global drag resize type.
+     * if it is RESIZE_TYPE_UNDEFINED, return default value.
+     *
+     * @param dragResizeType global drag resize type to get
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
+
+    /**
+     * @brief Set drag resize type of specific app.
+     * only when global value is RESIZE_TYPE_UNDEFINED, this value take effect.
+     *
+     * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to set
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
+
+    /**
+     * @brief Get drag resize type of specific app.
+     * effective order:
+     *  1. global value
+     *  2. app value
+     *  3. default value
+     *
+     * @param bundleName bundleName of specific app
+     * @param dragResizeType drag resize type to get
+     * @return WM_OK means get success, others means failed.
+     */
+    WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+
+    /**
+     * @brief Shift window pointer event within the same application. Only main window and subwindow.
+     *
+     * @param sourceWindowId Window id which the pointer event shift from
+     * @param targetWindowId Window id which the pointer event shift to
+     * @return WM_OK means shift window pointer event success, others means failed.
+     */
+    WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
 private:
     WindowManager();

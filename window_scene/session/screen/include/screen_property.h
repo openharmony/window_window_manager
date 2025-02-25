@@ -33,6 +33,9 @@ enum class ScreenPropertyChangeReason : uint32_t {
     FOLD_SCREEN_FOLDING,
     VIRTUAL_SCREEN_RESIZE,
     RELATIVE_POSITION_CHANGE,
+    SUPER_FOLD_STATUS_CHANGE,
+    VIRTUAL_PIXEL_RATIO_CHANGE,
+    ACCESS_INFO_CHANGE,
 };
 class ScreenProperty {
 public:
@@ -47,6 +50,12 @@ public:
 
     void SetPhyBounds(const RRect& phyBounds);
     RRect GetPhyBounds() const;
+
+    void SetFakeBounds(const RRect& fakeBounds);
+    RRect GetFakeBounds() const;
+
+    void SetIsFakeInUse(bool isFakeInUse);
+    bool GetIsFakeInUse() const;
 
     void SetScaleX(float scaleX);
     float GetScaleX() const;
@@ -99,6 +108,9 @@ public:
     Rotation GetScreenRotation() const;
     void UpdateScreenRotation(Rotation rotation);
 
+    Rotation GetDeviceRotation() const;
+    void UpdateDeviceRotation(Rotation rotation);
+
     void SetOrientation(Orientation orientation);
     Orientation GetOrientation() const;
 
@@ -109,8 +121,14 @@ public:
     DisplayOrientation GetDisplayOrientation() const;
     void CalcDefaultDisplayOrientation();
 
+    void SetDeviceOrientation(DisplayOrientation displayOrientation);
+    DisplayOrientation GetDeviceOrientation() const;
+
     void SetPhysicalRotation(float rotation);
     float GetPhysicalRotation() const;
+
+    void SetScreenComponentRotation(float rotation);
+    float GetScreenComponentRotation() const;
 
     float GetXDpi() const;
     float GetYDpi() const;
@@ -129,6 +147,12 @@ public:
     void SetStartY(uint32_t startY);
     uint32_t GetStartY() const;
 
+    void SetValidHeight(uint32_t validHeight);
+    int32_t GetValidHeight() const;
+ 
+    void SetValidWidth(uint32_t validWidth);
+    int32_t GetValidWidth() const;
+
     void SetStartPosition(uint32_t startX, uint32_t startY);
 
     void SetScreenType(ScreenType type);
@@ -136,6 +160,17 @@ public:
 
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
+
+    void SetScreenShape(ScreenShape screenShape);
+    ScreenShape GetScreenShape() const;
+
+    void SetX(int32_t x);
+    int32_t GetX() const;
+
+    void SetY(int32_t y);
+    int32_t GetY() const;
+
+    void SetXYPosition(int32_t x, int32_t y);
 
     DMRect GetAvailableArea()
     {
@@ -146,6 +181,52 @@ public:
     {
         availableArea_ = area;
     }
+
+    DMRect GetExpandAvailableArea()
+    {
+        return expandAvailableArea_;
+    }
+
+    void SetExpandAvailableArea(DMRect area)
+    {
+        expandAvailableArea_ = area;
+    }
+
+    DMRect GetCreaseRect()
+    {
+        return creaseRect_;
+    }
+
+    void SetCreaseRect(DMRect creaseRect)
+    {
+        creaseRect_ = creaseRect;
+    }
+
+    RRect GetPhysicalTouchBounds();
+
+    void SetPhysicalTouchBounds(bool isSecondaryDevice);
+
+    int32_t GetInputOffsetX();
+
+    int32_t GetInputOffsetY();
+
+    void SetInputOffsetY(bool isSecondaryDevice);
+
+    float CalculatePPI();
+    uint32_t CalculateDPI();
+
+    // OffScreenRender
+    void SetCurrentOffScreenRendering(bool enable) { isCurrentOffScreenRendering_ = enable; }
+    bool GetCurrentOffScreenRendering() { return isCurrentOffScreenRendering_; }
+    void SetScreenRealWidth(uint32_t width) { screenRealWidth_ = width; }
+    uint32_t GetScreenRealWidth() { return screenRealWidth_; }
+    void SetScreenRealHeight(uint32_t height) { screenRealHeight_ = height; }
+    uint32_t GetScreenRealHeight() { return screenRealHeight_; }
+    void SetScreenRealPPI() { screenRealPPI_ = CalculatePPI(); }
+    float GetScreenRealPPI() { return screenRealPPI_; }
+    void SetScreenRealDPI() { screenRealDPI_ = CalculateDPI(); }
+    uint32_t GetScreenRealDPI() { return screenRealDPI_; }
+
 private:
     static inline bool IsVertical(Rotation rotation)
     {
@@ -153,8 +234,11 @@ private:
     }
     float rotation_ { 0.0f };
     float physicalRotation_ { 0.0f };
+    float screenComponentRotation_ { 0.0f };
     RRect bounds_;
     RRect phyBounds_;
+    RRect fakeBounds_;
+    bool isFakeInUse_ = false;  // is fake bounds in use
 
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
@@ -180,7 +264,9 @@ private:
 
     Orientation orientation_ { Orientation::UNSPECIFIED };
     DisplayOrientation displayOrientation_ { DisplayOrientation::UNKNOWN };
+    DisplayOrientation deviceOrientation_ { DisplayOrientation::UNKNOWN };
     Rotation screenRotation_ { Rotation::ROTATION_0 };
+    Rotation deviceRotation_ { Rotation::ROTATION_0 };
     Orientation screenRequestedOrientation_ { Orientation::UNSPECIFIED };
     DisplayState displayState_ { DisplayState::UNKNOWN };
 
@@ -193,12 +279,33 @@ private:
     uint32_t startX_ { 0 };
     uint32_t startY_ { 0 };
 
+    int32_t x_ { 0 };
+    int32_t y_ { 0 };
+
+    uint32_t validWidth_ { UINT32_MAX };
+    uint32_t validHeight_ { UINT32_MAX };
+
+    ScreenShape screenShape_ { ScreenShape::RECTANGLE };
+
     ScreenType type_ { ScreenType::REAL };
 
     void UpdateXDpi();
     void UpdateYDpi();
     void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
     DMRect availableArea_;
+    DMRect expandAvailableArea_;
+    DMRect creaseRect_;
+
+    RRect physicalTouchBounds_;
+    int32_t inputOffsetX_ { 0 };
+    int32_t inputOffsetY_ { 0 };
+
+    // OffScreenRender
+    bool isCurrentOffScreenRendering_ { false };
+    uint32_t screenRealWidth_ { UINT32_MAX };
+    uint32_t screenRealHeight_ { UINT32_MAX };
+    float screenRealPPI_ { 0.0f };
+    uint32_t screenRealDPI_ { 0 };
 };
 } // namespace OHOS::Rosen
 

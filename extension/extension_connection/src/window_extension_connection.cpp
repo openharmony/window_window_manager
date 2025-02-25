@@ -122,7 +122,7 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     want.SetParam(WINDOW_ID, static_cast<int>(windowId));
     componentCallback_ = callback;
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, nullptr);
-    WLOGI("Connection extension end ret = %{public}d windowId = %{public}u uid = %{public}u", ret, windowId, uid);
+    WLOGI("Connection extension end ret=%{public}d windowId=%{public}u uid=%{public}u", ret, windowId, uid);
     return ret;
 }
 
@@ -142,21 +142,16 @@ int WindowExtensionConnection::Impl::ConnectExtension(const AppExecFwk::ElementN
     componentCallback_ = callback;
     auto extSessionInfo = SetAbilitySessionInfo(extensionSession);
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectUIExtensionAbility(want, this, extSessionInfo, uid);
-    WLOGI("Connection ui extension end ret = %{public}d windowId = %{public}u uid = %{public}u", ret, windowId, uid);
+    WLOGI("Connection ui extension end ret=%{public}d windowId=%{public}u uid=%{public}u", ret, windowId, uid);
     return ret;
 }
 
 sptr<AAFwk::SessionInfo> WindowExtensionConnection::Impl::SetAbilitySessionInfo(
     const sptr<ExtensionSession>& extSession)
 {
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = new (std::nothrow) AAFwk::SessionInfo();
-    if (!abilitySessionInfo) {
-        WLOGFE("abilitySessionInfo is nullptr");
-        return nullptr;
-    }
-    auto sessionInfo = extSession->GetSessionInfo();
+    auto abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->sessionToken = extSession->AsObject();
-    abilitySessionInfo->callerToken = sessionInfo.callerToken_;
+    abilitySessionInfo->callerToken = extSession->GetSessionInfo().callerToken_;
     abilitySessionInfo->persistentId = extSession->GetPersistentId();
     return abilitySessionInfo;
 }

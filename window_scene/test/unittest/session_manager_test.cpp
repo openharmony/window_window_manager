@@ -99,20 +99,12 @@ HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, Function | SmallTest |
     sm_->Clear();
     sm_->ClearSessionManagerProxy();
     auto sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(nullptr, sceneSessionManagerProxy);
-    } else {
-        ASSERT_EQ(nullptr, sceneSessionManagerProxy);
-    }
+    ASSERT_NE(nullptr, sceneSessionManagerProxy);
 
     sm_->ClearSessionManagerProxy();
     sm_->sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(nullptr, sceneSessionManagerProxy);
-    } else {
-        ASSERT_EQ(nullptr, sceneSessionManagerProxy);
-    }
+    ASSERT_NE(nullptr, sceneSessionManagerProxy);
 }
 
 /**
@@ -239,11 +231,7 @@ HWTEST_F(SessionManagerTest, OnUserSwitch, Function | SmallTest | Level2)
     sm_->userSwitchCallbackFunc_ = [&]() { funInvoked = true; };
     auto sessionManagerService = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sm_->OnUserSwitch(sessionManagerService);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(funInvoked, true);
-    } else {
-        ASSERT_EQ(funInvoked, false);
-    }
+    ASSERT_EQ(funInvoked, true);
 }
 
 /**
@@ -361,7 +349,6 @@ HWTEST_F(SessionManagerTest, RegisterSMSRecoverListener2, Function | SmallTest |
 HWTEST_F(SessionManagerTest, InitMockSMSProxy, Function | SmallTest | Level2)
 {
     ASSERT_NE(nullptr, sm_);
-    sm_->InitMockSMSProxy();
     sm_->InitMockSMSProxy();
     ASSERT_NE(sm_->foundationDeath_, nullptr);
 }

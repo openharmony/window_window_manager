@@ -19,6 +19,10 @@
 #include <functional>
 #include <string>
 
+namespace ffrt {
+class queue;
+} // namespace ffrt
+
 namespace OHOS::Rosen {
 class TaskHandleMap;
 
@@ -47,6 +51,7 @@ public:
 
 private:
     std::unique_ptr<TaskHandleMap> taskHandleMap_;
+    std::unique_ptr<ffrt::queue> ffrtQueue_;
 };
 } // namespace OHOS::Rosen
 

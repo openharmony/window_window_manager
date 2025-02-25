@@ -44,8 +44,8 @@ public:
     WSError TransferAccessibilityChildTreeUnregister(bool isChannelNull);
     WSError TransferAccessibilityDumpChildInfo(bool isChannelNull);
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
-    sptr<WindowEventChannel> windowEventChannel_ = new WindowEventChannelMocker(sessionStage);
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<WindowEventChannel> windowEventChannel_ = sptr<WindowEventChannelMocker>::MakeSptr(sessionStage);
 };
 
 void WindowEventChannelTest::SetUpTestCase()
@@ -129,7 +129,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEvent, Function | SmallTest | Level2
 HWTEST_F(WindowEventChannelTest, TransferPointerEvent, Function | SmallTest | Level2)
 {
     auto pointerEvent = MMI::PointerEvent::Create();
-    sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    sptr<WindowEventChannel> windowEventChannel = sptr<WindowEventChannel>::MakeSptr(sessionStage);
     ASSERT_NE(nullptr, windowEventChannel);
 
     auto res = windowEventChannel->TransferPointerEvent(pointerEvent);
@@ -176,7 +176,7 @@ HWTEST_F(WindowEventChannelTest, TransferBackpressedEventForConsumed, Function |
     res = windowEventChannel_->TransferBackpressedEventForConsumed(isConsumed);
     ASSERT_EQ(res, WSError::WS_OK);
 
-    sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    sptr<WindowEventChannel> windowEventChannel = sptr<WindowEventChannel>::MakeSptr(sessionStage);
     ASSERT_NE(nullptr, windowEventChannel);
     windowEventChannel->sessionStage_ = nullptr;
     res = windowEventChannel->TransferBackpressedEventForConsumed(isConsumed);
@@ -278,7 +278,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumed02, Function | Small
     res = windowEventChannel_->TransferKeyEventForConsumed(keyEvent, isConsumed, true);
     EXPECT_EQ(res, WSError::WS_OK);
 
-    sptr<WindowEventChannel> windowEventChannel = new (std::nothrow) WindowEventChannel(sessionStage);
+    sptr<WindowEventChannel> windowEventChannel = sptr<WindowEventChannel>::MakeSptr(sessionStage);
     ASSERT_NE(nullptr, windowEventChannel);
     windowEventChannel->sessionStage_ = nullptr;
     res = windowEventChannel->TransferKeyEventForConsumed(keyEvent, isConsumed, false);
@@ -296,8 +296,8 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync01, Function | 
     ASSERT_NE(keyEvent, nullptr);
     bool isPreImeEvent = false;
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
-    sptr<WindowEventChannel> windowEventChannel = new WindowEventChannel(sessionStage);
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<WindowEventChannel> windowEventChannel = sptr<WindowEventChannel>::MakeSptr(sessionStage);
     ASSERT_NE(windowEventChannel, nullptr);
     auto res = windowEventChannel->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, nullptr);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -314,10 +314,10 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync02, Function | 
     ASSERT_NE(keyEvent, nullptr);
     bool isPreImeEvent = false;
 
-    sptr<ISessionStage> sessionStage = new SessionStageMocker();
-    sptr<WindowEventChannel> windowEventChannel = new WindowEventChannel(sessionStage);
+    sptr<ISessionStage> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    sptr<WindowEventChannel> windowEventChannel = sptr<WindowEventChannel>::MakeSptr(sessionStage);
     ASSERT_NE(windowEventChannel, nullptr);
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     auto res = windowEventChannel->TransferKeyEventForConsumedAsync(keyEvent, isPreImeEvent, iRemoteObjectMocker);
     ASSERT_EQ(res, WSError::WS_OK);
 }
@@ -330,7 +330,7 @@ HWTEST_F(WindowEventChannelTest, TransferKeyEventForConsumedAsync02, Function | 
 HWTEST_F(WindowEventChannelTest, WindowEventChannelListenerProxyOnTransferKeyEventForConsumed,
     Function | SmallTest | Level2)
 {
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     WindowEventChannelListenerProxy listenerProxy(iRemoteObjectMocker);
     listenerProxy.OnTransferKeyEventForConsumed(100, true, true, WSError::WS_OK);
 }

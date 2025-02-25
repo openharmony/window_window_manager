@@ -101,7 +101,7 @@ bool SessionPermission::IsSACalling()
         TLOGD(WmsLogTag::DEFAULT, "SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
         return true;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
+    TLOGD(WmsLogTag::DEFAULT, "Not SA called, tokenId:%{private}u, flag:%{public}u", tokenId, flag);
     return false;
 }
 
@@ -117,7 +117,7 @@ bool SessionPermission::VerifyCallingPermission(const std::string& permissionNam
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
+    TLOGD(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
@@ -133,7 +133,7 @@ bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken
             permissionName.c_str(), callerToken, ret);
         return false;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
+    TLOGD(WmsLogTag::DEFAULT, "Verify AccessToken success. permission %{public}s, callingTokenID:%{private}u",
         permissionName.c_str(), callerToken);
     return true;
 }
@@ -141,11 +141,11 @@ bool SessionPermission::VerifyPermissionByCallerToken(const uint32_t callerToken
 bool SessionPermission::VerifySessionPermission()
 {
     if (IsSACalling()) {
-        WLOGFI("Is SA Call, Permission verified success.");
+        TLOGD(WmsLogTag::DEFAULT, "Is SA Call, Permission verified success.");
         return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
-        WLOGFI("MANAGE permission verified success.");
+        TLOGD(WmsLogTag::DEFAULT, "MANAGE permission verified success.");
         return true;
     }
     WLOGFW("Permission verified failed.");
@@ -165,10 +165,10 @@ bool SessionPermission::IsShellCall()
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
-        WLOGFI("TokenType is Shell, verify success");
+        TLOGD(WmsLogTag::DEFAULT, "TokenType is Shell, verify success");
         return true;
     }
-    TLOGI(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
+    TLOGD(WmsLogTag::DEFAULT, "Not Shell called. tokenId:%{private}u, type:%{public}u", callerToken, tokenType);
     return false;
 }
 
@@ -256,7 +256,7 @@ bool SessionPermission::IsSameAppAsCalling(const std::string& bundleName, const 
     }
 
     if (bundleInfo.signatureInfo.appIdentifier == appIdentifier) {
-        TLOGI(WmsLogTag::DEFAULT, "verify app success");
+        TLOGD(WmsLogTag::DEFAULT, "verify app success");
         return true;
     }
 
@@ -299,7 +299,7 @@ bool SessionPermission::IsStartedByUIExtension()
 
 bool SessionPermission::CheckCallingIsUserTestMode(pid_t pid)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Calling proxy func");
+    TLOGD(WmsLogTag::DEFAULT, "Calling proxy func");
     bool isUserTestMode = false;
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient == nullptr) {

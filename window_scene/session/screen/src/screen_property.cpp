@@ -24,7 +24,15 @@ constexpr float PHONE_SCREEN_DENSITY = 3.5f;
 constexpr float ELSE_SCREEN_DENSITY = 1.5f;
 constexpr float INCH_2_MM = 25.4f;
 constexpr int32_t HALF_VALUE = 2;
+constexpr int32_t TRUNCATE_TWO_DECIMALS = 100;
 constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
+constexpr float SECONDARY_ROTATION_90 = 90.0F;
+constexpr float SECONDARY_ROTATION_270 = 270.0F;
+constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
+constexpr int32_t FULL_STATUS_WIDTH = 2048;
+constexpr int32_t SCREEN_HEIGHT = 2232;
+constexpr float EPSILON = 1e-6f;
+constexpr float PPI_TO_DPI = 1.6f;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -47,6 +55,16 @@ float ScreenProperty::GetPhysicalRotation() const
     return physicalRotation_;
 }
 
+void ScreenProperty::SetScreenComponentRotation(float rotation)
+{
+    screenComponentRotation_ = rotation;
+}
+
+float ScreenProperty::GetScreenComponentRotation() const
+{
+    return screenComponentRotation_;
+}
+
 void ScreenProperty::SetBounds(const RRect& bounds)
 {
     bounds_ = bounds;
@@ -57,6 +75,26 @@ void ScreenProperty::SetBounds(const RRect& bounds)
 RRect ScreenProperty::GetBounds() const
 {
     return bounds_;
+}
+
+void ScreenProperty::SetFakeBounds(const RRect& fakeBounds)
+{
+    fakeBounds_ = fakeBounds;
+}
+
+RRect ScreenProperty::GetFakeBounds() const
+{
+    return fakeBounds_;
+}
+
+void ScreenProperty::SetIsFakeInUse(bool isFakeInUse)
+{
+    isFakeInUse_ = isFakeInUse;
+}
+
+bool ScreenProperty::GetIsFakeInUse() const
+{
+    return isFakeInUse_;
 }
 
 void ScreenProperty::SetScaleX(float scaleX)
@@ -152,6 +190,26 @@ float ScreenProperty::GetDensityInCurResolution() const
 void ScreenProperty::SetDensityInCurResolution(float densityInCurResolution)
 {
     densityInCurResolution_ = densityInCurResolution;
+}
+
+void ScreenProperty::SetValidHeight(uint32_t validHeight)
+{
+    validHeight_ = validHeight;
+}
+ 
+int32_t ScreenProperty::GetValidHeight() const
+{
+    return validHeight_;
+}
+ 
+void ScreenProperty::SetValidWidth(uint32_t validWidth)
+{
+    validWidth_ = validWidth;
+}
+ 
+int32_t ScreenProperty::GetValidWidth() const
+{
+    return validWidth_;
 }
 
 void ScreenProperty::SetPhyWidth(uint32_t phyWidth)
@@ -280,6 +338,16 @@ Rotation ScreenProperty::GetScreenRotation() const
     return screenRotation_;
 }
 
+void ScreenProperty::UpdateDeviceRotation(Rotation rotation)
+{
+    deviceRotation_ = rotation;
+}
+
+Rotation ScreenProperty::GetDeviceRotation() const
+{
+    return deviceRotation_;
+}
+
 void ScreenProperty::SetOrientation(Orientation orientation)
 {
     orientation_ = orientation;
@@ -308,6 +376,16 @@ void ScreenProperty::SetDisplayOrientation(DisplayOrientation displayOrientation
 DisplayOrientation ScreenProperty::GetDisplayOrientation() const
 {
     return displayOrientation_;
+}
+
+void ScreenProperty::SetDeviceOrientation(DisplayOrientation displayOrientation)
+{
+    deviceOrientation_ = displayOrientation;
+}
+
+DisplayOrientation ScreenProperty::GetDeviceOrientation() const
+{
+    return deviceOrientation_;
 }
 
 void ScreenProperty::UpdateXDpi()
@@ -345,8 +423,10 @@ void ScreenProperty::CalcDefaultDisplayOrientation()
 {
     if (bounds_.rect_.width_ > bounds_.rect_.height_) {
         displayOrientation_ = DisplayOrientation::LANDSCAPE;
+        deviceOrientation_ = DisplayOrientation::LANDSCAPE;
     } else {
         displayOrientation_ = DisplayOrientation::PORTRAIT;
+        deviceOrientation_ = DisplayOrientation::PORTRAIT;
     }
 }
 
@@ -456,5 +536,108 @@ void ScreenProperty::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffs
 uint32_t ScreenProperty::GetDefaultDeviceRotationOffset() const
 {
     return defaultDeviceRotationOffset_;
+}
+
+void ScreenProperty::SetScreenShape(ScreenShape screenShape)
+{
+    screenShape_ = screenShape;
+}
+
+ScreenShape ScreenProperty::GetScreenShape() const
+{
+    return screenShape_;
+}
+
+void ScreenProperty::SetX(int32_t x)
+{
+    x_ = x;
+}
+
+int32_t ScreenProperty::GetX() const
+{
+    return x_;
+}
+
+void ScreenProperty::SetY(int32_t y)
+{
+    y_ = y;
+}
+
+int32_t ScreenProperty::GetY() const
+{
+    return y_;
+}
+
+void ScreenProperty::SetXYPosition(int32_t x, int32_t y)
+{
+    x_ = x;
+    y_ = y;
+}
+
+RRect ScreenProperty::GetPhysicalTouchBounds()
+{
+    return physicalTouchBounds_;
+}
+
+void ScreenProperty::SetPhysicalTouchBounds(bool isSecondaryDevice)
+{
+    if (!isSecondaryDevice) {
+        physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
+        return;
+    }
+    if (rotation_ == SECONDARY_ROTATION_90 || rotation_ == SECONDARY_ROTATION_270) {
+        physicalTouchBounds_.rect_.width_ = phyBounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = phyBounds_.rect_.height_;
+    } else {
+        physicalTouchBounds_.rect_.width_ = phyBounds_.rect_.height_;
+        physicalTouchBounds_.rect_.height_ = phyBounds_.rect_.width_;
+    }
+}
+
+int32_t ScreenProperty::GetInputOffsetX()
+{
+    return inputOffsetX_;
+}
+
+int32_t ScreenProperty::GetInputOffsetY()
+{
+    return inputOffsetY_;
+}
+
+static inline bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
+{
+    return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
+}
+
+void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice)
+{
+    inputOffsetX_ = 0;
+    if (!isSecondaryDevice) {
+        return;
+    }
+    if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(), FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        inputOffsetX_ = SECONDARY_FULL_OFFSETY;
+    }
+}
+
+float ScreenProperty::CalculatePPI()
+{
+    int32_t phywidth = GetPhyWidth();
+    int32_t phyHeight = GetPhyHeight();
+    float phyDiagonal = std::sqrt(static_cast<float>(phywidth * phywidth + phyHeight * phyHeight));
+    if (phyDiagonal < EPSILON) {
+        return 0.0f;
+    }
+    RRect bounds = GetBounds();
+    int32_t width = bounds.rect_.GetWidth();
+    int32_t height = bounds.rect_.GetHeight();
+    float ppi = std::sqrt(static_cast<float>(width * width + height * height)) * INCH_2_MM / phyDiagonal;
+    return std::round(ppi * TRUNCATE_TWO_DECIMALS) / TRUNCATE_TWO_DECIMALS;
+}
+
+uint32_t ScreenProperty::CalculateDPI()
+{
+    return static_cast<uint32_t>(std::round(CalculatePPI() * PPI_TO_DPI));
 }
 } // namespace OHOS::Rosen

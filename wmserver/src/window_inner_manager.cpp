@@ -103,36 +103,33 @@ void WindowInnerManager::CreateInnerWindow(std::string name, DisplayId displayId
     WindowType type, WindowMode mode)
 {
     bool recentHolderWindowFlag = isRecentHolderEnable_;
-    auto task = [name, displayId, rect, mode, type, recentHolderWindowFlag]() {
+    PostTask([name, displayId, rect, mode, type, recentHolderWindowFlag]() {
         if (type == WindowType::WINDOW_TYPE_PLACEHOLDER && recentHolderWindowFlag) {
             PlaceHolderWindow::GetInstance().Create(name, displayId, rect, mode);
         }
-    };
-    PostTask(task, "CreateInnerWindow");
+    }, "CreateInnerWindow");
     return;
 }
 
 void WindowInnerManager::DestroyInnerWindow(DisplayId displayId, WindowType type)
 {
     bool recentHolderWindowFlag = isRecentHolderEnable_;
-    auto task = [type, recentHolderWindowFlag]() {
+    PostTask([type, recentHolderWindowFlag]() {
         if (type == WindowType::WINDOW_TYPE_PLACEHOLDER && recentHolderWindowFlag) {
             PlaceHolderWindow::GetInstance().Destroy();
         }
-    };
-    PostTask(task, "DestroyInnerWindow");
+    }, "DestroyInnerWindow");
     return;
 }
 
 void WindowInnerManager::UpdateInnerWindow(DisplayId displayId, WindowType type, uint32_t width, uint32_t height)
 {
     bool recentHolderWindowFlag = isRecentHolderEnable_;
-    auto task = [type, width, height, recentHolderWindowFlag]() {
+    PostTask([type, width, height, recentHolderWindowFlag]() {
         if (type == WindowType::WINDOW_TYPE_PLACEHOLDER && recentHolderWindowFlag) {
             PlaceHolderWindow::GetInstance().Update(width, height);
         }
-    };
-    PostTask(task, "UpdateInnerWindow");
+    }, "UpdateInnerWindow");
     return;
 }
 
@@ -146,15 +143,14 @@ void WindowInnerManager::MinimizeAbility(const wptr<WindowNode>& node, bool isFr
     }
     wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
     WLOGFD("minimize window %{public}u,  isfromuser: %{public}d", weakNode->GetWindowId(), isFromUser);
-    auto task = [weakToken, isFromUser]() {
+    PostTask([weakToken, isFromUser]() {
         auto token = weakToken.promote();
         if (token == nullptr) {
             WLOGE("minimize ability failed, because window token is nullptr.");
             return;
         }
         AAFwk::AbilityManagerClient::GetInstance()->MinimizeAbility(token, isFromUser);
-    };
-    PostTask(task, "MinimizeAbility");
+    }, "MinimizeAbility");
 }
 
 void WindowInnerManager::TerminateAbility(const wptr<WindowNode>& node)
@@ -167,7 +163,7 @@ void WindowInnerManager::TerminateAbility(const wptr<WindowNode>& node)
     }
     wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
     WLOGFD("terminate window %{public}u", weakNode->GetWindowId());
-    auto task = [weakToken]() {
+    PostTask([weakToken]() {
         auto token = weakToken.promote();
         if (token == nullptr) {
             WLOGE("terminate ability failed, because window token is nullptr.");
@@ -175,8 +171,7 @@ void WindowInnerManager::TerminateAbility(const wptr<WindowNode>& node)
         }
         AAFwk::Want resultWant;
         AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token, -1, &resultWant);
-    };
-    PostTask(task, "TerminateAbility");
+    }, "TerminateAbility");
 }
 
 void WindowInnerManager::CloseAbility(const wptr<WindowNode>& node)
@@ -189,7 +184,7 @@ void WindowInnerManager::CloseAbility(const wptr<WindowNode>& node)
     }
     wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
     WLOGFD("close window %{public}u", weakNode->GetWindowId());
-    auto task = [weakToken]() {
+    PostTask([weakToken]() {
         auto token = weakToken.promote();
         if (token == nullptr) {
             WLOGE("close ability failed, because window token is nullptr.");
@@ -197,8 +192,7 @@ void WindowInnerManager::CloseAbility(const wptr<WindowNode>& node)
         }
         AAFwk::Want resultWant;
         AAFwk::AbilityManagerClient::GetInstance()->CloseAbility(token);
-    };
-    PostTask(task, "CloseAbility");
+    }, "CloseAbility");
 }
 
 void WindowInnerManager::CompleteFirstFrameDrawing(const wptr<WindowNode>& node)
@@ -211,15 +205,14 @@ void WindowInnerManager::CompleteFirstFrameDrawing(const wptr<WindowNode>& node)
     }
     wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
     WLOGFD("CompleteFirstFrameDrawing %{public}u", weakNode->GetWindowId());
-    auto task = [weakToken]() {
+    PostTask([weakToken]() {
         auto token = weakToken.promote();
         if (token == nullptr) {
             WLOGE("CompleteFirstFrameDrawing failed, because window token is nullptr.");
             return;
         }
         AAFwk::AbilityManagerClient::GetInstance()->CompleteFirstFrameDrawing(token);
-    };
-    PostTask(task, "CompleteFirstFrameDrawing");
+    }, "CompleteFirstFrameDrawing");
 }
 
 void WindowInnerManager::UpdateMissionSnapShot(const wptr<WindowNode>& node, std::shared_ptr<Media::PixelMap> pixelMap)
@@ -232,7 +225,7 @@ void WindowInnerManager::UpdateMissionSnapShot(const wptr<WindowNode>& node, std
     }
     wptr<IRemoteObject> weakToken(weakNode->abilityToken_);
     WLOGFD("Update id %{public}u", weakNode->GetWindowId());
-    auto task = [weakToken, pixelMap]() {
+    PostTask([weakToken, pixelMap]() {
         auto token = weakToken.promote();
         if (token == nullptr) {
             WLOGE("UpdateMissionSnapShot failed, because window token is nullptr.");
@@ -243,8 +236,7 @@ void WindowInnerManager::UpdateMissionSnapShot(const wptr<WindowNode>& node, std
             return;
         }
         AAFwk::AbilityManagerClient::GetInstance()->UpdateMissionSnapShot(token, pixelMap);
-    };
-    PostTask(task, "UpdateMissionSnapShot");
+    }, "UpdateMissionSnapShot");
 }
 
 void WindowInnerManager::PostTask(InnerTask &&task, std::string name, EventPriority priority)
@@ -337,7 +329,7 @@ void WindowInnerManager::StartWindowInfoReportLoop()
     int64_t delayTime = 1000 * 60 * 60; // an hour.
     bool ret = eventHandler_->PostTask(task, "wms:WindowInfoReport", delayTime);
     if (!ret) {
-        WLOGFE("post listener callback task failed. the task name is WindowInfoReport");
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "post listener callback task failed. the task name is WindowInfoReport");
         return;
     }
     isReportTaskStart_ = true;

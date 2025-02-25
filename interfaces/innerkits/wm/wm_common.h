@@ -16,16 +16,40 @@
 #ifndef OHOS_ROSEN_WM_COMMON_H
 #define OHOS_ROSEN_WM_COMMON_H
 
-#include <parcel.h>
 #include <map>
-#include <float.h>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include <float.h>
+
+#include <parcel.h>
+
+#include "../dm/dm_common.h"
+#include "securec.h"
+#include "wm_math.h"
+#include "wm_type.h"
+
 namespace OHOS {
 namespace Rosen {
-using DisplayId = uint64_t;
+namespace {
+constexpr uint32_t DEFAULT_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t DEFAULT_BUTTON_BACKGROUND_SIZE = 28;
+constexpr uint32_t DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN = 20;
+constexpr int32_t DEFAULT_COLOR_MODE = -1;
+constexpr int32_t MIN_COLOR_MODE = -1;
+constexpr int32_t MAX_COLOR_MODE = 1;
+constexpr int32_t LIGHT_COLOR_MODE = 0;
+constexpr int32_t DARK_COLOR_MODE = 1;
+constexpr uint32_t MIN_SPACING_BETWEEN_BUTTONS = 12;
+constexpr uint32_t MAX_SPACING_BETWEEN_BUTTONS = 24;
+constexpr uint32_t MIN_BUTTON_BACKGROUND_SIZE = 20;
+constexpr uint32_t MAX_BUTTON_BACKGROUND_SIZE = 40;
+constexpr uint32_t MIN_CLOSE_BUTTON_RIGHT_MARGIN = 8;
+constexpr uint32_t MAX_CLOSE_BUTTON_RIGHT_MARGIN = 22;
+constexpr int32_t API_VERSION_INVALID = -1;
+}
+
 /**
  * @brief Enumerates type of window.
  */
@@ -87,6 +111,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_SCB_DEFAULT,
     WINDOW_TYPE_TRANSPARENT_VIEW,
     WINDOW_TYPE_SCREEN_CONTROL,
+    WINDOW_TYPE_WALLET_SWIPE_CARD,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -120,7 +145,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_SPLIT_PRIMARY = 100,
     WINDOW_MODE_SPLIT_SECONDARY,
     WINDOW_MODE_FLOATING,
-    WINDOW_MODE_PIP
+    WINDOW_MODE_PIP,
+    END = WINDOW_MODE_PIP,
 };
 
 /**
@@ -139,12 +165,15 @@ enum class WindowModeType : uint8_t {
  * @brief Enumerates modal of sub session.
  */
 enum class SubWindowModalType : uint32_t {
-    TYPE_UNDEFINED = 0,
+    BEGIN = 0,
+    TYPE_UNDEFINED = BEGIN,
     TYPE_NORMAL,
     TYPE_DIALOG,
     TYPE_WINDOW_MODALITY,
     TYPE_TOAST,
     TYPE_APPLICATION_MODALITY,
+    TYPE_TEXT_MENU,
+    END = TYPE_TEXT_MENU,
 };
 
 /**
@@ -171,6 +200,16 @@ enum class WindowBlurStyle : uint32_t {
     WINDOW_BLUR_THIN,
     WINDOW_BLUR_REGULAR,
     WINDOW_BLUR_THICK
+};
+
+/**
+ * @brief Enumerates cross axis state of window.
+ */
+enum class CrossAxisState : uint32_t {
+    STATE_INVALID = 0,
+    STATE_CROSS,
+    STATE_NO_CROSS,
+    STATE_END,
 };
 
 /**
@@ -203,7 +242,7 @@ enum class WMError : int32_t {
     WM_ERROR_NO_REMOTE_ANIMATION,
     WM_ERROR_INVALID_DISPLAY,
     WM_ERROR_INVALID_PARENT,
-    WM_ERROR_OPER_FULLSCREEN_FAILED,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS,
     WM_ERROR_REPEAT_OPERATION,
     WM_ERROR_INVALID_SESSION,
     WM_ERROR_INVALID_CALLING,
@@ -244,7 +283,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_START_ABILITY_FAILED = 1300007,
     WM_ERROR_INVALID_DISPLAY = 1300008,
     WM_ERROR_INVALID_PARENT = 1300009,
-    WM_ERROR_OPER_FULLSCREEN_FAILED = 1300010,
+    WM_ERROR_INVALID_OP_IN_CUR_STATUS = 1300010,
     WM_ERROR_PIP_DESTROY_FAILED = 1300011,
     WM_ERROR_PIP_STATE_ABNORMALLY = 1300012,
     WM_ERROR_PIP_CREATE_FAILED = 1300013,
@@ -281,6 +320,19 @@ inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSetting
     return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 
+inline SystemBarSettingFlag& operator|=
+    (SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs) { return lhs = lhs | rhs; }
+
+/**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    CONTROL_APP_TYPE_BEGIN = 0,
+    APP_LOCK = 1,
+    PARENT_CONTROL,
+    CONTROL_APP_TYPE_END,
+};
+
 /**
  * @brief Enumerates flag of multiWindowUIType.
  */
@@ -306,10 +358,19 @@ enum class WindowFlag : uint32_t {
     WINDOW_FLAG_FORBID_SPLIT_MOVE = 1 << 3,
     WINDOW_FLAG_WATER_MARK = 1 << 4,
     WINDOW_FLAG_IS_MODAL = 1 << 5,
-    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 6,
-    WINDOW_FLAG_HANDWRITING = 1 << 7,
-    WINDOW_FLAG_IS_TOAST = 1 << 8,
-    WINDOW_FLAG_END = 1 << 9,
+    WINDOW_FLAG_HANDWRITING = 1 << 6,
+    WINDOW_FLAG_IS_TOAST = 1 << 7,
+    WINDOW_FLAG_IS_APPLICATION_MODAL = 1 << 8,
+    WINDOW_FLAG_IS_TEXT_MENU = 1 << 9,
+    WINDOW_FLAG_END = 1 << 10,
+};
+
+/**
+ * @brief Enumerates system and app sub window avoid area options
+ */
+enum class AvoidAreaOption : uint32_t {
+    ENABLE_SYSTEM_WINDOW = 1,
+    ENABLE_APP_SUB_WINDOW = 1 << 1,
 };
 
 /**
@@ -346,7 +407,9 @@ enum class WindowSizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
+    RESIZE_WITH_ANIMATION,
     MOVE,
+    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -360,8 +423,17 @@ enum class WindowSizeChangeReason : uint32_t {
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
+    DRAG_MOVE,
+    AVOID_AREA_CHANGE,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(WindowSizeChangeReason reason)
+{
+    return reason == WindowSizeChangeReason::MOVE || reason == WindowSizeChangeReason::DRAG_MOVE;
+}
 
 /**
  * @brief Enumerates layout mode of window.
@@ -381,6 +453,15 @@ enum class DragEvent : uint32_t {
     DRAG_EVENT_OUT,
     DRAG_EVENT_MOVE,
     DRAG_EVENT_END,
+};
+
+/**
+ * @brief Enumerates drag resize type.
+ */
+enum class DragResizeType : uint32_t {
+    RESIZE_TYPE_UNDEFINED = 0,
+    RESIZE_EACH_FRAME = 1,
+    RESIZE_WHEN_DRAG_END = 2,
 };
 
 /**
@@ -544,20 +625,23 @@ struct MainWindowState : public Parcelable {
 };
 
 namespace {
-    constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
-    constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
-    constexpr uint32_t INVALID_WINDOW_ID = 0;
-    constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
-    constexpr float MINIMUM_BRIGHTNESS = 0.0f;
-    constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
-    constexpr int32_t INVALID_PID = -1;
-    constexpr int32_t INVALID_UID = -1;
-    constexpr int32_t INVALID_USER_ID = -1;
-    constexpr int32_t SYSTEM_USERID = 0;
-    constexpr int32_t BASE_USER_RANGE = 200000;
-    constexpr int32_t DEFAULT_SCREEN_ID = 0;
-    constexpr int32_t FULL_CIRCLE_DEGREE = 360;
-    constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+constexpr uint32_t SYSTEM_COLOR_WHITE = 0xE5FFFFFF;
+constexpr uint32_t SYSTEM_COLOR_BLACK = 0x66000000;
+constexpr uint32_t INVALID_WINDOW_ID = 0;
+constexpr float UNDEFINED_BRIGHTNESS = -1.0f;
+constexpr float MINIMUM_BRIGHTNESS = 0.0f;
+constexpr float MAXIMUM_BRIGHTNESS = 1.0f;
+constexpr int32_t INVALID_PID = -1;
+constexpr int32_t INVALID_UID = -1;
+constexpr int32_t INVALID_USER_ID = -1;
+constexpr int32_t SYSTEM_USERID = 0;
+constexpr int32_t BASE_USER_RANGE = 200000;
+constexpr int32_t DEFAULT_SCREEN_ID = 0;
+constexpr int32_t FULL_CIRCLE_DEGREE = 360;
+constexpr int32_t ONE_FOURTH_FULL_CIRCLE_DEGREE = 90;
+constexpr float UNDEFINED_DENSITY = -1.0f;
+constexpr float MINIMUM_CUSTOM_DENSITY = 0.5f;
+constexpr float MAXIMUM_CUSTOM_DENSITY = 4.0f;
 }
 
 inline int32_t GetUserIdByUid(int32_t uid)
@@ -646,6 +730,43 @@ private:
 };
 
 /**
+ * @struct SingleHandTransform
+ *
+ * @brief parameter of transform in single hand mode.
+ */
+struct SingleHandTransform {
+    int32_t posX = 0;
+    int32_t posY = 0;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+
+    bool operator==(const SingleHandTransform& right) const
+    {
+        return posX == right.posX && MathHelper::NearEqual(scaleX, right.scaleX) &&
+               posY == right.posY && MathHelper::NearEqual(scaleY, right.scaleY);
+    }
+
+    bool operator!=(const SingleHandTransform& right) const
+    {
+        return !(*this == right);
+    }
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(posX) && parcel.WriteInt32(posY) &&
+               parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY);
+    }
+
+    void Unmarshalling(Parcel& parcel)
+    {
+        posX = parcel.ReadInt32();
+        posY = parcel.ReadInt32();
+        scaleX = parcel.ReadFloat();
+        scaleY = parcel.ReadFloat();
+    }
+};
+
+/**
  * @struct SystemBarProperty
  *
  * @brief Property of system bar
@@ -713,6 +834,11 @@ struct Rect {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
     }
 
+    bool IsUninitializedSize() const
+    {
+        return width_ == 0 && height_ == 0;
+    }
+
     bool IsInsideOf(const Rect& a) const
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
@@ -721,10 +847,27 @@ struct Rect {
 
     inline std::string ToString() const
     {
-        std::stringstream ss;
-        ss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
-        return ss.str();
+        std::ostringstream oss;
+        oss << "[" << posX_ << " " << posY_ << " " << width_ << " " << height_ << "]";
+        return oss.str();
     }
+
+    static const Rect EMPTY_RECT;
+};
+
+inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
+
+/**
+ * @struct RectAnimationConfig
+ *
+ * @brief Window RectAnimationConfig
+ */
+struct RectAnimationConfig {
+    uint32_t duration = 0; // Duartion of the animation, in milliseconds.
+    float x1 = 0.0f;       // X coordinate of the first point on the Bezier curve.
+    float y1 = 0.0f;       // Y coordinate of the first point on the Bezier curve.
+    float x2 = 0.0f;       // X coordinate of the second point on the Bezier curve.
+    float y2 = 0.0f;       // Y coordinate of the second point on the Bezier curve.
 };
 
 /**
@@ -741,9 +884,12 @@ enum class UIExtensionUsage : uint32_t {
  * @brief UIExtension info for event
  */
 struct ExtensionWindowEventInfo {
-    int32_t persistentId  = 0;
+    int32_t persistentId = 0;
     int32_t pid = -1;
-    Rect windowRect {0, 0, 0, 0};
+    Rect windowRect { 0, 0, 0, 0 }; // Calculated from global rect and UIExtension windowRect
+    Rect uiExtRect { 0, 0, 0, 0 };  // Transferred from arkUI
+    bool hasUpdatedRect = false;
+    bool isConstrainedModal = false;
 };
 
 /**
@@ -797,11 +943,13 @@ struct KeyboardPanelInfo : public Parcelable {
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
-    TYPE_SYSTEM,           // area of SystemUI
-    TYPE_CUTOUT,           // cutout of screen
-    TYPE_SYSTEM_GESTURE,   // area for system gesture
-    TYPE_KEYBOARD,         // area for soft input keyboard
-    TYPE_NAVIGATION_INDICATOR, // area for navigation indicator
+    TYPE_START = 0,
+    TYPE_SYSTEM = TYPE_START,           // area of SystemUI
+    TYPE_CUTOUT,                        // cutout of screen
+    TYPE_SYSTEM_GESTURE,                // area for system gesture
+    TYPE_KEYBOARD,                      // area for soft input keyboard
+    TYPE_NAVIGATION_INDICATOR,          // area for navigation indicator
+    TYPE_END,
 };
 
 /**
@@ -1047,7 +1195,11 @@ struct PiPTemplateInfo {
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
 };
 
-using OnCallback = std::function<void(int64_t, int64_t)>;
+struct PiPWindowSize {
+    uint32_t width;
+    uint32_t height;
+    double scale;
+};
 
 /**
  * @struct VsyncCallback
@@ -1059,9 +1211,9 @@ struct VsyncCallback {
 };
 
 struct WindowLimits {
-    uint32_t maxWidth_ = INT32_MAX;
-    uint32_t maxHeight_ = INT32_MAX;
-    uint32_t minWidth_ = 1;
+    uint32_t maxWidth_ = static_cast<uint32_t>(INT32_MAX); // The width and height are no larger than INT32_MAX.
+    uint32_t maxHeight_ = static_cast<uint32_t>(INT32_MAX);
+    uint32_t minWidth_ = 1; // The width and height of the window cannot be less than or equal to 0.
     uint32_t minHeight_ = 1;
     float maxRatio_ = FLT_MAX;
     float minRatio_ = 0.0f;
@@ -1087,10 +1239,10 @@ struct WindowLimits {
  * @brief An area of title buttons relative to the upper right corner of the window.
  */
 struct TitleButtonRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const TitleButtonRect& a) const
     {
@@ -1102,6 +1254,14 @@ struct TitleButtonRect {
         return !this->operator==(a);
     }
 
+    void ResetRect()
+    {
+        posX_ = 0;
+        posY_ = 0;
+        width_ = 0;
+        height_ = 0;
+    }
+
     bool IsUninitializedRect() const
     {
         return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
@@ -1111,6 +1271,239 @@ struct TitleButtonRect {
     {
         return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
             posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+};
+
+/**
+ * @brief WindowInfo filter Option
+ */
+enum class WindowInfoFilterOption : WindowInfoFilterOptionDataType {
+    ALL = 0,
+    EXCLUDE_SYSTEM = 1,
+    VISIBLE = 1 << 1,
+    FOREGROUND = 1 << 2,
+};
+
+inline WindowInfoFilterOption operator|(WindowInfoFilterOption lhs, WindowInfoFilterOption rhs)
+{
+    return static_cast<WindowInfoFilterOption>(static_cast<WindowInfoFilterOptionDataType>(lhs) |
+        static_cast<WindowInfoFilterOptionDataType>(rhs));
+}
+
+inline bool IsChosenWindowOption(WindowInfoFilterOption options, WindowInfoFilterOption option)
+{
+    return (static_cast<WindowInfoFilterOptionDataType>(options) &
+        static_cast<WindowInfoFilterOptionDataType>(option)) != 0;
+}
+
+/**
+ * @brief WindowInfo Type Option
+ */
+enum class WindowInfoTypeOption : WindowInfoTypeOptionDataType {
+    WINDOW_UI_INFO = 1,
+    WINDOW_DISPLAY_INFO = 1 << 1,
+    WINDOW_LAYOUT_INFO = 1 << 2,
+    WINDOW_META_INFO = 1 << 3,
+    ALL = ~0,
+};
+
+inline WindowInfoTypeOption operator|(WindowInfoTypeOption lhs, WindowInfoTypeOption rhs)
+{
+    return static_cast<WindowInfoTypeOption>(static_cast<WindowInfoTypeOptionDataType>(lhs) |
+        static_cast<WindowInfoTypeOptionDataType>(rhs));
+}
+
+inline bool IsChosenWindowOption(WindowInfoTypeOption options, WindowInfoTypeOption option)
+{
+    return (static_cast<WindowInfoTypeOptionDataType>(options) &
+        static_cast<WindowInfoTypeOptionDataType>(option)) != 0;
+}
+
+/**
+ * @enum WindowVisibilityState
+ *
+ * @brief Visibility state of a window
+ */
+enum WindowVisibilityState : uint32_t {
+    START = 0,
+    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = START,
+    WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
+    WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
+    WINDOW_LAYER_STATE_MAX,
+    END = WINDOW_LAYER_STATE_MAX,
+};
+
+/**
+ * @struct WindowUIInfo
+ *
+ * @brief Window UI info
+ */
+struct WindowUIInfo : public Parcelable {
+    WindowVisibilityState visibilityState = WINDOW_LAYER_STATE_MAX;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(visibilityState));
+    }
+
+    static WindowUIInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowUIInfo* windowUIInfo = new WindowUIInfo();
+        uint32_t visibilityState = 0;
+        if (!parcel.ReadUint32(visibilityState)) {
+            delete windowUIInfo;
+            return nullptr;
+        }
+        windowUIInfo->visibilityState = static_cast<WindowVisibilityState>(visibilityState);
+        return windowUIInfo;
+    }
+};
+
+/**
+ * @struct WindowDisplayInfo
+ *
+ * @brief Window display info
+ */
+struct WindowDisplayInfo : public Parcelable {
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint64(displayId);
+    }
+
+    static WindowDisplayInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowDisplayInfo* windowDisplayInfo = new WindowDisplayInfo();
+        if (!parcel.ReadUint64(windowDisplayInfo->displayId)) {
+            delete windowDisplayInfo;
+            return nullptr;
+        }
+        return windowDisplayInfo;
+    }
+};
+
+/**
+ * @struct WindowLayoutInfo
+ *
+ * @brief Layout info for all windows on the screen.
+ */
+struct WindowLayoutInfo : public Parcelable {
+    Rect rect = Rect::EMPTY_RECT;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
+               parcel.WriteUint32(rect.height_);
+    }
+  
+    static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
+        if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
+            !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_)) {
+            delete windowLayoutInfo;
+            return nullptr;
+        }
+        return windowLayoutInfo;
+    }
+};
+
+/**
+ * @struct WindowMetaInfo
+ *
+ * @brief Window meta info
+ */
+struct WindowMetaInfo : public Parcelable {
+    int32_t windowId;
+    std::string windowName;
+    std::string bundleName;
+    std::string abilityName;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(windowId) && parcel.WriteString(windowName) && parcel.WriteString(bundleName) &&
+               parcel.WriteString(abilityName);
+    }
+    static WindowMetaInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
+        if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
+            !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName)) {
+            delete windowMetaInfo;
+            return nullptr;
+        }
+        return windowMetaInfo;
+    }
+};
+
+/**
+ * @struct WindowInfo
+ *
+ * @brief Classified window info
+ */
+struct WindowInfo : public Parcelable {
+    WindowUIInfo windowUIInfo;
+    WindowDisplayInfo windowDisplayInfo;
+    WindowLayoutInfo windowLayoutInfo;
+    WindowMetaInfo windowMetaInfo;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteParcelable(&windowUIInfo) && parcel.WriteParcelable(&windowDisplayInfo) &&
+               parcel.WriteParcelable(&windowLayoutInfo) && parcel.WriteParcelable(&windowMetaInfo);
+    }
+
+    static WindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        WindowInfo* windowInfo = new WindowInfo();
+        sptr<WindowUIInfo> windowUIInfo = parcel.ReadParcelable<WindowUIInfo>();
+        sptr<WindowDisplayInfo> windowDisplayInfo = parcel.ReadParcelable<WindowDisplayInfo>();
+        sptr<WindowLayoutInfo> windowLayoutInfo = parcel.ReadParcelable<WindowLayoutInfo>();
+        sptr<WindowMetaInfo> windowMetaInfo = parcel.ReadParcelable<WindowMetaInfo>();
+        if (!windowUIInfo || !windowDisplayInfo || !windowLayoutInfo || !windowMetaInfo) {
+            delete windowInfo;
+            return nullptr;
+        }
+        windowInfo->windowUIInfo = *windowUIInfo;
+        windowInfo->windowDisplayInfo = *windowDisplayInfo;
+        windowInfo->windowLayoutInfo = *windowLayoutInfo;
+        windowInfo->windowMetaInfo = *windowMetaInfo;
+        return windowInfo;
+    }
+};
+
+/**
+ * @struct WindowInfoOption
+ *
+ * @brief Option of list window info
+ */
+struct WindowInfoOption : public Parcelable {
+    WindowInfoFilterOption windowInfoFilterOption = WindowInfoFilterOption::ALL;
+    WindowInfoTypeOption windowInfoTypeOption = WindowInfoTypeOption::ALL;
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    int32_t windowId = 0;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteUint32(static_cast<uint32_t>(windowInfoFilterOption)) &&
+               parcel.WriteUint32(static_cast<uint32_t>(windowInfoTypeOption)) &&
+               parcel.WriteUint64(displayId) &&
+               parcel.WriteInt32(windowId);
+    }
+
+    static WindowInfoOption* Unmarshalling(Parcel& parcel)
+    {
+        WindowInfoOption* windowInfoOption = new WindowInfoOption();
+        uint32_t windowInfoFilterOption;
+        uint32_t windowInfoTypeOption;
+        if (!parcel.ReadUint32(windowInfoFilterOption) || !parcel.ReadUint32(windowInfoTypeOption) ||
+            !parcel.ReadUint64(windowInfoOption->displayId) || !parcel.ReadInt32(windowInfoOption->windowId)) {
+            delete windowInfoOption;
+            return nullptr;
+        }
+        windowInfoOption->windowInfoFilterOption = static_cast<WindowInfoFilterOption>(windowInfoFilterOption);
+        windowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOption);
+        return windowInfoOption;
     }
 };
 
@@ -1192,6 +1585,23 @@ struct KeyboardAnimationConfig {
     KeyboardAnimationCurve curveOut;
 };
 
+struct MoveConfiguration {
+    DisplayId displayId = DISPLAY_ID_INVALID;
+    RectAnimationConfig rectAnimationConfig = { 0, 0.0f, 0.0f, 0.0f, 0.0f };
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 1024;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[displayId: %llu, rectAnimationConfig: [%u, %f, %f, %f, %f]]", displayId, rectAnimationConfig.duration,
+            rectAnimationConfig.x1, rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
+};
+
 enum class CaseType {
     CASE_WINDOW_MANAGER = 0,
     CASE_WINDOW,
@@ -1199,10 +1609,10 @@ enum class CaseType {
 };
 
 enum class MaximizePresentation {
-    FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set imersiveStateEnable
-    EXIT_IMMERSIVE = 1,       // imersiveStateEnable will be set as false
-    ENTER_IMMERSIVE = 2,       // imersiveStateEnable will be set as true
-    // imersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
+    FOLLOW_APP_IMMERSIVE_SETTING = 0,  // follow app set immersiveStateEnable
+    EXIT_IMMERSIVE = 1,                // immersiveStateEnable will be set as false
+    ENTER_IMMERSIVE = 2,               // immersiveStateEnable will be set as true
+    // immersiveStateEnable will be set as true, titleHoverShowEnabled and dockHoverShowEnabled will be set as false
     ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER = 3,
 };
 
@@ -1235,6 +1645,13 @@ struct SubWindowOptions {
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 
+struct DecorButtonStyle {
+    int32_t  colorMode = DEFAULT_COLOR_MODE;
+    uint32_t spacingBetweenButtons = DEFAULT_SPACING_BETWEEN_BUTTONS;
+    uint32_t closeButtonRightMargin = DEFAULT_CLOSE_BUTTON_RIGHT_MARGIN;
+    uint32_t buttonBackgroundSize = DEFAULT_BUTTON_BACKGROUND_SIZE;
+};
+
 struct ExtensionWindowConfig {
     std::string windowName;
     ExtensionWindowAttribute windowAttribute = ExtensionWindowAttribute::UNKNOWN;
@@ -1243,25 +1660,60 @@ struct ExtensionWindowConfig {
     SystemWindowOptions systemWindowOptions;
 };
 
+template <typename T>
+struct SptrHash {
+    std::size_t operator()(const sptr<T>& ptr) const
+    {
+        return std::hash<T*>{}(ptr.GetRefPtr());
+    }
+};
+
 /**
- * @class KeyboardLayoutParams
+ * @struct WindowDensityInfo
  *
- * @brief Keyboard need adjust layout
+ * @brief Currently available density
  */
-class KeyboardLayoutParams : public Parcelable {
-public:
+struct WindowDensityInfo {
+    float systemDensity = UNDEFINED_DENSITY;
+    float defaultDensity = UNDEFINED_DENSITY;
+    float customDensity = UNDEFINED_DENSITY;
+
+    std::string ToString() const
+    {
+        std::string str;
+        constexpr int BUFFER_SIZE = 64;
+        char buffer[BUFFER_SIZE] = { 0 };
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
+            "[%f, %f, %f]", systemDensity, defaultDensity, customDensity) > 0) {
+            str.append(buffer);
+        }
+        return str;
+    }
+};
+
+/**
+ * @struct KeyboardLayoutParams
+ *
+ * @brief Keyboard needs to adjust layout
+ */
+struct KeyboardLayoutParams : public Parcelable {
     WindowGravity gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    int32_t landscapeAvoidHeight_ = -1;
+    int32_t portraitAvoidHeight_ = -1;
     Rect LandscapeKeyboardRect_ { 0, 0, 0, 0 };
     Rect PortraitKeyboardRect_ { 0, 0, 0, 0 };
     Rect LandscapePanelRect_ { 0, 0, 0, 0 };
     Rect PortraitPanelRect_ { 0, 0, 0, 0 };
 
-    bool operator==(const KeyboardLayoutParams& params) const
+    bool operator==(const KeyboardLayoutParams& other) const
     {
-        return (gravity_ == params.gravity_ && LandscapeKeyboardRect_ == params.LandscapeKeyboardRect_ &&
-            PortraitKeyboardRect_ == params.PortraitKeyboardRect_ &&
-            LandscapePanelRect_ == params.LandscapePanelRect_ &&
-            PortraitPanelRect_ == params.PortraitPanelRect_);
+        return (gravity_ == other.gravity_ &&
+                landscapeAvoidHeight_ == other.landscapeAvoidHeight_ &&
+                portraitAvoidHeight_ == other.portraitAvoidHeight_ &&
+                LandscapeKeyboardRect_ == other.LandscapeKeyboardRect_ &&
+                PortraitKeyboardRect_ == other.PortraitKeyboardRect_ &&
+                LandscapePanelRect_ == other.LandscapePanelRect_ &&
+                PortraitPanelRect_ == other.PortraitPanelRect_);
     }
 
     bool operator!=(const KeyboardLayoutParams& params) const
@@ -1272,46 +1724,87 @@ public:
     bool isEmpty() const
     {
         return LandscapeKeyboardRect_.IsUninitializedRect() && PortraitKeyboardRect_.IsUninitializedRect() &&
-            LandscapePanelRect_.IsUninitializedRect() && PortraitPanelRect_.IsUninitializedRect();
+               LandscapePanelRect_.IsUninitializedRect() && PortraitPanelRect_.IsUninitializedRect();
     }
 
     static inline bool WriteParcel(Parcel& parcel, const Rect& rect)
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
-            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+               parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
     }
 
     static inline bool ReadParcel(Parcel& parcel, Rect& rect)
     {
         return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
-            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
+               parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
     }
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         return (parcel.WriteUint32(static_cast<uint32_t>(gravity_)) &&
-            WriteParcel(parcel, LandscapeKeyboardRect_) &&
-            WriteParcel(parcel, PortraitKeyboardRect_) &&
-            WriteParcel(parcel, LandscapePanelRect_) &&
-            WriteParcel(parcel, PortraitPanelRect_));
+                parcel.WriteInt32(landscapeAvoidHeight_) &&
+                parcel.WriteInt32(portraitAvoidHeight_) &&
+                WriteParcel(parcel, LandscapeKeyboardRect_) &&
+                WriteParcel(parcel, PortraitKeyboardRect_) &&
+                WriteParcel(parcel, LandscapePanelRect_) &&
+                WriteParcel(parcel, PortraitPanelRect_));
     }
 
     static KeyboardLayoutParams* Unmarshalling(Parcel& parcel)
     {
-        KeyboardLayoutParams *params = new(std::nothrow) KeyboardLayoutParams();
-        if (params == nullptr) {
-            return nullptr;
-        }
-        params->gravity_ = static_cast<WindowGravity>(parcel.ReadUint32());
-        if (ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
+        KeyboardLayoutParams* params = new KeyboardLayoutParams();
+        uint32_t gravity;
+        if (parcel.ReadUint32(gravity) &&
+            parcel.ReadInt32(params->landscapeAvoidHeight_) &&
+            parcel.ReadInt32(params->portraitAvoidHeight_) &&
+            ReadParcel(parcel, params->LandscapeKeyboardRect_) &&
             ReadParcel(parcel, params->PortraitKeyboardRect_) &&
             ReadParcel(parcel, params->LandscapePanelRect_) &&
             ReadParcel(parcel, params->PortraitPanelRect_)) {
+            params->gravity_ = static_cast<WindowGravity>(gravity);
             return params;
         }
         delete params;
         return nullptr;
     }
+};
+
+/**
+ * @struct KeyboardTouchHotAreas
+ *
+ * @brief Keyboard needs to set hotArea
+ */
+struct KeyboardTouchHotAreas {
+    std::vector<Rect> landscapeKeyboardHotAreas_;
+    std::vector<Rect> portraitKeyboardHotAreas_;
+    std::vector<Rect> landscapePanelHotAreas_;
+    std::vector<Rect> portraitPanelHotAreas_;
+
+    bool isKeyboardEmpty() const
+    {
+        return (landscapeKeyboardHotAreas_.empty() || portraitKeyboardHotAreas_.empty());
+    }
+
+    bool isPanelEmpty() const
+    {
+        return (landscapePanelHotAreas_.empty() || portraitPanelHotAreas_.empty());
+    }
+};
+
+enum class KeyboardViewMode: uint32_t {
+    NON_IMMERSIVE_MODE = 0,
+    IMMERSIVE_MODE,
+    LIGHT_IMMERSIVE_MODE,
+    DARK_IMMERSIVE_MODE,
+    VIEW_MODE_END,
+};
+
+/*
+ * Multi User
+ */
+enum class UserSwitchEventType: uint32_t {
+    SWITCHING,
+    SWITCHED,
 };
 }
 }

@@ -17,22 +17,36 @@
 #define OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 
 #include "session/host/include/system_session.h"
-#include <transaction/rs_interfaces.h>
-#include <transaction/rs_transaction.h>
 #include "transaction/rs_sync_transaction_controller.h"
 
 namespace OHOS::Rosen {
+enum class SystemKeyboardAvoidChangeReason : uint32_t {
+    KEYBOARD_BEGIN,
+    KEYBOARD_CREATED,
+    KEYBOARD_SHOW,
+    KEYBOARD_HIDE,
+    KEYBOARD_DISCONNECT,
+    KEYBOARD_GRAVITY_BOTTOM,
+    KEYBOARD_GRAVITY_FLOAT,
+    KEYBOARD_END,
+};
+
 using OnGetSceneSessionCallback = std::function<sptr<SceneSession>(uint32_t callingSessionId)>;
 using OnGetFocusedSessionIdCallback = std::function<int32_t()>;
 using OnCallingSessionIdChangeCallback = std::function<void(uint32_t callingSessionId)>;
+using OnSystemKeyboardAvoidChangeCallback = std::function<void(DisplayId displayId,
+    SystemKeyboardAvoidChangeReason reason)>;
+using NotifyOccupiedAreaChangeCallback = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 
 class KeyboardSession : public SystemSession {
 public:
     // callback for notify SceneSessionManager
     struct KeyboardSessionCallback : public RefBase {
-        OnGetSceneSessionCallback onGetSceneSession_;
-        OnGetFocusedSessionIdCallback onGetFocusedSessionId_;
-        OnCallingSessionIdChangeCallback onCallingSessionIdChange_;
+        OnGetSceneSessionCallback onGetSceneSession;
+        OnGetFocusedSessionIdCallback onGetFocusedSessionId;
+        OnCallingSessionIdChangeCallback onCallingSessionIdChange;
+        OnSystemKeyboardAvoidChangeCallback onSystemKeyboardAvoidChange;
+        NotifyOccupiedAreaChangeCallback onNotifyOccupiedAreaChange;
     };
     KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
         const sptr<KeyboardSessionCallback>& keyboardCallback);
@@ -53,23 +67,27 @@ public:
     void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow, bool isRotating) override;
     bool IsVisibleForeground() const override;
     uint32_t GetCallingSessionId() override;
+    void RecalculatePanelRectForAvoidArea(WSRect& panelRect) override;
+    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
+    void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) override;
+
+protected:
+    void EnableCallingSessionAvoidArea() override;
+    void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
 
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
     int32_t GetFocusedSessionId();
 
-    WSError SetKeyboardSessionGravity(SessionGravity gravity);
     void SetCallingSessionId(uint32_t callingSessionId) override;
 
     void NotifyOccupiedAreaChangeInfo(const sptr<SceneSession>& callingSession, const WSRect& rect,
         const WSRect& occupiedArea, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void RaiseCallingSession(const WSRect& keyboardPanelRect, bool needCheckVisible,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
-    void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void UpdateKeyboardAvoidArea();
     void UseFocusIdIfCallingSessionIdInvalid();
-    void UpdateCallingSessionIdAndPosition(uint32_t callingSessionId);
-    void RelayoutKeyBoard();
+    void UpdateCallingSessionIdAndPosition(uint32_t newCallingSessionId);
     void NotifyKeyboardPanelInfoChange(WSRect rect, bool isKeyboardPanelShow);
     bool CheckIfNeedRaiseCallingSession(sptr<SceneSession> callingSession, bool isCallingSessionFloating);
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
@@ -77,9 +95,12 @@ private:
     std::string GetSessionScreenName();
     void MoveAndResizeKeyboard(const KeyboardLayoutParams& params, const sptr<WindowSessionProperty>& sessionProperty,
         bool isShow);
+    void NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason reason);
+    void NotifyRootSceneOccupiedAreaChange(const sptr<OccupiedAreaChangeInfo>& info);
 
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
+    NotifyKeyboarViewModeChangeFunc changeKeyboardViewModeFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H

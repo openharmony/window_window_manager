@@ -29,21 +29,13 @@ public:
     void SetUp() override;
     void TearDown() override;
 };
-void WindowPrepareTerminateTest::SetUpTestCase()
-{
-}
+void WindowPrepareTerminateTest::SetUpTestCase() {}
 
-void WindowPrepareTerminateTest::TearDownTestCase()
-{
-}
+void WindowPrepareTerminateTest::TearDownTestCase() {}
 
-void WindowPrepareTerminateTest::SetUp()
-{
-}
+void WindowPrepareTerminateTest::SetUp() {}
 
-void WindowPrepareTerminateTest::TearDown()
-{
-}
+void WindowPrepareTerminateTest::TearDown() {}
 
 namespace {
 /**
@@ -57,6 +49,6 @@ HWTEST_F(WindowPrepareTerminateTest, DoPrepareTerminate, Function | SmallTest | 
     handler.DoPrepareTerminate();
     ASSERT_TRUE(true); // above function run success
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

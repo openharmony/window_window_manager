@@ -142,7 +142,7 @@ bool ClientAgentContainer<T1, T2>::UnregisterAgentLocked(std::set<sptr<T1>>& age
 template<typename T1, typename T2>
 void ClientAgentContainer<T1, T2>::RemoveAgent(const sptr<IRemoteObject>& remoteObject)
 {
-    WLOGFI("RemoveAgent");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     if (remoteObject == nullptr) {
         WLOGFE("remoteObject is invalid");
         return;

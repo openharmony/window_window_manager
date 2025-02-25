@@ -139,6 +139,7 @@ public:
      * @param y The position y of hit offset.
      */
     void SetHitOffset(int32_t x, int32_t y);
+
     /**
      * @brief Set window tag.
      *
@@ -491,6 +492,64 @@ public:
      */
     bool GetIsUIExtAnySubWindow() const;
 
+    /**
+     * @brief Set whether this window is a system keyboard
+     *
+     * @param isSystemKeyboard true means the window is a system keyboard.
+     */
+    void SetIsSystemKeyboard(bool isSystemKeyboard);
+
+    /**
+     * @brief Check whether this window is a system keyboard.
+     *
+     * @return true - this window is a system keyboard, false - this window is not a system keyboard.
+     */
+    bool IsSystemKeyboard() const;
+
+    /**
+     * @brief Set density of UIExtension.
+     *
+     * @param density Density of UIExtension.
+     */
+    void SetDensity(float density);
+
+    /**
+     * @brief Get density of UIExtension.
+     *
+     * @return Density of UIExtension.
+     */
+    float GetDensity() const;
+
+    /**
+     * @brief Set DPI follow-up mode of UIExtension.
+     *
+     * @param isDensityFollowHost DPI follow-up mode of UIExtension.
+     */
+    void SetIsDensityFollowHost(bool isDensityFollowHost);
+
+    /**
+     * @brief Get DPI follow-up mode of UIExtension.
+     *
+     * @return true - DPI follows host, false - DPI follows UIExtensionAbility.
+     */
+    bool GetIsDensityFollowHost() const;
+
+    /**
+     * @brief Set whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @param isConstrainedModal true - is a constrained modal UIExtension,
+     *                           false - is not a constrained modal UIExtension,
+     */
+    void SetConstrainedModal(bool isConstrainedModal);
+
+    /**
+     * @brief Get whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @return true - is a constrained modal UIExtension,
+     *         false - is not a constrained modal UIExtension,
+     */
+    bool IsConstrainedModal() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -521,6 +580,7 @@ private:
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
+    bool isSystemKeyboard_ = false;
 
     /*
      * UIExtension
@@ -530,6 +590,9 @@ private:
     bool isUIExtFirstSubWindow_ = false;
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    float density_ = 1.0f;
+    bool isDensityFollowHost_ = false;
+    bool isConstrainedModal_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

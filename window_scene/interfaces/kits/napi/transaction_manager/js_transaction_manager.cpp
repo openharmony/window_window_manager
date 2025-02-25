@@ -37,7 +37,7 @@ napi_value NapiGetUndefined(napi_env env)
 
 napi_value JsTransactionManager::Init(napi_env env, napi_value exportObj)
 {
-    WLOGI("[NAPI]JsTransactionManager Init");
+    TLOGD(WmsLogTag::DEFAULT, "JsTransactionManager Init");
     if (env == nullptr || exportObj == nullptr) {
         WLOGFE("env or exportObj is null!");
         return nullptr;
@@ -59,20 +59,20 @@ JsTransactionManager::JsTransactionManager(napi_env env)
 
 void JsTransactionManager::Finalizer(napi_env env, void* data, void* hint)
 {
-    WLOGI("[NAPI]Finalizer");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     std::unique_ptr<JsTransactionManager>(static_cast<JsTransactionManager*>(data));
 }
 
 napi_value JsTransactionManager::OpenSyncTransaction(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]OpenSyncTransaction");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
     return (me != nullptr) ? me->OnOpenSyncTransaction(env, info) : nullptr;
 }
 
 napi_value JsTransactionManager::CloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    WLOGI("[NAPI]CloseSyncTransaction");
+    TLOGD(WmsLogTag::DEFAULT, "Enter");
     JsTransactionManager* me = CheckParamsAndGetThis<JsTransactionManager>(env, info);
     return (me != nullptr) ? me->OnCloseSyncTransaction(env, info) : nullptr;
 }
@@ -98,15 +98,13 @@ napi_value JsTransactionManager::OnOpenSyncTransaction(napi_env env, napi_callba
 
 napi_value JsTransactionManager::OnCloseSyncTransaction(napi_env env, napi_callback_info info)
 {
-    auto task = []() {
-        auto transactionController = RSSyncTransactionController::GetInstance();
-        if (transactionController) {
+    auto task = [] {
+        if (auto transactionController = RSSyncTransactionController::GetInstance()) {
             transactionController->CloseSyncTransaction();
         }
     };
-    auto handler = SceneSessionManager::GetInstance().GetTaskScheduler();
-    if (handler) {
-        handler->PostAsyncTask(task);
+    if (auto handler = SceneSessionManager::GetInstance().GetTaskScheduler()) {
+        handler->PostAsyncTask(task, __func__);
     } else {
         task();
     }

@@ -143,7 +143,7 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
         }
         size_t size = static_cast<size_t>(len);
         if ((size > parcel.GetReadableBytes()) || (missionInfos.max_size() < size)) {
-            TLOGE(WmsLogTag::DEFAULT, "Failed to read MissionInfo vector, size = %{public}zu", size);
+            TLOGE(WmsLogTag::DEFAULT, "Failed to read MissionInfo vector, size=%{public}zu", size);
             return false;
         }
         missionInfos.clear();
@@ -161,9 +161,11 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
     return true;
 }
 
-int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState& state)
+int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState& state,
+    int32_t callingUid)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Mission id: %{public}d, state: %{public}d", missionId, state);
+    TLOGI(WmsLogTag::DEFAULT, "missionId:%{public}d,state:%{public}d,callingUid:%{public}d",
+        missionId, state, callingUid);
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "remote system ablity is null");
@@ -177,6 +179,7 @@ int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFw
     }
     PARCEL_WRITE_HELPER(data, Int32, missionId);
     PARCEL_WRITE_HELPER(data, Int32, static_cast<int32_t>(state));
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     int32_t error = remote->SendRequest(SET_MISSION_CONTINUE_STATE, data, reply, option);
     if (error != ERR_NONE) {
         TLOGE(WmsLogTag::DEFAULT, "transact failed, error: %{public}d", error);

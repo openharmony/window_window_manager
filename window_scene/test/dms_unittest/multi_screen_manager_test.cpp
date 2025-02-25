@@ -19,6 +19,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "zidl/screen_session_manager_client_interface.h"
+#include "common_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,7 +39,7 @@ public:
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override {};
     void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) override {};
-    void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus) override {};
+    void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) override {};
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override {};
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override {};
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override {};
@@ -54,7 +55,11 @@ public:
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override {};
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {};
+    void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override {}
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
+    void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
+    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override {}
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };
@@ -65,10 +70,15 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<TestClient> testClient_;
+    void SetAceessTokenPermission(const std::string processName);
 };
 
 void MultiScreenManagerTest::SetUpTestCase()
 {
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("foundation", perms, 1);
 }
 
 void MultiScreenManagerTest::TearDownTestCase()
@@ -111,7 +121,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch01, Function | SmallTe
     ScreenId mainScreenId = 1;
     std::vector<ScreenId> ScreenIds = {2, 3};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
 }
 
@@ -127,7 +138,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch02, Function | SmallTe
     ScreenId screenGroupId;
     sptr<ScreenSession> session = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[mainScreenId] = session;
-    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds,
+        DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -148,7 +160,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch03, Function | SmallTe
     ScreenCombination combination =  ScreenCombination::SCREEN_ALONE;
     sptr<ScreenSessionGroup> sessiongroup = new ScreenSessionGroup(mainScreenId, rsId, name, combination);
     ScreenSessionManager::GetInstance().smsScreenGroupMap_[mainScreenId] = sessiongroup;
-    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -162,7 +175,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch04, Function | SmallTe
     ScreenId mainScreenId = 1003;
     std::vector<ScreenId> ScreenIds = {2, 3};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
 }
 
@@ -176,7 +190,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch05, Function | SmallTe
     ScreenId mainScreenId = 101;
     std::vector<ScreenId> ScreenIds = {1, 2};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
 }
 
@@ -190,8 +205,66 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch06, Function | SmallTe
     ScreenId mainScreenId = 102;
     std::vector<ScreenId> ScreenIds = {1, 3};
     ScreenId screenGroupId;
-    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, screenGroupId);
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, DMRect::NONE(),
+        screenGroupId);
     EXPECT_EQ(screenGroupId, 0);
+}
+
+/**
+ * @tc.name: VirtualScreenMirrorSwitch
+ * @tc.desc: VirtualScreenMirrorSwitch func DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch07, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<ScreenId> ScreenIds = {2, 3};
+    ScreenId screenGroupId;
+    DMRect myRect = {0, 0, 400, 600};
+    MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, myRect,
+        screenGroupId);
+    EXPECT_EQ(screenGroupId, 0);
+}
+
+/**
+ * @tc.name: VirtualScreenMirrorSwitch
+ * @tc.desc: mainScreen is not nullptr and DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch08, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 1002;
+    std::vector<ScreenId> ScreenIds = {2, 3};
+    ScreenId screenGroupId;
+    sptr<ScreenSession> session = new ScreenSession();
+    DMRect myRect = {0, 0, 400, 600};
+    ScreenSessionManager::GetInstance().screenSessionMap_[mainScreenId] = session;
+    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds,
+        myRect, screenGroupId);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: VirtualScreenMirrorSwitch
+ * @tc.desc: ret != DMError::DM_OK and DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch09, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 1002;
+    std::vector<ScreenId> ScreenIds = {2, 3};
+    ScreenId screenGroupId;
+    sptr<ScreenSession> session = new ScreenSession();
+    ScreenSessionManager::GetInstance().screenSessionMap_[mainScreenId] = session;
+    ScreenId rsId = 1002;
+    std::string name = "ok";
+    DMRect myRect = {0, 0, 400, 600};
+    ScreenCombination combination =  ScreenCombination::SCREEN_ALONE;
+    sptr<ScreenSessionGroup> sessiongroup = new ScreenSessionGroup(mainScreenId, rsId, name, combination);
+    ScreenSessionManager::GetInstance().smsScreenGroupMap_[mainScreenId] = sessiongroup;
+    auto ret = MultiScreenManager::GetInstance().VirtualScreenMirrorSwitch(mainScreenId, ScreenIds, myRect,
+        screenGroupId);
+    EXPECT_EQ(ret, DMError::DM_OK);
 }
 
 /**
@@ -202,7 +275,7 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenMirrorSwitch06, Function | SmallTe
 HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch01, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 
@@ -217,7 +290,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch02, Function | SmallT
     sptr<ScreenSession> session = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -234,7 +307,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch03, Function | SmallT
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
     sptr<ScreenSession> session1 = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[1002] = session1;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -249,10 +322,9 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch04, Function | SmallT
     sptr<ScreenSession> session = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
-
 
 /**
  * @tc.name: PhysicalScreenMirrorSwitch05
@@ -267,9 +339,92 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch05, Function | SmallT
         ScreenSessionManager::GetInstance().defaultScreenId_] = session;
     sptr<ScreenSession> session1 = new ScreenSession();
     ScreenSessionManager::GetInstance().screenSessionMap_[12] = session1;
-    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds);
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, DMRect::NONE());
     EXPECT_EQ(ret, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: PhysicalScreenMirrorSwitch06
+ * @tc.desc: and DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch06, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds = {2, 3};
+    DMRect myRect = {0, 0, 400, 600};
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, myRect);
+    EXPECT_NE(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: PhysicalScreenMirrorSwitch07
+ * @tc.desc: defaultSession != nullptr and DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch07, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds = {1002, 1003};
+    sptr<ScreenSession> session = new ScreenSession();
+    DMRect myRect = {0, 0, 400, 600};
+    ScreenSessionManager::GetInstance().screenSessionMap_[
+        ScreenSessionManager::GetInstance().defaultScreenId_] = session;
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, myRect);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: PhysicalScreenMirrorSwitch08
+ * @tc.desc: defaultSession != nullptr and DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch08, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds = {1002, 1003};
+    sptr<ScreenSession> session = new ScreenSession();
+    DMRect myRect = {0, 0, 400, 600};
+    ScreenSessionManager::GetInstance().screenSessionMap_[
+        ScreenSessionManager::GetInstance().defaultScreenId_] = session;
+    sptr<ScreenSession> session1 = new ScreenSession();
+    ScreenSessionManager::GetInstance().screenSessionMap_[1002] = session1;
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, myRect);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: PhysicalScreenMirrorSwitch09
+ * @tc.desc: defaultSession != nullptr and DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch09, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds = {101, 102};
+    sptr<ScreenSession> session = new ScreenSession();
+    DMRect myRect = {0, 0, 400, 600};
+    ScreenSessionManager::GetInstance().screenSessionMap_[
+        ScreenSessionManager::GetInstance().defaultScreenId_] = session;
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, myRect);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+
+/**
+ * @tc.name: PhysicalScreenMirrorSwitch10
+ * @tc.desc: defaultSession != nullptr and DMRect not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch10, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds = {12, 13};
+    sptr<ScreenSession> session = new ScreenSession();
+    ScreenSessionManager::GetInstance().screenSessionMap_[
+        ScreenSessionManager::GetInstance().defaultScreenId_] = session;
+    sptr<ScreenSession> session1 = new ScreenSession();
+    DMRect myRect = {0, 0, 400, 600};
+    ScreenSessionManager::GetInstance().screenSessionMap_[12] = session1;
+    DMError ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(screenIds, myRect);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
 
 /**
  * @tc.name: PhysicalScreenUniqueSwitch
@@ -513,7 +668,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch12, Function | SmallTe
 HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {};
-    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
+    std::vector<DisplayId> displayIds;
+    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -525,7 +681,8 @@ HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
 HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1001, 1002};
-    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
+    std::vector<DisplayId> displayIds;
+    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -538,9 +695,10 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
+
 
 /**
  * @tc.name: MirrorSwitch01
@@ -551,7 +709,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch01, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1001, 1002};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -564,7 +722,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch02, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {2, 3};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -577,7 +735,7 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch03, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1003, 1002};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -590,7 +748,21 @@ HWTEST_F(MultiScreenManagerTest, MirrorSwitch04, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1003, 2};
     ScreenId screenGroupId = 0;
-    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, screenGroupId);
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, DMRect::NONE(), screenGroupId);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: MirrorSwitch
+ * @tc.desc: MirrorSwitch func
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, MirrorSwitch05, Function | SmallTest | Level1)
+{
+    std::vector<ScreenId> screenIds = {};
+    ScreenId screenGroupId = 0;
+    DMRect myRect = {0, 0, 400, 600};
+    DMError ret = MultiScreenManager::GetInstance().MirrorSwitch(1, screenIds, myRect, screenGroupId);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -899,7 +1071,6 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange02, Function | SmallTest | L
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
 }
 
-
 /**
  * @tc.name: DoFirstMirrorChange
  * @tc.desc: DoFirstMirrorChangeExtend
@@ -957,7 +1128,6 @@ HWTEST_F(MultiScreenManagerTest, DoFirstMirrorChange04, Function | SmallTest | L
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId1);
 }
-
 
 /**
  * @tc.name: DoFirstExtendChange
@@ -1857,6 +2027,262 @@ HWTEST_F(MultiScreenManagerTest, ExternalScreenDisconnectChange05, Function | Sm
             lock(ScreenSessionManager::GetInstance().screenSessionMapMutex_);
         ScreenSessionManager::GetInstance().screenSessionMap_.erase(internalId);
     }
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: A is located to the left of B
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching01, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 200, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B is located to the left of A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching02, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 200, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: A is located to the upper of B
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching03, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 100};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B is located to the upper of A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching04, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 100};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B is located in the lower right corner of A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching05, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 200, 100};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: A is located in the lower right corner of B
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching06, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 200, 100};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B has no contact with A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching07, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 300, 0};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AreScreensTouching
+ * @tc.desc: B has no contact with A
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiScreenManagerTest, AreScreensTouching08, Function | SmallTest | Level1)
+{
+    ScreenProperty mainProperty = ScreenProperty();
+    RRect mainBounds;
+    mainBounds.rect_.width_ = 200;
+    mainBounds.rect_.height_ = 100;
+    mainProperty.SetBounds(mainBounds);
+    DisplayId mainScreenId = 0;
+    sptr<ScreenSession> mainScreenSession = new (std::nothrow) ScreenSession(mainScreenId, mainProperty, 0);
+    ASSERT_NE(mainScreenSession, nullptr);
+
+    ScreenProperty secondProperty = ScreenProperty();
+    RRect secondBounds;
+    secondBounds.rect_.width_ = 200;
+    secondBounds.rect_.height_ = 100;
+    secondProperty.SetBounds(secondBounds);
+    DisplayId secondScreenId = 1;
+    sptr<ScreenSession> secondScreenSession = new (std::nothrow) ScreenSession(secondScreenId, secondProperty, 0);
+    ASSERT_NE(secondScreenSession, nullptr);
+
+    MultiScreenPositionOptions mainScreenOptions = {mainScreenId, 0, 0};
+    MultiScreenPositionOptions secondScreenOption = {secondScreenId, 0, 200};
+    auto ret = MultiScreenManager::GetInstance().AreScreensTouching(mainScreenSession, secondScreenSession,
+        mainScreenOptions, secondScreenOption);
+    ASSERT_EQ(ret, false);
 }
 }
 } // namespace Rosen

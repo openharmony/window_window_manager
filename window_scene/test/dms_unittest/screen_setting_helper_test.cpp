@@ -53,20 +53,6 @@ void ScreenSettingHelperTest::TearDown()
 }
 
 namespace {
-
-    /**
-     * @tc.name: SetSettingDefaultDpi
-     * @tc.desc: SetSettingDefaultDpi
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, SetSettingDefaultDpi, Function | SmallTest | Level3)
-    {
-        uint32_t dpi = 520;
-        std::string key = "default_display_dpi";
-        auto ret = ScreenSettingHelper::SetSettingDefaultDpi(dpi, key);
-        ASSERT_TRUE(ret);
-    }
-
     /**
      * @tc.name: RegisterSettingDpiObserver
      * @tc.desc: RegisterSettingDpiObserver
@@ -117,19 +103,6 @@ namespace {
         std::string key = "test";
         bool ret = ScreenSettingHelper::GetSettingDpi(dpi, key);
         ASSERT_FALSE(ret);
-    }
-
-    /**
-     * @tc.name: GetSettingDpi02
-     * @tc.desc: GetSettingDpi02
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingDpi02, Function | SmallTest | Level3)
-    {
-        uint32_t dpi = 0;
-        std::string key = "user_set_dpi_value";
-        bool ret = ScreenSettingHelper::GetSettingDpi(dpi, key);
-        ASSERT_TRUE(ret);
     }
 
     /**
@@ -213,30 +186,6 @@ namespace {
     }
 
     /**
-     * @tc.name: UnregisterExtendSettingDpiObserver01
-     * @tc.desc: UnregisterExtendSettingDpiObserver01
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterExtendSettingDpiObserver01, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper::extendDpiObserver_ = nullptr;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
-        ASSERT_EQ(ScreenSettingHelper::extendDpiObserver_, nullptr);
-    }
-
-    /**
-     * @tc.name: UnregisterExtendSettingDpiObserver02
-     * @tc.desc: UnregisterExtendSettingDpiObserver02
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterExtendSettingDpiObserver02, Function | SmallTest | Level3)
-    {
-        ScreenSettingHelper::extendDpiObserver_ = new SettingObserver;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
-        ASSERT_EQ(ScreenSettingHelper::extendDpiObserver_, nullptr);
-    }
-
-    /**
      * @tc.name: UnregisterSettingRotationObserver01
      * @tc.desc: UnregisterSettingRotationObserver01
      * @tc.type: FUNC
@@ -244,7 +193,6 @@ namespace {
     HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver01, Function | SmallTest | Level3)
     {
         ScreenSettingHelper::rotationObserver_ = nullptr;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
         ASSERT_EQ(ScreenSettingHelper::rotationObserver_, nullptr);
     }
 
@@ -256,7 +204,6 @@ namespace {
     HWTEST_F(ScreenSettingHelperTest, UnregisterSettingRotationObserver02, Function | SmallTest | Level3)
     {
         ScreenSettingHelper::rotationObserver_ = new SettingObserver;
-        ScreenSettingHelper::UnregisterExtendSettingDpiObserver();
         ASSERT_NE(ScreenSettingHelper::rotationObserver_, nullptr);
     }
 
@@ -334,6 +281,102 @@ namespace {
         std::string key = "screen_rotation_screen_id_value";
         auto result = ScreenSettingHelper::GetSettingRotation(screenId, key);
         ASSERT_EQ(result, false);
+    }
+
+    /**
+     * @tc.name: GetSettingValue
+     * @tc.desc: GetSettingValue
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetSettingValue, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        uint32_t value = 0;
+        std::string key = "test";
+        bool ret = screenSettingHelper.GetSettingValue(value, key);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: RemoveInvalidChar01
+     * @tc.desc: RemoveInvalidChar Test01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "test";
+        auto ret = screenSettingHelper.RemoveInvalidChar(test_str);
+        ASSERT_EQ(ret, "");
+    }
+
+    /**
+     * @tc.name: RemoveInvalidChar02
+     * @tc.desc: RemoveInvalidChar Test02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RemoveInvalidChar02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "test 2.0 ,";
+        auto ret = screenSettingHelper.RemoveInvalidChar(test_str);
+        ASSERT_EQ(ret, " 2.0 ,");
+    }
+
+    /**
+     * @tc.name: SplitString
+     * @tc.desc: SplitString Test01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, SplitString01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> splitValues = {"split", "test"};
+        std::string input = "";
+        char delimiter = ',';
+        auto ret = screenSettingHelper.SplitString(splitValues, input, delimiter);
+        ASSERT_FALSE(ret);
+    }
+
+    /**
+     * @tc.name: SplitString
+     * @tc.desc: SplitString Test02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, SplitString02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::vector<std::string> splitValues = {};
+        std::string input = "test, str";
+        char delimiter = ',';
+        auto ret = screenSettingHelper.SplitString(splitValues, input, delimiter);
+        ASSERT_TRUE(ret);
+    }
+
+    /**
+     * @tc.name: IsNumber01
+     * @tc.desc: IsNumber01 Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, IsNumber01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "12.34";
+        auto ret = screenSettingHelper.IsNumber(test_str);
+        ASSERT_TRUE(ret);
+    }
+
+    /**
+     * @tc.name: IsNumber02
+     * @tc.desc: IsNumber02 Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, IsNumber02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string test_str = "test";
+        auto ret = screenSettingHelper.IsNumber(test_str);
+        ASSERT_FALSE(ret);
     }
 }
 } // namespace Rosen

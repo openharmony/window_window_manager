@@ -17,11 +17,10 @@
 
 #include "common/include/session_permission.h"
 #include "key_event.h"
-#include "session/host/include/session.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
-#include "parameters.h"
 #include "pointer_event.h"
+
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SystemSession" };
@@ -33,8 +32,9 @@ constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 5;
 SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
     : SceneSession(info, specificCallback)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "Create SystemSession");
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), true);
+    TLOGD(WmsLogTag::WMS_LIFE, "Create");
+    pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
@@ -44,7 +44,7 @@ SystemSession::SystemSession(const SessionInfo& info, const sptr<SpecificSession
 
 SystemSession::~SystemSession()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "~SystemSession, id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
 }
 
 void SystemSession::UpdateCameraWindowStatus(bool isShowing)
@@ -86,12 +86,12 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
             WLOGFW("parent session is null");
             return WSError::WS_ERROR_INVALID_PARENT;
         }
-        if (!parentSession->IsSessionForeground()) {
+        if ((type == WindowType::WINDOW_TYPE_TOAST) && !parentSession->IsSessionForeground()) {
             WLOGFW("parent session is not in foreground");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
     }
-    auto task = [weakThis = wptr(this), property]() {
+    PostTask([weakThis = wptr(this), property]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -107,8 +107,7 @@ WSError SystemSession::Show(sptr<WindowSessionProperty> property)
         session->UpdatePiPWindowStateChanged(true);
         auto ret = session->SceneSession::Foreground(property);
         return ret;
-    };
-    PostTask(task, "Show");
+    }, "Show");
     return WSError::WS_OK;
 }
 
@@ -126,7 +125,7 @@ WSError SystemSession::Hide()
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
     }
-    auto task = [weakThis = wptr(this)]() {
+    PostTask([weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -149,14 +148,13 @@ WSError SystemSession::Hide()
         session->UpdatePiPWindowStateChanged(false);
         ret = session->SceneSession::Background();
         return ret;
-    };
-    PostTask(task, "Hide");
+    }, "Hide");
     return WSError::WS_OK;
 }
 
 WSError SystemSession::Disconnect(bool isFromClient, const std::string& identityToken)
 {
-    auto task = [weakThis = wptr(this), isFromClient]() {
+    PostTask([weakThis = wptr(this), isFromClient]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "session is null");
@@ -167,8 +165,7 @@ WSError SystemSession::Disconnect(bool isFromClient, const std::string& identity
         session->UpdateCameraWindowStatus(false);
         session->UpdatePiPWindowStateChanged(false);
         return WSError::WS_OK;
-    };
-    PostTask(task, "Disconnect");
+    }, "Disconnect");
     return WSError::WS_OK;
 }
 
@@ -185,7 +182,7 @@ WSError SystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
         }
     }
     if (type == WindowType::WINDOW_TYPE_DIALOG) {
-        Session::ProcessClickModalSpecificWindowOutside(posX, posY);
+        Session::ProcessClickModalWindowOutside(posX, posY);
         auto sessionProperty = GetSessionProperty();
         if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
             RaiseToAppTopForPointDown();
@@ -232,27 +229,17 @@ WSError SystemSession::TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& ke
 
 WSError SystemSession::ProcessBackEvent()
 {
-    if (!IsSessionValid()) {
-        TLOGD(WmsLogTag::WMS_EVENT, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
-        return WSError::WS_ERROR_INVALID_SESSION;
-    }
     if (GetWindowType() == WindowType::WINDOW_TYPE_DIALOG && !dialogSessionBackGestureEnabled_) {
         TLOGI(WmsLogTag::WMS_DIALOG, "this is dialog, id: %{public}d", GetPersistentId());
         return WSError::WS_OK;
     }
-    if (sessionStage_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "sessionStage_ is nullptr, id = %{public}d.",
-            GetPersistentId());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->HandleBackEvent();
+    return Session::ProcessBackEvent();
 }
 
 WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
     std::shared_ptr<RSTransaction> rsTransaction)
 {
-    auto task = [weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
         auto session = weakThis.promote();
         if (!session) {
             WLOGFE("session is null");
@@ -270,8 +257,7 @@ WSError SystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
             }
         }
         return ret;
-    };
-    PostTask(task, "NotifyClientToUpdateRect");
+    }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
 
@@ -308,7 +294,7 @@ bool SystemSession::NeedSystemPermission(WindowType type)
     return !(type == WindowType::WINDOW_TYPE_SCENE_BOARD || type == WindowType::WINDOW_TYPE_SYSTEM_FLOAT ||
         type == WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW || type == WindowType::WINDOW_TYPE_TOAST ||
         type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_APP_LAUNCHING ||
-        type == WindowType::WINDOW_TYPE_PIP);
+        type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_FLOAT);
 }
 
 bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
@@ -320,7 +306,7 @@ bool SystemSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::Pointer
     if (isPC && isDialog && sessionState != SessionState::STATE_FOREGROUND &&
         sessionState != SessionState::STATE_ACTIVE &&
         action != MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
-        WLOGFW("CheckPointerEventDispatch false, Current Session Info: [persistentId: %{public}d, "
+        WLOGFW("false, Current Session Info: [persistentId: %{public}d, "
             "state: %{public}d, action:%{public}d]", GetPersistentId(), GetSessionState(), action);
         return false;
     }

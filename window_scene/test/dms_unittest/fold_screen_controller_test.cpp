@@ -293,6 +293,25 @@ namespace {
     }
 
     /**
+     * @tc.name: GetCurrentScreenId03
+     * @tc.desc: test function :GetCurrentScreenId
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetCurrentScreenId03, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        fsc_.foldScreenPolicy_ = nullptr;
+        auto ret = fsc_.GetCurrentScreenId();
+        ASSERT_EQ(ret, 0);
+
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
+        ret = fsc_.GetCurrentScreenId();
+        ASSERT_NE(ret, 0);
+    }
+
+    /**
      * @tc.name: SetOnBootAnimation01
      * @tc.desc: test function :SetOnBootAnimation
      * @tc.type: FUNC
@@ -321,6 +340,26 @@ namespace {
         bool onBootAnimation = true;
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         fsc_.SetOnBootAnimation(onBootAnimation);
+        ASSERT_EQ(onBootAnimation, true);
+    }
+
+    /**
+     * @tc.name: SetOnBootAnimation03
+     * @tc.desc: test function :SetOnBootAnimation
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, SetOnBootAnimation03, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        bool onBootAnimation = true;
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
+        fsc_.SetOnBootAnimation(onBootAnimation);
+        ASSERT_EQ(onBootAnimation, true);
+        fsc_.foldScreenPolicy_ = nullptr;
+        bool onBootAnimation01 = false;
+        fsc_.SetOnBootAnimation(onBootAnimation01);
         ASSERT_EQ(onBootAnimation, true);
     }
 
@@ -355,6 +394,159 @@ namespace {
     }
 
     /**
+     * @tc.name: AddOrRemoveDisplayNodeToTree01
+     * @tc.desc: test function :AddOrRemoveDisplayNodeToTree
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, AddOrRemoveDisplayNodeToTree01, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        ScreenId screenId = 1;
+        int32_t command = 0;
+
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
+        fsc_.AddOrRemoveDisplayNodeToTree(screenId, command);
+        ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+    }
+
+    /**
+     * @tc.name: AddOrRemoveDisplayNodeToTree02
+     * @tc.desc: test function :AddOrRemoveDisplayNodeToTree
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, AddOrRemoveDisplayNodeToTree02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        ScreenId screenId = 0;
+        int32_t command = 1;
+
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
+        fsc_.AddOrRemoveDisplayNodeToTree(screenId, command);
+        ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+    }
+
+    /**
+     * @tc.name: GetdisplayModeRunningStatus&SetdisplayModeChangeStatus01
+     * @tc.desc: test function :GetdisplayModeRunningStatus&SetdisplayModeChangeStatus
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, ModeChangeStatusTest01, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        bool status = false;
+
+        fsc_.SetdisplayModeChangeStatus(status);
+        auto ret = fsc_.GetdisplayModeRunningStatus();
+
+        ASSERT_EQ(ret, false);
+    }
+
+    /**
+     * @tc.name: GetdisplayModeRunningStatus&SetdisplayModeChangeStatus02
+     * @tc.desc: test function :GetdisplayModeRunningStatus&SetdisplayModeChangeStatus
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, ModeChangeStatusTest02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        bool status = true;
+
+        fsc_.SetdisplayModeChangeStatus(status);
+        auto ret = fsc_.GetdisplayModeRunningStatus();
+
+        ASSERT_EQ(ret, true);
+    }
+
+    /**
+     * @tc.name: GetLastCacheDisplayMode01
+     * @tc.desc: test function :GetLastCacheDisplayMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetLastCacheDisplayMode01, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
+        fsc_.SetDisplayMode(displayMode);
+        auto ret = fsc_.GetLastCacheDisplayMode();
+
+        ASSERT_EQ(ret, FoldDisplayMode::UNKNOWN);
+    }
+
+    /**
+     * @tc.name: GetLastCacheDisplayMode02
+     * @tc.desc: test function :GetLastCacheDisplayMode
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetLastCacheDisplayMode02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        FoldDisplayMode displayMode = FoldDisplayMode::FULL;
+        fsc_.SetDisplayMode(displayMode);
+        auto ret = fsc_.GetLastCacheDisplayMode();
+
+        ASSERT_EQ(ret, FoldDisplayMode::FULL);
+    }
+
+    /**
+     * @tc.name: GetModeChangeRunningStatus
+     * @tc.desc: test function :GetModeChangeRunningStatus
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, GetModeChangeRunningStatus, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        auto ret = fsc_.GetModeChangeRunningStatus();
+
+        ASSERT_EQ(ret, false);
+    }
+
+    /**
+     * @tc.name: ExitCoordination01
+     * @tc.desc: test function :ExitCoordination
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, ExitCoordination01, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
+        fsc_.ExitCoordination();
+
+        ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
+    }
+
+    /**
+     * @tc.name: ExitCoordination02
+     * @tc.desc: test function :ExitCoordination
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, ExitCoordination02, Function | SmallTest | Level3)
+    {
+        std::recursive_mutex mutex;
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
+
+        fsc_.foldScreenPolicy_ = nullptr;
+        fsc_.ExitCoordination();
+
+        ASSERT_EQ(fsc_.foldScreenPolicy_, nullptr);
+    }
+
+    /**
      * @tc.name: GetTentMode
      * @tc.desc: test function :GetTentMode
      * @tc.type: FUNC
@@ -369,16 +561,31 @@ namespace {
     }
 
     /**
-     * @tc.name: OnTentModeChanged
+     * @tc.name: OnTentModeChanged01
      * @tc.desc: test function :OnTentModeChanged
      * @tc.type: FUNC
      */
-    HWTEST_F(FoldScreenControllerTest, OnTentModeChanged, Function | SmallTest | Level1)
+    HWTEST_F(FoldScreenControllerTest, OnTentModeChanged01, Function | SmallTest | Level1)
     {
         if (ssm_.IsFoldable()) {
             bool isTentMode = false;
             ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
+
             ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), false);
+        }
+    }
+
+    /**
+     * @tc.name: OnTentModeChanged02
+     * @tc.desc: test function :OnTentModeChanged
+     * @tc.type: FUNC
+     */
+    HWTEST_F(FoldScreenControllerTest, OnTentModeChanged02, Function | SmallTest | Level1)
+    {
+        if (ssm_.IsFoldable()) {
+            bool isTentMode = true;
+            ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
+            ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), true);
         }
     }
 }

@@ -135,6 +135,7 @@ HWTEST_F(SurfaceDrawTest, DrawImage01, Function | SmallTest | Level1)
     ASSERT_FALSE(SurfaceDraw::DrawImage(surfaceNode, -1, -1, IMAGE_PLACE_HOLDER_PNG_PATH));
     window->Destroy();
 }
+
 /**
  * @tc.name: DecodeImageToPixelMap
  * @tc.desc: SurfaceDraw::DecodeImageToPixelMap test
@@ -145,6 +146,7 @@ HWTEST_F(SurfaceDrawTest, DecodeImageToPixelMap01, Function | SmallTest | Level1
     ASSERT_EQ(SurfaceDraw::DecodeImageToPixelMap(""), nullptr);
     ASSERT_NE(SurfaceDraw::DecodeImageToPixelMap(IMAGE_PLACE_HOLDER_PNG_PATH), nullptr);
 }
+
 /**
  * @tc.name: DrawMasking
  * @tc.desc: SurfaceDraw::DrawMasking test
@@ -175,6 +177,7 @@ HWTEST_F(SurfaceDrawTest, DrawMasking01, Function | SmallTest | Level1)
     SurfaceDraw::DrawMasking(surfaceNode, screenRect, transRect);
     window->Destroy();
 }
+
 /**
  * @tc.name: DoDrawImageRect
  * @tc.desc: SurfaceDraw::DoDrawImageRect test
@@ -210,6 +213,7 @@ HWTEST_F(SurfaceDrawTest, DoDrawImageRect01, Function | SmallTest | Level1)
     ASSERT_TRUE(SurfaceDraw::DoDrawImageRect(buffer, rect, pixelMap, color, false));
     window->Destroy();
 }
+
 /**
  * @tc.name: GetSurfaceSnapshot
  * @tc.desc: SurfaceDraw::GetSurfaceSnapshot test

@@ -294,7 +294,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent, Function | SmallTest | Leve
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     auto ret = ssm_->ProcessBackEvent();
     EXPECT_EQ(ret, WSError::WS_OK);
@@ -451,6 +452,34 @@ HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner02, F
     sceneSession1 = nullptr;
     ret = ssm_->DestroyAndDisconnectSpecificSessionInner(2);
     EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: DestroyAndDisconnectSpecificSessionInner03
+ * @tc.desc: DestroyAndDisconnectSpecificSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, DestroyAndDisconnectSpecificSessionInner03, Function | SmallTest | Level3)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
+    sessionInfo.abilityName_ = "DestroyAndDisconnectSpecificSessionInner03";
+    sptr<SceneSession> floatSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    floatSession->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    floatSession->persistentId_ = 1;
+    sptr<SceneSession> subSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    subSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->persistentId_ = 2;
+    subSession->SetParentSession(floatSession);
+    floatSession->subSession_.push_back(subSession);
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, floatSession));
+    ssm_->sceneSessionMap_.insert(std::make_pair(2, subSession));
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ssm_->sceneSessionMap_.find(2), ssm_->sceneSessionMap_.end());
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(2);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -851,6 +880,8 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTe
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
     sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = false;
@@ -861,6 +892,8 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront, Function | SmallTe
     sceneSession->sessionInfo_.abilityInfo = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
     sceneSession->sessionInfo_.isSystem_ = true;
+    ssm_->NotifySessionMovedToFront(persistentId);
+    ssm_->listenerController_ = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
 
@@ -934,7 +967,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent01, Function | SmallTest | Le
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     auto ret = ssm_->ProcessBackEvent();
@@ -955,7 +989,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent02, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = true;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->rootSceneProcessBackEventFunc_ = nullptr;
@@ -977,7 +1012,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent03, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = true;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     RootSceneProcessBackEventFunc func = [](){};
@@ -1001,7 +1037,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent04, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = false;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     ssm_->rootSceneProcessBackEventFunc_ = nullptr;
@@ -1023,7 +1060,8 @@ HWTEST_F(SceneSessionManagerTest7, ProcessBackEvent05, Function | SmallTest | Le
     ASSERT_NE(nullptr, sceneSession);
     sceneSession->sessionInfo_.isSystem_ = false;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->focusedSessionId_ = 1;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(1);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = false;
     RootSceneProcessBackEventFunc func = [](){};
@@ -1128,6 +1166,8 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront01, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
     sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = true;
@@ -1150,6 +1190,8 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront02, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     ASSERT_NE(nullptr, sceneSession->sessionInfo_.abilityInfo);
     sceneSession->sessionInfo_.abilityInfo->excludeFromMissions = false;
@@ -1172,6 +1214,8 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront03, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.abilityInfo = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
@@ -1190,6 +1234,8 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront04, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
+    ssm_->listenerController_ = std::make_shared<SessionListenerController>();
+    ASSERT_NE(nullptr, ssm_->listenerController_);
     sceneSession->sessionInfo_.isSystem_ = true;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
@@ -1208,6 +1254,7 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront05, Function | Small
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ASSERT_NE(nullptr, ssm_);
+    ssm_->listenerController_ = nullptr;
     ssm_->NotifySessionMovedToFront(persistentId);
 }
 

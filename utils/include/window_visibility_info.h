@@ -20,18 +20,6 @@
 
 namespace OHOS::Rosen {
 /**
- * @enum WindowVisibilityState
- *
- * @brief Visibility state of a window
- */
-enum WindowVisibilityState : uint32_t {
-    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = 0,
-    WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
-    WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
-    WINDOW_LAYER_STATE_MAX
-};
-
-/**
  * @enum WindowLayerState
  *
  * @brief Layer state of a window
@@ -56,6 +44,7 @@ public:
      * @brief Default construct of WindowVisibilityInfo.
      */
     WindowVisibilityInfo() = default;
+
     /**
      * @brief Construct of WindowVisibilityInfo.
      *
@@ -71,9 +60,9 @@ public:
 
     WindowVisibilityInfo(uint32_t winId, int32_t pid, int32_t uid, WindowVisibilityState visibilityState,
         WindowType winType, WindowStatus windowStatus, const Rect& rect, const std::string& bundleName,
-        const std::string& abilityName) : windowId_(winId), pid_(pid), uid_(uid), visibilityState_(visibilityState),
-        windowType_(winType), windowStatus_(windowStatus), rect_(rect), bundleName_(bundleName),
-        abilityName_(abilityName) {}
+        const std::string& abilityName, bool isFocused) : windowId_(winId), pid_(pid), uid_(uid),
+        visibilityState_(visibilityState), windowType_(winType), windowStatus_(windowStatus), rect_(rect),
+        bundleName_(bundleName), abilityName_(abilityName), isFocused_(isFocused) {}
 
     /**
      * @brief Deconstruct of WindowVisibilityInfo.
@@ -87,6 +76,7 @@ public:
      * @return True means marshall success, false means marshall failed.
      */
     virtual bool Marshalling(Parcel& parcel) const override;
+
     /**
      * @brief Unmarshalling WindowVisibilityInfo.
      *
@@ -101,13 +91,27 @@ public:
 
     const std::string& GetBundleName() const { return bundleName_; }
 
+    void SetBundleName(const std::string& bundleName) { bundleName_ = bundleName; }
+
     const std::string& GetAbilityName() const { return abilityName_; }
+
+    void SetAbilityName(const std::string& abilityName) { abilityName_ = abilityName; }
 
     WindowStatus GetWindowStatus() const { return windowStatus_; }
 
     WindowType GetWindowType() const { return windowType_; }
 
     WindowVisibilityState GetWindowVisibilityState() const { return visibilityState_; }
+
+    bool IsFocused() const { return isFocused_; }
+
+    int32_t GetAppIndex() const { return appIndex_; }
+
+    void SetAppIndex(int32_t appIndex) { appIndex_ = appIndex; }
+
+    bool IsSystem() const { return isSystem_; }
+
+    void SetIsSystem(bool isSystem) { isSystem_ = isSystem; }
 
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
@@ -118,6 +122,9 @@ public:
     Rect rect_ = {0, 0, 0, 0};
     std::string bundleName_;
     std::string abilityName_;
+    bool isFocused_ = false;
+    int32_t appIndex_ { 0 };
+    bool isSystem_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H

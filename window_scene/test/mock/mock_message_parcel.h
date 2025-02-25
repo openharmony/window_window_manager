@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef MOCK_MESSAGE_PARCEL_H
 #define MOCK_MESSAGE_PARCEL_H
 namespace OHOS {
@@ -27,6 +28,7 @@ public:
     static void SetWriteString16ErrorFlag(bool flag);
     static void SetWriteParcelableErrorFlag(bool flag);
     static void SetWriteInterfaceTokenErrorFlag(bool flag);
+    static void SetReadUint32ErrorFlag(bool flag);
     static void SetReadInt32ErrorFlag(bool flag);
     static void SetReadInt64ErrorFlag(bool flag);
     static void SetReadStringVectorErrorFlag(bool flag);

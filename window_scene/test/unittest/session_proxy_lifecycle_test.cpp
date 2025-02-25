@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "session_proxy.h"
 #include "iremote_object_mocker.h"
 #include <gtest/gtest.h>
@@ -38,8 +39,8 @@ namespace {
 HWTEST_F(SessionProxyLifecycleTest, Foreground, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Foreground start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sptr<WindowSessionProperty> property;
     WSError res = sProxy->Foreground(property);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -54,9 +55,9 @@ HWTEST_F(SessionProxyLifecycleTest, Foreground, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyLifecycleTest, Foreground1, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Foreground start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
-    sptr<WindowSessionProperty> property = new WindowSessionProperty();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     WSError res = sProxy->Foreground(property);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -71,8 +72,8 @@ HWTEST_F(SessionProxyLifecycleTest, Foreground1, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyLifecycleTest, Background, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Background start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     WSError res = sProxy->Background();
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Background end";
@@ -86,8 +87,8 @@ HWTEST_F(SessionProxyLifecycleTest, Background, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyLifecycleTest, Disconnect, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Disconnect start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     WSError res = sProxy->Disconnect();
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: Disconnect end";
@@ -101,9 +102,9 @@ HWTEST_F(SessionProxyLifecycleTest, Disconnect, Function | SmallTest | Level2)
 HWTEST_F(SessionProxyLifecycleTest, DrawingCompleted, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: DrawingCompleted start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SessionProxy> sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     WSError res = sProxy->DrawingCompleted();
     ASSERT_EQ(res, WSError::WS_OK);
@@ -118,9 +119,9 @@ HWTEST_F(SessionProxyLifecycleTest, DrawingCompleted, Function | SmallTest | Lev
 HWTEST_F(SessionProxyLifecycleTest, RemoveStartingWindow, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: RemoveStartingWindow start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(iRemoteObjectMocker, nullptr);
-    sptr<SessionProxy> sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
     WSError res = sProxy->RemoveStartingWindow();
     ASSERT_EQ(res, WSError::WS_OK);
@@ -135,13 +136,13 @@ HWTEST_F(SessionProxyLifecycleTest, RemoveStartingWindow, Function | SmallTest |
 HWTEST_F(SessionProxyLifecycleTest, PendingSessionActivation, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: PendingSessionActivation start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
     WSError res = sProxy->PendingSessionActivation(abilitySessionInfo);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new (std::nothrow) AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo1, nullptr);
     res = sProxy->PendingSessionActivation(abilitySessionInfo1);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -156,13 +157,13 @@ HWTEST_F(SessionProxyLifecycleTest, PendingSessionActivation, Function | SmallTe
 HWTEST_F(SessionProxyLifecycleTest, TerminateSession, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: TerminateSession start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
     WSError res = sProxy->TerminateSession(abilitySessionInfo);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new (std::nothrow) AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo1, nullptr);
     res = sProxy->TerminateSession(abilitySessionInfo1);
     ASSERT_EQ(res, WSError::WS_OK);
@@ -177,13 +178,13 @@ HWTEST_F(SessionProxyLifecycleTest, TerminateSession, Function | SmallTest | Lev
 HWTEST_F(SessionProxyLifecycleTest, NotifySessionException, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: NotifySessionException start";
-    sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
-    SessionProxy* sProxy = new (std::nothrow) SessionProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
     WSError res = sProxy->NotifySessionException(abilitySessionInfo);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
-    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = new (std::nothrow) AAFwk::SessionInfo();
+    sptr<AAFwk::SessionInfo> abilitySessionInfo1 = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo1, nullptr);
     res = sProxy->NotifySessionException(abilitySessionInfo1);
     ASSERT_EQ(res, WSError::WS_OK);

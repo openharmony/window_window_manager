@@ -593,15 +593,15 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
 
 void WindowRoot::DestroyLeakStartingWindow()
 {
-    WLOGFD("DestroyLeakStartingWindow is called");
+    TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "called");
     std::vector<uint32_t> destroyIds;
     for (auto& iter : windowNodeMap_) {
         if (iter.second->startingWindowShown_ && !iter.second->GetWindowToken()) {
             destroyIds.push_back(iter.second->GetWindowId());
         }
     }
-    for (auto& id : destroyIds) {
-        WLOGFD("Id:%{public}u", id);
+    for (auto id : destroyIds) {
+        TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "Id:%{public}u", id);
         DestroyWindow(id, false);
     }
 }
@@ -678,7 +678,8 @@ bool WindowRoot::CheckAddingModeAndSize(sptr<WindowNode>& node, const sptr<Windo
         return true;
     }
     // intercept the node which doesn't support floating mode at tile mode
-    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetModeSupportInfo(), container->GetCurrentLayoutMode())) {
+    if (WindowHelper::IsInvalidWindowInTileLayoutMode(node->GetWindowModeSupportType(),
+        container->GetCurrentLayoutMode())) {
         WLOGFE("window doesn't support floating mode in tile, windowId: %{public}u", node->GetWindowId());
         return false;
     }

@@ -45,13 +45,24 @@ static bool operator==(const MMI::Rect left, const MMI::Rect right)
     return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
 }
 
-static bool operator!=(const MMI::Rect& a, const WSRect& b)
-{
-    if (a.x != b.posX_ || a.y != b.posY_ || a.width != b.width_ || a.height != b.height_) {
-        return true;
+struct InputRectHash {
+    std::size_t operator()(const MMI::Rect& r) const
+    {
+        std::size_t h1 = std::hash<int32_t>{}(r.x);
+        std::size_t h2 = std::hash<int32_t>{}(r.y);
+        std::size_t h3 = std::hash<int32_t>{}(r.width);
+        std::size_t h4 = std::hash<int32_t>{}(r.height);
+        return ((h1 * 31 + h2) * 31 + h3) * 31 + h4;
     }
-    return false;
-}
+};
+
+struct InputRectEqual {
+    bool operator()(const MMI::Rect& left, const MMI::Rect& right) const
+    {
+        return left.x == right.x && left.y == right.y &&
+               left.width == right.width && left.height == right.height;
+    }
+};
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
@@ -104,16 +115,28 @@ Vector2f CalRotationToTranslate(const MMI::Direction& displayRotation, float wid
     return translate;
 }
 
+Matrix3f GetTransformFromWindowInfo(const MMI::WindowInfo& hostWindowInfo)
+{
+    const std::vector<float>& hostTransform = hostWindowInfo.transform;
+    if (hostTransform.size() != TRANSFORM_DATA_LEN) {
+        TLOGE(WmsLogTag::WMS_EVENT, "transform data len invalid, id: %{public}d", hostWindowInfo.id);
+        return Matrix3f();
+    }
+    return Matrix3f(hostTransform[0], hostTransform[1], hostTransform[2],  // 0,1,2: matrix index
+                    hostTransform[3], hostTransform[4], hostTransform[5],  // 3,4,5: matrix index
+                    hostTransform[6], hostTransform[7], hostTransform[8]); // 6,7,8: matrix index
+}
+
 void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
-    bool useUIExtension) const
+    const SingleHandData& singleHandData, bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
     auto sessionProperty = sceneSession->GetSessionProperty();
     if (sessionProperty == nullptr) {
-        WLOGFE("sessionProperty is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is nullptr");
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
@@ -130,33 +153,39 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
     Vector2f offset = sceneSession->GetSessionGlobalPosition(useUIExtension);
     float rotate = 0.0f;
     Vector2f translate = CalRotationToTranslate(displayRotation, width, height, offset, rotate);
-    transform = transform.Translate(translate).Rotate(rotate).Scale(scale, sceneSession->GetPivotX(),
-        sceneSession->GetPivotY());
-    transform = transform.Inverse();
+    if (!NearZero(singleHandData.singleHandY)) {
+        transform = transform.Scale({singleHandData.scaleX, singleHandData.scaleY},
+                                    singleHandData.pivotX, singleHandData.height);
+    }
+    transform = transform.Translate(translate).Rotate(rotate)
+                         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
 }
 
 void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSession, Matrix3f& transform,
-    bool useUIExtension) const
+    const SingleHandData& singleHandData, bool useUIExtension) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
     transform = Matrix3f::IDENTITY;
     bool isRotate = sceneSession->GetSessionInfo().isRotable_;
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
+    auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
         (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN &&
         FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
-        transform = transform.Translate(translate);
-        transform = transform.Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY());
-        transform = transform.Inverse();
+        if (!NearZero(singleHandData.singleHandY)) {
+            transform = transform.Scale({singleHandData.scaleX, singleHandData.scaleY},
+                                        singleHandData.pivotX, singleHandData.height);
+        }
+        transform = transform.Translate(translate)
+                             .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse();
         return;
     }
-    CalNotRotateTransform(sceneSession, transform, useUIExtension);
+    CalNotRotateTransform(sceneSession, transform, singleHandData, useUIExtension);
 }
 
 
@@ -165,7 +194,7 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     std::vector<MMI::Rect>& pointerHotAreas) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
     WSRect windowRect = sceneSession->GetSessionGlobalRect();
@@ -206,31 +235,64 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     pointerHotAreas.emplace_back(pointerRect);
 }
 
-void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
-    std::vector<MMI::Rect>& pointerHotAreas) const
+static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, std::vector<Rect>& hotAreas)
 {
-    if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+    sptr<SceneSession> session = (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) ?
+        sceneSession->GetKeyboardSession() : sceneSession;
+    auto sessionProperty = session->GetSessionProperty();
+    KeyboardTouchHotAreas keyboardTouchHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
+    auto displayId = sessionProperty->GetDisplayId();
+    std::map<ScreenId, ScreenProperty> screensProperties =
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
     }
-    WSRect windowRect = sceneSession->GetSessionGlobalRect();
-    const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
-    for (auto area : hotAreas) {
+    const auto& screenProperty = screensProperties[displayId];
+    bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        if (keyboardTouchHotAreas.isKeyboardEmpty()) {
+            return;
+        }
+        hotAreas = isLandscape ? keyboardTouchHotAreas.landscapeKeyboardHotAreas_ :
+            keyboardTouchHotAreas.portraitKeyboardHotAreas_;
+    } else if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        if (keyboardTouchHotAreas.isPanelEmpty()) {
+            return;
+        }
+        hotAreas = isLandscape ? keyboardTouchHotAreas.landscapePanelHotAreas_ :
+            keyboardTouchHotAreas.portraitPanelHotAreas_;
+    }
+}
+
+void SceneSessionDirtyManager::UpdateHotAreas(const sptr<SceneSession>& sceneSession,
+    std::vector<MMI::Rect>& touchHotAreas, std::vector<MMI::Rect>& pointerHotAreas) const
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return;
+    }
+    std::unordered_set<MMI::Rect, InputRectHash, InputRectEqual> hotAreaHashSet;
+    std::vector<Rect> hotAreas = sceneSession->GetTouchHotAreas();
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        UpdateKeyboardHotAreasInner(sceneSession, hotAreas);
+    }
+    for (const auto& area : hotAreas) {
         MMI::Rect rect;
         rect.x = area.posX_;
         rect.y = area.posY_;
         rect.width = static_cast<int32_t>(area.width_);
         rect.height = static_cast<int32_t>(area.height_);
-        auto iter = std::find_if(touchHotAreas.begin(), touchHotAreas.end(),
-            [&rect](const MMI::Rect& var) { return rect == var; });
-        if (iter != touchHotAreas.end()) {
+        if (hotAreaHashSet.count(rect)) {
             continue;
         }
+        hotAreaHashSet.insert(rect);
         touchHotAreas.emplace_back(rect);
         pointerHotAreas.emplace_back(rect);
         if (touchHotAreas.size() == static_cast<uint32_t>(MMI::WindowInfo::MAX_HOTAREA_COUNT)) {
-            auto sessionid = sceneSession->GetWindowId();
-            WLOGFE("id = %{public}d hotAreas size > %{public}d", sessionid, static_cast<int>(hotAreas.size()));
+            auto sessionId = sceneSession->GetWindowId();
+            TLOGE(WmsLogTag::WMS_EVENT, "id=%{public}d hotAreas size > %{public}d",
+                sessionId, static_cast<int>(hotAreas.size()));
             break;
         }
     }
@@ -246,27 +308,24 @@ static void AddDialogSessionMapItem(const sptr<SceneSession>& session,
     if (mainSession == nullptr) {
         return;
     }
-    bool isTopmostModalSubWindow = false;
+    bool isTopmostModalWindow = false;
     const auto& property = session->GetSessionProperty();
     if (property != nullptr && property->IsTopmost()) {
-        isTopmostModalSubWindow = true;
+        isTopmostModalWindow = true;
     }
     if (auto iter = dialogMap.find(mainSession->GetPersistentId());
         iter != dialogMap.end() && iter->second != nullptr) {
         auto& targetSession = iter->second;
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        SubWindowModalType targetModalType = targetSession->GetSubWindowModalType();
-        if (modalType == targetModalType) {
+        if (session->IsApplicationModal() == targetSession->IsApplicationModal()) {
             if (targetSession->GetSessionProperty() &&
                 targetSession->GetSessionProperty()->IsTopmost() &&
-                !isTopmostModalSubWindow) {
+                !isTopmostModalWindow) {
                 return;
             }
             if (targetSession->GetZOrder() > session->GetZOrder()) {
                 return;
             }
-        } else if (modalType == SubWindowModalType::TYPE_WINDOW_MODALITY &&
-                   targetModalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
+        } else if (!session->IsApplicationModal() && targetSession->IsApplicationModal()) {
             return;
         }
     }
@@ -295,9 +354,7 @@ static void AddCallingPidMapItem(const sptr<SceneSession>& session,
     auto sessionCallingPid = session->GetCallingPid();
     auto iter = callingPidMap.find(sessionCallingPid);
     if (iter == callingPidMap.end()) {
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        if (modalType == SubWindowModalType::TYPE_DIALOG ||
-            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
+        if (!session->IsApplicationModal()) {
             return;
         }
         callingPidMap.emplace(std::make_pair(sessionCallingPid, session));
@@ -345,15 +402,13 @@ std::map<int32_t, sptr<SceneSession>> SceneSessionDirtyManager::GetDialogSession
         if (session == nullptr || session->GetForceHideState() != ForceHideState::NOT_HIDDEN) {
             continue;
         }
-        SubWindowModalType modalType = session->GetSubWindowModalType();
-        if (modalType == SubWindowModalType::TYPE_DIALOG ||
-            modalType == SubWindowModalType::TYPE_WINDOW_MODALITY) {
-            AddDialogSessionMapItem(session, dialogMap);
-            AddCallingPidMapItem(session, callingPidMap);
-        } else if (modalType == SubWindowModalType::TYPE_APPLICATION_MODALITY) {
-            AddDialogSessionMapItem(session, dialogMap);
+        if (!session->IsModal() && !session->IsDialogWindow()) {
+            continue;
+        }
+        AddDialogSessionMapItem(session, dialogMap);
+        AddCallingPidMapItem(session, callingPidMap);
+        if (session->IsApplicationModal()) {
             hasModalApplication = true;
-            AddCallingPidMapItem(session, callingPidMap);
         }
     }
     if (hasModalApplication) {
@@ -373,7 +428,7 @@ bool SceneSessionDirtyManager::IsFilterSession(const sptr<SceneSession>& sceneSe
     } else if (sceneSession->IsSystemSession() && sceneSession->IsVisible() && sceneSession->IsSystemActive()) {
         return false;
     }
-    if (!Rosen::SceneSessionManager::GetInstance().IsSessionVisible(sceneSession)) {
+    if (!SceneSessionManager::GetInstance().IsSessionVisible(sceneSession)) {
         return true;
     }
     return false;
@@ -383,14 +438,14 @@ void SceneSessionDirtyManager::NotifyWindowInfoChange(const sptr<SceneSession>& 
     const WindowUpdateType& type, const bool startMoving)
 {
     if (sceneSession == nullptr) {
-        WLOGFW("sceneSession is null");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
         return;
     }
 
     if (type == WindowUpdateType::WINDOW_UPDATE_ADDED || type == WindowUpdateType::WINDOW_UPDATE_REMOVED||
         type == WindowUpdateType::WINDOW_UPDATE_ACTIVE) {
-            WLOGFD("[EventDispatch] wid = %{public}d, winType = %{public}d",
-                sceneSession->GetWindowId(), static_cast<int>(type));
+        TLOGD(WmsLogTag::WMS_EVENT, "[EventDispatch] wid=%{public}d, winType=%{public}d",
+            sceneSession->GetWindowId(), static_cast<int>(type));
     }
     ResetFlushWindowInfoTask();
 }
@@ -407,29 +462,60 @@ void SceneSessionDirtyManager::ResetFlushWindowInfoTask()
             }
             flushWindowInfoCallback_();
         };
+        TLOGD(WmsLogTag::WMS_EVENT, "in");
         SceneSessionManager::GetInstance().PostFlushWindowInfoTask(task,
             UPDATE_WINDOW_INFO_TASK, UPDATE_TASK_DURATION);
     }
 }
 
+bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<SceneSession>& sceneSession,
+    SecSurfaceInfo& constrainedModalUIExtInfo)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return false;
+    }
+    auto surfaceNode = sceneSession->GetSurfaceNode();
+    if (surfaceNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+        return false;
+    }
+    auto surfaceNodeId = surfaceNode->GetId();
+    {
+        std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        auto iter = constrainedModalUIExtInfoMap_.find(surfaceNodeId);
+        if (iter == constrainedModalUIExtInfoMap_.end()) {
+            return false;
+        }
+        if (!iter->second.empty()) {
+            constrainedModalUIExtInfo = iter->second.back();
+            return true;
+        }
+    }
+    return false;
+}
+
 void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::WindowInfo>& windowInfoList,
-    MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession)
+    MMI::WindowInfo windowInfo, const sptr<SceneSession>& sceneSession,
+    const ExtensionWindowEventInfo& extensionInfo)
 {
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return;
     }
 
-    auto extensionInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     windowInfo.id = extensionInfo.persistentId;
     if (extensionInfo.windowRect.width_ != 0 || extensionInfo.windowRect.height_ != 0) {
+        auto singleHandData = GetSingleHandData(sceneSession);
         MMI::Rect windowRect = {
-            .x = extensionInfo.windowRect.posX_,
-            .y = extensionInfo.windowRect.posY_,
+            .x = static_cast<float>(extensionInfo.windowRect.posX_) * singleHandData.scaleX +
+                 singleHandData.singleHandX,
+            .y = static_cast<float>(extensionInfo.windowRect.posY_) * singleHandData.scaleY +
+                 singleHandData.singleHandY,
             .width = extensionInfo.windowRect.width_,
             .height = extensionInfo.windowRect.height_
         };
-        windowInfo.area =  windowRect;
+        windowInfo.area = windowRect;
         std::vector<MMI::Rect> touchHotAreas;
         MMI::Rect touchRect = {
             .x = 0,
@@ -439,28 +525,54 @@ void SceneSessionDirtyManager::AddModalExtensionWindowInfo(std::vector<MMI::Wind
         };
         touchHotAreas.emplace_back(touchRect);
         windowInfo.defaultHotAreas = touchHotAreas;
-        windowInfo.pointerHotAreas = touchHotAreas;
+        windowInfo.pointerHotAreas = std::move(touchHotAreas);
         Matrix3f transform;
-        CalTransform(sceneSession, transform, true);
+        CalTransform(sceneSession, transform, singleHandData, true);
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
-        windowInfo.transform = transformData;
+        windowInfo.transform = std::move(transformData);
     }
 
     windowInfo.agentWindowId = extensionInfo.persistentId;
     windowInfo.pid = extensionInfo.pid;
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
-    windowInfo.pointerChangeAreas = pointerChangeAreas;
+    windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
     windowInfo.zOrder = windowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
 
     windowInfoList.emplace_back(windowInfo);
 }
 
-auto SceneSessionDirtyManager::GetFullWindowInfoList(const std::vector<MMI::WindowInfo>& lastWindowInfoList) ->
+void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowInfo>& windowInfoList,
+    const sptr<SceneSession>& sceneSession, const MMI::WindowInfo& hostWindowInfo)
+{
+    auto modalUIExtensionEventInfo = sceneSession->GetLastModalUIExtensionEventInfo();
+    if (!modalUIExtensionEventInfo) {
+        return;
+    }
+    if (modalUIExtensionEventInfo->isConstrainedModal) {  // constrained UIExt
+        SecSurfaceInfo constrainedModalUIExtInfo;
+        if (!GetLastConstrainedModalUIExtInfo(sceneSession, constrainedModalUIExtInfo)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "cannot find last constrained Modal UIExtInfo");
+            return;
+        }
+        MMI::WindowInfo windowInfo = GetSecComponentWindowInfo(constrainedModalUIExtInfo,
+            hostWindowInfo, sceneSession, GetTransformFromWindowInfo(hostWindowInfo));
+        std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
+        windowInfo.pointerChangeAreas = std::move(pointerChangeAreas);
+        windowInfo.zOrder = hostWindowInfo.zOrder + ZORDER_UIEXTENSION_INDEX;
+        windowInfo.privacyUIFlag = false;
+        TLOGD(WmsLogTag::WMS_EVENT, "constrained Modal UIExt id: %{public}d", windowInfo.id);
+        windowInfoList.emplace_back(windowInfo);
+    } else {  // normal UIExt
+        AddModalExtensionWindowInfo(windowInfoList, hostWindowInfo, sceneSession, *modalUIExtensionEventInfo);
+    }
+}
+
+auto SceneSessionDirtyManager::GetFullWindowInfoList() ->
 std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
 {
     std::vector<MMI::WindowInfo> windowInfoList;
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
-    const auto sceneSessionMap = Rosen::SceneSessionManager::GetInstance().GetSceneSessionMap();
+    const auto sceneSessionMap = SceneSessionManager::GetInstance().GetSceneSessionMap();
     // all input event should trans to dialog window if dialog exists
     const auto dialogMap = GetDialogSessionMap(sceneSessionMap);
     uint32_t maxHotAreasNum = 0;
@@ -469,11 +581,12 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         if (sceneSessionValue == nullptr) {
             continue;
         }
-        WLOGFD("[EventDispatch] FullSceneSessionInfoUpdate windowName = %{public}s bundleName = %{public}s"
-            " windowId = %{public}d activeStatus = %{public}d", sceneSessionValue->GetWindowName().c_str(),
+        TLOGD(WmsLogTag::WMS_EVENT,
+            "[EventDispatch] windowName=%{public}s bundleName=%{public}s"
+            " windowId=%{public}d activeStatus=%{public}d", sceneSessionValue->GetWindowName().c_str(),
             sceneSessionValue->GetSessionInfo().bundleName_.c_str(), sceneSessionValue->GetWindowId(),
             sceneSessionValue->GetForegroundInteractiveStatus());
-        auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, lastWindowInfoList, WindowAction::WINDOW_ADD);
+        auto [windowInfo, pixelMap] = GetWindowInfo(sceneSessionValue, WindowAction::WINDOW_ADD);
         auto iter = (sceneSessionValue->GetMainSessionId() == INVALID_SESSION_ID) ?
             dialogMap.find(sceneSessionValue->GetPersistentId()) :
             dialogMap.find(sceneSessionValue->GetMainSessionId());
@@ -482,10 +595,10 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
             iter->second->GetZOrder() > sceneSessionValue->GetZOrder()) {
             windowInfo.agentWindowId = static_cast<int32_t>(iter->second->GetPersistentId());
             windowInfo.pid = static_cast<int32_t>(iter->second->GetCallingPid());
-        } else if (sceneSessionValue->HasModalUIExtension()) {
-            AddModalExtensionWindowInfo(windowInfoList, windowInfo, sceneSessionValue);
+        } else {
+            GetModalUIExtensionInfo(windowInfoList, sceneSessionValue, windowInfo);
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "windowId = %{public}d, agentWindowId = %{public}d, zOrder = %{public}f",
+        TLOGD(WmsLogTag::WMS_EVENT, "windowId=%{public}d, agentWindowId=%{public}d, zOrder=%{public}f",
             windowInfo.id, windowInfo.agentWindowId, windowInfo.zOrder);
         windowInfoList.emplace_back(windowInfo);
         pixelMapList.emplace_back(pixelMap);
@@ -513,10 +626,10 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
         TLOGE(WmsLogTag::WMS_EVENT, "sessionProperty is null");
         return;
     }
-    bool dragEnabled = sessionProperty->GetDragEnabled();
-    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s dragEnabled: %{public}d", sceneSession->GetWindowName().c_str(),
-        dragEnabled);
-    if (dragEnabled) {
+    bool isDragAccessible = sceneSession->IsDragAccessible();
+    TLOGD(WmsLogTag::WMS_EVENT, "window %{public}s isDragAccessible: %{public}d", sceneSession->GetWindowName().c_str(),
+        isDragAccessible);
+    if (isDragAccessible) {
         float vpr = 1.5f; // 1.5: default vp
         auto displayId = sessionProperty->GetDisplayId();
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
@@ -549,7 +662,7 @@ void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSessio
                 pointerAreaFivePx, pointerAreaSixteenPx, pointerAreaFivePx};
         }
     } else {
-        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is: %{public}d dragEnabled is false",
+        TLOGD(WmsLogTag::WMS_EVENT, "sceneSession is: %{public}d dragAccessible is false",
             sceneSession->GetPersistentId());
     }
 }
@@ -586,23 +699,11 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     }
 }
 
-int FindLastWindowInfoIndex(const std::vector<MMI::WindowInfo>& lastWindowInfoList, int32_t windowId)
-{
-    int sizeOfLastWindowInfoList = static_cast<int>(lastWindowInfoList.size());
-    for (int i = 0; i < sizeOfLastWindowInfoList; i++) {
-        if (lastWindowInfoList[i].id == windowId) {
-            return i;
-        }
-    }
-    return -1;
-}
-
 std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyManager::GetWindowInfo(
-    const sptr<SceneSession>& sceneSession, const std::vector<MMI::WindowInfo>& lastWindowInfoList,
-    const SceneSessionDirtyManager::WindowAction& action) const
+    const sptr<SceneSession>& sceneSession, const WindowAction& action) const
 {
     if (sceneSession == nullptr) {
-        WLOGFE("sceneSession is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};
     }
     sptr<WindowSessionProperty> windowSessionProperty = sceneSession->GetSessionProperty();
@@ -616,35 +717,15 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     auto uid = sceneSession->GetCallingUid();
     auto windowId = sceneSession->GetWindowId();
     auto displayId = windowSessionProperty->GetDisplayId();
-    bool rectChangeBySystem = sceneSession->GetRectChangeBySystem();
-    CalTransform(sceneSession, transform);
+    const auto& singleHandData = GetSingleHandData(sceneSession);
+    CalTransform(sceneSession, transform, singleHandData);
     std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
 
     auto agentWindowId = sceneSession->GetWindowId();
-    if (rectChangeBySystem) {
-        int lastWindowIdx = FindLastWindowInfoIndex(lastWindowInfoList, windowId);
-        if (lastWindowIdx != -1 && lastWindowInfoList[lastWindowIdx].area != windowRect) {
-            sceneSession -> SetRectChangeBySystem(false);
-        } else {
-            rectChangeBySystem = false;
-        }
-    }
     auto zOrder = sceneSession->GetZOrder();
     std::vector<int32_t> pointerChangeAreas(POINTER_CHANGE_AREA_COUNT, 0);
-    auto windowMode = windowSessionProperty->GetWindowMode();
-    auto maxMode = windowSessionProperty->GetMaximizeMode();
     WindowType windowType = windowSessionProperty->GetWindowType();
-    bool isMainWindow = Rosen::WindowHelper::IsMainWindow(windowType);
-    bool isDecorDialog = Rosen::WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    bool isNoDialogAndDragEnabledSystemWindow = Rosen::WindowHelper::IsSystemWindow(windowType) &&
-        !(Rosen::WindowHelper::IsDialogWindow(windowType)) && windowSessionProperty->GetDragEnabled();
-    bool isDecorSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
-    if ((windowMode == Rosen::WindowMode::WINDOW_MODE_FLOATING &&
-        (isMainWindow || isDecorDialog || isDecorSubWindow || isNoDialogAndDragEnabledSystemWindow) &&
-        maxMode != Rosen::MaximizeMode::MODE_AVOID_SYSTEM_BAR) ||
-        (sceneSession->GetSessionInfo().isSetPointerAreas_)) {
-            UpdatePointerAreas(sceneSession, pointerChangeAreas);
-    }
+    CheckIfUpdatePointAreas(windowType, sceneSession, windowSessionProperty, pointerChangeAreas);
     std::vector<MMI::Rect> touchHotAreas;
     std::vector<MMI::Rect> pointerHotAreas;
     UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
@@ -653,19 +734,20 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         .id = windowId,
         .pid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : pid,
         .uid = uid,
-        .area = { windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_ },
-        .defaultHotAreas = touchHotAreas,
-        .pointerHotAreas = pointerHotAreas,
+        .area = { windowRect.posX_ * singleHandData.scaleX + singleHandData.singleHandX,
+                  windowRect.posY_ * singleHandData.scaleY + singleHandData.singleHandY,
+                  windowRect.width_, windowRect.height_ },
+        .defaultHotAreas = std::move(touchHotAreas),
+        .pointerHotAreas = std::move(pointerHotAreas),
         .agentWindowId = agentWindowId,
         .action = static_cast<MMI::WINDOW_UPDATE_ACTION>(action),
         .displayId = displayId,
         .zOrder = zOrder,
-        .pointerChangeAreas = pointerChangeAreas,
+        .pointerChangeAreas = std::move(pointerChangeAreas),
         .transform = transformData,
         .pixelMap = pixelMap.get(),
         .windowInputType = static_cast<MMI::WindowInputType>(sceneSession->GetSessionInfo().windowInputType_),
         .windowType = static_cast<int32_t>(windowType),
-        .rectChangeBySystem = rectChangeBySystem,
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
@@ -674,6 +756,49 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     UpdatePrivacyMode(sceneSession, windowInfo);
     windowInfo.uiExtentionWindowInfo = GetSecSurfaceWindowinfoList(sceneSession, windowInfo, transform);
     return {windowInfo, pixelMap};
+}
+
+SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSession>& sceneSession) const
+{
+    SingleHandData singleHandData;
+    auto sessionProperty = sceneSession->GetSessionProperty();
+    auto displayId = sessionProperty->GetDisplayId();
+    const std::map<ScreenId, ScreenProperty>& screensProperties =
+        ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    auto screenPropertyIter = screensProperties.find(displayId);
+    if (screenPropertyIter == screensProperties.end()) {
+        return singleHandData;
+    }
+    const SingleHandTransform& transform = sceneSession->GetSingleHandTransform();
+    const auto& screenProperty = screenPropertyIter->second;
+    singleHandData.scaleX = transform.scaleX;
+    singleHandData.scaleY = transform.scaleY;
+    singleHandData.width = screenProperty.GetBounds().rect_.GetWidth();
+    singleHandData.height = screenProperty.GetBounds().rect_.GetHeight();
+    singleHandData.singleHandX = transform.posX;
+    singleHandData.singleHandY = transform.posY;
+    singleHandData.pivotX = (transform.posX == 0) ? 0.0f : singleHandData.width;
+    return singleHandData;
+}
+
+void SceneSessionDirtyManager::CheckIfUpdatePointAreas(WindowType windowType, const sptr<SceneSession>& sceneSession,
+    const sptr<WindowSessionProperty>& windowSessionProperty, std::vector<int32_t>& pointerChangeAreas) const
+{
+    bool isMainWindow = WindowHelper::IsMainWindow(windowType);
+    bool isDecorEnabledDialog = WindowHelper::IsDialogWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isDragAccessibleSystemWindowButNotDialog = WindowHelper::IsSystemWindow(windowType) &&
+        !WindowHelper::IsDialogWindow(windowType) && sceneSession->IsDragAccessible();
+    bool isDecorEnabledSubWindow = WindowHelper::IsSubWindow(windowType) && windowSessionProperty->IsDecorEnable();
+    bool isDragAccessibleSubWindow = WindowHelper::IsSubWindow(windowType) && sceneSession->IsDragAccessible();
+    bool isUpdatePointerAreasNeeded = isMainWindow || isDecorEnabledDialog || isDecorEnabledSubWindow ||
+        isDragAccessibleSubWindow || isDragAccessibleSystemWindowButNotDialog;
+    auto windowMode = windowSessionProperty->GetWindowMode();
+    auto maximizeMode = windowSessionProperty->GetMaximizeMode();
+    if ((windowMode == WindowMode::WINDOW_MODE_FLOATING && maximizeMode != MaximizeMode::MODE_AVOID_SYSTEM_BAR &&
+         isUpdatePointerAreasNeeded) ||
+        sceneSession->GetSessionInfo().isSetPointerAreas_) {
+        UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    }
 }
 
 void SceneSessionDirtyManager::RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback)
@@ -728,8 +853,7 @@ std::string DumpSecSurfaceInfo(const SecSurfaceInfo& secSurfaceInfo)
     return infoStr;
 }
 
-MMI::WindowInfo SceneSessionDirtyManager::MakeWindowInfoFormHostWindow(const SecRectInfo& secRectInfo,
-    const MMI::WindowInfo& hostWindowinfo) const
+MMI::WindowInfo SceneSessionDirtyManager::MakeWindowInfoFormHostWindow(const MMI::WindowInfo& hostWindowinfo) const
 {
     MMI::WindowInfo windowinfo;
     windowinfo.id = hostWindowinfo.id;
@@ -789,7 +913,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetHostComponentWindowInfo(const SecSu
     MMI::WindowInfo windowinfo;
     const auto& secRectInfoList = secSurfaceInfo.upperNodes;
     if (secRectInfoList.size() > 0) {
-        windowinfo = MakeWindowInfoFormHostWindow(secRectInfoList[0], hostWindowinfo);
+        windowinfo = MakeWindowInfoFormHostWindow(hostWindowinfo);
     }
     for (const auto& secRectInfo : secRectInfoList) {
         windowinfo.pid = secSurfaceInfo.hostPid;
@@ -808,9 +932,8 @@ MMI::WindowInfo SceneSessionDirtyManager::GetSecComponentWindowInfo(const SecSur
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return {};
     }
-    MMI::WindowInfo windowinfo;
     const auto& secRectInfo = secSurfaceInfo.uiExtensionRectInfo;
-    windowinfo = MakeWindowInfoFormHostWindow(secRectInfo, hostWindowinfo);
+    MMI::WindowInfo windowinfo = MakeWindowInfoFormHostWindow(hostWindowinfo);
     windowinfo.id = sceneSession->GetUIExtPersistentIdBySurfaceNodeId(secSurfaceInfo.uiExtensionNodeId);
     if (windowinfo.id == 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "GetUIExtPersistentId ERROR");
@@ -882,6 +1005,23 @@ void SceneSessionDirtyManager::UpdateSecSurfaceInfo(const std::map<uint64_t,
     if (updateSecSurfaceInfoNeeded) {
         ResetFlushWindowInfoTask();
         DumpSecSurfaceInfoMap(secSurfaceInfoMap);
+    }
+}
+
+void SceneSessionDirtyManager::UpdateConstrainedModalUIExtInfo(const std::map<uint64_t,
+    std::vector<SecSurfaceInfo>>& constrainedModalUIExtInfoMap)
+{
+    bool updateConstrainedModalUIExtInfoNeeded = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
+        if (constrainedModalUIExtInfoMap_ != constrainedModalUIExtInfoMap) {
+            constrainedModalUIExtInfoMap_ = constrainedModalUIExtInfoMap;
+            updateConstrainedModalUIExtInfoNeeded = true;
+        }
+    }
+    if (updateConstrainedModalUIExtInfoNeeded) {
+        ResetFlushWindowInfoTask();
+        DumpSecSurfaceInfoMap(constrainedModalUIExtInfoMap);
     }
 }
 

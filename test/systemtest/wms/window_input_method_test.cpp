@@ -27,9 +27,12 @@ class WindowInputMethodTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    virtual void SetUp() override;
-    virtual void TearDown() override;
-    Utils::TestWindowInfo inputMethodWindowInfo_;
+    void SetUp() override;
+    void TearDown() override;
+
+private:
+    static constexpr uint32_t TEST_SLEEP_SECOND = 1;
+    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
 void WindowInputMethodTest::SetUpTestCase()
@@ -46,71 +49,52 @@ void WindowInputMethodTest::TearDownTestCase()
 
 void WindowInputMethodTest::SetUp()
 {
-    inputMethodWindowInfo_ = {
-        .name = "",
-        .rect = Utils::customAppRect_,
-        .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
-        .mode = WindowMode::WINDOW_MODE_FLOATING,
-        .needAvoid = false,
-        .parentLimit = false,
-        .showWhenLocked = true,
-        .parentId = INVALID_WINDOW_ID,
-    };
 }
 
 void WindowInputMethodTest::TearDown()
 {
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
 /**
- * @tc.name: InputMethodWindow01
- * @tc.desc: One InputMethod Floating Window
+ * @tc.name: ShowKeyboard1
+ * @tc.desc: create window and show keyboard.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowInputMethodTest, InputMethodWindow01, Function | MediumTest | Level3)
+HWTEST_F(WindowInputMethodTest, ShowKeyboard01, Function | MediumTest | Level3)
 {
-    inputMethodWindowInfo_.name = "input_method.1";
-    const sptr<Window>& window = Utils::CreateTestWindow(inputMethodWindowInfo_);
-    ASSERT_NE(window, nullptr);
-    ASSERT_EQ(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, window->GetType());
-    window->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_EQ(WMError::WM_OK, window->Hide());
-    window->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_FLOAT, 0);
-    ASSERT_EQ(WMError::WM_OK, window->Show());
-    ASSERT_EQ(WMError::WM_OK, window->Hide());
-}
-
-/**
- * @tc.name: InputMethodWindow02
- * @tc.desc: One InputMethod Floating Window & One KeyGuard Window
- * @tc.type: FUNC
- */
-HWTEST_F(WindowInputMethodTest, InputMethodWindow02, Function | MediumTest | Level3)
-{
-    inputMethodWindowInfo_.name = "input_method.2";
-    const sptr<Window>& inputMethodWindow = Utils::CreateTestWindow(inputMethodWindowInfo_);
-    ASSERT_NE(inputMethodWindow, nullptr);
-    inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_BOTTOM, 0);
-    inputMethodWindow->Show();
-    if (Utils::customAppRect_.width_ == inputMethodWindow->GetRect().width_) {
-        ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
+    WindowTestUtils::TestWindowInfo windowInfo = {
+        .name = "ShowKeyboard",
+        .rect = Utils::customAppRect_,
+        .type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT,
+        .mode = WindowMode::WINDOW_MODE_FLOATING,
+        .needAvoid = true,
+        .parentLimit = false,
+        .showWhenLocked = true,
+        .parentId = INVALID_WINDOW_ID,
+    };
+    const sptr<Window>& fullWindow = Utils::CreateTestWindow(windowInfo);
+    if (fullWindow == nullptr) {
+        return;
     }
+    ASSERT_EQ(WMError::WM_OK, fullWindow->ShowKeyboard(KeyboardViewMode::DARK_IMMERSIVE_MODE));
+    sleep(TEST_SLEEP_SECOND);
 
-    if (inputMethodWindow->GetRect().height_ == Utils::customAppRect_.height_) {
-        ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
-    }
-    
-    inputMethodWindow->Hide();
-    inputMethodWindow->SetWindowGravity(WindowGravity::WINDOW_GRAVITY_FLOAT, 0);
-    inputMethodWindow->Show();
+    ASSERT_EQ(WMError::WM_OK, fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::LIGHT_IMMERSIVE_MODE));
+    sleep(TEST_SLEEP_SECOND);
 
-    if (Utils::customAppRect_.width_ == inputMethodWindow->GetRect().width_) {
-        ASSERT_EQ(inputMethodWindow->GetRect().width_,  Utils::customAppRect_.width_);
-        ASSERT_EQ(inputMethodWindow->GetRect().height_,  Utils::customAppRect_.height_);
-    }
-    inputMethodWindow->Hide();
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
+        fullWindow->ChangeKeyboardViewMode(static_cast<KeyboardViewMode>(-1)));
+    sleep(TEST_SLEEP_SECOND);
+
+    ASSERT_EQ(WMError::WM_OK, fullWindow->Hide());
+    sleep(TEST_SLEEP_SECOND);
+
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
+        fullWindow->ChangeKeyboardViewMode(KeyboardViewMode::DARK_IMMERSIVE_MODE));
+    sleep(TEST_SLEEP_SECOND);
+    fullWindow->Destroy();
 }
 } // namespace
 } // namespace Rosen

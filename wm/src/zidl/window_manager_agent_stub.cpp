@@ -50,7 +50,14 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE: {
-            WindowModeType type = static_cast<WindowModeType>(data.ReadUint8());
+            uint8_t typeId = 0;
+            if (!data.ReadUint8(typeId) ||
+                typeId < static_cast<uint8_t>(WindowModeType::WINDOW_MODE_SPLIT_FLOATING) ||
+                typeId > static_cast<uint8_t>(WindowModeType::WINDOW_MODE_OTHER)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "read WindowModeType failed");
+                return ERR_INVALID_DATA;
+            }
+            WindowModeType type = static_cast<WindowModeType>(typeId);
             UpdateWindowModeTypeInfo(type);
             break;
         }
@@ -88,7 +95,14 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
                 WLOGFE("read accessibility window infos failed");
                 return ERR_INVALID_DATA;
             }
-            WindowUpdateType type = static_cast<WindowUpdateType>(data.ReadUint32());
+            int32_t typeId = 0;
+            if (!data.ReadInt32(typeId) ||
+                typeId < static_cast<int32_t>(WindowUpdateType::WINDOW_UPDATE_ADDED) ||
+                typeId > static_cast<int32_t>(WindowUpdateType::WINDOW_UPDATE_ALL)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "read WindowUpdateType failed");
+                return ERR_INVALID_DATA;
+            }
+            WindowUpdateType type = static_cast<WindowUpdateType>(typeId);
             NotifyAccessibilityWindowInfo(infos, type);
             break;
         }
@@ -152,7 +166,14 @@ int WindowManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
             break;
         }
         case WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE: {
-            WindowStyleType type = static_cast<WindowStyleType>(data.ReadUint8());
+            uint8_t typeId = 0;
+            if (!data.ReadUint8(typeId) ||
+                typeId < static_cast<uint8_t>(WindowStyleType::WINDOW_STYLE_DEFAULT) ||
+                typeId > static_cast<uint8_t>(WindowStyleType::WINDOW_STYLE_FREE_MULTI_WINDOW)) {
+                TLOGE(WmsLogTag::WMS_LIFE, "read WindowStyleType failed");
+                return ERR_INVALID_DATA;
+            }
+            WindowStyleType type = static_cast<WindowStyleType>(typeId);
             NotifyWindowStyleChange(type);
             break;
         }

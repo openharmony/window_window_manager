@@ -74,7 +74,7 @@ void MultiInstanceManager::SetCurrentUserId(int32_t userId)
 
 bool MultiInstanceManager::IsMultiInstance(const std::string& bundleName)
 {
-    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
+    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
     auto iter = appInfoMap_.find(bundleName);
     if (iter == appInfoMap_.end()) {
         AppExecFwk::ApplicationInfo appInfo;
@@ -91,7 +91,7 @@ bool MultiInstanceManager::IsMultiInstance(const std::string& bundleName)
 
 uint32_t MultiInstanceManager::GetMaxInstanceCount(const std::string& bundleName)
 {
-    std::shared_lock<std::shared_mutex> lock(appInfoMutex_);
+    std::unique_lock<std::shared_mutex> lock(appInfoMutex_);
     auto iter = appInfoMap_.find(bundleName);
     if (iter == appInfoMap_.end()) {
         AppExecFwk::ApplicationInfo appInfo;

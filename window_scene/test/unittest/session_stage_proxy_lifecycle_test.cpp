@@ -35,8 +35,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-    sptr<IRemoteObject> iRemoteObjectMocker = new (std::nothrow) IRemoteObjectMocker();
-    sptr<SessionStageProxy> sessionStage_ = new SessionStageProxy(iRemoteObjectMocker);
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SessionStageProxy> sessionStage_ = sptr<SessionStageProxy>::MakeSptr(iRemoteObjectMocker);
 };
 
 void SessionStageProxyLifecycleTest::SetUpTestCase()
@@ -109,6 +109,7 @@ HWTEST_F(SessionStageProxyLifecycleTest, NotifySessionForeground, Function | Sma
     ASSERT_TRUE((sessionStage_ != nullptr));
     sessionStage_->NotifySessionForeground(reason, withAnimation);
 }
+
 /**
  * @tc.name: NotifySessionBackground
  * @tc.desc: test function : NotifySessionBackground

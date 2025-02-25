@@ -22,13 +22,18 @@
 #include <map>
 #include <utility>
 #include <atomic>
+#include "session/screen/include/screen_session.h"
 
 #include "dm_common.h"
 #include "wm_single_instance.h"
+#include "transaction/rs_interfaces.h"
+#include "fold_screen_info.h"
 
 namespace OHOS {
 
 namespace Rosen {
+
+class RSInterfaces;
 
 class SuperFoldStateManager final {
     WM_DECLARE_SINGLE_INSTANCE_BASE(SuperFoldStateManager)
@@ -45,11 +50,13 @@ public:
 
     void HandleSuperFoldStatusChange(SuperFoldStatusChangeEvents events);
 
+    sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
+
     SuperFoldStatus GetCurrentStatus();
-    
+
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 private:
-    std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::HALF_FOLDED;
+    std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
 
     struct Transition {
         SuperFoldStatus nextState;
@@ -58,6 +65,12 @@ private:
 
     using transEvent = std::pair<SuperFoldStatus, SuperFoldStatusChangeEvents>;
     std::map<transEvent, Transition> stateManagerMap_;
+
+    bool isParamsValid(std::vector<std::string>& params);
+
+    void InitSuperFoldStateManagerMap();
+
+    void InitSuperFoldCreaseRegionParams();
 
     static void DoAngleChangeFolded(SuperFoldStatusChangeEvents event);
 
@@ -71,9 +84,24 @@ private:
 
     static void DoFoldedToHalfFolded(SuperFoldStatusChangeEvents event);
 
-    static void DoExpandedToKeyboard(SuperFoldStatusChangeEvents event);
-
     void SetCurrentStatus(SuperFoldStatus curState);
+
+    void HandleDisplayNotify(SuperFoldStatusChangeEvents changeEvent);
+    void HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSession> screenSession);
+    void HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSession> screenSession);
+    void HandleKeyboardOnDisplayNotify(sptr<ScreenSession> screenSession);
+    static void HandleHalfScreenDisplayNotify(sptr<ScreenSession> screenSession);
+    void HandleKeyboardOffDisplayNotify(sptr<ScreenSession> screenSession);
+    static void HandleFullScreenDisplayNotify(sptr<ScreenSession> screenSession);
+    void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
+
+    static void BootFinishedCallback(const char *key, const char *value, void *context);
+    void InitHalfScreen();
+    void RegisterHalfScreenSwitchesObserver();
+    void UnregisterHalfScreenSwitchesObserver();
+    void OnHalfScreenSwitchesStateChanged();
+    static bool ChangeScreenState(bool toHalf);
+    static int32_t GetCurrentValidHeight(sptr<ScreenSession> screenSession);
 };
 } // Rosen
 } // OHOS

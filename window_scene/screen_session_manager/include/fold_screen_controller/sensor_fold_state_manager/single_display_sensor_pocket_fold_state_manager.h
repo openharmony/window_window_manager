@@ -47,9 +47,13 @@ public:
     void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) override {};
     sptr<IRemoteObject> AsObject() override { return nullptr; };
     std::string GetForegroundApp();
+    void RegisterCameraForegroundChanged(std::function<void()> callback);
+    bool IsCameraForeground();
 
 private:
     std::string foregroundBundleName_ {""};
+    std::function<void()> onCameraForegroundChanged_ { nullptr };
+    bool isCameraForeground_ = false;
 };
 class SingleDisplaySensorPocketFoldStateManager : public SensorFoldStateManager {
 public:
@@ -58,22 +62,25 @@ public:
 
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
-    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1) override;
     void RegisterApplicationStateObserver() override;
+    bool IsCameraMode() override;
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
     void UpdateSwitchScreenBoundaryForLargeFoldDevice(float, int);
     void SetCameraFoldStrategy(float angle);
-    void SetCameraStatusChange(float angle, int hall);
+    void SetCameraRotationStatusChange(float angle, int hall);
     sptr<ApplicationStatePocketObserver> applicationStateObserver_;
     bool isInCameraFoldStrategy_ = false;
-    bool isCameraStatus_ = false;
+    bool isCameraRotationStrategy_ = false;
     std::vector<std::string> hallSwitchPackageNameList_;
     int allowUserSensorForLargeFoldDevice = 0;
     bool TriggerTentExit(float angle, int hall);
     void TentModeHandleSensorChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy);
     void ReportTentStatusChange(ReportTentModeStatus tentStatus);
+    float currentAngle = -1.0F;
+    int currentHall = -1;
 };
 } // namespace Rosen
 } // namespace OHOS

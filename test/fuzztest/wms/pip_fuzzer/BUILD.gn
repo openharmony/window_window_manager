@@ -31,10 +31,7 @@ ohos_fuzztest("PipFuzzTest") {
     "../../../../utils/include",
 
     # for abilityContext
-    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "//third_party/node/deps/icu-small/source/common",
-    "${ability_runtime_inner_api_path}/ability_manager/include",
 
     # abilityContext end
   ]

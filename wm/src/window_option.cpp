@@ -23,7 +23,7 @@ WindowOption::WindowOption(): windowTag_(WindowTag::SYSTEM_WINDOW)
 {
 }
 
-void WindowOption::SetWindowRect(const struct Rect& rect)
+void WindowOption::SetWindowRect(const Rect& rect)
 {
     windowRect_ = rect;
 }
@@ -351,6 +351,46 @@ void WindowOption::SetWindowTopmost(bool isTopmost)
 bool WindowOption::GetWindowTopmost() const
 {
     return isTopmost_;
+}
+
+void WindowOption::SetIsSystemKeyboard(bool isSystemKeyboard)
+{
+    isSystemKeyboard_ = isSystemKeyboard;
+}
+
+bool WindowOption::IsSystemKeyboard() const
+{
+    return isSystemKeyboard_;
+}
+
+void WindowOption::SetDensity(float density)
+{
+    density_ = density;
+}
+
+float WindowOption::GetDensity() const
+{
+    return density_;
+}
+
+void WindowOption::SetIsDensityFollowHost(bool isDensityFollowHost)
+{
+    isDensityFollowHost_ = isDensityFollowHost;
+}
+
+bool WindowOption::GetIsDensityFollowHost() const
+{
+    return isDensityFollowHost_;
+}
+
+void WindowOption::SetConstrainedModal(bool isConstrainedModal)
+{
+    isConstrainedModal_ = (uiExtensionUsage_ == static_cast<uint32_t>(UIExtensionUsage::MODAL)) && isConstrainedModal;
+}
+
+bool WindowOption::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
 }
 
 } // namespace Rosen

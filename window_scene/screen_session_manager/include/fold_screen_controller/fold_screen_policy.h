@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
 #define OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_POLICY_H
 
@@ -23,13 +24,23 @@
 #include "fold_screen_info.h"
 
 namespace OHOS::Rosen {
+const uint32_t FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM = 1;
 const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
+constexpr uint32_t SECONDARY_FOLD_TO_EXPAND_TASK_NUM = 2;
+
+enum class DisplayModeChangeReason : uint32_t {
+    DEFAULT = 0,
+    RECOVER,
+    INVALID,
+};
+
 class FoldScreenPolicy : public RefBase {
 public:
     FoldScreenPolicy();
     virtual ~FoldScreenPolicy();
 
-    virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode);
+    virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     virtual void SendSensorResult(FoldStatus foldStatus);
     virtual ScreenId GetCurrentScreenId();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
@@ -38,9 +49,12 @@ public:
     virtual void UpdateForPhyScreenPropertyChange();
     virtual void ExitCoordination();
     virtual void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    virtual FoldDisplayMode GetModeMatchStatus() { return FoldDisplayMode::UNKNOWN; }
     virtual void BootAnimationFinishPowerInit() {};
     virtual void ChangeOnTentMode(FoldStatus currentState);
     virtual void ChangeOffTentMode();
+    virtual Drawing::Rect GetScreenSnapshotRect();
+    virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
     FoldStatus GetFoldStatus();
@@ -56,19 +70,23 @@ public:
     sptr<FoldCreaseRegion> currentFoldCreaseRegion_ = nullptr;
     bool lockDisplayStatus_ = false;
     bool onBootAnimation_ = false;
-    /**
+    std::vector<uint32_t> screenParams_ = {};
+    /*
      *    Avoid fold to expand process queues public interface
      */
     bool GetModeChangeRunningStatus();
-    virtual void SetdisplayModeChangeStatus(bool status){};
+    virtual void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false){};
+    virtual void SetSecondaryDisplayModeChangeStatus(bool status){};
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
-    
+    virtual std::vector<uint32_t> GetScreenParams() { return screenParams_; };
+
 protected:
-    /**
+    /*
      *    Avoid fold to expand process queues private variable
      */
     std::atomic<int> pengdingTask_{FOLD_TO_EXPAND_TASK_NUM};
+    std::atomic<int> secondaryPengdingTask_{SECONDARY_FOLD_TO_EXPAND_TASK_NUM};
     std::atomic<bool> displayModeChangeRunning_ = false;
     std::atomic<FoldDisplayMode> lastCachedisplayMode_ = FoldDisplayMode::UNKNOWN;
     std::chrono::steady_clock::time_point startTimePoint_ = std::chrono::steady_clock::now();

@@ -36,6 +36,7 @@ public:
      * @return sptr<ExtensionSession> return session if create extension session success;Otherwise, return nullptr
      */
     sptr<ExtensionSession> RequestExtensionSession(const SessionInfo& sessionInfo);
+
     /**
      * @brief active extension session
      *
@@ -43,7 +44,8 @@ public:
      * @return WSError
      */
     WSError RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession, uint32_t hostWindowId,
-        const std::function<void(WSError)>&& resultCallback);
+        std::function<void(WSError)>&& resultCallback);
+
     /**
      * @brief background extension session
      *
@@ -51,7 +53,8 @@ public:
      * @return WSError
      */
     WSError RequestExtensionSessionBackground(
-        const sptr<ExtensionSession>& extensionSession, const std::function<void(WSError)>&& resultCallback);
+        const sptr<ExtensionSession>& extensionSession, std::function<void(WSError)>&& resultCallback);
+
     /**
      * @brief destroy extension session
      *
@@ -59,7 +62,8 @@ public:
      * @return WSError
      */
     WSError RequestExtensionSessionDestruction(
-        const sptr<ExtensionSession>& extensionSession, const std::function<void(WSError)>&& resultCallback);
+        const sptr<ExtensionSession>& extensionSession, std::function<void(WSError)>&& resultCallback);
+
     /**
      * @brief destroy extension session done
      *

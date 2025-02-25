@@ -23,6 +23,10 @@
 #include "session_manager.h"
 #include "screen_cutout_controller.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "screen_session_manager/include/screen_session_manager.h"
+#include "display_manager_agent_default.h"
+#include "screen_scene_config.h"
+#include "common_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,10 +43,15 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void SetAceessTokenPermission(const std::string processName);
 };
 
 void ScreenCutoutControllerTest::SetUpTestCase()
 {
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("foundation", perms, 1);
 }
 
 void ScreenCutoutControllerTest::TearDownTestCase()
@@ -109,7 +118,7 @@ namespace {
      * @tc.desc: ScreenCutoutController convert boundary rects by rotation
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation, Function | SmallTest | Level3)
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation01, Function | SmallTest | Level3)
     {
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
         DMRect emptyRect = {0, 0, 0, 0};
@@ -118,6 +127,108 @@ namespace {
         std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
         ASSERT_TRUE(controller != nullptr);
         controller->ConvertBoundaryRectsByRotation(boundaryRects, displayId);
+    }
+
+    /**
+     * @tc.name: ConvertBoundaryRectsByRotation
+     * @tc.desc: ROTATION_0
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation02, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
+        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
+        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
+        ASSERT_TRUE(controller != nullptr);
+        EXPECT_EQ(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
+        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    }
+
+    /**
+     * @tc.name: ConvertBoundaryRectsByRotation
+     * @tc.desc: ROTATION_90
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation03, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
+        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
+        ASSERT_TRUE(controller != nullptr);
+        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
+        Rotation rotation = Rotation::ROTATION_90;
+        screenProperty.UpdateScreenRotation(rotation);
+        ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
+        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    }
+
+    /**
+     * @tc.name: ConvertBoundaryRectsByRotation
+     * @tc.desc: ROTATION_180
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation04, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
+        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
+        ASSERT_TRUE(controller != nullptr);
+        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
+        Rotation rotation = Rotation::ROTATION_180;
+        screenProperty.UpdateScreenRotation(rotation);
+        ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
+        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
+    }
+
+    /**
+     * @tc.name: ConvertBoundaryRectsByRotation
+     * @tc.desc: ROTATION_270
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, ConvertBoundaryRectsByRotation05, Function | SmallTest | Level3)
+    {
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        DMRect emptyRect = {0, 0, 0, 0};
+        DMRect emptyRect_ = {1, 2, 3, 3};
+        std::vector<DMRect> boundaryRects = {emptyRect, emptyRect_};
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
+        ASSERT_NE(ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId), nullptr);
+        ASSERT_TRUE(controller != nullptr);
+        ScreenProperty screenProperty = ScreenSessionManager::GetInstance().GetScreenProperty(screenId);
+        Rotation rotation = Rotation::ROTATION_270;
+        screenProperty.UpdateScreenRotation(rotation);
+        ASSERT_NE(screenProperty.GetScreenRotation(), Rotation::ROTATION_0);
+        controller->ConvertBoundaryRectsByRotation(boundaryRects, screenId);
+        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
     /**
@@ -234,10 +345,20 @@ namespace {
      */
     HWTEST_F(ScreenCutoutControllerTest, CalcWaterfallRects02, Function | SmallTest | Level3)
     {
-        DisplayId displayId = 1;
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
-        ASSERT_TRUE(controller != nullptr);
-        controller->CalcWaterfallRects(displayId);
+        ASSERT_NE(controller, nullptr);
+        EXPECT_FALSE(ScreenSceneConfig::IsWaterfallDisplay());
+        bool testWaterfallDisplay = ScreenSceneConfig::isWaterfallDisplay_;
+        ScreenSceneConfig::isWaterfallDisplay_ = true;
+        EXPECT_TRUE(ScreenSceneConfig::IsWaterfallDisplay());
+        controller->CalcWaterfallRects(screenId);
+        ScreenSceneConfig::isWaterfallDisplay_ = testWaterfallDisplay;
+        ScreenSessionManager::GetInstance().DestroyVirtualScreen(screenId);
     }
 
     /**
@@ -344,9 +465,31 @@ namespace {
      */
     HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation01, Function | SmallTest | Level3)
     {
-        DisplayId displayId = 0;
+        DisplayId displayId = 2000;
         sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        controller->defaultDeviceRotation_ = 0;
         ASSERT_EQ(Rotation::ROTATION_0, controller->GetCurrentDisplayRotation(displayId));
+        controller->defaultDeviceRotation_ = 1;
+        ASSERT_NE(Rotation::ROTATION_0, controller->GetCurrentDisplayRotation(displayId));
+    }
+
+    /**
+     * @tc.name: GetCurrentDisplayRotation
+     * @tc.desc: GetCurrentDisplayRotation func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenCutoutControllerTest, GetCurrentDisplayRotation02, Function | SmallTest | Level3)
+    {
+        sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+        VirtualScreenOption virtualOption;
+        virtualOption.name_ = "createVirtualOption";
+        auto screenId = ScreenSessionManager::GetInstance().CreateVirtualScreen(
+            virtualOption, displayManagerAgent->AsObject());
+        sptr<ScreenCutoutController> controller = new ScreenCutoutController();
+        ASSERT_NE(controller, nullptr);
+        auto displayInfo = ScreenSessionManager::GetInstance().GetDisplayInfoById(screenId);
+        ASSERT_NE(displayInfo, nullptr);
+        ASSERT_EQ(displayInfo->GetRotation(), controller->GetCurrentDisplayRotation(screenId));
     }
 
     /**

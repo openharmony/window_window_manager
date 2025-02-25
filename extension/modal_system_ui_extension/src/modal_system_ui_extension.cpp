@@ -30,7 +30,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int32_t INVALID_USERID = -1;
-constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
+constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 5;
 constexpr int32_t VALUE_TYPE_STRING = 9;
 constexpr uint64_t DISCONNECT_ABILITY_DELAY_TIME_MICROSECONDS = 5000000;
 } // namespace
@@ -55,7 +55,7 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
     dialogConnectionCallback_ = sptr<DialogAbilityConnection>::MakeSptr(want);
     auto result = abilityManagerClient->ConnectAbility(systemUIWant, dialogConnectionCallback_, INVALID_USERID);
     if (result != ERR_OK) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "ConnectAbility failed, result = %{public}d", result);
+        TLOGE(WmsLogTag::WMS_UIEXT, "ConnectAbility failed, result=%{public}d", result);
         return false;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "ConnectAbility success");
@@ -108,6 +108,14 @@ bool ModalSystemUiExtension::DialogAbilityConnection::SendWant(const sptr<IRemot
         TLOGE(WmsLogTag::WMS_UIEXT, "write parameters failed");
         return false;
     }
+    if (!data.WriteString16(u"uri") || !data.WriteString16(Str8ToStr16(want_.GetUri().ToString()))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write uri failed");
+        return false;
+    }
+    if (!data.WriteString16(u"flags") || !data.WriteUint32(want_.GetFlags())) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "write flags failed");
+        return false;
+    }
     int32_t ret = remoteObject->SendRequest(AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
     if (ret != ERR_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "show dialog failed");
@@ -140,7 +148,7 @@ void ModalSystemUiExtension::DialogAbilityConnection::OnAbilityConnectDone(
         }
         auto result = abilityManagerClient->DisconnectAbility(connection);
         if (result != ERR_OK) {
-            TLOGE(WmsLogTag::WMS_UIEXT, "DisconnectAbility failed, result = %{public}d", result);
+            TLOGE(WmsLogTag::WMS_UIEXT, "DisconnectAbility failed, result=%{public}d", result);
         } else {
             TLOGI(WmsLogTag::WMS_UIEXT, "DisconnectAbility success");
         }

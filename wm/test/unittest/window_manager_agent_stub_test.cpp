@@ -14,9 +14,9 @@
  */
 
 #include <gtest/gtest.h>
-#include "window_manager_agent_stub.h"
-#include "window_manager_agent.h"
 #include "marshalling_helper.h"
+#include "window_manager_agent.h"
+#include "window_manager_agent_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -31,22 +31,16 @@ public:
     sptr<WindowManagerAgentStub> stub_;
 };
 
-void WindowManagerAgentStubTest::SetUpTestCase()
-{
-}
+void WindowManagerAgentStubTest::SetUpTestCase() {}
 
-void WindowManagerAgentStubTest::TearDownTestCase()
-{
-}
+void WindowManagerAgentStubTest::TearDownTestCase() {}
 
 void WindowManagerAgentStubTest::SetUp()
 {
     stub_ = new WindowManagerAgent();
 }
 
-void WindowManagerAgentStubTest::TearDown()
-{
-}
+void WindowManagerAgentStubTest::TearDown() {}
 
 namespace {
 /**
@@ -180,14 +174,13 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest08, Function | SmallTest | L
     data.WriteUint64(0);
 
     SystemBarRegionTints tints;
-    MarshallingHelper::MarshallingVectorObj<SystemBarRegionTint>(data, tints,
-        [](Parcel& parcel, const SystemBarRegionTint& tint) {
+    MarshallingHelper::MarshallingVectorObj<SystemBarRegionTint>(
+        data, tints, [](Parcel& parcel, const SystemBarRegionTint& tint) {
             return parcel.WriteUint32(static_cast<uint32_t>(tint.type_)) && parcel.WriteBool(tint.prop_.enable_) &&
-                parcel.WriteUint32(tint.prop_.backgroundColor_) && parcel.WriteUint32(tint.prop_.contentColor_) &&
-                parcel.WriteInt32(tint.region_.posX_) && parcel.WriteInt32(tint.region_.posY_) &&
-                parcel.WriteInt32(tint.region_.width_) && parcel.WriteInt32(tint.region_.height_);
-        }
-    );
+                   parcel.WriteUint32(tint.prop_.backgroundColor_) && parcel.WriteUint32(tint.prop_.contentColor_) &&
+                   parcel.WriteInt32(tint.region_.posX_) && parcel.WriteInt32(tint.region_.posY_) &&
+                   parcel.WriteInt32(tint.region_.width_) && parcel.WriteInt32(tint.region_.height_);
+        });
 
     uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_SYSTEM_BAR_PROPS);
 
@@ -208,8 +201,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest09, Function | SmallTest | L
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
     data.WriteBool(true);
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WATER_MARK_FLAG);
+    uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WATER_MARK_FLAG);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
@@ -227,8 +219,8 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest10, Function | SmallTest | L
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
     data.WriteBool(true);
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED);
+    uint32_t code =
+        static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_GESTURE_NAVIGATION_ENABLED);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
@@ -245,9 +237,8 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest11, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(u"error.GetDescriptor");
-    
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE);
+
+    uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
 }
@@ -265,8 +256,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest12, Function | SmallTest | L
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
     data.WriteUint8(static_cast<uint8_t>(WindowModeType::WINDOW_MODE_FLOATING));
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE);
+    uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
@@ -283,9 +273,8 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest13, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
-    
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE);
+    data.WriteUint8(static_cast<uint8_t>(WindowModeType::WINDOW_MODE_FLOATING));
+    uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_MODE_TYPE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
@@ -303,14 +292,13 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest14, Function | SmallTest | L
     oneNum.visibleWindowNum = 3;
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     visibleWindowNumInfo.push_back(oneNum);
-    MarshallingHelper::MarshallingVectorObj<VisibleWindowNumInfo>(data, visibleWindowNumInfo,
-        [](Parcel& parcel, const VisibleWindowNumInfo& num) {
+    MarshallingHelper::MarshallingVectorObj<VisibleWindowNumInfo>(
+        data, visibleWindowNumInfo, [](Parcel& parcel, const VisibleWindowNumInfo& num) {
             return parcel.WriteUint32(num.displayId) && parcel.WriteUint32(num.visibleWindowNum);
-        }
-    );
+        });
 
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM);
+    uint32_t code =
+        static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_VISIBLE_WINDOW_NUM);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -328,8 +316,8 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest15, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_DRAWING_STATE);
+    uint32_t code =
+        static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_DRAWING_STATE);
     ASSERT_NE(stub_, nullptr);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -349,8 +337,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest16, Function | SmallTest | L
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
     data.WriteUint8(static_cast<uint8_t>(1));
     data.WriteBool(true);
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT);
+    uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_FLOAT);
     ASSERT_NE(stub_, nullptr);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -370,8 +357,8 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest17, Function | SmallTest | L
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
     data.WriteUint8(static_cast<uint8_t>(1));
     data.WriteBool(true);
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS);
+    uint32_t code =
+        static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_CAMERA_WINDOW_STATUS);
     ASSERT_NE(stub_, nullptr);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
@@ -389,6 +376,7 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest18, Function | SmallTest | L
     MessageOption option;
 
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
+    data.WriteUint8(static_cast<uint8_t>(1));
     uint32_t code = static_cast<uint32_t>(12);
     ASSERT_NE(stub_, nullptr);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
@@ -406,8 +394,9 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest19, Function | SmallTest | L
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(WindowManagerAgentStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE);
+    data.WriteUint8(static_cast<uint8_t>(WindowStyleType::WINDOW_STYLE_DEFAULT));
+    uint32_t code =
+        static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_WINDOW_STYLE_TYPE);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }
@@ -429,11 +418,10 @@ HWTEST_F(WindowManagerAgentStubTest, OnRemoteRequest20, Function | SmallTest | L
     data.WriteParcelable(focusChangeInfo);
     data.WriteRemoteObject(focusChangeInfo->abilityToken_);
 
-    uint32_t code = static_cast<uint32_t>(
-        IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS);
+    uint32_t code = static_cast<uint32_t>(IWindowManagerAgent::WindowManagerAgentMsg::TRANS_ID_UPDATE_FOCUS);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, static_cast<int>(ERR_INVALID_DATA));
 }
-}
-}
-}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

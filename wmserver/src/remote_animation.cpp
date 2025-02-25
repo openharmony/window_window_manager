@@ -155,10 +155,10 @@ bool RemoteAnimation::CheckTransition(sptr<WindowTransitionInfo> srcInfo, const 
 
     // check support window mode when one app starts another app
     if ((dstNode != nullptr && dstInfo != nullptr) &&
-        !WindowHelper::CheckSupportWindowMode(dstNode->GetWindowMode(), dstNode->GetModeSupportInfo(), dstInfo)) {
+        !WindowHelper::CheckSupportWindowMode(dstNode->GetWindowMode(), dstNode->GetWindowModeSupportType(), dstInfo)) {
         WLOGFE("RSWindowAnimation: the mode of dstNode isn't supported, winId: %{public}u, mode: %{public}u, "
-            "modeSupportInfo: %{public}u", dstNode->GetWindowId(), dstNode->GetWindowMode(),
-            dstNode->GetModeSupportInfo());
+            "windowModeSupportType: %{public}u", dstNode->GetWindowId(), dstNode->GetWindowMode(),
+            dstNode->GetWindowModeSupportType());
         return false;
     }
 
@@ -180,7 +180,7 @@ void RemoteAnimation::OnRemoteDie(const sptr<IRemoteObject>& remoteObject)
 static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
 {
     if (srcNode == nullptr || srcNode->leashWinSurfaceNode_ == nullptr) {
-        WLOGFD("srcNode or srcNode->leashWinSurfaceNode_ is empty");
+        TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "srcNode or srcNode->leashWinSurfaceNode_ is empty");
         return;
     }
     if (srcNode->firstFrameAvailable_) {
@@ -188,7 +188,8 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         bool snapSucc = SurfaceDraw::GetSurfaceSnapshot(srcNode->surfaceNode_, pixelMap, SNAPSHOT_TIMEOUT_MS, 1.0, 1.0);
         if (!snapSucc) {
             // need to draw starting window when get pixelmap failed
-            WLOGFE("get surfaceSnapshot failed for window:%{public}u", srcNode->GetWindowId());
+            TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "get surfaceSnapshot failed for window:%{public}u",
+                srcNode->GetWindowId());
             return;
         }
         WindowInnerManager::GetInstance().UpdateMissionSnapShot(srcNode, pixelMap);
@@ -203,10 +204,12 @@ static void GetAndDrawSnapShot(const sptr<WindowNode>& srcNode)
         srcNode->leashWinSurfaceNode_->RemoveChild(srcNode->surfaceNode_);
         srcNode->leashWinSurfaceNode_->AddChild(srcNode->closeWinSurfaceNode_, -1);
         RSTransaction::FlushImplicitTransaction();
-        WLOGFI("Draw surface snapshot in starting window for window:%{public}u", srcNode->GetWindowId());
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Draw surface snapshot in starting window for window:%{public}u",
+            srcNode->GetWindowId());
     } else if (srcNode->surfaceNode_) {
         srcNode->surfaceNode_->SetIsNotifyUIBufferAvailable(true);
-        WLOGFI("Draw startingWindow in starting window for window:%{public}u", srcNode->GetWindowId());
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Draw startingWindow in starting window for window:%{public}u",
+            srcNode->GetWindowId());
     }
 }
 

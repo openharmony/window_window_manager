@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "memory_guard.h"
 
 #include "window_manager_hilog.h"

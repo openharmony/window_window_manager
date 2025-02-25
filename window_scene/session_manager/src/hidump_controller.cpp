@@ -101,7 +101,8 @@ void HidumpController::DumpSessionParamList(std::ostringstream& oss)
         << std::endl
         << "callingPid callingUid isSystem reuse lockedState time type isSystemCalling topmost"
         << std::endl
-        << "isPrivacyMode isSystemPrivacyMode parentId flag parentPersistentId mode state modeSupportInfo animationFlag"
+        << "isPrivacyMode isSystemPrivacyMode parentId flag parentPersistentId mode "
+        << "state windowModeSupportType animationFlag"
         << std::endl
         << "isFloatingAppType isNonSystemFloating forceHide isNeedUpdateMode "
         << "meedDefaultAnimationFlag shouldHideNonSecure forceHideState"
@@ -130,7 +131,7 @@ void HidumpController::DumpSessionParam(
         << property->GetParentPersistentId() << "|"
         << static_cast<uint32_t>(property->GetWindowMode()) << "|"
         << static_cast<uint32_t>(property->GetWindowState()) << "|"
-        << property->GetModeSupportInfo() << "|"
+        << property->GetWindowModeSupportType() << "|"
         << property->GetAnimationFlag() << "|"
         << std::endl
         << property->IsFloatingWindowAppType() << "|"
@@ -224,6 +225,7 @@ void HidumpController::DumpLayoutParam(
         << std::setprecision(precision) << session->GetAspectRatio() << "|"
         << std::setprecision(precision) << session->GetFloatingScale() << "|"
         << session->IsDirtyWindow() << "|"
+        << session->IsDragAccessible() << "|"
         << property->GetDragEnabled() << "|"
         << property->GetRaiseEnabled() << "|"
         << std::endl
@@ -314,6 +316,8 @@ void HidumpController::DumpKeyboardParam(
         << std::setprecision(precision) << property->GetTextFieldHeight() << "|"
         << std::endl
         << "{" << static_cast<uint32_t>(keyboardLayoutParams.gravity_) << "|"
+        << keyboardLayoutParams.landscapeAvoidHeight_ << "|"
+        << keyboardLayoutParams.portraitAvoidHeight_ << "|"
         << "[" << LandscapeKeyboardRect.posX_ << " "
         << LandscapeKeyboardRect.posY_ << " "
         << LandscapeKeyboardRect.width_ << " "
@@ -343,7 +347,7 @@ void HidumpController::DumpSysconfigParamList(std::ostringstream& oss)
 {
     oss << "Sysconfig:"
         << std::endl
-        << "isSystemDecorEnable decorModeSupportInfo isStretchable defaultWindowMode "
+        << "isSystemDecorEnable decorWindowModeSupportType isStretchable defaultWindowMode "
         << "keyboardAnimationConfig maxFloatingWindowSize windowUIType"
         << std::endl
         << "miniWidthOfMainWindow miniHeightOfMainWindow miniWidthOfSubWindow miniHeightOfSubWindow backgroundswitch "
@@ -358,7 +362,7 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
     oss << "Sysconfig:"
         << std::endl
         << systemConfig.isSystemDecorEnable_ << "|"
-        << systemConfig.decorModeSupportInfo_ << "|"
+        << systemConfig.decorWindowModeSupportType_ << "|"
         << systemConfig.isStretchable_ << "|"
         << static_cast<uint32_t>(systemConfig.defaultWindowMode_) << "|"
         << "[" << systemConfig.animationIn_.curveType_ << " "
@@ -377,7 +381,7 @@ void HidumpController::DumpSysconfigParam(std::ostringstream& oss, sptr<SceneSes
         << systemConfig.freeMultiWindowSupport_ << "|"
         << systemConfig.supportTypeFloatWindow_ << "|"
         <<  "[" << freeMultiWindowConfig.isSystemDecorEnable_ << " "
-        << freeMultiWindowConfig.decorModeSupportInfo_ << " "
+        << freeMultiWindowConfig.decorWindowModeSupportType_ << " "
         << static_cast<uint32_t>(freeMultiWindowConfig.defaultWindowMode_) << " "
         << freeMultiWindowConfig.maxMainFloatingWindowNumber_<< "]|"
         << std::endl;

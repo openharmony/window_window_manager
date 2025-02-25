@@ -101,7 +101,7 @@ public:
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -254,7 +254,7 @@ void WindowManager::Impl::NotifyWindowDrawingContentInfoChanged(
 void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing)
 {
     TLOGD(WmsLogTag::DEFAULT,
-        "Camera float window, accessTokenId = %{private}u, isShowing = %{public}u", accessTokenId, isShowing);
+        "Camera float window, accessTokenId=%{private}u, isShowing=%{public}u", accessTokenId, isShowing);
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangeListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -267,7 +267,7 @@ void WindowManager::Impl::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, 
 
 void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
 {
-    WLOGFI("Notify water mark flag changed result, showWaterMark = %{public}d", showWaterMark);
+    WLOGFI("Notify water mark flag changed result, showWaterMark=%{public}d", showWaterMark);
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -280,7 +280,7 @@ void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
 
 void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
 {
-    WLOGFI("Notify gesture navigation enable result, enable = %{public}d", enable);
+    WLOGFI("Notify gesture navigation enable result, enable=%{public}d", enable);
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -389,7 +389,7 @@ WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConne
         TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS connection changed listener registered could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "Register enter");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "Register enter");
     {
         std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         if (pImpl_->wmsConnectionChangedListener_) {
@@ -428,7 +428,7 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
         pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
     }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+    ret = WindowAdapter::GetInstance().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
         WLOGFW("RegisterWindowManagerAgent failed!");
@@ -1023,8 +1023,8 @@ WMError WindowManager::UnregisterWindowPidVisibilityChangedListener(
 WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId,
     float density, DisplayOrientation orientation)
 {
-    TLOGD(WmsLogTag::DMS, "notify display info change, displayid = %{public}" PRIu64", density=%{public}f," \
-        "orientation = %{public}d", displayId, density, orientation);
+    TLOGD(WmsLogTag::DMS, "notify display info change, displayid=%{public}" PRIu64 ", density=%{public}f, "
+        "orientation=%{public}d", displayId, density, orientation);
     if (token == nullptr) {
         TLOGE(WmsLogTag::DMS, "notify display info change failed, token is nullptr");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -1033,9 +1033,9 @@ WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token,
     return WMError::WM_OK;
 }
 
-void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
-    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo);
+    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo, displayId);
 }
 
 void WindowManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const
@@ -1119,6 +1119,29 @@ WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     return ret;
 }
 
+WMError WindowManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos) const
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowInfoOption: %{public}u %{public}u %{public}" PRIu64" %{public}d",
+        static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
+        static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
+        windowInfoOption.displayId, windowInfoOption.windowId);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ListWindowInfo(windowInfoOption, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAllWindowLayoutInfo(displayId, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetVisibilityWindowInfo(infos);
@@ -1150,7 +1173,7 @@ WMError WindowManager::GetUIContentRemoteObj(int32_t windowId, sptr<IRemoteObjec
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetUIContentRemoteObj(windowId, uiContentRemoteObj);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "Failed to get UIContentRemoteObj. PersistentId=%{public}d; ret=%{public}u",
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get UIContentRemoteObj. PersistentId=%{public}d; ret=%{public}u",
             windowId, static_cast<uint32_t>(ret));
     }
     return ret;
@@ -1412,7 +1435,7 @@ WMError WindowManager::SkipSnapshotForAppProcess(int32_t pid, bool skip)
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SkipSnapshotForAppProcess(pid, skip);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "skip failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "skip failed");
     }
     return ret;
 }
@@ -1421,7 +1444,7 @@ WMError WindowManager::SetProcessWatermark(int32_t pid, const std::string& water
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().SetProcessWatermark(pid, watermarkName, isEnabled);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }
@@ -1437,11 +1460,11 @@ WMError WindowManager::GetWindowIdsByCoordinate(DisplayId displayId, int32_t win
     return ret;
 }
 
-WMError WindowManager::ReleaseForegroundSessionScreenLock()
+WMError WindowManager::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().ReleaseForegroundSessionScreenLock();
+    WMError ret = SingletonContainer::Get<WindowAdapter>().UpdateScreenLockStatusForApp(bundleName, isRelease);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "release screen lock failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "update screen lock status failed");
     }
     return ret;
 }
@@ -1451,7 +1474,53 @@ WMError WindowManager::GetDisplayIdByWindowId(const std::vector<uint64_t>& windo
 {
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetDisplayIdByWindowId(windowIds, windowDisplayIdMap);
     if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetGlobalDragResizeType(DragResizeType dragResizeType)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::GetGlobalDragResizeType(DragResizeType& dragResizeType)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetGlobalDragResizeType(dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetAppDragResizeType(bundleName, dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetAppDragResizeType(bundleName, dragResizeType);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
+        sourceWindowId, targetWindowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "failed");
     }
     return ret;
 }

@@ -32,12 +32,14 @@ class StartWindowOption;
 }
 namespace OHOS::AppExecFwk {
 struct AbilityInfo;
+enum class SupportWindowMode;
 }
 
 namespace OHOS::Rosen {
 class RSTransaction;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
+constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -133,6 +135,12 @@ enum class StartMethod : int32_t {
     START_CALL
 };
 
+enum class SingleHandMode : int32_t {
+    LEFT = 0,
+    RIGHT,
+    MIDDLE
+};
+
 /**
  * @brief collaborator type.
  */
@@ -196,78 +204,97 @@ enum class FocusChangeReason {
      * default focus change reason
      */
     DEFAULT = 0,
+
     /**
      * focus change for move up
      */
     MOVE_UP,
+
     /**
      * focus change for click
      */
     CLICK,
+
     /**
      * focus change for foreground
      */
     FOREGROUND,
+
     /**
      * focus change for background
      */
     BACKGROUND,
+
     /**
      * focus change for split screen.5
      */
     SPLIT_SCREEN,
+
     /**
      * focus change for full screen
      */
     FULL_SCREEN,
+
     /**
      * focus change for global search
      */
     SCB_SESSION_REQUEST,
+
     /**
      * focus change for floating scene
      */
     FLOATING_SCENE,
+
     /**
      * focus change for losing focus
      */
     SCB_SESSION_REQUEST_UNFOCUS,
+
     /**
      * focus change for client requerst.10
      */
     CLIENT_REQUEST,
+
     /**
      * focus change for wind
      */
     WIND,
+
     /**
      * focus change for app foreground
      */
     APP_FOREGROUND,
+
     /**
      * focus change for app background
      */
     APP_BACKGROUND,
+
     /**
      * focus change for recent,Multitasking
      */
     RECENT,
+
     /**
      * focus change for inner app.
      */
     SCB_START_APP,
+
     /**
      * focus for setting focuable.
      */
     FOCUSABLE,
+
     /**
      * select last focused app when requestSessionUnFocus.
      */
     LAST_FOCUSED_APP,
+
     /**
      * focus for zOrder pass through VOICE_INTERACTION.
      */
     VOICE_INTERACTION,
+
     /**
      * focus change max.
      */
@@ -289,6 +316,19 @@ struct SessionViewportConfig {
     uint64_t displayId_ = 0;
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
+};
+
+struct WindowSizeLimits {
+    uint32_t maxWindowWidth = 0;
+    uint32_t minWindowWidth = 0;
+    uint32_t maxWindowHeight = 0;
+    uint32_t minWindowHeight = 0;
+
+    bool operator==(const WindowSizeLimits& sizeLimits) const
+    {
+        return (maxWindowWidth == sizeLimits.maxWindowWidth && minWindowWidth == sizeLimits.minWindowWidth &&
+            maxWindowHeight == sizeLimits.maxWindowHeight && minWindowHeight == sizeLimits.minWindowHeight);
+    }
 };
 
 struct SessionInfo {
@@ -347,8 +387,15 @@ struct SessionInfo {
     bool isPcOrPadEnableActivation_ = false;
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
+    int32_t requestId = 0;
+    std::string specifiedFlag_ = "";
 
-    /**
+    /*
+     * App Use Control
+     */
+    bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
+
+    /*
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -357,11 +404,17 @@ struct SessionInfo {
     uint32_t parentWindowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     SessionViewportConfig config_;
 
-    /**
-     * Multi instance
+    /*
+     * Multi Instance
      */
     bool isNewAppInstance_ = false;
     std::string appInstanceKey_;
+
+    /*
+     * PC Window
+     */
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+    WindowSizeLimits windowSizeLimits;
 };
 
 enum class SessionFlag : uint32_t {
@@ -382,7 +435,9 @@ enum class SizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
+    RESIZE_WITH_ANIMATION,
     MOVE,
+    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -395,8 +450,19 @@ enum class SizeChangeReason : uint32_t {
     PIP_AUTO_START,
     PIP_RATIO_CHANGE,
     PIP_RESTORE,
+    UPDATE_DPI_SYNC,
+    DRAG_MOVE,
+    AVOID_AREA_CHANGE,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
     END,
 };
+
+inline bool IsMoveToOrDragMove(SizeChangeReason reason)
+{
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE ||
+           reason == SizeChangeReason::MOVE_WITH_ANIMATION;
+}
 
 enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE = 100,
@@ -412,6 +478,9 @@ enum class SessionEvent : uint32_t {
     EVENT_SPLIT_SECONDARY,
     EVENT_DRAG_START,
     EVENT_DRAG,
+    EVENT_MAXIMIZE_WITHOUT_ANIMATION,
+    EVENT_MAXIMIZE_WATERFALL,
+    EVENT_END
 };
 
 enum class BrokerStates: uint32_t {
@@ -510,7 +579,11 @@ struct WSRectT {
             width_ << " " << height_ << "]";
         return ss.str();
     }
+    static const WSRectT<T> EMPTY_RECT;
 };
+
+template<typename T>
+inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
@@ -590,6 +663,8 @@ struct AppWindowSceneConfig {
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
+    WindowShadowConfig focusedShadowDark_;
+    WindowShadowConfig unfocusedShadowDark_;
     KeyboardSceneAnimationConfig keyboardAnimationIn_;
     KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
@@ -618,6 +693,7 @@ struct SessionEventParam {
     int32_t pointerY_ = 0;
     int32_t sessionWidth_ = 0;
     int32_t sessionHeight_ = 0;
+    uint32_t dragResizeType = 0;
 };
 
 /**
@@ -660,6 +736,9 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_WIND_RECOVER, // Enter win+D in recover mode
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
+    SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
+    SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
+    SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 

@@ -38,6 +38,7 @@ enum class WindowPairStatus : uint32_t {
     SECONDARY_AND_DIVIDER,
     PAIRED_DONE
 };
+
 /**
  * @brief Enumerates the message of split event.
  */
@@ -101,6 +102,7 @@ public:
      * @param node trigger window node
      */
     bool StatusSupprtedWhenRecentUpdate(sptr<WindowNode>& node);
+    
     /**
      * @brief Handle changes in the state of the window pair
      *

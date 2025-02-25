@@ -101,6 +101,7 @@ HWTEST_F(WindowManagerServiceTest, OnAddSystemAbility01, Function | SmallTest | 
     wms->OnAddSystemAbility(0, str);
     ASSERT_EQ(nullptr, wms->windowCommonEvent_->subscriber_);
 }
+
 /**
  * @tc.name: WindowVisibilityChangeCallback
  * @tc.desc: WindowVisibilityChangeCallback test
@@ -115,6 +116,7 @@ HWTEST_F(WindowManagerServiceTest, WindowVisibilityChangeCallback01, Function | 
     std::chrono::milliseconds dura(time);
     std::this_thread::sleep_for(dura);
 }
+
 /**
  * @tc.name: InitWithAbilityManagerServiceAdded
  * @tc.desc: Init with ability manager service added.
@@ -127,6 +129,7 @@ HWTEST_F(WindowManagerServiceTest, InitWithAbilityManagerServiceAdded01, Functio
     wms->InitWithAbilityManagerServiceAdded();
     ASSERT_NE(nullptr, wms->wmsHandler_);
 }
+
 /**
  * @tc.name: Dump
  * @tc.desc: Dump info
@@ -150,6 +153,7 @@ HWTEST_F(WindowManagerServiceTest, Dump01, Function | SmallTest | Level2)
     close(fd);
     unlink(dumpFile.c_str());
 }
+
 /**
  * @tc.name: NotifyWindowTransition
  * @tc.desc: NotifyWindowTransition test
@@ -166,6 +170,7 @@ HWTEST_F(WindowManagerServiceTest, NotifyWindowTransition01, Function | SmallTes
         ASSERT_NE(WMError::WM_ERROR_NO_REMOTE_ANIMATION, wms->NotifyWindowTransition(fromInfo, toInfo, true));
     }
 }
+
 /**
  * @tc.name: StartingWindow
  * @tc.desc: StartingWindow test
@@ -194,7 +199,6 @@ HWTEST_F(WindowManagerServiceTest, MoveMissionsToForeground01, Function | SmallT
     ASSERT_EQ(WMError::WM_OK, rs);
 }
 
-
 /**
  * @tc.name: MoveMissionsToBackground
  * @tc.desc: MoveMissionsToBackground test
@@ -222,6 +226,7 @@ HWTEST_F(WindowManagerServiceTest, CreateWindow01, Function | SmallTest | Level2
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->CreateWindow(window, property, RS_node, id, nullptr));
     wms->DestroyWindow(id, true);
 }
+
 /**
  * @tc.name: AddWindow
  * @tc.desc: AddWindow test
@@ -232,6 +237,7 @@ HWTEST_F(WindowManagerServiceTest, AddWindow01, Function | SmallTest | Level2)
     sptr<WindowProperty> property = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->AddWindow(property));
 }
+
 /**
  * @tc.name: RegisterWindowManagerAgent
  * @tc.desc: RegisterWindowManagerAgent test
@@ -244,6 +250,7 @@ HWTEST_F(WindowManagerServiceTest, RegisterWindowManagerAgent01, Function | Smal
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->RegisterWindowManagerAgent(type, windowManagerAgent));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->UnregisterWindowManagerAgent(type, windowManagerAgent));
 }
+
 /**
  * @tc.name: SetWindowAnimationController
  * @tc.desc: SetWindowAnimationController test
@@ -256,6 +263,7 @@ HWTEST_F(WindowManagerServiceTest, SetWindowAnimationController01, Function | Sm
     controller = new RSIWindowAnimationControllerMocker;
     ASSERT_EQ(WMError::WM_OK, wms->SetWindowAnimationController(controller));
 }
+
 /**
  * @tc.name: OnWindowEvent
  * @tc.desc: OnWindowEvent test
@@ -268,6 +276,7 @@ HWTEST_F(WindowManagerServiceTest, OnWindowEvent01, Function | SmallTest | Level
     wms->OnWindowEvent(Event::REMOTE_DIED, remoteObject);
     ASSERT_EQ(INVALID_WINDOW_ID, wms->windowRoot_->GetWindowIdByObject(remoteObject));
 }
+
 /**
  * @tc.name: UpdateProperty
  * @tc.desc: UpdateProperty test
@@ -279,6 +288,7 @@ HWTEST_F(WindowManagerServiceTest, UpdateProperty01, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->UpdateProperty(windowProperty,
         PropertyChangeAction::ACTION_UPDATE_ANIMATION_FLAG, true));
 }
+
 /**
  * @tc.name: GetModeChangeHotZones
  * @tc.desc: GetModeChangeHotZones test
@@ -295,6 +305,7 @@ HWTEST_F(WindowManagerServiceTest, GetModeChangeHotZones01, Function | SmallTest
     wms->hotZonesConfig_ = config;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, wms->GetModeChangeHotZones(displayId, hotZone));
 }
+
 /**
  * @tc.name: UpdateAvoidAreaListener
  * @tc.desc: UpdateAvoidAreaListener test
@@ -311,6 +322,7 @@ HWTEST_F(WindowManagerServiceTest, UpdateAvoidAreaListener01, Function | SmallTe
         ASSERT_NE(WMError::WM_DO_NOTHING, wms->UpdateAvoidAreaListener(0, true));
     }
 }
+
 /**
  * @tc.name: BindDialogTarget
  * @tc.desc: BindDialogTarget test
@@ -326,6 +338,7 @@ HWTEST_F(WindowManagerServiceTest, BindDialogTarget01, Function | SmallTest | Le
         ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->BindDialogTarget(id, targetToken));
     }
 }
+
 /**
  * @tc.name: DispatchKeyEvent01
  * @tc.desc: Dispatch KeyEvent for app window bellow the component window.
@@ -360,6 +373,7 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent01, Function | SmallTest | Le
     wms->DispatchKeyEvent(compNode->GetWindowId(), event);
     testing::Mock::AllowLeak(token);
 }
+
 /**
  * @tc.name: DispatchKeyEvent02
  * @tc.desc: Dispatch KeyEvent for app window bellow the app window.
@@ -391,6 +405,7 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent02, Function | SmallTest | Le
     ASSERT_TRUE(windowNodes[1] == appNode2);
     wms->DispatchKeyEvent(appNode1->GetWindowId(), event);
 }
+
 /**
  * @tc.name: DispatchKeyEvent03
  * @tc.desc: Dispatch KeyEvent for app window bellow two component window.
@@ -432,6 +447,7 @@ HWTEST_F(WindowManagerServiceTest, DispatchKeyEvent03, Function | SmallTest | Le
     wms->DispatchKeyEvent(compNode2->GetWindowId(), event);
     testing::Mock::AllowLeak(token);
 }
+
 /**
  * @tc.name: SetWindowGravity
  * @tc.desc: SetWindowGravity test
@@ -446,6 +462,7 @@ HWTEST_F(WindowManagerServiceTest, SetWindowGravity01, Function | SmallTest | Le
         ASSERT_NE(WMError::WM_ERROR_NULLPTR, wms->SetWindowGravity(id, WindowGravity::WINDOW_GRAVITY_BOTTOM, 0));
     }
 }
+
 /**
  * @tc.name: GetWindowAnimationTargets01
  * @tc.desc: get window animation targets

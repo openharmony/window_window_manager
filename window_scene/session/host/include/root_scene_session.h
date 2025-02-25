@@ -30,14 +30,36 @@ public:
     using LoadContentFunc =
         std::function<void(const std::string&, napi_env, napi_value, AbilityRuntime::Context*)>;
     RootSceneSession() : SceneSession({}, nullptr) {}
+    explicit RootSceneSession(const sptr<SpecificSessionCallback>& specificCallback)
+        : SceneSession({}, specificCallback) {}
     virtual ~RootSceneSession() = default;
 
     void SetLoadContentFunc(const LoadContentFunc& loadContentFunc);
     void LoadContent(
         const std::string& contentUrl, napi_env env, napi_value storage, AbilityRuntime::Context* context);
 
+    /*
+     * Window Layout
+     */
+    void SetRootSessionRect(const WSRect& rect);
+
+    /*
+     * Window Immersive
+     */
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) override;
+    WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
+
 private:
     LoadContentFunc loadContentFunc_;
+
+    /*
+     * Window Immersive
+     */
+    void GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    void GetCutoutAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    void GetKeyboardAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidArea& avoidArea);
 };
 } // namespace OHOS::Rosen
 

@@ -39,6 +39,7 @@ public:
 private:
     enum class ListenerType : uint32_t {
         WINDOW_SIZE_CHANGE_CB,
+        WINDOW_RECT_CHANGE_CB,
         AVOID_AREA_CHANGE_CB,
         WINDOW_EVENT_CB,
         WINDOW_STAGE_EVENT_CB,
@@ -47,6 +48,8 @@ private:
     bool IsCallbackRegistered(napi_env env, std::string type, napi_value jsListenerObject);
     WmErrorCode ProcessWindowChangeRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
+    WmErrorCode ProcessWindowRectChangeRegister(const sptr<JsExtensionWindowListener>& listener,
+        const sptr<Window>& window, bool isRegister);
     WmErrorCode ProcessAvoidAreaChangeRegister(sptr<JsExtensionWindowListener> listener,
         sptr<Window> window, bool isRegister);
     WmErrorCode ProcessLifeCycleEventRegister(sptr<JsExtensionWindowListener> listener,

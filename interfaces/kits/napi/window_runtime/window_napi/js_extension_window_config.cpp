@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "js_extension_window_config.h"
 #include <string>
 #include "js_window_utils.h"
@@ -57,7 +58,7 @@ JsExtensionWindowConfig::~JsExtensionWindowConfig() = default;
 
 void JsExtensionWindowConfig::Finalizer(napi_env env, void* data, void* hint)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     std::unique_ptr<JsExtensionWindowConfig>(static_cast<JsExtensionWindowConfig *>(data));
 }
 
@@ -89,7 +90,7 @@ napi_value CreateJsExtensionWindowConfig(napi_env env,
 
 napi_value JsExtensionWindowConfig::GetWindowName(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetWindowName,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -101,7 +102,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowName(napi_env env, NapiCallbackIn
 
 napi_value JsExtensionWindowConfig::GetWindowAttribute(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetWindowAttribute,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -113,7 +114,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowAttribute(napi_env env, NapiCallb
 
 napi_value JsExtensionWindowConfig::GetWindowRect(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetWindowRect,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -143,7 +144,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowRect(napi_env env, NapiCallbackIn
 
 napi_value JsExtensionWindowConfig::GetWindowRectLeft(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetWindowRectLeft,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -155,7 +156,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowRectLeft(napi_env env, NapiCallba
 
 napi_value JsExtensionWindowConfig::GetWindowRectTop(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetWindowRectTop,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -167,7 +168,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowRectTop(napi_env env, NapiCallbac
 
 napi_value JsExtensionWindowConfig::GetWindowRectWidth(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetWindowRectWidth,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -179,7 +180,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowRectWidth(napi_env env, NapiCallb
 
 napi_value JsExtensionWindowConfig::GetWindowRectHeight(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetWindowRectHeight,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -191,7 +192,7 @@ napi_value JsExtensionWindowConfig::OnGetWindowRectHeight(napi_env env, NapiCall
 
 napi_value JsExtensionWindowConfig::GetSubWindowOptions(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetSubWindowOptions,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -221,7 +222,7 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptions(napi_env env, NapiCall
 
 napi_value JsExtensionWindowConfig::GetSubWindowOptionsTitle(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetSubWindowOptionsTitle,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -233,7 +234,7 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsTitle(napi_env env, Nap
 
 napi_value JsExtensionWindowConfig::GetSubWindowOptionsDecorEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetSubWindowOptionsDecorEnabled,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -245,7 +246,7 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsDecorEnabled(napi_env e
 
 napi_value JsExtensionWindowConfig::GetSubWindowOptionsIsModal(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetSubWindowOptionsIsModal,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -257,7 +258,7 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsIsModal(napi_env env, N
 
 napi_value JsExtensionWindowConfig::GetSubWindowOptionsIsTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetSubWindowOptionsIsTopmost,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -269,7 +270,7 @@ napi_value JsExtensionWindowConfig::OnGetSubWindowOptionsIsTopmost(napi_env env,
 
 napi_value JsExtensionWindowConfig::GetSystemWindowOptions(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetSystemWindowOptions,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -293,7 +294,7 @@ napi_value JsExtensionWindowConfig::OnGetSystemWindowOptions(napi_env env, NapiC
 
 napi_value JsExtensionWindowConfig::GetSystemWindowOptionsWindowType(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnGetSystemWindowOptionsWindowType,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -305,7 +306,7 @@ napi_value JsExtensionWindowConfig::OnGetSystemWindowOptionsWindowType(napi_env 
 
 napi_value JsExtensionWindowConfig::SetWindowName(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetWindowName,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -328,7 +329,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowName(napi_env env, NapiCallbackIn
 
 napi_value JsExtensionWindowConfig::SetWindowAttribute(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetWindowAttribute,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -351,7 +352,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowAttribute(napi_env env, NapiCallb
 
 napi_value JsExtensionWindowConfig::SetWindowRect(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetWindowRect,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -390,7 +391,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRect(napi_env env, NapiCallbackIn
 
 napi_value JsExtensionWindowConfig::SetWindowRectLeft(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetWindowRectLeft,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -413,7 +414,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectLeft(napi_env env, NapiCallba
 
 napi_value JsExtensionWindowConfig::SetWindowRectTop(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetWindowRectTop,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -436,7 +437,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectTop(napi_env env, NapiCallbac
 
 napi_value JsExtensionWindowConfig::SetWindowRectWidth(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetWindowRectWidth,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -459,7 +460,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectWidth(napi_env env, NapiCallb
 
 napi_value JsExtensionWindowConfig::SetWindowRectHeight(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetWindowRectHeight,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -482,7 +483,7 @@ napi_value JsExtensionWindowConfig::OnSetWindowRectHeight(napi_env env, NapiCall
 
 napi_value JsExtensionWindowConfig::SetSubWindowOptions(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetSubWindowOptions,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -526,7 +527,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptions(napi_env env, NapiCall
 
 napi_value JsExtensionWindowConfig::SetSubWindowOptionsTitle(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetSubWindowOptionsTitle,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -550,7 +551,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsTitle(napi_env env, Nap
 
 napi_value JsExtensionWindowConfig::SetSubWindowOptionsDecorEnabled(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetSubWindowOptionsDecorEnabled,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -573,7 +574,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsDecorEnabled(napi_env e
 
 napi_value JsExtensionWindowConfig::SetSubWindowOptionsIsModal(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetSubWindowOptionsIsModal,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -596,7 +597,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsIsModal(napi_env env, N
 
 napi_value JsExtensionWindowConfig::SetSubWindowOptionsIsTopmost(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetSubWindowOptionsIsTopmost,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -619,7 +620,7 @@ napi_value JsExtensionWindowConfig::OnSetSubWindowOptionsIsTopmost(napi_env env,
 
 napi_value JsExtensionWindowConfig::SetSystemWindowOptions(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetSystemWindowOptions,
         EXTENSION_WINDOW_CONFIG_NAME);
 }
@@ -642,7 +643,7 @@ napi_value JsExtensionWindowConfig::OnSetSystemWindowOptions(napi_env env, NapiC
 
 napi_value JsExtensionWindowConfig::SetSystemWindowOptionsWindowType(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]called");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsExtensionWindowConfig, OnSetSystemWindowOptionsWindowType,
         EXTENSION_WINDOW_CONFIG_NAME);
 }

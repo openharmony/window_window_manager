@@ -61,6 +61,7 @@ public:
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
+    virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
     /*
      * used by powermgr
      */
@@ -88,6 +89,8 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
+    virtual ScreenPowerState GetScreenPower();
+    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
 private:
     static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;
 };

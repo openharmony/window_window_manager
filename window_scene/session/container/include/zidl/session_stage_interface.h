@@ -52,7 +52,8 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateRect(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION }) = 0;
+        const SceneAnimationConfig& config = { nullptr, ROTATE_ANIMATION_DURATION },
+        const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) = 0;
     virtual void UpdateDensity() = 0;
     virtual WSError UpdateOrientation() = 0;
 
@@ -69,6 +70,10 @@ public:
     {
         return WSError::WS_OK;
     };
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError HandleBackEvent() = 0;
     virtual WSError MarkProcessed(int32_t eventId) = 0;
 
@@ -82,6 +87,7 @@ public:
      */
     virtual WSError UpdateFocus(bool isFocused) = 0;
     virtual WSError NotifyDestroy() = 0;
+    virtual WSError NotifyHighlightChange(bool isHighlight) = 0;
 
     /**
      * @brief Notify client to close the existing pip window.
@@ -120,6 +126,15 @@ public:
     virtual WSError NotifyDialogStateChange(bool isForeground) = 0;
 
     /**
+     * @brief Notify single hand transform.
+     *
+     * Notify singleHandTransform when single hand mode changed.
+     *
+     * @param singleHandTransform transform to change.
+     */
+    virtual void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) = 0;
+
+    /**
      * @brief Set pip event to client.
      *
      * Set the pip event to client. Such as close, restore, destroy events.
@@ -129,6 +144,18 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetPipActionEvent(const std::string& action, int32_t status) = 0;
+
+    /**
+     * @brief notify pip size to client.
+     *
+     * Notify the pip size to client. including width, height and scale.
+     *
+     * @param width Indicates the size width.
+     * @param height Indicates the size height.
+     * @param scale Indicates the size scale.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) = 0;
 
     /**
      * @brief Set the media control event to client.
@@ -208,6 +235,14 @@ public:
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
+
+    virtual WSError SetDragActivated(bool dragActivated) = 0;
+
+    virtual WSError SetFullScreenWaterfallMode(bool isWaterfallMode) { return WSError::WS_DO_NOTHING; }
+    virtual WSError SetSupportEnterWaterfallMode(bool isSupportEnter) { return WSError::WS_DO_NOTHING; }
+    virtual WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) = 0;
+    virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
+    virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

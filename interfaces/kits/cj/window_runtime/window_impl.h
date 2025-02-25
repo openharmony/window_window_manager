@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef WINDOW_IMPL_H
 #define WINDOW_IMPL_H
 
@@ -43,6 +44,22 @@ struct CBarProperties {
     std::string navigationBarColor;
     bool isNavigationBarLightIcon;
     std::string navigationBarContentColor;
+    bool enableStatusBarAnimation;
+    bool enableNavigationBarAnimation;
+};
+
+struct CTitleButtonRect {
+    int32_t right;
+    int32_t top;
+    uint32_t width;
+    uint32_t height;
+};
+
+struct CWindowLimits {
+    uint32_t maxWidth = INT32_MAX;
+    uint32_t maxHeight = INT32_MAX;
+    uint32_t minWidth = 1;
+    uint32_t minHeight = 1;
 };
 
 class CJWindowImpl : public OHOS::FFI::FFIData {
@@ -97,11 +114,33 @@ public:
     int32_t Opacity(double opacity);
     std::shared_ptr<Media::PixelMap> Snapshot(int32_t* errCode);
     int32_t SetWindowSystemBarEnable(char** arr, uint32_t size);
-    int32_t OnRegisterWindowCallback(const std::string& type, int64_t funcId);
+    int32_t OnRegisterWindowCallback(const std::string& type, int64_t funcId, int64_t parameter = 0);
     int32_t UnregisterWindowCallback(const std::string& type, int64_t funcId);
     int32_t SetWindowSystemBarProperties(const CBarProperties& cProperties);
     ResWindow CheckWindow();
     OHOS::FFI::RuntimeType* GetRuntimeType() override { return GetClassType(); }
+    int32_t SetSubWindowModal(bool isModal);
+    int32_t SetWindowLimits(const CWindowLimits& cWindowLimits, CWindowLimits& rePtr);
+    int32_t GetWindowLimits(CWindowLimits& rePtr);
+    bool GetImmersiveModeEnabledState(int32_t& errCode);
+    int32_t SetImmersiveModeEnabledState(bool enabled);
+    int32_t KeepKeyboardOnFocus(bool keepKeyboardFlag);
+    int32_t GetWindowDecorHeight(int32_t& height);
+    int32_t SetWindowDecorHeight(int32_t height);
+    int32_t Recover();
+    int32_t SetWindowDecorVisible(bool isVisible);
+    int32_t GetTitleButtonRect(CTitleButtonRect& rePtr);
+    int32_t SetDialogBackGestureEnabled(bool enabled);
+    int32_t DisableLandscapeMultiWindow();
+    int32_t EnableLandscapeMultiWindow();
+    int32_t SetWindowGrayScale(float grayScale);
+    uint32_t GetPreferredOrientation(int32_t& errCode);
+    int32_t GetWindowStatus(int32_t& errCode);
+    int32_t GetWindowSystemBarProperties(CJBarProperties& rePtr);
+    int32_t SpecificSystemBarEnabled(int32_t name, bool enable, bool enableAnimation);
+    int32_t Maximize(int32_t presentation);
+    int32_t CreateSubWindowWithOptions(std::string name, int64_t &windowId,
+                                       CSubWindowOptions option);
 private:
     friend class OHOS::FFI::RuntimeType;
     friend class OHOS::FFI::TypeBase;

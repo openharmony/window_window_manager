@@ -120,6 +120,12 @@ FOCUS_WINDOW:
   PID: {type: INT32, desc: app pid}
   UID: {type: INT32, desc: app uid}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
+  WINDOW_TYPE: {type: UINT32, desc: window type}
+
+WINDOW_STATUS_CHANGE:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: PowerStats, desc: Window status changed}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  WINDOW_MODE: {type: STRING, desc: window mode}
 
 APPLICATION_BLOCK_INPUT:
   __BASE: {type: FAULT, level: CRITICAL, desc: The event is not consumed}
@@ -151,7 +157,21 @@ CONTAINER_START_BEGIN:
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   TIMESTAMP: {type: INT64, desc: timestamp}
 
+EXTEND_DISPLAY_PLUG_IN_AND_OUT:
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: Records the insertion and removal events of the extended display, preserve: true}
+  PLUG_IN_AND_OUT: {type: UINT32, desc: display plug in and out}
+  DISPLAY_CONNECT_NUM: {type: INT32, desc: Number of connected displays}
+  DISPLAY_INUSED_NUM: {type: INT32, desc: Number of inUsed displays}
+  EXTENSION_DISPLAY_MODE_STATUS: {type: UINT32, desc: extension display mode status}
+  MAIN_DISPLAY_ID: {type: UINT32, desc: Current main display ID}
+
 VH_MODE:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: notify VH_MODE}
   MODE: {type: INT32, desc: VH MODE after rotation}
- 
+
+THROW_SLIP:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: Window throw slip}
+  BUNDLE_NAME: {type: STRING, desc: Bundle name}
+  START_SIDE: {type: INT32, desc: Start side of throw slip 1 B side 2 C side}
+  START_WINDOW_MODE: {type: INT32, desc: Start window mode of throw slip 0 float 1 fullscreen 2 waterfall mode}
+  THROW_MODE: {type: INT32, desc: Throw slip mode 0 move drag 1 multifingers gesture 2 button in titlebar menu}

@@ -38,7 +38,11 @@ public:
 
     virtual WMError HidePrivacyContentForHost(bool needHide) = 0;
 
+    virtual bool IsPcWindow() const = 0;
+
     virtual bool IsPcOrPadFreeMultiWindowMode() const = 0;
+
+    virtual WMError OccupyEvents(int32_t eventFlags) = 0;
 };
 } // namespace Rosen
 } // namespace OHOS

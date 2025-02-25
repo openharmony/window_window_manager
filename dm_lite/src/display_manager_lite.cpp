@@ -38,6 +38,7 @@ public:
     sptr<DisplayLite> GetDefaultDisplay();
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
+    FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
     bool IsFoldable();
 
@@ -47,6 +48,8 @@ public:
     DMError UnregisterFoldStatusListener(sptr<IFoldStatusListener> listener);
     DMError RegisterDisplayModeListener(sptr<IDisplayModeListener> listener);
     DMError UnregisterDisplayModeListener(sptr<IDisplayModeListener> listener);
+    DMError RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
+    DMError UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener);
     void OnRemoteDied();
     sptr<DisplayLite> GetDisplayById(DisplayId displayId);
     /*
@@ -84,6 +87,10 @@ private:
      */
     class DisplayManagerAgent;
     sptr<DisplayManagerAgent> displayStateAgent_;
+    void NotifyScreenMagneticStateChanged(bool isMagneticState);
+    std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners_;
+    class DisplayManagerScreenMagneticStateAgent;
+    sptr<DisplayManagerScreenMagneticStateAgent> screenMagneticStateListenerAgent_;
 };
 
 class DisplayManagerLite::Impl::DisplayManagerListener : public DisplayManagerAgentDefault {
@@ -180,6 +187,21 @@ public:
     virtual void NotifyDisplayModeChanged(FoldDisplayMode displayMode) override
     {
         pImpl_->NotifyDisplayModeChanged(displayMode);
+    }
+private:
+    sptr<Impl> pImpl_;
+};
+
+class DisplayManagerLite::Impl::DisplayManagerScreenMagneticStateAgent : public DisplayManagerAgentDefault {
+public:
+    explicit DisplayManagerScreenMagneticStateAgent(sptr<Impl> impl) : pImpl_(impl)
+    {
+    }
+    ~DisplayManagerScreenMagneticStateAgent() = default;
+
+    virtual void NotifyScreenMagneticStateChanged(bool isMagneticState) override
+    {
+        pImpl_->NotifyScreenMagneticStateChanged(isMagneticState);
     }
 private:
     sptr<Impl> pImpl_;
@@ -514,9 +536,23 @@ FoldDisplayMode DisplayManagerLite::GetFoldDisplayMode()
     return pImpl_->GetFoldDisplayMode();
 }
 
+FoldDisplayMode DisplayManagerLite::GetFoldDisplayModeForExternal()
+{
+    return pImpl_->GetFoldDisplayModeForExternal();
+}
+
 FoldDisplayMode DisplayManagerLite::Impl::GetFoldDisplayMode()
 {
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetFoldDisplayMode();
+}
+
+FoldDisplayMode DisplayManagerLite::Impl::GetFoldDisplayModeForExternal()
+{
+    FoldDisplayMode displayMode = SingletonContainer::Get<DisplayManagerAdapterLite>().GetFoldDisplayMode();
+    if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+        return FoldDisplayMode::FULL;
+    }
+    return displayMode;
 }
 
 void DisplayManagerLite::SetFoldDisplayMode(const FoldDisplayMode mode)
@@ -672,6 +708,75 @@ void DisplayManagerLite::Impl::ClearDisplayStateCallback()
     }
 }
 
+DMError DisplayManagerLite::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("IScreenMagneticStateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->RegisterScreenMagneticStateListener(listener);
+}
+
+DMError DisplayManagerLite::Impl::RegisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    DMError ret = DMError::DM_OK;
+    if (screenMagneticStateListenerAgent_ == nullptr) {
+        screenMagneticStateListenerAgent_ = new DisplayManagerScreenMagneticStateAgent(this);
+        ret = SingletonContainer::Get<DisplayManagerAdapterLite>().RegisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent_,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
+    }
+    if (ret != DMError::DM_OK) {
+        WLOGFW("RegisterScreenMagneticStateListener failed !");
+        screenMagneticStateListenerAgent_ = nullptr;
+    } else {
+        WLOGD("IScreenMagneticStateListener register success");
+        screenMagneticStateListeners_.insert(listener);
+    }
+    return ret;
+}
+
+DMError DisplayManagerLite::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    if (listener == nullptr) {
+        WLOGFE("UnregisterScreenMagneticStateListener listener is nullptr.");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return pImpl_->UnregisterScreenMagneticStateListener(listener);
+}
+
+DMError DisplayManagerLite::Impl::UnregisterScreenMagneticStateListener(sptr<IScreenMagneticStateListener> listener)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto iter = std::find(screenMagneticStateListeners_.begin(), screenMagneticStateListeners_.end(), listener);
+    if (iter == screenMagneticStateListeners_.end()) {
+        WLOGFE("could not find this listener");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    screenMagneticStateListeners_.erase(iter);
+    DMError ret = DMError::DM_OK;
+    if (screenMagneticStateListeners_.empty() && screenMagneticStateListenerAgent_ != nullptr) {
+        ret = SingletonContainer::Get<DisplayManagerAdapterLite>().UnregisterDisplayManagerAgent(
+            screenMagneticStateListenerAgent_,
+            DisplayManagerAgentType::SCREEN_MAGNETIC_STATE_CHANGED_LISTENER);
+        screenMagneticStateListenerAgent_ = nullptr;
+    }
+    return ret;
+}
+
+void DisplayManagerLite::Impl::NotifyScreenMagneticStateChanged(bool isMagneticState)
+{
+    std::set<sptr<IScreenMagneticStateListener>> screenMagneticStateListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        screenMagneticStateListeners = screenMagneticStateListeners_;
+    }
+    for (auto& listener : screenMagneticStateListeners) {
+        listener->OnScreenMagneticStateChanged(isMagneticState);
+    }
+}
+
 bool DisplayManagerLite::TryToCancelScreenOff()
 {
     WLOGFD("[UL_POWER]TryToCancelScreenOff start");
@@ -704,6 +809,11 @@ DisplayId DisplayManagerLite::GetDefaultDisplayId()
 std::vector<DisplayId> DisplayManagerLite::GetAllDisplayIds()
 {
     return SingletonContainer::Get<DisplayManagerAdapterLite>().GetAllDisplayIds();
+}
+
+VirtualScreenFlag DisplayManagerLite::GetVirtualScreenFlag(ScreenId screenId)
+{
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().GetVirtualScreenFlag(screenId);
 }
 
 } // namespace OHOS::Rosen

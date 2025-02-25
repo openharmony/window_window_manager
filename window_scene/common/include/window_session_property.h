@@ -43,6 +43,7 @@ public:
     void SetWindowName(const std::string& name);
     void SetSessionInfo(const SessionInfo& info);
     void SetRequestRect(const struct Rect& rect);
+    void SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetFocusableOnShow(bool isFocusableOnShow);
@@ -84,9 +85,10 @@ public:
     void SetMainWindowTopmost(bool isTopmost);
     bool IsMainWindowTopmost() const;
     void AddWindowFlag(WindowFlag flag);
-    void SetModeSupportInfo(uint32_t modeSupportInfo);
+    void SetWindowModeSupportType(uint32_t windowModeSupportType);
     void SetFloatingWindowAppType(bool isAppType);
     void SetTouchHotAreas(const std::vector<Rect>& rects);
+    void SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& keyboardTouchHotAreas);
     void KeepKeyboardOnFocus(bool keepKeyboardFlag);
     void SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode);
     void SetCallingSessionId(uint32_t sessionId);
@@ -100,6 +102,12 @@ public:
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
+    
+    /*
+     * Window Immersive
+     */
+    void SetAvoidAreaOption(uint32_t avoidAreaOption);
+    uint32_t GetAvoidAreaOption() const;
 
     bool GetIsNeedUpdateWindowMode() const;
     const std::string& GetWindowName() const;
@@ -107,11 +115,10 @@ public:
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
+    RectAnimationConfig GetRectAnimationConfig() const;
     WindowType GetWindowType() const;
-    bool GetFocusable() const;
-    bool GetFocusableOnShow() const;
-    bool GetTouchable() const;
     bool GetDragEnabled() const;
+    bool GetTouchable() const;
     bool GetHideNonSystemFloatingWindows() const;
     bool GetForceHide() const;
     bool GetRaiseEnabled() const;
@@ -137,13 +144,14 @@ public:
     WindowLimits GetUserWindowLimits() const;
     WindowLimits GetConfigWindowLimitsVP() const;
     float GetLastLimitsVpr() const;
-    uint32_t GetModeSupportInfo() const;
+    uint32_t GetWindowModeSupportType() const;
     std::unordered_map<WindowType, SystemBarProperty> GetSystemBarProperty() const;
     bool IsDecorEnable();
     uint32_t GetAnimationFlag() const;
     const Transform& GetTransform() const;
     bool IsFloatingWindowAppType() const;
     void GetTouchHotAreas(std::vector<Rect>& rects) const;
+    KeyboardTouchHotAreas GetKeyboardTouchHotAreas() const;
     bool GetKeepKeyboardFlag() const;
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
@@ -181,6 +189,9 @@ public:
     WindowState GetWindowState() const;
     void SetWindowState(WindowState state);
 
+    uint8_t GetBackgroundAlpha() const;
+    void SetBackgroundAlpha(uint8_t alpha);
+
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
 
@@ -194,13 +205,19 @@ public:
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
 
-    /**
+    /*
      * Sub Window
      */
     void SetSubWindowLevel(uint32_t subWindowLevel);
     uint32_t GetSubWindowLevel() const;
 
-    /**
+    /*
+     * Window Property
+     */
+    void SetWindowCornerRadius(float cornerRadius);
+    float GetWindowCornerRadius() const;
+
+    /*
      * UIExtension
      */
     void SetRealParentId(int32_t realParentId);
@@ -215,16 +232,49 @@ public:
     WindowType GetParentWindowType() const;
     void SetIsUIExtAnySubWindow(bool isUIExtAnySubWindow);
     bool GetIsUIExtAnySubWindow() const;
+    void SetConstrainedModal(bool isConstrainedModal);
+    bool IsConstrainedModal() const;
 
-    /**
-     * Multi instance
+    /*
+     * Multi Instance
      */
     void SetAppInstanceKey(const std::string& appInstanceKey);
     std::string GetAppInstanceKey() const;
 
+    /*
+     * PC Window
+     */
+    void SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void GetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) const;
+    void SetWindowDelayRaiseEnabled(bool isEnabled);
+    bool IsWindowDelayRaiseEnabled() const;
+    void SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits);
+    WindowSizeLimits GetWindowSizeLimits() const;
+
+    /*
+     * Keyboard
+     */
+    void SetIsSystemKeyboard(bool isSystemKeyboard);
+    bool IsSystemKeyboard() const;
+    void SetKeyboardViewMode(KeyboardViewMode mode);
+    KeyboardViewMode GetKeyboardViewMode() const;
+
+    /*
+     * Window focus
+     */
+    bool GetFocusable() const;
+    bool GetFocusableOnShow() const;
+    bool GetExclusivelyHighlighted() const;
+    void SetExclusivelyHighlighted(bool isExclusivelyHighlighted);
+
 private:
+    void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
+    bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
     bool MarshallingTouchHotAreas(Parcel& parcel) const;
+    bool MarshallingKeyboardTouchHotAreas(Parcel& parcel) const;
+    static void UnmarshallingTouchHotAreasInner(Parcel& parcel, std::vector<Rect>& touchHotAreas);
     static void UnmarshallingTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
+    static void UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property);
     bool WriteActionUpdateTurnScreenOn(Parcel& parcel);
     bool WriteActionUpdateKeepScreenOn(Parcel& parcel);
     bool WriteActionUpdateFocusable(Parcel& parcel);
@@ -239,6 +289,7 @@ private:
     bool WriteActionUpdateMode(Parcel& parcel);
     bool WriteActionUpdateAnimationFlag(Parcel& parcel);
     bool WriteActionUpdateTouchHotArea(Parcel& parcel);
+    bool WriteActionUpdateKeyboardTouchHotArea(Parcel& parcel);
     bool WriteActionUpdateDecorEnable(Parcel& parcel);
     bool WriteActionUpdateWindowLimits(Parcel& parcel);
     bool WriteActionUpdateDragenabled(Parcel& parcel);
@@ -248,7 +299,10 @@ private:
     bool WriteActionUpdateWindowMask(Parcel& parcel);
     bool WriteActionUpdateTopmost(Parcel& parcel);
     bool WriteActionUpdateMainWindowTopmost(Parcel& parcel);
-    bool WriteActionUpdateModeSupportInfo(Parcel& parcel);
+    bool WriteActionUpdateWindowModeSupportType(Parcel& parcel);
+    bool WriteActionUpdateAvoidAreaOption(Parcel& parcel);
+    bool WriteActionUpdateBackgroundAlpha(Parcel& parcel);
+    bool WriteActionUpdateExclusivelyHighlighted(Parcel& parcel);
     void ReadActionUpdateTurnScreenOn(Parcel& parcel);
     void ReadActionUpdateKeepScreenOn(Parcel& parcel);
     void ReadActionUpdateFocusable(Parcel& parcel);
@@ -263,6 +317,7 @@ private:
     void ReadActionUpdateMode(Parcel& parcel);
     void ReadActionUpdateAnimationFlag(Parcel& parcel);
     void ReadActionUpdateTouchHotArea(Parcel& parcel);
+    void ReadActionUpdateKeyboardTouchHotArea(Parcel& parcel);
     void ReadActionUpdateDecorEnable(Parcel& parcel);
     void ReadActionUpdateWindowLimits(Parcel& parcel);
     void ReadActionUpdateDragenabled(Parcel& parcel);
@@ -272,15 +327,19 @@ private:
     void ReadActionUpdateWindowMask(Parcel& parcel);
     void ReadActionUpdateTopmost(Parcel& parcel);
     void ReadActionUpdateMainWindowTopmost(Parcel& parcel);
-    void ReadActionUpdateModeSupportInfo(Parcel& parcel);
+    void ReadActionUpdateWindowModeSupportType(Parcel& parcel);
+    void ReadActionUpdateAvoidAreaOption(Parcel& parcel);
+    void ReadActionUpdateBackgroundAlpha(Parcel& parcel);
+    void ReadActionUpdateExclusivelyHighlighted(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
-    Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
     mutable std::mutex windowRectMutex_;
     Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
+    mutable std::mutex requestRectMutex_;
+    Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
+    mutable std::mutex rectAnimationConfigMutex_;
+    RectAnimationConfig rectAnimationConfig_ { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
-    bool focusable_ { true };
-    bool focusableOnShow_ { true };
     bool touchable_ { true };
     bool dragEnabled_ = { true };
     bool raiseEnabled_ = { true };
@@ -291,7 +350,7 @@ private:
     bool topmost_ = false;
     bool mainWindowTopmost_ = false;
     Orientation requestedOrientation_ = Orientation::UNSPECIFIED;
-    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED;
+    Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
@@ -311,7 +370,7 @@ private:
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {0, 0, {}};
     KeyboardLayoutParams keyboardLayoutParams_;
-    uint32_t modeSupportInfo_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
+    uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
@@ -324,6 +383,7 @@ private:
     bool isFloatingWindowAppType_ = false;
     mutable std::mutex touchHotAreasMutex_;
     std::vector<Rect> touchHotAreas_;  // coordinates relative to window.
+    KeyboardTouchHotAreas keyboardTouchHotAreas_;  // coordinates relative to window.
     bool hideNonSystemFloatingWindows_ = false;
     bool forceHide_ = false;
     bool keepKeyboardFlag_ = false;
@@ -339,8 +399,8 @@ private:
     bool fullScreenStart_ = false;
     std::shared_ptr<Media::PixelMap> windowMask_ = nullptr;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
-    static const std::map<uint32_t, HandlWritePropertyFunc> writeFuncMap_;
-    static const std::map<uint32_t, HandlReadPropertyFunc> readFuncMap_;
+    static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
+    static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool compatibleModeInPc_ = false;
     int32_t compatibleInPcPortraitWidth_ = 0;
     int32_t compatibleInPcPortraitHeight_ = 0;
@@ -351,13 +411,14 @@ private:
     bool isPcAppInPad_ = false;
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
+    uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
 
-    /**
+    /*
      * Sub Window
      */
-    uint32_t subWindowLevel_ = 1;
+    uint32_t subWindowLevel_ = 0;
 
-    /**
+    /*
      * UIExtension
      */
     int32_t realParentId_ = INVALID_SESSION_ID;
@@ -366,23 +427,56 @@ private:
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtAnySubWindow_ = false;
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    bool isConstrainedModal_ = false;
 
-    /**
-     * Multi instance
+    /*
+     * Multi Instance
      */
     std::string appInstanceKey_;
+
+    /*
+     * PC Window
+     */
+    mutable std::mutex supportWindowModesMutex_;
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes_;
+    bool isWindowDelayRaiseEnabled_ = false;
+    WindowSizeLimits windowSizeLimits_;
+
+    /*
+     * Keyboard
+     */
+    bool isSystemKeyboard_ = false;
+    KeyboardViewMode keyboardViewMode_ = KeyboardViewMode::NON_IMMERSIVE_MODE;
+
+    /*
+     * Window Immersive
+     */
+    uint32_t avoidAreaOption_ = 0;
+
+    /*
+     * Window Focus
+     */
+    bool focusable_ { true };
+    bool focusableOnShow_ { true };
+    bool isExclusivelyHighlighted_ { true };
+    
+    /*
+     * Window Property
+     */
+    float cornerRadius_ = 0.0f;
+    mutable std::mutex cornerRadiusMutex_;
 };
 
 struct FreeMultiWindowConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
-    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     uint32_t maxMainFloatingWindowNumber_ = 0;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteBool(isSystemDecorEnable_) ||
-            !parcel.WriteUint32(decorModeSupportInfo_)) {
+            !parcel.WriteUint32(decorWindowModeSupportType_)) {
             return false;
         }
 
@@ -400,7 +494,7 @@ struct FreeMultiWindowConfig : public Parcelable {
             return nullptr;
         }
         config->isSystemDecorEnable_ = parcel.ReadBool();
-        config->decorModeSupportInfo_ = parcel.ReadUint32();
+        config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         config->maxMainFloatingWindowNumber_ = parcel.ReadUint32();
         return config;
@@ -437,7 +531,7 @@ struct AppForceLandscapeConfig : public Parcelable {
 
 struct SystemSessionConfig : public Parcelable {
     bool isSystemDecorEnable_ = true;
-    uint32_t decorModeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    uint32_t decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     bool isStretchable_ = false;
     WindowMode defaultWindowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     KeyboardAnimationCurve animationIn_;
@@ -462,7 +556,7 @@ struct SystemSessionConfig : public Parcelable {
     virtual bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteBool(isSystemDecorEnable_) || !parcel.WriteBool(isStretchable_) ||
-            !parcel.WriteUint32(decorModeSupportInfo_)) {
+            !parcel.WriteUint32(decorWindowModeSupportType_)) {
             return false;
         }
 
@@ -508,7 +602,7 @@ struct SystemSessionConfig : public Parcelable {
         }
         config->isSystemDecorEnable_ = parcel.ReadBool();
         config->isStretchable_ = parcel.ReadBool();
-        config->decorModeSupportInfo_ = parcel.ReadUint32();
+        config->decorWindowModeSupportType_ = parcel.ReadUint32();
         config->defaultWindowMode_ = static_cast<WindowMode>(parcel.ReadUint32());
         sptr<KeyboardAnimationCurve> animationIn = parcel.ReadParcelable<KeyboardAnimationCurve>();
         if (animationIn == nullptr) {

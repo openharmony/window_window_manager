@@ -231,14 +231,26 @@ std::vector<sptr<Window>> Window::GetSubWindow(uint32_t parentId)
     }
 }
 
-void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+void Window::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts)
 {
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        WindowSceneSessionImpl::UpdateConfigurationForAll(configuration);
-        RootScene::UpdateConfigurationForAll(configuration);
-        WindowExtensionSessionImpl::UpdateConfigurationForAll(configuration);
+        WindowSceneSessionImpl::UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+        RootScene::UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+        WindowExtensionSessionImpl::UpdateConfigurationForAll(configuration, ignoreWindowContexts);
     } else {
-        WindowImpl::UpdateConfigurationForAll(configuration);
+        WindowImpl::UpdateConfigurationForAll(configuration, ignoreWindowContexts);
+    }
+}
+
+void Window::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        WindowSceneSessionImpl::UpdateConfigurationSyncForAll(configuration);
+        RootScene::UpdateConfigurationSyncForAll(configuration);
+        WindowExtensionSessionImpl::UpdateConfigurationSyncForAll(configuration);
+    } else {
+        WindowImpl::UpdateConfigurationSyncForAll(configuration);
     }
 }
 } // namespace Rosen

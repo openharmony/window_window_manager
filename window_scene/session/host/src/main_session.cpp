@@ -15,12 +15,18 @@
 
 #include "session/host/include/main_session.h"
 
+#include <ipc_skeleton.h>
+
+#include "common/include/fold_screen_state_internel.h"
+#include "common/include/session_permission.h"
+#include "window_helper.h"
 #include "session_helper.h"
 #include "session/host/include/scene_persistent_storage.h"
 
 namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MainSession" };
+constexpr int32_t MAX_LABEL_SIZE = 1024;
 } // namespace
 
 MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
@@ -31,7 +37,8 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
     }
-    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId());
+    pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
+    moveDragController_ = sptr<MoveDragController>::MakeSptr(GetPersistentId(), GetWindowType());
     if (specificCallback != nullptr &&
         specificCallback->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback->onWindowInputPidChangeCallback_);
@@ -64,7 +71,8 @@ WSError MainSession::Reconnect(const sptr<ISessionStage>& sessionStage, const sp
             WLOGFE("session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid);
+        WSError ret = LOCK_GUARD_EXPR(SCENE_GUARD,
+            session->Session::Reconnect(sessionStage, eventChannel, surfaceNode, property, token, pid, uid));
         if (ret != WSError::WS_OK) {
             return ret;
         }
@@ -87,9 +95,13 @@ WSError MainSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 {
     const auto& id = GetPersistentId();
     WLOGFI("id: %{public}d, type: %{public}d", id, GetWindowType());
-    if (CheckDialogOnForeground()) {
+    auto isModal = IsModal();
+    if (!isModal && CheckDialogOnForeground()) {
         HandlePointDownDialog();
         return WSError::WS_OK;
+    }
+    if (isModal) {
+        Session::ProcessClickModalWindowOutside(posX, posY);
     }
     PresentFocusIfPointDown();
     return SceneSession::ProcessPointDownSession(posX, posY);
@@ -153,7 +165,7 @@ bool MainSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEv
 WSError MainSession::SetTopmost(bool topmost)
 {
     TLOGI(WmsLogTag::WMS_HIERARCHY, "SetTopmost id: %{public}d, topmost: %{public}d", GetPersistentId(), topmost);
-    auto task = [weakThis = wptr(this), topmost]() {
+    PostTask([weakThis = wptr(this), topmost]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
@@ -164,12 +176,11 @@ WSError MainSession::SetTopmost(bool topmost)
             TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session topmost change, id: %{public}d, topmost: %{public}u",
                 session->GetPersistentId(), topmost);
             property->SetTopmost(topmost);
-            if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onSessionTopmostChange_) {
-                session->sessionChangeCallback_->onSessionTopmostChange_(topmost);
+            if (session->onSessionTopmostChange_) {
+                session->onSessionTopmostChange_(topmost);
             }
         }
-    };
-    PostTask(task, "SetTopmost");
+    }, "SetTopmost");
     return WSError::WS_OK;
 }
 
@@ -180,15 +191,11 @@ bool MainSession::IsTopmost() const
 
 WSError MainSession::SetMainWindowTopmost(bool isTopmost)
 {
-    auto property = GetSessionProperty();
-    if (property) {
-        property->SetMainWindowTopmost(isTopmost);
-        TLOGD(WmsLogTag::WMS_HIERARCHY,
-            "Notify session topmost change, id: %{public}d, isTopmost: %{public}u",
-            GetPersistentId(), isTopmost);
-        if (mainWindowTopmostChangeFunc_) {
-            mainWindowTopmostChangeFunc_(isTopmost);
-        }
+    GetSessionProperty()->SetMainWindowTopmost(isTopmost);
+    TLOGD(WmsLogTag::WMS_HIERARCHY, "id: %{public}d, isTopmost: %{public}u",
+        GetPersistentId(), isTopmost);
+    if (mainWindowTopmostChangeFunc_) {
+        mainWindowTopmostChangeFunc_(isTopmost);
     }
     return WSError::WS_OK;
 }
@@ -208,7 +215,7 @@ void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
 
 void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "id: %{public}d, isExitSplitOnBackground: %{public}d", persistentId_,
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "id:%{public}d, isExitSplitOnBackground:%{public}d", persistentId_,
         isExitSplitOnBackground);
     isExitSplitOnBackground_ = isExitSplitOnBackground;
 }
@@ -231,21 +238,208 @@ void MainSession::NotifyClientToUpdateInteractive(bool interactive)
     }
 }
 
-WSError MainSession::OnRestoreMainWindow()
+/*
+ * Notify when updating highlight instead after hightlight functionality enabled
+ */
+WSError MainSession::UpdateFocus(bool isFocused)
 {
-    auto task = [weakThis = wptr(this)]() {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && !IsFocused() && isFocused && pcFoldScreenController_) {
+        pcFoldScreenController_->UpdateSupportEnterWaterfallMode();
+    }
+    return Session::UpdateFocus(isFocused);
+}
+
+WSError MainSession::OnTitleAndDockHoverShowChange(bool isTitleHoverShown, bool isDockHoverShown)
+{
+    const char* const funcName = __func__;
+    PostTask([weakThis = wptr(this), isTitleHoverShown, isDockHoverShown, funcName] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", funcName);
+            return;
         }
-        if (session->sessionChangeCallback_ && session->sessionChangeCallback_->onRestoreMainWindowFunc_) {
-            session->sessionChangeCallback_->onRestoreMainWindowFunc_();
+        TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s isTitleHoverShown: %{public}d, isDockHoverShown: %{public}d",
+            funcName, isTitleHoverShown, isDockHoverShown);
+        if (session->onTitleAndDockHoverShowChangeFunc_) {
+            session->onTitleAndDockHoverShowChangeFunc_(isTitleHoverShown, isDockHoverShown);
         }
-        return WSError::WS_OK;
-    };
-    PostTask(task, "OnRestoreMainWindow");
+    }, funcName);
     return WSError::WS_OK;
 }
 
+WSError MainSession::OnRestoreMainWindow()
+{
+    PostTask([weakThis = wptr(this)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "session is null");
+            return;
+        }
+        if (session->onRestoreMainWindowFunc_) {
+            session->onRestoreMainWindowFunc_();
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
+{
+    PostTask([weakThis = wptr(this), enabled] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        if (session->onSetWindowRectAutoSaveFunc_) {
+            session->onSetWindowRectAutoSaveFunc_(enabled);
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError MainSession::NotifySupportWindowModesChange(
+    const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), supportedWindowModes = supportedWindowModes, where]() mutable {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is null", where);
+            return;
+        }
+        if (session->onSetSupportedWindowModesFunc_) {
+            session->onSetSupportedWindowModesFunc_(std::move(supportedWindowModes));
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError MainSession::NotifyMainModalTypeChange(bool isModal)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), isModal, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s main window isModal:%{public}d", where, isModal);
+        if (session->onMainModalTypeChange_) {
+            session->onMainModalTypeChange_(isModal);
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+bool MainSession::IsModal() const
+{
+    return WindowHelper::IsModalMainWindow(GetSessionProperty()->GetWindowType(),
+                                           GetSessionProperty()->GetWindowFlags());
+}
+
+bool MainSession::IsApplicationModal() const
+{
+    return IsModal();
+}
+
+void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback)
+{
+    PostTask([weakThis = wptr(this), callback = std::move(callback)] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        session->onSessionLockStateChangeCallback_ = std::move(callback);
+        if (session->onSessionLockStateChangeCallback_ && session->GetSessionLockState()) {
+            session->onSessionLockStateChangeCallback_(session->GetSessionLockState());
+        }
+    }, __func__);
+}
+
+void MainSession::NotifySessionLockStateChange(bool isLockedState)
+{
+    PostTask([weakThis = wptr(this), isLockedState] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        if (session->GetSessionLockState() == isLockedState) {
+            TLOGNW(WmsLogTag::WMS_MAIN, "isLockedState is already %{public}d", isLockedState);
+            return;
+        }
+        session->SetSessionLockState(isLockedState);
+        if (session->onSessionLockStateChangeCallback_) {
+            TLOGNI(WmsLogTag::WMS_MAIN, "onSessionLockStageChange to:%{public}d", isLockedState);
+            session->onSessionLockStateChangeCallback_(isLockedState);
+        }
+    }, __func__);
+}
+
+void MainSession::SetSessionLockState(bool isLockedState)
+{
+    isLockedState_ = isLockedState;
+}
+
+bool MainSession::GetSessionLockState() const
+{
+    return isLockedState_;
+}
+
+WSError MainSession::SetSessionLabelAndIcon(const std::string& label,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "id: %{public}d", persistentId_);
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    const bool pidCheck = (callingPid != -1) && (callingPid == GetCallingPid());
+    if (!pidCheck ||
+        !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_SET_ABILITY_INSTANCE_INFO)) {
+        TLOGE(WmsLogTag::WMS_MAIN,
+            "The caller has not permission granted or not the same processs, "
+            "callingPid_: %{public}d, callingPid: %{public}d, bundleName: %{public}s",
+            GetCallingPid(), callingPid, GetSessionInfo().bundleName_.c_str());
+        return WSError::WS_ERROR_INVALID_PERMISSION;
+    }
+    if (!systemConfig_.IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "device not support");
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (label.empty() || label.length() > MAX_LABEL_SIZE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "invalid label");
+        return WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
+    }
+    return SetSessionLabelAndIconInner(label, icon);
+}
+
+WSError MainSession::SetSessionLabelAndIconInner(const std::string& label,
+    const std::shared_ptr<Media::PixelMap>& icon)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), where, label, icon] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is nullptr", where);
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        if (session->updateSessionLabelAndIconFunc_) {
+            session->updateSessionLabelAndIconFunc_(label, icon);
+        }
+        return WSError::WS_OK;
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+void MainSession::SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), func = std::move(func), where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s session is null", where);
+            return;
+        }
+        session->updateSessionLabelAndIconFunc_ = std::move(func);
+    }, __func__);
+}
 } // namespace OHOS::Rosen

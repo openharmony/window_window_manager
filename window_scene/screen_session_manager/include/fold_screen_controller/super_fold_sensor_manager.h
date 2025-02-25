@@ -52,15 +52,16 @@ public:
  
     void HandleHallData(const SensorEvent * const event);
 
-    void HandleSuperSensorChange();
+    void HandleSuperSensorChange(SuperFoldStatusChangeEvents events);
 
-    void SetHasKeyboard(bool flag);
-    
+    float GetCurAngle();
+
+    void HandleScreenConnectChange();
+    void HandleScreenDisconnectChange();
+
 private:
     
     std::recursive_mutex mutex_;
-
-    SuperFoldStatusChangeEvents events_ = SuperFoldStatusChangeEvents::UNDEFINED;
  
     SensorUser postureUser {};
  

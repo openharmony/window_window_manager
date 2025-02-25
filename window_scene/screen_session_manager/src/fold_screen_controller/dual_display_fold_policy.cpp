@@ -64,7 +64,7 @@ DualDisplayFoldPolicy::DualDisplayFoldPolicy(std::recursive_mutex& displayInfoMu
     currentFoldCreaseRegion_ = new FoldCreaseRegion(screenIdMain, rect);
 }
 
-void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status)
+void DualDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation)
 {
     if (status) {
         pengdingTask_ = CHANGE_MODE_TASK_NUM;
@@ -106,7 +106,7 @@ ScreenId DualDisplayFoldPolicy::GetScreenIdByDisplayMode(FoldDisplayMode display
     return screenId;
 }
 
-void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
+void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
@@ -129,13 +129,16 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode)
         }
     }
     SetdisplayModeChangeStatus(true);
+    {
+        std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+        lastDisplayMode_ = displayMode;
+    }
     ReportFoldDisplayModeChange(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
     ChangeScreenDisplayModeProc(screenSession, displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         currentDisplayMode_ = displayMode;
-        lastDisplayMode_ = displayMode;
     }
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     SetdisplayModeChangeStatus(false);
@@ -321,7 +324,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn();
     TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination, isScreenOn= %{public}d", isScreenOn);
     auto taskScreenOff = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: off screenId: %{public}" PRIu64 "", offScreenId);
         screenId_ = offScreenId;
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
         ScreenSessionManager::GetInstance().SetScreenPowerForFold(ScreenPowerStatus::POWER_STATUS_OFF);
@@ -335,7 +338,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeInner(sptr<ScreenSession> scr
     AddOrRemoveDisplayNodeToTree(offScreenId, REMOVE_DISPLAY_NODE);
 
     auto taskScreenOn = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}" PRIu64 "", onScreenId);
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on screenId: %{public}" PRIu64 "", onScreenId);
         screenId_ = onScreenId;
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
@@ -358,7 +361,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
 #endif
     // on main screen
     auto taskScreenOnMain = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on main screenId");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on main screenId");
         screenId_ = SCREEN_ID_MAIN;
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
@@ -376,7 +379,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
     screenPowerTaskScheduler_->PostAsyncTask(taskScreenOnMain, "taskScreenOnMain");
     // on sub screen
     auto taskScreenOnSub = [=] {
-        TLOGI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on sub screenId");
+        TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayMode: on sub screenId");
         if (isScreenOn) {
             ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
             ScreenSessionManager::GetInstance().SetScreenPowerForFold(SCREEN_ID_SUB,

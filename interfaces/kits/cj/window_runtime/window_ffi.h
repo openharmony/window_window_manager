@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef WINDOW_FFI_H
 #define WINDOW_FFI_H
 
+#include <cstdint>
 #include "cj_ffi/cj_common_ffi.h"
 #include "singleton_container.h"
 #include "window_impl.h"
@@ -29,6 +31,7 @@ extern "C" {
     FFI_EXPORT int32_t FfiOHOSWindowSetWindowLayoutMode(uint32_t mode);
     FFI_EXPORT int32_t FfiOHOSWindowMinimizeAll(int64_t displayId);
     FFI_EXPORT RetDataI64 FfiOHOSGetLastWindow(OHOS::AbilityRuntime::Context* ctx);
+    FFI_EXPORT int32_t FfiOHOSShiftAppWindowFocus(int32_t sourceWindowId, int32_t targetWindowId);
 
     // window
     FFI_EXPORT int32_t FfiOHOSWindowHide(int64_t id);
@@ -88,6 +91,35 @@ extern "C" {
     FFI_EXPORT int32_t FfiOHOSOnKeyboardHeightChange(int64_t id, int64_t callbackId);
     FFI_EXPORT int32_t FfiOHOSOffKeyboardHeightChange(int64_t id);
     FFI_EXPORT int32_t FfiOHOSOnWindowEvent(int64_t id, int64_t callbackId);
+    FFI_EXPORT int32_t FfiOHOSOnNoInteractionDetected(int64_t id, int64_t timeout, int64_t callbackId);
+    FFI_EXPORT int32_t FfiOHOSOnCallback(int64_t id, int64_t callbackId, const char* callbackType);
+    FFI_EXPORT int32_t FfiOHOSOffCallback(int64_t id, int64_t callbackId, const char* callbackType);
+    FFI_EXPORT int32_t FfiOHOSSetSubWindowModal(int64_t id, bool isModal);
+    FFI_EXPORT int32_t FfiOHOSIsFocused(int64_t id, int32_t* errCode);
+    FFI_EXPORT int32_t FfiOHOSSetWindowLimits(int64_t id, OHOS::Rosen::CWindowLimits windloLimits,
+                                              OHOS::Rosen::CWindowLimits* retPtr);
+    FFI_EXPORT int32_t FfiOHOSGetWindowLimits(int64_t id, OHOS::Rosen::CWindowLimits* retPtr);
+    FFI_EXPORT bool FfiOHOSGetImmersiveModeEnabledState(int64_t id, int32_t* errCode);
+    FFI_EXPORT int32_t FfiOHOSSetImmersiveModeEnabledState(int64_t id, bool enabled);
+    FFI_EXPORT int32_t FfiOHOSKeepKeyboardOnFocus(int64_t id, bool keepKeyboardFlag);
+    FFI_EXPORT int32_t FfiOHOSGetWindowDecorHeight(int64_t id, int32_t* height);
+    FFI_EXPORT int32_t FfiOHOSSetWindowDecorHeight(int64_t id, int32_t height);
+    FFI_EXPORT int32_t FfiOHOSRecover(int64_t id);
+    FFI_EXPORT int32_t FfiOHOSSetWindowDecorVisible(int64_t id, bool isVisible);
+    FFI_EXPORT int32_t FfiOHOSGetTitleButtonRect(int64_t id, OHOS::Rosen::CTitleButtonRect* retPtr);
+    FFI_EXPORT int32_t FfiOHOSSetDialogBackGestureEnabled(int64_t id, bool enabled);
+    FFI_EXPORT int32_t FfiOHOSDisableLandscapeMultiWindow(int64_t id);
+    FFI_EXPORT int32_t FfiOHOSEnableLandscapeMultiWindow(int64_t id);
+    FFI_EXPORT int32_t FfiOHOSSetWindowGrayScale(int64_t id, float grayScale);
+    FFI_EXPORT int32_t FfiOHOSSpecificSystemBarEnabled(int64_t id, int32_t name,
+                                                       bool enable,
+                                                       bool enableAnimation);
+    FFI_EXPORT int32_t FfiOHOSGetWindowSystemBarProperties(int64_t id, CJBarProperties* systemBarProperty);
+    FFI_EXPORT uint32_t FfiOHOSGetPreferredOrientation(int64_t id, int32_t* errCode);
+    FFI_EXPORT int32_t FfiOHOSGetWindowStatus(int64_t id, int32_t* errCode);
+    FFI_EXPORT int32_t FfiOHOSMaximize(int64_t id, int32_t presentation);
+    FFI_EXPORT RetDataI64 FfiOHOSCreateSubWindowWithOptions(int64_t id, char* name, CSubWindowOptions option);
+
 
     // WindowStage
     FFI_EXPORT RetDataI64 FfiOHOSBindWindowStage(int64_t windowStageImplPtr);
@@ -98,6 +130,11 @@ extern "C" {
     FFI_EXPORT int32_t FfiOHOSLoadContentByName(int64_t id, char* name);
     FFI_EXPORT int32_t FfiOHOSDisableWindowDecor(int64_t id);
     FFI_EXPORT int32_t FfiOHOSSetShowOnLockScreen(int64_t id, bool showOnLockScreen);
+    FFI_EXPORT int32_t FfiOHOSSetDefaultDensityEnabled(int64_t id, bool enabled);
+    FFI_EXPORT int32_t FfiOHOSStageOn(int64_t id, int64_t callbackId);
+    FFI_EXPORT int32_t FfiOHOSStageOff(int64_t id, int64_t callbackId);
+    FFI_EXPORT RetDataI64 FfiOHOSCreateSubWindowWithOptionsStage(int64_t id, const char* name,
+        const char* title, bool decorEnabled, bool isModal);
 }
 
 #endif

@@ -30,9 +30,9 @@ WM_DECLARE_SINGLE_INSTANCE_BASE(MultiScreenManager);
 public:
     DMError VirtualScreenUniqueSwitch(sptr<ScreenSession> screenSession, const std::vector<ScreenId>& screenIds);
 
-    DMError UniqueSwitch(const std::vector<ScreenId>& screenIds);
+    DMError UniqueSwitch(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds);
 
-    DMError MirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds,
+    DMError MirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds, DMRect mainScreenRegion,
         ScreenId& screenGroupId);
 
     void MultiScreenModeChange(sptr<ScreenSession> mainSession, sptr<ScreenSession> secondarySession,
@@ -47,6 +47,11 @@ public:
     void InternalScreenOffChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
 
     void ExternalScreenDisconnectChange(sptr<ScreenSession> internalSession, sptr<ScreenSession> externalSession);
+
+    bool AreScreensTouching(sptr<ScreenSession> mainScreenSession, sptr<ScreenSession> secondScreenSession,
+        MultiScreenPositionOptions mainScreenOptions, MultiScreenPositionOptions secondScreenOption);
+
+    void MultiScreenReportDataToRss(std::string multiScreenType, std::string status);
 private:
     MultiScreenManager();
     ~MultiScreenManager();
@@ -55,9 +60,9 @@ private:
         std::vector<ScreenId>& physicalScreenIds, std::vector<ScreenId>& virtualScreenIds);
 
     DMError VirtualScreenMirrorSwitch(const ScreenId mainScreenId, const std::vector<ScreenId>& screenIds,
-        ScreenId& screenGroupId);
+        DMRect mainScreenRegion, ScreenId& screenGroupId);
 
-    DMError PhysicalScreenMirrorSwitch(const std::vector<ScreenId>& screenIds);
+    DMError PhysicalScreenMirrorSwitch(const std::vector<ScreenId>& screenIds, DMRect mainScreenRegion);
 
     DMError PhysicalScreenUniqueSwitch(const std::vector<ScreenId>& screenIds);
 

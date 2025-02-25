@@ -71,9 +71,7 @@ void WindowMoveDragTest::TearDownTestCase()
 void WindowMoveDragTest::SetUp()
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(0);
-    if (display == nullptr) {
-        return;
-    }
+    ASSERT_NE(display, nullptr);
     WLOGI("GetDefaultDisplay: id %{public}llu, w %{public}d, h %{public}d, fps %{public}u\n",
         (unsigned long long)display->GetId(), display->GetWidth(), display->GetHeight(), display->GetRefreshRate());
     Rect displayRect = {0, 0, display->GetWidth(), display->GetHeight()};
@@ -148,9 +146,7 @@ namespace {
  */
 HWTEST_F(WindowMoveDragTest, DragWindow01, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -169,9 +165,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow01, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow02, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -190,9 +184,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow02, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow03, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -212,9 +204,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow03, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow04, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -234,9 +224,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow04, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow05, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -255,9 +243,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow05, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow06, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -277,9 +263,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow06, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow07, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -297,9 +281,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow07, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -318,9 +300,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow08, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();
@@ -339,9 +319,7 @@ HWTEST_F(WindowMoveDragTest, DragWindow09, Function | MediumTest | Level3)
  */
 HWTEST_F(WindowMoveDragTest, DragWindow10, Function | MediumTest | Level3)
 {
-    if (window_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(window_, nullptr);
     ASSERT_EQ(WMError::WM_OK, window_->Show());
     usleep(WAIT_SYANC_MS);
     startPointRect_ = window_->GetRect();

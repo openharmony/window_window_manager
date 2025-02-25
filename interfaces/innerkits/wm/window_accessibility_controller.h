@@ -36,6 +36,7 @@ public:
      * @param scale Parameter of zooming.
      */
     void SetAnchorAndScale(int32_t x, int32_t y, float scale);
+
     /**
      * @brief Set anchor offset, only take effect for the main display.
      *
@@ -43,6 +44,7 @@ public:
      * @param deltaY Y coordinate offset of anchor.
      */
     void SetAnchorOffset(int32_t deltaX, int32_t deltaY);
+
     /**
      * @brief Turn off the func of window zoom.
      */

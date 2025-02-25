@@ -103,12 +103,17 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
             uint32_t windowId = data.ReadUint32();
             uint32_t avoidAreaTypeId = 0;
             if (!data.ReadUint32(avoidAreaTypeId) ||
-                avoidAreaTypeId < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
-                avoidAreaTypeId > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
+                avoidAreaTypeId >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
                 return ERR_INVALID_DATA;
             }
             auto avoidAreaType = static_cast<AvoidAreaType>(avoidAreaTypeId);
-            AvoidArea avoidArea = GetAvoidAreaByType(windowId, avoidAreaType);
+            Rect rect = {};
+            if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+                !data.ReadUint32(rect.width_) || !data.ReadUint32(rect.height_)) {
+                TLOGE(WmsLogTag::WMS_IMMS, "read rect error");
+                return ERR_INVALID_DATA;
+            }
+            AvoidArea avoidArea = GetAvoidAreaByType(windowId, avoidAreaType, rect);
             reply.WriteParcelable(&avoidArea);
             break;
         }
@@ -371,7 +376,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_BIND_DIALOG_TARGET: {
             uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
-                TLOGE(WmsLogTag::DEFAULT, "Failed to readInt32 windowId");
+                TLOGE(WmsLogTag::DEFAULT, "Failed to read windowId");
                 return ERR_INVALID_DATA;
             }
             sptr<IRemoteObject> targetToken = data.ReadRemoteObject();
@@ -422,7 +427,7 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         case WindowManagerMessage::TRANS_ID_GET_SNAPSHOT: {
             uint32_t windowId = 0;
             if (!data.ReadUint32(windowId)) {
-                TLOGE(WmsLogTag::DEFAULT, "read windowId error");
+                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read windowId error");
                 return ERR_INVALID_DATA;
             }
             std::shared_ptr<Media::PixelMap> pixelMap = GetSnapshot(windowId);
@@ -513,7 +518,12 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
         }
         case WindowManagerMessage::TRANS_ID_GET_FOCUS_WINDOW_INFO: {
             FocusChangeInfo focusInfo;
-            GetFocusWindowInfo(focusInfo);
+            uint64_t displayId = 0;
+            if (!data.ReadUint64(displayId)) {
+                TLOGE(WmsLogTag::WMS_FOCUS, "Failed to read displayId");
+                return ERR_INVALID_DATA;
+            }
+            GetFocusWindowInfo(focusInfo, displayId);
             reply.WriteParcelable(&focusInfo);
             break;
         }

@@ -47,6 +47,7 @@ public:
     void SaveSnapshot(const std::shared_ptr<Media::PixelMap>& pixelMap,
         const std::function<void()> resetSnapshotCallback = [](){});
     bool IsSavingSnapshot();
+    void ResetSnapshotCache();
     void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId);
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
@@ -68,7 +69,7 @@ private:
     std::atomic<bool> isSavingSnapshot_ { false };
 
     static std::shared_ptr<WSFFRTHelper> snapshotFfrtHelper_;
-    std::mutex savingSnapshotMutex_;
+    mutable std::mutex savingSnapshotMutex_;
 };
 } // namespace OHOS::Rosen
 

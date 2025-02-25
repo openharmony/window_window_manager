@@ -28,13 +28,15 @@ using ScreenId = uint64_t;
 namespace {
 constexpr DisplayId DISPLAY_ID_INVALID = -1ULL;
 constexpr ScreenId SCREEN_ID_INVALID = -1ULL;
+constexpr ScreenId SCREEN_ID_FAKE = 999;
+constexpr DisplayId DISPLAY_ID_FAKE = 999;
 constexpr ScreenId ERROR_ID_NOT_SYSTEM_APP = -202ULL;
 constexpr int DOT_PER_INCH = 160;
 const static std::string DEFAULT_SCREEN_NAME = "buildIn";
 constexpr int DOT_PER_INCH_MAXIMUM_VALUE = 1000;
 constexpr int DOT_PER_INCH_MINIMUM_VALUE = 80;
 constexpr uint32_t BASELINE_DENSITY = 160;
-constexpr float INCH_TO_MM = 25.4f;
+constexpr uint32_t HALF_SCREEN_PARAM = 2;
 }
 
 /**
@@ -87,6 +89,11 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_AOD_SLIDING = 40,
     STATE_CHANGE_REASON_PEN = 41,
     STATE_CHANGE_REASON_SHUT_DOWN = 42,
+    STATE_CHANGE_REASON_SCREEN_CONNECT = 43,
+    STATE_CHANGE_REASON_HIBERNATE = 45,
+    STATE_CHANGE_REASON_EX_SCREEN_INIT = 46,
+    STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT = 47,
+    STATE_CHANGE_REASON_ROLLBACK_HIBERNATE = 48,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -101,6 +108,8 @@ enum class ScreenPowerState : uint32_t {
     POWER_OFF,
     POWER_BUTT,
     INVALID_STATE,
+    POWER_DOZE,
+    POWER_DOZE_SUSPEND,
 };
 
 enum class ScreenPropertyChangeType : uint32_t {
@@ -111,6 +120,29 @@ enum class ScreenPropertyChangeType : uint32_t {
     ROTATION_END,
     /* Only update screen rotation property info to DMS. */
     ROTATION_UPDATE_PROPERTY_ONLY,
+    /* Only update screen rotation property info not notify. */
+    ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY,
+    /* Undefined. */
+    UNDEFINED,
+};
+
+/**
+ * @brief Enumerates screen shape.
+ */
+enum class ScreenShape : uint32_t {
+    RECTANGLE = 0,
+    ROUND = 1,
+};
+
+/**
+ * @brief displayed soure mode
+ */
+enum class DisplaySourceMode : uint32_t {
+    NONE = 0,
+    MAIN = 1,
+    MIRROR = 2,
+    EXTEND = 3,
+    ALONE = 4,
 };
 
 /**
@@ -135,6 +167,7 @@ enum class DisplayEvent : uint32_t {
     SCREEN_LOCK_SUSPEND,
     SCREEN_LOCK_OFF,
     SCREEN_LOCK_FINGERPRINT,
+    SCREEN_LOCK_DOZE_FINISH,
 };
 
 /**
@@ -208,8 +241,8 @@ enum class DisplayPowerEvent : uint32_t {
     DISPLAY_ON,
     DISPLAY_OFF,
     DESKTOP_READY,
-    DOZE,
-    DOZE_SUSPEND,
+    DISPLAY_DOZE,
+    DISPLAY_DOZE_SUSPEND,
     DISPLAY_OFF_CANCELED,
 };
 
@@ -219,6 +252,12 @@ enum class DisplayPowerEvent : uint32_t {
 enum class EventStatus : uint32_t {
     BEGIN,
     END,
+};
+
+enum class VirtualScreenFlag : uint32_t {
+    DEFAULT = 0,
+    CAST = 1,
+    MAX = 2,
 };
 
 class IDisplayPowerEventListener : public RefBase {
@@ -311,6 +350,7 @@ enum class DisplayChangeEvent : uint32_t {
     UPDATE_ORIENTATION_FROM_WINDOW,
     UPDATE_ROTATION_FROM_WINDOW,
     UPDATE_REFRESHRATE,
+    SUPER_FOLD_RESOLUTION_CHANGED,
     UNKNOWN,
 };
 
@@ -331,6 +371,7 @@ enum class DisplayStateChangeType : uint32_t {
     DISPLAY_COMPRESS,
     UPDATE_SCALE,
     UNKNOWN,
+    RESOLUTION_CHANGE,
 };
 
 /**
@@ -352,6 +393,12 @@ enum class FoldStatus: uint32_t {
     EXPAND = 1,
     FOLDED = 2,
     HALF_FOLD = 3,
+    FOLD_STATE_EXPAND_WITH_SECOND_EXPAND = 11,
+    FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED = 21,
+    FOLD_STATE_FOLDED_WITH_SECOND_EXPAND = 12,
+    FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED = 22,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND = 13,
+    FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED = 23,
 };
 
 /**
@@ -379,6 +426,15 @@ enum class SuperFoldStatus : uint32_t {
 };
 
 /**
+ * @brief Enumerates the extend screen connect status.
+ */
+enum class ExtendScreenConnectStatus: uint32_t {
+    UNKNOWN = 0,
+    CONNECT,
+    DISCONNECT,
+};
+
+/**
  * @brief Enumerates the fold display mode.
  */
 enum class FoldDisplayMode: uint32_t {
@@ -387,6 +443,7 @@ enum class FoldDisplayMode: uint32_t {
     MAIN = 2,
     SUB = 3,
     COORDINATION = 4,
+    GLOBAL_FULL = 5,
 };
 
 enum class DisplayType : uint32_t {
@@ -405,6 +462,17 @@ enum class ScreenCombination : uint32_t {
 enum class MultiScreenMode : uint32_t {
     SCREEN_MIRROR = 0,
     SCREEN_EXTEND = 1,
+};
+
+/**
+ * @brief Enumerates the virtual screen type.
+ */
+enum class VirtualScreenType: uint32_t {
+    UNKNOWN = 0,
+    SCREEN_CASTING,
+    SCREEN_RECORDING,
+    SUPER_DESKTOP,
+    HICAR,
 };
 
 struct Point {
@@ -433,6 +501,12 @@ struct ExpandOption {
     uint32_t startY_;
 };
 
+struct MultiScreenRecoverOption {
+    ScreenId screenId_;
+    uint32_t first_;
+    uint32_t second_;
+};
+
 struct MultiScreenPositionOptions {
     ScreenId screenId_;
     uint32_t startX_;
@@ -454,6 +528,16 @@ struct DisplayPhysicalResolution {
 struct ScrollableParam {
     std::string velocityScale_;
     std::string friction_;
+};
+
+/**
+ * @brief screen direction info
+ */
+struct ScreenDirectionInfo {
+    int32_t notifyRotation_;
+    int32_t screenRotation_;
+    int32_t rotation_;
+    int32_t phyRotation_;
 };
 
 /**

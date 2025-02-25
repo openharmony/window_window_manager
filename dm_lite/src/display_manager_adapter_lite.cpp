@@ -238,6 +238,16 @@ std::vector<DisplayId> DisplayManagerAdapterLite::GetAllDisplayIds()
     return displayManagerServiceProxy_->GetAllDisplayIds();
 }
 
+VirtualScreenFlag DisplayManagerAdapterLite::GetVirtualScreenFlag(ScreenId screenId)
+{
+    INIT_PROXY_CHECK_RETURN(VirtualScreenFlag::DEFAULT);
+    if (screenId == SCREEN_ID_INVALID) {
+        WLOGFE("screenId id is invalid");
+        return VirtualScreenFlag::DEFAULT;
+    }
+    return displayManagerServiceProxy_->GetVirtualScreenFlag(screenId);
+}
+
 bool ScreenManagerAdapterLite::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state,
     PowerStateChangeReason reason)
 {
@@ -258,6 +268,20 @@ ScreenPowerState ScreenManagerAdapterLite::GetScreenPower(ScreenId dmsScreenId)
     INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
 
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
+}
+
+ScreenPowerState ScreenManagerAdapterLite::GetScreenPower()
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+
+    return displayManagerServiceProxy_->GetScreenPower();
+}
+
+DMError ScreenManagerAdapterLite::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->GetAllScreenInfos(screenInfos);
 }
 
 DMSDeathRecipientLite::DMSDeathRecipientLite(BaseAdapterLite& adapter) : adapter_(adapter)
@@ -289,7 +313,7 @@ void DMSDeathRecipientLite::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
 
 BaseAdapterLite::~BaseAdapterLite()
 {
-    WLOGFI("BaseAdapterLite destroy");
+    WLOGFI("destroy");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     Clear();
     displayManagerServiceProxy_ = nullptr;
@@ -297,7 +321,7 @@ BaseAdapterLite::~BaseAdapterLite()
 
 void BaseAdapterLite::Clear()
 {
-    WLOGFI("BaseAdapterLite Clear");
+    WLOGFI("Clear");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if ((displayManagerServiceProxy_ != nullptr) && (displayManagerServiceProxy_->AsObject() != nullptr)) {
         displayManagerServiceProxy_->AsObject()->RemoveDeathRecipient(dmsDeath_);

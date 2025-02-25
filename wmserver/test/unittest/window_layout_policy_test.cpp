@@ -40,7 +40,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 
-struct WindowInfo {
+struct WindowTestInfo {
     Rect winRect_;
     WindowType winType_;
     WindowMode winMode_;
@@ -55,10 +55,10 @@ public:
     static void TearDownTestCase();
     virtual void SetUp() override;
     virtual void TearDown() override;
-    sptr<WindowNode> CreateWindowNode(const WindowInfo& windowInfo);
+    sptr<WindowNode> CreateWindowNode(const WindowTestInfo& windowTestInfo);
     sptr<DisplayInfo> CreateDisplayInfo(const Rect& displayRect);
 
-    static WindowInfo windowInfo_;
+    static WindowTestInfo windowInfo_;
     static sptr<WindowNodeContainer> container_;
     static DisplayGroupInfo& displayGroupInfo_;
     static sptr<DisplayInfo> defaultDisplayInfo_;
@@ -73,7 +73,7 @@ sptr<DisplayGroupController> WindowLayoutPolicyTest::displayGroupController_ = n
 sptr<WindowLayoutPolicyCascade> WindowLayoutPolicyTest::layoutPolicy_ = nullptr;
 sptr<WindowLayoutPolicyTile> WindowLayoutPolicyTest::layoutPolicyTile_ = nullptr;
 sptr<DisplayInfo> WindowLayoutPolicyTest::defaultDisplayInfo_ = nullptr;
-WindowInfo WindowLayoutPolicyTest::windowInfo_ = {
+WindowTestInfo WindowLayoutPolicyTest::windowInfo_ = {
     .winRect_ = { 0, 0, 0, 0 },
     .winType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,
     .winMode_ = WindowMode::WINDOW_MODE_FLOATING,
@@ -126,16 +126,16 @@ void WindowLayoutPolicyTest::TearDown()
     displayGroupInfo_.displayInfosMap_.clear();
 }
 
-sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowInfo& windowInfo)
+sptr<WindowNode> WindowLayoutPolicyTest::CreateWindowNode(const WindowTestInfo& windowTestInfo)
 {
     sptr<WindowProperty> property = new WindowProperty();
-    property->SetWindowType(windowInfo.winType_);
-    property->SetWindowMode(windowInfo.winMode_);
-    property->SetWindowRect(windowInfo.winRect_);
-    property->SetOriginRect(windowInfo.winRect_);
-    property->SetDecorEnable(windowInfo.decorEnable_);
-    property->SetWindowSizeChangeReason(windowInfo.reason_);
-    property->SetDragType(windowInfo.dragType_);
+    property->SetWindowType(windowTestInfo.winType_);
+    property->SetWindowMode(windowTestInfo.winMode_);
+    property->SetWindowRect(windowTestInfo.winRect_);
+    property->SetOriginRect(windowTestInfo.winRect_);
+    property->SetDecorEnable(windowTestInfo.decorEnable_);
+    property->SetWindowSizeChangeReason(windowTestInfo.reason_);
+    property->SetDragType(windowTestInfo.dragType_);
     property->SetDisplayId(0);
     property->SetWindowId(0);
     sptr<WindowNode> node = new WindowNode(property, nullptr, nullptr);
@@ -1372,6 +1372,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetDividerRect, Function | SmallTest | Level2)
     Rect rect{0, 0, 0, 0};
     ASSERT_NE(result, rect);
 }
+
 /**
  * @tc.name: AdjustFixedOrientationRSSurfaceNode
  * @tc.desc: test AdjustFixedOrientationRSSurfaceNode
@@ -1438,6 +1439,7 @@ HWTEST_F(WindowLayoutPolicyTest, GetStoragedAspectRatio, Function | SmallTest | 
     auto result = PersistentStorage::HasKey(keyName, PersistentStorageType::ASPECT_RATIO);
     ASSERT_EQ(false, result);
 }
+
 /**
  * @tc.name: FixWindowRectWithinDisplay
  * @tc.desc: test FixWindowRectWithinDisplay
@@ -1451,6 +1453,7 @@ HWTEST_F(WindowLayoutPolicyTest, FixWindowRectWithinDisplay, Function | SmallTes
     auto displayInfo = display->GetDisplayInfo();
     EXPECT_EQ(displayInfo->GetWaterfallDisplayCompressionStatus(), false);
 }
+
 /**
  * @tc.name: IsNeedAnimationSync
  * @tc.desc: test IsNeedAnimationSync

@@ -199,7 +199,7 @@ void PictureInPictureManager::DoLocateSource()
 
 void PictureInPictureManager::DoClose(bool destroyWindow, bool byPriority)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "in");
+    TLOGI(WmsLogTag::WMS_PIP, "destroyWindow:%{public}d, byPriority:%{public}d", destroyWindow, byPriority);
     if (!HasActiveController()) {
         return;
     }
@@ -233,8 +233,8 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
     auto func = PIP_ACTION_MAP.find(actionName);
     if (func == PIP_ACTION_MAP.end()) {
         TLOGI(WmsLogTag::WMS_PIP, "through pass");
-        if (HasActiveController()) {
-            activeController_->DoActionEvent(actionName, status);
+        if (auto controller = GetActiveController()) {
+            controller->DoActionEvent(actionName, status);
         }
         return;
     }
@@ -244,29 +244,33 @@ void PictureInPictureManager::DoActionEvent(const std::string& actionName, int32
 void PictureInPictureManager::DoControlEvent(PiPControlType controlType, PiPControlStatus status)
 {
     TLOGI(WmsLogTag::WMS_PIP, "controlType:%{public}u, enabled:%{public}d", controlType, status);
-    if (!HasActiveController()) {
-        return;
+    if (auto controller = GetActiveController()) {
+        controller->DoControlEvent(controlType, status);
     }
-    activeController_->DoControlEvent(controlType, status);
 }
 
 void PictureInPictureManager::AutoStartPipWindow()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
     if (autoStartController_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "autoStartController_ is null");
+        return;
+    }
+    auto autoStartController = autoStartController_.promote();
+    if (autoStartController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "autoStartController is null");
         return;
     }
-    if (autoStartController_->GetPiPNavigationId().empty() || autoStartController_->IsTypeNodeEnabled()) {
+    if (autoStartController->GetPiPNavigationId().empty() || autoStartController->IsTypeNodeEnabled()) {
         TLOGI(WmsLogTag::WMS_PIP, "No use navigation for auto start");
-        autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
+        autoStartController->StartPictureInPicture(StartPipType::AUTO_START);
         return;
     }
     sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-        autoStartController_->GetMainWindowId());
+        autoStartController->GetMainWindowId());
     if (mainWindow) {
         auto navController = NavigationController::GetNavigationController(mainWindow->GetUIContent(),
-            autoStartController_->GetPiPNavigationId());
+            autoStartController->GetPiPNavigationId());
         if (!navController) {
             TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
             return;
@@ -278,12 +282,30 @@ void PictureInPictureManager::AutoStartPipWindow()
                 TLOGE(WmsLogTag::WMS_PIP, "GetNavController info error, %{public}d not registered", handleId);
                 return;
             }
-            auto pipController = autoStartControllerMap_[handleId];
+            auto wptrPipController = autoStartControllerMap_[handleId];
+            if (wptrPipController == nullptr) {
+                TLOGE(WmsLogTag::WMS_PIP, "wptrPipController is nullptr");
+                return;
+            }
+            auto pipController = wptrPipController.promote();
+            if (!pipController) {
+                TLOGE(WmsLogTag::WMS_PIP, "pipController is nullptr");
+                return;
+            }
             pipController->StartPictureInPicture(StartPipType::AUTO_START);
         } else {
             TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
         }
     }
 }
+
+void PictureInPictureManager::PipSizeChange(uint32_t width, uint32_t height, double scale)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    if (auto controller = GetActiveController()) {
+        controller->PipSizeChange(width, height, scale);
+    }
+}
+
 }
 }

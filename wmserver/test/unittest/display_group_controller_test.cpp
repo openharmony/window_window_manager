@@ -158,7 +158,6 @@ HWTEST_F(DisplayGroupControllerTest, UpdateDisplayGroupWindowTree01, Function | 
     displayGroupController_->UpdateDisplayGroupWindowTree();
 }
 
-
 /**
  * @tc.name: ProcessCrossNodes02
  * @tc.desc: IsShowingOnMultiDisplays_ is true with different DisplayStateChangeType
@@ -495,7 +494,6 @@ HWTEST_F(DisplayGroupControllerTest, PreProcessWindowNode03, Function | SmallTes
     ASSERT_EQ(expectRect, actualRect);
 }
 
-
 /**
  * @tc.name: PostProcessWindowNode01
  * @tc.desc: PostProcessWindowNode with multi display is true
@@ -763,6 +761,7 @@ HWTEST_F(DisplayGroupControllerTest, ProcessWindowPairWhenDisplayChange, Functio
     layoutPolicy = nullptr;
     ASSERT_EQ(nullptr, layoutPolicy);
 }
+
 /**
  * @tc.name: ProcessNotCrossNodesOnDestroyedDisplay08
  * @tc.desc: DisplayId not equals to defaultDisplayId, and no node on groupWindowTree

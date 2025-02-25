@@ -33,6 +33,15 @@ declare_args() {
   device_status_enable = true
   window_manager_feature_subscribe_motion = false
   window_manager_feature_tp_enable = false
+  window_manager_fold_ability = true
+  window_manager_feature_screen_active_mode = true
+  window_manager_feature_screen_color_gamut = true
+  window_manager_feature_screen_hdr_format = true
+  window_manager_feature_screen_color_space = true
+  window_manager_feature_multi_screen = true
+  window_manager_feature_multi_screen_frame_ctl = true
+  window_manager_feature_cam_mode = true
+  window_manager_feature_multi_usr = true
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.msdp_device_status)) {

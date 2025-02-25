@@ -58,7 +58,7 @@ void SystemSessionLifecycleTest::SetUp()
     info.abilityName_ = "testSystemSession1";
     info.moduleName_ = "testSystemSession2";
     info.bundleName_ = "testSystemSession3";
-    systemSession_ = new (std::nothrow) SystemSession(info, specificCallback);
+    systemSession_ = sptr<SystemSession>::MakeSptr(info, specificCallback);
     EXPECT_NE(nullptr, systemSession_);
 }
 
@@ -84,7 +84,7 @@ namespace {
  */
 HWTEST_F(SystemSessionLifecycleTest, Show01, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
 
     ASSERT_TRUE((systemSession_ != nullptr));
     ASSERT_EQ(WSError::WS_OK, systemSession_->Show(property));
@@ -97,7 +97,7 @@ HWTEST_F(SystemSessionLifecycleTest, Show01, Function | SmallTest | Level1)
  */
 HWTEST_F(SystemSessionLifecycleTest, Show02, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_TRUE((property != nullptr));
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
     ASSERT_TRUE((systemSession_ != nullptr));
@@ -112,7 +112,7 @@ HWTEST_F(SystemSessionLifecycleTest, Show02, Function | SmallTest | Level1)
  */
 HWTEST_F(SystemSessionLifecycleTest, Show03, Function | SmallTest | Level1)
 {
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_TRUE((property != nullptr));
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ASSERT_TRUE((systemSession_ != nullptr));
@@ -128,11 +128,11 @@ HWTEST_F(SystemSessionLifecycleTest, Show03, Function | SmallTest | Level1)
 HWTEST_F(SystemSessionLifecycleTest, Reconnect01, Function | SmallTest | Level1)
 {
     auto surfaceNode = CreateRSSurfaceNode();
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
-    sptr<SessionStageMocker> mockSessionStage = new (std::nothrow) SessionStageMocker();
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, mockSessionStage);
-    sptr<TestWindowEventChannel> testWindowEventChannel = new (std::nothrow) TestWindowEventChannel();
+    sptr<TestWindowEventChannel> testWindowEventChannel = sptr<TestWindowEventChannel>::MakeSptr();
     EXPECT_NE(nullptr, testWindowEventChannel);
 
     auto result = systemSession_->Reconnect(nullptr, nullptr, nullptr, property);
@@ -207,10 +207,10 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect02, Function | SmallTest | Level1
     info.bundleName_ = "Disconnect02Func";
     info.windowType_ = 2122;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
     sptr<SystemSession> sysSession =
-        new (std::nothrow) SystemSession(info, specificCallback);
+        sptr<SystemSession>::MakeSptr(info, specificCallback);
     ASSERT_NE(sysSession, nullptr);
 
     bool isFromClient = true;
@@ -230,13 +230,13 @@ HWTEST_F(SystemSessionLifecycleTest, Disconnect03, Function | SmallTest | Level1
     info.bundleName_ = "Disconnect03Func";
     info.windowType_ = 2122;
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     ASSERT_NE(specificCallback, nullptr);
     sptr<SystemSession> sysSession =
-        new (std::nothrow) SystemSession(info, specificCallback);
+        sptr<SystemSession>::MakeSptr(info, specificCallback);
     ASSERT_NE(sysSession, nullptr);
 
-    sptr<WindowSessionProperty> property = new (std::nothrow) WindowSessionProperty();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     WindowType type = WindowType::WINDOW_TYPE_FLOAT_CAMERA;
     property->SetWindowType(type);
     sysSession->property_ = property;

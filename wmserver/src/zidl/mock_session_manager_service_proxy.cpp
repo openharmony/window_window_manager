@@ -208,11 +208,11 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByUserIdAndBundleNames(in
         return ERR_TRANSACTION_FAILED;
     }
     if (!data.WriteInt32(userId)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write userId failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write userId failed");
         return ERR_INVALID_DATA;
     }
     if (!data.WriteStringVector(bundleNameList)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write bundleNameList failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write bundleNameList failed");
         return ERR_INVALID_DATA;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -242,11 +242,11 @@ int32_t MockSessionManagerServiceProxy::SetSnapshotSkipByIdNamesMap(
     data.WriteInt32(userIdAndBunldeNames.size());
     for (auto it = userIdAndBunldeNames.begin(); it != userIdAndBunldeNames.end(); ++it) {
         if (!data.WriteInt32(it->first)) {
-            TLOGE(WmsLogTag::DEFAULT, "Write [it->first] failed");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write [it->first] failed");
             return ERR_INVALID_DATA;
         }
         if (!data.WriteStringVector(it->second)) {
-            TLOGE(WmsLogTag::DEFAULT, "Write [it->second] failed");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write [it->second] failed");
             return ERR_INVALID_DATA;
         }
     }

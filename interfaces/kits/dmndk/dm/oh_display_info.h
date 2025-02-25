@@ -158,10 +158,13 @@ typedef enum {
 typedef struct {
     /** rect left */
     int32_t left;
+
     /** rect top */
     int32_t top;
+
     /** rect width */
     uint32_t width;
+
     /** rect height */
     uint32_t height;
 } NativeDisplayManager_Rect;

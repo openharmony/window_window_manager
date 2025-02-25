@@ -40,6 +40,7 @@ ScreenScene::ScreenScene(std::string name) : name_(name)
     vsyncStation_ = std::make_shared<VsyncStation>(nodeId);
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
     g_ssIsDestroyed = false;
+    displayId_ = DISPLAY_ID_INVALID;
 }
 
 ScreenScene::~ScreenScene()
@@ -114,6 +115,7 @@ void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason 
     config.SetPosition(rect.posX_, rect.posY_);
     config.SetDensity(density_);
     config.SetOrientation(orientation_);
+    config.SetDisplayId(GetDisplayId());
     uiContent_->UpdateViewportConfig(config, reason);
 }
 
@@ -200,6 +202,17 @@ void ScreenScene::SetDisplayOrientation(int32_t orientation)
         return;
     }
     orientation_ = orientation;
+}
+
+Ace::UIContent* ScreenScene::GetUIContent() const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (uiContent_) {
+        return uiContent_.get();
+    } else {
+        TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
+        return nullptr;
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

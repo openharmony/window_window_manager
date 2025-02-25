@@ -21,7 +21,7 @@ const uint32_t MODE_CHANGE_TIMEOUT_MS = 2000;
 FoldScreenPolicy::FoldScreenPolicy() = default;
 FoldScreenPolicy::~FoldScreenPolicy() = default;
 
-void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode) {}
+void FoldScreenPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason) {}
 
 void FoldScreenPolicy::LockDisplayStatus(bool locked)
 {
@@ -77,6 +77,7 @@ void FoldScreenPolicy::ChangeOffTentMode() {}
 
 bool FoldScreenPolicy::GetModeChangeRunningStatus()
 {
+    TLOGE(WmsLogTag::DMS, "GetdisplayModeRunningStatus: %{public}d", GetdisplayModeRunningStatus());
     auto currentTime = std::chrono::steady_clock::now();
     auto intervalMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - startTimePoint_).count();
     if (intervalMs > MODE_CHANGE_TIMEOUT_MS) {
@@ -112,4 +113,12 @@ int64_t FoldScreenPolicy::getFoldingElapsedMs()
 }
 
 void FoldScreenPolicy::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) {};
+
+Drawing::Rect FoldScreenPolicy::GetScreenSnapshotRect()
+{
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    return snapshotRect;
+}
+
+void FoldScreenPolicy::SetMainScreenRegion(DMRect& mainScreenRegion) {}
 } // namespace OHOS::Rosen

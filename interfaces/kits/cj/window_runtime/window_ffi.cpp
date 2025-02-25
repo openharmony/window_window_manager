@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "window_ffi.h"
 #include <transaction/rs_interfaces.h>
 #include "pixel_map_impl.h"
@@ -65,6 +66,14 @@ RetDataI64 FfiOHOSGetLastWindow(OHOS::AbilityRuntime::Context* ctx)
     RetDataI64 ret;
     ret.code = OHOS::Rosen::WindowManagerImpl::GetLastWindow(ctx, ret.data);
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] GetLastWindow success");
+    return ret;
+}
+
+int32_t FfiOHOSShiftAppWindowFocus(int32_t sourceWindowId, int32_t targetWindowId)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "ShiftAppWindowFocus start");
+    int32_t ret = OHOS::Rosen::WindowManagerImpl::ShiftAppWindowFocus(sourceWindowId, targetWindowId);
+    TLOGI(WmsLogTag::WMS_FOCUS, "ShiftAppWindowFocus success");
     return ret;
 }
 
@@ -398,7 +407,7 @@ int32_t FFiOHOSWindowSetPreferredOrientation(int64_t id, uint32_t orientation)
     return res;
 }
 
-int32_t FFiOHOSWindowGetWindowAvoidArea(int64_t id, uint32_t areaType,  OHOS::Rosen::CAvoidArea *retPtr)
+int32_t FFiOHOSWindowGetWindowAvoidArea(int64_t id, uint32_t areaType, OHOS::Rosen::CAvoidArea* retPtr)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] FFiOHOSWindowGetWindowAvoidArea start");
     auto instance = FFIData::GetData<CJWindowImpl>(id);
@@ -759,6 +768,8 @@ int32_t FFiOHOSWindowSetWindowSystemBarProperties(int64_t id, CJBarProperties pr
     cProperties.navigationBarColor = properties.navigationBarColor;
     cProperties.navigationBarContentColor = properties.navigationBarContentColor;
     cProperties.isNavigationBarLightIcon = properties.isNavigationBarLightIcon;
+    cProperties.enableStatusBarAnimation = properties.enableStatusBarAnimation;
+    cProperties.enableNavigationBarAnimation = properties.enableNavigationBarAnimation;
     int32_t res = instance->SetWindowSystemBarProperties(cProperties);
     TLOGI(WmsLogTag::WMS_DIALOG, "[Window] SetWindowSystemBarProperties success");
     return res;
@@ -800,6 +811,330 @@ int32_t FfiOHOSOnWindowEvent(int64_t id, int64_t callbackId)
     return ret;
 }
 
+int32_t FfiOHOSOnCallback(int64_t id, int64_t callbackId, const char* callbackType)
+{
+    TLOGI(WmsLogTag::DEFAULT, "On %{public}s start", callbackType);
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    const std::string type = callbackType;
+    int32_t ret = instance->OnRegisterWindowCallback(type, callbackId);
+    TLOGI(WmsLogTag::DEFAULT, "On %{public}s success", callbackType);
+    return ret;
+}
+
+int32_t FfiOHOSOffCallback(int64_t id, int64_t callbackId, const char* callbackType)
+{
+    TLOGI(WmsLogTag::DEFAULT, "Off %{public}s start", callbackType);
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    const std::string type = callbackType;
+    int32_t ret = instance->UnregisterWindowCallback(type, callbackId);
+    TLOGI(WmsLogTag::DEFAULT, "Off %{public}s success", callbackType);
+    return ret;
+}
+
+int32_t FfiOHOSOnNoInteractionDetected(int64_t id, int64_t timeout, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "OnNoInteractionDetected start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    const std::string type = "noInteractionDetected";
+    int32_t ret = instance->OnRegisterWindowCallback(type, callbackId, timeout);
+    TLOGI(WmsLogTag::DEFAULT, "OnNoInteractionDetected success");
+    return ret;
+}
+
+int32_t FfiOHOSSetSubWindowModal(int64_t id, bool isModal)
+{
+    TLOGI(WmsLogTag::WMS_SUB, "SetSubWindowModal start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->SetSubWindowModal(isModal);
+    TLOGI(WmsLogTag::WMS_SUB, "SetSubWindowModal success");
+    return ret;
+}
+
+int32_t FfiOHOSIsFocused(int64_t id, int32_t* errCode)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "IsFocused start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        *errCode = WM_ERROR_STATE_ABNORMALLY;
+        return 0;
+    }
+    int32_t ret = instance->GetWindowProperties(errCode).focusable;
+    TLOGI(WmsLogTag::WMS_FOCUS, "IsFocused success");
+    return ret;
+}
+
+int32_t FfiOHOSSetWindowLimits(int64_t id,
+                               OHOS::Rosen::CWindowLimits windloLimits,
+                               OHOS::Rosen::CWindowLimits* retPtr)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "SetWindowLimits start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    CWindowLimits cWindowLimits;
+    cWindowLimits.maxWidth = windloLimits.maxWidth;
+    cWindowLimits.maxHeight = windloLimits.maxHeight;
+    cWindowLimits.minWidth = windloLimits.minWidth;
+    cWindowLimits.minHeight = windloLimits.minHeight;
+
+    int32_t ret = instance->SetWindowLimits(cWindowLimits, *retPtr);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "SetWindowLimits success");
+    return ret;
+}
+
+int32_t FfiOHOSGetWindowLimits(int64_t id, OHOS::Rosen::CWindowLimits* retPtr)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    int32_t ret = instance->GetWindowLimits(*retPtr);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "GetWindowLimits success");
+    return ret;
+}
+
+bool FfiOHOSGetImmersiveModeEnabledState(int64_t id, int32_t* errCode)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "GetImmersiveModeEnabledState start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        *errCode = WM_ERROR_STATE_ABNORMALLY;
+        return false;
+    }
+    bool ret = instance->GetImmersiveModeEnabledState(*errCode);
+    TLOGI(WmsLogTag::WMS_IMMS, "GetImmersiveModeEnabledState success");
+    return ret;
+}
+
+int32_t FfiOHOSSetImmersiveModeEnabledState(int64_t id, bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "SetImmersiveModeEnabledState start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->SetImmersiveModeEnabledState(enabled);
+    TLOGI(WmsLogTag::WMS_IMMS, "SetImmersiveModeEnabledState success");
+    return ret;
+}
+
+int32_t FfiOHOSKeepKeyboardOnFocus(int64_t id, bool keepKeyboardFlag)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "KeepKeyboardOnFocus start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->KeepKeyboardOnFocus(keepKeyboardFlag);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "KeepKeyboardOnFocus success");
+    return ret;
+}
+
+int32_t FfiOHOSGetWindowDecorHeight(int64_t id, int32_t* height)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "GetWindowDecorHeight start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    int32_t ret = instance->GetWindowDecorHeight(*height);
+    TLOGI(WmsLogTag::WMS_DECOR, "GetWindowDecorHeight success");
+    return ret;
+}
+
+int32_t FfiOHOSSetWindowDecorHeight(int64_t id, int32_t height)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "SetWindowDecorHeight start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    int32_t ret = instance->SetWindowDecorHeight(height);
+    TLOGI(WmsLogTag::WMS_DECOR, "SetWindowDecorHeight success");
+    return ret;
+}
+
+int32_t FfiOHOSRecover(int64_t id)
+{
+    TLOGI(WmsLogTag::WMS_RECOVER, "Recover start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    int32_t ret = instance->Recover();
+    TLOGI(WmsLogTag::WMS_RECOVER, "Recover success");
+    return ret;
+}
+
+int32_t FfiOHOSSetWindowDecorVisible(int64_t id, bool isVisible)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "SetWindowDecorVisible start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->SetWindowDecorVisible(isVisible);
+    TLOGI(WmsLogTag::WMS_DECOR, "SetWindowDecorVisible success");
+    return ret;
+}
+
+int32_t FfiOHOSGetTitleButtonRect(int64_t id,
+                                  OHOS::Rosen::CTitleButtonRect* retPtr)
+{
+    TLOGI(WmsLogTag::WMS_DECOR, "GetTitleButtonRect start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    int32_t ret = instance->GetTitleButtonRect(*retPtr);
+    TLOGI(WmsLogTag::WMS_DECOR, "GetTitleButtonRect success");
+    return ret;
+}
+
+int32_t FfiOHOSSetDialogBackGestureEnabled(int64_t id, bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_DIALOG, "SetDialogBackGestureEnabled start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->SetDialogBackGestureEnabled(enabled);
+    TLOGI(WmsLogTag::WMS_DIALOG, "SetDialogBackGestureEnabled success");
+    return ret;
+}
+
+int32_t FfiOHOSDisableLandscapeMultiWindow(int64_t id)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "DisableLandscapeMultiWindow start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->DisableLandscapeMultiWindow();
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "DisableLandscapeMultiWindow success");
+    return ret;
+}
+
+int32_t FfiOHOSEnableLandscapeMultiWindow(int64_t id)
+{
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "EnableLandscapeMultiWindow start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->EnableLandscapeMultiWindow();
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "EnableLandscapeMultiWindow success");
+    return ret;
+}
+
+int32_t FfiOHOSSetWindowGrayScale(int64_t id, float grayScale)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SetWindowGrayScale start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->SetWindowGrayScale(grayScale);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SetWindowGrayScale success");
+    return ret;
+}
+
+int32_t FfiOHOSSpecificSystemBarEnabled(int64_t id, int32_t name, bool enable,
+                                        bool enableAnimation)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "SpecificSystemBarEnabled start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->SpecificSystemBarEnabled(name, enable, enableAnimation);
+    TLOGI(WmsLogTag::WMS_IMMS, "SpecificSystemBarEnabled success");
+    return ret;
+}
+
+int32_t FfiOHOSGetWindowSystemBarProperties(int64_t id,
+                                            CJBarProperties* systemBarProperty)
+{
+    TLOGI(WmsLogTag::WMS_IMMS, "GetWindowSystemBarProperties start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->GetWindowSystemBarProperties(*systemBarProperty);
+    TLOGI(WmsLogTag::WMS_IMMS, "GetWindowSystemBarProperties success");
+    return ret;
+}
+
+uint32_t FfiOHOSGetPreferredOrientation(int64_t id, int32_t* errCode)
+{
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    uint32_t ret = instance->GetPreferredOrientation(*errCode);
+    return ret;
+}
+
+int32_t FfiOHOSGetWindowStatus(int64_t id, int32_t* errCode)
+{
+    TLOGI(WmsLogTag::WMS_PC, "GetWindowStatus start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->GetWindowStatus(*errCode);
+    TLOGI(WmsLogTag::WMS_PC, "GetWindowStatus success");
+    return ret;
+}
+
+int32_t FfiOHOSMaximize(int64_t id, int32_t presentation)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Maximize start");
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->Maximize(presentation);
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Maximize success");
+    return ret;
+}
+
+RetDataI64 FfiOHOSCreateSubWindowWithOptions(int64_t id, char* name,
+                                             CSubWindowOptions option)
+{
+    TLOGI(WmsLogTag::WMS_SUB, "CreateSubWindowWithOptions start");
+    RetDataI64 ret;
+    std::string nm = name;
+    auto instance = FFIData::GetData<CJWindowImpl>(id);
+    if (instance == nullptr) {
+        ret.code = WM_ERROR_STATE_ABNORMALLY;
+        return ret;
+    }
+    ret.code = instance->CreateSubWindowWithOptions(nm, ret.data, option);
+    TLOGI(WmsLogTag::WMS_SUB, "CreateSubWindowWithOptions success");
+    return ret;
+}
+
 // WindowStage
 RetDataI64 FfiOHOSBindWindowStage(int64_t windowStageImplPtr)
 {
@@ -829,7 +1164,7 @@ RetDataI64 FfiOHOSGetMainWindow(int64_t id)
     return ret;
 }
 
-RetDataI64 FfiOHOSCreateSubWindow(int64_t id, char *name)
+RetDataI64 FfiOHOSCreateSubWindow(int64_t id, char* name)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[WindowStage] createSubWindow start");
     RetDataI64 ret;
@@ -854,7 +1189,7 @@ RetStruct FfiOHOSGetSubWindow(int64_t id)
     return ret;
 }
 
-int32_t FfiOHOSLoadContent(int64_t id, char *path)
+int32_t FfiOHOSLoadContent(int64_t id, char* path)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[WindowStage] loadContent start");
     std::string url = path;
@@ -866,7 +1201,7 @@ int32_t FfiOHOSLoadContent(int64_t id, char *path)
     return instance->OnLoadContent(url, storageJson, false);
 }
 
-int32_t FfiOHOSLoadContentByName(int64_t id, char *name)
+int32_t FfiOHOSLoadContentByName(int64_t id, char* name)
 {
     TLOGI(WmsLogTag::WMS_DIALOG, "[WindowStage] loadContentByName start");
     return SUCCESS_CODE;
@@ -891,6 +1226,59 @@ int32_t FfiOHOSSetShowOnLockScreen(int64_t id, bool showOnLockScreen)
     }
     return instance->SetShowOnLockScreen(showOnLockScreen);
 }
+
+int32_t FfiOHOSSetDefaultDensityEnabled(int64_t id, bool enabled)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "setDefaultDensityEnabled start");
+    auto instance = FFIData::GetData<CJWindowStageImpl>(id);
+    if (instance == nullptr) {
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    return instance->SetDefaultDensityEnabled(enabled);
+}
+
+int32_t FfiOHOSStageOn(int64_t id, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "on windowStageEvent start");
+    auto instance = FFIData::GetData<CJWindowStageImpl>(id);
+    if (instance == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "on windowStageEvent is nullptr");
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->OnEvent(callbackId);
+    TLOGI(WmsLogTag::DEFAULT, "on windowStageEvent success");
+    return ret;
+}
+
+int32_t FfiOHOSStageOff(int64_t id, int64_t callbackId)
+{
+    TLOGI(WmsLogTag::DEFAULT, "off windowStageEvent start");
+    auto instance = FFIData::GetData<CJWindowStageImpl>(id);
+    if (instance == nullptr) {
+        TLOGI(WmsLogTag::DEFAULT, "off windowStageEvent is nullptr");
+        return WM_ERROR_STATE_ABNORMALLY;
+    }
+    int32_t ret = instance->OffEvent(callbackId);
+    TLOGI(WmsLogTag::DEFAULT, "off windowStageEvent success");
+    return ret;
+}
+
+RetDataI64 FfiOHOSCreateSubWindowWithOptionsStage(int64_t id, const char* name,
+    const char* title, bool decorEnabled, bool isModal)
+{
+    TLOGI(WmsLogTag::WMS_SUB, "CreateSubWindowWithOptionsStage start");
+    RetDataI64 ret;
+    const std::string nameStr = name;
+    const std::string titleStr = title;
+    auto instance = FFIData::GetData<CJWindowStageImpl>(id);
+    if (instance == nullptr) {
+        ret.code = WM_ERROR_STATE_ABNORMALLY;
+        return ret;
+    }
+    ret.code = instance->CreateSubWindowWithOptions(ret.data, nameStr, titleStr, decorEnabled, isModal);
+    return ret;
+}
+
 } // extern "C"
 }
 }

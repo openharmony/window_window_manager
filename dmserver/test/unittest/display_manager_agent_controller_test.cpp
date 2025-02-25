@@ -96,6 +96,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenConnect, Function | SmallTes
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 1);
 }
+
 /**
  * @tc.name: OnScreenChange
  * @tc.desc: OnScreenChange test
@@ -122,6 +123,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenChange, Function | SmallTest
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 1);
 }
+
 /**
  * @tc.name: OnScreenGroupChange
  * @tc.desc: OnScreenChange test
@@ -152,6 +154,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnScreenGroupChange, Function | Smal
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 1);
 }
+
 /**
  * @tc.name: OnDisplayCreate
  * @tc.desc: OnDisplayCreate test
@@ -176,6 +179,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayCreate, Function | SmallTes
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 0);
 }
+
 /**
  * @tc.name: OnDisplayDestroy
  * @tc.desc: OnDisplayDestroy test
@@ -199,6 +203,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayDestroy, Function | SmallTe
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 0);
 }
+
 /**
  * @tc.name: OnDisplayChange
  * @tc.desc: OnDisplayChange test
@@ -227,6 +232,7 @@ HWTEST_F(DisplayManagerAgentControllerTest, OnDisplayChange, Function | SmallTes
         GetAgentsByType(DisplayManagerAgentType::SCREEN_EVENT_LISTENER).size();
     ASSERT_EQ(result, 0);
 }
+
 /**
  * @tc.name: OnScreenshot
  * @tc.desc: OnScreenshot test

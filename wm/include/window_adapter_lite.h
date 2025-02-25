@@ -36,7 +36,7 @@ class WindowAdapterLite {
 WM_DECLARE_SINGLE_INSTANCE(WindowAdapterLite);
 public:
     using WMSConnectionChangedCallbackFunc = std::function<void(int32_t, int32_t, bool)>;
-    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
     virtual WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent);
     virtual WMError UnregisterWindowManagerAgent(WindowManagerAgentType type,
@@ -45,22 +45,26 @@ public:
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void ClearWindowAdapter();
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
+    virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     virtual WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
-    virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
     virtual WMError TerminateSessionByPersistentId(int32_t persistentId);
     virtual WMError CloseTargetFloatWindow(const std::string& bundleName);
     virtual WMError CloseTargetPiPWindow(const std::string& bundleName);
     virtual WMError GetCurrentPiPWindowInfo(std::string& bundleName);
-    WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
 
 private:
     static inline SingletonDelegator<WindowAdapterLite> delegator;
     bool InitSSMProxy();
+
+    /*
+     * Multi User
+     */
     void OnUserSwitch();
     void ReregisterWindowManagerLiteAgent();
 

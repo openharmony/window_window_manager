@@ -229,6 +229,17 @@ void WindowScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
     }
 }
 
+void WindowScene::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
+{
+    if (auto mainWindow = GetMainWindow()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", mainWindow->GetWindowId());
+        mainWindow->UpdateConfigurationForSpecified(configuration, resourceManager);
+    } else {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "main window is null");
+    }
+}
+
 std::string WindowScene::GetContentInfo(BackupAndRestoreType type) const
 {
     auto mainWindow = GetMainWindow();

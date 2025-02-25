@@ -346,6 +346,7 @@ HWTEST_F(DisplayManagerServiceTest, RsDisplayNode, Function | SmallTest | Level3
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     dms_->UpdateRSTree(DISPLAY_ID_INVALID, DISPLAY_ID_INVALID, surfaceNode, true, false);
+    EXPECT_EQ(dms_->abstractScreenController_->GetAbstractScreen(DISPLAY_ID_INVALID), nullptr);
     dms_->UpdateRSTree(0, 0, surfaceNode, true, false);
 }
 
@@ -583,7 +584,7 @@ HWTEST_F(DisplayManagerServiceTest, GetDisplaySnapshot, Function | SmallTest | L
 {
     DisplayId displayId = -1;
     DmErrorCode* errorCode = nullptr;
-    auto ret = dms_->GetDisplaySnapshot(displayId, errorCode);
+    auto ret = dms_->GetDisplaySnapshot(displayId, errorCode, false);
     ASSERT_EQ(nullptr, ret);
 }
 

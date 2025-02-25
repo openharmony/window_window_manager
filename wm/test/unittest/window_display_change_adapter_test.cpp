@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#include "iremote_object_mocker.h"
 #include "window_display_change_adapter.h"
 #include "window_manager_hilog.h"
-#include "iremote_object_mocker.h"
 
 #include "window_display_change_adapter.cpp"
 
@@ -28,12 +28,14 @@ namespace OHOS {
 namespace Rosen {
 class TestDisplayInfoChangedListener : public IDisplayInfoChangedListener {
 public:
-    DisplayId displayId_ { 0 };
-    float density_ { 0.0f };
-    DisplayOrientation orientation_ { DisplayOrientation::UNKNOWN };
+    DisplayId displayId_{ 0 };
+    float density_{ 0.0f };
+    DisplayOrientation orientation_{ DisplayOrientation::UNKNOWN };
 
-    void OnDisplayInfoChange(const sptr<IRemoteObject>& token, DisplayId displayId, float density,
-        DisplayOrientation orientation) override
+    void OnDisplayInfoChange(const sptr<IRemoteObject>& token,
+                             DisplayId displayId,
+                             float density,
+                             DisplayOrientation orientation) override
     {
         displayId_ = displayId;
         density_ = density;
@@ -48,21 +50,13 @@ public:
     void SetUp() override;
     void TearDown() override;
 };
-void WindowDisplayChangeAdapterTest::SetUpTestCase()
-{
-}
+void WindowDisplayChangeAdapterTest::SetUpTestCase() {}
 
-void WindowDisplayChangeAdapterTest::TearDownTestCase()
-{
-}
+void WindowDisplayChangeAdapterTest::TearDownTestCase() {}
 
-void WindowDisplayChangeAdapterTest::SetUp()
-{
-}
+void WindowDisplayChangeAdapterTest::SetUp() {}
 
-void WindowDisplayChangeAdapterTest::TearDown()
-{
-}
+void WindowDisplayChangeAdapterTest::TearDown() {}
 
 namespace {
 /**
@@ -108,6 +102,6 @@ HWTEST_F(WindowDisplayChangeAdapterTest, OnDisplayInfoChange, Function | SmallTe
     ASSERT_EQ(density, listener->density_);
     ASSERT_EQ(orientation, listener->orientation_);
 }
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

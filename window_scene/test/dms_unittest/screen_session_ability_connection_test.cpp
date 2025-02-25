@@ -32,6 +32,7 @@ namespace Rosen {
 constexpr int32_t DEFAULT_VALUE = -1;
 constexpr uint32_t EXTENSION_CONNECT_OUT_TIME = 300; // ms
 constexpr uint32_t TRANS_CMD_SEND_SNAPSHOT_RECT = 2;
+constexpr int32_t RES_FAILURE = -1;
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
 }
@@ -126,6 +127,48 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, OnAbilityDisconnectDone, Function |
     }
     abilityConnectionStub.clear();
     abilityConnectionStub = nullptr;
+}
+
+/**
+ * @tc.name: AddObjectDeathRecipient
+ * @tc.desc: AddObjectDeathRecipient func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, AddObjectDeathRecipient, Function | SmallTest | Level1)
+{
+    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
+    ASSERT_NE(abilityConnectionStub, nullptr);
+    EXPECT_EQ(abilityConnectionStub->AddObjectDeathRecipient(), false);
+    abilityConnectionStub.clear();
+    abilityConnectionStub = nullptr;
+}
+
+/**
+ * @tc.name: SendMessage
+ * @tc.desc: SendMessage func test02
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessage02, Function | SmallTest | Level1)
+{
+    ScreenSessionAbilityConnection screenSessionAbilityConnection;
+    int32_t transCode = 0;
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = screenSessionAbilityConnection.SendMessage(transCode, data, reply);
+    EXPECT_EQ(ret, RES_FAILURE);
+}
+
+/**
+ * @tc.name: IsConnected
+ * @tc.desc: IsConnected func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionAbilityConnectionTest, IsConnected, Function | SmallTest | Level1)
+{
+    ScreenSessionAbilityConnection screenSessionAbilityConnection;
+    auto ret = screenSessionAbilityConnection.IsConnected();
+    EXPECT_EQ(ret, false);
 }
 
 /**

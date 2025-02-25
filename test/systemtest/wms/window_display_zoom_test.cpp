@@ -74,9 +74,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom01, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom01";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -124,9 +122,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom02, Function | MediumTest | Level3)
 {
     windowInfo_.name = "DisplayZoom02";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->Show());
     sleep(1);
 
@@ -159,9 +155,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom03, Function | MediumTest | Level3)
 {
     windowInfo_.name = "DisplayZoom03";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -191,9 +185,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom04";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -206,7 +198,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom04, Function | MediumTest | Level3)
     expect.scaleX_ = expect.scaleY_ = 2; // scale value
     ASSERT_TRUE(expect == implPtr->GetWindowProperty()->GetZoomTransform());
 
-    ASSERT_EQ(WMError::WM_OK, window->Hide());;
+    ASSERT_EQ(WMError::WM_OK, window->Hide());
     WindowAccessibilityController::GetInstance().OffWindowZoom();
     sleep(1);
 
@@ -231,9 +223,7 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
 
     windowInfo_.name = "DisplayZoom05";
     sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    if (window == nullptr) {
-        return;
-    }
+    ASSERT_NE(window, nullptr);
     Window* ptr = window.GetRefPtr();
     WindowImpl* implPtr = (WindowImpl*)ptr;
     ASSERT_EQ(WMError::WM_OK, window->Show());
@@ -264,24 +254,6 @@ HWTEST_F(WindowDisplayZoomTest, DisplayZoom05, Function | MediumTest | Level3)
     window->Destroy();
 }
 
-/**
- * @tc.name: DisplayZoom06
- * @tc.desc: test speical window type
- * @tc.type: FUNC
- * @tc.require: issueI5NGWL
- */
-HWTEST_F(WindowDisplayZoomTest, DisplayZoom06, Function | MediumTest | Level3)
-{
-    WindowAccessibilityController::GetInstance().SetAnchorAndScale(0, 0, 2);
-    sleep(1);
-    windowInfo_.name = "DisplayZoom06";
-    windowInfo_.type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
-    sptr<Window> window = Utils::CreateTestWindow(windowInfo_);
-    ASSERT_NE(nullptr, window);
-    sleep(1);
-    WindowAccessibilityController::GetInstance().OffWindowZoom();
-    window->Destroy();
-}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
 #include "mock/mock_session_stub.h"
@@ -52,7 +53,7 @@ void SessionStubMockTest::TearDownTestCase()
 
 void SessionStubMockTest::SetUp()
 {
-    session_ = new (std::nothrow) SessionStubMocker();
+    session_ = sptr<SessionStubMocker>::MakeSptr();
     EXPECT_NE(nullptr, session_);
 }
 

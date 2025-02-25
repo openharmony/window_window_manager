@@ -23,6 +23,7 @@ namespace OHOS::AppExecFwk {
 class IBundleMgr;
 struct ApplicationInfo;
 enum ApplicationFlag;
+struct BundleInfo;
 } // namespace OHOS::AppExecFwk
 
 namespace OHOS {
@@ -36,6 +37,8 @@ public:
         const int32_t userId, std::vector<AppExecFwk::ApplicationInfo>& appInfos));
     MOCK_METHOD4(GetApplicationInfo, bool(const std::string& appName, const AppExecFwk::ApplicationFlag flag,
         const int32_t userId, AppExecFwk::ApplicationInfo& appInfo));
+    MOCK_METHOD4(GetBundleInfoV9, ErrCode(const std::string& bundleName, int32_t flags,
+        AppExecFwk::BundleInfo& bundleInfo, int32_t userId));
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -128,7 +128,7 @@ HWTEST_F(WindowControllerTest, StartingWindow, Function | SmallTest | Level3)
     transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
     transitionInfo_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-    node_->property_->modeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    node_->property_->windowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     windowController_->StartingWindow(transitionInfo_, nullptr, 0, false);
     ASSERT_EQ(1, windowRoot_->windowNodeMap_.size());
 
@@ -159,13 +159,13 @@ HWTEST_F(WindowControllerTest, NotifyWindowTransition, Function | SmallTest | Le
     sptr<IRemoteObject> srcAbilityTokenMocker = new IRemoteObjectMocker();
     srcInfo->SetAbilityToken(srcAbilityTokenMocker);
     sptr<WindowNode> srcNode = StartingWindow::CreateWindowNode(srcInfo, 102); // 102 is windowId
-    srcNode->property_->modeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    srcNode->property_->windowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
 
     dstInfo = new WindowTransitionInfo();
     sptr<IRemoteObject> dstAbilityTokenMocker = new IRemoteObjectMocker();
     dstInfo->SetAbilityToken(dstAbilityTokenMocker);
     sptr<WindowNode> dstNode = StartingWindow::CreateWindowNode(dstInfo, 103); // 103 is windowId
-    dstNode->property_->modeSupportInfo_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
+    dstNode->property_->windowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
 
     windowRoot_->windowNodeMap_.clear();
     windowRoot_->windowNodeMap_.insert(std::make_pair(srcNode->GetWindowId(), srcNode));
@@ -1768,6 +1768,10 @@ HWTEST_F(WindowControllerTest, UpdateProperty3, Function | SmallTest | Level3)
     property->SetWindowSizeChangeReason(WindowSizeChangeReason::MOVE);
     res = windowController_->UpdateProperty(property, action);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
+
+    property->SetWindowSizeChangeReason(WindowSizeChangeReason::DRAG_MOVE);
+    res = windowController_->UpdateProperty(property, action);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_DISPLAY, res);
 }
 
 /**
@@ -2039,7 +2043,6 @@ HWTEST_F(WindowControllerTest, UpdateProperty12, Function | SmallTest | Level3)
     WMError res = windowController_->UpdateProperty(property, action);
     ASSERT_EQ(WMError::WM_OK, res);
 }
-
 
 /**
  * @tc.name: UpdateProperty

@@ -27,6 +27,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SysCapUtil"};
+const uint32_t API_VERSION_MOD = 1000;
 }
 
 std::string SysCapUtil::GetClientName()
@@ -64,9 +65,32 @@ std::string SysCapUtil::GetBundleName()
     if (iBundleMgr->GetBundleInfoForSelf(0, bundleInfo) == ERR_OK) {
         bundleName = bundleInfo.name;
     } else {
-        WLOGFW("Call for GetBundleInfoForSelf failed");
+        TLOGW(WmsLogTag::DEFAULT, "Failed");
     }
     return StringUtil::Trim(bundleName);
+}
+
+uint32_t SysCapUtil::GetApiCompatibleVersion()
+{
+    uint32_t apiCompatibleVersion = 0;
+    OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    OHOS::sptr<OHOS::IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    sptr<AppExecFwk::IBundleMgr> iBundleMgr = OHOS::iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (iBundleMgr == nullptr) {
+        WLOGFW("IBundleMgr is null");
+        return apiCompatibleVersion;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    if (iBundleMgr->GetBundleInfoForSelf(0, bundleInfo) == ERR_OK) {
+        apiCompatibleVersion = bundleInfo.targetVersion % API_VERSION_MOD;
+        WLOGFD("targetVersion: [%{public}u], apiCompatibleVersion: [%{public}u]", bundleInfo.targetVersion,
+            apiCompatibleVersion);
+    } else {
+        TLOGW(WmsLogTag::DEFAULT, "Failed");
+    }
+    return apiCompatibleVersion;
 }
 
 std::string SysCapUtil::GetProcessName()

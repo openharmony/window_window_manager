@@ -208,6 +208,12 @@ uint32_t Screen::GetModeId() const
     return pImpl_->GetScreenInfo()->GetModeId();
 }
 
+std::string Screen::GetSerialNumber() const
+{
+    UpdateScreenInfo();
+    return pImpl_->GetScreenInfo()->GetSerialNumber();
+}
+
 std::vector<sptr<SupportedScreenModes>> Screen::GetSupportedModes() const
 {
     return pImpl_->GetScreenInfo()->GetModes();

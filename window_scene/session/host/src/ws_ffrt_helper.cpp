@@ -29,6 +29,7 @@
 
 namespace OHOS::Rosen {
 namespace {
+constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WSFFRTHelper"};
 const std::unordered_map<TaskQos, ffrt::qos> FFRT_QOS_MAP = {
     { TaskQos::INHERIT, ffrt_qos_inherit },
@@ -56,12 +57,12 @@ public:
             if (iter->second != nullptr) {
                 auto ret = ffrt::skip(iter->second);
                 if (ret != 0) {
-                    WLOGI("Failed to cancel task, taskName = %{public}s, retcode = %{public}d", taskName.c_str(), ret);
+                    WLOGI("Failed to cancel task, taskName=%{public}s, retcode=%{public}d", taskName.c_str(), ret);
                 }
             }
             taskMap_.erase(iter);
         } else {
-            WLOGI("Task is not existed, taskName = %{public}s", taskName.c_str());
+            WLOGI("Task is not existed, taskName=%{public}s", taskName.c_str());
         }
     }
 
@@ -83,7 +84,13 @@ private:
     std::shared_mutex mutex_;
 };
 
-WSFFRTHelper::WSFFRTHelper() : taskHandleMap_(std::make_unique<TaskHandleMap>()) {}
+WSFFRTHelper::WSFFRTHelper() : taskHandleMap_(std::make_unique<TaskHandleMap>())
+{
+    ffrtQueue_ = std::make_unique<ffrt::queue>(ffrt::queue_concurrent, "WSFFRTHelper",
+        ffrt::queue_attr().qos(ffrt_qos_user_interactive).max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
+    TLOGI(WmsLogTag::WMS_MAIN, "FFRT user interactive qos max queue thread number: %{public}d",
+        FFRT_USER_INTERACTIVE_MAX_THREAD_NUM);
+}
 
 WSFFRTHelper::~WSFFRTHelper() = default;
 
@@ -98,10 +105,9 @@ void WSFFRTHelper::SubmitTask(std::function<void()>&& task, const std::string& t
         localTask();
         return;
     }
-    ffrt::task_handle handle = ffrt::submit_h(std::move(localTask), {}, {}, ffrt::task_attr().delay(delayTime).
-        qos(FFRT_QOS_MAP.at(qos)));
+    ffrt::task_handle handle = ffrtQueue_->submit_h(std::move(localTask));
     if (handle == nullptr) {
-        WLOGE("Failed to post task, taskName = %{public}s", taskName.c_str());
+        WLOGE("Failed to post task, taskName=%{public}s", taskName.c_str());
         return;
     }
     taskHandleMap_->SaveTask(taskName, std::move(handle));

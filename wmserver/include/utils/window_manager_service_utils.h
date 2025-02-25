@@ -25,7 +25,6 @@
 #include "window_node.h"
 #include "display_info.h"
 
-
 namespace OHOS {
 namespace Rosen {
 namespace {
