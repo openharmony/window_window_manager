@@ -102,6 +102,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateWindowSceneAfterCustomAnimation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_LANDSCAPE_MULTI_WINDOW):
             return HandleSetLandscapeMultiWindow(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_IS_MID_SCENE):
+            return HandleGetIsMidScene(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_ABOVE_TARGET):
             return HandleRaiseAboveTarget(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RAISE_APP_MAIN_WINDOW):
@@ -763,6 +765,19 @@ int SessionStub::HandleSetLandscapeMultiWindow(MessageParcel& data, MessageParce
     bool isLandscapeMultiWindow = data.ReadBool();
     const WSError errCode = SetLandscapeMultiWindow(isLandscapeMultiWindow);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetIsMidScene(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "in");
+    bool isMidScene = false;
+    const WSError errCode = GetIsMidScene(isMidScene);
+    if (!reply.WriteBool(isMidScene)) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write isMidScene failed");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

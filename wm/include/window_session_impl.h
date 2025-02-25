@@ -295,6 +295,11 @@ public:
     WMError SetContinueState(int32_t continueState) override;
 
     /*
+     * Multi Window
+     */
+    WMError GetIsMidScene(bool& isMidScene) override;
+
+    /*
      * Window Layout
      */
     WMError EnableDrag(bool enableDrag) override;
