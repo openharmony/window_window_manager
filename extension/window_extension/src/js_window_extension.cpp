@@ -223,12 +223,7 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
     WLOGI("called.");
     Extension::OnConnect(want);
     napi_env env = jsRuntime_.GetNapiEnv();
-    auto jsCallback = [weakThis = wptr(this), want, env] {
-        auto connection = weakThis.promote();
-        if (!connection) {
-            WLOGI("session is null or already disconnected");
-            return;
-        }
+    auto jsCallback = [this, want, env] {
         napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
         napi_value argv[] = { napiWant };
         CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv));
@@ -309,17 +304,12 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
 void JsWindowExtension::OnWindowCreated() const
 {
     napi_env env = jsRuntime_.GetNapiEnv();
-    auto jsCallback = [weakThis = wptr(this), env] {
-        auto connection = weakThis.promote();
-        if (!connection) {
-            WLOGI("session is null or already disconnected");
-            return;
-        }
-        if (connection->stub_ == nullptr) {
+    auto jsCallback = [this, env] {
+        if (stub_ == nullptr) {
             WLOGE("stub is nullptr");
             return;
         }
-        auto window = connection->stub_->GetWindow();
+        auto window = stub_->GetWindow();
         if (window == nullptr) {
             WLOGE("get window failed");
             return;
@@ -330,7 +320,7 @@ void JsWindowExtension::OnWindowCreated() const
             return;
         }
         napi_value argv[] = { value };
-        connection->CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv));
+        CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
         WLOGE("send event failed");
