@@ -591,6 +591,21 @@ WMError WindowRoot::ToggleShownStateForAllAppWindows()
     return res;
 }
 
+void WindowRoot::NotifyMMIServiceOnline()
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "called");
+    for (const auto& [windowId, window] : windowNodeMap_) {
+        if (window == nullptr) {
+            WLOGFE("window is nullptr.");
+            return;
+        }
+        if (window->GetWindowToken()) {
+            TLOGI(WmsLogTag::WMS_EVENT, "Id:%{public}u", windowId);
+            window->GetWindowToken()->NotifyMMIServiceOnline(windowId);
+        }
+    }
+}
+
 void WindowRoot::DestroyLeakStartingWindow()
 {
     TLOGD(WmsLogTag::WMS_STARTUP_PAGE, "called");
