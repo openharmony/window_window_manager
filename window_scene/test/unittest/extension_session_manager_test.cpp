@@ -91,11 +91,11 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation02, Funct
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionActivation(extensionSession, 1, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 
-    instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
-    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionActivation(extensionSession, 1, nullptr));
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionActivation(extensionSession, 1, (func)));
     usleep(WAIT_SYNC_IN_NS);
 
-    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionActivation(extensionSession, 1, (func)));
+    ExtensionSession->persistentId_ = -1;
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionActivation(extensionSession, 1, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -125,12 +125,11 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground02, Funct
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionBackground(extensionSession, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 
-    instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
-    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionBackground(extensionSession, nullptr));
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionBackground(extensionSession, func));
     usleep(WAIT_SYNC_IN_NS);
 
-    instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
-    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionBackground(extensionSession, func));
+    ExtensionSession->persistentId_ = -1;
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionBackground(extensionSession, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -160,12 +159,11 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction03, Func
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 
-    instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
-    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, nullptr));
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, func));
     usleep(WAIT_SYNC_IN_NS);
 
-    instance->extensionSessionMap_[extensionSession->GetPersistentId()] = extensionSession;
-    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, func));
+    ExtensionSession->persistentId_ = -1;
+    ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 }
 
