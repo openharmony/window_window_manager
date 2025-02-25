@@ -16,9 +16,9 @@
 //gtest
 #include <gtest/gtest.h>
 #include "window_test_utils.h"
-#include "window_scene_session_impl.h"
 #include "ability_context_impl.h"
 #include "mock_session.h"
+#include "window_scene_session_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,8 +30,6 @@ using Utils = WindowTestUtils;
 class WindowStatusChangeTest : public testing::Test
 {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
 
@@ -39,14 +37,6 @@ private:
     static constexpr uint32_t TEST_SLEEP_S = 1; // test sleep time
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
 };
-
-void WindowStatusChangeTest::SetUpTestCase() {
-    // Setup code here
-}
-
-void WindowStatusChangeTest::TearDownTestCase() {
-    // Teardown code here
-}
 
 void WindowStatusChangeTest::SetUp()
 {
@@ -59,25 +49,22 @@ void WindowStatusChangeTest::TearDown()
 }
 
 namespace {
-    /**
-     * @tc.name: ChangeWindowStatus01
-     * @tc.desc: one FLOATING MainWindow, maximize ImmersiveMode
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: ChangeWindowStatus01
+ * @tc.desc: one FLOATING MainWindow, maximize ImmersiveMode
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus01, Function | MediumTest | Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("Window1_1");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10011);
@@ -102,25 +89,22 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus01, Function | MediumTest | L
     window->Destroy(true, true);
 }
 
-    /**
-     * @tc.name: ChangeWindowStatus02
-     * @tc.desc: one FLOATING MainWindow, maximize and recover
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: ChangeWindowStatus02
+ * @tc.desc: one FLOATING MainWindow, maximize and recover
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus02, Function | MediumTest | Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("Window1_2");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10012);
@@ -157,25 +141,22 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus02, Function | MediumTest | L
     window->Destroy(true, true);
 }
 
-    /**
-     * @tc.name: ChangeWindowStatus03
-     * @tc.desc: one FLOATING SubWindow, maximize and recover
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: ChangeWindowStatus03
+ * @tc.desc: one FLOATING SubWindow, maximize and recover
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus03, Function | MediumTest | Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("Window1_3");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10013);
@@ -208,25 +189,22 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus03, Function | MediumTest | L
     window->Destroy(true, true);
 }
 
-    /**
-     * @tc.name: ChangeWindowStatus04
-     * @tc.desc: one FULLSCREEN SubWindow, recover
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: ChangeWindowStatus04
+ * @tc.desc: one FULLSCREEN SubWindow, recover
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus04, Function | MediumTest | Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("Window1_4");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10014);
@@ -253,25 +231,22 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus04, Function | MediumTest | L
     window->Destroy(true, true);
 }
 
-    /**
-     * @tc.name: ChangeWindowStatus05
-     * @tc.desc: one FLOATING MainWindow, minimize and restore
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: ChangeWindowStatus05
+ * @tc.desc: one FLOATING MainWindow, minimize and restore
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus05, Function | MediumTest | Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("Window2_1");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10021);
@@ -301,25 +276,22 @@ HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus05, Function | MediumTest | L
     window->Destroy(true, true);
 }
 
-    /**
-     * @tc.name: ChangeWindowStatus06
-     * @tc.desc: one FLOATING SubWindow, minimize and restore
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: ChangeWindowStatus06
+ * @tc.desc: one FLOATING SubWindow, minimize and restore
+ * @tc.type: FUNC
+ */
 HWTEST_F(WindowStatusChangeTest, ChangeWindowStatus06, Function | MediumTest | Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("Window2_2");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10022);
