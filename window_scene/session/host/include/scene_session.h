@@ -518,7 +518,6 @@ public:
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     uint32_t GetTargetAPIVersion();
-    bool UpdateInteractiveInner(bool interactive);
 
     /*
      * Window Decor
