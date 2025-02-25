@@ -422,6 +422,21 @@ DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<uint64_t>& screenIds
     return DMError::DM_OK;
 }
 
+DMError ScreenManagerLite::GetPhysicalScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    std::vector<sptr<ScreenInfo>> allScreenInfos;
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(allScreenInfos);
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    for (const auto& screenInfo : allScreenInfos) {
+        if (screenInfo->GetType() == ScreenType::REAL) {
+            screenInfos.push_back(screenInfo);
+        }
+    }
+    return DMError::DM_OK;
+}
+
 void ScreenManagerLite::Impl::OnRemoteDied()
 {
     WLOGFD("dms is died");
