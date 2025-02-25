@@ -572,11 +572,11 @@ WSError SceneSession::UpdateActiveStatus(bool isActive)
 DMRect SceneSession::CalcRectForStatusBar()
 {
     DMRect statusBarRect = {0, 0, 0, 0};
-    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByType_ == nullptr) {
+    if (specificCallback_ == nullptr || specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "specificCallback is null");
         return statusBarRect;
     }
-    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByType_(
+    const auto& statusBarVector = specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_(
         WindowType::WINDOW_TYPE_STATUS_BAR, GetSessionProperty()->GetDisplayId());
     for (auto& statusBar : statusBarVector) {
         if (statusBar == nullptr) {
