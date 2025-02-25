@@ -120,7 +120,7 @@ public:
      *
      * @return the error code of window
      */
-    WMError GoDestroy();
+    WMError GoResume();
 
     /**
      * Window handle new want.
