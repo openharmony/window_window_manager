@@ -3170,7 +3170,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get highlight property of window.
      *
@@ -3214,7 +3214,7 @@ public:
      * @param want the want to store param.
      */
     virtual void GetExtensionConfig(AAFwk::WantParams& want) const {}
- 
+
     /**
      * @brief Update custom extension param.
      *
@@ -3242,6 +3242,13 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Get the api version.
+     *
+     * @return Api version
+     */
+    virtual uint32_t GetApiVersion() const { return 0; }
 };
 }
 }

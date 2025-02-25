@@ -501,7 +501,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get highlight property of window.
      *
@@ -509,6 +509,13 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the api version.
+     *
+     * @return Api version
+     */
+    virtual uint32_t GetApiVersion() const { return 0; }
 };
 }
 }
