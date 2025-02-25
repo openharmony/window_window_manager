@@ -1700,6 +1700,7 @@ void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
 {
     sptr<SessionLifeCycleTask> lifeCycleTask = nullptr;
+    sptr<SessionLifeCycleTask> frontlifeCycleTask = nullptr;
     {
         std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
         if (!lifeCycleTaskQueue_.empty()) {
@@ -1724,8 +1725,9 @@ void Session::PostLifeCycleTask(Task&& task, const std::string& name, const Life
         lifeCycleTaskQueue_.push_back(lifeCycleTask);
         TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
             name.c_str(), persistentId_);
+        frontlifeCycleTask = lifeCycleTaskQueue_.front();
     }
-    StartLifeCycleTask(lifeCycleTask);
+    StartLifeCycleTask(frontlifeCycleTask);
 }
 
 void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
