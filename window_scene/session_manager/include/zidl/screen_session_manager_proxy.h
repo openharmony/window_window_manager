@@ -65,6 +65,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override;
+    virtual ScreenPowerState GetScreenPower() override;
     virtual bool SetDisplayState(DisplayState state) override;
     virtual DisplayState GetDisplayState(DisplayId displayId) override;
     virtual bool TryToCancelScreenOff() override;

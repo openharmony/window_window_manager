@@ -165,6 +165,7 @@ public:
     virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate);
+    virtual ScreenPowerState GetScreenPower();
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };
