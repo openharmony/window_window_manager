@@ -5506,12 +5506,12 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    int32_t callingPid = IPCSkeleton::GetCallingPid();
-    if (callingPid != sceneSession->GetCallingPid() &&
-        !SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER)) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
+    // int32_t callingPid = IPCSkeleton::GetCallingPid();
+    // if (callingPid != sceneSession->GetCallingPid() &&
+    //     !SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER)) {
+    //     TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
+    //     return WMError::WM_ERROR_INVALID_CALLING;
+    // }
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
             RequestSessionFocus(persistentId, byForeground, reason);
