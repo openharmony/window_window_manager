@@ -409,7 +409,7 @@ static bool isConfigOptionWindowTypeValid(napi_env env, WindowOption& option)
     return true;
 }
 
-void NapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask,
+static void NapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask,
     const std::function<void()>& asyncTask)
 {
     if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
