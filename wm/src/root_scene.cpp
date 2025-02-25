@@ -223,8 +223,9 @@ void RootScene::RegisterInputEventListener()
     if (!(DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
         uiContent_.get(), eventHandler_))) {
         WLOGFE("EnableInputEventListener fail");
+    } else {
+        InputTransferStation::GetInstance().MarkRegisterToMMI();
     }
-    InputTransferStation::GetInstance().MarkRegisterToMMI();
 }
 
 void RootScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
