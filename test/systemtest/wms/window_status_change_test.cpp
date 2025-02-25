@@ -15,10 +15,12 @@
 
 //gtest
 #include <gtest/gtest.h>
-#include "window_test_utils.h"
+
 #include "ability_context_impl.h"
+
 #include "mock_session.h"
 #include "window_scene_session_impl.h"
+#include "window_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
