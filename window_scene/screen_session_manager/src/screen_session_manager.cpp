@@ -136,6 +136,8 @@ const std::string SCREEN_MIRROR = "mirror";
 const std::string MULTI_SCREEN_EXIT_STR = "exit";
 const std::string MULTI_SCREEN_ENTER_STR = "enter";
 #endif
+const bool IS_COORDINATION_SUPPORT =
+    OHOS::system::GetBoolParameter("const.window.foldabledevice.is_coordination_support", false);
 
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
@@ -243,25 +245,33 @@ void ScreenSessionManager::FoldScreenPowerInit()
         if (currentScreenId == SCREEN_ID_FULL) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 1.");
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
-            rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+            if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && IS_COORDINATION_SUPPORT) {
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Full animation Init 2.");
 #ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, fullTpChange.c_str());
 #endif
-            rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+            if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && IS_COORDINATION_SUPPORT) {
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF);
+            }
             foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_MODE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
         } else if (currentScreenId == SCREEN_ID_MAIN) {
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 3.");
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_OFF_FAKE);
-            rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
+            if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && IS_COORDINATION_SUPPORT) {
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_ON);
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(timeStamp));
             TLOGI(WmsLogTag::DMS, "ScreenSessionManager Fold Screen Power Main animation Init 4.");
 #ifdef TP_FEATURE_ENABLE
             rsInterface_.SetTpFeatureConfig(tpType, mainTpChange.c_str());
 #endif
-            rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+            if (FoldScreenStateInternel::IsDualDisplayFoldDevice() && IS_COORDINATION_SUPPORT) {
+                rsInterface_.SetScreenPowerStatus(SCREEN_ID_FULL, ScreenPowerStatus::POWER_STATUS_OFF);
+            }
             foldScreenController_->AddOrRemoveDisplayNodeToTree(SCREEN_ID_FULL, REMOVE_DISPLAY_MODE);
             rsInterface_.SetScreenPowerStatus(SCREEN_ID_MAIN, ScreenPowerStatus::POWER_STATUS_ON);
         } else {
