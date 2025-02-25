@@ -101,11 +101,6 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
 
 void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 {
-    if (IsRegisterToMMI()) {
-        TLOGI(WmsLogTag::WMS_EVENT, "IsRegisterToMMI");
-        return;
-    }
-
     uint32_t windowId = window->GetWindowId();
     TLOGD(WmsLogTag::WMS_EVENT, "Add input window, windowId: %{public}u", windowId);
 
@@ -115,12 +110,20 @@ void InputTransferStation::AddInputWindow(const sptr<Window>& window)
             windowId, window->GetType());
         return;
     }
+
+    if (!firstTimeRegister_) {
+        auto ret = MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(inputListener_, eventHandler_);
+        TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer %{public}u", ret);
+        return; 
+    }
+
     sptr<WindowInputChannel> inputChannel = new WindowInputChannel(window);
     std::lock_guard<std::mutex> lock(mtx_);
     if (destroyed_) {
         TLOGW(WmsLogTag::WMS_EVENT, "Already destroyed");
         return;
     }
+    firstTimeRegister_ = false;
     windowInputChannels_.insert(std::make_pair(windowId, inputChannel));
     if (inputListener_ == nullptr) {
         TLOGD(WmsLogTag::WMS_EVENT, "Init input listener, IsMainHandlerAvailable: %{public}u",
