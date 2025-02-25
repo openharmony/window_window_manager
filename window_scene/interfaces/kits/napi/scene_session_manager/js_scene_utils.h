@@ -67,7 +67,7 @@ enum class JsSessionType : uint32_t {
     TYPE_DIVIDER,
     TYPE_TRANSPARENT_VIEW,
     TYPE_WALLET_SWIPE_CARD,
-    TYPE_SCREEN_CONTROL,
+    TYPE_SCREEN_CONTROL
 };
 
 const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
