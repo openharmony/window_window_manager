@@ -737,7 +737,7 @@ HWTEST_F(WindowSessionTest3, NotifySessionFocusableChange, Function | SmallTest 
 {
     int resultValue = 0;
     NotifySessionFocusableChangeFunc func = [&resultValue](const bool isFocusable) {
-        resultValue = +1;
+        resultValue += 1;
     };
     session_->SetSessionFocusableChangeListener(func);
     session_->NotifySessionFocusableChange(true);
@@ -823,18 +823,12 @@ HWTEST_F(WindowSessionTest3, NotifyClick, Function | SmallTest | Level2)
 {
     ASSERT_NE(session_, nullptr);
     int resultValue = 0;
-    bool hasRequestFocus = true;
-    bool hasIsClick = true;
-    NotifyClickFunc func = [&resultValue, &hasRequestFocus, &hasIsClick](bool requestFocus, bool isClick) {
-        resultValue = 1;
-        hasRequestFocus = requestFocus;
-        hasIsClick = isClick;
+    NotifyClickFunc func = [&resultValue]() {
+        resultValue += 1;
     };
     session_->SetClickListener(func);
-    session_->NotifyClick(false, false);
-    EXPECT_EQ(resultValue, 1);
-    EXPECT_EQ(hasRequestFocus, false);
-    EXPECT_EQ(hasIsClick, false);
+    session_->NotifyClick();
+    EXPECT_EQ(resultValue, 2);
 }
 
 /**
