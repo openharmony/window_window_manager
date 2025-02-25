@@ -4522,11 +4522,11 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
         auto display = SingletonContainer::IsDestroyed() ? nullptr :
             SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
         if (display != nullptr) {
-            if (auto displayInfo = display->GetDisplayInfo()) {
-                DMRect availableArea = { 0, 0, 0, 0 };
-                if (display->GetAvailableArea(availableArea) == DMError::DM_OK) {
-                    UpdateNewSizeForPCWindow(displayInfo, availableArea);
-                }
+            DMRect availableArea = { 0, 0, 0, 0 };
+            DMError ret = display->GetAvailableArea(availableArea);
+            auto displayInfo = display->GetDisplayInfo();
+            if (displayInfo != nullptr && ret == DMError::DM_OK) {
+                UpdateNewSizeForPCWindow(displayInfo, availableArea);
             }
         }
     }
@@ -5211,8 +5211,8 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& i
         if (needMove) {
             MoveTo(left, top);
         }
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, height: %{public}u, Id: %{public}u", left, top,
-            GetPersistentId());
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, "
+            "width: %{public}u, height: %{public}u, Id: %{public}u", left, top, width, height, GetPersistentId());
     }
 }
 } // namespace Rosen
