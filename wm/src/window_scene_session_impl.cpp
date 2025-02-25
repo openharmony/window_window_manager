@@ -5229,5 +5229,10 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
     densityInfo.customDensity = customDensity;
     return WMError::WM_OK;
 }
+
+uint32_t WindowSceneSessionImpl::GetApiVersion() const
+{
+    return SysCapUtil::GetApiCompatibleVersion();
+}
 } // namespace Rosen
 } // namespace OHOS

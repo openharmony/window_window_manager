@@ -4443,5 +4443,10 @@ void WindowImpl::RegisterWindowInspectorCallback()
     };
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
 }
+
+uint32_t WindowImpl::GetApiVersion() const
+{
+    return SysCapUtil::GetApiCompatibleVersion();
+}
 } // namespace Rosen
 } // namespace OHOS

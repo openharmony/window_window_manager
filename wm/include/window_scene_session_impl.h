@@ -213,6 +213,7 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
+    uint32_t GetApiVersion() const override;
 
     /*
      * Window Decor
@@ -267,7 +268,7 @@ protected:
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
-    
+
     /*
      * Window Recover
      */
@@ -391,7 +392,7 @@ private:
      * Move Drag
      */
     bool CalcWindowShouldMove();
-    
+
     /*
      * PC Window
      */
