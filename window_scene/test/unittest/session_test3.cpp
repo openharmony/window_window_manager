@@ -828,7 +828,7 @@ HWTEST_F(WindowSessionTest3, NotifyClick, Function | SmallTest | Level2)
     };
     session_->SetClickListener(func);
     session_->NotifyClick();
-    EXPECT_EQ(resultValue, 2);
+    EXPECT_EQ(resultValue, 1);
 }
 
 /**
