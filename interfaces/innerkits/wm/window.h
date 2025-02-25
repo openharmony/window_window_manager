@@ -1066,7 +1066,7 @@ public:
      *
      * @return WMError
      */
-    virtual WMError Resume() { return WMError::WM_OK; }
+    virtual void Resume() {}
 
     /**
      * @brief Hide window
