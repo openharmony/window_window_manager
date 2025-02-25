@@ -388,6 +388,15 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     return;
 }
 
+static void StageNapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask,
+    const std::function<void()>& asyncTask)
+{
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "send event failed"));
+    }
+}
+
 napi_value JsWindowStage::OnLoadContent(napi_env env, napi_callback_info info, bool isLoadedByName)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
@@ -436,10 +445,7 @@ napi_value JsWindowStage::OnLoadContent(napi_env env, napi_callback_info info, b
         }
         LoadContentTask(contentStorage, contextUrl, win, env, *task, isLoadedByName);
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "send event failed"));
-    }
+    StageNapiSendEvent(env, napiAsyncTask, asyncTask);
     return result;
 }
 

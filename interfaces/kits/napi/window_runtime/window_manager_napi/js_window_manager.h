@@ -75,6 +75,8 @@ private:
         napi_env env, napi_value jsObject, WindowOption& option);
     static bool ParseConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option, void*& contextPtr);
+    static void NapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask,
+        const std::function<void()>& asyncTask);
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
 };
 }  // namespace Rosen
