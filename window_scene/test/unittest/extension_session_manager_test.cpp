@@ -94,7 +94,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionActivation02, Funct
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionActivation(extensionSession, 1, (func)));
     usleep(WAIT_SYNC_IN_NS);
 
-    ExtensionSession->persistentId_ = -1;
+    extensionSession->persistentId_ = -1;
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionActivation(extensionSession, 1, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 }
@@ -128,7 +128,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionBackground02, Funct
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionBackground(extensionSession, func));
     usleep(WAIT_SYNC_IN_NS);
 
-    ExtensionSession->persistentId_ = -1;
+    extensionSession->persistentId_ = -1;
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionBackground(extensionSession, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 }
@@ -162,7 +162,7 @@ HWTEST_F(ExtensionSessionManagerTest, RequestExtensionSessionDestruction03, Func
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, func));
     usleep(WAIT_SYNC_IN_NS);
 
-    ExtensionSession->persistentId_ = -1;
+    extensionSession->persistentId_ = -1;
     ASSERT_EQ(WSError::WS_OK, instance->RequestExtensionSessionDestruction(extensionSession, nullptr));
     usleep(WAIT_SYNC_IN_NS);
 }
