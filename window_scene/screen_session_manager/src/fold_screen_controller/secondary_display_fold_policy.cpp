@@ -186,6 +186,7 @@ FoldDisplayMode SecondaryDisplayFoldPolicy::GetModeMatchStatus()
 void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
     FoldDisplayMode displayMode)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode) {
