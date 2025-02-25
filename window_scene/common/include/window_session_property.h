@@ -102,6 +102,7 @@ public:
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
+    void SetIsAtomicService(bool isAtomicService);
     
     /*
      * Window Immersive
@@ -167,6 +168,7 @@ public:
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
     bool GetCompatibleModeEnableInPad() const;
+    bool GetIsAtomicService() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -412,6 +414,7 @@ private:
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
+    bool isAtomicService_ = false;
 
     /*
      * Sub Window
