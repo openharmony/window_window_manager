@@ -1336,6 +1336,7 @@ void WindowSceneSessionImpl::SetDefaultProperty()
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             property_->SetTouchable(false);
             property_->SetFocusable(false);
+            SetAlpha(0);
             break;
         }
         default:
