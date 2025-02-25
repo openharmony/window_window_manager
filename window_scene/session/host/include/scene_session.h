@@ -210,6 +210,7 @@ public:
     WSError UpdateClientRect(const WSRect& rect) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
     WSRect GetSessionGlobalRectWithSingleHandScale();
+    void SetWinRectWhenUpdateRect(const WSRect& rect);
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
