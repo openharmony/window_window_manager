@@ -102,6 +102,7 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
 void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 {
     if (IsRegisterToMMI()) {
+        TLOGI(WmsLogTag::WMS_EVENT, "IsRegisterToMMI");
         return;
     }
 

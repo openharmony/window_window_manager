@@ -91,14 +91,14 @@ bool IntentionEventManager::EnableInputEventListener(Ace::UIContent* uiContent,
     }
     auto listener =
         std::make_shared<IntentionEventManager::InputEventListener>(uiContent, eventHandler);
-    MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
+    auto ret = MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler);
     TLOGI(WmsLogTag::WMS_EVENT, "SetWindowInputEventConsumer success");
     if (IS_BETA) {
         // Xcollie's SetTimerCounter task is set with the params to record count and time of the input down event
         int id = HiviewDFX::XCollie::GetInstance().SetTimerCount("FREQUENT_CLICK_WARNING", FREQUENT_CLICK_TIME_LIMIT,
             FREQUENT_CLICK_COUNT_LIMIT);
     }
-    return true;
+    return ret > 0;
 }
 
 void IntentionEventManager::InputEventListener::SetPointerEventStatus(
