@@ -197,10 +197,13 @@ public:
     ScreenId screenId_ {};
     ScreenId rsId_ {};
     ScreenId defaultScreenId_ = SCREEN_ID_INVALID;
+
+    void SetIsInternal(bool isInternal);
+    bool GetIsInternal() const;
     void SetIsRealScreen(bool isReal);
     bool GetIsRealScreen();
 
-    bool isExtended_ { false };
+    bool isInternal_ { false };
     bool isReal_ { false };
 
     NodeId nodeId_ {};
@@ -212,6 +215,7 @@ public:
     ScreenId groupSmsId_ { SCREEN_ID_INVALID };
     ScreenId lastGroupSmsId_ { SCREEN_ID_INVALID };
     std::atomic<bool> isScreenLocked_ = true;
+    bool isExtended_ { false };
 
     void Connect();
     void Disconnect();

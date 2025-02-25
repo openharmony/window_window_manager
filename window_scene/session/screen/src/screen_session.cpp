@@ -354,6 +354,16 @@ bool ScreenSession::GetIsRealScreen()
     return isReal_;
 }
 
+void ScreenSession::SetIsInternal(bool isInternal)
+{
+    isInternal_ = isInternal;
+}
+
+bool ScreenSession::GetIsInternal() const
+{
+    return isInternal_;
+}
+
 std::string ScreenSession::GetName()
 {
     return name_;
