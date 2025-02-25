@@ -409,6 +409,15 @@ static bool isConfigOptionWindowTypeValid(napi_env env, WindowOption& option)
     return true;
 }
 
+void NapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask,
+    const std::function<void()>& asyncTask)
+{
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "send event failed"));
+    }
+}
+
 napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
@@ -441,24 +450,22 @@ napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
     void* contextPtr = nullptr;
     GetNativeContext(env, nativeContext, contextPtr, errCode);
 
-    TLOGD(WmsLogTag::WMS_LIFE, "Window name=%{public}s, type=%{public}u, err=%{public}d", windowName.c_str(), winType, errCode);
+    TLOGD(WmsLogTag::WMS_LIFE, "Window name=%{public}s, type=%{public}u, err=%{public}d", windowName.c_str(), winType,
+        errCode);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
-    auto asyncTask = [=] {
+    auto asyncTask = [errCode, parentId, contextPtr, windowName, winType, env, task = napiAsyncTask] {
         if (errCode != WMError::WM_OK) {
-            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params"));
             return;
         }
         if (parentId == INVALID_WINDOW_ID) {
-            return CreateSystemWindowTask(contextPtr, windowName, winType, env, *napiAsyncTask);
+            return CreateSystemWindowTask(contextPtr, windowName, winType, env, *task);
         } else {
-            return CreateSubWindowTask(parentId, windowName, winType, env, *napiAsyncTask);
+            return CreateSubWindowTask(parentId, windowName, winType, env, *task);
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "send event failed"));
-    }
+    NapiSendEvent(env, napiAsyncTask, asyncTask);
     return result;
 }
 
@@ -567,19 +574,16 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
     }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
-    auto asyncTask = [=] {
+    auto asyncTask = [option, contextPtr, env, task = napiAsyncTask] {
         sptr<WindowOption> windowOption = new WindowOption(option);
         if (WindowHelper::IsSystemWindow(option.GetWindowType())) {
-            return CreateNewSystemWindowTask(contextPtr, windowOption, env, *napiAsyncTask);
+            return CreateNewSystemWindowTask(contextPtr, windowOption, env, *task);
         }
         if (WindowHelper::IsSubWindow(option.GetWindowType())) {
-            return CreateNewSubWindowTask(windowOption, env, *napiAsyncTask);
+            return CreateNewSubWindowTask(windowOption, env, *task);
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "send event failed"));
-    }
+    NapiSendEvent(env, napiAsyncTask, asyncTask);
     return result;
 }
 
@@ -657,31 +661,29 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
         (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [=] {
+    auto asyncTask = [errCode, windowName, env, task = napiAsyncTask] {
         if (errCode != WMError::WM_OK) {
-            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params"));
             return;
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WM:Find %s", windowName.c_str());
         std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
         if (jsWindowObj != nullptr && jsWindowObj->GetNapiValue() != nullptr) {
             TLOGI(WmsLogTag::WMS_LIFE, "Find window: %{public}s, use exist js window", windowName.c_str());
-            napiAsyncTask->Resolve(env, jsWindowObj->GetNapiValue());
+            task->Resolve(env, jsWindowObj->GetNapiValue());
         } else {
             sptr<Window> window = Window::Find(windowName);
             if (window == nullptr) {
                 TLOGE(WmsLogTag::WMS_LIFE, "Cannot find window: %{public}s", windowName.c_str());
-                napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Cannot find window"));
+                task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
+                    "Cannot find window"));
             } else {
-                napiAsyncTask->Resolve(env, CreateJsWindowObject(env, window));
+                task->Resolve(env, CreateJsWindowObject(env, window));
                 TLOGI(WmsLogTag::WMS_LIFE, "Find window: %{public}s, create js window", windowName.c_str());
             }
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "send event failed"));
-    }
+    NapiSendEvent(env, napiAsyncTask, asyncTask);
     return result;
 }
 
@@ -752,27 +754,25 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
 
-    TLOGI(WmsLogTag::WMS_LIFE, "Display id=%{public}" PRIu64 ", err=%{public}d", static_cast<uint64_t>(displayId), errCode);
+    TLOGI(WmsLogTag::WMS_LIFE, "Display id=%{public}" PRIu64 ", err=%{public}d", static_cast<uint64_t>(displayId),
+        errCode);
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [=] {
+    auto asyncTask = [displayId, env, task = napiAsyncTask] {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WM:MinimizeAll: " PRIu64"",
             static_cast<uint64_t>(displayId));
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId)));
         if (ret == WmErrorCode::WM_OK) {
-            napiAsyncTask->Resolve(env, NapiGetUndefined(env));
+            task->Resolve(env, NapiGetUndefined(env));
             TLOGI(WmsLogTag::WMS_LIFE, "OnMinimizeAll success");
         } else {
-            napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnMinimizeAll failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnMinimizeAll failed"));
         }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "send event failed"));
-    }
+    NapiSendEvent(env, napiAsyncTask, asyncTask);
     return result;
 }
 
