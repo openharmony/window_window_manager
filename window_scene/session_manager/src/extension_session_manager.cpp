@@ -23,6 +23,7 @@
 #include "singleton_container.h"
 
 #include "session/host/include/extension_session.h"
+#include "perform_reporter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -123,6 +124,19 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
         TLOGNI(WmsLogTag::WMS_UIEXT, "Activate ret:%{public}d, persistentId:%{public}d", errorCode, persistentId);
+        if (errorCode != ERR_OK) {
+            std::ostringstream oss;
+            oss << "Start UIExtensionAbility failed" << ",";
+            oss << " provider windowName: " << extSession->GetWindowName() << ",";
+            oss << " errorCode: " << errorCode << ";";
+            int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
+                static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL),
+                getpid(), persistentId, oss.str()
+            );
+            if (ret != 0) {
+                TLOGNI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
+            }
+        }
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
             callback(ret);
