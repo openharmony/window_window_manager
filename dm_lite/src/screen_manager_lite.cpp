@@ -292,6 +292,9 @@ DMError ScreenManagerLite::RegisterScreenModeChangeListener(sptr<IScreenModeChan
         WLOGFE("RegisterScreenListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    GetPhysicalScreenInfos(screenInfos);
+    listener->NotifyScreenModeChange(screenInfos);
     return pImpl_->RegisterScreenModeChangeListener(listener);
 }
 
