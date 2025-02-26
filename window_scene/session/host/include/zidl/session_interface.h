@@ -196,7 +196,7 @@ public:
     virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
     virtual WSError GetIsMidScene(bool& isMidScene) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) { return WSError::WS_OK; }
+        const sptr<AAFwk::SessionInfo> abilitySessionInfo, const ExceptionInfo exceptionInfo) { return WSError::WS_OK; }
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }

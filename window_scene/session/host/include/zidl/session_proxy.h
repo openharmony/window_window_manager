@@ -44,7 +44,7 @@ public:
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
+        const sptr<AAFwk::SessionInfo> abilitySessionInfo, const ExceptionInfo& exceptionInfo) override;
     WSError OnSessionEvent(SessionEvent event) override;
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;

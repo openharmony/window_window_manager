@@ -585,7 +585,8 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
+WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+    const ExceptionInfo& exceptionInfo)
 {
     if (abilitySessionInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
@@ -624,6 +625,14 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
     }
     if (!data.WriteString(abilitySessionInfo->identityToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write identity token info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(exceptionInfo.needRemoveSession)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write needRemoveSession token info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(exceptionInfo.needClearCallerLink)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write needClearCallerLink info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

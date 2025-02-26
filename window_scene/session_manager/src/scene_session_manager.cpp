@@ -962,7 +962,9 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             }
             const auto& sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
             TLOGNI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId=%{public}d", sessionId);
-            sceneSession->NotifySessionExceptionInner(sceneSessionInfo, false);
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = false;
+            sceneSession->NotifySessionExceptionInner(sceneSessionInfo, exceptionInfo);
         }
         RemoveFailRecoveredSession();
     }, __func__);
@@ -2418,7 +2420,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         if (!PreHandleCollaborator(sceneSession, persistentId)) {
             TLOGE(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, ancoSceneState: %{public}d",
                 persistentId, sceneSession->GetSessionInfo().ancoSceneState);
-            sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), true);
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = true;
+            sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
         }
     }
@@ -2462,6 +2466,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     NotifyCollaboratorAfterStart(sceneSession, sceneSessionInfo);
     if (errCode != ERR_OK) {
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
+        ExceptionInfo exceptionInfo;
+        exceptionInfo.needRemoveSession = true;
         sceneSession->NotifySessionExceptionInner(sceneSessionInfo, true, false, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
@@ -4071,7 +4077,9 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
-            sceneSession->NotifySessionExceptionInner(abilitySessionInfo, true, false, true);
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = true;
+            sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
             if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
                 startUIAbilityErrorFunc_(
                     static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
@@ -4862,7 +4870,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         return;
     }
     sceneSession->SetSessionExceptionListener([this, where = __func__](
-        const SessionInfo& info, bool needRemoveSession = false, bool startFail = false) {
+        const SessionInfo& info, const ExceptionInfo & exceptionInfo , bool startFail = false) {
         auto task = [this, info, where] {
             auto session = GetSceneSession(info.persistentId_);
             if (session == nullptr) {
@@ -11714,7 +11722,9 @@ void SceneSessionManager::RemoveFailRecoveredSession()
             continue;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId=%{public}d", persistentId);
-        sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), true);
+        ExceptionInfo exceptionInfo;
+        exceptionInfo.needRemoveSession = true;
+        sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
     }
     failRecoveredPersistentIdSet_.clear();
 }

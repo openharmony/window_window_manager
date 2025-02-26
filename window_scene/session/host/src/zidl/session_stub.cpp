@@ -597,6 +597,17 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
         return ERR_INVALID_DATA;
     }
+    ExceptionInfo exceptionInfo;
+    if (!data.ReadBool(exceptionInfo.needRemoveSession)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(exceptionInfo.needClearCallerLink)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needClearCallerLink failed.");
+        return ERR_INVALID_DATA;
+    }
+    exceptionInfo.needClearCallerLink =
+        exceptionInfo.needRemoveSession ? true : exceptionInfo.needClearCallerLink;
     WSError errCode = NotifySessionException(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
