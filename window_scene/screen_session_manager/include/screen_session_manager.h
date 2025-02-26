@@ -46,7 +46,9 @@ static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_
     {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
     {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
     {ScreenPowerStatus::POWER_STATUS_DOZE, DisplayPowerEvent::DISPLAY_DOZE},
-    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
+    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND},
+    {ScreenPowerStatus::POWER_STATUS_ON_ADVANCED, DisplayPowerEvent::DISPLAY_ON},
+    {ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED, DisplayPowerEvent::DISPLAY_OFF}
 };
 
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
