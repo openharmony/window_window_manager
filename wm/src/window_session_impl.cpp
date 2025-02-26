@@ -3775,10 +3775,17 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    if (lastAvoidAreaMap_[type] != *avoidArea) {
-        lastAvoidAreaMap_[type] = *avoidArea;
-        NotifyAvoidAreaChange(avoidArea, type);
-        UpdateViewportConfig(GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
+    auto task = [this, avoidArea, type] {
+        if (lastAvoidAreaMap_[type] != *avoidArea) {
+            lastAvoidAreaMap_[type] = *avoidArea;
+            NotifyAvoidAreaChange(avoidArea, type);
+            UpdateViewportConfig(GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
+        }
+    };
+    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        task();
+    } else {
+        handler_->PostSyncTask(std::move(task), __func__);
     }
     return WSError::WS_OK;
 }
