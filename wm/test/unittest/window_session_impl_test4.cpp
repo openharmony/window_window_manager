@@ -2590,6 +2590,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowCrossAxisChange, Function | SmallTe
     EXPECT_CALL(*crossListener, OnCrossAxisChange(CrossAxisState::STATE_CROSS)).Times(1);
     window->NotifyWindowCrossAxisChange(CrossAxisState::STATE_CROSS);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
+    WindowSessionImpl::windowCrossAxisListeners_[window->property_->persistentId_].clear();
 }
 
 /**
