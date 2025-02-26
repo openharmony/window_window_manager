@@ -22,6 +22,17 @@ PipOption::PipOption()
 {
 }
 
+void PipOption::ClearNapiRefs(napi_env env)
+{
+    if (customNodeController_) {
+        napi_delete_reference(env, customNodeController_);
+        customNodeController_ = nullptr;
+    }
+    if (typeNode_) {
+        napi_delete_reference(env, typeNode_);
+        typeNode_ = nullptr;
+    }
+}
 void PipOption::SetContext(void* contextPtr)
 {
     contextPtr_ = contextPtr;
