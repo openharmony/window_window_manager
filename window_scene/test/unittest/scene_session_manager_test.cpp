@@ -1914,6 +1914,23 @@ HWTEST_F(SceneSessionManagerTest, GetRootMainWindowId, Function | SmallTest | Le
     ASSERT_EQ(result, WMError::WM_OK);
     ASSERT_EQ(hostWindowId, sceneSession1->GetPersistentId());
 }
+
+/**
+ * @tc.name: BuildCancelPointerEvent
+ * @tc.desc: test function : BuildCancelPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, BuildCancelPointerEvent, Function | SmallTest | Level3)
+{
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ssm_->BuildCancelPointerEvent(pointerEvent, 0, MMI::PointerEvent::POINTER_ACTION_DOWN, 2);
+    int32_t pointerId = 99999999;
+    ASSERT_EQ(pointerEvent->GetId(), pointerId);
+    ASSERT_EQ(pointerEvent->GetTargetWindowId(), 2);
+    ASSERT_EQ(pointerEvent->GetPointerId(), 0);
+    ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    ASSERT_EQ(pointerEvent->GetSourceType(), MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

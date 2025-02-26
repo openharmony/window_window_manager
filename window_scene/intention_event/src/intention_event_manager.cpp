@@ -17,7 +17,6 @@
 #ifdef IMF_ENABLE
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
-#include "scene_session.h"
 #include "session_helper.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_hilog.h"
@@ -125,6 +124,34 @@ void IntentionEventManager::InputEventListener::UpdateLastMouseEvent(
     }
 }
 
+void IntentionEventManager::InputEventListener::SetPointerEventStatus(
+    int32_t fingerId, int32_t action, int32_t sourceType, const sptr<SceneSession>& sceneSession) const
+{
+    switch (action) {
+        case MMI::PointerEvent::POINTER_ACTION_DOWN:
+            sceneSession->SetFingerPointerDownStatus(fingerId);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_UP:
+            sceneSession->RemoveFingerPointerDownStatus(fingerId);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+            sceneSession->SetMousePointerDownEventStatus(true);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+            sceneSession->SetMousePointerDownEventStatus(false);
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+                sceneSession->SetMousePointerDownEventStatus(false);
+            } else {
+                sceneSession->RemoveFingerPointerDownStatus(fingerId);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 bool IntentionEventManager::InputEventListener::CheckPointerEvent(
     const std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
@@ -172,7 +199,12 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
             pointerEvent->SetPointerId(pointerId + dispatchTimes * TRANSPARENT_FINGER_ID);
         }
     }
+    auto sourceType = pointerEvent->GetSourceType();
     if (action != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        if (sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE ||
+            sourceType == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+            SetPointerEventStatus(pointerEvent->GetPointerId(), action, sourceType, sceneSession);
+        }
         static uint32_t eventId = 0;
         TLOGI(WmsLogTag::WMS_INPUT_KEY_FLOW, "eid:%{public}d,InputId:%{public}d,wid:%{public}u"
             ",windowName:%{public}s,action:%{public}d,isSystem:%{public}d", eventId++, pointerEvent->GetId(), windowId,
