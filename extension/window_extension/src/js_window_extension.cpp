@@ -223,10 +223,15 @@ sptr<IRemoteObject> JsWindowExtension::OnConnect(const AAFwk::Want& want)
     WLOGI("called.");
     Extension::OnConnect(want);
     napi_env env = jsRuntime_.GetNapiEnv();
-    auto jsCallback = [this, want, env] {
+    if (!jsObj_) {
+        WLOGFW("Not found WindowExtension.js");
+        return nullptr;
+    }
+    napi_value value = jsObj_->GetNapiValue();
+    auto jsCallback = [want, env, value] {
         napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
         napi_value argv[] = { napiWant };
-        CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv));
+        CallJsMethod("onConnect", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
     if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
         WLOGE("send event failed");
@@ -248,9 +253,14 @@ void JsWindowExtension::OnDisconnect(const AAFwk::Want& want)
 {
     Extension::OnDisconnect(want);
     napi_env env = jsRuntime_.GetNapiEnv();
+    if (!jsObj_) {
+        WLOGFW("Not found WindowExtension.js");
+        return;
+    }
+    napi_value value = jsObj_->GetNapiValue();
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
     napi_value argv[] = { napiWant };
-    CallJsMethod("onDisconnect", argv, AbilityRuntime::ArraySize(argv));
+    CallJsMethod("onDisconnect", argv, AbilityRuntime::ArraySize(argv), env, value);
     auto window = stub_ != nullptr ? stub_->GetWindow() : nullptr;
     if (window != nullptr) {
         window->Destroy();
@@ -304,12 +314,12 @@ void JsWindowExtension::OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo
 void JsWindowExtension::OnWindowCreated() const
 {
     napi_env env = jsRuntime_.GetNapiEnv();
-    auto jsCallback = [this, env] {
-        if (stub_ == nullptr) {
-            WLOGE("stub is nullptr");
-            return;
-        }
-        auto window = stub_->GetWindow();
+    if (stub_ == nullptr) {
+        WLOGE("stub is nullptr");
+        return;
+    }
+    auto jsCallback = [stub = stub_, env] {
+        auto window = stub->GetWindow();
         if (window == nullptr) {
             WLOGE("get window failed");
             return;
@@ -320,7 +330,7 @@ void JsWindowExtension::OnWindowCreated() const
             return;
         }
         napi_value argv[] = { value };
-        CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv));
+        CallJsMethod("onWindowReady", argv, AbilityRuntime::ArraySize(argv), env, value);
     };
     if (napi_status::napi_ok != napi_send_event(env, jsCallback, napi_eprio_high)) {
         WLOGE("send event failed");
@@ -334,19 +344,10 @@ napi_valuetype GetType(napi_env env, napi_value value)
     return res;
 }
 
-napi_value JsWindowExtension::CallJsMethod(const char* name, napi_value const * argv, size_t argc) const
+napi_value CallJsMethod(const char* name, napi_value const * argv, size_t argc,
+    napi_env env, napi_value value)
 {
     WLOGI("called (%{public}s), begin", name);
-
-    if (!jsObj_) {
-        WLOGFW("Not found WindowExtension.js");
-        return nullptr;
-    }
-
-    AbilityRuntime::HandleScope handleScope(jsRuntime_);
-    napi_env env = jsRuntime_.GetNapiEnv();
-
-    napi_value value = jsObj_->GetNapiValue();
     if (value == nullptr) {
         WLOGFE("Failed to get WindowExtension object");
         return nullptr;
