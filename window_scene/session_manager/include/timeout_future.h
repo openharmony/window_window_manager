@@ -30,10 +30,7 @@ public:
         return result_;
     }
 
-    bool IsReady()
-    {
-        return isReady_;
-    }
+    inline bool IsReady() { return isReady_; }
 
     void FutureCall(T t)
     {
