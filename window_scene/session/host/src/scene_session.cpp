@@ -3407,6 +3407,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
     }, __func__);
 }
 
+/** @note @window.drag */
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 {
     if (!specificCallback_) {
