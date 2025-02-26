@@ -391,6 +391,17 @@ enum class ScreenCombination : uint32_t {
     SCREEN_MAIN,
 };
 
+/**
+ * @brief Enumerates the virtual screen type.
+ */
+enum class VirtualScreenType: uint32_t {
+    UNKNOWN = 0,
+    SCREEN_CASTING,
+    SCREEN_RECORDING,
+    SUPER_DESKTOP,
+    HICAR,
+};
+
 struct Point {
     int32_t posX_;
     int32_t posY_;
