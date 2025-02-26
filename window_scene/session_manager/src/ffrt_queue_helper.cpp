@@ -14,8 +14,11 @@
  */
 
 #include "ffrt_queue_helper.h"
+
 #include <cstdint>
+
 #include "ffrt_inner.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
@@ -23,7 +26,9 @@ constexpr int32_t FFRT_USER_INTERACTIVE_MAX_THREAD_NUM = 5;
 FfrtQueueHelper::FfrtQueueHelper()
 {
     ffrtQueue_ = std::make_unique<ffrt::queue>(ffrt::queue_concurrent, "FfrtQueueHelper",
-        ffrt::queue_attr().qos(ffrt_qos_user_interactive).max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
+        ffrt::queue_attr()
+        .qos(ffrt_qos_user_interactive)
+        .max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
 }
 
 FfrtQueueHelper::~FfrtQueueHelper() = default;
@@ -32,7 +37,11 @@ bool FfrtQueueHelper::SubmitTaskAndWait(std::function<void()>&& task, uint64_t t
 {
     auto timeoutFuture = std::make_shared<TimeoutFuture<bool>>();
     ffrtQueue_->submit([localTask = std::move(task), timeoutFuture] {
-        localTask();
+        if (localTask) {
+            localTask();
+        } else {
+            TLOGNE(WmsLogTag::WMS_LIFE, "task function is empty");
+        }
         timeoutFuture->FutureCall(true);
     });
     bool isTimeout = false;
