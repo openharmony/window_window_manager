@@ -243,7 +243,6 @@ public:
     virtual WSError SendContainerModalEvent(const std::string& eventName, const std::string& eventValue) = 0;
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
-    virtual uint32_t GetTargetAPIVersion() { return 0; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

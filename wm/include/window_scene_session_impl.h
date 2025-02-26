@@ -418,7 +418,7 @@ private:
      * Window Lifecycle
      */
     bool isColdStart_ = true;
-    void NotifyPcModeResume();
+    void NotifyFreeMultiWindowModeResume();
 };
 } // namespace Rosen
 } // namespace OHOS

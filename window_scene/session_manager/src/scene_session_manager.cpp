@@ -2567,7 +2567,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
 
-        if (sceneSession->GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
             TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
             sceneSession->UpdateInteractiveInner(false);
         }
@@ -2822,7 +2822,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
             this->RemoveSnapshotFromCache(persistentId);
         });
-        if (sceneSession->GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
             TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
             sceneSession->UpdateInteractiveInner(false);
         }
@@ -4072,7 +4072,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         bool isFromUser = false;
-        if (sceneSession->GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
             TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
             sceneSession->UpdateInteractiveInner(false);
         }

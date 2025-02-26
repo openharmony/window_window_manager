@@ -30,7 +30,6 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionStageProxy"};
 constexpr int32_t MAX_INFO_SIZE = 50;
 constexpr size_t MAX_PARCEL_CAPACITY = 100 * 1024 * 1024; // 100M
-constexpr uint32_t DEFAULT_VERSION = 0;
 
 bool CopyBufferFromRawData(void*& buffer, size_t size, const void* data)
 {
@@ -1665,35 +1664,5 @@ WSError SessionStageProxy::NotifyWindowAttachStateChange(bool isAttach)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
-}
-
-uint32_t SessionStageProxy::GetTargetAPIVersion()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
-        return DEFAULT_VERSION;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
-        return DEFAULT_VERSION;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SessionStageInterfaceCode::TRANS_ID_GET_TARGET_API_VERSION),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
-        return DEFAULT_VERSION;
-    }
-
-    uint32_t version;
-    if (!reply.ReadUint32(version)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "read version failed");
-        return DEFAULT_VERSION;
-    }
-    return version;
 }
 } // namespace OHOS::Rosen
