@@ -74,6 +74,9 @@ PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption
 
 PictureInPictureController::~PictureInPictureController()
 {
+    if (pipOption_) {
+        pipOption_->ClearNapiRefs(env_);
+    }
     TLOGI(WmsLogTag::WMS_PIP, "Destruction");
     if (!isAutoStartEnabled_) {
         return;
