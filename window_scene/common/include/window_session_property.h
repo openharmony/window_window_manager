@@ -414,6 +414,7 @@ private:
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
+    mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
 
     /*
