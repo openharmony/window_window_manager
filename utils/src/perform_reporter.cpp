@@ -337,10 +337,10 @@ int32_t WindowInfoReporter::ReportUIExtensionException(int32_t exceptionType, in
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         "EXCEPTION_TYPE", exceptionType,
         "PID", pid,
-        "PERSISTENT_ID", persistentId,
+        "PERSISTENTID", persistentId,
         "MSG", uiextInfo);
     if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_UIEXT, "Write HiSysEvent error, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write HiSysEvent error, ret: %{public}d", ret);
     }
     return ret;
 }
@@ -356,7 +356,7 @@ int32_t WindowInfoReporter::ReportEventDispatchException(int32_t exceptionType, 
         "PID", pid,
         "MSG", flushInfo);
     if (ret != 0) {
-        TLOGE(WmsLogTag::WMS_EVENT, "Write HiSysEvent error, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::WMS_EVENT, "Write HiSysEvent error, ret: %{public}d", ret);
     }
     return ret;
 }
