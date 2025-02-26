@@ -561,7 +561,8 @@ HWTEST_F(WindowSessionTest4, SetSessionIcon, Function | SmallTest | Level2)
 HWTEST_F(WindowSessionTest4, SetSessionExceptionListener, Function | SmallTest | Level2)
 {
     session_->SetSessionExceptionListener(nullptr, true);
-    session_->SetSessionExceptionListener([](const SessionInfo& info, bool removeSession, bool startFail) {}, true);
+    session_->SetSessionExceptionListener([](const SessionInfo& info,
+        const ExceptionInfo& exceptionInfo , bool startFail) {}, true);
     usleep(waitSyncInNs_);
     ASSERT_NE(nullptr, session_->jsSceneSessionExceptionFunc_);
 }

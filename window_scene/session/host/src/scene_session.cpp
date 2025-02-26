@@ -5207,9 +5207,9 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 }
 
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
-    bool needRemoveSession, bool isFromClient, bool startFail)
+    const ExceptionInfo& exceptionInfo, bool isFromClient, bool startFail)
 {
-    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, needRemoveSession,
+    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, exceptionInfo,
         isFromClient, startFail, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -5248,23 +5248,24 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
             session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
         }
         if (session->sessionExceptionFunc_) {
-            session->sessionExceptionFunc_(info, needRemoveSession, false);
+            session->sessionExceptionFunc_(info, exceptionInfo, false);
         }
         if (session->jsSceneSessionExceptionFunc_) {
-            session->jsSceneSessionExceptionFunc_(info, needRemoveSession, startFail);
+            session->jsSceneSessionExceptionFunc_(info, exceptionInfo, startFail);
         }
         return WSError::WS_OK;
     }, __func__, LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
-WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
+WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+    const ExceptionInfo& exceptionInfo)
 {
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    return NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
+    return NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, true);
 }
 
 WSRect SceneSession::GetLastSafeRect() const

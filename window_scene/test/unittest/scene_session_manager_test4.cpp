@@ -1562,31 +1562,32 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | Smal
         std::make_shared<SessionListenerController>();
     ssm_->listenerController_ = listenerController;
     ASSERT_NE(ssm_->listenerController_, nullptr);
-    ssm_->RegisterSessionExceptionFunc(sceneSession);
+    ExceptionInfo exceptionInfo;
+    ssm_->RegisterSessionExceptionFunc(sceneSession, exceptionInfo);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo, nullptr);
-    WSError result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    WSError result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     abilitySessionInfo->errorCode = 1;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     abilitySessionInfo->errorCode = 0;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     sessionInfo.isSystem_ = false;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     ssm_->listenerController_ = nullptr;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     sessionInfo.persistentId_ = 2;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
 }

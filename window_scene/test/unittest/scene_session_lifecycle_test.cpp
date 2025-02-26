@@ -981,39 +981,6 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: NotifySessionException
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionException, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifySessionException";
-    info.bundleName_ = "NotifySessionException";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-
-    sptr<AAFwk::SessionInfo> info1 = nullptr;
-    WSError result = sceneSession->NotifySessionException(info1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-
-    result = sceneSession->NotifySessionException(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-}
-
-/**
  * @tc.name: NotifySessionException01
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1025,10 +992,9 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTe
     bool needRemoveSession = true;
     OHOS::Rosen::Session session(info);
     session.isTerminating_ = true;
-    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
-    sceneSession->GetLastSafeRect();
-    WSRect rect;
-    sceneSession->SetLastSafeRect(rect);
+    ExceptionInfo exceptionInfo;
+    WSError ret = sceneSession->NotifySessionException(abilitySessionInfo, exceptionInfo);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
