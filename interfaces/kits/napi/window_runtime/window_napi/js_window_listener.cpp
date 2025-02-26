@@ -128,7 +128,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         }
         HandleScope handleScope(env);
         napi_value propertyValue = nullptr;
-        napi_create_object(eng, &propertyValue);
+        napi_create_object(env, &propertyValue);
         if (propertyValue == nullptr) {
             WLOGFE("Failed to convert prop to jsObject");
             return;
@@ -136,7 +136,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         napi_set_named_property(env, propertyValue, "displayId",
             CreateJsValue(eng, static_cast<uint32_t>(displayId)));
         napi_set_named_property(env, propertyValue, "regionTint",
-            CreateJsSystemBarRegionTintArrayObject(eng, tints));
+            CreateJsSystemBarRegionTintArrayObject(env, tints));
         napi_value argv[] = {propertyValue};
         thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
