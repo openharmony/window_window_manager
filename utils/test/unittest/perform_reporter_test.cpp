@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
+#include "input_manager.h"
 #include "perform_reporter.h"
 #include "window_manager_hilog.h"
 
@@ -404,6 +405,73 @@ HWTEST_F(PerformReporterTest, ClearRecordedInfos016, Function | SmallTest | Leve
     int res = 0;
     WindowInfoReporter windowInfoReporter;
     windowInfoReporter.ClearRecordedInfos();
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportUIExtensionException
+ * @tc.desc: ReportUIExtensionException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportUIExtensionException, Function | SmallTest | Level2)
+{
+    int32_t res = 0;
+    WindowInfoReporter windowInfoReporter;
+    WindowDFXHelperType exceptionType = WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL;
+    int32_t pid = 1111;
+    int32_t persistentId = 1111111111;
+    // WS_ERROR_IPC_FAILED = 1005
+    int32_t errorCode = 1005;
+    std::ostringstream oss;
+    oss << "TransferExtensionData from provider to host failed" << ",";
+    oss << " provider bundleName: " << "testProviderBundleName1" << ",";
+    oss << " provider windowName: " << "testWindowName1" << ",";
+    oss << " errorCode: " << errorCode << ";";
+    res = windowInfoReporter.ReportUIExtensionException(static_cast<int32_t>(exceptionType), pid, persistentId,
+        oss.str()
+    );
+    ASSERT_EQ(res, 0);
+
+    exceptionType = WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL;
+    pid = 2222;
+    persistentId = 1111122222;
+    // ERR_BASE = (-99)
+    errorCode = -99;
+    oss.str("");
+    oss << "Start UIExtensionAbility failed" << ",";
+    oss << " provider windowName: " << "testWindowName2" << ",";
+    oss << " errorCode: " << errorCode << ";";
+    res = windowInfoReporter.ReportUIExtensionException(static_cast<int32_t>(exceptionType), pid, persistentId,
+        oss.str()
+    );
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportEventDispatchException
+ * @tc.desc: ReportEventDispatchException test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportEventDispatchException, Function | SmallTest | Level2)
+{
+    int32_t res = 0;
+    WindowInfoReporter windowInfoReporter;
+    std::vector<MMI::DisplayInfo> displayInfos;
+    ASSERT_EQ(displayInfos.empty(), true);
+    WindowDFXHelperType exceptionType = WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION;
+    int32_t pid = 1111;
+    std::ostringstream oss;
+    oss << "displayInfos flush to MMI is empty!" << ",";
+    res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
+    ASSERT_EQ(res, 0);
+
+    std::vector<MMI::WindowInfo> windowInfoList;
+    ASSERT_EQ(windowInfoList.empty(), true);
+    exceptionType = WindowDFXHelperType::WINDOW_FLUSH_EMPTY_WINDOW_INFO_TO_MMI_EXCEPTION;
+    pid = 2222;
+    oss.str("");
+    oss << "windowInfoList flush to MMI is empty!" << ",";
+    res = windowInfoReporter.ReportEventDispatchException(static_cast<int32_t>(exceptionType), pid, oss.str());
     ASSERT_EQ(res, 0);
 }
 
