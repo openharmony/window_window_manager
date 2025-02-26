@@ -1579,7 +1579,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        if (session->sessionStage_) {
+        if (session->needNotifyAttachState_.load() && session->sessionStage_) {
             session->sessionStage_->NotifyWindowAttachStateChange(isAttach);
         }
         TLOGND(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
@@ -1591,6 +1591,11 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
     }, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
+}
+
+void Session::SetNeedNotifyAttachState(bool needNotify)
+{
+    needNotifyAttachState_.store(needNotify);
 }
 
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)

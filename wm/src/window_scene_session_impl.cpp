@@ -4690,7 +4690,9 @@ WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
     }
     windowAttachStateChangeListener_ = listener;
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
-    return WMError::WM_OK;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return static_cast<WMError>(hostSession->NotifyWindowAttachStateListenerRegistered(true));
 }
 
 WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()

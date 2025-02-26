@@ -109,6 +109,9 @@ private:
     int HandleUpdatePiPControlStatus(MessageParcel& data, MessageParcel& reply);
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
 
+    // Window Pattern
+    int HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply);
+    
     // PC Window
     int HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel& reply);
     int HandleSetSupportedWindowModes(MessageParcel& data, MessageParcel& reply);

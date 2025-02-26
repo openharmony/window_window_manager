@@ -246,6 +246,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
             return HandleContainerModalEvent(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED):
+            return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1539,6 +1541,19 @@ int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& r
         return ERR_INVALID_DATA;
     }
     OnContainerModalEvent(eventName, eventValue);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_PATTERN, "registered: %{public}d", registered);
+    WSError errcode = NotifyWindowAttachStateListenerRegistered(registered);
+    reply.WriteInt32(static_cast<int32_t>(errcode));
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

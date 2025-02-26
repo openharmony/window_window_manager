@@ -540,6 +540,7 @@ public:
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+    void SetNeedNotifyAttachState(bool needNotify);
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
@@ -957,6 +958,7 @@ private:
      */
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
+    std::atomic<bool> needNotifyAttachState_ = { true };
 };
 } // namespace OHOS::Rosen
 
