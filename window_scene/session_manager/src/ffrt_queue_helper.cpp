@@ -27,8 +27,8 @@ FfrtQueueHelper::FfrtQueueHelper()
 {
     ffrtQueue_ = std::make_unique<ffrt::queue>(ffrt::queue_concurrent, "FfrtQueueHelper",
         ffrt::queue_attr()
-        .qos(ffrt_qos_user_interactive)
-        .max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
+            .qos(ffrt_qos_user_interactive)
+            .max_concurrency(FFRT_USER_INTERACTIVE_MAX_THREAD_NUM));
 }
 
 FfrtQueueHelper::~FfrtQueueHelper() = default;
@@ -36,14 +36,14 @@ FfrtQueueHelper::~FfrtQueueHelper() = default;
 bool FfrtQueueHelper::SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout)
 {
     auto timeoutFuture = std::make_shared<TimeoutFuture<bool>>();
-    ffrtQueue_->submit([localTask = std::move(task), timeoutFuture] {
+    ffrtQueue_->submit([localTask = std::move(task), timeoutFuture, where = __func__] {
         if (localTask) {
             localTask();
         } else {
-            TLOGNE(WmsLogTag::WMS_LIFE, "task function is empty");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: task function is empty", where);
         }
         timeoutFuture->FutureCall(true);
-    });
+    }, __func__);
     bool isTimeout = false;
     timeoutFuture->GetResult(timeout, isTimeout);
     return isTimeout;
