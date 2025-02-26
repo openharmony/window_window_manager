@@ -517,6 +517,7 @@ public:
     static uint32_t GetWindowDragHotAreaType(DisplayId displayId, uint32_t type, int32_t pointerX, int32_t pointerY);
     static void AddOrUpdateWindowDragHotArea(DisplayId displayId, uint32_t type, const WSRect& area);
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
+    bool UpdateInteractiveInner(bool interactive);
 
     /*
      * Window Decor
@@ -674,7 +675,6 @@ protected:
      * Window Pipeline
      */
     bool UpdateVisibilityInner(bool visibility) REQUIRES(SCENE_GUARD);
-    bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
