@@ -3392,6 +3392,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
     }
 }
 
+/** @note @window.drag */
 WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
 {
     return PostSyncTask([weakThis = wptr(this), rect, where = __func__] {
