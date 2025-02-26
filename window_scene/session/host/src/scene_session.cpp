@@ -6864,4 +6864,10 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
         maskColorValue_->Set(Rosen::RSColor::FromArgbInt(snapshotMaskColor_));
     }
 }
+
+WSError SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
+{
+    SetNeedNotifyAttachState(registered);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
