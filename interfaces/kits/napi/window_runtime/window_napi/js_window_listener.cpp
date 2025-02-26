@@ -122,7 +122,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
     // js callback should run in js thread
     auto jsCallback = [self = weakRef_, displayId, tints, env = env_] {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr) {
+        if (thisListener == nullptr || env == nullptr) {
             WLOGFE("this listener or eng is nullptr");
             return;
         }
