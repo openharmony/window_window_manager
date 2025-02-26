@@ -602,14 +602,16 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
         }
         if (isKeyboardShow) {
             // notify calling session when keyboard is not visible
+            if (session->GetCallingSessionId() == INVALID_WINDOW_ID) {
+                uint32_t focusedSessionId = static_cast<uint32_t>(session->GetFocusedSessionId());
+                TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId);
+                session->GetSessionProperty()->SetCallingSessionId(focusedSessionId);
+            }
             session->RaiseCallingSession(keyboardPanelRect, false, rsTransaction);
             session->UpdateKeyboardAvoidArea();
         } else {
             session->RestoreCallingSession(rsTransaction);
-            auto sessionProperty = session->GetSessionProperty();
-            if (sessionProperty) {
-                sessionProperty->SetCallingSessionId(INVALID_WINDOW_ID);
-            }
+            session->GetSessionProperty()->SetCallingSessionId(INVALID_WINDOW_ID);
         }
 
         if (!session->isKeyboardSyncTransactionOpen_) {
