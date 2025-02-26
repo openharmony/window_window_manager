@@ -395,6 +395,54 @@ HWTEST_F(IntentionEventManagerTest, OnInputEventPointer1, Function | MediumTest 
     pointerEvent->AddPointerItem(item);
     inputEventListener_->OnInputEvent(pointerEvent);
 }
+
+/**
+ * @tc.name: SetPointerEventStatus
+ * @tc.desc: SetPointerEventStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(IntentionEventManagerTest, SetPointerEventStatus, Function | MediumTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetPointerEventStatus";
+    info.bundleName_ = "SetPointerEventStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    int32_t action = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    auto fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(1, fingerPointerDownStatusList.size());
+
+    action = MMI::PointerEvent::POINTER_ACTION_UP;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(0, fingerPointerDownStatusList.size());
+
+    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    EXPECT_EQ(true, sceneSession->GetMousePointerDownEventStatus());
+
+    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_UP;
+    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    EXPECT_EQ(false, sceneSession->GetMousePointerDownEventStatus());
+
+    action = MMI::PointerEvent::POINTER_ACTION_DOWN;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    action = MMI::PointerEvent::POINTER_ACTION_CANCEL;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN, sceneSession);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(0, fingerPointerDownStatusList.size());
+
+    action = MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN;
+    inputEventListener_->SetPointerEventStatus(1, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    action = MMI::PointerEvent::POINTER_ACTION_CANCEL;
+    inputEventListener_->SetPointerEventStatus(0, action, MMI::PointerEvent::SOURCE_TYPE_MOUSE, sceneSession);
+    EXPECT_EQ(false, sceneSession->GetMousePointerDownEventStatus());
+}
 }
 }
 }
