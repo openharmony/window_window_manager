@@ -510,8 +510,10 @@ public:
     /*
      * Window Pattern
      */
+    void InitSnapshotCache();
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
+    void RemoveSnapshotFromCache(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -1033,6 +1035,7 @@ private:
      * Window Pattern
      */
     std::unique_ptr<LRUCache> snapshotLRUCache_;
+    std::size_t snapshotCapacity_ = 0;
 };
 } // namespace OHOS::Rosen
 
