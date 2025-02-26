@@ -627,11 +627,11 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
         TLOGE(WmsLogTag::WMS_LIFE, "Write identity token info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(exceptionInfo.needRemoveSession)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write needRemoveSession token info failed");
+    if (!data.WriteBool(exceptionInfo.needRemoveSession)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write needRemoveSession info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(exceptionInfo.needClearCallerLink)) {
+    if (!data.WriteBool(exceptionInfo.needClearCallerLink)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write needClearCallerLink info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

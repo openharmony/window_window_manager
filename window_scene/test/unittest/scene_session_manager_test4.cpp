@@ -1563,7 +1563,7 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | Smal
     ssm_->listenerController_ = listenerController;
     ASSERT_NE(ssm_->listenerController_, nullptr);
     ExceptionInfo exceptionInfo;
-    ssm_->RegisterSessionExceptionFunc(sceneSession, exceptionInfo);
+    ssm_->RegisterSessionExceptionFunc(sceneSession);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo, nullptr);
