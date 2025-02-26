@@ -81,14 +81,14 @@ WINDOW_EXCEPTION_DETECTION:
 
 UIEXTENSION_EXCEPTION:
   __BASE: {type: FAULT, level: CRITICAL, desc: UIExtension encountered an exception}
-  DETECTION_TYPE: {type: INT32, desc: exception type}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
   PID: {type: INT32, desc: pid}
   PERSISTENTID: {type: INT32, desc: persistentId}
   MSG: {type: STRING, desc: uiextension abnormal information}
 
 EVENT_DISPATCH_EXCEPTION:
   __BASE: {type: FAULT, level: CRITICAL, desc: Event dispatch encountered an exception}
-  DETECTION_TYPE: {type: INT32, desc: exception type}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
   PID: {type: INT32, desc: pid}
   MSG: {type: STRING, desc: event dispatch abnormal information}
 

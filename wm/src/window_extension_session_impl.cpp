@@ -328,8 +328,8 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     auto ret = hostSession->TransferExtensionData(wantParams);
     if (static_cast<int32_t>(ret) != 0) {
-        std::ostringstream oss;
         if (context_ != nullptr) {
+            std::ostringstream oss;
             oss << "TransferExtensionData from provider to host failed" << ",";
             oss << " provider bundleName: " << context_->GetBundleName() << ",";
             oss << " provider windowName: " << property_->GetWindowName() << ",";
