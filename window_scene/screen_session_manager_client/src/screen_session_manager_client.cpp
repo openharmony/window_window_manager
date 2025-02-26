@@ -155,6 +155,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
             screenSessionMap_.emplace(screenId, screenSession);
+            extraScreenSessionMap_[screenId] = screenSession;
         }
         screenSession->SetIsExtend(isExtend);
         screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(screenId));
@@ -182,6 +183,19 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         screenSession->Disconnect();
     }
 }
+
+void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
+{
+    auto screenSession = GetScreenSessionExtra(screenId);
+        if (!screenSession) {
+            WLOGFE("extra screenSession is null");
+            return;
+        }
+        screenSession->DestroyScreenScene();
+        extraScreenSessionMap_.erase(screenId);
+        WLOGFI("ExtraDestroyScreen end");
+}
+
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     auto screenSession = GetScreenSession(mainScreenId);
@@ -199,6 +213,17 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
         WLOGFE("Error found screen session with id: %{public}" PRIu64, screenId);
+        return nullptr;
+    }
+    return iter->second;
+}
+
+sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionExtra(ScreenId screenId) const
+{
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    auto iter = extraScreenSessionMap_.find(screenId);
+    if (iter == extraScreenSessionMap_.end()) {
+        WLOGFE("Error found extra screen session with id: %{public}" PRIu64, screenId);
         return nullptr;
     }
     return iter->second;
