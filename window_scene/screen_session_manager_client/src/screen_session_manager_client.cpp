@@ -24,6 +24,7 @@
 #include "pipeline/rs_node_map.h"
 #include "window_manager_hilog.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
+#include "fold_screen_state_internel.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -555,8 +556,12 @@ void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbP
         ScreenProperty screenProperty = screenSession->GetScreenProperty();
         RRect bounds = screenProperty.GetBounds();
         float rotation = screenSession->ConvertRotationToFloat(screenSession->GetRotation());
-        screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
-            ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            UpdatePropertyWhenSwitchUser(screenSession, rotation, bounds, screenId);
+        } else {
+            screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+                ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY);
+        }
     }
     WLOGFI("switch user callback end");
 }
@@ -755,5 +760,20 @@ void ScreenSessionManagerClient::OnExtendScreenConnectStatusChanged(ScreenId scr
     WLOGI("screenId=%{public}" PRIu64 " extendScreenConnectStatus=%{public}d", screenId,
         static_cast<uint32_t>(extendScreenConnectStatus));
     screenSession->ExtendScreenConnectStatusChange(screenId, extendScreenConnectStatus);
+}
+
+void ScreenSessionManagerClient::UpdatePropertyWhenSwitchUser(const sptr <ScreenSession>& screenSession,
+    float rotation, RRect bounds, ScreenId screenId)
+{
+    screenSession->UpdateToInputManager(bounds, static_cast<int>(rotation), static_cast<int>(rotation),
+        FoldDisplayMode::UNKNOWN, screenSessionManager_->IsOrientationNeedChanged());
+    screenSession->SetPhysicalRotation(rotation);
+    screenSession->SetScreenComponentRotation(rotation);
+    screenSession->SetValidHeight(bounds.rect_.GetHeight());
+    screenSession->SetValidWidth(bounds.rect_.GetWidth());
+    screenSessionManager_->UpdateScreenDirectionInfo(screenId, rotation, rotation, rotation,
+        ScreenPropertyChangeType::UNSPECIFIED);
+    screenSessionManager_->UpdateScreenRotationProperty(screenId, bounds, rotation,
+        ScreenPropertyChangeType::UNSPECIFIED);
 }
 } // namespace OHOS::Rosen

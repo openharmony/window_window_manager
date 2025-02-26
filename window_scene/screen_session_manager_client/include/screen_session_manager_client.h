@@ -129,7 +129,8 @@ private:
 
     void NotifyScreenConnect(const sptr<ScreenSession>& screenSession);
     void NotifyScreenDisconnect(const sptr<ScreenSession>& screenSession);
-
+    void UpdatePropertyWhenSwitchUser(const sptr <ScreenSession>& screenSession,
+        float rotation, RRect bounds, ScreenId screenId);
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
