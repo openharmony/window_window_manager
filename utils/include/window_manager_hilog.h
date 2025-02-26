@@ -16,8 +16,10 @@
 #ifndef OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 #define OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 
-#include "hilog/log.h"
+#include <cstdint>
 #include <unordered_map>
+#include "hilog/log.h"
+
 namespace OHOS {
 namespace Rosen {
 static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
