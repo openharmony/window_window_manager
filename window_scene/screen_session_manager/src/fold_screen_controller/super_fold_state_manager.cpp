@@ -570,8 +570,8 @@ bool SuperFoldStateManager::ChangeScreenState(bool toHalf)
     auto screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
     auto screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight();
     if (toHalf) {
-        screenWidth = screenProperty.GetFakeBounds().rect_.GetWidth();
-        screenHeight = screenProperty.GetFakeBounds().rect_.GetHeight();
+        screenWidth = screenProperty.GetPhyBounds().rect_.GetWidth();
+        screenHeight = screenProperty.GetPhyBounds().rect_.GetHeight() / HEIGHT_HALF;
         HandleHalfScreenDisplayNotify(screenSession);
     } else {
         HandleFullScreenDisplayNotify(screenSession);
