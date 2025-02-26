@@ -1388,6 +1388,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isExclusivelyHighlighted_ = property->isExclusivelyHighlighted_;
     cornerRadius_ = property->cornerRadius_;
     isAtomicService_ = property->isAtomicService_;
+    apiVersion_ = property->apiVersion_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1932,6 +1933,16 @@ void WindowSessionProperty::SetConstrainedModal(bool isConstrained)
 bool WindowSessionProperty::IsConstrainedModal() const
 {
     return isConstrainedModal_;
+}
+
+void WindowSessionProperty::SetApiVersion(uint32_t version)
+{
+    apiVersion_ = version;
+}
+
+uint32_t WindowSessionProperty::GetApiVersion() const
+{
+    return apiVersion_;
 }
 } // namespace Rosen
 } // namespace OHOS

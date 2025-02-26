@@ -750,6 +750,33 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAfterDidBackground, Function | Small
     EXPECT_CALL(*mockListener, AfterDidBackground()).Times(1);
     ASSERT_EQ(WMError::WM_OK, window->Hide(static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), false, false));
 }
+
+/**
+ * @tc.name: Resume
+ * @tc.desc: Resume
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, Resume, Function | SmallTest | Level2)
+{
+    sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
+    sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Test");
+    option->SetDisplayId(0);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->RegisterLifeCycleListener(listener);
+    window->SetTargetAPIVersion(16);
+
+    EXPECT_CALL(*mockListener, AfterResumed()).Times(1);
+    window->Resume();
+}
 }
 } // namespace Rosen
 } // namespace OHOS
