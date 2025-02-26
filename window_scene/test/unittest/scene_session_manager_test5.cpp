@@ -869,6 +869,24 @@ HWTEST_F(SceneSessionManagerTest5, DestroyToastSession, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: InitSnapshotCache
+ * @tc.desc: InitSnapshotCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->InitSnapshotCache();
+    if (ssm_->systemConfig_.uiType_ == UI_TYPE_PC) {
+        ASSERT_EQ(ssm_->snapshotCapacity_, 50);
+    } else if (ssm_->systemConfig_.uiType_ == UI_TYPE_PAD) {
+        ASSERT_EQ(ssm_->snapshotCapacity_, 8);
+    } else {
+        ASSERT_EQ(ssm_->snapshotCapacity_, 3);
+    }
+}
+
+/**
  * @tc.name: PutSnapshotToCache
  * @tc.desc: PutSnapshotToCache
  * @tc.type: FUNC
@@ -887,7 +905,7 @@ HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, Function | SmallTest | Le
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
     ssm_->sceneSessionMap_.insert({30, sceneSession});
-    for (int32_t id = 30; id <= 33; ++id) {
+    for (int32_t id = 30; id <= 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
     ASSERT_EQ(sceneSession->snapshot_, nullptr);
@@ -912,12 +930,38 @@ HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, Function | SmallTest 
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ssm_->sceneSessionMap_.insert({30, sceneSession});
     sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
-    for (int32_t id = 30; id < 33; ++id) {
+    for (int32_t id = 30; id < 0 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
     ssm_->VisitSnapshotFromCache(30);
-    usleep(WAIT_SYNC_IN_NS);
-    ssm_->PutSnapshotToCache(33);
+    ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
+    ASSERT_NE(sceneSession->snapshot_, nullptr);
+}
+
+/**
+ * @tc.name: RemoveSnapshotFromCache
+ * @tc.desc: RemoveSnapshotFromCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 30;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 30;
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    ssm_->sceneSessionMap_.insert({30, sceneSession});
+    sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
+    for (int32_t id = 30; id < 0 + ssm_->snapshotCapacity_; ++id) {
+        ssm_->PutSnapshotToCache(id);
+    }
+    ssm_->RemoveSnapshotFromCache(31);
+    ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
     ASSERT_NE(sceneSession->snapshot_, nullptr);
 }
 
