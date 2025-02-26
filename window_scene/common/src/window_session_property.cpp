@@ -1151,11 +1151,13 @@ bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
 
 void WindowSessionProperty::SetIsAtomicService(bool isAtomicService)
 {
+    std::lock_guard lock(atomicServiceMutex_);
     isAtomicService_ = isAtomicService;
 }
 
 bool WindowSessionProperty::GetIsAtomicService() const
 {
+    std::lock_guard lock(atomicServiceMutex_);
     return isAtomicService_;
 }
 
