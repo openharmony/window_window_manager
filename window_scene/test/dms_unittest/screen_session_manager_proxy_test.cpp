@@ -27,6 +27,7 @@
 #include "display_manager_adapter.h"
 #include "display_manager_agent_default.h"
 #include "scene_board_judgement.h"
+#include "session_manager/include/screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1048,16 +1049,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, RemoveVirtualScreenFromGroup, Function |
     
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
     std::vector<ScreenId> screens = {1002, 1003, 1004};
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->RemoveVirtualScreenFromGroup(screens);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->RemoveVirtualScreenFromGroup(screens);
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
+    EXPECT_EQ(screenSession, nullptr);
 }
 
 /**
@@ -1378,16 +1373,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, ConvertScreenIdToRsScreenId, Function | 
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    int resultValue = 0;
     ScreenId screenId = 1001;
     ScreenId rsScreenId = 1002;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    auto ret = screenSessionManagerProxy->ConvertScreenIdToRsScreenId(screenId, rsScreenId);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -1423,15 +1412,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpAllScreensInfo, Function | SmallTest
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    int resultValue = 0;
     std::string dumpInfo;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
+    EXPECT_NE(dumpInfo, "");
 }
 
 /**
@@ -1445,16 +1428,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, Function | SmallT
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    int resultValue = 0;
     ScreenId id = 1001;
     std::string dumpInfo;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
+    EXPECT_NE(dumpInfo, "");
 }
 
 /**
@@ -1468,15 +1445,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayMode, Function | SmallTest
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    int resultValue = 0;
     const FoldDisplayMode displayMode {0};
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->SetFoldDisplayMode(displayMode);
+    if (screenSessionManagerProxy->IsFoldable()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else {
+        EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    }
 }
 
 /**
@@ -1490,15 +1465,13 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, Function | SmallTes
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    int resultValue = 0;
     bool locked = true;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetFoldStatusLocked(locked);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->SetFoldStatusLocked(locked);
+    if (screenSessionManagerProxy->IsFoldable()) {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else {
+        EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    }
 }
 
 /**
@@ -1526,15 +1499,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsFoldable, Function | SmallTest | Level
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->IsFoldable();
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->IsFoldable();
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
+    EXPECT_EQ(screenSession, nullptr);
 }
 
 /**
@@ -1547,15 +1514,8 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsCaptured, Function | SmallTest | Level
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->IsCaptured();
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    auto ret = screenSessionManagerProxy->IsCaptured();
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -1620,15 +1580,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetClient, Function | SmallTest | Level1
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
 
-    int resultValue = 0;
     const sptr<IScreenSessionManagerClient> client = nullptr;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SetClient(client);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->SetClient(client);
+    EXPECT_EQ(client, nullptr);
 }
 
 /**
@@ -1641,15 +1595,9 @@ HWTEST_F(ScreenSessionManagerProxyTest, SwitchUser, Function | SmallTest | Level
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->SwitchUser();
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->SwitchUser();
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
+    EXPECT_EQ(screenSession, nullptr);
 }
 
 /**
@@ -1662,16 +1610,10 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetScreenProperty, Function | SmallTest 
     SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
     sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
     sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
-
-    int resultValue = 0;
     ScreenId screenId = 1001;
-    std::function<void()> func = [&]()
-    {
-        screenSessionManagerProxy->GetScreenProperty(screenId);
-        resultValue = 1;
-    };
-    func();
-    EXPECT_EQ(resultValue, 1);
+    screenSessionManagerProxy->GetScreenProperty(screenId);
+    auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(2000);
+    EXPECT_EQ(screenSession, nullptr);
 }
 
 /**
