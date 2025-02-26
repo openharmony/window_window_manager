@@ -1014,7 +1014,8 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
     bool res = data.WriteString(virtualOption.name_) && data.WriteUint32(virtualOption.width_) &&
         data.WriteUint32(virtualOption.height_) && data.WriteFloat(virtualOption.density_) &&
         data.WriteInt32(virtualOption.flags_) && data.WriteBool(virtualOption.isForShot_) &&
-        data.WriteUInt64Vector(virtualOption.missionIds_);
+        data.WriteUInt64Vector(virtualOption.missionIds_) &&
+        data.WriteUint32(static_cast<uint32_t>(virtualOption.virtualScreenType_));
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&
@@ -2024,7 +2025,7 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
 }
 
 //SetFoldDisplayModeFromJs add DMError to return DMErrorCode for js
-DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode)
+DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2040,6 +2041,10 @@ DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMod
     }
     if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
         WLOGFE("Write displayMode failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(reason)) {
+        WLOGFE("Write reason failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS),

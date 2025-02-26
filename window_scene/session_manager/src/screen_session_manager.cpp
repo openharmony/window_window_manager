@@ -1565,7 +1565,12 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     }
     // 多屏协作灭屏不通知锁屏
     gotScreenOffNotify_  = false;
-    sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
+    if (reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT &&
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS &&
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON &&
+        reason != PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
+        sessionDisplayPowerController_->canCancelSuspendNotify_ = true;
+    }
     sessionDisplayPowerController_->SuspendBegin(reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         isMultiScreenCollaboration_ = true;
@@ -2817,8 +2822,10 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return SCREEN_ID_INVALID;
     }
-    ExitCoordination("CreateVirtualScreen");
-    TLOGI(WmsLogTag::DMS, "ENTER");
+    if (option.virtualScreenType_ != VirtualScreenType::SCREEN_RECORDING) {
+        ExitCoordination("CreateVirtualScreen(cast)");
+    }
+    TLOGI(WmsLogTag::DMS, "ENTER, virtualScreenType: %{public}u", static_cast<uint32_t>(option.virtualScreenType_));
     if (SessionPermission::IsBetaVersion()) {
         CheckAndSendHiSysEvent("CREATE_VIRTUAL_SCREEN", "hmos.screenrecorder");
     }
@@ -4667,44 +4674,79 @@ ScreenProperty ScreenSessionManager::GetPhyScreenProperty(ScreenId screenId)
     return iter->second;
 }
 
-void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
+void ScreenSessionManager::UpdateCameraBackSelfie(bool isCameraBackSelfie)
 {
-    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
-            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+    if (isCameraBackSelfie_ == isCameraBackSelfie) {
         return;
     }
-    if (!g_foldScreenFlag) {
+    isCameraBackSelfie_ = isCameraBackSelfie;
+
+    auto screenSession = GetDefaultScreenSession();
+    if (!screenSession) {
+        TLOGW(WmsLogTag::DMS, "screenSession is null, notify camera back selfie failed");
         return;
+    }
+    screenSession->HandleCameraBackSelfieChange(isCameraBackSelfie);
+
+    if (isCameraBackSelfie) {
+        TLOGI(WmsLogTag::DMS, "isBackSelfie, SetScreenCorrection MAIN to 270");
+        rsInterface_.SetScreenCorrection(SCREEN_ID_MAIN, static_cast<ScreenRotation>(ROTATION_270));
+    } else {
+        TLOGI(WmsLogTag::DMS, "exit BackSelfie, SetScreenCorrection MAIN to 90");
+        SetScreenCorrection();
+    }
+}
+
+void ScreenSessionManager::SetFoldDisplayMode(const FoldDisplayMode displayMode)
+{
+    SetFoldDisplayModeInner(displayMode);
+}
+
+DMError ScreenSessionManager::SetFoldDisplayModeInner(const FoldDisplayMode displayMode, std::string reason)
+{
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d, reason: %{public}s",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), reason.c_str());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (!g_foldScreenFlag) {
+        return DMError::DM_ERROR_INVALID_MODE_ID;
     }
     if (foldScreenController_ == nullptr) {
         TLOGI(WmsLogTag::DMS, "SetFoldDisplayMode foldScreenController_ is null");
-        return;
+        return DMError::DM_ERROR_INVALID_MODE_ID;
     }
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::DMS, "SetFoldDisplayMode permission denied!");
-        return;
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     TLOGI(WmsLogTag::DMS, "calling clientName: %{public}s, calling pid: %{public}d, setmode: %{public}d",
         SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid(), displayMode);
     if (foldScreenController_->GetTentMode() &&
         (displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::COORDINATION)) {
         TLOGW(WmsLogTag::DMS, "in TentMode, SetFoldDisplayMode to %{public}d failed", displayMode);
-        return;
+        return DMError::DM_ERROR_INVALID_MODE_ID;
+    } else if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
+        IsScreenCasting() && displayMode == FoldDisplayMode::COORDINATION) {
+        TLOGW(WmsLogTag::DMS, "is phone casting, SetFoldDisplayMode to %{public}d is not allowed", displayMode);
+        return DMError::DM_ERROR_INVALID_MODE_ID;
+    }
+    if (reason.compare("backSelfie") == 0) {
+        UpdateCameraBackSelfie(true);
     }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
+    return DMError::DM_OK;
 }
 
-DMError ScreenSessionManager::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode)
+DMError ScreenSessionManager::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    SetFoldDisplayMode(displayMode);
-    return DMError::DM_OK;
+    return SetFoldDisplayModeInner(displayMode, reason);
 }
 
 void ScreenSessionManager::UpdateDisplayScaleState(ScreenId screenId)
@@ -5226,14 +5268,14 @@ void ScreenSessionManager::OnSensorRotationChange(float sensorRotation, ScreenId
     clientProxy_->OnSensorRotationChanged(screenId, sensorRotation);
 }
 
-void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, ScreenId screenId)
+void ScreenSessionManager::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId)
 {
     TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " hoverStatus: %{public}d", screenId, hoverStatus);
     if (!clientProxy_) {
         TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy_->OnHoverStatusChanged(screenId, hoverStatus);
+    clientProxy_->OnHoverStatusChanged(screenId, hoverStatus, needRotate);
 }
 
 void ScreenSessionManager::OnScreenOrientationChange(float screenOrientation, ScreenId screenId)
@@ -5254,6 +5296,16 @@ void ScreenSessionManager::OnScreenRotationLockedChange(bool isLocked, ScreenId 
         return;
     }
     clientProxy_->OnScreenRotationLockedChanged(screenId, isLocked);
+}
+
+void ScreenSessionManager::OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId)
+{
+    TLOGI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " isCameraBackSelfie: %{public}d", screenId, isCameraBackSelfie);
+    if (!clientProxy_) {
+        TLOGI(WmsLogTag::DMS, "clientProxy_ is null");
+        return;
+    }
+    clientProxy_->OnCameraBackSelfieChanged(screenId, isCameraBackSelfie);
 }
 
 void ScreenSessionManager::NotifyClientProxyUpdateFoldDisplayMode(FoldDisplayMode displayMode)
@@ -6088,5 +6140,18 @@ int32_t ScreenSessionManager::GetCameraStatus()
 int32_t ScreenSessionManager::GetCameraPosition()
 {
     return cameraPosition_;
+}
+
+bool ScreenSessionManager::IsScreenCasting()
+{
+    for (auto sessionIt : screenSessionMap_) {
+        if (sessionIt.first != SCREEN_ID_MAIN && sessionIt.first != SCREEN_ID_FULL &&
+            sessionIt.first != SCREEN_ID_PC && sessionIt.first != SCREEN_ID_PC_MAIN) {
+            TLOGI(WmsLogTag::DMS, "casting, screenid: %{public}" PRIu64, sessionIt.first);
+            return true;
+        }
+    }
+    TLOGI(WmsLogTag::DMS, "not casting");
+    return false;
 }
 } // namespace OHOS::Rosen
