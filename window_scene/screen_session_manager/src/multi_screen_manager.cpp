@@ -235,6 +235,11 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
     }
     if (!physicalScreenIds.empty()) {
         switchStatus = PhysicalScreenUniqueSwitch(physicalScreenIds);
+        if (switchStatus == DMError::DM_OK) {
+            for (auto screenId : physicalScreenIds) {
+                ScreenSessionManager::GetInstance().UnregisterSettingWireCastObserver(screenId);
+            }
+        }
         TLOGW(WmsLogTag::DMS, "physical screen switch to unique result: %{public}d", switchStatus);
         AddUniqueScreenDisplayId(displayIds, physicalScreenIds, switchStatus);
     }
@@ -265,6 +270,12 @@ DMError MultiScreenManager::MirrorSwitch(const ScreenId mainScreenId, const std:
     if (!physicalScreenIds.empty()) {
         screenGroupId = 1;
         switchStatus = PhysicalScreenMirrorSwitch(physicalScreenIds, mainScreenRegion);
+        if (switchStatus == DMError::DM_OK) {
+            for (auto screenId : physicalScreenIds) {
+                auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+                ScreenSessionManager::GetInstance().RegisterSettingWireCastObserver(screenSession);
+            }
+        }
         TLOGW(WmsLogTag::DMS, "physical screen switch to mirror result: %{public}d", switchStatus);
     }
     TLOGW(WmsLogTag::DMS, "end switchStatus: %{public}d", switchStatus);
