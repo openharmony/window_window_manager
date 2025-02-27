@@ -108,6 +108,29 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSession, Function | SmallTest 
 }
 
 /**
+ * @tc.name: GetScreenSessionExtra
+ * @tc.desc: GetScreenSessionExtra test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetScreenSessionExtra, Function | SmallTest | Level2)
+{
+    ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = nullptr;
+    screenSession = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
+    EXPECT_EQ(screenSession, nullptr);
+
+    screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    screenSessionManagerClient_->extraScreenSessionMap_.emplace(screenId, screenSession);
+
+    auto screenSession2 = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
+    EXPECT_EQ(screenSession2, screenSession);
+
+    screenSessionManagerClient_->extraScreenSessionMap_.clear();
+    screenSession = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
+    EXPECT_EQ(screenSession, nullptr);
+}
+
+/**
  * @tc.name: OnScreenConnectionChanged01
  * @tc.desc: OnScreenConnectionChanged test
  * @tc.type: FUNC
