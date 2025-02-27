@@ -2616,6 +2616,25 @@ HWTEST_F(WindowSessionImplTest4, GetCrossAxisState, Function | SmallTest | Level
     EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
 }
 
+/**
+ * @tc.name: SendContainerModalEvent
+ * @tc.desc: SendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SendContainerModalEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendContainerModalEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SendContainerModalEvent("scb_back_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("scb_back_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
