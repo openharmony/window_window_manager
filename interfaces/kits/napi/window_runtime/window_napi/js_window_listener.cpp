@@ -134,7 +134,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
             return;
         }
         napi_set_named_property(env, propertyValue, "displayId",
-            CreateJsValue(eng, static_cast<uint32_t>(displayId)));
+            CreateJsValue(env, static_cast<uint32_t>(displayId)));
         napi_set_named_property(env, propertyValue, "regionTint",
             CreateJsSystemBarRegionTintArrayObject(env, tints));
         napi_value argv[] = {propertyValue};
