@@ -3585,6 +3585,25 @@ void SceneSessionManager::RegisterBindDialogTargetListener(const sptr<SceneSessi
     }, __func__);
 }
 
+void SceneSessionManager::SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession)
+{
+    if (newSession->GetSessionProperty()->GetDisplayId() == DISPLAY_ID_INVALID) {
+        uint64_t defaultDisplayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        int32_t focusSessionId = windowFocusController_->GetFocusedSessionId(defaultDisplayId);
+        auto focusedSession = GetSceneSession(focusSessionId);
+        DisplayId displayId = defaultDisplayId;
+        if (focusedSession != nullptr && focusedSession->GetSessionProperty()->GetDisplayId() != DISPLAY_ID_INVALID) {
+            displayId = focusedSession->GetSessionProperty()->GetDisplayId();
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, focus id %{public}d, display id: %{public}" PRIu64,
+                newSession->GetPersistentId(), focusedSession->GetPersistentId(), displayId);
+        } else {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get focus id failed, use default displayId %{public}" PRIu64, displayId);
+        }
+        newSession->SetScreenId(displayId);
+        newSession->GetSessionProperty()->SetDisplayId(displayId);
+    }
+}
+
 void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,
     sptr<WindowSessionProperty> property, const WindowType& type)
 {
@@ -3609,6 +3628,8 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
                 && createKeyboardSessionFunc_) {
                 createKeyboardSessionFunc_(newSession, newSession->GetKeyboardPanelSession());
             } else if (createSystemSessionFunc_) {
+                SetFocusedSessionDisplayIdIfNeeded(newSession);
+                property->SetDisplayId(newSession->GetSessionProperty()->GetDisplayId());
                 createSystemSessionFunc_(newSession);
             }
             TLOGD(WmsLogTag::WMS_LIFE, "Create system session, id:%{public}d, type: %{public}d",

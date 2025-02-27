@@ -100,6 +100,12 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
         return WSError::WS_ERROR_IPC_FAILED;
     }
     property->SetWindowCornerRadius(cornerRadius);
+    uint64_t displayId = 0;
+    if (!reply.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read displayId failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    property->SetDisplayId(displayId);
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
