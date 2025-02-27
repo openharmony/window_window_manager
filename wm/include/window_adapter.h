@@ -164,6 +164,9 @@ public:
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
+    virtual WMError RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true);
+
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
     bool InitWMSProxy();

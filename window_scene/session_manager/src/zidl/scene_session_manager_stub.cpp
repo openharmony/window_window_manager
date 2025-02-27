@@ -205,6 +205,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchGestureConsumeResult(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE):
             return HandleWatchFocusActiveChange(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_FOR_SYSTEM_KEYBOARD):
+            return HandleRequestFocusForSystemKeyboard(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
         default:
@@ -379,6 +381,29 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, Messa
         return ERR_INVALID_DATA;
     }
     WMError ret = RequestFocusStatus(persistentId, isFocused, true, FocusChangeReason::CLIENT_REQUEST);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRequestFocusForSystemKeyboard(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
+    bool byForeground = false;
+    if (!data.ReadBool(byForeground)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read byForeground failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RequestFocusForSystemKeyboard(persistentId, isFocused, byForeground);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

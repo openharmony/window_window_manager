@@ -5506,12 +5506,12 @@ WMError SceneSessionManager::RequestFocusStatus(int32_t persistentId, bool isFoc
         TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    // int32_t callingPid = IPCSkeleton::GetCallingPid();
-    // if (callingPid != sceneSession->GetCallingPid() &&
-    //     !SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER)) {
-    //     TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
-    //     return WMError::WM_ERROR_INVALID_CALLING;
-    // }
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
+    if (callingPid != sceneSession->GetCallingPid() &&
+        !SessionPermission::IsSameAppAsCalling(SCENE_BOARD_BUNDLE_NAME, SCENE_BOARD_APP_IDENTIFIER)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, not call by the same process");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
             RequestSessionFocus(persistentId, byForeground, reason);
@@ -5615,6 +5615,32 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
     ShiftFocus(displayId, sceneSession, false, reason);
     return WSError::WS_OK;
+}
+
+WMError SceneSessionManager::RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused,
+    bool byForeground)
+{
+    FocusChangeReason reason = FocusChangeReason::SYSTEM_KEYBOARD;
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, only support SA calling.");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto task = [this, persistentId, isFocused, byForeground, reason]() {
+        if (isFocused) {
+            RequestSessionFocus(persistentId, byForeground, reason);
+        } else {
+            RequestSessionUnfocus(persistentId, reason);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "RequestFocusForSystemKeyboard" + std::to_string(persistentId));
+    focusChangeReason_ = reason;
+    return WMError::WM_OK;
 }
 
 WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground, FocusChangeReason reason)
