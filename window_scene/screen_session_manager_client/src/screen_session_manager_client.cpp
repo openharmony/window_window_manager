@@ -187,13 +187,16 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
 void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
 {
     auto screenSession = GetScreenSessionExtra(screenId);
-        if (!screenSession) {
-            WLOGFE("extra screenSession is null");
-            return;
-        }
-        screenSession->DestroyScreenScene();
+    if (!screenSession) {
+        WLOGFE("extra screenSession is null");
+        return;
+    }
+    screenSession->DestroyScreenScene();
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         extraScreenSessionMap_.erase(screenId);
-        WLOGFI("ExtraDestroyScreen end");
+    }
+    WLOGFI("ExtraDestroyScreen end");
 }
 
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)

@@ -27,7 +27,6 @@
 
 namespace OHOS::Rosen {
 using namespace AbilityRuntime;
-constexpr size_t SCREEN_DISCONNECT = 1;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSession" };
 const std::string ON_CONNECTION_CALLBACK = "connect";
@@ -49,7 +48,8 @@ const std::string ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGE_CALLBACK = "extendScree
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
-napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession, const int& type)
+napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& screenSession,
+    const ScreenEvent screenEvent)
 {
     TLOGD(WmsLogTag::DMS, "Create.");
     napi_value objValue = nullptr;
@@ -59,7 +59,7 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
         return NapiGetUndefined(env);
     }
 
-    auto jsScreenSession = std::make_unique<JsScreenSession>(env, screenSession, type);
+    auto jsScreenSession = std::make_unique<JsScreenSession>(env, screenSession, screenEvent);
     napi_wrap(env, objValue, jsScreenSession.release(), JsScreenSession::Finalizer, nullptr, nullptr);
     napi_set_named_property(env, objValue, "screenId",
         CreateJsValue(env, static_cast<int64_t>(screenSession->GetScreenId())));
@@ -85,7 +85,7 @@ void JsScreenSession::Finalizer(napi_env env, void* data, void* hint)
     std::unique_ptr<JsScreenSession>(static_cast<JsScreenSession*>(data));
 }
 
-JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const int& type)
+JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent)
     : env_(env), screenSession_(screenSession)
 {
     std::string name = screenSession_ ? screenSession_->GetName() : "UNKNOWN";
@@ -109,8 +109,8 @@ JsScreenSession::JsScreenSession(napi_env env, const sptr<ScreenSession>& screen
             OnScreenDensityChange();
         };
         screenSession_->SetScreenSceneDpiChangeListener(func);
-        if (type == SCREEN_DISCONNECT) {
-            TLOGNI(WmsLogTag::DMS, "type is SCREEN_DISCONNECT, not set destroyFunc");
+        if (screenEvent == ScreenEvent::DISCONNECTED) {
+            TLOGI(WmsLogTag::DMS, "ScreenEvent is DISCONNECTED, not set destroyFunc");
             return;
         }
         DestroyScreenSceneFunc destroyFunc = [screenScene = screenScene_]() {
