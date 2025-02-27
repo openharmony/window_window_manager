@@ -296,14 +296,14 @@ enum class FocusChangeReason {
     VOICE_INTERACTION,
 
     /**
-     * focus change max.
-     */
-    MAX,
-
-    /**
      * focus on previous window for system keyboard
      */
     SYSTEM_KEYBOARD,
+
+    /**
+     * focus change max.
+     */
+    MAX,
 };
 
 enum class SceneType : uint8_t {
