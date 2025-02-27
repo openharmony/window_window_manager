@@ -3042,6 +3042,7 @@ void SceneSession::SetMoveDragCallback()
     }
 }
 
+/** @note @window.drag */
 void SceneSession::InitializeCrossMoveDrag()
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
@@ -3061,6 +3062,7 @@ void SceneSession::InitializeCrossMoveDrag()
     moveDragController_->InitCrossDisplayProperty(property->GetDisplayId(), parentNode->GetId());
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason)
 {
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
@@ -3116,6 +3118,7 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
     });
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
 {
     if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
@@ -3271,6 +3274,7 @@ void SceneSession::ThrowSlipDirectly(const WSRectF& velocity)
     }, __func__);
 }
 
+/** @note @window.drag */
 void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
 {
     if (!moveDragController_) {
@@ -3335,6 +3339,7 @@ bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
@@ -3390,6 +3395,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
     }
 }
 
+/** @note @window.drag */
 WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
 {
     return PostSyncTask([weakThis = wptr(this), rect, where = __func__] {
@@ -3405,6 +3411,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
     }, __func__);
 }
 
+/** @note @window.drag */
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 {
     if (!specificCallback_) {

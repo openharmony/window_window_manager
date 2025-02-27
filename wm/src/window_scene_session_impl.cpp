@@ -2772,6 +2772,7 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     return WMError::WM_OK;
 }
 
+/** @note @window.drag */
 void WindowSceneSessionImpl::StartMove()
 {
     WLOGFI("id: %{public}d", GetPersistentId());
