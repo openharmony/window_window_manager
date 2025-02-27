@@ -1311,6 +1311,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
+        isDidForeground_ = false;
         if (!interactive_) {
             hasFirstNotifyInteractive_ = false;
         }
