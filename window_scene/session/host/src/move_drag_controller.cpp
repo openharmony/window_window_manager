@@ -992,27 +992,24 @@ WSRect MoveDragController::CalcFixedAspectRatioTargetRect(AreaType type, int32_t
     ConvertXYByAspectRatio(tranX, tranY, aspectRatio);
     FixTranslateByLimits(tranX, tranY);
     switch (type) {
+        // tranX and tranY is signed
         case AreaType::LEFT_TOP: {
             return {posX + tranX, posY + tranY, width - tranX, height - tranY};
         }
         case AreaType::RIGHT_TOP: {
-            return {posX, posY + (mainMoveAxis_ == AxisType::X_AXIS ? (-tranY) : (tranY)),
-                    width + (mainMoveAxis_ == AxisType::X_AXIS ? (tranX) : (-tranX)),
-                    height + (mainMoveAxis_ == AxisType::X_AXIS ? (tranY) : (-tranY))};
+            return {posX, posY + tranY, width + tranX, height - tranY};
         }
         case AreaType::RIGHT_BOTTOM: {
             return {posX, posY, width + tranX, height + tranY};
         }
         case AreaType::LEFT_BOTTOM: {
-            return {posX + (mainMoveAxis_ == AxisType::X_AXIS ? (tranX) : (-tranX)), posY,
-                    width - (mainMoveAxis_ == AxisType::X_AXIS ? (tranX) : (-tranX)),
-                    height - (mainMoveAxis_ == AxisType::X_AXIS ? (tranY) : (-tranY))};
+            return {posX + tranX, posY, width - tranX, height + tranY};
         }
         case AreaType::LEFT: {
-            return {posX + tranX, posY, width - tranX, height - tranY};
+            return {posX + tranX, posY, width - tranX, height + tranY};
         }
         case AreaType::TOP: {
-            return {posX, posY + tranY, width - tranX, height - tranY};
+            return {posX, posY + tranY, width + tranX, height - tranY};
         }
         case AreaType::RIGHT: {
             return {posX, posY, width + tranX, height + tranY};
@@ -1081,27 +1078,62 @@ void MoveDragController::CalcFixedAspectRatioTranslateLimits(AreaType type)
             maxW = maxH * aspectRatio_;
         }
     }
-    if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::LEFT)) {
-        minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
-        maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
-        minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-    } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::RIGHT)) {
-        minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-        maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-        minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-    } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::TOP)) {
-        minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-        maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-        minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
-        maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
-    } else if (static_cast<uint32_t>(type) & static_cast<uint32_t>(AreaType::BOTTOM)) {
-        minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-        maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
-        minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
-        maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+
+    const static std::map<AreaType, std::function<void(int32_t, int32_t, int32_t, int32_t)>> calcMinMaxTranMap = {
+        { AreaType::LEFT, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
+            maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
+            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        }},
+        { AreaType::LEFT_TOP, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
+            maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
+            minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
+            maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
+        }},
+        { AreaType::LEFT_BOTTOM, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - maxW;
+            maxTranX_ = static_cast<int32_t>(moveDragProperty_.originalRect_.width_) - minW;
+            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        }},
+        { AreaType::RIGHT, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        }},
+        { AreaType::RIGHT_TOP, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
+            maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
+        }},
+        { AreaType::RIGHT_BOTTOM, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        }},
+        { AreaType::TOP, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            minTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - maxH;
+            maxTranY_ = static_cast<int32_t>(moveDragProperty_.originalRect_.height_) - minH;
+        }},
+        { AreaType::BOTTOM, [this](int32_t maxW, int32_t minW, int32_t maxH, int32_t minH) {
+            minTranX_ = minW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            maxTranX_ = maxW - static_cast<int32_t>(moveDragProperty_.originalRect_.width_);
+            minTranY_ = minH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+            maxTranY_ = maxH - static_cast<int32_t>(moveDragProperty_.originalRect_.height_);
+        }},
+    };
+    if (calcMinMaxTranMap.find(type) == calcMinMaxTranMap.end()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "not find type:%{public}d", type);
+        return;
     }
+    calcMinMaxTranMap.at(type)(maxW, minW, maxH, minH);
 }
 
 void MoveDragController::FixTranslateByLimits(int32_t& tranX, int32_t& tranY)
@@ -1135,14 +1167,34 @@ bool MoveDragController::InitMainAxis(AreaType type, int32_t tranX, int32_t tran
     return true;
 }
 
+int32_t MoveDragController::ConvertByAreaType(int32_t tran) const
+{
+    const static std::map<AreaType, int32_t> areaTypeMap = {
+        { AreaType::LEFT, NEGATIVE_CORRELATION },
+        { AreaType::RIGHT, POSITIVE_CORRELATION },
+        { AreaType::TOP, NEGATIVE_CORRELATION },
+        { AreaType::BOTTOM, POSITIVE_CORRELATION },
+        { AreaType::LEFT_TOP, POSITIVE_CORRELATION },
+        { AreaType::RIGHT_TOP, NEGATIVE_CORRELATION },
+        { AreaType::LEFT_BOTTOM, NEGATIVE_CORRELATION },
+        { AreaType::RIGHT_BOTTOM, POSITIVE_CORRELATION },
+    };
+    if (areaTypeMap.find(type_) == areaTypeMap.end()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "not find type:%{public}d", type_);
+        return tran;
+    }
+    return areaTypeMap.at(type_) * tran;
+}
+
 void MoveDragController::ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio)
 {
     if (mainMoveAxis_ == AxisType::X_AXIS) {
         ty = tx / aspectRatio;
+        ty = ConvertByAreaType(ty);
     } else if (mainMoveAxis_ == AxisType::Y_AXIS) {
         tx = ty * aspectRatio;
+        tx = ConvertByAreaType(tx);
     }
-    return;
 }
 
 void MoveDragController::InitDecorValue(const sptr<WindowSessionProperty> property,
