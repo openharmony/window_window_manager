@@ -564,7 +564,7 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
     bool GetSessionRSVisible(const sptr<Session>& session,
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
-    
+
     /*
      * Window Input Event
      */
