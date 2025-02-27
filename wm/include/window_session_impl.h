@@ -174,6 +174,9 @@ public:
     void NotifyOccupiedAreaChangeInfoInner(sptr<OccupiedAreaChangeInfo> info);
     void NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo> info,
                                       const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    void NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo);
+    void NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo);
+    void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
     void NotifyWindowCrossAxisChange(CrossAxisState state) override;
@@ -192,6 +195,10 @@ public:
     WMError UnregisterDialogTargetTouchListener(const sptr<IDialogTargetTouchListener>& listener) override;
     WMError RegisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
     WMError UnregisterOccupiedAreaChangeListener(const sptr<IOccupiedAreaChangeListener>& listener) override;
+    WMError RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
+    WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
+    WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
     WMError RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError UnregisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener) override;
     WMError RegisterWindowVisibilityChangeListener(const IWindowVisibilityListenerSptr& listener) override;
@@ -574,6 +581,10 @@ private:
     template<typename T>
     EnableIfSame<T, IOccupiedAreaChangeListener, std::vector<sptr<IOccupiedAreaChangeListener>>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IKeyboardDidShowListener, std::vector<sptr<IKeyboardDidShowListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IKeyboardDidHideListener, std::vector<sptr<IKeyboardDidHideListener>>> GetListeners();
+    template<typename T>
     EnableIfSame<T, IScreenshotListener, std::vector<sptr<IScreenshotListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, ITouchOutsideListener, std::vector<sptr<ITouchOutsideListener>>> GetListeners();
@@ -660,6 +671,8 @@ private:
     static std::recursive_mutex dialogDeathRecipientListenerMutex_;
     static std::recursive_mutex dialogTargetTouchListenerMutex_;
     static std::recursive_mutex occupiedAreaChangeListenerMutex_;
+    static std::recursive_mutex keyboardDidShowListenerMutex_;
+    static std::recursive_mutex keyboardDidHideListenerMutex_;
     static std::recursive_mutex screenshotListenerMutex_;
     static std::recursive_mutex touchOutsideListenerMutex_;
     static std::recursive_mutex windowVisibilityChangeListenerMutex_;
@@ -677,6 +690,8 @@ private:
     static std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> dialogDeathRecipientListeners_;
     static std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> dialogTargetTouchListener_;
     static std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> occupiedAreaChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IKeyboardDidShowListener>>> keyboardDidShowListeners_;
+    static std::map<int32_t, std::vector<sptr<IKeyboardDidHideListener>>> keyboardDidHideListeners_;
     static std::map<int32_t, std::vector<sptr<IScreenshotListener>>> screenshotListeners_;
     static std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> touchOutsideListeners_;
     static std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> windowVisibilityChangeListeners_;
@@ -764,6 +779,12 @@ private:
      * Window Scene
      */
     WSError NotifyWindowAttachStateChange(bool isAttach) override { return WSError::WS_OK; }
+
+    /*
+     * keyboard
+     */
+    bool isKeyboardDidShowRegistered_ = false;
+    bool isKeyboardDidHideRegistered_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

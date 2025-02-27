@@ -283,6 +283,18 @@ HWTEST_F(SessionStageProxyTest, NotifyOccupiedAreaChangeInfo, Function | SmallTe
 }
 
 /**
+ * @tc.name: NotifyKeyboardAnimationCompleted
+ * @tc.desc: test function : NotifyKeyboardAnimationCompleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, NotifyKeyboardAnimationCompleted, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    KeyboardPanelInfo keyboardPanelInfo;
+    sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+}
+
+/**
  * @tc.name: UpdateAvoidArea
  * @tc.desc: test function : UpdateAvoidArea
  * @tc.type: FUNC
