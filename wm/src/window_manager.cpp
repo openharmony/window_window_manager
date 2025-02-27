@@ -1524,5 +1524,16 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     }
     return ret;
 }
+
+WMError WindowManager::RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused,
+    bool byForeground)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RequestFocusForSystemKeyboard(persistentId,
+        isFocused, byForeground);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS
