@@ -6157,13 +6157,13 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask =
         [weakToken = wptr<Window>(windowToken_), task = napiAsyncTask, aspectRatio, where = __func__, env] {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
+            auto window = weakToken.promote();
+            if (window == nullptr) {
                 task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "OnSetAspectRatio failed."));
                 return;
             }
-            WMError ret = weakWindow->SetAspectRatio(aspectRatio);
+            WMError ret = window->SetAspectRatio(aspectRatio);
             if (ret == WMError::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
@@ -6171,7 +6171,7 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
                     "SetAspectRatio failed."));
             }
             TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
         };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
