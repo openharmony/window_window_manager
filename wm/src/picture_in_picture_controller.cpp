@@ -457,7 +457,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         return;
     }
     if (mainWindow_ != nullptr && pipOption_ != nullptr) {
-        TLOGI(WmsLogTag::WMS_PIP, "UpdateContentSize mainWindow width:%{public}u height:%{public}u", width, height);
+        TLOGI(WmsLogTag::WMS_PIP, "mainWindow width:%{public}u height:%{public}u", width, height);
         uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
         uint32_t contentWidth = static_cast<uint32_t>(width);
         uint32_t contentHeight = static_cast<uint32_t>(height);
@@ -486,7 +486,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }
     }
-    TLOGI(WmsLogTag::WMS_PIP, "UpdateContentSize window: %{public}u width:%{public}u height:%{public}u",
+    TLOGI(WmsLogTag::WMS_PIP, "window: %{public}u width:%{public}u height:%{public}u",
         window_->GetWindowId(), width, height);
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
