@@ -1001,7 +1001,7 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "set window layout mode permission denied!");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     size_t argc = 4;
