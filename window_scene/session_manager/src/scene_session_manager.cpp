@@ -963,7 +963,6 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             const auto& sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
             TLOGNI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId=%{public}d", sessionId);
             ExceptionInfo exceptionInfo;
-            exceptionInfo.needRemoveSession = false;
             sceneSession->NotifySessionExceptionInner(sceneSessionInfo, exceptionInfo);
         }
         RemoveFailRecoveredSession();
