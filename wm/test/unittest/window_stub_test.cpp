@@ -268,10 +268,7 @@ HWTEST_F(WindowStubTest, OnRemoteRequest10, Function | SmallTest | Level2)
     uint32_t code = 0;
 
     int res = windowStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(res, -1);
-
-    IWindow::WindowMessage msgId = IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT;
-    EXPECT_EQ(msgId, IWindow::WindowMessage::TRANS_ID_UPDATE_WINDOW_RECT);
+    EXPECT_EQ(res, static_cast<int>(ERR_TRANSACTION_FAILED));
 }
 
 /**

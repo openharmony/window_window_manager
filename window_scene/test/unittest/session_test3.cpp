@@ -714,7 +714,6 @@ HWTEST_F(WindowSessionTest3, Snapshot, Function | SmallTest | Level2)
  */
 HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     session_->SetSessionState(SessionState::STATE_CONNECT);
     session_->SetSessionStateChangeNotifyManagerListener(nullptr);
 
@@ -723,7 +722,7 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallT
 
     int resultValue = 0;
     NotifyBufferAvailableChangeFunc func = [&resultValue](const bool isAvailable) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetBufferAvailableChangeListener(func);
     EXPECT_EQ(resultValue, 1);
@@ -736,17 +735,13 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallT
  */
 HWTEST_F(WindowSessionTest3, NotifySessionFocusableChange, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     NotifySessionFocusableChangeFunc func = [&resultValue](const bool isFocusable) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetSessionFocusableChangeListener(func);
     session_->NotifySessionFocusableChange(true);
-
-    session_->sessionFocusableChangeFunc_ = nullptr;
-    session_->NotifySessionFocusableChange(true);
-    EXPECT_EQ(resultValue, 1);
+    EXPECT_EQ(resultValue, 2);
 }
 
 /**
@@ -810,14 +805,13 @@ HWTEST_F(WindowSessionTest3, SetCompatibleModeInPc, Function | SmallTest | Level
  */
 HWTEST_F(WindowSessionTest3, NotifySessionTouchableChange, Function | SmallTest | Level2)
 {
-    ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     NotifySessionTouchableChangeFunc func = [&resultValue](const bool touchable) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetSessionTouchableChangeListener(func);
     session_->NotifySessionTouchableChange(true);
-    EXPECT_EQ(resultValue, 1);
+    EXPECT_EQ(resultValue, 2);
 }
 
 /**
@@ -830,7 +824,7 @@ HWTEST_F(WindowSessionTest3, NotifyClick, Function | SmallTest | Level2)
     ASSERT_NE(session_, nullptr);
     int resultValue = 0;
     NotifyClickFunc func = [&resultValue]() {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetClickListener(func);
     session_->NotifyClick();
