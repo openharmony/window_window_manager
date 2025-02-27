@@ -669,17 +669,17 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "WM:Find %s", windowName.c_str());
         std::shared_ptr<NativeReference> jsWindowObj = FindJsWindowObject(windowName);
         if (jsWindowObj != nullptr && jsWindowObj->GetNapiValue() != nullptr) {
-            TLOGI(WmsLogTag::WMS_LIFE, "Find window: %{public}s, use exist js window", windowName.c_str());
+            TLOGNI(WmsLogTag::WMS_LIFE, "Find window: %{public}s, use exist js window", windowName.c_str());
             task->Resolve(env, jsWindowObj->GetNapiValue());
         } else {
             sptr<Window> window = Window::Find(windowName);
             if (window == nullptr) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Cannot find window: %{public}s", windowName.c_str());
+                TLOGNE(WmsLogTag::WMS_LIFE, "Cannot find window: %{public}s", windowName.c_str());
                 task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
                     "Cannot find window"));
             } else {
                 task->Resolve(env, CreateJsWindowObject(env, window));
-                TLOGI(WmsLogTag::WMS_LIFE, "Find window: %{public}s, create js window", windowName.c_str());
+                TLOGNI(WmsLogTag::WMS_LIFE, "Find window: %{public}s, create js window", windowName.c_str());
             }
         }
     };
@@ -767,7 +767,7 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
             SingletonContainer::Get<WindowManager>().MinimizeAllAppWindows(static_cast<uint64_t>(displayId)));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
-            TLOGI(WmsLogTag::WMS_LIFE, "OnMinimizeAll success");
+            TLOGNI(WmsLogTag::WMS_LIFE, "OnMinimizeAll success");
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnMinimizeAll failed"));
         }
