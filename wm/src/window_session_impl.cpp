@@ -3248,6 +3248,7 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
     TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
     if (reason != static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH) &&
         reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did foreground", reason);
         return;
     }
     if (handler_ == nullptr) {
@@ -3296,6 +3297,7 @@ void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
     TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
     if (reason != static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH) &&
         reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did background", reason);
         return;
     }
     if (handler_ == nullptr) {
