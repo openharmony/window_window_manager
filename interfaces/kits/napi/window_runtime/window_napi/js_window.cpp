@@ -2803,7 +2803,7 @@ napi_value JsWindow::OnSetLayoutFullScreen(napi_env env, napi_callback_info info
                 napi_get_value_bool(env, nativeVal, &isLayoutFullScreen));
         }
     }
-    const char* const where = __func__;  
+    const char* const where = __func__;
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -3631,7 +3631,7 @@ napi_value JsWindow::OnIsWindowSupportWideGamut(napi_env env, napi_callback_info
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             WLOGFE("window is nullptr or get invalid param");
-            task.Reject(env,
+            task->Reject(env,
                 JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
@@ -5069,7 +5069,7 @@ napi_value JsWindow::OnSetWindowColorSpace(napi_env env, napi_callback_info info
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     const char* const where = __func__;
-    auto asyncTask = [weakToken= wptr<Window>(windowToken_), colorSpace, where, env, task = napiAsyncTask] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), colorSpace, where, env, task = napiAsyncTask] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             WLOGFE("window is nullptr");
