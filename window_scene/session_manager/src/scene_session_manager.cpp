@@ -5622,14 +5622,14 @@ WMError SceneSessionManager::RequestFocusForSystemKeyboard(int32_t persistentId,
 {
     FocusChangeReason reason = FocusChangeReason::SYSTEM_KEYBOARD;
     TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, only support SA calling.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
         return WMError::WM_ERROR_NULLPTR;
-    }
-    if (!SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, only support SA calling.");
-        return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto task = [this, persistentId, isFocused, byForeground, reason]() {
         if (isFocused) {
