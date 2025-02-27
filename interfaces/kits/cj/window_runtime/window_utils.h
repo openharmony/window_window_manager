@@ -153,8 +153,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_SYSTEM_TOAST,
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
-
-    TYPE_MAIN = 32;
+    TYPE_MAIN = 32,
     TYPE_END
 };
 

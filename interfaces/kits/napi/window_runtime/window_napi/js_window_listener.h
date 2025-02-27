@@ -79,7 +79,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public ISubWindowCloseListener,
                          public IWindowHighlightChangeListener {
 public:
-    JsWindowListener(napi_env env, std::shared_ptr<NativeReference> callback, CaseType caseType)
+    JsWindowListener(napi_env env, NativeReference* callback, CaseType caseType)
         : env_(env), jsCallBack_(callback), caseType_(caseType), weakRef_(wptr<JsWindowListener> (this)) {}
     ~JsWindowListener();
     void OnSystemBarPropertyChange(DisplayId displayId, const SystemBarRegionTints& tints) override;
@@ -142,7 +142,7 @@ private:
     void LifeCycleCallBack(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
-    std::shared_ptr<NativeReference> jsCallBack_;
+    NativeReference* jsCallBack_;
     CaseType caseType_ = CaseType::CASE_WINDOW;
     wptr<JsWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;

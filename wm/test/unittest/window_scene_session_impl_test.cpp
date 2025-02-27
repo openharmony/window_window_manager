@@ -1818,7 +1818,7 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreen03, Function | SmallTest
     window->property_->SetCompatibleModeInPc(true);
     sptr<WindowSessionImpl> mainWindow = CreateWindow("mainWindow", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, 100);
     mainWindow->SetFreeMultiWindowMode(true);
-    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
+    ASSERT_EQ(WMError::WM_OK, mainWindow->SetLayoutFullScreen(true));
 }
 
 /**

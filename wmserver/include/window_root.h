@@ -96,6 +96,7 @@ public:
     uint32_t GetTotalWindowNum() const;
     uint32_t GetWindowIdByObject(const sptr<IRemoteObject>& remoteObject);
     sptr<WindowNode> GetWindowForDumpAceHelpInfo() const;
+    void NotifyMMIServiceOnline();
     void DestroyLeakStartingWindow();
     void SetSplitRatios(const std::vector<float>& splitRatioNumbers);
     std::vector<sptr<WindowNode>> GetSplitScreenWindowNodes(DisplayId displayId);

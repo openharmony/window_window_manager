@@ -112,7 +112,7 @@ private:
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,
         napi_env env, napi_value parameter);
-    std::map<std::string, std::map<std::shared_ptr<NativeReference>, sptr<JsWindowListener>>> jsCbMap_;
+    std::map<std::string, std::map<NativeReference*, sptr<JsWindowListener>>> jsCbMap_;
     std::mutex mtx_;
 };
 } // namespace Rosen

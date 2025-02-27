@@ -34,6 +34,7 @@ group("systemtest") {
     ":wms_window_rotation_test",
     ":wms_window_split_immersive_test",
     ":wms_window_split_test",
+    ":wms_window_status_change_test",
     ":wms_window_subwindow_test",
     ":wms_window_system_toast_window_test",
     ":wms_window_systemsubwindow_test",
@@ -539,6 +540,26 @@ ohos_systemtest("wms_window_nointeraction_listener_test") {
   sources = [ "window_nointeraction_listener_test.cpp" ]
 
   deps = [ ":wms_systemtest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "power_manager:powermgr_client",
+  ]
+}
+
+ohos_systemtest("wms_window_status_change_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_status_change_test.cpp" ]
+
+  include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
+  ]
 
   external_deps = [
     "c_utils:utils",

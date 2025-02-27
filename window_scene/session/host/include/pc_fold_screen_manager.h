@@ -30,6 +30,7 @@
 namespace OHOS::Rosen {
 using FoldScreenStatusChangeCallback = std::function<void(DisplayId displayId,
     SuperFoldStatus status, SuperFoldStatus prevStatus)>;
+using SystemKeyboardStatusChangeCallback = std::function<void(DisplayId displayId, bool hasSystemKeyboard)>;
 
 enum class ScreenSide : uint8_t {
     EXPAND = 0,
@@ -55,6 +56,7 @@ public:
     void UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
     SuperFoldStatus GetScreenFoldStatus() const;
+    SuperFoldStatus GetScreenFoldStatus(DisplayId displayId) const;
     bool IsHalfFolded(DisplayId displayId) const;
     bool IsHalfFoldedOnMainDisplay(DisplayId displayId) const;
     bool IsPcFoldScreen(DisplayId displayId) const;
@@ -100,6 +102,9 @@ public:
     void RegisterFoldScreenStatusChangeCallback(int32_t persistentId,
         const std::weak_ptr<FoldScreenStatusChangeCallback>& func);
     void UnregisterFoldScreenStatusChangeCallback(int32_t persistentId);
+    void RegisterSystemKeyboardStatusChangeCallback(int32_t persistentId,
+        const std::weak_ptr<SystemKeyboardStatusChangeCallback>& func);
+    void UnregisterSystemKeyboardStatusChangeCallback(int32_t persistentId);
     DisplayId GetDisplayId() const { return displayId_; }
 
 private:
@@ -138,8 +143,11 @@ private:
 
     void ExecuteFoldScreenStatusChangeCallbacks(DisplayId displayId,
         SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void ExecuteSystemKeyboardStatusChangeCallbacks(DisplayId displayId, bool hasSystemKeyboard);
     std::mutex callbackMutex_;
     std::unordered_map<int32_t, std::weak_ptr<FoldScreenStatusChangeCallback>> foldScreenStatusChangeCallbacks_;
+    std::unordered_map<int32_t, std::weak_ptr<SystemKeyboardStatusChangeCallback>>
+        systemKeyboardStatusChangeCallbacks_;
 };
 } // namespace OHOS::Rosen
 
