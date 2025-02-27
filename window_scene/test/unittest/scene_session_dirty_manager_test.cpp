@@ -327,6 +327,42 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform, Function | SmallTe
 }
 
 /**
+ * @tc.name: CalNotRotateTransform2
+ * @tc.desc: CalNotRotateTransform2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, CalNotRotateTransform2, Function | SmallTest | Level2)
+{
+    SessionInfo sessionInfo;
+    SingleHandData testSingleHandData;
+    Matrix3f transform;
+    Matrix3f testTransform = transform;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    auto screenId = 0;
+    sceneSession->GetSessionProperty()->SetDisplayId(screenId);
+    ScreenProperty screenProperty0;
+    screenProperty0.SetRotation(0.0f);
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ASSERT_NE(screenSession, nullptr);
+    ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(FoldDisplayMode::UNKNOWN);
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
+    testTransform.SetZero();
+    ScreenSessionManagerClient::GetInstance().OnPropertyChanged(screenId, screenProperty0, reason);
+    auto oriProperty = sceneSession->GetSessionProperty();
+    sceneSession->property_ = nullptr;
+    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, testTransform);
+    sceneSession->property_ = oriProperty;
+    testSingleHandData.singleHandY = 0;
+    manager_->CalNotRotateTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, testTransform);
+}
+
+/**
  * @tc.name: CalTransform
  * @tc.desc: CalTransform
  * @tc.type: FUNC
@@ -373,6 +409,10 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransform, Function | SmallTest | Leve
     manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
+    testSingleHandData.singleHandY = 0;
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+    ASSERT_EQ(transform, transform.Translate(translate)
+        .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
 }
 
 /**
@@ -390,9 +430,6 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Le
     sessionInfo.bundleName_ = "UpdateHotAreas";
     sessionInfo.moduleName_ = "UpdateHotAreas";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    if (sceneSession == nullptr) {
-        return;
-    }
     ASSERT_NE(sceneSession, nullptr);
     std::vector<OHOS::Rosen::Rect> touchHotAreasInSceneSession(0);
     sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreasInSceneSession);
@@ -427,6 +464,28 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas, Function | SmallTest | Le
     sceneSession->GetSessionProperty()->SetTouchHotAreas(fullSceneSession);
     touchHotAreas.clear();
     pointerHotAreas.clear();
+    manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+    ASSERT_EQ(touchHotAreas.size(), 1);
+}
+
+/**
+ * @tc.name: UpdateHotAreas2
+ * @tc.desc: UpdateHotAreas2
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest, UpdateHotAreas2, Function | SmallTest | Level2)
+{
+    std::vector<MMI::Rect> touchHotAreas(0);
+    std::vector<MMI::Rect> pointerHotAreas(0);
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    std::vector<OHOS::Rosen::Rect> touchHotAreasInSceneSession(0);
+    sceneSession->GetSessionProperty()->SetTouchHotAreas(touchHotAreasInSceneSession);
+    sceneSession->GetSessionProperty()->type_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+    touchHotAreas.clear();
+    pointerHotAreas.clear();
+    sceneSession->GetSessionProperty()->SetDisplayId(-100);
     manager_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
     ASSERT_EQ(touchHotAreas.size(), 1);
 }
@@ -570,6 +629,11 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
+    auto oriProperty = sceneSession->property_;
+    sceneSession->property_ = nullptr;
+    manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
+    ASSERT_EQ(0, pointerChangeAreas.size());
+    sceneSession->property_ = oriProperty;
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sceneSession->property_->SetDragEnabled(false);
     manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
@@ -600,6 +664,7 @@ HWTEST_F(SceneSessionDirtyManagerTest, UpdatePointerAreas, Function | SmallTest 
     ASSERT_EQ(compare3, pointerChangeAreas);
     limits.maxHeight_ = 1;
     sceneSession->property_->SetWindowLimits(limits);
+    sceneSession->property_->displayId_ = 0;
     manager_->UpdatePointerAreas(sceneSession, pointerChangeAreas);
     std::vector<int32_t> compare4 = pointerChangeAreas = {pointerAreaSixteenPx, pointerAreaFivePx,
         pointerAreaSixteenPx, pointerAreaFivePx, pointerAreaSixteenPx,
@@ -923,8 +988,10 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetModalUIExtensionInfo, Function | Small
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     surfaceNode->SetId(0);
     sceneSession->SetSurfaceNode(surfaceNode);
+    std::vector<SecSurfaceInfo> surfaceInfoList;
     SecSurfaceInfo secSurfaceInfo;
     manager_->constrainedModalUIExtInfoMap_.clear();
+    manager_->constrainedModalUIExtInfoMap_[0] = surfaceInfoList;
     manager_->constrainedModalUIExtInfoMap_[0].emplace_back(secSurfaceInfo);
     manager_->GetModalUIExtensionInfo(windowInfoList, sceneSession, windowInfo);
     ASSERT_EQ(len + 2, windowInfoList.size());
