@@ -41,6 +41,8 @@ using NotifyWindowDragHotAreaFunc = std::function<void(DisplayId displayId, uint
 using NotifyWindowPidChangeCallback = std::function<void(int32_t windowId, bool startMoving)>;
 
 const uint32_t WINDOW_HOT_AREA_TYPE_UNDEFINED = 0;
+const int32_t POSITIVE_CORRELATION = 1;
+const int32_t NEGATIVE_CORRELATION = -1;
 
 enum class MoveDirection : uint32_t {
     UNKNOWN,
@@ -237,6 +239,7 @@ private:
     void FixTranslateByLimits(int32_t& tranX, int32_t& tranY);
     bool InitMainAxis(AreaType type, int32_t tranX, int32_t tranY);
     void ConvertXYByAspectRatio(int32_t& tx, int32_t& ty, float aspectRatio);
+    int32_t ConvertByAreaType(int32_t tran) const;
     void ProcessSessionRectChange(SizeChangeReason reason);
     void InitDecorValue(const sptr<WindowSessionProperty> property, const SystemSessionConfig& sysConfig);
 
