@@ -992,6 +992,81 @@ int32_t ScreenSessionManager::GetCurrentInUseScreenNumber()
     return inUseScreenNumber_;
 }
 
+bool ScreenSessionManager::SetCastPrivacyToRS(sptr<ScreenSession> screenSession, bool enable)
+{
+    bool phyMirrorEnable = IsDefaultMirrorMode(screenSession->GetScreenId());
+    if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL || !phyMirrorEnable) {
+        TLOGE(WmsLogTag::DMS, "screen is not real or external, screenId:%{public}" PRIu64"",
+            screenSession->GetScreenId());
+        return false;
+    }
+    ScreenId rsScreenId = INVALID_SCREEN_ID;
+    if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetScreenId(), rsScreenId) ||
+        rsScreenId == INVALID_SCREEN_ID) {
+        TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+        return false;
+    }
+    rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, enable);
+    return true;
+}
+
+void ScreenSessionManager::SetCastPrivacyFromSettingData()
+{
+    bool enable = true;
+    bool isOK = ScreenSettingHelper::GetSettingCast(enable);
+    TLOGI(WmsLogTag::DMS, "get setting cast done, isOK: %{public}u, enable: %{public}u", isOK, enable);
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (const auto& sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        bool isSuc = SetCastPrivacyToRS(screenSession, enable);
+        TLOGI(WmsLogTag::DMS, "set cast privacy done, isSuc:%{public}d, enable:%{public}d, screenId:%{public}" PRIu64"",
+            isSuc, enable, sessionIt.first);
+    }
+}
+
+void ScreenSessionManager::RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession)
+{
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    bool phyMirrorEnable = IsDefaultMirrorMode(screenSession->GetScreenId());
+    if (!g_isPcDevice && phyMirrorEnable && screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL) {
+        TLOGI(WmsLogTag::DMS, "Register Setting wire cast Observer");
+        SettingObserver::UpdateFunc updateFunc = [this](const std::string& key) { SetCastPrivacyFromSettingData(); };
+        ScreenSettingHelper::RegisterSettingWireCastObserver(updateFunc);
+    }
+}
+
+void ScreenSessionManager::UnregisterSettingWireCastObserver(ScreenId screenId)
+{
+    if (g_isPcDevice) {
+        return;
+    }
+    for (const auto& sessionIt : screenSessionMap_) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        bool phyMirrorEnable = IsDefaultMirrorMode(screenSession->GetScreenId());
+        if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL || !phyMirrorEnable) {
+            TLOGE(WmsLogTag::DMS, "screen is not real or external, screenId:%{public}" PRIu64"", sessionIt.first);
+            continue;
+        }
+        if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR &&
+            screenSession->GetScreenId() != screenId) {
+            return;
+        }
+    }
+    ScreenSettingHelper::UnregisterSettingWireCastObserver();
+    TLOGI(WmsLogTag::DMS, "unregister Setting wire cast Observer");
+}
+
 void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSession,
     ScreenId screenId, ScreenEvent screenEvent)
 {
@@ -999,6 +1074,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     if (phyMirrorEnable) {
         PhyMirrorConnectWakeupScreen();
         NotifyCastWhenScreenConnectChange(true);
+        RegisterSettingWireCastObserver(screenSession);
     }
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr) {
@@ -1078,6 +1154,9 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
     if (phyMirrorEnable) {
         NotifyScreenDisconnected(screenSession->GetScreenId());
         isPhyScreenConnected_ = false;
+    }
+    if (!g_isPcDevice && phyMirrorEnable) {
+        UnregisterSettingWireCastObserver(screenId);
     }
     TLOGW(WmsLogTag::DMS, "disconnect success. ScreenId: %{public}" PRIu64 "", screenId);
 }
