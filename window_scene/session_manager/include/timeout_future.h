@@ -30,8 +30,6 @@ public:
         return result_;
     }
 
-    inline bool IsReady() { return isReady_; }
-
     void FutureCall(T t)
     {
         std::unique_lock<std::mutex> lock(mutex_);
@@ -41,6 +39,8 @@ public:
     }
 
 private:
+    inline bool IsReady() { return isReady_; }
+
     std::condition_variable conditionVariable_;
     std::mutex mutex_;
     bool isReady_ = false;
