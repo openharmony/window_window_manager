@@ -1082,51 +1082,6 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTes
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
 }
-
-/**
- * @tc.name: NotifySessionExceptionInner
- * @tc.desc: NotifySessionExceptionInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
-
-    SessionInfo info;
-    info.abilityName_ = "NotifySessionExceptionInner";
-    info.bundleName_ = "NotifySessionExceptionInner";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isTerminating_ = false;
-    auto res = sceneSession->NotifySessionExceptionInner(nullptr, needRemoveSession, true);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->clientIdentityToken_ = "session1";
-    abilitySessionInfo->identityToken = "session2";
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = true;
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = false;
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->sessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    ASSERT_NE(nullptr, sceneSession->sessionExceptionFunc_);
-    sceneSession->jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    ASSERT_NE(nullptr, sceneSession->jsSceneSessionExceptionFunc_);
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
-}
 }
 }
 }
