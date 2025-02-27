@@ -283,6 +283,66 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     }
 }
 
+void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_SHOW_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
+    }
+}
+
+void JsWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_HIDE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
+    }
+}
+
 void JsWindowListener::OnTouchOutside() const
 {
     WLOGI("CALLED");
