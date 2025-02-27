@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "session_manager/include/scene_session_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "session_manager/include/scene_session_dirty_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -774,6 +775,40 @@ HWTEST_F(SceneInputManagerTest, FlushEmptyInfoToMMI, Function | SmallTest | Leve
     SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
     SceneInputManager::GetInstance().eventHandler_ = preEventHandler;
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GetConstrainedModalExtWindowInfo
+ * @tc.desc: GetConstrainedModalExtWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, GetConstrainedModalExtWindowInfo, Function | SmallTest | Level3)
+{
+    auto ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(nullptr);
+    ASSERT_EQ(ret, std::nullopt);
+    auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
+    SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_EQ(ret, std::nullopt);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
+    SceneInputManager::GetInstance().sceneSessionDirty_->constrainedModalUIExtInfoMap_.clear();
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_EQ(ret, std::nullopt);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->SetId(0);
+    sceneSession->surfaceNode_ = surfaceNode;
+    std::vector<SecSurfaceInfo> surfaceInfoList;
+    SecSurfaceInfo secSurfaceInfo;
+    surfaceInfoList.emplace_back(secSurfaceInfo);
+    SceneInputManager::GetInstance().sceneSessionDirty_->constrainedModalUIExtInfoMap_[0] = surfaceInfoList;
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_EQ(ret, std::nullopt);
+    sceneSession->uiExtNodeIdToPersistentIdMap_[0] = 1;
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_NE(ret, std::nullopt);
 }
 }
 }
