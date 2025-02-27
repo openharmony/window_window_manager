@@ -2603,8 +2603,7 @@ public:
      * @param densityInfo the struct representing system density, default density and custom density.
      * @return WMError.
      */
-    virtual WMError GetWindowDensityInfo(
-        WindowDensityInfo& densityInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) { return WMError::WM_OK; }
 
     /**
      * @brief Get virtual pixel ratio.
