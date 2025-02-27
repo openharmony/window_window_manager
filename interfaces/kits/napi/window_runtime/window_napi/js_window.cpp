@@ -3813,8 +3813,7 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    NapiAsyncTask::CompleteCallback complete = [weakToken = wptr<Window>(windowToken_), brightness,
-                                                env, task = napiAsyncTask] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), brightness, env, task = napiAsyncTask] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env,
@@ -4123,8 +4122,8 @@ napi_value JsWindow::OnSetKeepScreenOn(napi_env env, napi_callback_info info)
         (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    NapiAsyncTask::CompleteCallback complete = [weakToken = wptr<Window>(windowToken_), keepScreenOn, errCode,
-                                                env, task = napiAsyncTask] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), keepScreenOn, errCode,
+                      env, task = napiAsyncTask] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             WLOGFE("window is nullptr");
@@ -4595,7 +4594,7 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), shouldHide, env,
-        task = napiAsyncTask, where = __func__] {
+                      task = napiAsyncTask, where = __func__] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);
