@@ -190,7 +190,7 @@ public:
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
 
-    /**
+    /*
      * Window Decor
      */
     WMError SetWindowTitle(const std::string& title) override;
