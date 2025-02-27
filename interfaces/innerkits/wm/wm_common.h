@@ -1077,9 +1077,6 @@ public:
  * @brief Exception info.
  */
 struct ExceptionInfo : public Parcelable {
-    bool needRemoveSession = false;
-    bool needClearCallerLink = true;
-
     /**
      * @brief Marshalling ExceptionInfo.
      *
@@ -1108,6 +1105,9 @@ struct ExceptionInfo : public Parcelable {
         }
         return info;
     }
+
+    bool needRemoveSession = false;
+    bool needClearCallerLink = true;
 };
 
 /**

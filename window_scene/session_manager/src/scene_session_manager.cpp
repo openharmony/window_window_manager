@@ -2419,7 +2419,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         if (!PreHandleCollaborator(sceneSession, persistentId)) {
             TLOGE(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, ancoSceneState: %{public}d",
                 persistentId, sceneSession->GetSessionInfo().ancoSceneState);
-            ExceptionInfo exceptionInfo = {true, true};
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = true;
             sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
         }
@@ -2464,7 +2465,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     NotifyCollaboratorAfterStart(sceneSession, sceneSessionInfo);
     if (errCode != ERR_OK) {
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
-        ExceptionInfo exceptionInfo = {true, true};
+        ExceptionInfo exceptionInfo;
+        exceptionInfo.needRemoveSession = true;
         sceneSession->NotifySessionExceptionInner(sceneSessionInfo, exceptionInfo, false, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
@@ -4074,7 +4076,8 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
-            ExceptionInfo exceptionInfo = {true, true};
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = true;
             sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
             if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
                 startUIAbilityErrorFunc_(
@@ -11718,7 +11721,8 @@ void SceneSessionManager::RemoveFailRecoveredSession()
             continue;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId=%{public}d", persistentId);
-        ExceptionInfo exceptionInfo = {true, true};
+        ExceptionInfo exceptionInfo;
+        exceptionInfo.needRemoveSession = true;
         sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
     }
     failRecoveredPersistentIdSet_.clear();
