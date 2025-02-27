@@ -19,6 +19,7 @@
 #include "session_manager/include/fold_screen_controller/secondary_fold_sensor_manager.h"
 #include "session_manager/include/fold_screen_controller/fold_screen_sensor_manager.h"
 #include "session_manager/include/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,8 +30,7 @@ namespace {
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 std::recursive_mutex g_displayInfoMutex;
 std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>("test");
-sptr<SecondaryDisplayFoldPolicy> g_policy =
-    new SecondaryDisplayFoldPolicy(g_displayInfoMutex, screenPowerTaskScheduler_);
+sptr<SecondaryDisplayFoldPolicy> g_policy;
 sptr<SecondaryDisplaySensorFoldStateManager> g_stateManager = new SecondaryDisplaySensorFoldStateManager();
 constexpr size_t SECONDARY_POSTURE_SIZE = 3;
 constexpr size_t SECONDARY_HALL_SIZE = 2;
@@ -42,6 +42,7 @@ constexpr uint16_t CORRECT_HALL_AB = 0;
 constexpr uint16_t FIRST_DATA = 0;
 constexpr uint16_t SECOND_DATA = 1;
 constexpr uint16_t THIRD_DATA = 2;
+#define ONLY_FOR_SECONDARY_DISPLAY_FOLD if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {return;}
 }
 class SecondaryFoldSensorManagerTest : public testing::Test {
 public:
@@ -53,6 +54,8 @@ public:
 
 void SecondaryFoldSensorManagerTest::SetUpTestCase()
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
+    g_policy = new SecondaryDisplayFoldPolicy(g_displayInfoMutex, screenPowerTaskScheduler_);
     SecondaryFoldSensorManager::GetInstance().SetFoldScreenPolicy(g_policy);
     SecondaryFoldSensorManager::GetInstance().SetSensorFoldStateManager(g_stateManager);
 }
@@ -78,6 +81,7 @@ namespace {
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, RegisterPostureCallback01, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     SecondaryFoldSensorManager::GetInstance().RegisterPostureCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsPostureUserCallbackInvalid());
 }
@@ -89,6 +93,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, RegisterPostureCallback01, Function | S
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterPostureCallback01, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     SecondaryFoldSensorManager::GetInstance().UnRegisterPostureCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsPostureUserCallbackInvalid());
 }
@@ -100,6 +105,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterPostureCallback01, Function |
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, RegisterHallCallback01, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     SecondaryFoldSensorManager::GetInstance().RegisterHallCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsHallUserCallbackInvalid());
 }
@@ -111,6 +117,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, RegisterHallCallback01, Function | Smal
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, UnRegisterHallCallback01, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     SecondaryFoldSensorManager::GetInstance().UnRegisterHallCallback();
     EXPECT_FALSE(SecondaryFoldSensorManager::GetInstance().IsHallUserCallbackInvalid());
 }
@@ -138,6 +145,7 @@ static std::vector<float> HandlePostureData(float postureBc, float postureAb, fl
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData01, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandlePostureData(nullptr);
     std::vector<float> postures = SecondaryFoldSensorManager::GetInstance().GetGlobalAngle();
     EXPECT_EQ(postures.size(), SECONDARY_POSTURE_SIZE);
@@ -153,6 +161,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData01, Function | SmallTe
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData02, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     SensorEvent postureEvent = {
         .dataLen = sizeof(PostureData),
         .data = nullptr,
@@ -172,6 +181,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData02, Function | SmallTe
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData03, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     float postureBc = 181.0F;
     float postureAb = 160.0F;
     float postureAbAnti = -1.0F;
@@ -189,6 +199,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData03, Function | SmallTe
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandlePostureData04, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     std::vector<float> postures = HandlePostureData(CORRECT_POSTURE_BC, CORRECT_POSTURE_AB, CORRECT_POSTURE_AB_ANTI);
     EXPECT_EQ(postures.size(), SECONDARY_POSTURE_SIZE);
     EXPECT_EQ(postures[FIRST_DATA], CORRECT_POSTURE_BC);
@@ -219,6 +230,7 @@ static std::vector<uint16_t> HandleHallDataExt(uint16_t hallBc, uint16_t hallAb)
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt01, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     OHOS::Rosen::SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(nullptr);
     std::vector<uint16_t> halls = SecondaryFoldSensorManager::GetInstance().GetGlobalHall();
     EXPECT_EQ(halls.size(), SECONDARY_HALL_SIZE);
@@ -233,6 +245,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt01, Function | SmallTe
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt02, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     SensorEvent hallEvent = {
         .dataLen = sizeof(FoldScreenSensorManager::EXTHALLData),
         .data = nullptr,
@@ -251,6 +264,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt02, Function | SmallTe
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt03, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     uint16_t hallBc = 2;
     uint16_t hallAb = 0;
     std::vector<uint16_t> halls = HandleHallDataExt(hallBc, hallAb);
@@ -266,6 +280,7 @@ HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt03, Function | SmallTe
  */
 HWTEST_F(SecondaryFoldSensorManagerTest, HandleHallDataExt04, Function | SmallTest | Level3)
 {
+    ONLY_FOR_SECONDARY_DISPLAY_FOLD
     std::vector<uint16_t> halls = HandleHallDataExt(CORRECT_HALL_BC, CORRECT_HALL_AB);
     EXPECT_EQ(halls.size(), SECONDARY_HALL_SIZE);
     EXPECT_EQ(halls[FIRST_DATA], CORRECT_HALL_BC);
