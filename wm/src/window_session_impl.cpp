@@ -1175,7 +1175,7 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
         return;
     }
     if (state_ != WindowState::STATE_SHOWN) {
-        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}, is not shown", state_);
+        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d, is not shown", state_);
         return;
     }
     if (interactive) {
