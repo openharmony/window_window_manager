@@ -1333,7 +1333,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     TLOGI(WmsLogTag::WMS_DECOR, "[hideSplit, hideMaximize, hideMinimizeButton, hideCloseButton]:"
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
-    if (property_->GetCompatibleModeInPc()) {
+    if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
         uiContent->HideWindowTitleButton(true, false, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent("scb_back_visibility", "true");
     } else {
@@ -3775,10 +3775,17 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    if (lastAvoidAreaMap_[type] != *avoidArea) {
-        lastAvoidAreaMap_[type] = *avoidArea;
-        NotifyAvoidAreaChange(avoidArea, type);
-        UpdateViewportConfig(GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
+    auto task = [this, avoidArea, type] {
+        if (lastAvoidAreaMap_[type] != *avoidArea) {
+            lastAvoidAreaMap_[type] = *avoidArea;
+            NotifyAvoidAreaChange(avoidArea, type);
+            UpdateViewportConfig(GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
+        }
+    };
+    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
+        task();
+    } else {
+        handler_->PostSyncTask(std::move(task), __func__);
     }
     return WSError::WS_OK;
 }

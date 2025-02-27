@@ -857,7 +857,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateRootSceneSessionAvoidArea, Function | S
 {
     ASSERT_NE(nullptr, ssm_);
     int32_t persistentId = 1;
-    ssm_->rootSceneSession_ = ssm_->GetRootSceneSession();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ASSERT_NE(nullptr, ssm_->rootSceneSession_);
     bool needUpdate = false;
     ssm_->UpdateRootSceneSessionAvoidArea(persistentId, needUpdate);

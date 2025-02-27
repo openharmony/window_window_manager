@@ -99,6 +99,15 @@ SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus() const
     return screenFoldStatus_;
 }
 
+SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus(DisplayId displayId) const
+{
+    std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
+    if (displayId_ != displayId) {
+        return SuperFoldStatus::UNKNOWN;
+    }
+    return screenFoldStatus_;
+}
+
 bool PcFoldScreenManager::IsHalfFolded(DisplayId displayId) const
 {
     std::shared_lock<std::shared_mutex> lock(displayInfoMutex_);
@@ -120,7 +129,11 @@ void PcFoldScreenManager::UpdateSystemKeyboardStatus(bool hasSystemKeyboard)
 {
     TLOGI(WmsLogTag::WMS_KEYBOARD, "status: %{public}d", hasSystemKeyboard);
     std::unique_lock<std::shared_mutex> lock(displayInfoMutex_);
+    if (hasSystemKeyboard_ == hasSystemKeyboard) {
+        return;
+    }
     hasSystemKeyboard_ = hasSystemKeyboard;
+    ExecuteSystemKeyboardStatusChangeCallbacks(displayId_, hasSystemKeyboard_);
 }
 
 bool PcFoldScreenManager::HasSystemKeyboard() const
@@ -542,6 +555,45 @@ void PcFoldScreenManager::ExecuteFoldScreenStatusChangeCallbacks(DisplayId displ
             continue;
         }
         (*callback)(displayId, status, prevStatus);
+        iter++;
+    }
+}
+
+void PcFoldScreenManager::RegisterSystemKeyboardStatusChangeCallback(int32_t persistentId,
+    const std::weak_ptr<SystemKeyboardStatusChangeCallback>& func)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", persistentId);
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    auto [_, result] = systemKeyboardStatusChangeCallbacks_.insert_or_assign(persistentId, func);
+    if (result) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback has registered");
+    }
+}
+
+void PcFoldScreenManager::UnregisterSystemKeyboardStatusChangeCallback(int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d", persistentId);
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    auto iter = systemKeyboardStatusChangeCallbacks_.find(persistentId);
+    if (iter == systemKeyboardStatusChangeCallbacks_.end()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback not registered");
+        return;
+    }
+    systemKeyboardStatusChangeCallbacks_.erase(iter);
+}
+
+void PcFoldScreenManager::ExecuteSystemKeyboardStatusChangeCallbacks(DisplayId displayId, bool hasSystemKeyboard)
+{
+    std::unique_lock<std::mutex> lock(callbackMutex_);
+    for (auto iter = systemKeyboardStatusChangeCallbacks_.begin();
+        iter != systemKeyboardStatusChangeCallbacks_.end();) {
+        auto callback = iter->second.lock();
+        if (callback == nullptr) {
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "callback invalid, id: %{public}d", iter->first);
+            iter = systemKeyboardStatusChangeCallbacks_.erase(iter);
+            continue;
+        }
+        (*callback)(displayId, hasSystemKeyboard);
         iter++;
     }
 }

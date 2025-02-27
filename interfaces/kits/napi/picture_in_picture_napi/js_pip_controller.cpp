@@ -227,6 +227,7 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napi_delete_reference(env, typeNodeRef);
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }

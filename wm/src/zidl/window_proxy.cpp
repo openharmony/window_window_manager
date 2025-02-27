@@ -684,6 +684,31 @@ void WindowProxy::NotifyForegroundInteractiveStatus(bool interactive)
     }
 }
 
+void WindowProxy::NotifyMMIServiceOnline(uint32_t winId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(winId)) {
+        WLOGFE("Write windowId failed");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFE("remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_NOTIFY_MMI_SERVICE_ONLINE),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 } // namespace Rosen
 } // namespace OHOS
 

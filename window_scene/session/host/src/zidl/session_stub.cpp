@@ -427,6 +427,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
+        reply.WriteBool(property->GetIsAtomicService());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
