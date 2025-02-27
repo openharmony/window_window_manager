@@ -2615,6 +2615,7 @@ HWTEST_F(WindowSessionImplTest4, GetCrossAxisState, Function | SmallTest | Level
         .WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
     EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
 }
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
