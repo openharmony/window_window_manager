@@ -2568,7 +2568,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
 
         if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
-            TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
+            TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
             sceneSession->UpdateInteractiveInner(false);
         }
         sceneSession->SetActive(false);
@@ -2823,7 +2823,7 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
             this->RemoveSnapshotFromCache(persistentId);
         });
         if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
-            TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
+            TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
             sceneSession->UpdateInteractiveInner(false);
         }
         sceneSession->DisconnectTask(false, isSaveSnapshot);
@@ -4073,7 +4073,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         bool isFromUser = false;
         if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
-            TLOGI(WmsLogTag::WMS_MAIN, "Notify scene session id:%{public}d pause", persistentId);
+            TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
             sceneSession->UpdateInteractiveInner(false);
         }
         int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
