@@ -3887,10 +3887,10 @@ napi_value JsWindow::OnSetFocusable(napi_env env, napi_callback_info info)
                 return;
             }
             if (errCode != WMError::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
+                task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
                 return;
             }
-            WMError ret = weakWindow->SetFocusable(focusable);
+            WMError ret = window->SetFocusable(focusable);
             if (ret == WMError::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
@@ -4523,7 +4523,7 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask =
-        [weakToken = wptr<Window>(windowToken_), raiseEnabled, env, task = napiAsyncTask, where = __func__] {
+        [weakToken = wptr<Window>(windowToken_), raiseEnabled, env, errCode, task = napiAsyncTask, where = __func__] {
             auto window = weakToken.promote();
             if (window == nullptr) {
                 TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s: window is nullptr", where);
@@ -4531,8 +4531,8 @@ napi_value JsWindow::OnSetRaiseByClickEnabled(napi_env env, napi_callback_info i
                 return;
             }
             if (errCode != WMError::WM_OK) {
-                wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
-                task.Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Invalidate params."));
+                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+                task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "Invalidate params."));
                 return;
             }
             WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetRaiseByClickEnabled(raiseEnabled));
@@ -4719,7 +4719,7 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
                 task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
                 return;
             }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->RaiseAboveTarget(subWindowId));
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseAboveTarget(subWindowId));
             if (ret == WmErrorCode::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
