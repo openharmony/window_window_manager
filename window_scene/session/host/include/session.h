@@ -203,10 +203,30 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+
+    /*
+     * Window Scene Snapshot
+     */
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt);
+    void SetSaveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(saveSnapshotCallbackMutex_);
+            saveSnapshotCallback_ = std::move(task);
+        }
+    }
+
+    void SetRemoveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(removeSnapshotCallbackMutex_);
+            removeSnapshotCallback_ = std::move(task);
+        }
+    }
+
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -850,6 +870,14 @@ private:
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };
+
+    /*
+     * Window Scene Snapshot
+     */
+    Task saveSnapshotCallback_ = []() {};
+    Task removeSnapshotCallback_ = []() {};
+    std::mutex saveSnapshotCallbackMutex_;
+    std::mutex removeSnapshotCallbackMutex_;
 };
 } // namespace OHOS::Rosen
 
