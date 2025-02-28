@@ -392,6 +392,8 @@ public:
     DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
     void UpdateValidArea(ScreenId screenId, uint32_t validWidth, uint32_t validHeight);
     bool GetIsRealScreen(ScreenId screenId) override;
+    void UnregisterSettingWireCastObserver(ScreenId screenId);
+    void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
 
 protected:
     ScreenSessionManager();
@@ -642,6 +644,8 @@ private:
     bool IsDefaultMirrorMode(ScreenId screenId);
     void SetCastFromSettingData();
     void RegisterCastObserver(std::vector<ScreenId>& mirrorScreenIds);
+    void SetCastPrivacyFromSettingData();
+    bool SetCastPrivacyToRS(sptr<ScreenSession> screenSession, bool enable);
     void ExitCoordination(const std::string& reason);
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
     void SetExtendPixelRatio(const float& dpi);
