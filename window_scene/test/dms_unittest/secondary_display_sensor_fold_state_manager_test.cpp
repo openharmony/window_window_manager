@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "screen_session_manager/include/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
