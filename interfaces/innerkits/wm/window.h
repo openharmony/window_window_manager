@@ -142,6 +142,16 @@ public:
      * @brief Notify caller that window is destroyed.
      */
     virtual void AfterDestroyed() {}
+
+    /**
+     * @brief Notify caller that window is already foreground.
+     */
+    virtual void AfterDidForeground() {}
+
+    /**
+     * @brief Notify caller that window is already background.
+     */
+    virtual void AfterDidBackground() {}
 };
 
 /**
@@ -1050,6 +1060,11 @@ public:
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
                          bool withFocus = true) { return WMError::WM_OK; }
+
+    /**
+     * @brief resume window
+     */
+    virtual void Resume() {}
 
     /**
      * @brief Hide window

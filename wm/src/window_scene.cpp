@@ -159,6 +159,18 @@ WMError WindowScene::GoForeground(uint32_t reason)
     return mainWindow->Show(reason);
 }
 
+WMError WindowScene::GoResume()
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    auto mainWindow = GetMainWindow();
+    if (mainWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    mainWindow->Resume();
+    return WMError::WM_OK;
+}
+
 WMError WindowScene::GoBackground(uint32_t reason)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "reason: %{public}u", reason);

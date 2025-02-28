@@ -61,6 +61,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_15 = 15;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
 
 /*
  * DFX
@@ -1173,12 +1174,19 @@ void WindowSessionImpl::NotifyForegroundInteractiveStatus(bool interactive)
     if (IsNotifyInteractiveDuplicative(interactive)) {
         return;
     }
-    if (state_ == WindowState::STATE_SHOWN) {
-        if (interactive) {
-            NotifyAfterResumed();
-        } else {
-            NotifyAfterPaused();
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGI(WmsLogTag::WMS_LIFE, "window state %{public}d, is not shown", state_);
+        return;
+    }
+    if (interactive) {
+        if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION && !isDidForeground_) {
+            TLOGI(WmsLogTag::WMS_LIFE, "api version %{public}u, isDidForeground %{public}d", GetTargetAPIVersion(),
+                isDidForeground_);
+            return;
         }
+        NotifyAfterResumed();
+    } else {
+        NotifyAfterPaused();
     }
 }
 
@@ -3235,6 +3243,31 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     }
 }
 
+void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH) &&
+        reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did foreground", reason);
+        return;
+    }
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    handler_->PostTask([weak = wptr(this), where] {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
+        auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterDidForeground, lifecycleListeners);
+    }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
 void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotifyUiContent)
 {
     if (needNotifyListeners) {
@@ -3257,6 +3290,31 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
+}
+
+void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH) &&
+        reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did background", reason);
+        return;
+    }
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "handler is nullptr");
+        return;
+    }
+    const char* const where = __func__;
+    handler_->PostTask([weak = wptr(this), where] {
+        auto window = weak.promote();
+        if (window == nullptr) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
+        auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
+        CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners);
+    }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag)

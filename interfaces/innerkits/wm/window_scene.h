@@ -116,6 +116,13 @@ public:
     WMError GoDestroy();
 
     /**
+     * Window go resume.
+     *
+     * @return the error code of window
+     */
+    WMError GoResume();
+
+    /**
      * Window handle new want.
      *
      * @param want ability want.

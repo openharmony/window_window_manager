@@ -39,6 +39,7 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
+    void Resume() override;
 
     /*
      * Window Layout
@@ -413,6 +414,12 @@ private:
     static std::mutex windowAttachStateChangeListenerMutex_;
     sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+
+    /*
+     * Window Lifecycle
+     */
+    bool isColdStart_ = true;
+    void NotifyFreeMultiWindowModeResume();
 };
 } // namespace Rosen
 } // namespace OHOS
