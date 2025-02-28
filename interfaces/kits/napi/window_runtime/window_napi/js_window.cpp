@@ -3899,7 +3899,9 @@ napi_value JsWindow::OnSetFocusable(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: Window [%{public}u, %{public}s] set focusable end",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
-    napi_send_event(env, asyncTask, napi_eprio_high);
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "window state is abnormal!");
+    }
     return result;
 }
 
