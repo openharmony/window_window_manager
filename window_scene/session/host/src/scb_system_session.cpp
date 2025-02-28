@@ -49,9 +49,10 @@ SCBSystemSession::~SCBSystemSession()
 
 void SCBSystemSession::RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func)
 {
-    if (surfaceNode_) {
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Set buffer available callback");
-        surfaceNode_->SetBufferAvailableCallback(func);
+        surfaceNode->SetBufferAvailableCallback(func);
     } else {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "surfaceNode_ is null");
     }
