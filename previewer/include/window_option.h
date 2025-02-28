@@ -225,6 +225,13 @@ public:
     void SetSubWindowTitle(const std::string& subWindowTitle);
 
     /**
+     * @brief Set is subwindow support maximize.
+     *
+     * @param maximizeSupported true means support default not support.
+     */
+    void SetSubWindowMaximizeSupported(bool maximizeSupported);
+
+    /**
      * @brief Set subwindow topmost.
      *
      * @param isTopmost true means enable, default disabled.
@@ -393,6 +400,13 @@ public:
     bool GetWindowTopmost() const;
 
     /**
+     * @brief Get subwindow maximizeSupported
+     *
+     * @return true means subwindow support maximize, otherwise not.
+     */
+    bool GetSubWindowMaximizeSupported() const;
+
+    /**
      * @brief Set whether this window is a sub window of any level of UIExtension.
      *
      * @param isUIExtAnySubWindow true - is any sub window of UIExtension,
@@ -413,6 +427,7 @@ private:
     std::string windowName_ { "" };
     std::string bundleName_ { "" };
     std::string subWindowTitle_ = { "" };
+    bool subWindowMaximizeSupported_ = false;
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
     WindowMode mode_ { WindowMode::WINDOW_MODE_UNDEFINED };
     bool focusable_ { true };
