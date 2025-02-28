@@ -1236,8 +1236,8 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
 void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
 {
     TLOGI(WmsLogTag::WMS_MAIN, "api version %{public}u, IsPcMode %{public}d, isColdStart %{public}d",
-        GetTargetAPIVersion(), IsPcOrPadFreeMultiWindowMode(), isColdStart_);
-    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION && IsPcOrPadFreeMultiWindowMode() && !isColdStart_) {
+        GetTargetAPIVersion(), IsPcOrPadCapabilityEnabled(), isColdStart_);
+    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION && IsPcOrPadCapabilityEnabled() && !isColdStart_) {
         isDidForeground_ = true;
         NotifyForegroundInteractiveStatus(true);
     }
