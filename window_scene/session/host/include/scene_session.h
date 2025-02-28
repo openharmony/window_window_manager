@@ -488,6 +488,7 @@ public:
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
+    bool UpdateInteractiveInner(bool interactive);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -674,7 +675,6 @@ protected:
      * Window Pipeline
      */
     bool UpdateVisibilityInner(bool visibility) REQUIRES(SCENE_GUARD);
-    bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);

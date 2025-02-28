@@ -134,6 +134,7 @@ constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 24;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -2380,7 +2381,8 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSessio
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo)
 {
     bool isColdStart = false;
-    return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, isColdStart);
+    return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, isColdStart,
+        static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
 }
 
 int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession,
@@ -2445,7 +2447,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-        errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sceneSessionInfo, isColdStart);
+        errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sceneSessionInfo, isColdStart,
+            static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
     } else {
         TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u",
             isNewActive, sceneSession->GetSessionState());
@@ -2453,7 +2456,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             sceneSession->GetSessionState() == SessionState::STATE_END) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-            errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sceneSessionInfo, isColdStart);
+            errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sceneSessionInfo, isColdStart,
+                static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionForeground: %{public}d", persistentId);
             sceneSession->NotifySessionForeground(1, true);
@@ -2567,6 +2571,13 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             "isToDesktop:%{public}d isSaveSnapshot:%{public}d",
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
+
+        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
+            if (!sceneSession->UpdateInteractiveInner(false)) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
+            }
+        }
         sceneSession->SetActive(false);
 
         if (isToDesktop) {
@@ -2595,9 +2606,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
                 persistentId, static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
             auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
             if (!isDelegator) {
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sceneSessionInfo);
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sceneSessionInfo, false,
+                    static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
             } else {
-                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sceneSessionInfo, true);
+                AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sceneSessionInfo, true,
+                    static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
             }
         }
 
@@ -2816,6 +2829,12 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         sceneSession->SetRemoveSnapshotCallback([this, persistentId]() {
             this->RemoveSnapshotFromCache(persistentId);
         });
+        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
+            if (!sceneSession->UpdateInteractiveInner(false)) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
+            }
+        }
         sceneSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
             TLOGNE(WmsLogTag::WMS_MAIN, "Destruct session invalid by %{public}d", persistentId);
@@ -2871,9 +2890,11 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
     TLOGI(WmsLogTag::WMS_MAIN, "begin CloseUIAbility: %{public}d system: %{public}d",
         persistentId, sceneSession->GetSessionInfo().isSystem_);
     if (isForceClean) {
-        AAFwk::AbilityManagerClient::GetInstance()->CleanUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit);
+        AAFwk::AbilityManagerClient::GetInstance()->CleanUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit,
+            static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
     } else {
-        AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit);
+        AAFwk::AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sceneSessionInfo, isUserRequestedExit,
+            static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
     }
     sceneSession->SetSessionInfoAncoSceneState(AncoSceneState::DEFAULT_STATE);
     if (needRemoveSession) {
@@ -4060,6 +4081,12 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             "MinimizeUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         bool isFromUser = false;
+        if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
+            if (!sceneSession->UpdateInteractiveInner(false)) {
+                TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
+            }
+        }
         int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
             abilitySessionInfo, isFromUser, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode == ERR_OK) {
