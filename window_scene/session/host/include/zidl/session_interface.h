@@ -344,6 +344,14 @@ public:
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 
     /**
+     * @brief Get waterfall mode.
+     *
+     * @param isWaterfallMode Indicates the waterfall mode.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError GetWaterfallMode(bool& isWaterfallMode) { return WSError::WS_OK; };
+
+    /**
      * @brief Callback for setting the window support modes.
      *
      * @param supportedWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.

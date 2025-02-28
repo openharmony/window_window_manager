@@ -139,6 +139,11 @@ public:
     WSError GetCrossAxisState(CrossAxisState& state) override;
 
     /*
+     * PC Fold Screen
+     */
+    WSError GetWaterfallMode(bool& isWaterfallMode) override;
+
+    /*
      * PC Window
      */
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,

@@ -5073,9 +5073,9 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable)
 
 WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "prev: %{public}d, curr: %{public}d",
-        isFullScreenWaterfallMode_.load(), isWaterfallMode);
-    if (isFullScreenWaterfallMode_.load() == isWaterfallMode) {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
+        isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
+    if (isFullScreenWaterfallMode_.load() == isWaterfallMode && isValidWaterfallMode_.load()) {
         return WSError::WS_DO_NOTHING;
     }
     isFullScreenWaterfallMode_.store(isWaterfallMode);
@@ -5084,6 +5084,8 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
     } else {
         lastWindowModeBeforeWaterfall_.store(WindowMode::WINDOW_MODE_UNDEFINED);
     }
+    isValidWaterfallMode_.store(true);
+    NotifyWaterfallModeChange(isWaterfallMode);
     return WSError::WS_OK;
 }
 

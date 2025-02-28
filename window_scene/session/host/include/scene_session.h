@@ -633,6 +633,7 @@ public:
     void MaskSupportEnterWaterfallMode();
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(const WSRectF& velocity);
+    WSError GetWaterfallMode(bool& isWaterfallMode) override;
 
     /*
      * Keyboard

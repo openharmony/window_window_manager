@@ -4644,6 +4644,12 @@ bool SceneSession::IsFullScreenWaterfallMode()
     return pcFoldScreenController_->IsFullScreenWaterfallMode();
 }
 
+WSError SceneSession::GetWaterfallMode(bool& isWaterfallMode)
+{
+    isWaterfallMode = IsFullScreenWaterfallMode();
+    return WSError::WS_OK;
+}
+
 void SceneSession::RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func)
 {
     PostTask([weakThis = wptr(this), func = std::move(func), where = __func__]() mutable {

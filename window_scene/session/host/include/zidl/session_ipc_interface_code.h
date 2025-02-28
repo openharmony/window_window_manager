@@ -104,6 +104,9 @@ enum class SessionInterfaceCode {
     TRANS_ID_UPDATE_PIP_RECT,
     TRANS_ID_UPDATE_PIP_CONTROL_STATUS,
     TRANS_ID_SET_AUTOSTART_PIP,
+
+    // PC Fold Screen
+    TRANS_ID_GET_WATERFALL_MODE,
 };
 } // namespace Rosen
 } // namespace OHOS
