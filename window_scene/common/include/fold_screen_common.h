@@ -20,7 +20,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     /**
-     * ACE call to native event mame, use for fold screen
+     * ACE call to native event name, use for fold screen
      */
     const std::string WINDOW_WATERFALL_EVENT = "win_waterfall_window_event";
     const std::string WINDOW_RELOCATION_EVENT = "win_relocation_to_top";
