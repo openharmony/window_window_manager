@@ -124,6 +124,7 @@ void SecondaryDisplayFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
     onBootAnimation_ = onBootAnimation;
     if (!onBootAnimation_) {
         TLOGW(WmsLogTag::DMS, "when boot animation finished, change display mode");
+        isChangeScreenWhenBootCompleted = true;
         RecoverWhenBootAnimationExit();
     }
 }
@@ -188,9 +189,12 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
 {
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-        if (currentDisplayMode_ == displayMode) {
+        if (currentDisplayMode_ == displayMode && !isChangeScreenWhenBootCompleted) {
             TLOGW(WmsLogTag::DMS, "already in displayMode %{public}d", displayMode);
             return;
+        }
+        if (isChangeScreenWhenBootCompleted) {
+            isChangeScreenWhenBootCompleted = false;
         }
     }
     SetSecondaryDisplayModeChangeStatus(true);
@@ -248,7 +252,8 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
@@ -268,7 +273,8 @@ void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[MAIN_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_MAIN, TpFeatureConfigType::AFT_TP_FEATURE);
@@ -288,7 +294,8 @@ void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(Scree
         .h = screenParams_[GLOBAL_FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_GLOBAL_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
