@@ -26,7 +26,6 @@
 #include "window_property.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_interface.h"
-#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
