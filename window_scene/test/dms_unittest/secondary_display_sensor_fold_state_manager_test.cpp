@@ -57,6 +57,9 @@ namespace {
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange, Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::vector<float> angels = {0, 0};
     std::vector<uint16_t> halls = {0, 0};
     sptr<FoldScreenPolicy> foldScreenPolicy = nullptr;
@@ -73,6 +76,9 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, HandleAngleOrHallChange, Fu
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceAB,
         Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     float angel = 0;
     uint16_t hall = 0;
     SecondaryDisplaySensorFoldStateManager manager;
@@ -94,6 +100,9 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryF
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryForLargeFoldDeviceBC,
         Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     float angel = 0;
     uint16_t hall = 0;
     SecondaryDisplaySensorFoldStateManager manager;
@@ -114,6 +123,9 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, UpdateSwitchScreenBoundaryF
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     float angel = -0.1;
     uint16_t hall = 0;
     int32_t allowUserSensorForLargeFoldDevice = 0;
@@ -160,6 +172,9 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf01, Fun
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     SecondaryDisplaySensorFoldStateManager manager;
     int32_t allowUserSensorForLargeFoldDevice = 1;
     FoldStatus state = FoldStatus::UNKNOWN;
@@ -205,6 +220,9 @@ HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetNextFoldStateHalf02, Fun
  */
 HWTEST_F(SecondaryDisplaySensorFoldStateManagerTest, GetGlobalFoldState, Function | SmallTest | Level1)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     SecondaryDisplaySensorFoldStateManager manager;
     FoldStatus nextStatePrimary = FoldStatus::EXPAND;
     FoldStatus nextStateSecondary = FoldStatus::EXPAND;
