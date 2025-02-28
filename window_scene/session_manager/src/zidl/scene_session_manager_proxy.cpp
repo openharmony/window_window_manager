@@ -360,7 +360,7 @@ WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool 
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+WMError SceneSessionManagerProxy::RequestFocusStatusBySA(int32_t persistentId, bool isFocused,
     bool byForeground, FocusChangeReason reason)
 {
     TLOGI(WmsLogTag::WMS_FOCUS,
@@ -396,7 +396,7 @@ WMError SceneSessionManagerProxy::RequestFocusOnPreviousWindow(int32_t persisten
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
-            static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_ON_PREVIOUS_WINDOW),
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA),
             data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

@@ -205,10 +205,10 @@ public:
     {
         return WMError::WM_OK;
     }
-    virtual WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT)
+    virtual WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     virtual WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
     {
