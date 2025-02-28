@@ -1414,7 +1414,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpAllScreensInfo, Function | SmallTest
 
     std::string dumpInfo;
     screenSessionManagerProxy->DumpAllScreensInfo(dumpInfo);
-    EXPECT_NE(dumpInfo, "");
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(dumpInfo, "");
+    } else {
+        EXPECT_NE(dumpInfo, "");
+    }
 }
 
 /**
@@ -1431,7 +1435,11 @@ HWTEST_F(ScreenSessionManagerProxyTest, DumpSpecialScreenInfo, Function | SmallT
     ScreenId id = 1001;
     std::string dumpInfo;
     screenSessionManagerProxy->DumpSpecialScreenInfo(id, dumpInfo);
-    EXPECT_NE(dumpInfo, "");
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(dumpInfo, "");
+    } else {
+        EXPECT_NE(dumpInfo, "");
+    }
 }
 
 /**
