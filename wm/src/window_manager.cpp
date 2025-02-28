@@ -27,6 +27,7 @@
 #include "window_manager_hilog.h"
 #include "window_display_change_adapter.h"
 #include "wm_common.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1525,11 +1526,17 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     return ret;
 }
 
-WMError WindowManager::RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused,
-    bool byForeground)
+WMError WindowManager::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+    bool byForeground, int32_t reason)
 {
-    WMError ret = SingletonContainer::Get<WindowAdapter>().RequestFocusForSystemKeyboard(persistentId,
-        isFocused, byForeground);
+    int32_t reasonStart = static_cast<int32_t>(FocusChangeReason::DEFAULT);
+    int32_t reasonEnd = static_cast<int32_t>(FocusChangeReason::MAX);
+    if (reason < reasonStart || reason > reasonEnd) {
+        TLOGE(WmsLogTag::DEFAULT, "could not find focus reason");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RequestFocusOnPreviousWindow(persistentId,
+        isFocused, byForeground, static_cast<FocusChangeReason>(reason));
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "failed");
     }

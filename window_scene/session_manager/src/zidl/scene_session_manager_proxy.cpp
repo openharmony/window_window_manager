@@ -360,11 +360,11 @@ WMError SceneSessionManagerProxy::RequestFocusStatus(int32_t persistentId, bool 
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerProxy::RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused,
-    bool byForeground)
+WMError SceneSessionManagerProxy::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+    bool byForeground, FocusChangeReason reason)
 {
     TLOGI(WmsLogTag::WMS_FOCUS,
-        "SceneSessionManagerProxy::RequestFocusForSystemKeyboard id: %{public}d, focusState:\
+        "SceneSessionManagerProxy::RequestFocusOnPreviousWindow id: %{public}d, focusState:\
         %{public}d, byForeground: %{public}d", persistentId, isFocused, byForeground);
     MessageParcel data;
     MessageParcel reply;
@@ -385,6 +385,10 @@ WMError SceneSessionManagerProxy::RequestFocusForSystemKeyboard(int32_t persiste
         WLOGFE("Write byForeground failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    if (!data.WriteInt32(static_cast<int32_t>(reason))) {
+        WLOGFE("Write reason failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -392,7 +396,7 @@ WMError SceneSessionManagerProxy::RequestFocusForSystemKeyboard(int32_t persiste
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_FOR_SYSTEM_KEYBOARD),
+        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_ON_PREVIOUS_WINDOW),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;

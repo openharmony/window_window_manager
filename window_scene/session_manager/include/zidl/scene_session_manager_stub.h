@@ -117,7 +117,7 @@ private:
     int HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
-    int HandleRequestFocusForSystemKeyboard(MessageParcel& data, MessageParcel& reply);
+    int HandleRequestFocusOnPreviousWindow(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
