@@ -2469,6 +2469,29 @@ WSError SessionProxy::GetCrossAxisState(CrossAxisState& state)
     return WSError::WS_OK;
 }
 
+WSError SessionProxy::GetWaterfallMode(bool& isWaterfallMode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "writeInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    isWaterfallMode = reply.ReadBool();
+    return WSError::WS_OK;
+}
+
 WSError SessionProxy::OnContainerModalEvent(const std::string& eventName, const std::string& eventValue)
 {
     MessageParcel data;

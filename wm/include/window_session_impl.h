@@ -379,6 +379,13 @@ public:
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WSError NotifyHighlightChange(bool isHighlight) override;
 
+    /*
+     * PC Fold Screen
+     */
+    bool IsWaterfallModeEnabled() override;
+    WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
+    WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
+
 protected:
     WMError Connect();
     bool IsWindowSessionInvalid() const;
@@ -533,6 +540,9 @@ protected:
      * PC Fold Screen
      */
     bool supportEnterWaterfallMode_ { false };
+    std::atomic_bool isFullScreenWaterfallMode_ { false };
+    std::atomic_bool isValidWaterfallMode_ { false };
+    void NotifyWaterfallModeChange(bool isWaterfallMode);
 
     /*
      * Window Property
@@ -647,6 +657,15 @@ private:
      */
     void GetTitleButtonVisible(bool& hideMaximizeButton, bool& hideMinimizeButton, bool& hideSplitButton,
         bool& hideCloseButton);
+
+    /*
+     * PC Fold Screen
+     */
+    static std::mutex waterfallModeChangeListenerMutex_;
+    static std::map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> waterfallModeChangeListeners_;
+    template<typename T>
+    EnableIfSame<T, IWaterfallModeChangeListener, std::vector<sptr<IWaterfallModeChangeListener>>> GetListeners();
+    bool InitWaterfallMode();
 
     static std::recursive_mutex lifeCycleListenerMutex_;
     static std::recursive_mutex windowChangeListenerMutex_;

@@ -244,6 +244,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleStartMovingWithCoordinate(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_CROSS_AXIS_STATE):
             return HandleGetCrossAxisState(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE):
+            return HandleGetWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
             return HandleContainerModalEvent(data, reply);
         default:
@@ -1508,6 +1510,17 @@ int SessionStub::HandleGetCrossAxisState(MessageParcel& data, MessageParcel& rep
     GetCrossAxisState(state);
     if (!reply.WriteUint32(static_cast<uint32_t>(state))) {
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetWaterfallMode(MessageParcel& data, MessageParcel& reply)
+{
+    bool isWaterfallMode = false;
+    GetWaterfallMode(isWaterfallMode);
+    if (!reply.WriteBool(isWaterfallMode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

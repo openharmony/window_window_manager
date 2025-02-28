@@ -611,6 +611,21 @@ public:
     virtual void OnKeyboardPanelInfoChanged(const KeyboardPanelInfo& keyboardPanelInfo) {}
 };
 
+/**
+ * @class IWaterfallModeChangeListener
+ *
+ * @brief IWaterfallModeChangeListener is used to observe the waterfall mode.
+ */
+class IWaterfallModeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when waterfall mode changed.
+     *
+     * @param isWaterfallMode new waterfall mode.
+     */
+    virtual void OnWaterfallModeChange(const bool isWaterfallMode) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -3239,6 +3254,35 @@ public:
      * @return WM_OK means unregister success
      */
     virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Query whether the waterfall mode is enabled or not.
+     *
+     * @return true means the waterfall mode is enabled, and false means the opposite.
+     */
+    virtual bool IsWaterfallModeEnabled() { return false; }
+
+    /**
+     * @brief Register waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister waterfall mode change listener.
+     *
+     * @param listener IWaterfallModeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
     {
         return WMError::WM_OK;
     }
