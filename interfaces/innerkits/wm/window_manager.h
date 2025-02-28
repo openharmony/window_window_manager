@@ -1030,15 +1030,16 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
     /**
-     * @brief Request focus on previous window for system keyboard.
+     * @brief Request focus on previous window.
      *
      * @param persistentId previous window id
      * @param isFocused true if request focus, otherwise false, default is true
      * @param byForeground true if by foreground, otherwise false, default is true
+     * @param reason the reason for requesting focus, default is DEFAULT
      * @return WM_OK means request focus success, others means failed.
      */
-    WMError RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true);
+    WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, int32_t reason = 0);
 
 private:
     WindowManager();

@@ -5617,10 +5617,9 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     return WSError::WS_OK;
 }
 
-WMError SceneSessionManager::RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused,
-    bool byForeground)
+WMError SceneSessionManager::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+    bool byForeground, FocusChangeReason reason)
 {
-    FocusChangeReason reason = FocusChangeReason::SYSTEM_KEYBOARD;
     TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
     if (!SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, only support SA calling.");
@@ -5638,7 +5637,7 @@ WMError SceneSessionManager::RequestFocusForSystemKeyboard(int32_t persistentId,
             RequestSessionUnfocus(persistentId, reason);
         }
     };
-    taskScheduler_->PostAsyncTask(task, "RequestFocusForSystemKeyboard" + std::to_string(persistentId));
+    taskScheduler_->PostAsyncTask(task, "RequestFocusOnPreviousWindow" + std::to_string(persistentId));
     focusChangeReason_ = reason;
     return WMError::WM_OK;
 }

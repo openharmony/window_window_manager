@@ -26,6 +26,7 @@
 #include "window_property.h"
 #include "wm_single_instance.h"
 #include "zidl/window_manager_interface.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -164,8 +165,8 @@ public:
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
 
-    virtual WMError RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true);
+    virtual WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;

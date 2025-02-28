@@ -271,8 +271,8 @@ public:
         int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) { return WMError::WM_OK; }
-    virtual WMError RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true) { return WMError::WM_OK; }
+    virtual WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT) { return WMError::WM_OK; }
 };
 }
 }

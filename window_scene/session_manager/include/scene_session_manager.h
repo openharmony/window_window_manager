@@ -289,8 +289,8 @@ public:
     WSError RaiseWindowToTop(int32_t persistentId) override;
     void SetScreenLocked(const bool isScreenLocked);
     bool IsScreenLocked() const;
-    WMError RequestFocusForSystemKeyboard(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true) override;
+    WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
 
     /*
      * Multi User
