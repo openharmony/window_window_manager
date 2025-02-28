@@ -5300,5 +5300,10 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& i
             "width: %{public}u, height: %{public}u, Id: %{public}u", left, top, width, height, GetPersistentId());
     }
 }
+
+uint32_t WindowSceneSessionImpl::GetApiVersion() const
+{
+    return SysCapUtil::GetApiCompatibleVersion();
+}
 } // namespace Rosen
 } // namespace OHOS
