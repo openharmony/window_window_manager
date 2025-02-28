@@ -105,6 +105,72 @@ inline OH_DISPLAY_RuntimeType runtimeType(const Opt_Int32& value)
     return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
 }
 template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const OH_Number& value)
+{
+    return INTEROP_RUNTIME_NUMBER;
+}
+template <>
+inline void WriteToString(std::string* result, const Opt_Number* value) {
+    result->append("{.tag=");
+    result->append(tagNameExact((OH_Tag)(value->tag)));
+    result->append(", .value=");
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        WriteToString(result, &value->value);
+    } else {
+        OH_Undefined undefined = { 0 };
+        WriteToString(result, undefined);
+    }
+    result->append("}");
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const Opt_Number& value)
+{
+    return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const OH_DISPLAY_Rect& value)
+{
+    return INTEROP_RUNTIME_OBJECT;
+}
+template <>
+inline void WriteToString(std::string* result, const OH_DISPLAY_Rect* value) {
+    result->append("{");
+    // OH_Number left
+    result->append(".left=");
+    WriteToString(result, &value->left);
+    // OH_Number top
+    result->append(", ");
+    result->append(".top=");
+    WriteToString(result, &value->top);
+    // OH_Number width
+    result->append(", ");
+    result->append(".width=");
+    WriteToString(result, &value->width);
+    // OH_Number height
+    result->append(", ");
+    result->append(".height=");
+    WriteToString(result, &value->height);
+    result->append("}");
+}
+template <>
+inline void WriteToString(std::string* result, const Opt_Rect* value) {
+    result->append("{.tag=");
+    result->append(tagNameExact((OH_Tag)(value->tag)));
+    result->append(", .value=");
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        WriteToString(result, &value->value);
+    } else {
+        OH_Undefined undefined = { 0 };
+        WriteToString(result, undefined);
+    }
+    result->append("}");
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const Opt_Rect& value)
+{
+    return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
+}
+template <>
 inline OH_DISPLAY_RuntimeType runtimeType(const Array_Rect& value)
 {
     return INTEROP_RUNTIME_OBJECT;
@@ -144,12 +210,32 @@ inline OH_DISPLAY_RuntimeType runtimeType(const Opt_Array_Rect& value)
     return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
 }
 template <>
-inline OH_DISPLAY_RuntimeType runtimeType(const OH_Number& value)
+inline OH_DISPLAY_RuntimeType runtimeType(const OH_DISPLAY_WaterfallDisplayAreaRects& value)
 {
-    return INTEROP_RUNTIME_NUMBER;
+    return INTEROP_RUNTIME_OBJECT;
 }
 template <>
-inline void WriteToString(std::string* result, const Opt_Number* value) {
+inline void WriteToString(std::string* result, const OH_DISPLAY_WaterfallDisplayAreaRects* value) {
+    result->append("{");
+    // OH_DISPLAY_Rect left
+    result->append(".left=");
+    WriteToString(result, &value->left);
+    // OH_DISPLAY_Rect right
+    result->append(", ");
+    result->append(".right=");
+    WriteToString(result, &value->right);
+    // OH_DISPLAY_Rect top
+    result->append(", ");
+    result->append(".top=");
+    WriteToString(result, &value->top);
+    // OH_DISPLAY_Rect bottom
+    result->append(", ");
+    result->append(".bottom=");
+    WriteToString(result, &value->bottom);
+    result->append("}");
+}
+template <>
+inline void WriteToString(std::string* result, const Opt_WaterfallDisplayAreaRects* value) {
     result->append("{.tag=");
     result->append(tagNameExact((OH_Tag)(value->tag)));
     result->append(", .value=");
@@ -162,7 +248,7 @@ inline void WriteToString(std::string* result, const Opt_Number* value) {
     result->append("}");
 }
 template <>
-inline OH_DISPLAY_RuntimeType runtimeType(const Opt_Number& value)
+inline OH_DISPLAY_RuntimeType runtimeType(const Opt_WaterfallDisplayAreaRects& value)
 {
     return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
 }
@@ -172,9 +258,8 @@ inline OH_DISPLAY_RuntimeType runtimeType(const OH_DISPLAY_Display& value)
     return INTEROP_RUNTIME_OBJECT;
 }
 template <>
-inline void WriteToString(std::string* result, const OH_DISPLAY_Display* value) {
-    result->append("{");
-    result->append("}");
+inline void WriteToString(std::string* result, const OH_DISPLAY_Display value) {
+    WriteToString(result, static_cast<InteropNativePointer>(value));
 }
 template <>
 inline void WriteToString(std::string* result, const Opt_Display* value) {
@@ -182,7 +267,7 @@ inline void WriteToString(std::string* result, const Opt_Display* value) {
     result->append(tagNameExact((OH_Tag)(value->tag)));
     result->append(", .value=");
     if (value->tag != INTEROP_TAG_UNDEFINED) {
-        WriteToString(result, &value->value);
+        WriteToString(result, value->value);
     } else {
         OH_Undefined undefined = { 0 };
         WriteToString(result, undefined);
@@ -288,6 +373,103 @@ inline OH_DISPLAY_RuntimeType runtimeType(const Opt_display_FoldDisplayMode& val
     return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
 }
 template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const OH_DISPLAY_CutoutInfo& value)
+{
+    return INTEROP_RUNTIME_OBJECT;
+}
+template <>
+inline void WriteToString(std::string* result, const OH_DISPLAY_CutoutInfo* value) {
+    result->append("{");
+    // Array_Rect boundingRects
+    result->append(".boundingRects=");
+    WriteToString(result, &value->boundingRects);
+    // OH_DISPLAY_WaterfallDisplayAreaRects waterfallDisplayAreaRects
+    result->append(", ");
+    result->append(".waterfallDisplayAreaRects=");
+    WriteToString(result, &value->waterfallDisplayAreaRects);
+    result->append("}");
+}
+template <>
+inline void WriteToString(std::string* result, const Opt_CutoutInfo* value) {
+    result->append("{.tag=");
+    result->append(tagNameExact((OH_Tag)(value->tag)));
+    result->append(", .value=");
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        WriteToString(result, &value->value);
+    } else {
+        OH_Undefined undefined = { 0 };
+        WriteToString(result, undefined);
+    }
+    result->append("}");
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const Opt_CutoutInfo& value)
+{
+    return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const Array_Display& value)
+{
+    return INTEROP_RUNTIME_OBJECT;
+}
+
+template <>
+inline void WriteToString(std::string* result, const OH_DISPLAY_Display value);
+
+inline void WriteToString(std::string* result, const Array_Display* value) {
+    int32_t count = value->length;
+    result->append("{.array=allocArray<OH_DISPLAY_Display, " + std::to_string(count) + ">({{");
+    for (int i = 0; i < count; i++) {
+        if (i > 0) result->append(", ");
+        WriteToString(result, value->array[i]);
+    }
+    result->append("}})");
+    result->append(", .length=");
+    result->append(std::to_string(value->length));
+    result->append("}");
+}
+template <>
+inline void WriteToString(std::string* result, const Opt_Array_Display* value) {
+    result->append("{.tag=");
+    result->append(tagNameExact((OH_Tag)(value->tag)));
+    result->append(", .value=");
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        WriteToString(result, &value->value);
+    } else {
+        OH_Undefined undefined = { 0 };
+        WriteToString(result, undefined);
+    }
+    result->append("}");
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const Opt_Array_Display& value)
+{
+    return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const OH_String& value)
+{
+    return INTEROP_RUNTIME_STRING;
+}
+template <>
+inline void WriteToString(std::string* result, const Opt_String* value) {
+    result->append("{.tag=");
+    result->append(tagNameExact((OH_Tag)(value->tag)));
+    result->append(", .value=");
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        WriteToString(result, &value->value);
+    } else {
+        OH_Undefined undefined = { 0 };
+        WriteToString(result, undefined);
+    }
+    result->append("}");
+}
+template <>
+inline OH_DISPLAY_RuntimeType runtimeType(const Opt_String& value)
+{
+    return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
+}
+template <>
 inline OH_DISPLAY_RuntimeType runtimeType(const OH_Boolean& value)
 {
     return INTEROP_RUNTIME_BOOLEAN;
@@ -337,70 +519,12 @@ inline OH_DISPLAY_RuntimeType runtimeType(const Opt_GlobalScope_ohos_display& va
 {
     return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
 }
-template <>
-inline OH_DISPLAY_RuntimeType runtimeType(const OH_DISPLAY_Rect& value)
-{
-    return INTEROP_RUNTIME_OBJECT;
-}
-template <>
-inline void WriteToString(std::string* result, const OH_DISPLAY_Rect* value) {
-    result->append("{");
-    // OH_Number left
-    result->append(".left=");
-    WriteToString(result, &value->left);
-    // OH_Number top
-    result->append(", ");
-    result->append(".top=");
-    WriteToString(result, &value->top);
-    // OH_Number width
-    result->append(", ");
-    result->append(".width=");
-    WriteToString(result, &value->width);
-    // OH_Number height
-    result->append(", ");
-    result->append(".height=");
-    WriteToString(result, &value->height);
-    result->append("}");
-}
-template <>
-inline void WriteToString(std::string* result, const Opt_Rect* value) {
-    result->append("{.tag=");
-    result->append(tagNameExact((OH_Tag)(value->tag)));
-    result->append(", .value=");
-    if (value->tag != INTEROP_TAG_UNDEFINED) {
-        WriteToString(result, &value->value);
-    } else {
-        OH_Undefined undefined = { 0 };
-        WriteToString(result, undefined);
-    }
-    result->append("}");
-}
-template <>
-inline OH_DISPLAY_RuntimeType runtimeType(const Opt_Rect& value)
-{
-    return (value.tag != INTEROP_TAG_UNDEFINED) ? (INTEROP_RUNTIME_OBJECT) : (INTEROP_RUNTIME_UNDEFINED);
-}
 class Serializer : public SerializerBase {
     public:
     Serializer(CallbackResourceHolder* resourceHolder = nullptr) : SerializerBase(resourceHolder) {
     }
     public:
     Serializer(uint8_t* data, OH_UInt32 dataLength = 0, CallbackResourceHolder* resourceHolder = nullptr) : SerializerBase(data, dataLength, resourceHolder) {
-    }
-    void writeDisplay(OH_DISPLAY_Display value)
-    {
-    }
-    void writeFoldCreaseRegion(OH_DISPLAY_FoldCreaseRegion value)
-    {
-        Serializer& valueSerializer = *this;
-        const auto value_displayId = value.displayId;
-        valueSerializer.writeNumber(value_displayId);
-        const auto value_creaseRects = value.creaseRects;
-        valueSerializer.writeInt32(value_creaseRects.length);
-        for (int i = 0; i < value_creaseRects.length; i++) {
-            const OH_DISPLAY_Rect value_creaseRects_element = value_creaseRects.array[i];
-            valueSerializer.writeRect(value_creaseRects_element);
-        }
     }
     void writeRect(OH_DISPLAY_Rect value)
     {
@@ -414,16 +538,78 @@ class Serializer : public SerializerBase {
         const auto value_height = value.height;
         valueSerializer.writeNumber(value_height);
     }
+    void writeWaterfallDisplayAreaRects(OH_DISPLAY_WaterfallDisplayAreaRects value)
+    {
+        Serializer& valueSerializer = *this;
+        const auto value_left = value.left;
+        valueSerializer.writeRect(value_left);
+        const auto value_right = value.right;
+        valueSerializer.writeRect(value_right);
+        const auto value_top = value.top;
+        valueSerializer.writeRect(value_top);
+        const auto value_bottom = value.bottom;
+        valueSerializer.writeRect(value_bottom);
+    }
+    void writeDisplay(OH_DISPLAY_Display value)
+    {
+        Serializer& valueSerializer = *this;
+        valueSerializer.writePointer(value);
+    }
+    void writeFoldCreaseRegion(OH_DISPLAY_FoldCreaseRegion value)
+    {
+        Serializer& valueSerializer = *this;
+        const auto value_displayId = value.displayId;
+        valueSerializer.writeNumber(value_displayId);
+        const auto value_creaseRects = value.creaseRects;
+        valueSerializer.writeInt32(value_creaseRects.length);
+        for (int i = 0; i < value_creaseRects.length; i++) {
+            const OH_DISPLAY_Rect value_creaseRects_element = value_creaseRects.array[i];
+            valueSerializer.writeRect(value_creaseRects_element);
+        }
+    }
+    void writeCutoutInfo(OH_DISPLAY_CutoutInfo value)
+    {
+        Serializer& valueSerializer = *this;
+        const auto value_boundingRects = value.boundingRects;
+        valueSerializer.writeInt32(value_boundingRects.length);
+        for (int i = 0; i < value_boundingRects.length; i++) {
+            const OH_DISPLAY_Rect value_boundingRects_element = value_boundingRects.array[i];
+            valueSerializer.writeRect(value_boundingRects_element);
+        }
+        const auto value_waterfallDisplayAreaRects = value.waterfallDisplayAreaRects;
+        valueSerializer.writeWaterfallDisplayAreaRects(value_waterfallDisplayAreaRects);
+    }
 };
 
 class Deserializer : public DeserializerBase {
     public:
     Deserializer(uint8_t* data, OH_Int32 length) : DeserializerBase(data, length) {
     }
+    OH_DISPLAY_Rect readRect()
+    {
+        OH_DISPLAY_Rect value = {};
+        Deserializer& valueDeserializer = *this;
+        value.left = static_cast<OH_Number>(valueDeserializer.readNumber());
+        value.top = static_cast<OH_Number>(valueDeserializer.readNumber());
+        value.width = static_cast<OH_Number>(valueDeserializer.readNumber());
+        value.height = static_cast<OH_Number>(valueDeserializer.readNumber());
+        return value;
+    }
+    OH_DISPLAY_WaterfallDisplayAreaRects readWaterfallDisplayAreaRects()
+    {
+        OH_DISPLAY_WaterfallDisplayAreaRects value = {};
+        Deserializer& valueDeserializer = *this;
+        value.left = valueDeserializer.readRect();
+        value.right = valueDeserializer.readRect();
+        value.top = valueDeserializer.readRect();
+        value.bottom = valueDeserializer.readRect();
+        return value;
+    }
     OH_DISPLAY_Display readDisplay()
     {
-        OH_DISPLAY_Display value = {};
-        return value;
+        Deserializer& valueDeserializer = *this;
+        OH_NativePointer ptr = valueDeserializer.readPointer();
+        return static_cast<OH_DISPLAY_Display>(ptr);
     }
     OH_DISPLAY_FoldCreaseRegion readFoldCreaseRegion()
     {
@@ -440,23 +626,41 @@ class Deserializer : public DeserializerBase {
         value.creaseRects = creaseRects_buf;
         return value;
     }
-    OH_DISPLAY_Rect readRect()
+    OH_DISPLAY_CutoutInfo readCutoutInfo()
     {
-        OH_DISPLAY_Rect value = {};
+        OH_DISPLAY_CutoutInfo value = {};
         Deserializer& valueDeserializer = *this;
-        value.left = static_cast<OH_Number>(valueDeserializer.readNumber());
-        value.top = static_cast<OH_Number>(valueDeserializer.readNumber());
-        value.width = static_cast<OH_Number>(valueDeserializer.readNumber());
-        value.height = static_cast<OH_Number>(valueDeserializer.readNumber());
+        const OH_Int32 boundingRects_buf_length = valueDeserializer.readInt32();
+        Array_Rect boundingRects_buf = {};
+        valueDeserializer.resizeArray<std::decay<decltype(boundingRects_buf)>::type,
+        std::decay<decltype(*boundingRects_buf.array)>::type>(&boundingRects_buf, boundingRects_buf_length);
+        for (int boundingRects_buf_i = 0; boundingRects_buf_i < boundingRects_buf_length; boundingRects_buf_i++) {
+            boundingRects_buf.array[boundingRects_buf_i] = valueDeserializer.readRect();
+        }
+        value.boundingRects = boundingRects_buf;
+        value.waterfallDisplayAreaRects = valueDeserializer.readWaterfallDisplayAreaRects();
         return value;
     }
 };
+OH_DISPLAY_DisplayHandle Display_constructImpl();
+void Display_destructImpl(OH_DISPLAY_DisplayHandle thiz);
+OH_DISPLAY_CutoutInfo Display_getCutoutInfoImpl(OH_NativePointer thisPtr);
 OH_NativePointer GlobalScope_ohos_display_getFoldDisplayModeImpl();
-OH_DISPLAY_Display GlobalScope_ohos_display_getDefaultDisplaySyncImpl();
+OH_NativePointer GlobalScope_ohos_display_getDefaultDisplaySyncImpl();
 OH_NativePointer GlobalScope_ohos_display_getFoldStatusImpl();
 OH_DISPLAY_FoldCreaseRegion GlobalScope_ohos_display_getCurrentFoldCreaseRegionImpl();
-OH_DISPLAY_Display GlobalScope_ohos_display_getDisplayByIdSyncImpl(const OH_Number* displayId);
+OH_NativePointer GlobalScope_ohos_display_getDisplayByIdSyncImpl(const OH_Number* displayId);
 OH_Boolean GlobalScope_ohos_display_isFoldableImpl();
+OH_Number GlobalScope_ohos_display_onImpl(const OH_String* type);
+OH_NativePointer GlobalScope_ohos_display_getAllDisplaysImpl();
+const OH_DISPLAY_DisplayModifier* OH_DISPLAY_DisplayModifierImpl() {
+    const static OH_DISPLAY_DisplayModifier instance = {
+        &Display_constructImpl,
+        &Display_destructImpl,
+        &Display_getCutoutInfoImpl,
+    };
+    return &instance;
+}
 const OH_DISPLAY_Modifier* OH_DISPLAY_ModifierImpl() {
     const static OH_DISPLAY_Modifier instance = {
         &GlobalScope_ohos_display_getFoldDisplayModeImpl,
@@ -465,12 +669,15 @@ const OH_DISPLAY_Modifier* OH_DISPLAY_ModifierImpl() {
         &GlobalScope_ohos_display_getCurrentFoldCreaseRegionImpl,
         &GlobalScope_ohos_display_getDisplayByIdSyncImpl,
         &GlobalScope_ohos_display_isFoldableImpl,
+        &GlobalScope_ohos_display_onImpl,
+        &GlobalScope_ohos_display_getAllDisplaysImpl,
     };
     return &instance;
 }
 const OH_DISPLAY_API* GetDISPLAYAPIImpl(int version) {
     const static OH_DISPLAY_API api = {
         1, // version
+        &OH_DISPLAY_DisplayModifierImpl,
         &OH_DISPLAY_ModifierImpl,
     };
     if (version != api.version) return nullptr;
@@ -479,16 +686,28 @@ const OH_DISPLAY_API* GetDISPLAYAPIImpl(int version) {
 
 // Accessors
 
+OH_NativePointer impl_Display_ctor() {
+        return GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->Display()->construct();
+}
+KOALA_INTEROP_0(Display_ctor, OH_NativePointer)
+OH_NativePointer impl_Display_getFinalizer() {
+        return (OH_NativePointer) GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->Display()->destruct;
+}
+KOALA_INTEROP_0(Display_getFinalizer, OH_NativePointer)
+KInteropReturnBuffer impl_Display_getCutoutInfo(OH_NativePointer thisPtr) {
+        Serializer _retSerializer {};
+        _retSerializer.writeCutoutInfo(GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->Display()->getCutoutInfo(thisPtr));
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(Display_getCutoutInfo, KInteropReturnBuffer, OH_NativePointer)
 void impl_GlobalScope_ohos_display_getFoldDisplayMode() {
         GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->getFoldDisplayMode();
 }
 KOALA_INTEROP_V0(GlobalScope_ohos_display_getFoldDisplayMode)
-KInteropReturnBuffer impl_GlobalScope_ohos_display_getDefaultDisplaySync() {
-        Serializer _retSerializer {};
-        _retSerializer.writeDisplay(GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->getDefaultDisplaySync());
-        return _retSerializer.toReturnBuffer();
+OH_NativePointer impl_GlobalScope_ohos_display_getDefaultDisplaySync() {
+        return GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->getDefaultDisplaySync();
 }
-KOALA_INTEROP_0(GlobalScope_ohos_display_getDefaultDisplaySync, KInteropReturnBuffer)
+KOALA_INTEROP_0(GlobalScope_ohos_display_getDefaultDisplaySync, OH_NativePointer)
 void impl_GlobalScope_ohos_display_getFoldStatus() {
         GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->getFoldStatus();
 }
@@ -499,16 +718,22 @@ KInteropReturnBuffer impl_GlobalScope_ohos_display_getCurrentFoldCreaseRegion() 
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_0(GlobalScope_ohos_display_getCurrentFoldCreaseRegion, KInteropReturnBuffer)
-KInteropReturnBuffer impl_GlobalScope_ohos_display_getDisplayByIdSync(KInteropNumber displayId) {
-        Serializer _retSerializer {};
-        _retSerializer.writeDisplay(GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->getDisplayByIdSync((const OH_Number*) (&displayId)));
-        return _retSerializer.toReturnBuffer();
+OH_NativePointer impl_GlobalScope_ohos_display_getDisplayByIdSync(KInteropNumber displayId) {
+        return GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->getDisplayByIdSync((const OH_Number*) (&displayId));
 }
-KOALA_INTEROP_1(GlobalScope_ohos_display_getDisplayByIdSync, KInteropReturnBuffer, KInteropNumber)
+KOALA_INTEROP_1(GlobalScope_ohos_display_getDisplayByIdSync, OH_NativePointer, KInteropNumber)
 OH_Boolean impl_GlobalScope_ohos_display_isFoldable() {
         return GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->isFoldable();
 }
 KOALA_INTEROP_0(GlobalScope_ohos_display_isFoldable, OH_Boolean)
+OH_Int32 impl_GlobalScope_ohos_display_on(const KStringPtr& type) {
+        return GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->on((const OH_String*) (&type)).i32;
+}
+KOALA_INTEROP_1(GlobalScope_ohos_display_on, OH_Int32, KStringPtr)
+void impl_GlobalScope_ohos_display_getAllDisplays() {
+        GetDISPLAYAPIImpl(DISPLAY_API_VERSION)->DISPLAY()->getAllDisplays();
+}
+KOALA_INTEROP_V0(GlobalScope_ohos_display_getAllDisplays)
 void deserializeAndCallCallback(OH_Int32 kind, uint8_t* thisArray, OH_Int32 thisLength)
 {
     printf("Unknown callback kind\n");

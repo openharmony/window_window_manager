@@ -56,7 +56,44 @@ export class Serializer extends SerializerBase {
      constructor() {
         super()
     }
+    writeRect(value: display.Rect): void {
+        let valueSerializer : Serializer = this
+        const value_left  = value.left
+        valueSerializer.writeNumber(value_left)
+        const value_top  = value.top
+        valueSerializer.writeNumber(value_top)
+        const value_width  = value.width
+        valueSerializer.writeNumber(value_width)
+        const value_height  = value.height
+        valueSerializer.writeNumber(value_height)
+    }
+    writeWaterfallDisplayAreaRects(value: display.WaterfallDisplayAreaRects): void {
+        let valueSerializer : Serializer = this
+        const value_left  = value.left
+        valueSerializer.writeRect(value_left)
+        const value_right  = value.right
+        valueSerializer.writeRect(value_right)
+        const value_top  = value.top
+        valueSerializer.writeRect(value_top)
+        const value_bottom  = value.bottom
+        valueSerializer.writeRect(value_bottom)
+    }
     writeDisplay(value: display.Display): void {
+        let valueSerializer : Serializer = this
+        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
+        {
+            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
+            const peer  = base.getPeer()
+            let ptr : KPointer = nullptr
+            if (peer != undefined)
+                ptr = peer.ptr
+            valueSerializer.writePointer(ptr)
+            return
+        }
+        else
+        {
+            throw new Error("Value is not a MaterializedBase instance!")
+        }
     }
     writeFoldCreaseRegion(value: display.FoldCreaseRegion): void {
         let valueSerializer : Serializer = this
@@ -69,15 +106,15 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeRect(value_creaseRects_element)
         }
     }
-    writeRect(value: display.Rect): void {
+    writeCutoutInfo(value: display.CutoutInfo): void {
         let valueSerializer : Serializer = this
-        const value_left  = value.left
-        valueSerializer.writeNumber(value_left)
-        const value_top  = value.top
-        valueSerializer.writeNumber(value_top)
-        const value_width  = value.width
-        valueSerializer.writeNumber(value_width)
-        const value_height  = value.height
-        valueSerializer.writeNumber(value_height)
+        const value_boundingRects  = value.boundingRects
+        valueSerializer.writeInt32(value_boundingRects.length as int32)
+        for (let i = 0; i < value_boundingRects.length; i++) {
+            const value_boundingRects_element : display.Rect = value_boundingRects[i]
+            valueSerializer.writeRect(value_boundingRects_element)
+        }
+        const value_waterfallDisplayAreaRects  = value.waterfallDisplayAreaRects
+        valueSerializer.writeWaterfallDisplayAreaRects(value_waterfallDisplayAreaRects)
     }
 }

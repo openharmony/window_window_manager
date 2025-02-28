@@ -21,6 +21,7 @@
 #include "window_manager_hilog.h"
 #include "dm_common.h"
 #include "refbase.h"
+#include "../../common/ani.h"
 
 using namespace OHOS::Rosen;
 namespace OHOS {
@@ -32,11 +33,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsDisp
 }
 }
 
-OH_DISPLAY_display_FoldDisplayMode convertToFoldDisplayMode(OHOS::Rosen::FoldDisplayMode mode)
-{
-    return static_cast<OH_DISPLAY_display_FoldDisplayMode>(static_cast<uint32_t>(mode));
-}
-
 OH_Number convertIntToOHNumber(uint32_t num)
 {
     OH_Number ohNum;
@@ -44,6 +40,40 @@ OH_Number convertIntToOHNumber(uint32_t num)
     ohNum.i32 = num;
     return ohNum;
 }
+
+OH_DISPLAY_Rect convertToOHRect(DMRect dmRect){
+    OH_DISPLAY_Rect ret;
+    ret.height = convertIntToOHNumber(dmRect.height_);
+    ret.top = convertIntToOHNumber(dmRect.posY_);
+    ret.left = convertIntToOHNumber(dmRect.posX_);
+    ret.width = convertIntToOHNumber(dmRect.width_);
+    return ret;
+}
+
+OH_DISPLAY_CutoutInfo convertToOHCutout(OHOS::sptr<OHOS::Rosen::CutoutInfo> cutoutInfo)
+{
+    OH_DISPLAY_CutoutInfo ret;
+    std::vector<DMRect> boundingRects = cutoutInfo->GetBoundingRects();
+    int size = boundingRects.size();
+    ret.boundingRects.array = new OH_DISPLAY_Rect[size];
+    for (int i = 0; i < size; i++) {
+        ret.boundingRects.array[i].height = convertIntToOHNumber(boundingRects.at(i).height_);
+        ret.boundingRects.array[i].top = convertIntToOHNumber(boundingRects.at(i).posY_);
+        ret.boundingRects.array[i].left = convertIntToOHNumber(boundingRects.at(i).posX_);
+        ret.boundingRects.array[i].width = convertIntToOHNumber(boundingRects.at(i).width_);
+    }
+    ret.waterfallDisplayAreaRects.left = convertToOHRect(cutoutInfo->GetWaterfallDisplayAreaRects().left);
+    ret.waterfallDisplayAreaRects.right = convertToOHRect(cutoutInfo->GetWaterfallDisplayAreaRects().right);
+    ret.waterfallDisplayAreaRects.top = convertToOHRect(cutoutInfo->GetWaterfallDisplayAreaRects().top);
+    ret.waterfallDisplayAreaRects.bottom = convertToOHRect(cutoutInfo->GetWaterfallDisplayAreaRects().bottom);
+    return ret;
+}
+
+OH_DISPLAY_display_FoldDisplayMode convertToFoldDisplayMode(OHOS::Rosen::FoldDisplayMode mode)
+{
+    return static_cast<OH_DISPLAY_display_FoldDisplayMode>(static_cast<uint32_t>(mode));
+}
+
 
 OH_DISPLAY_FoldCreaseRegion convertToFoldCreaseRegion(OHOS::Rosen::FoldCreaseRegion foldCreaseRegion)
 {
@@ -58,7 +88,7 @@ OH_DISPLAY_FoldCreaseRegion convertToFoldCreaseRegion(OHOS::Rosen::FoldCreaseReg
         ret.creaseRects.array[i].left = convertIntToOHNumber(dmRects.at(i).posX_);
         ret.creaseRects.array[i].width = convertIntToOHNumber(dmRects.at(i).width_);
     }
-    ret.creaseRects.length = foldCreaseRegion.GetCreaseRects().size();
+    ret.creaseRects.length = size;
     return ret;
 }
 
@@ -70,12 +100,10 @@ OH_NativePointer GlobalScope_ohos_display_getFoldDisplayModeImpl()
     return static_cast<OH_NativePointer>(modePtr);
 }
 
-OH_DISPLAY_Display GlobalScope_ohos_display_getDefaultDisplaySyncImpl()
+OH_NativePointer GlobalScope_ohos_display_getDefaultDisplaySyncImpl()
 {
     auto display = OHOS::Rosen::SingletonContainer::Get<OHOS::Rosen::DisplayManager>().GetDefaultDisplaySync(true);
-    OH_DISPLAY_Display ret;
-    ret.handle = display;
-    return ret;
+    return static_cast<OH_NativePointer>(display);
 }
 
 OH_NativePointer GlobalScope_ohos_display_getFoldStatusImpl()
@@ -93,9 +121,9 @@ OH_DISPLAY_FoldCreaseRegion GlobalScope_ohos_display_getCurrentFoldCreaseRegionI
     return convertToFoldCreaseRegion(*region);
 }
 
-OH_DISPLAY_Display GlobalScope_ohos_display_getDisplayByIdSyncImpl(const OH_Number* displayId)
+OH_NativePointer GlobalScope_ohos_display_getDisplayByIdSyncImpl(const OH_Number* displayId)
 {
-    OH_DISPLAY_Display displayRet;
+    OH_NativePointer displayRet = nullptr;
     if (displayId == nullptr || displayId->i32 < 0) {
         TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to displayId");
         return displayRet;
@@ -107,7 +135,7 @@ OH_DISPLAY_Display GlobalScope_ohos_display_getDisplayByIdSyncImpl(const OH_Numb
         return displayRet;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Sync:OnGetDisplayByIdSync end");
-    displayRet.handle = display;
+    displayRet = display;
     return displayRet;
 }
 
@@ -116,4 +144,27 @@ OH_Boolean GlobalScope_ohos_display_isFoldableImpl()
     auto foldable = OHOS::Rosen::SingletonContainer::Get<OHOS::Rosen::DisplayManager>().IsFoldable();
     WLOGD("[NAPI]" PRIu64", isFoldable = %{public}u", foldable);
     return static_cast<OH_Boolean>(foldable);
+}
+
+OH_DISPLAY_CutoutInfo Display_getCutoutInfoImpl(OH_NativePointer thisPtr) {
+    auto display = OHOS::Rosen::SingletonContainer::Get<OHOS::Rosen::DisplayManager>().GetDefaultDisplay();
+    OHOS::sptr<OHOS::Rosen::CutoutInfo> cutoutInfo = display->GetCutoutInfo();
+    return convertToOHCutout(cutoutInfo);
+}
+
+OH_NativePointer GlobalScope_ohos_display_getAllDisplaysImpl() {
+    std::vector<OHOS::Rosen::sptr<OHOS::Rosen::Display>>* displays = new std::vector<OHOS::Rosen::sptr<OHOS::Rosen::Display>>();
+    *displays = OHOS::Rosen::SingletonContainer::Get<OHOS::Rosen::DisplayManager>().GetAllDisplays();
+    return static_cast<OH_NativePointer>(displays);
+}
+
+OH_DISPLAY_DisplayHandle Display_constructImpl() {
+    return {};
+}
+void Display_destructImpl(OH_DISPLAY_DisplayHandle thiz) {
+}
+
+// needs env, can not impl currently
+OH_Number GlobalScope_ohos_display_onImpl(const OH_String* type, env) {
+    return {};
 }

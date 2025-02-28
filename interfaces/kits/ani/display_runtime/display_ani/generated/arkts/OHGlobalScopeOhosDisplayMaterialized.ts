@@ -44,13 +44,20 @@ export class GlobalScope_ohos_display {
     public static isFoldable(): boolean {
         return GlobalScope_ohos_display.isFoldable_serialize()
     }
+    public static on(type: string): number {
+        const type_casted = type as (string)
+        return GlobalScope_ohos_display.on_serialize(type_casted)
+    }
+    public static getAllDisplays(): Array<display.Display> {
+        return GlobalScope_ohos_display.getAllDisplays_serialize()
+    }
     private static getFoldDisplayMode_serialize(): display_FoldDisplayMode {
         const retval  = DISPLAYNativeModule._GlobalScope_ohos_display_getFoldDisplayMode()
         throw new Error("Object deserialization is not implemented.")
     }
     private static getDefaultDisplaySync_serialize(): display.Display {
         const retval  = DISPLAYNativeModule._GlobalScope_ohos_display_getDefaultDisplaySync()
-        return new Deserializer(retval, retval.length).readDisplay()
+        throw new Error("Object deserialization is not implemented.")
     }
     private static getFoldStatus_serialize(): display_FoldStatus {
         const retval  = DISPLAYNativeModule._GlobalScope_ohos_display_getFoldStatus()
@@ -62,10 +69,18 @@ export class GlobalScope_ohos_display {
     }
     private static getDisplayByIdSync_serialize(displayId: number): display.Display {
         const retval  = DISPLAYNativeModule._GlobalScope_ohos_display_getDisplayByIdSync(displayId)
-        return new Deserializer(retval, retval.length).readDisplay()
+        throw new Error("Object deserialization is not implemented.")
     }
     private static isFoldable_serialize(): boolean {
         const retval  = DISPLAYNativeModule._GlobalScope_ohos_display_isFoldable()
         return retval
+    }
+    private static on_serialize(type: string): number {
+        const retval  = DISPLAYNativeModule._GlobalScope_ohos_display_on(type)
+        return retval
+    }
+    private static getAllDisplays_serialize(): Array<display.Display> {
+        const retval  = DISPLAYNativeModule._GlobalScope_ohos_display_getAllDisplays()
+        throw new Error("Object deserialization is not implemented.")
     }
 }
