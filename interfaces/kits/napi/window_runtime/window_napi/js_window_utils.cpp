@@ -36,6 +36,7 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+constexpr uint32_t API_VERSION_16 = 16;
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
 }
@@ -464,7 +465,11 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
     WindowType type = window->GetType();
-    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
+    uint32_t apiVersion = window->GetApiVersion();
+    if (apiVersion < API_VERSION_16 && type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "api version %{public}d.", apiVersion);
+        napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
+    } else if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
     } else {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
