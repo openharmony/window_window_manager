@@ -212,6 +212,11 @@ public:
     WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) override { return WMError::WM_OK; }
     WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) override { return WMError::WM_OK; }
     WMError RequestFocus(uint32_t windowId) override { return WMError::WM_OK; }
+    WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT) override
+    {
+        return WMError::WM_OK;
+    }
     AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
         const Rect& rect = Rect::EMPTY_RECT) override { return {}; }
 
@@ -366,11 +371,6 @@ public:
         int32_t targetPersistentId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override { return WMError::WM_OK; }
-    WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT) override
-    {
-        return WMError::WM_OK;
-    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

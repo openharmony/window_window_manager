@@ -35,6 +35,7 @@ private:
     int HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocusStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleRequestFocusOnPreviousWindow(MessageParcel& data, MessageParcel& reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverAndReconnectSceneSession(MessageParcel& data, MessageParcel& reply);
@@ -117,7 +118,6 @@ private:
     int HandleSetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppDragResizeType(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowPointerEvent(MessageParcel& data, MessageParcel& reply);
-    int HandleRequestFocusOnPreviousWindow(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
