@@ -150,26 +150,28 @@ JsTransitionController::~JsTransitionController()
 
 void JsTransitionController::AnimationForShown()
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[NAPI]");
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, lastParam, &result);
     auto asyncTask = [self = weakRef_, task = napiAsyncTask]() {
         auto thisController = self.promote();
         if (thisController == nullptr) {
-            WLOGFE("this transition Controller is null!");
+            TLOGE(WmsLogTag::WMS_ANIMATION, "this transition Controller is null!");
             return;
         }
         HandleScope handleScope(thisController->env_);
         auto jsWin = thisController->jsWin_.lock();
         auto window = thisController->windowToken_.promote();
         if (jsWin == nullptr || window == nullptr) {
-            WLOGFE("native window or jsWindow is null!");
+            TLOGE(WmsLogTag::WMS_ANIMATION, "native window or jsWindow is null!");
             return;
         }
         auto state = window->GetWindowState();
         if (state != WindowState::STATE_SHOWN) {
-            WLOGFE("animation shown configuration for state %{public}u not support!", static_cast<uint32_t>(state));
+            TLOGE(WmsLogTag::WMS_ANIMATION,
+                "animation shown configuration for state %{public}u not support!",
+                static_cast<uint32_t>(state));
             return;
         }
         napi_value jsTransContextObj = CreateJsTransitionContextObject(
@@ -183,33 +185,32 @@ void JsTransitionController::AnimationForShown()
         window->UpdateSurfaceNodeAfterCustomAnimation(true);
     };
     if (napi_status::napi_ok != napi_send_event(env_, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(
-            env_, JsErrUtils::CreateJsError(env_, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to run napiAsyncTask for animationForShown");
     }
 }
 
 void JsTransitionController::AnimationForHidden()
 {
-    WLOGFI("[NAPI]");
+    TLOGI(WmsLogTag::WMS_ANIMATION, "[NAPI]");
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env_, lastParam, &result);
     auto asyncTask = [self = weakRef_, task = napiAsyncTask]() {
         auto thisController = self.promote();
         if (thisController == nullptr) {
-            WLOGFE("this transition Controller is null!");
+            TLOGE(WmsLogTag::WMS_ANIMATION, "this transition Controller is null!");
             return;
         }
         HandleScope handleScope(thisController->env_);
         auto jsWin = thisController->jsWin_.lock();
         auto window = thisController->windowToken_.promote();
         if (jsWin == nullptr || window == nullptr) {
-            WLOGFE("native window or jsWindow is null!");
+            TLOGE(WmsLogTag::WMS_ANIMATION, "native window or jsWindow is null!");
             return;
         }
         auto state = window->GetWindowState();
         if (state != WindowState::STATE_HIDDEN) {
-            WLOGFE("animation hidden configuration for state %{public}u not support!",
+            TLOGE(WmsLogTag::WMS_ANIMATION, "animation hidden configuration for state %{public}u not support!",
                 static_cast<uint32_t>(state));
             return;
         }
@@ -222,8 +223,7 @@ void JsTransitionController::AnimationForHidden()
         thisController->CallJsMethod("animationForHidden", argv, ArraySize(argv));
     };
     if (napi_status::napi_ok != napi_send_event(env_, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(
-            env_, JsErrUtils::CreateJsError(env_, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to run napiAsyncTask for animationForHidden");
     }
 }
 
