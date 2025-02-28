@@ -293,6 +293,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->IsMainWindowTopmost())));
     napi_set_named_property(env, objValue, "subWindowModalType",
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowModalType())));
+    napi_set_named_property(env, objValue, "bundleName",
+        CreateJsValue(env, session->GetSessionInfo().bundleName_));
     SetWindowSizeAndPosition(env, objValue, session);
     const char* moduleName = "JsSceneSession";
     BindNativeMethod(env, objValue, moduleName);
