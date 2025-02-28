@@ -16,10 +16,18 @@
 #define KOALA_INTEROP_MODULE NotSpecifiedInteropModule
 #include "display.h"
 
+OH_DISPLAY_DisplayHandle Display_constructImpl() {
+    return {};
+}
+void Display_destructImpl(OH_DISPLAY_DisplayHandle thiz) {
+}
+OH_DISPLAY_CutoutInfo Display_getCutoutInfoImpl(OH_NativePointer thisPtr) {
+    return {};
+}
 OH_NativePointer GlobalScope_ohos_display_getFoldDisplayModeImpl() {
     return {};
 }
-OH_DISPLAY_Display GlobalScope_ohos_display_getDefaultDisplaySyncImpl() {
+OH_NativePointer GlobalScope_ohos_display_getDefaultDisplaySyncImpl() {
     return {};
 }
 OH_NativePointer GlobalScope_ohos_display_getFoldStatusImpl() {
@@ -28,9 +36,15 @@ OH_NativePointer GlobalScope_ohos_display_getFoldStatusImpl() {
 OH_DISPLAY_FoldCreaseRegion GlobalScope_ohos_display_getCurrentFoldCreaseRegionImpl() {
     return {};
 }
-OH_DISPLAY_Display GlobalScope_ohos_display_getDisplayByIdSyncImpl(const OH_Number* displayId) {
+OH_NativePointer GlobalScope_ohos_display_getDisplayByIdSyncImpl(const OH_Number* displayId) {
     return {};
 }
 OH_Boolean GlobalScope_ohos_display_isFoldableImpl() {
+    return {};
+}
+OH_Number GlobalScope_ohos_display_onImpl(const OH_String* type) {
+    return {};
+}
+OH_NativePointer GlobalScope_ohos_display_getAllDisplaysImpl() {
     return {};
 }

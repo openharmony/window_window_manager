@@ -13,6 +13,9 @@ export class TypeChecker {
     static isdisplay_FoldStatus(value: object|string|number|undefined|null): boolean {
         return value instanceof display_FoldStatus
     }
+    static isdisplayCutoutInfo(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof display.CutoutInfo
+    }
     static isdisplayDisplay(value: object|string|number|undefined|null): boolean {
         return value instanceof display.Display
     }
@@ -21,6 +24,9 @@ export class TypeChecker {
     }
     static isdisplayRect(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof display.Rect
+    }
+    static isdisplayWaterfallDisplayAreaRects(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof display.WaterfallDisplayAreaRects
     }
     static isArray_Rect(value: object|string|number|undefined|null): boolean {
         return value instanceof Array<display.Rect>
