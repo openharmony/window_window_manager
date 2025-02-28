@@ -16,6 +16,7 @@
 #include "scene_input_manager.h"
 
 #include <hitrace_meter.h>
+#include "perform_reporter.h"
 #include "scene_session_dirty_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -32,6 +33,7 @@ constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 constexpr int INVALID_PERSISTENT_ID = 0;
+constexpr int DEFAULT_SCREEN_POS = 0;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -224,6 +226,12 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
             screenProperty.GetPivotY() * screenHeight).Inverse();
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
+        int32_t screenOneHandX = DEFAULT_SCREEN_POS;
+        int32_t screenOneHandY = DEFAULT_SCREEN_POS;
+        if (screenId == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
+            screenOneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX;
+            screenOneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY;
+        }
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
             .x = screenProperty.GetStartX(),
@@ -246,8 +254,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .screenRealPPI = screenProperty.GetScreenRealPPI(),
             .screenRealDPI = static_cast<int32_t>(screenProperty.GetScreenRealDPI()),
             .screenCombination = static_cast<MMI::ScreenCombination>(screenCombination),
-            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
-            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY,
+            .oneHandX = screenOneHandX,
+            .oneHandY = screenOneHandY,
             .validWidth = screenProperty.GetValidWidth(),
             .validHeight = screenProperty.GetValidHeight(),
             .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset()),
@@ -566,6 +574,17 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
         }
         std::vector<MMI::DisplayInfo> displayInfos;
         ConstructDisplayInfos(displayInfos);
+        if (displayInfos.empty()) {
+            std::ostringstream oss;
+            oss << "displayInfos flush to MMI is empty!";
+            int32_t ret = WindowInfoReporter::GetInstance().ReportEventDispatchException(
+                static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION),
+                getpid(), oss.str()
+            );
+            if (ret != 0) {
+                TLOGNI(WmsLogTag::WMS_EVENT, "ReportEventDispatchException message failed, ret: %{public}d", ret);
+            }
+        }
         if (!forceFlush && !CheckNeedUpdate(displayInfos, windowInfoList)) {
             return;
         }

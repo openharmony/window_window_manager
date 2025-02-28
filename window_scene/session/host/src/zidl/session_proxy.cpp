@@ -331,6 +331,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
         property->SetAppInstanceKey(reply.ReadString());
         property->SetDragEnabled(reply.ReadBool());
+        property->SetIsAtomicService(reply.ReadBool());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -585,7 +586,8 @@ WSError SessionProxy::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
+WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+    const ExceptionInfo& exceptionInfo)
 {
     if (abilitySessionInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is null");
@@ -624,6 +626,14 @@ WSError SessionProxy::NotifySessionException(const sptr<AAFwk::SessionInfo> abil
     }
     if (!data.WriteString(abilitySessionInfo->identityToken)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write identity token info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(exceptionInfo.needRemoveSession)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write needRemoveSession info failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(exceptionInfo.needClearCallerLink)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write needClearCallerLink info failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

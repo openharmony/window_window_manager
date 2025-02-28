@@ -213,6 +213,7 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
+    uint32_t GetApiVersion() const override;
 
     /*
      * Window Decor
@@ -267,7 +268,7 @@ protected:
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
-    
+
     /*
      * Window Recover
      */
@@ -288,6 +289,7 @@ private:
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
     void UpdateNewSize();
+    void UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info, const DMRect& availableArea);
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
@@ -390,7 +392,7 @@ private:
      * Move Drag
      */
     bool CalcWindowShouldMove();
-    
+
     /*
      * PC Window
      */

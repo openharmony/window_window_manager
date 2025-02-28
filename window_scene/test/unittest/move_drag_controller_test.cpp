@@ -25,6 +25,7 @@
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "screen_manager.h"
 #include "scene_board_judgement.h"
+#include "window_scene.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -206,6 +207,16 @@ HWTEST_F(MoveDragControllerTest, InitMoveDragProperty, Function | SmallTest | Le
  */
 HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, Function | SmallTest | Level1)
 {
+    moveDragController->InitCrossDisplayProperty(1, 2);
+    ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
+    ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
+    ASSERT_EQ(true, moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
+        moveDragController->GetDisplayIdsDuringMoveDrag().end());
+    ScreenId screenId = 1;
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession =
+        sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     moveDragController->InitCrossDisplayProperty(1, 2);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
     ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
@@ -698,11 +709,20 @@ HWTEST_F(MoveDragControllerTest, ConsumeMoveEvent, Function | SmallTest | Level1
         moveDragController->SetStartMoveFlag(false);
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
         ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->hasPointDown_ = false;
+        moveDragController->moveDragIsInterrupted_ = true;
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->moveDragIsInterrupted_ = false;
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->hasPointDown_ = true;
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
         ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
         moveDragController->SetStartMoveFlag(true);
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
         ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->moveDragIsInterrupted_ = true;
+        ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
+        moveDragController->moveDragIsInterrupted_ = false;
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
         ASSERT_EQ(false, moveDragController->ConsumeMoveEvent(pointerEvent, originalRect));
         pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
@@ -781,6 +801,60 @@ HWTEST_F(MoveDragControllerTest, ConsumeDragEvent, Function | SmallTest | Level1
         ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
         moveDragController->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
         moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType() + 1;
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+    }
+}
+
+/**
+ * @tc.name: ConsumeDragEvent2
+ * @tc.desc: test function : ConsumeDragEvent2
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, ConsumeDragEvent2, Function | SmallTest | Level1)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(nullptr, pointerEvent);
+        sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+        WSRect originalRect = { 100, 100, 1000, 1000 };
+        SystemSessionConfig sysConfig;
+        moveDragController->GetVirtualPixelRatio();
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(nullptr, originalRect, property, sysConfig));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, nullptr, sysConfig));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->SetStartMoveFlag(true);
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->SetStartMoveFlag(false);
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        MMI::PointerEvent::PointerItem pointerItem;
+        pointerItem.SetPointerId(0);
+        pointerItem.SetWindowX(0);
+        pointerItem.SetWindowY(0);
+        pointerEvent->AddPointerItem(pointerItem);
+        pointerEvent->SetPointerId(0);
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_DOWN));
+        ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+        moveDragController->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+        moveDragController->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
+        pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_RIGHT);
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_MOVE));
+        ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->moveDragIsInterrupted_ = false;
+        ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->moveDragIsInterrupted_ = true;
+        pointerEvent->SetPointerAction(static_cast<int32_t>(MMI::PointerEvent::POINTER_ACTION_UP));
+        ASSERT_EQ(true, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->hasPointDown_ = false;
+        ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
+        moveDragController->hasPointDown_ = true;
+        moveDragController->moveDragIsInterrupted_ = false;
+        ScreenProperty screenProperty0;
+        ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
+            sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
+        moveDragController->moveDragStartDisplayId_ = 0;
         ASSERT_EQ(false, moveDragController->ConsumeDragEvent(pointerEvent, originalRect, property, sysConfig));
     }
 }
@@ -1176,6 +1250,18 @@ HWTEST_F(MoveDragControllerTest, GetOriginalPointerPosY, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: GetPointerType
+ * @tc.desc: GetPointerType
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetPointerType, Function | SmallTest | Level1)
+{
+    int32_t testType = MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
+    moveDragController->moveDragProperty_.pointerType_ = testType;
+    ASSERT_EQ(testType, moveDragController->GetPointerType());
+}
+
+/**
  * @tc.name: GetNewAddedDisplayIdsDuringMoveDrag
  * @tc.desc: test function : GetNewAddedDisplayIdsDuringMoveDrag
  * @tc.type: FUNC
@@ -1224,6 +1310,13 @@ HWTEST_F(MoveDragControllerTest, CalcUnifiedTranslate, Function | SmallTest | Le
     std::pair<int32_t, int32_t> res = moveDragController->CalcUnifiedTranslate(pointerEvent);
     ASSERT_EQ(0, res.first);
     ASSERT_EQ(0, res.second);
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(0, screenSession));
+    res = moveDragController->CalcUnifiedTranslate(pointerEvent);
+    ASSERT_EQ(1, res.first);
+    ASSERT_EQ(1, res.second);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
 
 /**
@@ -1237,6 +1330,11 @@ HWTEST_F(MoveDragControllerTest, MoveDragInterrupted, Function | SmallTest | Lev
     ASSERT_EQ(false, moveDragController->GetStartDragFlag());
     ASSERT_EQ(false, moveDragController->GetStartMoveFlag());
     ASSERT_EQ(false, moveDragController->hasPointDown_);
+    moveDragController->isStartMove_ = true;
+    ASSERT_EQ(false, moveDragController->GetStartDragFlag());
+    ASSERT_EQ(true, moveDragController->GetStartMoveFlag());
+    ASSERT_EQ(false, moveDragController->hasPointDown_);
+    moveDragController->isStartMove_ = false;
 }
 
 /**
@@ -1293,7 +1391,7 @@ HWTEST_F(MoveDragControllerTest, OnChange, Function | SmallTest | Level1)
  */
 HWTEST_F(MoveDragControllerTest, StopMoving, Function | SmallTest | Level1)
 {
-    moveDragController->SetStartMoveFlag(true);
+    moveDragController->isStartMove_ = true;
     moveDragController->StopMoving();
     ASSERT_EQ(false, moveDragController->GetStartMoveFlag());
     ASSERT_EQ(false, moveDragController->hasPointDown_);
@@ -1314,6 +1412,78 @@ HWTEST_F(MoveDragControllerTest, HandleStartMovingWithCoordinate, Function | Sma
     ASSERT_EQ(500, moveDragController->moveTempProperty_.lastMovePointerPosY_);
     ASSERT_EQ(100, moveDragController->moveTempProperty_.lastDownPointerWindowX_);
     ASSERT_EQ(50, moveDragController->moveTempProperty_.lastDownPointerWindowY_);
+}
+
+/**
+ * @tc.name: GetTargetRectByDisplayId
+ * @tc.desc: test function : GetTargetRectByDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetTargetRectByDisplayId, Function | SmallTest | Level1)
+{
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    WSRect ret = moveDragController->GetTargetRectByDisplayId(0);
+    ASSERT_EQ(ret, moveDragController->moveDragProperty_.targetRect_);
+    ScreenProperty screenProperty0;
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
+        sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
+    ret = moveDragController->GetTargetRectByDisplayId(0);
+    int32_t currentDisplayOffsetX = static_cast<int32_t>(screenProperty0.GetStartX());
+    int32_t currentDisplayOffsetY = static_cast<int32_t>(screenProperty0.GetStartY());
+    WSRect testRect = { moveDragController->moveDragProperty_.targetRect_.posX_ +
+                            moveDragController->originalDisplayOffsetX_ - currentDisplayOffsetX,
+                        moveDragController->moveDragProperty_.targetRect_.posY_ +
+                            moveDragController->originalDisplayOffsetY_ - currentDisplayOffsetY,
+                        moveDragController->moveDragProperty_.targetRect_.width_,
+                        moveDragController->moveDragProperty_.targetRect_.height_ };
+    ASSERT_EQ(ret, testRect);
+}
+
+/**
+ * @tc.name: UpdateMoveAvailableArea
+ * @tc.desc: test function : UpdateMoveAvailableArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, UpdateMoveAvailableArea, Function | SmallTest | Level1)
+{
+    moveDragController->UpdateMoveAvailableArea(-1);
+    ASSERT_EQ(moveDragController->moveAvailableArea_.posX_, 0);
+    ScreenId screenId = 0;
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    ScreenId rsId = 0;
+    std::string name;
+    ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
+    moveDragController->UpdateMoveAvailableArea(0);
+    ASSERT_EQ(moveDragController->moveAvailableArea_.posX_, 0);
+}
+
+/**
+ * @tc.name: GetMoveInputBarStartDisplayId
+ * @tc.desc: test function : GetMoveInputBarStartDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, GetMoveInputBarStartDisplayId, Function | SmallTest | Level1)
+{
+    auto ret = moveDragController->GetMoveInputBarStartDisplayId();
+    ASSERT_EQ(moveDragController->moveInputBarStartDisplayId_, ret);
+}
+
+/**
+ * @tc.name: SetCurrentScreenProperty
+ * @tc.desc: test function : SetCurrentScreenProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, SetCurrentScreenProperty, Function | SmallTest | Level1)
+{
+    ScreenId screenId = 0;
+    ScreenEvent screenEvent = ScreenEvent::CONNECTED;
+    ScreenId rsId = 0;
+    std::string name;
+    ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
+    moveDragController->SetCurrentScreenProperty(-1);
+    ASSERT_EQ(moveDragController->screenSizeProperty_.currentDisplayStartX, 0);
+    moveDragController->SetCurrentScreenProperty(0);
+    ASSERT_EQ(moveDragController->screenSizeProperty_.currentDisplayStartX, 0);
 }
 }
 }

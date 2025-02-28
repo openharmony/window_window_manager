@@ -999,6 +999,21 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     return objValue;
 }
 
+napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "needRemoveSession",
+        CreateJsValue(env, exceptionInfo.needRemoveSession));
+    napi_set_named_property(env, objValue, "needClearCallerLink",
+        CreateJsValue(env, exceptionInfo.needClearCallerLink));
+    return objValue;
+}
+
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {
@@ -1698,8 +1713,8 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
-    SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
+    SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     return objValue;
 }
 

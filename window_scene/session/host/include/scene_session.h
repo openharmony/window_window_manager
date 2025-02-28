@@ -230,9 +230,9 @@ public:
         bool canStartAbilityFromBackground, bool isFromAncoAndToAnco);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
+        const sptr<AAFwk::SessionInfo> info, const ExceptionInfo& exceptionInfo) override;
     WSError NotifySessionExceptionInner(
-        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false,
+        const sptr<AAFwk::SessionInfo> info, const ExceptionInfo& exceptionInfo,
         bool isFromClient = false, bool startFail = false);
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

@@ -178,7 +178,7 @@ public:
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
-    
+
     WMError Create(uint32_t parentId,
         const std::shared_ptr<AbilityRuntime::Context>& context = nullptr);
     virtual WMError Destroy() override;
@@ -295,6 +295,7 @@ public:
     void UpdateZoomTransform(const Transform& trans, bool isDisplayZoomOn);
     void PerformBack() override;
     void NotifyForegroundInteractiveStatus(bool interactive);
+    void NotifyMMIServiceOnline(uint32_t winId);
     virtual bool PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability) override;
@@ -351,6 +352,7 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
     void UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration) override;
     void RegisterWindowInspectorCallback();
+    uint32_t GetApiVersion() const override;
 
     /*
      * Keyboard
@@ -409,6 +411,7 @@ private:
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     void NotifyDragEvent(const PointInfo& point, DragEvent event);
+    void ResetInputWindow(uint32_t winId);
     void DestroyDialogWindow();
     void DestroyFloatingWindow();
     void DestroySubWindow();

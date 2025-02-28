@@ -3042,6 +3042,7 @@ void SceneSession::SetMoveDragCallback()
     }
 }
 
+/** @note @window.drag */
 void SceneSession::InitializeCrossMoveDrag()
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
@@ -3061,12 +3062,14 @@ void SceneSession::InitializeCrossMoveDrag()
     moveDragController_->InitCrossDisplayProperty(property->GetDisplayId(), parentNode->GetId());
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason)
 {
     bool isGlobal = (reason != SizeChangeReason::DRAG_END);
     bool needFlush = (reason != SizeChangeReason::DRAG_END);
     throwSlipToFullScreenAnimCount_.store(0);
-    if (pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
+    if (moveDragController_ && moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+        pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId()) &&
         (reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END)) {
         if (pcFoldScreenController_->NeedFollowHandAnimation()) {
             auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
@@ -3116,6 +3119,7 @@ void SceneSession::OnNextVsyncReceivedWhenDrag()
     });
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason)
 {
     if (GetOriPosYBeforeRaisedByKeyboard() != 0) {
@@ -3194,6 +3198,10 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
 void SceneSession::OnThrowSlipAnimationStateChange(bool isAnimating)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "status: %{public}d", isAnimating);
+    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode) {
+        leashWinSurfaceNode->SetUIFirstSwitch(isAnimating ? RSUIFirstSwitch::FORCE_DISABLE : RSUIFirstSwitch::NONE);
+    }
     if (onThrowSlipAnimationStateChangeFunc_) {
         onThrowSlipAnimationStateChangeFunc_(isAnimating);
     }
@@ -3271,6 +3279,7 @@ void SceneSession::ThrowSlipDirectly(const WSRectF& velocity)
     }, __func__);
 }
 
+/** @note @window.drag */
 void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
 {
     if (!moveDragController_) {
@@ -3335,6 +3344,7 @@ bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
 }
 
+/** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
     auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
@@ -3390,6 +3400,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
     }
 }
 
+/** @note @window.drag */
 WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
 {
     return PostSyncTask([weakThis = wptr(this), rect, where = __func__] {
@@ -3405,6 +3416,7 @@ WSError SceneSession::UpdateRectForDrag(const WSRect& rect)
     }, __func__);
 }
 
+/** @note @window.drag */
 void SceneSession::UpdateWinRectForSystemBar(WSRect& rect)
 {
     if (!specificCallback_) {
@@ -5213,9 +5225,9 @@ WSError SceneSession::TerminateSession(const sptr<AAFwk::SessionInfo> abilitySes
 }
 
 WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
-    bool needRemoveSession, bool isFromClient, bool startFail)
+    const ExceptionInfo& exceptionInfo, bool isFromClient, bool startFail)
 {
-    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, needRemoveSession,
+    PostLifeCycleTask([weakThis = wptr(this), abilitySessionInfo, exceptionInfo,
         isFromClient, startFail, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -5254,23 +5266,24 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
             session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
         }
         if (session->sessionExceptionFunc_) {
-            session->sessionExceptionFunc_(info, needRemoveSession, false);
+            session->sessionExceptionFunc_(info, exceptionInfo, false);
         }
         if (session->jsSceneSessionExceptionFunc_) {
-            session->jsSceneSessionExceptionFunc_(info, needRemoveSession, startFail);
+            session->jsSceneSessionExceptionFunc_(info, exceptionInfo, startFail);
         }
         return WSError::WS_OK;
     }, __func__, LifeCycleTaskType::STOP);
     return WSError::WS_OK;
 }
 
-WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession)
+WSError SceneSession::NotifySessionException(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+    const ExceptionInfo& exceptionInfo)
 {
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         TLOGE(WmsLogTag::WMS_LIFE, "permission failed.");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    return NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
+    return NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, true);
 }
 
 WSRect SceneSession::GetLastSafeRect() const

@@ -1390,10 +1390,12 @@ HWTEST_F(SceneSessionTest2, OnMoveDragCallback02, Function | SmallTest | Level2)
 
     Session session(info);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    bool needRemoveSession = true;
-    session.sessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    session.jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
+    ExceptionInfo exceptionInfo;
+    session.sessionExceptionFunc_ = [](const SessionInfo& info,
+        const ExceptionInfo& exceInfo, bool startFail) {};
+    session.jsSceneSessionExceptionFunc_ = [](const SessionInfo& info,
+        const ExceptionInfo& exceInfo, bool startFail) {};
+    sceneSession->NotifySessionException(abilitySessionInfo, exceptionInfo);
 
     sceneSession->NotifyPiPWindowPrepareClose();
 

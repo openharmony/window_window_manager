@@ -79,6 +79,19 @@ WINDOW_EXCEPTION_DETECTION:
   PID: {type: INT32, desc: pid}
   MSG: {type: STRING, desc: detects abnormal information}
 
+UIEXTENSION_EXCEPTION:
+  __BASE: {type: FAULT, level: CRITICAL, desc: UIExtension encountered an exception}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
+  PID: {type: INT32, desc: pid}
+  PERSISTENTID: {type: INT32, desc: persistentId}
+  MSG: {type: STRING, desc: uiextension abnormal information}
+
+EVENT_DISPATCH_EXCEPTION:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Event dispatch encountered an exception}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
+  PID: {type: INT32, desc: pid}
+  MSG: {type: STRING, desc: event dispatch abnormal information}
+
 SHOW_WINDOW_TIME:
   __BASE: {type: STATISTIC, level: MINOR, desc: Sow window time performance}
   MSG: {type: STRING, desc: windowmanager event message}

@@ -429,6 +429,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
         reply.WriteString(property->GetAppInstanceKey());
         reply.WriteBool(property->GetDragEnabled());
+        reply.WriteBool(property->GetIsAtomicService());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
@@ -599,7 +600,18 @@ int SessionStub::HandleSessionException(MessageParcel& data, MessageParcel& repl
         TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = NotifySessionException(abilitySessionInfo);
+    ExceptionInfo exceptionInfo;
+    if (!data.ReadBool(exceptionInfo.needRemoveSession)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needRemoveSession failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadBool(exceptionInfo.needClearCallerLink)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read needClearCallerLink failed.");
+        return ERR_INVALID_DATA;
+    }
+    exceptionInfo.needClearCallerLink =
+        exceptionInfo.needRemoveSession ? true : exceptionInfo.needClearCallerLink;
+    WSError errCode = NotifySessionException(abilitySessionInfo, exceptionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
