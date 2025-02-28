@@ -1211,8 +1211,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
         parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
         parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
-        parcel.WriteBool(isAtomicService_);
-        parcel.WriteUint32(apiVersion_);
+        parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
