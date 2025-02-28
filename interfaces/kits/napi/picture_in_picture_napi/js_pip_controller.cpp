@@ -49,7 +49,11 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
 napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureController>& pipController)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
+    napi_status status = napi_create_object(env, &objValue);
+    if (status != napi_ok || objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "failed to create js obj, error:%{public}d", status);
+        return NapiGetUndefined(env);
+    }
 
     TLOGI(WmsLogTag::WMS_PIP, "CreateJsPipController");
     std::unique_ptr<JsPipController> jsPipController = std::make_unique<JsPipController>(pipController);

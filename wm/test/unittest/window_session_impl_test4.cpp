@@ -2590,6 +2590,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowCrossAxisChange, Function | SmallTe
     EXPECT_CALL(*crossListener, OnCrossAxisChange(CrossAxisState::STATE_CROSS)).Times(1);
     window->NotifyWindowCrossAxisChange(CrossAxisState::STATE_CROSS);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
+    WindowSessionImpl::windowCrossAxisListeners_[window->property_->persistentId_].clear();
 }
 
 /**
@@ -2613,6 +2614,26 @@ HWTEST_F(WindowSessionImplTest4, GetCrossAxisState, Function | SmallTest | Level
     EXPECT_CALL(*mockHostSession, GetCrossAxisState(_))
         .WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
     EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
+}
+
+/**
+ * @tc.name: SendContainerModalEvent
+ * @tc.desc: SendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SendContainerModalEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendContainerModalEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SendContainerModalEvent("scb_back_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("scb_back_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

@@ -1673,6 +1673,49 @@ HWTEST_F(WindowSceneSessionImplTest4, IsSystemDensityChanged01, Function | Small
     ret = window->IsSystemDensityChanged(displayInfo);
     ASSERT_EQ(false, ret);
 }
+
+/**
+ * @tc.name: UpdateNewSizeForPCWindow01
+ * @tc.desc: UpdateNewSizeForPCWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, UpdateNewSizeForPCWindow01, Function | SmallTest | Level2)
+{
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    auto displayInfo = display->GetDisplayInfo();
+    DMRect availableArea = { 0, 0, 1000, 800 };
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateNewSizeForPCWindow01Window");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1008);
+    SessionInfo sessionInfo = {"CreateNewSizeForPCBundle", "CreateNewSizeForPCModule", "CreateNewSizeForPCAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    // currentVpr
+    window->virtualPixelRatio_ = 2.0;
+    // newVpr
+    displayInfo->SetVirtualPixelRatio(1.0f);
+    Rect windowRect = { 10, 10, 800, 600 };
+    window->property_->SetRequestRect(windowRect);
+    window->property_->SetWindowRect(windowRect);
+    window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
+    Rect result = window->property_->GetRequestRect();
+    windowRect = { 10, 10, 400, 300 };
+    ASSERT_EQ(windowRect, result);
+
+    // currentVpr
+    window->virtualPixelRatio_ = 1.0;
+    // newVpr
+    displayInfo->SetVirtualPixelRatio(2.5f);
+    windowRect = { 10, 10, 600, 500 };
+    window->property_->SetRequestRect(windowRect);
+    window->property_->SetWindowRect(windowRect);
+    window->UpdateNewSizeForPCWindow(displayInfo, availableArea);
+    result = window->property_->GetRequestRect();
+    windowRect = { 0, 0, 1000, 800 };
+    ASSERT_EQ(windowRect, result);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

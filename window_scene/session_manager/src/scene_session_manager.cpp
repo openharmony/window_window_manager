@@ -962,7 +962,8 @@ void SceneSessionManager::UpdateRecoveredSessionInfo(const std::vector<int32_t>&
             }
             const auto& sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
             TLOGNI(WmsLogTag::WMS_RECOVER, "unrecoverable persistentId=%{public}d", sessionId);
-            sceneSession->NotifySessionExceptionInner(sceneSessionInfo, false);
+            ExceptionInfo exceptionInfo;
+            sceneSession->NotifySessionExceptionInner(sceneSessionInfo, exceptionInfo);
         }
         RemoveFailRecoveredSession();
     }, __func__);
@@ -2418,7 +2419,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         if (!PreHandleCollaborator(sceneSession, persistentId)) {
             TLOGE(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, ancoSceneState: %{public}d",
                 persistentId, sceneSession->GetSessionInfo().ancoSceneState);
-            sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), true);
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = true;
+            sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
             return WSError::WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED;
         }
     }
@@ -2462,7 +2465,9 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     NotifyCollaboratorAfterStart(sceneSession, sceneSessionInfo);
     if (errCode != ERR_OK) {
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
-        sceneSession->NotifySessionExceptionInner(sceneSessionInfo, true, false, true);
+        ExceptionInfo exceptionInfo;
+        exceptionInfo.needRemoveSession = true;
+        sceneSession->NotifySessionExceptionInner(sceneSessionInfo, exceptionInfo, false, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
                 static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
@@ -3254,10 +3259,11 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_FLOAT) {
+        bool isPadAndNotPcApp = systemConfig_.IsPadWindow() && !property->GetIsPcAppInPad();
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
         if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
             (SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd() ||
-             systemConfig_.supportTypeFloatWindow_)) {
+            (systemConfig_.supportTypeFloatWindow_ && !isPadAndNotPcApp))) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "check float permission success.");
             return true;
         } else {
@@ -4071,7 +4077,9 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
-            sceneSession->NotifySessionExceptionInner(abilitySessionInfo, true, false, true);
+            ExceptionInfo exceptionInfo;
+            exceptionInfo.needRemoveSession = true;
+            sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
             if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
                 startUIAbilityErrorFunc_(
                     static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
@@ -4862,7 +4870,7 @@ void SceneSessionManager::RegisterSessionExceptionFunc(const sptr<SceneSession>&
         return;
     }
     sceneSession->SetSessionExceptionListener([this, where = __func__](
-        const SessionInfo& info, bool needRemoveSession = false, bool startFail = false) {
+        const SessionInfo& info, const ExceptionInfo& exceptionInfo , bool startFail = false) {
         auto task = [this, info, where] {
             auto session = GetSceneSession(info.persistentId_);
             if (session == nullptr) {
@@ -5574,9 +5582,9 @@ void SceneSessionManager::RequestAllAppSessionUnfocus()
  * request focus and ignore its state
  * only used when app main window start before foreground
  */
-WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId)
+WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId, bool blockNotifyUntilVisible)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d", persistentId);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, blockNotify: %{public}d", persistentId, blockNotifyUntilVisible);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         WLOGFE("[WMSComm]session is nullptr");
@@ -5610,7 +5618,11 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
     auto needBlockNotifyFocusStatusUntilForeground = focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
     focusGroup->SetNeedBlockNotifyUnfocusStatus(needBlockNotifyFocusStatusUntilForeground);
-    if (!sceneSession->GetSessionInfo().isSystem_ && !IsSessionVisibleForeground(sceneSession)) {
+    if (!sceneSession->GetSessionInfo().isSystem_ && !blockNotifyUntilVisible && systemConfig_.IsPcWindow()) {
+        if (!sceneSession->IsSessionForeground()) {
+            focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
+        }
+    } else if (!sceneSession->GetSessionInfo().isSystem_ && !IsSessionVisibleForeground(sceneSession)) {
         focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     }
     ShiftFocus(displayId, sceneSession, false, reason);
@@ -7158,7 +7170,7 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmdediately(const s
             continue;
         }
         // no need to consider order, since rule of zOrder
-        if (RequestSessionFocusImmediately(topmostSession->GetPersistentId()) == WSError::WS_OK) {
+        if (RequestSessionFocusImmediately(topmostSession->GetPersistentId(), false) == WSError::WS_OK) {
             ret = WSError::WS_OK;
         }
     }
@@ -7194,7 +7206,7 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmdediately(const sptr<Sc
             continue;
         }
         // no need to consider order, since rule of zOrder
-        if (RequestSessionFocusImmediately(dialog->GetPersistentId()) == WSError::WS_OK) {
+        if (RequestSessionFocusImmediately(dialog->GetPersistentId(), false) == WSError::WS_OK) {
             ret = WSError::WS_OK;
         }
     }
@@ -11099,6 +11111,17 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
         SceneInputManager::GetInstance().ResetSessionDirty();
         auto [windowInfoList, pixelMapList] = SceneInputManager::GetInstance().GetFullWindowInfoList();
         TLOGND(WmsLogTag::WMS_EVENT, "windowInfoList size: %{public}d", static_cast<int32_t>(windowInfoList.size()));
+        if (windowInfoList.empty()) {
+            std::ostringstream oss;
+            oss << "windowInfoList flush to MMI is empty!";
+            int32_t ret = WindowInfoReporter::GetInstance().ReportEventDispatchException(
+                static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_WINDOW_INFO_TO_MMI_EXCEPTION),
+                getpid(), oss.str()
+            );
+            if (ret != 0) {
+                TLOGNI(WmsLogTag::WMS_EVENT, "ReportEventDispatchException message failed, ret: %{public}d", ret);
+            }
+        }
         SceneInputManager::GetInstance().
             FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList), forceFlush);
     };
@@ -11714,7 +11737,9 @@ void SceneSessionManager::RemoveFailRecoveredSession()
             continue;
         }
         TLOGI(WmsLogTag::WMS_RECOVER, "remove recover failed persistentId=%{public}d", persistentId);
-        sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), true);
+        ExceptionInfo exceptionInfo;
+        exceptionInfo.needRemoveSession = true;
+        sceneSession->NotifySessionExceptionInner(SetAbilitySessionInfo(sceneSession), exceptionInfo);
     }
     failRecoveredPersistentIdSet_.clear();
 }

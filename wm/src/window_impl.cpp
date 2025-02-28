@@ -1497,6 +1497,12 @@ WMError WindowImpl::BindDialogTarget(sptr<IRemoteObject> targetToken)
     return ret;
 }
 
+void WindowImpl::ResetInputWindow(uint32_t winId)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "Id:%{public}u", winId);
+    InputTransferStation::GetInstance().AddInputWindow(this);
+}
+
 void WindowImpl::DestroyDialogWindow()
 {
     // remove from appDialogWindowMap_
@@ -3853,6 +3859,12 @@ void WindowImpl::NotifyForegroundInteractiveStatus(bool interactive)
     }
 }
 
+void WindowImpl::NotifyMMIServiceOnline(uint32_t winId)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "Id:%{public}u", winId);
+    ResetInputWindow(winId);
+}
+
 void WindowImpl::TransformSurfaceNode(const Transform& trans)
 {
     if (surfaceNode_ == nullptr) {
@@ -4442,6 +4454,11 @@ void WindowImpl::RegisterWindowInspectorCallback()
         }
     };
     WindowInspector::GetInstance().RegisterGetWMSWindowListCallback(GetWindowId(), std::move(getWMSWindowListCallback));
+}
+
+uint32_t WindowImpl::GetApiVersion() const
+{
+    return SysCapUtil::GetApiCompatibleVersion();
 }
 } // namespace Rosen
 } // namespace OHOS

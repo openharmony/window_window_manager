@@ -3185,7 +3185,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get highlight property of window.
      *
@@ -3229,34 +3229,13 @@ public:
      * @param want the want to store param.
      */
     virtual void GetExtensionConfig(AAFwk::WantParams& want) const {}
- 
+
     /**
      * @brief Update custom extension param.
      *
      * @param want the want to update param.
      */
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
-
-    /**
-     * @brief Register window scene attach or detach framenode listener.
-     *
-     * @param listener IWindowAttachStateChangeListner.
-     * @return WM_OK means register success, others means register failed.
-     */
-    virtual WMError RegisterWindowAttachStateChangeListener(const sptr<IWindowAttachStateChangeListner>& listener)
-    {
-        return WMError::WM_OK;
-    }
-
-    /**
-     * @brief Unregister window scene attach or detach framenode listener.
-     *
-     * @return WM_OK means unregister success
-     */
-    virtual WMError UnregisterWindowAttachStateChangeListener()
-    {
-        return WMError::WM_OK;
-    }
 
     /**
      * @brief Query whether the waterfall mode is enabled or not.
@@ -3286,6 +3265,34 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Register window scene attach or detach framenode listener.
+     *
+     * @param listener IWindowAttachStateChangeListner.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowAttachStateChangeListener(const sptr<IWindowAttachStateChangeListner>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window scene attach or detach framenode listener.
+     *
+     * @return WM_OK means unregister success
+     */
+    virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Get the api version.
+     *
+     * @return Api version
+     */
+    virtual uint32_t GetApiVersion() const { return 0; }
 };
 }
 }

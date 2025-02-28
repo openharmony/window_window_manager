@@ -327,5 +327,38 @@ void WindowInfoReporter::ReportWindowException(int32_t detectionType, int32_t pi
         WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
     }
 }
+
+int32_t WindowInfoReporter::ReportUIExtensionException(int32_t exceptionType, int32_t pid, int32_t persistentId,
+    const std::string& uiextInfo)
+{
+    std::string eventName = "UIEXTENSION_EXCEPTION";
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "EXCEPTION_TYPE", exceptionType,
+        "PID", pid,
+        "PERSISTENTID", persistentId,
+        "MSG", uiextInfo);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
+    return ret;
 }
+
+int32_t WindowInfoReporter::ReportEventDispatchException(int32_t exceptionType, int32_t pid,
+    const std::string& flushInfo)
+{
+    std::string eventName = "EVENT_DISPATCH_EXCEPTION";
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "EXCEPTION_TYPE", exceptionType,
+        "PID", pid,
+        "MSG", flushInfo);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Write HiSysEvent error, ret: %{public}d", ret);
+    }
+    return ret;
+}
+} // namespace Rosen
 }
