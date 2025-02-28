@@ -855,6 +855,15 @@ WMError WindowAdapter::RequestFocusStatus(int32_t persistentId, bool isFocused)
     return static_cast<WMError>(wmsProxy->RequestFocusStatus(persistentId, isFocused));
 }
 
+WMError WindowAdapter::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+    bool byForeground, FocusChangeReason reason)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->RequestFocusOnPreviousWindow(persistentId, isFocused, byForeground, reason);
+}
+
 void WindowAdapter::AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
     const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal)
 {
@@ -1092,15 +1101,6 @@ WMError WindowAdapter::NotifyWatchFocusActiveChange(bool isActive)
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->NotifyWatchFocusActiveChange(isActive);
-}
-
-WMError WindowAdapter::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
-    bool byForeground, FocusChangeReason reason)
-{
-    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
-    auto wmsProxy = GetWindowManagerServiceProxy();
-    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->RequestFocusOnPreviousWindow(persistentId, isFocused, byForeground, reason);
 }
 } // namespace Rosen
 } // namespace OHOS

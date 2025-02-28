@@ -5561,6 +5561,31 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+    bool byForeground, FocusChangeReason reason)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, only support SA calling.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    auto sceneSession = GetSceneSession(persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto task = [this, persistentId, isFocused, byForeground, reason]() {
+        if (isFocused) {
+            RequestSessionFocus(persistentId, byForeground, reason);
+        } else {
+            RequestSessionUnfocus(persistentId, reason);
+        }
+    };
+    taskScheduler_->PostAsyncTask(task, "RequestFocusOnPreviousWindow" + std::to_string(persistentId));
+    focusChangeReason_ = reason;
+    return WMError::WM_OK;
+}
+
 void SceneSessionManager::RequestAllAppSessionUnfocus()
 {
     auto task = [this]() {
@@ -5615,31 +5640,6 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
     }
     ShiftFocus(displayId, sceneSession, false, reason);
     return WSError::WS_OK;
-}
-
-WMError SceneSessionManager::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
-    bool byForeground, FocusChangeReason reason)
-{
-    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
-    if (!SessionPermission::IsSACalling()) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "permission denied, only support SA calling.");
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
-    auto sceneSession = GetSceneSession(persistentId);
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "sceneSession is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    auto task = [this, persistentId, isFocused, byForeground, reason]() {
-        if (isFocused) {
-            RequestSessionFocus(persistentId, byForeground, reason);
-        } else {
-            RequestSessionUnfocus(persistentId, reason);
-        }
-    };
-    taskScheduler_->PostAsyncTask(task, "RequestFocusOnPreviousWindow" + std::to_string(persistentId));
-    focusChangeReason_ = reason;
-    return WMError::WM_OK;
 }
 
 WSError SceneSessionManager::RequestSessionFocus(int32_t persistentId, bool byForeground, FocusChangeReason reason)

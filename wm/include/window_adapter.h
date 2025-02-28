@@ -114,6 +114,8 @@ public:
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
+    virtual WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false);
     virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
@@ -163,9 +165,6 @@ public:
     virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
-
-    virtual WMError RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::DEFAULT);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
