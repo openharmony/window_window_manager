@@ -1191,7 +1191,9 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
                 task->Reject(env, JsErrUtils::CreateJsError(env, ret, "ShiftAppWindowFocus failed"));
             }
         };
-    napi_send_event(env, asyncTask, napi_eprio_high);
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        TLOGI(WmsLogTag::WMS_FOCUS, "window state is abnormal!");
+    }
     return result;
 }
 
