@@ -4701,8 +4701,8 @@ napi_value JsWindow::OnRaiseAboveTarget(napi_env env, napi_callback_info info)
     }
     int32_t subWindowId = -1;
     GetSubWindowId(env, argv[0], errCode, subWindowId);
-    if (errCode != WmErrorCode::WM_OK) {
-        return NapiThrowError(env, errCode);
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
