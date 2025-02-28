@@ -153,7 +153,7 @@ public:
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
         bool IsOrientationNeedChanged) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
-    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
+    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
@@ -341,7 +341,8 @@ public:
     ~ScreenSessionGroup();
 
     bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint);
-    bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint, sptr<ScreenSession> defaultScreenSession);
+    bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
+        sptr<ScreenSession> defaultScreenSession, bool isExtend = false);
     bool AddChildren(std::vector<sptr<ScreenSession>>& smsScreens, std::vector<Point>& startPoints);
     bool RemoveChild(sptr<ScreenSession>& smsScreen);
     bool HasChild(ScreenId childScreen) const;
