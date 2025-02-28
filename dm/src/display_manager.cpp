@@ -59,6 +59,7 @@ public:
     bool IsFoldable();
     bool IsCaptured();
     FoldStatus GetFoldStatus();
+    std::string GetDisplayCapability();
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
     void SetFoldDisplayMode(const FoldDisplayMode);
@@ -1049,6 +1050,16 @@ FoldStatus DisplayManager::GetFoldStatus()
 FoldStatus DisplayManager::Impl::GetFoldStatus()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetFoldStatus();
+}
+
+std::string DisplayManager::GetDisplayCapability()
+{
+    return pImpl_->GetDisplayCapability();
+}
+
+std::string DisplayManager::Impl::GetDisplayCapability()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability();
 }
 
 FoldDisplayMode DisplayManager::GetFoldDisplayMode()

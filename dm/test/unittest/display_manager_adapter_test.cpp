@@ -859,6 +859,17 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenSkipProtectedWindow, Function | Sma
     auto result = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
     ASSERT_EQ(result, DMError::DM_OK);
 }
+
+/**
+ * @tc.name: GetDisplayCapability
+ * @tc.desc: GetDisplayCapability test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, Function | SmallTest | Level2)
+{
+    std::string info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability();
+    ASSERT_NE(info, "");
+}
 }
 }
 }
