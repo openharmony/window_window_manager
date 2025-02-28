@@ -1232,21 +1232,23 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = argc <= 0 || GetType(env, argv[0]) != napi_function ? nullptr : argv[0];
     napi_value result = nullptr;
-    NapiAsyncTask::CompleteCallback complete =
-        [](napi_env env, NapiAsyncTask& task, int32_t status) {
-            std::vector<sptr<WindowVisibilityInfo>> infos;
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
-                TLOGND(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
-            } else {
-                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
-            }
-        };
-    NapiAsyncTask::Schedule("JsWindowManager::OnGetVisibleWindowInfo",
-                            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [env, task = napiAsyncTask]() {
+        std::vector<sptr<WindowVisibilityInfo>> infos;
+        WmErrorCode ret =
+            WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
+            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
+        } else {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnGetVisibleWindowInfo failed"));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 

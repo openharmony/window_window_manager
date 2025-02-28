@@ -3244,27 +3244,27 @@ napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_in
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, err](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, err]() mutable {
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, err));
+            task->Reject(env, JsErrUtils::CreateJsError(env, err));
             return;
         }
         WMError ret = weakWindow->SetLandscapeMultiWindow(true);
         if (ret == WMError::WM_OK) {
-            task.Resolve(env, NapiGetUndefined(env));
+            task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-                                           "JsWindow::OnEnableLandscapeMultiWindow failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+                "JsWindow::OnEnableLandscapeMultiWindow failed"));
         }
     };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnEnableLandscapeMultiWindow",
-                            env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(
+            env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
@@ -3276,26 +3276,27 @@ napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_i
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
-    wptr<Window> weakToken(windowToken_);
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, err](napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, err]() mutable {
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, err));
+            task->Reject(env, JsErrUtils::CreateJsError(env, err));
             return;
         }
         WMError ret = weakWindow->SetLandscapeMultiWindow(false);
         if (ret == WMError::WM_OK) {
-            task.Resolve(env, NapiGetUndefined(env));
+            task->Resolve(env, NapiGetUndefined(env));
         } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-                                           "JsWindow::OnDisableLandscapeMultiWindow failed"));
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+                "JsWindow::OnDisableLandscapeMultiWindow failed"));
         }
     };
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnDisableLandscapeMultiWindow",
-                            env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(
+            env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
