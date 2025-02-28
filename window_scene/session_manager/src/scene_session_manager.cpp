@@ -2569,7 +2569,9 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
 
         if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
             TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
-            sceneSession->UpdateInteractiveInner(false);
+            if (!sceneSession->UpdateInteractiveInner(false)) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
+            }
         }
         sceneSession->SetActive(false);
 
@@ -2824,7 +2826,9 @@ WSError SceneSessionManager::RequestSceneSessionDestruction(const sptr<SceneSess
         });
         if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
             TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
-            sceneSession->UpdateInteractiveInner(false);
+            if (!sceneSession->UpdateInteractiveInner(false)) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
+            }
         }
         sceneSession->DisconnectTask(false, isSaveSnapshot);
         if (!GetSceneSession(persistentId)) {
@@ -4074,7 +4078,9 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
         bool isFromUser = false;
         if (sceneSession->GetSessionProperty()->GetApiVersion() >= LIFECYCLE_ISOLATE_VERSION) {
             TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause", persistentId);
-            sceneSession->UpdateInteractiveInner(false);
+            if (!sceneSession->UpdateInteractiveInner(false)) {
+                TLOGI(WmsLogTag::WMS_LIFE, "Notify scene session id:%{public}d pause is duplicative", persistentId);
+            }
         }
         int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(
             abilitySessionInfo, isFromUser, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));

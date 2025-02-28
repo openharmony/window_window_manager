@@ -1063,8 +1063,6 @@ public:
 
     /**
      * @brief resume window
-     *
-     * @return WMError
      */
     virtual void Resume() {}
 

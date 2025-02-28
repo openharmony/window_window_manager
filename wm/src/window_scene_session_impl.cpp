@@ -128,6 +128,7 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_16 = 16;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -1236,7 +1237,7 @@ void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
 {
     TLOGI(WmsLogTag::WMS_MAIN, "api version %{public}u, IsPcMode %{public}d, isColdStart %{public}d",
         GetTargetAPIVersion(), IsPcOrPadFreeMultiWindowMode(), isColdStart_);
-    if (GetTargetAPIVersion() >= API_VERSION_16 && IsPcOrPadFreeMultiWindowMode() && !isColdStart_) {
+    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION && IsPcOrPadFreeMultiWindowMode() && !isColdStart_) {
         isDidForeground_ = true;
         NotifyForegroundInteractiveStatus(true);
     }
@@ -1244,7 +1245,7 @@ void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
 
 void WindowSceneSessionImpl::Resume()
 {
-    if (GetTargetAPIVersion() >= API_VERSION_16) {
+    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
         isDidForeground_ = true;
         isColdStart_ = false;
         TLOGI(WmsLogTag::WMS_LIFE, "in");
