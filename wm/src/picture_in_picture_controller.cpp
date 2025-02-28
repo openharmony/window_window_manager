@@ -456,7 +456,11 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         TLOGE(WmsLogTag::WMS_PIP, "invalid size");
         return;
     }
-    if (mainWindow_ != nullptr && pipOption_ != nullptr) {
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption_ is nullptr");
+        return;
+    }
+    if (mainWindow_ != nullptr) {
         TLOGI(WmsLogTag::WMS_PIP, "mainWindow width:%{public}u height:%{public}u", width, height);
         uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
         uint32_t contentWidth = static_cast<uint32_t>(width);
