@@ -191,17 +191,24 @@ typedef struct OH_AnyAPI {
     OH_Int32 version;
 } OH_AnyAPI;
 
+typedef struct OH_DISPLAY_Rect OH_DISPLAY_Rect;
+typedef struct Opt_Rect Opt_Rect;
 typedef struct Array_Rect Array_Rect;
 typedef struct Opt_Array_Rect Opt_Array_Rect;
-typedef struct OH_DISPLAY_Display OH_DISPLAY_Display;
+typedef struct OH_DISPLAY_WaterfallDisplayAreaRects OH_DISPLAY_WaterfallDisplayAreaRects;
+typedef struct Opt_WaterfallDisplayAreaRects Opt_WaterfallDisplayAreaRects;
+typedef struct DISPLAY_DisplayPeer DISPLAY_DisplayPeer;
+typedef struct DISPLAY_DisplayPeer* OH_DISPLAY_Display;
 typedef struct Opt_Display Opt_Display;
 typedef struct OH_DISPLAY_FoldCreaseRegion OH_DISPLAY_FoldCreaseRegion;
 typedef struct Opt_FoldCreaseRegion Opt_FoldCreaseRegion;
+typedef struct OH_DISPLAY_CutoutInfo OH_DISPLAY_CutoutInfo;
+typedef struct Opt_CutoutInfo Opt_CutoutInfo;
+typedef struct Array_Display Array_Display;
+typedef struct Opt_Array_Display Opt_Array_Display;
 typedef struct DISPLAY_GlobalScope_ohos_displayPeer DISPLAY_GlobalScope_ohos_displayPeer;
 typedef struct DISPLAY_GlobalScope_ohos_displayPeer* OH_DISPLAY_GlobalScope_ohos_display;
 typedef struct Opt_GlobalScope_ohos_display Opt_GlobalScope_ohos_display;
-typedef struct OH_DISPLAY_Rect OH_DISPLAY_Rect;
-typedef struct Opt_Rect Opt_Rect;
 typedef enum OH_DISPLAY_display_FoldStatus {
     OH_DISPLAY_DISPLAY_FOLD_STATUS_FOLD_STATUS_UNKNOWN = 0,
     OH_DISPLAY_DISPLAY_FOLD_STATUS_FOLD_STATUS_EXPANDED = 1,
@@ -227,6 +234,20 @@ typedef struct Opt_Int32 {
     OH_Tag tag;
     OH_Int32 value;
 } Opt_Int32;
+typedef struct Opt_Number {
+    OH_Tag tag;
+    OH_Number value;
+} Opt_Number;
+typedef struct OH_DISPLAY_Rect {
+    OH_Number left;
+    OH_Number top;
+    OH_Number width;
+    OH_Number height;
+} OH_DISPLAY_Rect;
+typedef struct Opt_Rect {
+    OH_Tag tag;
+    OH_DISPLAY_Rect value;
+} Opt_Rect;
 typedef struct Array_Rect {
     OH_DISPLAY_Rect* array;
     OH_Int32 length;
@@ -235,13 +256,16 @@ typedef struct Opt_Array_Rect {
     OH_Tag tag;
     Array_Rect value;
 } Opt_Array_Rect;
-typedef struct Opt_Number {
+typedef struct OH_DISPLAY_WaterfallDisplayAreaRects {
+    OH_DISPLAY_Rect left;
+    OH_DISPLAY_Rect right;
+    OH_DISPLAY_Rect top;
+    OH_DISPLAY_Rect bottom;
+} OH_DISPLAY_WaterfallDisplayAreaRects;
+typedef struct Opt_WaterfallDisplayAreaRects {
     OH_Tag tag;
-    OH_Number value;
-} Opt_Number;
-typedef struct OH_DISPLAY_Display {
-    void *handle;
-} OH_DISPLAY_Display;
+    OH_DISPLAY_WaterfallDisplayAreaRects value;
+} Opt_WaterfallDisplayAreaRects;
 typedef struct Opt_Display {
     OH_Tag tag;
     OH_DISPLAY_Display value;
@@ -254,6 +278,26 @@ typedef struct Opt_FoldCreaseRegion {
     OH_Tag tag;
     OH_DISPLAY_FoldCreaseRegion value;
 } Opt_FoldCreaseRegion;
+typedef struct OH_DISPLAY_CutoutInfo {
+    Array_Rect boundingRects;
+    OH_DISPLAY_WaterfallDisplayAreaRects waterfallDisplayAreaRects;
+} OH_DISPLAY_CutoutInfo;
+typedef struct Opt_CutoutInfo {
+    OH_Tag tag;
+    OH_DISPLAY_CutoutInfo value;
+} Opt_CutoutInfo;
+typedef struct Array_Display {
+    OH_DISPLAY_Display* array;
+    OH_Int32 length;
+} Array_Display;
+typedef struct Opt_Array_Display {
+    OH_Tag tag;
+    Array_Display value;
+} Opt_Array_Display;
+typedef struct Opt_String {
+    OH_Tag tag;
+    OH_String value;
+} Opt_String;
 typedef struct Opt_Boolean {
     OH_Tag tag;
     OH_Boolean value;
@@ -262,28 +306,28 @@ typedef struct Opt_GlobalScope_ohos_display {
     OH_Tag tag;
     OH_DISPLAY_GlobalScope_ohos_display value;
 } Opt_GlobalScope_ohos_display;
-typedef struct OH_DISPLAY_Rect {
-    OH_Number left;
-    OH_Number top;
-    OH_Number width;
-    OH_Number height;
-} OH_DISPLAY_Rect;
-typedef struct Opt_Rect {
-    OH_Tag tag;
-    OH_DISPLAY_Rect value;
-} Opt_Rect;
+struct OH_DISPLAY_DisplayHandleOpaque;
+typedef struct OH_DISPLAY_DisplayHandleOpaque* OH_DISPLAY_DisplayHandle;
+typedef struct OH_DISPLAY_DisplayModifier {
+    OH_DISPLAY_DisplayHandle (*construct)();
+    void (*destruct)(OH_DISPLAY_DisplayHandle thiz);
+    OH_DISPLAY_CutoutInfo (*getCutoutInfo)(OH_NativePointer thisPtr);
+} OH_DISPLAY_DisplayModifier;
 struct OH_DISPLAY_GlobalScope_ohos_displayHandleOpaque;
 typedef struct OH_DISPLAY_GlobalScope_ohos_displayHandleOpaque* OH_DISPLAY_GlobalScope_ohos_displayHandle;
 typedef struct OH_DISPLAY_Modifier {
     OH_NativePointer (*getFoldDisplayMode)();
-    OH_DISPLAY_Display (*getDefaultDisplaySync)();
+    OH_NativePointer (*getDefaultDisplaySync)();
     OH_NativePointer (*getFoldStatus)();
     OH_DISPLAY_FoldCreaseRegion (*getCurrentFoldCreaseRegion)();
-    OH_DISPLAY_Display (*getDisplayByIdSync)(const OH_Number* displayId);
+    OH_NativePointer (*getDisplayByIdSync)(const OH_Number* displayId);
     OH_Boolean (*isFoldable)();
+    OH_Number (*on)(const OH_String* type);
+    OH_NativePointer (*getAllDisplays)();
 } OH_DISPLAY_Modifier;
 typedef struct OH_DISPLAY_API {
     OH_Int32 version;
+    const OH_DISPLAY_DisplayModifier* (*Display)();
     const OH_DISPLAY_Modifier* (*DISPLAY)();
 } OH_DISPLAY_API;
 
