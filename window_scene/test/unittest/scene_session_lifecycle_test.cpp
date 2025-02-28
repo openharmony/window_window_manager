@@ -989,7 +989,6 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTe
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
     OHOS::Rosen::Session session(info);
     session.isTerminating_ = true;
     ExceptionInfo exceptionInfo;
