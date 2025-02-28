@@ -364,41 +364,41 @@ WMError SceneSessionManagerProxy::RequestFocusOnPreviousWindow(int32_t persisten
     bool byForeground, FocusChangeReason reason)
 {
     TLOGI(WmsLogTag::WMS_FOCUS,
-        "SceneSessionManagerProxy::RequestFocusOnPreviousWindow id: %{public}d, focusState:\
-        %{public}d, byForeground: %{public}d", persistentId, isFocused, byForeground);
+        "id: %{public}d, focusState: %{public}d, byForeground: %{public}d, reason: %{public}d",
+        persistentId, isFocused, byForeground, static_cast<int32_t>(reason));
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE("WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "WriteInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(persistentId)) {
-        WLOGFE("Write persistentId failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write persistentId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(isFocused)) {
-        WLOGFE("Write isFocused failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write isFocused failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(byForeground)) {
-        WLOGFE("Write byForeground failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write byForeground failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32(static_cast<int32_t>(reason))) {
-        WLOGFE("Write reason failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write reason failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFE("remote is null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_ON_PREVIOUS_WINDOW),
+            SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_ON_PREVIOUS_WINDOW),
         data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
