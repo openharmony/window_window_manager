@@ -36,3 +36,9 @@ export function getDisplayByIdSync(displayId: number): display.Display {
 export function isFoldable(): boolean {
     return GlobalScope_ohos_display.isFoldable()
 }
+export function on(type: string): number {
+    return GlobalScope_ohos_display.on(type)
+}
+export function getAllDisplays(): Array<display.Display> {
+    return GlobalScope_ohos_display.getAllDisplays()
+}

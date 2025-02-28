@@ -21,10 +21,15 @@ export class DISPLAYNativeModule {
         loadNativeModuleLibrary("DISPLAYNativeModule")
     }
     native static _AllocateNativeBuffer(len: int32, data: KUint8ArrayPtr, init: KUint8ArrayPtr): NativeBuffer 
+    native static _Display_ctor(): KPointer 
+    native static _Display_getFinalizer(): KPointer 
+    native static _Display_getCutoutInfo(ptr: KPointer): KInteropReturnBuffer 
     native static _GlobalScope_ohos_display_getFoldDisplayMode(): KPointer 
-    native static _GlobalScope_ohos_display_getDefaultDisplaySync(): KInteropReturnBuffer 
+    native static _GlobalScope_ohos_display_getDefaultDisplaySync(): KPointer 
     native static _GlobalScope_ohos_display_getFoldStatus(): KPointer 
     native static _GlobalScope_ohos_display_getCurrentFoldCreaseRegion(): KInteropReturnBuffer 
-    native static _GlobalScope_ohos_display_getDisplayByIdSync(displayId: number): KInteropReturnBuffer 
+    native static _GlobalScope_ohos_display_getDisplayByIdSync(displayId: number): KPointer 
     native static _GlobalScope_ohos_display_isFoldable(): boolean 
+    native static _GlobalScope_ohos_display_on(type: KStringPtr): number 
+    native static _GlobalScope_ohos_display_getAllDisplays(): KPointer 
 }
