@@ -16,7 +16,7 @@
 #include "window_manager_lru.h"
 
 namespace OHOS::Rosen {
-bool LRUCache::Visit(int32_t key)
+bool LRUCache::LocalVisit(int32_t key)
 {
     if (auto it = cacheMap_.find(key); it != cacheMap_.end()) {
         cacheList_.splice(cacheList_.begin(), cacheList_, it->second);
@@ -25,10 +25,17 @@ bool LRUCache::Visit(int32_t key)
     return false;
 }
 
+bool LRUCache::Visit(int32_t key)
+{
+    std::lock_guard lock(LRUCacheMutex_);
+    return LocalVisit(key);
+}
+
 int32_t LRUCache::Put(int32_t key)
 {
     int32_t lastRemovedKey = UNDEFINED_REMOVED_KEY;
-    if (!Visit(key)) {
+    std::lock_guard lock(LRUCacheMutex_);
+    if (!LocalVisit(key)) {
         if (cacheList_.size() >= capacity_) {
             lastRemovedKey = cacheList_.back();
             cacheList_.pop_back();
@@ -38,5 +45,14 @@ int32_t LRUCache::Put(int32_t key)
         cacheMap_[key] = cacheList_.begin();
     }
     return lastRemovedKey;
+}
+
+void LRUCache::Remove(int32_t key)
+{
+    std::lock_guard lock(LRUCacheMutex_);
+    if (auto it = cacheMap_.find(key); it != cacheMap_.end()) {
+        cacheList_.erase(it->second);
+        cacheMap_.erase(it);
+    }
 }
 } // namespace OHOS::Rosen
