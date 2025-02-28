@@ -456,6 +456,17 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         TLOGE(WmsLogTag::WMS_PIP, "invalid size");
         return;
     }
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption_ is nullptr");
+        return;
+    }
+    if (mainWindow_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "mainWindow width:%{public}u height:%{public}u", width, height);
+        uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
+        uint32_t contentWidth = static_cast<uint32_t>(width);
+        uint32_t contentHeight = static_cast<uint32_t>(height);
+        mainWindow_->SetAutoStartPiP(isAutoStartEnabled_, priority, contentWidth, contentHeight);
+    }
     pipOption_->SetContentSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     if (curState_ != PiPWindowState::STATE_STARTED) {
         TLOGD(WmsLogTag::WMS_PIP, "UpdateContentSize is disabled when state: %{public}u", curState_);
@@ -479,7 +490,7 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }
     }
-    TLOGI(WmsLogTag::WMS_PIP, "UpdateContentSize window: %{public}u width:%{public}u height:%{public}u",
+    TLOGI(WmsLogTag::WMS_PIP, "window: %{public}u width:%{public}u height:%{public}u",
         window_->GetWindowId(), width, height);
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
