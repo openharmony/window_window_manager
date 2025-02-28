@@ -1526,19 +1526,19 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
     return ret;
 }
 
-WMError WindowManager::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+WMError WindowManager::RequestFocus(int32_t persistentId, bool isFocused,
     bool byForeground, int32_t reason)
 {
     int32_t reasonStart = static_cast<int32_t>(FocusChangeReason::DEFAULT);
     int32_t reasonEnd = static_cast<int32_t>(FocusChangeReason::MAX);
     if (reason < reasonStart || reason > reasonEnd) {
-        TLOGE(WmsLogTag::DEFAULT, "could not find focus reason");
+        TLOGE(WmsLogTag::WMS_FOCUS, "could not find focus reason");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    WMError ret = SingletonContainer::Get<WindowAdapter>().RequestFocusOnPreviousWindow(persistentId,
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RequestFocusStatusBySA(persistentId,
         isFocused, byForeground, static_cast<FocusChangeReason>(reason));
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "failed");
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed");
     }
     return ret;
 }

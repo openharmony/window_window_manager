@@ -5561,7 +5561,7 @@ WMError SceneSessionManager::RequestFocusStatusBySCB(int32_t persistentId, bool 
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::RequestFocusOnPreviousWindow(int32_t persistentId, bool isFocused,
+WMError SceneSessionManager::RequestFocusStatusBySA(int32_t persistentId, bool isFocused,
     bool byForeground, FocusChangeReason reason)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, reason: %{public}d", persistentId, reason);
@@ -5582,7 +5582,6 @@ WMError SceneSessionManager::RequestFocusOnPreviousWindow(int32_t persistentId, 
         }
     };
     taskScheduler_->PostAsyncTask(task, "RequestFocusOnPreviousWindow" + std::to_string(persistentId));
-    focusChangeReason_ = reason;
     return WMError::WM_OK;
 }
 
