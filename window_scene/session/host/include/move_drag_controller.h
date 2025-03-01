@@ -92,7 +92,10 @@ public:
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
+    void UpdateSubWindowGravityWhenFollow(const sptr<MoveDragController>& followedController,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
+    AreaType GetAreaType() const { return type_; };
 
     /*
      * Cross Display Move Drag
