@@ -1169,11 +1169,11 @@ HWTEST_F(SceneSessionManagerTest5, InitSnapshotCache, Function | SmallTest | Lev
     ASSERT_NE(ssm_, nullptr);
     ssm_->InitSnapshotCache();
     if (ssm_->systemConfig_.windowUIType_ == WindowUIType::PC_WINDOW) {
-        ASSERT_EQ(ssm_->snapCapacity_, 24);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 50);
     } else if (ssm_->systemConfig_.windowUIType_ == WindowUIType::PAD_WINDOW) {
-        ASSERT_EQ(ssm_->snapCapacity_, 8);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 8);
     } else {
-        ASSERT_EQ(ssm_->snapCapacity_, 3);
+        ASSERT_EQ(ssm_->snapshotCapacity_, 3);
     }
 }
 
@@ -1196,7 +1196,7 @@ HWTEST_F(SceneSessionManagerTest5, PutSnapshotToCache, Function | SmallTest | Le
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
     ssm_->sceneSessionMap_.insert({30, sceneSession});
-    for (int32_t id = 30; id <= 30 + ssm_->snapCapacity_; ++id) {
+    for (int32_t id = 30; id <= 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
     ASSERT_EQ(sceneSession->snapshot_, nullptr);
@@ -1221,11 +1221,11 @@ HWTEST_F(SceneSessionManagerTest5, VisitSnapshotFromCache, Function | SmallTest 
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ssm_->sceneSessionMap_.insert({30, sceneSession});
     sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
-    for (int32_t id = 30; id < 30 + ssm_->snapCapacity_; ++id) {
+    for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
     ssm_->VisitSnapshotFromCache(30);
-    ssm_->PutSnapshotToCache(30 + ssm_->snapCapacity_);
+    ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
     ASSERT_NE(sceneSession->snapshot_, nullptr);
 }
 
@@ -1248,11 +1248,11 @@ HWTEST_F(SceneSessionManagerTest5, RemoveSnapshotFromCache, Function | SmallTest
     sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     ssm_->sceneSessionMap_.insert({30, sceneSession});
     sceneSession->snapshot_ = std::make_shared<Media::PixelMap>();
-    for (int32_t id = 30; id < 30 + ssm_->snapCapacity_; ++id) {
+    for (int32_t id = 30; id < 30 + ssm_->snapshotCapacity_; ++id) {
         ssm_->PutSnapshotToCache(id);
     }
     ssm_->RemoveSnapshotFromCache(31);
-    ssm_->PutSnapshotToCache(30 + ssm_->snapCapacity_);
+    ssm_->PutSnapshotToCache(30 + ssm_->snapshotCapacity_);
     ASSERT_NE(sceneSession->snapshot_, nullptr);
 }
 
