@@ -32,6 +32,7 @@ constexpr int MAX_WINDOWINFO_NUM = 15;
 constexpr int DEFALUT_DISPLAYID = 0;
 constexpr int EMPTY_FOCUS_WINDOW_ID = -1;
 constexpr int INVALID_PERSISTENT_ID = 0;
+constexpr int DEFAULT_SCREEN_POS = 0;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -206,6 +207,12 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
         transform = transform.Scale(scale, screenProperty.GetPivotX() * screenWidth,
             screenProperty.GetPivotY() * screenHeight).Inverse();
         std::vector<float> transformData(transform.GetData(), transform.GetData() + TRANSFORM_DATA_LEN);
+        int32_t screenOneHandX = DEFAULT_SCREEN_POS;
+        int32_t screenOneHandY = DEFAULT_SCREEN_POS;
+        if (screenId == ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
+            screenOneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX;
+            screenOneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY;
+        }
         MMI::DisplayInfo displayInfo = {
             .id = screenId,
             .x = screenProperty.GetOffsetX(),
@@ -219,8 +226,8 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .displayDirection = ConvertDegreeToMMIRotation(screenProperty.GetScreenComponentRotation()),
             .displayMode = static_cast<MMI::DisplayMode>(displayMode),
             .transform = transformData,
-            .oneHandX = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posX,
-            .oneHandY = SceneSessionManager::GetInstance().GetNormalSingleHandTransform().posY
+            .oneHandX = screenOneHandX,
+            .oneHandY = screenOneHandY
         };
         displayInfos.emplace_back(displayInfo);
     }
