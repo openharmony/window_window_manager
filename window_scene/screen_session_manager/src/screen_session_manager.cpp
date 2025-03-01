@@ -1507,7 +1507,7 @@ void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> screenSession
         TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
-    if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && !screenSession->isInternal_) {
+    if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
         screenSession->SetXYPosition(0, 0);
     } else {
         ScreenId internalScreenId = GetInternalScreenId();
@@ -1525,16 +1525,6 @@ void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> screenSession
         secondaryX = secondaryX + ~internalX + 1;
         secondaryY = secondaryY + ~internalY + 1;
         screenSession->SetXYPosition(secondaryX, secondaryY);
-    }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->GetScreenProperty().GetIsFakeInUse()) {
-        sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
-        if (fakeScreenSession == nullptr) {
-            TLOGI(WmsLogTag::DMS, "fakeScreenSession is nullptr");
-            return;
-        }
-        int32_t secondaryX = fakeScreenSession->GetScreenProperty().GetStartX();
-        fakeScreenSession->SetXYPosition(secondaryX, DISPLAY_B_HEIGHT);
-        fakeScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     }
 }
 
@@ -7623,6 +7613,8 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
         fakeScreenHeight = screenHeight - (static_cast<uint32_t>(creaseRect.posY_) + creaseRect.height_);
     }
     fakeScreenSession->UpdatePropertyByResolution(screenWidth, fakeScreenHeight);
+    fakeScreenSession->SetXYPosition(0, DISPLAY_B_HEIGHT);
+    fakeScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     screenSession->UpdatePropertyByFakeBounds(screenWidth, fakeScreenHeight);
     screenSession->SetFakeScreenSession(fakeScreenSession);
     screenSession->SetIsFakeInUse(true);
