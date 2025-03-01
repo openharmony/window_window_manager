@@ -209,6 +209,8 @@ public:
         const std::vector<sptr<ScreenInfo>>& screenInfos, ScreenGroupChangeEvent groupEvent);
     void OnScreenshot(sptr<ScreenshotInfo> info);
     bool IsMultiScreenCollaboration();
+    bool HasCastEngineOrPhyMirror(const std::vector<ScreenId>& screenIdsToExclude);
+    void HandlePhysicalMirrorConnect(sptr<ScreenSession> screenSession, bool phyMirrorEnable);
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
@@ -616,6 +618,7 @@ private:
     std::atomic<bool> isPhyScreenConnected_ = false;
     int32_t cameraStatus_ = {0};
     int32_t cameraPosition_ = {0};
+    PowerStateChangeReason powerStateChangeReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
 
     // Fold Screen
     std::map<ScreenId, ScreenProperty> phyScreenPropMap_;
