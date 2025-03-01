@@ -748,6 +748,9 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
     SingleHandData singleHandData;
     auto sessionProperty = sceneSession->GetSessionProperty();
     auto displayId = sessionProperty->GetDisplayId();
+    if (displayId != ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
+        return singleHandData;
+    }
     const std::map<ScreenId, ScreenProperty>& screensProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     auto screenPropertyIter = screensProperties.find(displayId);
