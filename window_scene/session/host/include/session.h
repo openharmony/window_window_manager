@@ -244,15 +244,14 @@ public:
         if (task) {
             saveSnapshotCallback_ = std::move(task);
         }
-    };
-
+    }
     void SetRemoveSnapshotCallback(Task&& task)
     {
         if (task) {
             removeSnapshotCallback_ = std::move(task);
         }
-    };
-    
+    }
+
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -939,7 +938,7 @@ private:
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
-    
+
     /*
      * Window Layout
      */
@@ -957,6 +956,8 @@ private:
      */
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
+    std::mutex saveSnapshotCallbackMutex_;
+    std::mutex removeSnapshotCallbackMutex_;
 };
 } // namespace OHOS::Rosen
 
