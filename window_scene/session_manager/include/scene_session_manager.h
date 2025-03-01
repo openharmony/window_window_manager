@@ -735,7 +735,6 @@ private:
     void NotifyAllAccessibilityInfo();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
-    void RegisterConstrainedModalUIExtInfoListener();
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
 
     /**
@@ -748,6 +747,7 @@ private:
     /**
      * PiP Window
      */
+    void RegisterConstrainedModalUIExtInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
 
     /*
