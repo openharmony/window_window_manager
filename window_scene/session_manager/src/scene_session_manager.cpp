@@ -88,7 +88,6 @@ const std::string SCENE_BOARD_APP_IDENTIFIER = "";
 const std::string SCENE_SESSION_MANAGER_THREAD = "OS_SceneSessionManager";
 const std::string WINDOW_INFO_REPORT_THREAD = "OS_WindowInfoReportThread";
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
-
 constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
@@ -4571,10 +4570,10 @@ bool SceneSessionManager::IsSessionVisible(const sptr<SceneSession>& session)
     }
 
     if (session->IsVisible() || state == SessionState::STATE_ACTIVE || state == SessionState::STATE_FOREGROUND) {
-        TLOGD(WmsLogTag::WMS_SUB, "Window is at foreground, id: %{public}d", session->GetPersistentId());
+        TLOGD(WmsLogTag::WMS_LIFE, "Window is at foreground, id: %{public}d", session->GetPersistentId());
         return true;
     }
-    TLOGD(WmsLogTag::WMS_SUB, "Window is at background, id: %{public}d", session->GetPersistentId());
+    TLOGD(WmsLogTag::WMS_LIFE, "Window is at background, id: %{public}d", session->GetPersistentId());
     return false;
 }
 
