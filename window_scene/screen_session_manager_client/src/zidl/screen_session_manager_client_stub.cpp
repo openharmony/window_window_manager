@@ -156,12 +156,20 @@ int ScreenSessionManagerClientStub::HandleSwitchUserCallback(MessageParcel& data
 int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParcel& data, MessageParcel& reply)
 {
     WLOGD("HandleOnScreenConnectionChanged");
-    auto screenId = static_cast<ScreenId>(data.ReadUint64());
-    auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
     auto rsId = static_cast<ScreenId>(data.ReadUint64());
     auto name = data.ReadString();
     bool isExtend = data.ReadBool();
-    OnScreenConnectionChanged(screenId, screenEvent, rsId, name, isExtend);
+    auto innerName = data.ReadString();
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
+    SessionOption option = {
+        .rsId_ = rsId,
+        .name_ = name,
+        .isExtend_ = isExtend,
+        .innerName_ = innerName,
+        .screenId_ = screenId,
+    };
+    OnScreenConnectionChanged(option, screenEvent);
     return ERR_NONE;
 }
 
