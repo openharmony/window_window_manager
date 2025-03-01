@@ -2136,27 +2136,27 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
     wptr<Window> weakToken(windowToken_);
     const char* const where = __func__;
     NapiAsyncTask::CompleteCallback complete =
-    [weakToken, winType, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
-        auto weakWindow = weakToken.promote();
-        if (weakWindow == nullptr) {
-            WLOGFE("window is nullptr");
-            task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
-            return;
-        }
-        if (errCode != WMError::WM_OK) {
-            task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
-            WLOGFE("get invalid param");
-            return;
-        }
-        WMError ret = weakWindow->SetWindowType(winType);
-        if (ret == WMError::WM_OK) {
-            task.Resolve(env, NapiGetUndefined(env));
-        } else {
-            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set type failed"));
-        }
-        WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
-            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
-    };
+        [weakToken, winType, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                WLOGFE("window is nullptr");
+                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+                return;
+            }
+            if (errCode != WMError::WM_OK) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
+                WLOGFE("get invalid param");
+                return;
+            }
+            WMError ret = weakWindow->SetWindowType(winType);
+            if (ret == WMError::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set type failed"));
+            }
+            WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
+                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
+        };
     napi_value lastParam = (argc <= 1) ? nullptr :
         (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
@@ -4589,7 +4589,7 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), shouldHide, env,
-                      task = napiAsyncTask, where = __func__] {
+        task = napiAsyncTask, where = __func__] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is nullptr", where);

@@ -140,7 +140,7 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
         napi_value argv[] = {propertyValue};
         thisListener->CallJsMethod(SYSTEM_BAR_TINT_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -314,7 +314,7 @@ void JsWindowListener::OnScreenshot()
         }
         thisListener->CallJsMethod(SCREENSHOT_EVENT_CB.c_str(), nullptr, 0);
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -368,7 +368,7 @@ void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
         napi_value argv[] = {CreateJsValue(eng, enable)};
         thisListener->CallJsMethod(GESTURE_NAVIGATION_ENABLED_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -384,7 +384,7 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
         napi_value argv[] = {CreateJsValue(eng, showWaterMark)};
         thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
@@ -485,7 +485,7 @@ void JsWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
         napi_value argv[] = { CreateJsValue(eng, isVisible) };
         thisListener->CallJsMethod(WINDOW_VISIBILITY_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
-    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_immediate)) {
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
     }
 }
