@@ -2958,18 +2958,6 @@ bool WindowSessionImpl::InitWaterfallMode()
     return true;
 }
 
-template<typename T>
-EnableIfSame<T, IWaterfallModeChangeListener,
-    std::vector<sptr<IWaterfallModeChangeListener>>> WindowSessionImpl::GetListeners()
-{
-    std::vector<sptr<IWaterfallModeChangeListener>> listeners;
-    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
-    for (auto& listener : waterfallModeChangeListeners_[GetPersistentId()]) {
-        listeners.push_back(listener);
-    }
-    return listeners;
-}
-
 WMError WindowSessionImpl::RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u", GetWindowId());
@@ -2984,6 +2972,16 @@ WMError WindowSessionImpl::UnregisterWaterfallModeChangeListener(const sptr<IWat
     return UnregisterListener(waterfallModeChangeListeners_[GetPersistentId()], listener);
 }
 
+std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallModeChangeListeners()
+{
+    std::vector<sptr<IWaterfallModeChangeListener>> listeners;
+    std::lock_guard<std::mutex> lockListener(waterfallModeChangeListenerMutex_);
+    for (auto& listener : waterfallModeChangeListeners_[GetPersistentId()]) {
+        listeners.push_back(listener);
+    }
+    return listeners;
+}
+
 void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, waterfall: %{public}d", GetWindowId(), isWaterfallMode);
@@ -2994,7 +2992,7 @@ void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE),
             want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
-    auto waterfallModeChangeListeners = GetListeners<IWaterfallModeChangeListener>();
+    auto waterfallModeChangeListeners = GetWaterfallModeChangeListeners();
     for (const auto& listener : waterfallModeChangeListeners) {
         if (listener != nullptr) {
             listener->OnWaterfallModeChange(isWaterfallMode);

@@ -663,8 +663,7 @@ private:
      */
     static std::mutex waterfallModeChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> waterfallModeChangeListeners_;
-    template<typename T>
-    EnableIfSame<T, IWaterfallModeChangeListener, std::vector<sptr<IWaterfallModeChangeListener>>> GetListeners();
+    std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
     bool InitWaterfallMode();
 
     static std::recursive_mutex lifeCycleListenerMutex_;
