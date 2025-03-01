@@ -958,7 +958,7 @@ private:
      */
     Task saveSnapshotCallback_ = []() {};
     Task removeSnapshotCallback_ = []() {};
-    std::atomic<bool> needNotifyAttachState_ = { true };
+    std::atomic<bool> needNotifyAttachState_ = { false };
 };
 } // namespace OHOS::Rosen
 

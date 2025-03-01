@@ -4699,8 +4699,10 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 {
     std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     windowAttachStateChangeListener_ = nullptr;
-    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
-    return WMError::WM_OK;
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener unregistered", GetPersistentId());
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return static_cast<WMError>(hostSession->NotifyWindowAttachStateListenerRegistered(false));
 }
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
