@@ -83,7 +83,7 @@ public:
     static napi_value SetWindowFocusable(napi_env env, napi_callback_info info);
     static napi_value SetTopmost(napi_env env, napi_callback_info info);
     static napi_value SetWindowTopmost(napi_env env, napi_callback_info info);
-    static napi_value SetWindowDelayRaise(napi_env env, napi_callback_info info);
+    static napi_value SetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info);
     static napi_value SetKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     static napi_value SetWakeUpScreen(napi_env env, napi_callback_info info);
@@ -290,7 +290,7 @@ private:
     napi_value OnSetWindowFocusable(napi_env env, napi_callback_info info);
     napi_value OnSetTopmost(napi_env env, napi_callback_info info);
     napi_value OnSetWindowTopmost(napi_env env, napi_callback_info info);
-    napi_value OnSetWindowDelayRaise(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info);
     napi_value OnSetKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWakeUpScreen(napi_env env, napi_callback_info info);

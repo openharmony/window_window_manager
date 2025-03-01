@@ -537,11 +537,11 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetWindowDelayRaise(napi_env env, napi_callback_info info)
+napi_value JsWindow::SetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnSetWindowDelayRaise(env, info) : nullptr;
+    return (me != nullptr) ? me->OnSetWindowDelayRaiseOnDrag(env, info) : nullptr;
 }
 
 napi_value JsWindow::SetKeepScreenOn(napi_env env, napi_callback_info info)
@@ -4035,7 +4035,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
     return result;
 }
 
-napi_value JsWindow::OnSetWindowDelayRaise(napi_env env, napi_callback_info info)
+napi_value JsWindow::OnSetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "windowToken is nullptr");
@@ -7814,7 +7814,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setWindowBrightness", moduleName, JsWindow::SetWindowBrightness);
     BindNativeFunction(env, object, "setTopmost", moduleName, JsWindow::SetTopmost);
     BindNativeFunction(env, object, "setWindowTopmost", moduleName, JsWindow::SetWindowTopmost);
-    BindNativeFunction(env, object, "setWindowDelayRaise", moduleName, JsWindow::SetWindowDelayRaise);
+    BindNativeFunction(env, object, "setWindowDelayRaiseOnDrag", moduleName, JsWindow::SetWindowDelayRaiseOnDrag);
     BindNativeFunction(env, object, "setDimBehind", moduleName, JsWindow::SetDimBehind);
     BindNativeFunction(env, object, "setFocusable", moduleName, JsWindow::SetFocusable);
     BindNativeFunction(env, object, "setWindowFocusable", moduleName, JsWindow::SetWindowFocusable);
