@@ -2133,37 +2133,35 @@ napi_value JsWindow::OnSetWindowType(napi_env env, napi_callback_info info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
 
+    wptr<Window> weakToken(windowToken_);
     const char* const where = __func__;
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), winType, errCode, where, env, task = napiAsyncTask] {
+    NapiAsyncTask::CompleteCallback complete =
+    [weakToken, winType, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             WLOGFE("window is nullptr");
-            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
             return;
         }
         if (errCode != WMError::WM_OK) {
-            task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
+            task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
             WLOGFE("get invalid param");
             return;
         }
         WMError ret = weakWindow->SetWindowType(winType);
         if (ret == WMError::WM_OK) {
-            task->Resolve(env, NapiGetUndefined(env));
+            task.Resolve(env, NapiGetUndefined(env));
         } else {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set type failed"));
+            task.Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set type failed"));
         }
         WLOGI("%{public}s end, window [%{public}u, %{public}s] ret=%{public}d",
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(), ret);
     };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
-    }
+    napi_value lastParam = (argc <= 1) ? nullptr :
+        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindow::OnSetWindowType",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -3839,20 +3837,17 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
 
 napi_value JsWindow::OnSetDimBehind(napi_env env, napi_callback_info info)
 {
+    NapiAsyncTask::CompleteCallback complete =
+        [](napi_env env, NapiAsyncTask& task, int32_t status) {
+            task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
+        };
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [env, task = napiAsyncTask] {
-        task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
-    };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
-    }
+    NapiAsyncTask::Schedule("JsWindow::OnSetDimBehind",
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
@@ -5100,33 +5095,35 @@ napi_value JsWindow::OnGetColorSpace(napi_env env, napi_callback_info info)
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    wptr<Window> weakToken(windowToken_);
     const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [weakToken, errCode, where](napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
-                task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
-                return;
-            }
-            if (errCode != WMError::WM_OK) {
-                task.Reject(env, JsErrUtils::CreateJsError(env, errCode));
-                WLOGFE("window is nullptr or get invalid param");
-                return;
-            }
-            ColorSpace colorSpace = weakWindow->GetColorSpace();
-            task.Resolve(env, CreateJsValue(env, static_cast<uint32_t>(colorSpace)));
-            WLOGI("%{public}s end, window [%{public}u, %{public}s] colorSpace=%{public}u",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
-                static_cast<uint32_t>(colorSpace));
-        };
 
     napi_value lastParam = (argc == 0) ? nullptr :
         (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindow::OnGetColorSpace",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), errCode, where, env, task = napiAsyncTask] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            WLOGFE("window is nullptr");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            return;
+        }
+        if (errCode != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
+            WLOGFE("window is nullptr or get invalid param");
+            return;
+        }
+        ColorSpace colorSpace = weakWindow->GetColorSpace();
+        task->Resolve(env, CreateJsValue(env, static_cast<uint32_t>(colorSpace)));
+        WLOGI("%{public}s end, window [%{public}u, %{public}s] colorSpace=%{public}u",
+            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+            static_cast<uint32_t>(colorSpace));
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+    }
     return result;
 }
 
