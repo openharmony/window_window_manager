@@ -36,8 +36,6 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
-constexpr size_t SCREEN_CONNECT = 0;
-constexpr size_t SCREEN_DISCONNECT = 1;
 
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "JsScreenSessionManager" };
@@ -291,8 +289,8 @@ void JsScreenSessionManager::OnScreenConnected(const sptr<ScreenSession>& screen
             TLOGNE(WmsLogTag::DMS, "Object is null!");
             return;
         }
-        int type = SCREEN_CONNECT;
-        napi_set_named_property(env, objValue, "screenSession", JsScreenSession::Create(env, screenSession, type));
+        napi_set_named_property(env, objValue, "screenSession",
+            JsScreenSession::Create(env, screenSession, ScreenEvent::CONNECTED));
         napi_set_named_property(env, objValue, "screenConnectChangeType", CreateJsValue(env, 0));
 
         napi_value argv[] = { objValue };
@@ -335,8 +333,8 @@ void JsScreenSessionManager::OnScreenDisconnected(const sptr<ScreenSession>& scr
             TLOGNE(WmsLogTag::DMS, "Object is null!");
             return;
         }
-        int type = SCREEN_DISCONNECT;
-        napi_set_named_property(env, objValue, "screenSession", JsScreenSession::Create(env, screenSession, type));
+        napi_set_named_property(env, objValue, "screenSession",
+            JsScreenSession::Create(env, screenSession, ScreenEvent::DISCONNECTED));
         napi_set_named_property(env, objValue, "screenConnectChangeType", CreateJsValue(env, 1));
 
         napi_value argv[] = { objValue };
@@ -669,8 +667,8 @@ napi_value JsScreenSessionManager::OnUpdateSuperFoldAvailableArea(napi_env env, 
 napi_value JsScreenSessionManager::OnExtraDestroyScreen(napi_env env, const napi_callback_info info)
 {
     WLOGFD("[NAPI]OnExtraDestroyScreen");
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: params num
         TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
@@ -685,7 +683,7 @@ napi_value JsScreenSessionManager::OnExtraDestroyScreen(napi_env env, const napi
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    ScreenSessionManagerClient::GetInstance().ExtraDestroyScreen(screenId);
+    ScreenSessionManagerClient::GetInstance().ExtraDestroyScreen(static_cast<ScreenId>(screenId));
     return NapiGetUndefined(env);
 }
 
