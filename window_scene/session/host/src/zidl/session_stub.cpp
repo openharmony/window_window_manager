@@ -1552,8 +1552,11 @@ int SessionStub::HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& 
         return ERR_INVALID_DATA;
     }
     TLOGD(WmsLogTag::WMS_PATTERN, "registered: %{public}d", registered);
-    WSError errcode = NotifyWindowAttachStateListenerRegistered(registered);
-    reply.WriteInt32(static_cast<int32_t>(errcode));
+    WSError errCode = NotifyWindowAttachStateListenerRegistered(registered);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
