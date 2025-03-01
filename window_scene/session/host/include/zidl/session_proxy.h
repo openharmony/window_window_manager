@@ -150,6 +150,11 @@ public:
      */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
+    /**
+     * Window layout
+     */
+    WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

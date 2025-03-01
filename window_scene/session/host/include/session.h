@@ -97,6 +97,7 @@ using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
+using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 
 class ILifecycleListener {
 public:
@@ -609,6 +610,8 @@ public:
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
     void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
+    virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
+    virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
 
     /*
      * Screen Lock

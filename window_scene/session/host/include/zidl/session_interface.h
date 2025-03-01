@@ -386,6 +386,7 @@ public:
      * @param registered true means register success.
      */
     virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
+    virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 
