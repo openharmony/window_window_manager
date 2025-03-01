@@ -408,7 +408,7 @@ void SceneSessionManager::Init()
     UpdateDarkColorModeToRS();
     CreateRootSceneSession();
     std::shared_ptr<FoldScreenStatusChangeCallback> callback = std::make_shared<FoldScreenStatusChangeCallback>(
-        std::bind(&SceneSessionManager::UpdateSessionCrossAxisState, this, std::placeholders::_1,
+        std::bind(&SceneSessionManager::NotifyFoldScreenStatusChange, this, std::placeholders::_1,
         std::placeholders::_2, std::placeholders::_3));
     PcFoldScreenManager::GetInstance().RegisterFoldScreenStatusChangeCallback(0, callback);
 
@@ -474,16 +474,23 @@ void SceneSessionManager::InitScheduleUtils()
 #endif
 }
 
-void SceneSessionManager::UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status,
+void SceneSessionManager::NotifyFoldScreenStatusChange(DisplayId displayId, SuperFoldStatus status,
     SuperFoldStatus prevStatus)
 {
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+    std::vector<sptr<SceneSession>> sessions;
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+            sessions.push_back(sceneSession);
+        }
+    }
+    for (const auto& sceneSession : sessions) {
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr");
             continue;
         }
         sceneSession->UpdateCrossAxis();
+        sceneSession->UpdateScreenFoldStatus(status);
     }
 }
 
@@ -1338,6 +1345,11 @@ void SceneSessionManager::CreateRootSceneSession()
     };
     specificCb->onNotifyAvoidAreaChange_ = [this](const sptr<AvoidArea>& avoidArea, AvoidAreaType type) {
         onNotifyAvoidAreaChangeForRootFunc_(avoidArea, type);
+    };
+    specificCb->onNotifyScreenFoldStatusChange_ = [this](SuperFoldStatus foldStatus) {
+        if (onNotifyScreenFoldStatusChangeFunc_) {
+            onNotifyScreenFoldStatusChangeFunc_(foldStatus);
+        }
     };
     rootSceneSession_ = sptr<RootSceneSession>::MakeSptr(specificCb);
     rootSceneSession_->isKeyboardPanelEnabled_ = isKeyboardPanelEnabled_;
@@ -13206,5 +13218,15 @@ void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId
         return;
     }
     sceneSession->RemoveLifeCycleTask(taskType);
+}
+
+SuperFoldStatus SceneSessionManager::GetPcScreenFoldStatus()
+{
+    return PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+}
+
+void SceneSessionManager::RegisterNotifyScreenFoldStatusChangeFunc(NotifyScreenFoldStatusChangeFunc&& func)
+{
+    onNotifyScreenFoldStatusChangeFunc_ = std::move(func);
 }
 } // namespace OHOS::Rosen

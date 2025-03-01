@@ -659,6 +659,10 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
         [](const std::string& id) {
         RootScene::staticRootScene_->SetTopWindowBoundaryByID(id);
     });
+    SceneSessionManager::GetInstance().RegisterNotifyScreenFoldStatusChangeFunc(
+        [](SuperFoldStatus foldStatus) {
+        RootScene::staticRootScene_->NotifyPcScreenFoldStatusChange(foldStatus);
+    });
 }
 
 void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
@@ -677,6 +681,9 @@ void JsSceneSessionManager::RegisterSSManagerCallbacksOnRootScene()
     });
     rootScene_->RegisterNotifyWatchFocusActiveChangeCallback([](bool isFocusActive) {
         SceneSessionManager::GetInstance().NotifyWatchFocusActiveChange(isFocusActive);
+    });
+    rootScene_->RegisterGetPcScreenFoldStatusCallback([]() {
+        return SceneSessionManager::GetInstance().GetPcScreenFoldStatus();
     });
     if (!Session::IsScbCoreEnabled()) {
         rootScene_->SetFrameLayoutFinishCallback([] {

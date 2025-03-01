@@ -6870,4 +6870,14 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
         maskColorValue_->Set(Rosen::RSColor::FromArgbInt(snapshotMaskColor_));
     }
 }
+
+void SceneSession::UpdateScreenFoldStatus(SuperFoldStatus foldStatus)
+{
+    if (specificCallback_ == nullptr || specificCallback_->onNotifyScreenFoldStatusChange_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is nullptr");
+        return;
+    }
+    specificCallback_->onNotifyScreenFoldStatusChange_(foldStatus);
+    return;
+}
 } // namespace OHOS::Rosen
