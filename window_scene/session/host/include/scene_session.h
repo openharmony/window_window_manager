@@ -660,7 +660,7 @@ public:
     /*
      * Window Pattern
     */
-    WSError NotifyWindowAttachStateListenerRegistered(bool registered) override;
+    void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
