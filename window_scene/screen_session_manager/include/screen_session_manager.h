@@ -396,6 +396,8 @@ public:
     bool GetIsRealScreen(ScreenId screenId) override;
     void UnregisterSettingWireCastObserver(ScreenId screenId);
     void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
+    SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
+    SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
 
 protected:
     ScreenSessionManager();
@@ -658,7 +660,8 @@ private:
     void SetMultiScreenOuterMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     void RecoveryMultiScreenNormalMode(sptr<ScreenSession>& innerSession, sptr<ScreenSession>& outerSession);
     bool IsFakeDisplayExist();
-    DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds);
+    DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds,
+        bool isCallingByThirdParty);
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
