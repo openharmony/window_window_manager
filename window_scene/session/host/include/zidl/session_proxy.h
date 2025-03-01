@@ -148,7 +148,7 @@ public:
     /*
      * Window Pattern
      */
-    WSError NotifyWindowAttachStateListenerRegistered(bool registered) override;
+    void NotifyWindowAttachStateListenerRegistered(bool registered) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

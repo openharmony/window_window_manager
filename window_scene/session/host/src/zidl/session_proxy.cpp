@@ -2509,30 +2509,28 @@ WSError SessionProxy::OnContainerModalEvent(const std::string& eventName, const 
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::NotifyWindowAttachStateListenerRegistered(bool registered)
+void SessionProxy::NotifyWindowAttachStateListenerRegistered(bool registered)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return;
     }
     if (!data.WriteBool(registered)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write enable failed");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
+        return;
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
     }
-    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

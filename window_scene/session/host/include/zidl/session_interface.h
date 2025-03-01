@@ -384,9 +384,8 @@ public:
      * @brief Notify the window attach state listener is registered or not.
      *
      * @param registered true means register success.
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError NotifyWindowAttachStateListenerRegistered(bool registered) { return WSError::WS_OK; }
+    virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
 };
 } // namespace OHOS::Rosen
 

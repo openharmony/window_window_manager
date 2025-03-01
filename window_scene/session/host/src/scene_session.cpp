@@ -6865,9 +6865,8 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
     }
 }
 
-WSError SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
+void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
 {
     SetNeedNotifyAttachState(registered);
-    return WSError::WS_OK;
 }
 } // namespace OHOS::Rosen

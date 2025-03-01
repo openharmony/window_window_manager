@@ -4692,7 +4692,8 @@ WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return static_cast<WMError>(hostSession->NotifyWindowAttachStateListenerRegistered(true));
+    hostSession->NotifyWindowAttachStateListenerRegistered(true);
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
@@ -4702,7 +4703,8 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener unregistered", GetPersistentId());
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return static_cast<WMError>(hostSession->NotifyWindowAttachStateListenerRegistered(false));
+    hostSession->NotifyWindowAttachStateListenerRegistered(false);
+    return WMError::WM_OK;
 }
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
