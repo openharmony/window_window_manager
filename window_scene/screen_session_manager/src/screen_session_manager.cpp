@@ -35,6 +35,7 @@
 #include <xcollie/watchdog.h>
 #include <hisysevent.h>
 #include <power_mgr_client.h>
+#include <screen_power_utils.h>
 
 #include "dm_common.h"
 #include "fold_screen_state_internel.h"
@@ -1081,11 +1082,7 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     ScreenId screenId, ScreenEvent screenEvent)
 {
     bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
-    if (phyMirrorEnable) {
-        PhyMirrorConnectWakeupScreen();
-        NotifyCastWhenScreenConnectChange(true);
-        RegisterSettingWireCastObserver(screenSession);
-    }
+    HandlePhysicalMirrorConnect(screenSession, phyMirrorEnable);
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr) {
         if ((screenId == 0 || (screenId == SCREEN_ID_MAIN && isCoordinationFlag_ == true)) &&
@@ -1138,6 +1135,13 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         NotifyDisplayDestroy(screenSession->GetScreenId());
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
+        if (!g_isPcDevice) {
+            std::vector<ScreenId> screenIdsToExclude = { screenId };
+            if (!HasCastEngineOrPhyMirror(screenIdsToExclude)) {
+                ScreenPowerUtils::DisablePowerForceTimingOut();
+                ScreenPowerUtils::LightAndLockScreen("light and lock screen");
+            }
+        }
     }
     HandlePCScreenDisconnect(screenSession);
 #ifdef WM_MULTI_SCREEN_ENABLE
@@ -1169,6 +1173,19 @@ void ScreenSessionManager::HandleScreenDisconnectEvent(sptr<ScreenSession> scree
         UnregisterSettingWireCastObserver(screenId);
     }
     TLOGW(WmsLogTag::DMS, "disconnect success. ScreenId: %{public}" PRIu64 "", screenId);
+}
+
+void ScreenSessionManager::HandlePhysicalMirrorConnect(sptr<ScreenSession> screenSession, bool phyMirrorEnable)
+{
+    if (phyMirrorEnable) {
+        PhyMirrorConnectWakeupScreen();
+        NotifyCastWhenScreenConnectChange(true);
+        RegisterSettingWireCastObserver(screenSession);
+        if (!g_isPcDevice) {
+            ScreenPowerUtils::EnablePowerForceTimingOut();
+            DisablePowerOffRenderControl(0);
+        }
+    }
 }
 
 void ScreenSessionManager::HandlePCScreenDisconnect(sptr<ScreenSession> screenSession)
@@ -2412,7 +2429,8 @@ bool ScreenSessionManager::WakeUpEnd()
 
 bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 {
-    // 该接口当前只有Power调用
+    // only power use
+    powerStateChangeReason_ = reason;
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[UL_POWER]ssm:SuspendBegin(%u)", reason);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
@@ -3054,6 +3072,24 @@ void ScreenSessionManager::TriggerDisplayModeUpdate(FoldDisplayMode targetDispla
 void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status)
 {
     auto rsSetScreenPowerStatusTask = [=] {
+        bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
+        if (phyMirrorEnable && !g_isPcDevice) {
+            auto screenSession = GetScreenSession(screenId);
+            if (screenSession == nullptr) {
+                return;
+            }
+            auto sourceMode = screenSession->GetSourceMode();
+            if (sourceMode == ScreenSourceMode::SCREEN_MIRROR &&
+                status != ScreenPowerStatus::POWER_STATUS_ON &&
+                powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
+                return;
+            }
+            if (sourceMode == ScreenSourceMode::SCREEN_UNIQUE &&
+                status != ScreenPowerStatus::POWER_STATUS_ON &&
+                powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY) {
+                return;
+            }
+        }
         rsInterface_.SetScreenPowerStatus(screenId, status);
     };
     screenPowerTaskScheduler_->PostVoidSyncTask(rsSetScreenPowerStatusTask, "rsInterface_.SetScreenPowerStatus task");
@@ -6377,6 +6413,33 @@ bool ScreenSessionManager::IsCaptured()
 bool ScreenSessionManager::IsMultiScreenCollaboration()
 {
     return isMultiScreenCollaboration_;
+}
+
+bool ScreenSessionManager::HasCastEngineOrPhyMirror(const std::vector<ScreenId>& screenIdsToExclude)
+{
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto sessionItem : screenSessionMap_) {
+        auto screenId = sessionItem.first;
+        auto screenSession = sessionItem.second;
+        if (screenSession == nullptr) {
+            TLOGI(WmsLogTag::DMS, "screenSession is null");
+            continue;
+        }
+        if (std::find(screenIdsToExclude.begin(), screenIdsToExclude.end(), screenId) != screenIdsToExclude.end()) {
+            continue;
+        }
+        auto screenType = screenSession->GetScreenProperty().GetScreenType();
+        if (screenType == ScreenType::VIRTUAL
+            && screenSession->GetName() == "CastEngine") {
+            return true;
+        }
+
+        if (IsDefaultMirrorMode(screenId) && screenType == ScreenType::REAL &&
+            screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+            return true;
+        }
+    }
+    return false;
 }
 
 FoldStatus ScreenSessionManager::GetFoldStatus()

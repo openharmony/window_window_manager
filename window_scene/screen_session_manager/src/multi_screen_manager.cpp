@@ -14,6 +14,8 @@
  */
 
 #include "multi_screen_manager.h"
+#include "screen_power_utils.h"
+#include "screen_scene_config.h"
 #ifdef RES_SCHED_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -240,6 +242,10 @@ DMError MultiScreenManager::UniqueSwitch(const std::vector<ScreenId>& screenIds,
                 ScreenSessionManager::GetInstance().UnregisterSettingWireCastObserver(screenId);
             }
         }
+        if (!ScreenSessionManager::GetInstance().HasCastEngineOrPhyMirror(physicalScreenIds) &&
+            switchStatus == DMError::DM_OK && ScreenSceneConfig::GetExternalScreenDefaultMode() != "none") {
+            ScreenPowerUtils::DisablePowerForceTimingOut();
+        }
         TLOGW(WmsLogTag::DMS, "physical screen switch to unique result: %{public}d", switchStatus);
         AddUniqueScreenDisplayId(displayIds, physicalScreenIds, switchStatus);
     }
@@ -274,6 +280,11 @@ DMError MultiScreenManager::MirrorSwitch(const ScreenId mainScreenId, const std:
             for (auto screenId : physicalScreenIds) {
                 auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
                 ScreenSessionManager::GetInstance().RegisterSettingWireCastObserver(screenSession);
+            }
+            // switchStatus is DM_OK and device is not PC
+            if (ScreenSceneConfig::GetExternalScreenDefaultMode() != "none") {
+                ScreenPowerUtils::EnablePowerForceTimingOut();
+                ScreenSessionManager::GetInstance().DisablePowerOffRenderControl(0);
             }
         }
         TLOGW(WmsLogTag::DMS, "physical screen switch to mirror result: %{public}d", switchStatus);
