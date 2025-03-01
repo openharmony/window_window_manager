@@ -436,5 +436,74 @@ void RootScene::SetTopWindowBoundaryByID(const std::string& stringId)
     TLOGI(WmsLogTag::WMS_LAYOUT, "end");
     uiContent_->SetTopWindowBoundaryByID(stringId);
 }
+
+void RootScene::RegisterGetPcScreenFoldStatusCallback(GetPcScreenFoldStatusCallback&& callback)
+{
+    getPcScreenFoldStatusCallback_ = std::move(callback);
+}
+
+void RootScene::NotifyPcScreenFoldStatusChange(SuperFoldStatus foldStatus)
+{
+    NotifyWaterfallModeChange(foldStatus == SuperFoldStatus::HALF_FOLDED);
+}
+
+bool RootScene::IsWaterfallModeEnabled()
+{
+    if (getPcScreenFoldStatusCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, root winId: %{public}u", GetWindowId());
+        return false;
+    }
+    auto foldStatus = getPcScreenFoldStatusCallback_();
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "foldStatus: %{public}u, root winId: %{public}u",
+        static_cast<uint32_t>(foldStatus), GetWindowId());
+    return foldStatus == SuperFoldStatus::HALF_FOLDED;
+}
+
+WMError RootScene::RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::mutex> lock(waterfallModeMutex_);
+    if (waterfallModeChangeListeners_.find(listener) == waterfallModeChangeListeners_.end()) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root register success");
+        waterfallModeChangeListeners_.insert(listener);
+    }
+    return WMError::WM_OK;
+}
+
+WMError RootScene::UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root listener is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root unregister success");
+    std::lock_guard<std::mutex> lock(waterfallModeMutex_);
+    waterfallModeChangeListeners_.erase(listener);
+    return WMError::WM_OK;
+}
+
+std::vector<sptr<IWaterfallModeChangeListener>> RootScene::GetWaterfallModeChangeListeners()
+{
+    std::vector<sptr<IWaterfallModeChangeListener>> listeners;
+    std::lock_guard<std::mutex> lock(waterfallModeMutex_);
+    for (auto& listener : waterfallModeChangeListeners_) {
+        listeners.push_back(listener);
+    }
+    return listeners;
+}
+
+void RootScene::NotifyWaterfallModeChange(bool isWaterfallMode)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root winId: %{public}u, waterfall: %{public}d", GetWindowId(), isWaterfallMode);
+    auto waterfallModeChangeListeners = GetWaterfallModeChangeListeners();
+    for (const auto& listener : waterfallModeChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWaterfallModeChange(isWaterfallMode);
+        }
+    }
+}
 } // namespace Rosen
 } // namespace OHOS

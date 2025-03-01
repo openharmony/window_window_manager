@@ -140,6 +140,7 @@ using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using NotifyRootSceneOccupiedAreaChangeFunc = std::function<void(const sptr<OccupiedAreaChangeInfo>& info)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
 using SetTopWindowBoundaryByIDFunc = std::function<void(const std::string& id)>;
+using NotifyScreenFoldStatusChangeFunc = std::function<void(SuperFoldStatus foldStatus)>;
 
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
@@ -516,6 +517,7 @@ public:
      * Fold Screen Status Change Report
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
+    void RegisterNotifyScreenFoldStatusChangeFunc(NotifyScreenFoldStatusChangeFunc&& func);
 
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
@@ -1172,10 +1174,12 @@ private:
     /*
      * Fold Screen Status Change Report
      */
+    NotifyScreenFoldStatusChangeFunc onNotifyScreenFoldStatusChangeFunc_ = nullptr;
     WMError MakeScreenFoldData(const std::vector<std::string>& screenFoldInfo, ScreenFoldData& screenFoldData);
     WMError CheckAndReportScreenFoldStatus(ScreenFoldData& data);
     WMError ReportScreenFoldStatus(const ScreenFoldData& data);
     void RecoveryVisibilityPidCount(int32_t pid) REQUIRES(SCENE_GUARD);
+    void NotifyFoldScreenStatusChange(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
 
     /*
      * Window Watermark
@@ -1194,7 +1198,6 @@ private:
     void InitVsyncStation();
     void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
-    void UpdateSessionCrossAxisState(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
 
     /*
      * Window Snapshot

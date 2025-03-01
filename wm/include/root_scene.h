@@ -41,6 +41,7 @@ using GetSessionAvoidAreaByTypeCallback = std::function<AvoidArea(AvoidAreaType)
 using UpdateRootSceneRectCallback = std::function<void(const Rect& rect)>;
 using UpdateRootSceneAvoidAreaCallback = std::function<void()>;
 using NotifyWatchFocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
+using GetPcScreenFoldStatusCallback = std::function<SuperFoldStatus()>;
 
 class RootScene : public Window {
 public:
@@ -125,6 +126,15 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId);
 
     /*
+     * PC Fold Screen
+     */
+    bool IsWaterfallModeEnabled() override;
+    WMError RegisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
+    WMError UnregisterWaterfallModeChangeListener(const sptr<IWaterfallModeChangeListener>& listener) override;
+    void RegisterGetPcScreenFoldStatusCallback(GetPcScreenFoldStatusCallback&& callback);
+    void NotifyPcScreenFoldStatusChange(SuperFoldStatus foldStatus);
+
+    /*
      * Window Property
      */
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
@@ -158,6 +168,16 @@ private:
     UpdateRootSceneAvoidAreaCallback updateRootSceneAvoidAreaCallback_ = nullptr;
     mutable std::mutex mutex_;
     std::unordered_set<sptr<IAvoidAreaChangedListener>, SptrHash<IAvoidAreaChangedListener>> avoidAreaChangeListeners_;
+
+    /*
+     * PC Fold Screen
+     */
+    GetPcScreenFoldStatusCallback getPcScreenFoldStatusCallback_ = nullptr;
+    mutable std::mutex waterfallModeMutex_;
+    std::unordered_set<sptr<IWaterfallModeChangeListener>, SptrHash<IWaterfallModeChangeListener>>
+        waterfallModeChangeListeners_;
+    std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
+    void NotifyWaterfallModeChange(bool isWaterfallMode);
 
     /*
      * Keyboard Window

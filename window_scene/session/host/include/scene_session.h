@@ -115,6 +115,7 @@ using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
+using NotifyPcScreenFoldStatusChangeFunc = std::function<void(SuperFoldStatus foldStatus)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -148,6 +149,7 @@ public:
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
+        NotifyPcScreenFoldStatusChangeFunc onNotifyScreenFoldStatusChange_;
     };
 
     // func for change window scene pattern property
@@ -634,6 +636,7 @@ public:
     void SetSupportEnterWaterfallMode(bool isSupportEnter);
     void ThrowSlipDirectly(const WSRectF& velocity);
     WSError GetWaterfallMode(bool& isWaterfallMode) override;
+    void UpdateScreenFoldStatus(SuperFoldStatus foldStatus);
 
     /*
      * Keyboard
