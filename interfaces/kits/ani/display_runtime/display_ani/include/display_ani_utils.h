@@ -36,6 +36,14 @@ static ani_object convertDisplay(sptr<Display> display, ani_env* env);
 
 static ani_fixedarray_ref convertDisplays(std::vector<sptr<Display>> displays, ani_env* env);
 
+static void GetStdString(ani_env *env, ani_string str, std::string &result);
+
+static ani_status NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...);
+
+static ani_status NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object);
+
+static ani_object CreateAniUndefined(ani_env* env);
+
 };
 }
 }

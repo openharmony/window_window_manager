@@ -44,7 +44,9 @@ ohos_shared_library("displayani_kit") {
   }
   sources = [
     "display_ani/src/display_ani_utils.cpp",
-    "display_ani/src/display_ani.cpp"
+    "display_ani/src/display_ani.cpp",
+    "display_ani/src/display_ani_listener.cpp",
+    "display_ani/src/display_ani_register_manager.cpp"
   ]
 
   configs = [
