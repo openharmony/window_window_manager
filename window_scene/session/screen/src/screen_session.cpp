@@ -55,7 +55,7 @@ ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
     : name_(config.name), screenId_(config.screenId), rsId_(config.rsId), defaultScreenId_(config.defaultScreenId),
-    property_(config.property), displayNode_(config.displayNode)
+    property_(config.property), displayNode_(config.displayNode), innerName_(config.innerName)
 {
     TLOGI(WmsLogTag::DMS,
         "[DPNODE]Create Session, reason: %{public}d, screenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
@@ -512,6 +512,16 @@ std::string ScreenSession::GetName()
 void ScreenSession::SetName(std::string name)
 {
     name_ = name;
+}
+
+std::string ScreenSession::GetInnerName()
+{
+    return innerName_;
+}
+
+void ScreenSession::SetInnerName(std::string innerName)
+{
+    innerName_ = innerName;
 }
 
 void ScreenSession::SetMirrorScreenType(MirrorScreenType mirrorType)
