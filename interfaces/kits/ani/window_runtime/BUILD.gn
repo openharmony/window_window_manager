@@ -84,6 +84,7 @@ ohos_shared_library("windowstageani_kit") {
     "image_framework:image_native",
     "ipc:ipc_napi",
     "ipc:ipc_single",
+    "napi:ace_napi",
     #"static_core:ani",
   ]
 
