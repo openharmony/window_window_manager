@@ -4683,13 +4683,16 @@ WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
 WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
     const sptr<IWindowAttachStateChangeListner>& listener)
 {
-    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d, listener is null", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     windowAttachStateChangeListener_ = listener;
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->NotifyWindowAttachStateListenerRegistered(true);
     return WMError::WM_OK;
 }
 
@@ -4697,13 +4700,17 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 {
     std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     windowAttachStateChangeListener_ = nullptr;
-    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener unregistered", GetPersistentId());
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->NotifyWindowAttachStateListenerRegistered(false);
     return WMError::WM_OK;
 }
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (!windowAttachStateChangeListener_) {
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
         return WSError::WS_ERROR_NULLPTR;

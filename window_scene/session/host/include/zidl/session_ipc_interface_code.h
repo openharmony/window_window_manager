@@ -104,6 +104,9 @@ enum class SessionInterfaceCode {
     TRANS_ID_UPDATE_PIP_RECT,
     TRANS_ID_UPDATE_PIP_CONTROL_STATUS,
     TRANS_ID_SET_AUTOSTART_PIP,
+
+    // Window Pattern
+    TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED,
 };
 } // namespace Rosen
 } // namespace OHOS

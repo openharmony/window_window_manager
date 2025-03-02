@@ -657,6 +657,11 @@ public:
     WSError SetWindowCornerRadius(float cornerRadius) override;
     void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
 
+    /*
+     * Window Pattern
+    */
+    void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+    
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
