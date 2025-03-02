@@ -61,6 +61,17 @@ export enum FoldDisplayMode {
     FOLD_DISPLAY_MODE_COORDINATION
 }
 
+export enum Orientation {
+
+    PORTRAIT = 0,
+
+    LANDSCAPE = 1,
+
+    PORTRAIT_INVERTED = 2,
+
+    LANDSCAPE_INVERTED = 3
+  }
+
 export enum FoldStatus {
 
     FOLD_STATUS_UNKNOWN = 0,
@@ -112,6 +123,10 @@ export interface Display {
     getCutoutInfo(): CutoutInfo;
 }
 
+export interface Callback<T> {
+  (data: T): void;
+}
+
 export class DisplayImpl implements Display {
     static { loadLibrary("displayani_kit.z"); }
 
@@ -132,6 +147,8 @@ export native function getDisplayByIdSync(displayId: number): Display;
 
 export native function getDefaultDisplaySync(): Display;
 
-// encapsulate to callback function!
+// encapsulate to async callback function!
 export native function getAllDisplays(): Array<Display>;
+
+export native function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void;
 }

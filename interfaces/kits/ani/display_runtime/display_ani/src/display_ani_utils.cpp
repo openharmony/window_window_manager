@@ -71,6 +71,10 @@ ani_object DisplayAniUtils::convertRect(DMRect rect, ani_env* env)
         WLOGFE("[ANI] null class CutoutInfoImpl");
         return obj;
     }
+    if(ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls , &obj)) {
+        WLOGFE("[ANI] create rect obj fail");
+        return obj;
+    }
     if (ANI_OK != env->Class_GetField(cls, "left", &leftFld)) {
         WLOGFE("[ANI] null field left");
         return obj;
@@ -117,6 +121,10 @@ ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
     ani_class cls;
     if (ANI_OK != env->FindClass("L@ohos/display/display/DisplayImpl", &cls)) {
         WLOGFE("[ANI] null class CutoutInfoImpl");
+        return obj;
+    }
+    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &obj)) {
+        WLOGFE("[ANI] create object fail");
         return obj;
     }
     ani_field displayIdFld;
@@ -238,10 +246,13 @@ ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
     if (ANI_OK != env->FixedArray_New_Int(colorSpaces.size(), &colorSpacesAni)) {
         WLOGFE("[ANI] create colorSpace array error");
     }
+    env->FixedArray_SetRegion_Int(colorSpacesAni, 0, colorSpaces.size(), reinterpret_cast<ani_int *>(colorSpaces.data()));
     auto hdrFormats = info->GetHdrFormats();
     if (ANI_OK != env->FixedArray_New_Int(hdrFormats.size(), &hdrFormatsAni)) {
         WLOGFE("[ANI] create colorSpace array error");
     }
+    env->FixedArray_SetRegion_Int(hdrFormatsAni, 0, hdrFormats.size(), reinterpret_cast<ani_int *>(hdrFormats.data()));
+
     env->Object_SetField_Ref(obj, colorSpacesFld, colorSpacesAni);
     env->Object_SetField_Ref(obj, hdrFormatsld, hdrFormatsAni);
 
@@ -262,5 +273,42 @@ ani_fixedarray_ref DisplayAniUtils::convertDisplays(std::vector<sptr<Display>> d
     return arrayres;
 }
 
+void DisplayAniUtils::GetStdString(ani_env *env, ani_string str, std::string &result){
+    ani_size sz {};
+    env->String_GetUTF8Size(str, &sz);
+    result.resize(sz + 1);
+    env->String_GetUTF8SubString(str, 0, sz, result.data(), result.size(), &sz);
+}
+
+ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...)
+{
+    ani_method aniCtor;
+    auto ret = env->Class_GetMethod(cls, "<ctor>", signature, &aniCtor);
+    if (ret != ANI_OK) {
+        return ret;
+    }
+    va_list args;
+    va_start(args, result);
+    ani_status status = env->Object_New(cls, aniCtor, result, args);
+    va_end(args);
+    return status;
+}
+
+ani_status DisplayAniUtils::NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object)
+{
+    ani_method aniCtor;
+    auto ret = env->Class_GetMethod(cls, "<ctor>", "V:V", &aniCtor);
+    if (ret != ANI_OK) {
+        return ret;
+    }
+    return env->Object_New(cls, aniCtor, object);
+}
+
+ani_object DisplayAniUtils::CreateAniUndefined(ani_env* env)
+{
+    ani_ref aniRef;
+    env->GetUndefined(&aniRef);
+    return static_cast<ani_object>(aniRef);
+}
 }
 }
