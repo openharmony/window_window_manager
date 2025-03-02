@@ -1329,9 +1329,19 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Le
 {
     int32_t uid = 0;
     DMHookInfo hookInfo;
-    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->GetDisplayHookInfo(uid, hookInfo);
+    hookInfo.enableHookRotation_ = true;
+    hookInfo.rotation_ = true;
+    hookInfo.density_ = 1.1;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 200;
+    ssm_->UpdateDisplayHookInfo(uid, true, hookInfo);
+    ssm_->GetDisplayHookInfo(uid, hookInfo);
+    ASSERT_TRUE(hookInfo.enableHookRotation_);
+    ASSERT_TRUE(hookInfo.rotation_);
+    ASSERT_EQ(hookInfo.width_, 100);
+    ASSERT_EQ(hookInfo.height_, 200);
 }
+
 
 /**
  * @tc.name: SetVirtualPixelRatio

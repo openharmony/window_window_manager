@@ -1055,17 +1055,22 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayHookInfo, Function | Small
     screenSessionManagerClient_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 
-/**
- * @tc.name: GetDisplayHookInfo
- * @tc.desc: GetDisplayHookInfo test
- * @tc.type: FUNC
- */
 HWTEST_F(ScreenSessionManagerClientTest, GetDisplayHookInfo, Function | SmallTest | Level2)
 {
     int32_t uid = 0;
     DMHookInfo hookInfo;
+    hookInfo.enableHookRotation_ = true;
+    hookInfo.rotation_ = true;
+    hookInfo.density_ = 1.1;
+    hookInfo.width_ = 100;
+    hookInfo.height_ = 200;
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->UpdateDisplayHookInfo(uid, true, hookInfo);
     screenSessionManagerClient_->GetDisplayHookInfo(uid, hookInfo);
+    ASSERT_TRUE(hookInfo.enableHookRotation_);
+    ASSERT_TRUE(hookInfo.rotation_);
+    ASSERT_EQ(hookInfo.width_, 100);
+    ASSERT_EQ(hookInfo.height_, 200);
 }
 
 /**
