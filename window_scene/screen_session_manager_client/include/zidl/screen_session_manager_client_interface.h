@@ -48,11 +48,12 @@ public:
         TRANS_ID_ON_SCREEN_CAPTURE_NOTIFY,
         TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED,
         TRANS_ID_ON_SECONDARY_REFLEXION_CHANGED,
+        TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED,
+        TRANS_ID_ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
-    virtual void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) = 0;
+    virtual void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) = 0;
     virtual void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) = 0;
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -76,6 +77,9 @@ public:
     virtual void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) = 0;
     virtual void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) = 0;
     virtual void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
+    virtual void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) = 0;
+    virtual void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
 };
 } // namespace OHOS::Rosen
 

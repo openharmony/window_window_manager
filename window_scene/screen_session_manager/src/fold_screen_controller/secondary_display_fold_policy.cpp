@@ -124,6 +124,7 @@ void SecondaryDisplayFoldPolicy::SetOnBootAnimation(bool onBootAnimation)
     onBootAnimation_ = onBootAnimation;
     if (!onBootAnimation_) {
         TLOGW(WmsLogTag::DMS, "when boot animation finished, change display mode");
+        isChangeScreenWhenBootCompleted = true;
         RecoverWhenBootAnimationExit();
     }
 }
@@ -186,11 +187,15 @@ FoldDisplayMode SecondaryDisplayFoldPolicy::GetModeMatchStatus()
 void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession> screenSession,
     FoldDisplayMode displayMode)
 {
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
-        if (currentDisplayMode_ == displayMode) {
+        if (currentDisplayMode_ == displayMode && !isChangeScreenWhenBootCompleted) {
             TLOGW(WmsLogTag::DMS, "already in displayMode %{public}d", displayMode);
             return;
+        }
+        if (isChangeScreenWhenBootCompleted) {
+            isChangeScreenWhenBootCompleted = false;
         }
     }
     SetSecondaryDisplayModeChangeStatus(true);
@@ -226,7 +231,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     } else {
         TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_);
+    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
@@ -234,8 +239,6 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
           screenSession->GetScreenProperty().GetBounds().rect_.width_,
           screenSession->GetScreenProperty().GetBounds().rect_.height_);
-    ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
-        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
 void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenProperty &screenProperty)
@@ -250,7 +253,8 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_FULL, TpFeatureConfigType::AFT_TP_FEATURE);
@@ -270,7 +274,8 @@ void SecondaryDisplayFoldPolicy::SetStatusMainActiveRectAndTpFeature(ScreenPrope
         .h = screenParams_[MAIN_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_MAIN, TpFeatureConfigType::AFT_TP_FEATURE);
@@ -290,7 +295,8 @@ void SecondaryDisplayFoldPolicy::SetStatusGlobalFullActiveRectAndTpFeature(Scree
         .h = screenParams_[GLOBAL_FULL_STATUS_WIDTH],
     };
     if (!onBootAnimation_) {
-        RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
+        TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }
 #ifdef TP_FEATURE_ENABLE
     RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE, STATUS_GLOBAL_FULL, TpFeatureConfigType::AFT_TP_FEATURE);

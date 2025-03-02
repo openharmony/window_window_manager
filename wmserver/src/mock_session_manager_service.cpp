@@ -174,7 +174,7 @@ static std::string Str16ToStr8(const std::u16string& str)
 
 int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& args)
 {
-    WLOGI("dump begin fd: %{public}d", fd);
+    TLOGD(WmsLogTag::DEFAULT, "dump begin fd: %{public}d", fd);
     if (fd < 0) {
         return -1;
     }
@@ -200,7 +200,7 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& a
         WLOGFE("write error");
         return -1; // WMError::WM_ERROR_INVALID_OPERATION;
     }
-    WLOGI("dump end");
+    TLOGD(WmsLogTag::DEFAULT, "dump end");
     return 0;
 }
 
@@ -248,7 +248,7 @@ sptr<MockSessionManagerService::SMSDeathRecipient> MockSessionManagerService::Ge
     std::shared_lock<std::shared_mutex> lock(smsDeathRecipientMapLock_);
     auto iter = smsDeathRecipientMap_.find(userId);
     if (iter != smsDeathRecipientMap_.end()) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "Get SMS death recipient with userId=%{public}d", userId);
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "Get SMS death recipient with userId=%{public}d", userId);
         return iter->second;
     } else {
         TLOGW(WmsLogTag::WMS_MULTI_USER, "Get SMS death recipient failed with userId=%{public}d", userId);
@@ -277,8 +277,8 @@ sptr<IRemoteObject> MockSessionManagerService::GetSessionManagerService()
         return nullptr;
     }
     if (clientUserId == SYSTEM_USERID) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "System user, return current sessionManagerService with %{public}d",
-            currentWMSUserId_);
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "System user, return current sessionManagerService with %{public}d",
+              currentWMSUserId_);
         clientUserId = currentWMSUserId_;
     }
     return GetSessionManagerServiceByUserId(clientUserId);
@@ -365,7 +365,7 @@ void MockSessionManagerService::RegisterSMSRecoverListener(const sptr<IRemoteObj
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
             return;
         }
-        TLOGI(WmsLogTag::WMS_RECOVER, "WMS is already connected, notify client");
+        TLOGI(WmsLogTag::WMS_RECOVER, "WMS ready,notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
     }
 }
@@ -469,7 +469,7 @@ void MockSessionManagerService::RegisterSMSLiteRecoverListener(const sptr<IRemot
             TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
             return;
         }
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "Lite wms is already connected, notify client");
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "Lite wms is already connected, notify client");
         smsListener->OnWMSConnectionChanged(currentWMSUserId_, currentScreenId_, true, sessionManagerService);
     }
 }
@@ -575,9 +575,8 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToClient(
         return;
     }
     TLOGD(WmsLogTag::WMS_MULTI_USER,
-        "wmsUserId = %{public}d, isConnected = %{public}d, remote process count = "
-        "%{public}" PRIu64,
-        wmsUserId, isConnected, static_cast<uint64_t>(smsRecoverListenerMap->size()));
+          "wmsUserId = %{public}d, isConnected = %{public}d, remote process count = %{public}zu",
+          wmsUserId, isConnected, smsRecoverListenerMap->size());
     auto sessionManagerService = GetSessionManagerServiceByUserId(currentWMSUserId_);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "SessionManagerService is null");
@@ -585,7 +584,7 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToClient(
     }
     for (auto& iter : *smsRecoverListenerMap) {
         if (iter.second != nullptr) {
-            TLOGI(WmsLogTag::WMS_MULTI_USER, "Call OnWMSConnectionChanged pid = %{public}d", iter.first);
+            TLOGD(WmsLogTag::WMS_MULTI_USER, "Call OnWMSConnectionChanged pid = %{public}d", iter.first);
             iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected, sessionManagerService);
         }
     }
@@ -608,9 +607,9 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToLiteClient(
     }
     for (auto& iter : *smsLiteRecoverListenerMap) {
         if (iter.second != nullptr) {
-            TLOGI(WmsLogTag::WMS_MULTI_USER,
-                "Call OnWMSConnectionChanged Lite pid = %{public}d, ref count = %{public}d", iter.first,
-                iter.second->GetSptrRefCount());
+            TLOGD(WmsLogTag::WMS_MULTI_USER,
+                  "Call OnWMSConnectionChanged Lite pid = %{public}d, ref count = %{public}d",
+                  iter.first, iter.second->GetSptrRefCount());
             iter.second->OnWMSConnectionChanged(wmsUserId, screenId, isConnected, sessionManagerService);
         }
     }

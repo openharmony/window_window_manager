@@ -124,6 +124,7 @@ HWTEST_F(SessionStageStubTest, HandleUpdateRect, Function | SmallTest | Level1)
     data.WriteUint32(1);
     data.WriteBool(false);
     data.WriteInt32(1);
+    data.WriteUint32(0);
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SIZE_CHANGE);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));

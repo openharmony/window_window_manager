@@ -326,7 +326,24 @@ WMError WindowExtensionSessionImpl::TransferExtensionData(const AAFwk::WantParam
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return static_cast<WMError>(hostSession->TransferExtensionData(wantParams));
+    auto ret = hostSession->TransferExtensionData(wantParams);
+    if (static_cast<int32_t>(ret) != 0) {
+        if (context_ != nullptr) {
+            std::ostringstream oss;
+            oss << "TransferExtensionData from provider to host failed" << ",";
+            oss << " provider bundleName: " << context_->GetBundleName() << ",";
+            oss << " provider windowName: " << property_->GetWindowName() << ",";
+            oss << " errorCode: " << static_cast<int32_t>(ret) << ";";
+            int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
+                static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL),
+                getpid(), GetPersistentId(), oss.str()
+            );
+            if (ret != 0) {
+                TLOGI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
+            }
+        }
+    }
+    return static_cast<WMError>(ret);
 }
 
 void WindowExtensionSessionImpl::RegisterTransferComponentDataListener(const NotifyTransferComponentDataFunc& func)
@@ -752,7 +769,7 @@ WMError WindowExtensionSessionImpl::GetSystemViewportConfig(SessionViewportConfi
         return WMError::WM_ERROR_NULLPTR;
     }
     config.density_ = displayInfo->GetVirtualPixelRatio();
-    auto rotation = ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
+    auto rotation = ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetOriginRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     config.transform_ = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     config.orientation_ = static_cast<int32_t>(displayInfo->GetDisplayOrientation());

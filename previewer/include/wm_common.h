@@ -103,8 +103,8 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_HANDWRITE,
     WINDOW_TYPE_SCENE_BOARD,
     WINDOW_TYPE_KEYBOARD_PANEL,
-    WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_WALLET_SWIPE_CARD,
+    WINDOW_TYPE_SCREEN_CONTROL,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -256,6 +256,15 @@ enum class SystemBarSettingFlag : uint32_t {
     ALL_SETTING = 0b11
 };
 
+inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
+{
+    using T = std::underlying_type_t<SystemBarSettingFlag>;
+    return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
+inline SystemBarSettingFlag& operator|=
+    (SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs) { return lhs = lhs | rhs; }
+
 /**
  * @brief Enumerates flag of window.
  */
@@ -349,6 +358,8 @@ enum class WindowSizeChangeReason : uint32_t {
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
     AVOID_AREA_CHANGE,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
     END
 };
 

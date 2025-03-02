@@ -18,8 +18,9 @@
 #include <thread>
 #include <chrono>
 #include "mock/mock_session_stage.h"
-#include "session/host/include/pc_fold_screen_controller.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/pc_fold_screen_controller.h"
+#include "session/host/include/sub_session.h"
 #include "wm_math.h"
 
 using namespace testing;
@@ -250,6 +251,18 @@ HWTEST_F(PcFoldScreenManagerTest, CalculateScreenSide, Function | SmallTest | Le
     SetHalfFolded();
     EXPECT_EQ(manager_.CalculateScreenSide(B_ACROSS_RECT), ScreenSide::FOLD_B);
     EXPECT_EQ(manager_.CalculateScreenSide(C_ACROSS_RECT), ScreenSide::FOLD_C);
+}
+
+/**
+ * @tc.name: IsCrossFoldCrease
+ * @tc.desc: test function : IsCrossFoldCrease
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, IsCrossFoldCrease, Function | SmallTest | Level1)
+{
+    SetHalfFolded();
+    EXPECT_FALSE(manager_.IsCrossFoldCrease(B_RECT));
+    EXPECT_TRUE(manager_.IsCrossFoldCrease(B_ACROSS_RECT));
 }
 
 /**
@@ -646,6 +659,54 @@ HWTEST_F(PcFoldScreenManagerTest, ExecuteFoldScreenStatusChangeCallbacks, Functi
 }
 
 /**
+ * @tc.name: RegisterSystemKeyboardStatusChangeCallback
+ * @tc.desc: test function : RegisterSystemKeyboardStatusChangeCallback, UnregisterSystemKeyboardStatusChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, RegisterSystemKeyboardStatusChangeCallback, Function | SmallTest | Level2)
+{
+    auto& callbacks = manager_.systemKeyboardStatusChangeCallbacks_;
+    callbacks.clear();
+    EXPECT_EQ(callbacks.size(), 0);
+    int32_t persistentId = 100;
+    auto func = std::make_shared<SystemKeyboardStatusChangeCallback>(
+        [](DisplayId displayId, bool hasSystemKeyboard) {}
+    );
+    manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
+        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+    EXPECT_NE(callbacks.find(persistentId), callbacks.end());
+    manager_.UnregisterSystemKeyboardStatusChangeCallback(persistentId);
+    EXPECT_EQ(callbacks.find(persistentId), callbacks.end());
+}
+
+/**
+ * @tc.name: ExecuteSystemKeyboardStatusChangeCallbacks
+ * @tc.desc: test function : ExecuteSystemKeyboardStatusChangeCallbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenManagerTest, ExecuteSystemKeyboardStatusChangeCallbacks, Function | SmallTest | Level2)
+{
+    auto& callbacks = manager_.systemKeyboardStatusChangeCallbacks_;
+    callbacks.clear();
+    EXPECT_EQ(callbacks.size(), 0);
+    int32_t persistentId = 100;
+    DisplayId testDisplayId = 0;
+    bool testStatus = false;
+    auto func = std::make_shared<SystemKeyboardStatusChangeCallback>(
+        [&testDisplayId, &testStatus](DisplayId displayId, bool hasSystemKeyboard) {
+            testDisplayId = displayId;
+            testStatus = hasSystemKeyboard;
+        }
+    );
+    manager_.RegisterSystemKeyboardStatusChangeCallback(persistentId,
+        std::weak_ptr<SystemKeyboardStatusChangeCallback>(func));
+    EXPECT_NE(callbacks.find(persistentId), callbacks.end());
+    manager_.ExecuteSystemKeyboardStatusChangeCallbacks(100, true);
+    EXPECT_EQ(testDisplayId, 100);
+    EXPECT_EQ(testStatus, true);
+}
+
+/**
  * @tc.name: GetVpr
  * @tc.desc: test function : GetVpr
  * @tc.type: FUNC
@@ -670,6 +731,22 @@ HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Le
     EXPECT_TRUE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
     manager_.UpdateSystemKeyboardStatus(true);
     EXPECT_FALSE(controller_->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+
+    // sub session
+    SetHalfFolded();
+    manager_.UpdateSystemKeyboardStatus(false);
+    SessionInfo subInfo;
+    subInfo.abilityName_ = "SubSession";
+    subInfo.bundleName_ = "SubSession";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(subInfo, nullptr);
+    ASSERT_NE(subSession, nullptr);
+    ASSERT_NE(subSession->pcFoldScreenController_, nullptr);
+    subSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    const auto& subController = subSession->pcFoldScreenController_;
+    subSession->property_->SetDecorEnable(true);
+    EXPECT_TRUE(subController->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
+    subSession->property_->SetDecorEnable(false);
+    EXPECT_FALSE(subController->IsAllowThrowSlip(DEFAULT_SCREEN_ID));
 }
 
 /**
@@ -679,10 +756,12 @@ HWTEST_F(PcFoldScreenControllerTest, IsAllowThrowSlip, Function | SmallTest | Le
  */
 HWTEST_F(PcFoldScreenControllerTest, OnConnect, Function | SmallTest | Level2)
 {
-    mainSession_->sessionInfo_.screenId_ = DEFAULT_SCREEN_ID;
-    SetHalfFolded();
+    mainSession_->sessionInfo_.screenId_ = DEFAULT_DISPLAY_ID;
+    SetExpanded();
     controller_->OnConnect();
     EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
+    controller_->onFoldScreenStatusChangeCallback_ = nullptr;
+    controller_->onSystemKeyboardStatusChangeCallback_ = nullptr;
     SetExpanded();
     controller_->OnConnect();
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
@@ -1025,6 +1104,18 @@ HWTEST_F(PcFoldScreenControllerTest, CalculateMovingVelocity, Function | SmallTe
     // throw directly
     controller_->RecordStartMoveRectDirectly(rect0, B_VELOCITY, false);
     EXPECT_EQ(controller_->startVelocity_, controller_->CalculateMovingVelocity());
+}
+
+/**
+ * @tc.name: IsSupportEnterWaterfallMode
+ * @tc.desc: test function : IsSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PcFoldScreenControllerTest, IsSupportEnterWaterfallMode, Function | SmallTest | Level2)
+{
+    EXPECT_TRUE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::HALF_FOLDED, false));
+    EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::HALF_FOLDED, true));
+    EXPECT_FALSE(controller_->IsSupportEnterWaterfallMode(SuperFoldStatus::EXPANDED, false));
 }
 }
 }

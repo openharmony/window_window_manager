@@ -142,6 +142,27 @@ public:
      * @brief Notify caller that window is destroyed.
      */
     virtual void AfterDestroyed() {}
+
+    /**
+     * @brief Notify caller that window is already foreground.
+     */
+    virtual void AfterDidForeground() {}
+
+    /**
+     * @brief Notify caller that window is already background.
+     */
+    virtual void AfterDidBackground() {}
+};
+
+/**
+ * @class IWindowAttachStateChangeListner
+ *
+ * @brief IWindowAttachStateChangeListner is used to observe the window attach or detach state changed.
+ */
+class IWindowAttachStateChangeListner : virtual public RefBase {
+public:
+    virtual void AfterAttached() {}
+    virtual void AfterDetached() {}
 };
 
 /**
@@ -1041,6 +1062,11 @@ public:
                          bool withFocus = true) { return WMError::WM_OK; }
 
     /**
+     * @brief resume window
+     */
+    virtual void Resume() {}
+
+    /**
      * @brief Hide window
      *
      * @param reason Reason for window state change.
@@ -1448,7 +1474,7 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration) {}
 
     /**
-     * @brief Update Configuration.
+     * @brief Update configuration for specified window.
      *
      * @param configuration Window configuration.
      * @param resourceManager The resource manager
@@ -2215,8 +2241,10 @@ public:
      *
      * @param isAutoStart true means auto start pip window when background, otherwise means the opposite.
      * @param priority 1 means height priority, 0 means low priority.
+     * @param width width means width of the video content.
+     * @param height height means height of the video content.
      */
-    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority) {}
+    virtual void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) {}
 
     /**
      * @brief When get focused, keep the keyboard created by other windows, support system window and app subwindow.
@@ -2351,6 +2379,16 @@ public:
     }
 
     /**
+     * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
+     *
+     * @param systemBarEnable is system bar enabled
+     * @param systemBarEnableAnimation is animation enabled
+     * @param SystemBarProperty WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
+     */
+    virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) {}
+
+    /**
      * @brief Set Specific System Bar(include status bar and nav bar) Property
      *
      * @param type WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
@@ -2387,6 +2425,20 @@ public:
     }
 
     /**
+     * @brief Update System Bar (include status bar and nav bar) Properties by Flags
+     *
+     * @param systemBarProperties map of status bar and nav bar properties
+     * @param systemBarPropertyFlags map of status bar and nav bar properties to be changed
+     * @return WMError
+     */
+    virtual WMError UpdateSystemBarProperties(
+        const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Set the single frame composer enabled flag of a window.
      *
      * @param enable true means the single frame composer is enabled, otherwise means the opposite.
@@ -2401,6 +2453,14 @@ public:
      * @return Errorcode of window.
      */
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the visibility of window decor.
+     *
+     * @param isVisible whether the window decor is visible.
+     * @return Errorcode of window.
+     */
+    virtual WMError GetDecorVisible(bool& isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Enable or disable move window by title bar.
@@ -3125,7 +3185,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get highlight property of window.
      *
@@ -3169,13 +3229,49 @@ public:
      * @param want the want to store param.
      */
     virtual void GetExtensionConfig(AAFwk::WantParams& want) const {}
- 
+
     /**
      * @brief Update custom extension param.
      *
      * @param want the want to update param.
      */
     virtual void UpdateExtensionConfig(const std::shared_ptr<AAFwk::Want>& want) {}
+
+    /**
+     * @brief Register window scene attach or detach framenode listener.
+     *
+     * @param listener IWindowAttachStateChangeListner.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowAttachStateChangeListener(const sptr<IWindowAttachStateChangeListner>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window scene attach or detach framenode listener.
+     *
+     * @return WM_OK means unregister success
+     */
+    virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Get the api version.
+     *
+     * @return Api version
+     */
+    virtual uint32_t GetApiVersion() const { return 0; }
+
+    /**
+     * @brief Set the feature of subwindow follow the layout of the parent window.
+     *
+     * @param isFollow true - follow, false - not follow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

@@ -31,6 +31,7 @@ void CreateCjSubWindowArrayObject(std::vector<sptr<Window>> &vec, RetStruct &ret
     }
     ret.data = windowList;
     ret.len = 0;
+    ret.code = static_cast<int32_t>(WmErrorCode::WM_OK);
     for (auto& window : vec) {
         if (window == nullptr) {
             continue;

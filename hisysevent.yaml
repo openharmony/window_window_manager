@@ -79,6 +79,19 @@ WINDOW_EXCEPTION_DETECTION:
   PID: {type: INT32, desc: pid}
   MSG: {type: STRING, desc: detects abnormal information}
 
+UIEXTENSION_EXCEPTION:
+  __BASE: {type: FAULT, level: CRITICAL, desc: UIExtension encountered an exception}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
+  PID: {type: INT32, desc: pid}
+  PERSISTENTID: {type: INT32, desc: persistentId}
+  MSG: {type: STRING, desc: uiextension abnormal information}
+
+EVENT_DISPATCH_EXCEPTION:
+  __BASE: {type: FAULT, level: CRITICAL, desc: Event dispatch encountered an exception}
+  EXCEPTION_TYPE: {type: INT32, desc: exception type}
+  PID: {type: INT32, desc: pid}
+  MSG: {type: STRING, desc: event dispatch abnormal information}
+
 SHOW_WINDOW_TIME:
   __BASE: {type: STATISTIC, level: MINOR, desc: Sow window time performance}
   MSG: {type: STRING, desc: windowmanager event message}
@@ -168,4 +181,10 @@ EXTEND_DISPLAY_PLUG_IN_AND_OUT:
 VH_MODE:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: notify VH_MODE}
   MODE: {type: INT32, desc: VH MODE after rotation}
- 
+
+THROW_SLIP:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: Window throw slip}
+  BUNDLE_NAME: {type: STRING, desc: Bundle name}
+  START_SIDE: {type: INT32, desc: Start side of throw slip 1 B side 2 C side}
+  START_WINDOW_MODE: {type: INT32, desc: Start window mode of throw slip 0 float 1 fullscreen 2 waterfall mode}
+  THROW_MODE: {type: INT32, desc: Throw slip mode 0 move drag 1 multifingers gesture 2 button in titlebar menu}

@@ -36,6 +36,7 @@ constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t ARG_COUNT_THREE = 3;
 constexpr int32_t MAX_TOUCHABLE_AREAS = 10;
+constexpr uint32_t API_VERSION_16 = 16;
 const std::string RESOLVED_CALLBACK = "resolvedCallback";
 const std::string REJECTED_CALLBACK = "rejectedCallback";
 }
@@ -93,10 +94,10 @@ napi_value WindowTypeInit(napi_env env)
         static_cast<int32_t>(ApiWindowType::TYPE_GLOBAL_SEARCH)));
     napi_set_named_property(env, objValue, "TYPE_HANDWRITE", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_HANDWRITE)));
-    napi_set_named_property(env, objValue, "TYPE_SCREEN_CONTROL", CreateJsValue(env,
-        static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
     napi_set_named_property(env, objValue, "TYPE_WALLET_SWIPE_CARD", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowType::TYPE_WALLET_SWIPE_CARD)));
+    napi_set_named_property(env, objValue, "TYPE_SCREEN_CONTROL", CreateJsValue(env,
+        static_cast<int32_t>(ApiWindowType::TYPE_SCREEN_CONTROL)));
 
     return objValue;
 }
@@ -445,23 +446,30 @@ napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, co
 {
     WLOGD("CreateJsWindowPropertiesObject");
     napi_value objValue = nullptr;
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr.");
+        return objValue;
+    }
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-
     Rect windowRect = window->GetRect();
     napi_value windowRectObj = GetRectAndConvertToJsValue(env, windowRect);
     if (windowRectObj == nullptr) {
-        WLOGFE("GetWindowRect failed!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowRect failed!");
     }
     napi_set_named_property(env, objValue, "windowRect", windowRectObj);
 
     napi_value drawableRectObj = GetRectAndConvertToJsValue(env, drawableRect);
     if (drawableRectObj == nullptr) {
-        WLOGFE("GetDrawableRect failed!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetDrawableRect failed!");
     }
     napi_set_named_property(env, objValue, "drawableRect", drawableRectObj);
 
     WindowType type = window->GetType();
-    if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
+    uint32_t apiVersion = window->GetApiVersion();
+    if (apiVersion < API_VERSION_16 && type == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "api version %{public}d.", apiVersion);
+        napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
+    } else if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
     } else {
         napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
@@ -664,8 +672,8 @@ napi_value CreateJsSystemBarRegionTintArrayObject(napi_env env, const SystemBarR
 }
 
 bool GetSystemBarStatus(napi_env env, napi_callback_info info,
-    std::map<WindowType, SystemBarProperty>& systemBarProperties,
-    std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags)
 {
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -890,7 +898,7 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
         uint32_t hexColor;
         ss << std::hex << color;
         ss >> hexColor;
-        WLOGI("Origin %{public}s, process %{public}s, final %{public}x",
+        TLOGD(WmsLogTag::DEFAULT, "Origin %{public}s, process %{public}s, final %{public}x",
             colorStr.c_str(), color.c_str(), hexColor);
         return hexColor;
     }
@@ -898,7 +906,8 @@ static uint32_t GetColorFromJs(napi_env env, napi_value jsObject,
 }
 
 bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto statusProperty = properties[WindowType::WINDOW_TYPE_STATUS_BAR];
     napi_value jsStatusContentColor = nullptr;
@@ -926,7 +935,8 @@ bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
 }
 
 bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     auto navProperty = properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR];
     napi_value jsNavigationContentColor = nullptr;
@@ -954,8 +964,8 @@ bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
 }
 
 bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
-    std::map<WindowType, SystemBarProperty>& properties,
-    std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+    std::unordered_map<WindowType, SystemBarProperty>& properties,
+    std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags)
 {
     properties[WindowType::WINDOW_TYPE_STATUS_BAR].backgroundColor_ =
         GetColorFromJs(env, jsObject, "statusBarColor",

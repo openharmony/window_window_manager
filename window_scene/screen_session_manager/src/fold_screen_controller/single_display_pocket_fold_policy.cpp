@@ -303,7 +303,8 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenO
         RSInterfaces::GetInstance().SetTpFeatureConfig(TP_TYPE_POWER_CTRL, MAIN_TP_OFF.c_str());
 #endif
         if (ifTentMode) {
-            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync();
+            PowerMgr::PowerMgrClient::GetInstance().WakeupDeviceAsync(
+                PowerMgr::WakeupDeviceType::WAKEUP_DEVICE_TENT_MODE_CHANGE);
         }
         SetdisplayModeChangeStatus(false);
     };
@@ -390,6 +391,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSes
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
         return;
     }
+    ScreenSessionManager::GetInstance().UpdateCameraBackSelfie(false);
     RSInterfaces::GetInstance().NotifyScreenSwitched();
     ReportFoldStatusChangeBegin((int32_t)SCREEN_ID_MAIN, (int32_t)SCREEN_ID_FULL);
 #ifdef TP_FEATURE_ENABLE

@@ -145,7 +145,7 @@ public:
      * Multi User
      */
     static napi_value InitUserInfo(napi_env env, napi_callback_info info);
-    static napi_value NotifySwitchingUser(napi_env env, napi_callback_info info);
+    static napi_value HandleUserSwitch(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -236,7 +236,7 @@ private:
      * Multi User
      */
     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
-    napi_value OnNotifySwitchingUser(napi_env env, napi_callback_info info);
+    napi_value OnHandleUserSwitch(napi_env env, napi_callback_info info);
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);

@@ -110,8 +110,8 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_KEYBOARD_PANEL,
     WINDOW_TYPE_SCB_DEFAULT,
     WINDOW_TYPE_TRANSPARENT_VIEW,
-    WINDOW_TYPE_SCREEN_CONTROL,
     WINDOW_TYPE_WALLET_SWIPE_CARD,
+    WINDOW_TYPE_SCREEN_CONTROL,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -314,6 +314,15 @@ enum class SystemBarSettingFlag : uint32_t {
     FOLLOW_SETTING = 1 << 2
 };
 
+inline SystemBarSettingFlag operator|(SystemBarSettingFlag lhs, SystemBarSettingFlag rhs)
+{
+    using T = std::underlying_type_t<SystemBarSettingFlag>;
+    return static_cast<SystemBarSettingFlag>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
+inline SystemBarSettingFlag& operator|=
+    (SystemBarSettingFlag& lhs, SystemBarSettingFlag rhs) { return lhs = lhs | rhs; }
+
 /**
  * @brief Enumerates flag of ControlAppType.
  */
@@ -416,6 +425,8 @@ enum class WindowSizeChangeReason : uint32_t {
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
     AVOID_AREA_CHANGE,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
     END,
 };
 
@@ -1058,6 +1069,45 @@ public:
         }
         return ss.str();
     }
+};
+
+/**
+ * @struct ExceptionInfo
+ *
+ * @brief Exception info.
+ */
+struct ExceptionInfo : public Parcelable {
+    /**
+     * @brief Marshalling ExceptionInfo.
+     *
+     * @param parcel Package of ExceptionInfo.
+     * @return True means marshall success, false means marshall failed.
+     */
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(needRemoveSession) &&
+               parcel.WriteBool(needClearCallerLink);
+    }
+
+    /**
+     * @brief Unmarshalling ExceptionInfo.
+     *
+     * @param parcel Package of ExceptionInfo.
+     * @return ExceptionInfo object.
+     */
+    static ExceptionInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new ExceptionInfo();
+        if (!parcel.ReadBool(info->needRemoveSession) ||
+            !parcel.ReadBool(info->needClearCallerLink)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    bool needRemoveSession = false;
+    bool needClearCallerLink = true;
 };
 
 /**
@@ -1786,6 +1836,14 @@ enum class KeyboardViewMode: uint32_t {
     LIGHT_IMMERSIVE_MODE,
     DARK_IMMERSIVE_MODE,
     VIEW_MODE_END,
+};
+
+/*
+ * Multi User
+ */
+enum class UserSwitchEventType: uint32_t {
+    SWITCHING,
+    SWITCHED,
 };
 }
 }

@@ -23,7 +23,11 @@
 
 #include "session/host/include/main_session.h"
 #include "session/host/include/keyboard_session.h"
+#define private public
+#define protected public
 #include "session/host/include/scene_session.h"
+#undef private
+#undef protected
 #include "session/host/include/sub_session.h"
 #include "session/host/include/system_session.h"
 #include "ui/rs_surface_node.h"
@@ -778,6 +782,423 @@ HWTEST_F(SceneSessionTest3, SetSidebarMaskColorModifier, Function | SmallTest | 
     session->SetSidebarMaskColorModifier(true);
     Rosen::RSColor colorOpen = session->maskColorValue_->Get();
     EXPECT_EQ(session->snapshotMaskColor_, colorOpen.AsArgbInt());
+}
+
+/**
+ * @tc.name: AddExtensionTokenInfo
+ * @tc.desc: AddExtensionTokenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, AddExtensionTokenInfo, Function | SmallTest | Level2)
+{
+    UIExtensionTokenInfo tokenInfo;
+    tokenInfo.abilityToken = nullptr;
+    SessionInfo info;
+    info.abilityName_ = "AddExtensionTokenInfo";
+    info.bundleName_ = "AddExtensionTokenInfo";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->AddExtensionTokenInfo(tokenInfo);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: RemoveExtensionTokenInfo
+ * @tc.desc: RemoveExtensionTokenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RemoveExtensionTokenInfo, Function | SmallTest | Level2)
+{
+    UIExtensionTokenInfo tokenInfo;
+    tokenInfo.abilityToken = nullptr;
+    SessionInfo info;
+    info.abilityName_ = "RemoveExtensionTokenInfo";
+    info.bundleName_ = "RemoveExtensionTokenInfo";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    auto res = sceneSession->extensionTokenInfos_.size();
+    sceneSession->RemoveExtensionTokenInfo(tokenInfo.abilityToken);
+    EXPECT_EQ(sceneSession->extensionTokenInfos_.size() <= res, true);
+}
+
+/**
+ * @tc.name: OnNotifyAboveLockScreen
+ * @tc.desc: OnNotifyAboveLockScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, OnNotifyAboveLockScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "OnNotifyAboveLockScreen";
+    info.bundleName_ = "OnNotifyAboveLockScreen";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->OnNotifyAboveLockScreen();
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->CheckExtensionOnLockScreenToClose();
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: CloseExtensionSync
+ * @tc.desc: CloseExtensionSync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, CloseExtensionSync, Function | SmallTest | Level2)
+{
+    UIExtensionTokenInfo tokenInfo;
+    tokenInfo.abilityToken = nullptr;
+    SessionInfo info;
+    info.abilityName_ = "CloseExtensionSync";
+    info.bundleName_ = "CloseExtensionSync";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->CloseExtensionSync(tokenInfo);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: NotifyTargetScreenWidthAndHeight
+ * @tc.desc: NotifyTargetScreenWidthAndHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyTargetScreenWidthAndHeight, Function | SmallTest | Level2)
+{
+    uint32_t screenWidth = 10;
+    uint32_t screenHeight = 10;
+    bool isScreenAngleMismatch = true;
+    SessionInfo info;
+    info.abilityName_ = "NotifyTargetScreenWidthAndHeight";
+    info.bundleName_ = "NotifyTargetScreenWidthAndHeight";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: SetIsStatusBarVisible
+ * @tc.desc: SetIsStatusBarVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, Function | SmallTest | Level2)
+{
+    bool isVisible = true;
+    SessionInfo info;
+    info.abilityName_ = "SetIsStatusBarVisible";
+    info.bundleName_ = "SetIsStatusBarVisible";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->SetIsStatusBarVisible(isVisible);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: GetAllAvoidAreas
+ * @tc.desc: GetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, Function | SmallTest | Level2)
+{
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    SessionInfo info;
+    info.abilityName_ = "GetAllAvoidAreas";
+    info.bundleName_ = "GetAllAvoidAreas";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = sceneSession->GetAllAvoidAreas(avoidAreas);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyPipWindowSizeChange
+ * @tc.desc: NotifyPipWindowSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, NotifyPipWindowSizeChange, Function | SmallTest | Level2)
+{
+    uint32_t width = 10;
+    uint32_t height = 10;
+    double scale = 10;
+    SessionInfo info;
+    info.abilityName_ = "NotifyPipWindowSizeChange";
+    info.bundleName_ = "NotifyPipWindowSizeChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = sceneSession->NotifyPipWindowSizeChange(width, height, scale);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: SendPointEventForMoveDrag
+ * @tc.desc: SendPointEventForMoveDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SendPointEventForMoveDrag, Function | SmallTest | Level2)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    bool isExecuteDelayRaise = true;
+    SessionInfo info;
+    info.abilityName_ = "SendPointEventForMoveDrag";
+    info.bundleName_ = "SendPointEventForMoveDrag";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = sceneSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: DisallowActivationFromPendingBackground
+ * @tc.desc: DisallowActivationFromPendingBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, DisallowActivationFromPendingBackground, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "DisallowActivationFromPendingBackground";
+    info.bundleName_ = "DisallowActivationFromPendingBackground";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    auto res = sceneSession->DisallowActivationFromPendingBackground(true, true, true, true);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: UpdateFullScreenWaterfallMode
+ * @tc.desc: UpdateFullScreenWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, UpdateFullScreenWaterfallMode, Function | SmallTest | Level2)
+{
+    bool isWaterfallMode = true;
+    SessionInfo info;
+    info.abilityName_ = "UpdateFullScreenWaterfallMode";
+    info.bundleName_ = "UpdateFullScreenWaterfallMode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->UpdateFullScreenWaterfallMode(isWaterfallMode);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: RegisterFullScreenWaterfallModeChangeCallback
+ * @tc.desc: RegisterFullScreenWaterfallModeChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RegisterFullScreenWaterfallModeChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterFullScreenWaterfallModeChangeCallback";
+    info.bundleName_ = "RegisterFullScreenWaterfallModeChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    std::function<void(bool isWaterfallMode)> func = [](bool isWaterfallMode) {
+        return;
+    };
+    sceneSession->RegisterFullScreenWaterfallModeChangeCallback(std::move(func));
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: RegisterThrowSlipAnimationStateChangeCallback
+ * @tc.desc: RegisterThrowSlipAnimationStateChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RegisterThrowSlipAnimationStateChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterThrowSlipAnimationStateChangeCallback";
+    info.bundleName_ = "RegisterThrowSlipAnimationStateChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    std::function<void(bool isAnimating)> func = [](bool isAnimating) {
+        return;
+    };
+    sceneSession->RegisterThrowSlipAnimationStateChangeCallback(std::move(func));
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: MaskSupportEnterWaterfallMode
+ * @tc.desc: MaskSupportEnterWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, MaskSupportEnterWaterfallMode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "MaskSupportEnterWaterfallMode";
+    info.bundleName_ = "MaskSupportEnterWaterfallMode";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->MaskSupportEnterWaterfallMode();
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->pcFoldScreenController_ = nullptr;
+    sceneSession->MaskSupportEnterWaterfallMode();
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: HandleActionUpdateMainWindowTopmost
+ * @tc.desc: HandleActionUpdateMainWindowTopmost
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, HandleActionUpdateMainWindowTopmost, Function | SmallTest | Level2)
+{
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateMainWindowTopmost";
+    info.bundleName_ = "HandleActionUpdateMainWindowTopmost";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    auto res = sceneSession->HandleActionUpdateMainWindowTopmost(windowSessionProperty, action);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: HandleBackgroundAlpha
+ * @tc.desc: HandleBackgroundAlpha
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, HandleBackgroundAlpha, Function | SmallTest | Level2)
+{
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS;
+    SessionInfo info;
+    info.abilityName_ = "HandleBackgroundAlpha";
+    info.bundleName_ = "HandleBackgroundAlpha";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_ = windowSessionProperty;
+
+    auto res = sceneSession->HandleBackgroundAlpha(windowSessionProperty, action);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SendContainerModalEvent
+ * @tc.desc: SendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SendContainerModalEvent, Function | SmallTest | Level2)
+{
+    string eventName = "test";
+    string eventValue = "test";
+    SessionInfo info;
+    info.abilityName_ = "SendContainerModalEvent";
+    info.bundleName_ = "SendContainerModalEvent";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+
+    auto res = sceneSession->SendContainerModalEvent(eventName, eventValue);
+    EXPECT_EQ(res, sceneSession->sessionStage_->SendContainerModalEvent(eventName, eventValue));
+}
+
+/**
+ * @tc.name: RegisterSetLandscapeMultiWindowFunc
+ * @tc.desc: RegisterSetLandscapeMultiWindowFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RegisterSetLandscapeMultiWindowFunc, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterSetLandscapeMultiWindowFunc";
+    info.bundleName_ = "RegisterSetLandscapeMultiWindowFunc";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    std::function<void(bool isLandscapeMultiWindow)> func = [](bool isLandscapeMultiWindow) {
+        return;
+    };
+    sceneSession->RegisterSetLandscapeMultiWindowFunc(std::move(func));
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: IsDirtyDragWindow
+ * @tc.desc: IsDirtyDragWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, IsDirtyDragWindow, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsDirtyDragWindow";
+    info.bundleName_ = "IsDirtyDragWindow";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->dirtyFlags_ = 0;
+
+    auto res = sceneSession->IsDirtyDragWindow();
+    EXPECT_EQ(res, sceneSession->dirtyFlags_
+        & static_cast<uint32_t>(SessionUIDirtyFlag::DRAG_RECT) || sceneSession->isDragging_);
+}
+
+/**
+ * @tc.name: RequestHideKeyboard
+ * @tc.desc: RequestHideKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RequestHideKeyboard, Function | SmallTest | Level2)
+{
+    bool isAppColdStart = true;
+    SessionInfo info;
+    info.abilityName_ = "RequestHideKeyboard";
+    info.bundleName_ = "RequestHideKeyboard";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->RequestHideKeyboard(isAppColdStart);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: SetStartingWindowExitAnimationFlag
+ * @tc.desc: SetStartingWindowExitAnimationFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetStartingWindowExitAnimationFlag, Function | SmallTest | Level2)
+{
+    bool enable = true;
+    SessionInfo info;
+    info.abilityName_ = "SetStartingWindowExitAnimationFlag";
+    info.bundleName_ = "SetStartingWindowExitAnimationFlag";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->SetStartingWindowExitAnimationFlag(enable);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetSkipSelfWhenShowOnVirtualScreen, Function | SmallTest | Level2)
+{
+    bool isSkip = true;
+    SessionInfo info;
+    info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
+    info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(isSkip);
+    EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: RegisterRequestedOrientationChangeCallback
+ * @tc.desc: RegisterRequestedOrientationChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, RegisterRequestedOrientationChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterRequestedOrientationChangeCallback";
+    info.bundleName_ = "RegisterRequestedOrientationChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    std::function<void(uint32_t orientation)> func = [](uint32_t orientation) {
+        return;
+    };
+    sceneSession->RegisterRequestedOrientationChangeCallback(std::move(func));
+    EXPECT_NE(sceneSession, nullptr);
 }
 }
 }

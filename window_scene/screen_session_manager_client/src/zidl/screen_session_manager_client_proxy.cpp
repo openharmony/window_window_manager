@@ -22,8 +22,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientProxy" };
 } // namespace
 
-void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-    ScreenId rsId, const std::string& name, bool isExtend)
+void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(SessionOption SessionOption, ScreenEvent screenEvent)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -38,24 +37,28 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenI
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteUint64(screenId)) {
+    if (!data.WriteUint64(SessionOption.rsId_)) {
+        WLOGFE("Write rsId failed");
+        return;
+    }
+    if (!data.WriteString(SessionOption.name_)) {
+        WLOGFE("Write name failed");
+        return;
+    }
+    if (!data.WriteBool(SessionOption.isExtend_)) {
+        WLOGFE("Write isExtended failed");
+        return;
+    }
+    if (!data.WriteString(SessionOption.innerName_)) {
+        WLOGFE("Write innerName failed");
+        return;
+    }
+    if (!data.WriteUint64(SessionOption.screenId_)) {
         WLOGFE("Write screenId failed");
         return;
     }
     if (!data.WriteUint8(static_cast<uint8_t>(screenEvent))) {
         WLOGFE("Write screenEvent failed");
-        return;
-    }
-    if (!data.WriteUint64(rsId)) {
-        WLOGFE("Write rsId failed");
-        return;
-    }
-    if (!data.WriteString(name)) {
-        WLOGFE("Write name failed");
-        return;
-    }
-    if (!data.WriteBool(isExtend)) {
-        WLOGFE("Write isExtended failed");
         return;
     }
     if (remote->SendRequest(
@@ -607,6 +610,36 @@ void ScreenSessionManagerClientProxy::ScreenCaptureNotify(ScreenId mainScreenId,
     }
 }
 
+void ScreenSessionManagerClientProxy::OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(screenId)) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteBool(isCameraBackSelfie)) {
+        WLOGFE("Write isCameraBackSelfie failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
 void ScreenSessionManagerClientProxy::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -631,6 +664,37 @@ void ScreenSessionManagerClientProxy::OnSuperFoldStatusChanged(ScreenId screenId
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SUPER_FOLD_STATUS_CHANGED),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return;
+    }
+}
+
+void ScreenSessionManagerClientProxy::OnExtendScreenConnectStatusChanged(ScreenId screenId,
+    ExtendScreenConnectStatus extendScreenConnectStatus)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGE("remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
+        WLOGFE("Write screenId failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(extendScreenConnectStatus))) {
+        WLOGFE("Write extendScreenConnectStatus failed");
+        return;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGED),
         data, reply, option) != ERR_NONE) {
         WLOGFE("SendRequest failed");
         return;

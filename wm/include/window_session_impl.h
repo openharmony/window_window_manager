@@ -39,6 +39,7 @@
 #include "window_helper.h"
 #include "window_option.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -165,7 +166,6 @@ public:
     WMError RequestFocusByClient(bool isFocused) const override;
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError HandleBackEvent() override;
-    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     KeyboardAnimationConfig GetKeyboardAnimationConfig() override;
     bool NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void NotifyPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -222,6 +222,8 @@ public:
     int32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
+    void NotifyAfterDidBackground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyForegroundFailed(WMError ret);
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
@@ -261,7 +263,7 @@ public:
     WSError NotifyPipWindowSizeChange(uint32_t width, uint32_t height, double scale) override;
     void UpdatePiPRect(const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status) override;
-    void SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
+    void SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
 
     void SetDrawingContentState(bool drawingContentState);
     WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
@@ -274,6 +276,7 @@ public:
      * Window Decor
      */
     WMError SetDecorVisible(bool isVisible) override;
+    WMError GetDecorVisible(bool& isVisible) override;
     WMError SetWindowTitleMoveEnabled(bool enable) override;
     WMError SetDecorHeight(int32_t decorHeight) override;
     WMError GetDecorHeight(int32_t& height) override;
@@ -350,6 +353,11 @@ public:
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     bool IsSystemWindow() const override { return WindowHelper::IsSystemWindow(GetType()); }
     bool IsAppWindow() const override { return WindowHelper::IsAppWindow(GetType()); }
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
 
     /*
      * Window Property
@@ -465,6 +473,7 @@ protected:
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
     std::atomic_bool isHighlighted_ = false;
+    std::atomic_bool shouldReNotifyHighlight_ = false;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -504,6 +513,7 @@ protected:
      */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
+    bool isDidForeground_ = false;
 
     /*
      * Window Layout
@@ -590,6 +600,7 @@ private:
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
     void NotifyAfterResumed();
     void NotifyAfterPaused();
+    void NotifyUIContentHighlightStatus(bool isHighlighted);
 
     /*
      * Window Decor listener
@@ -748,6 +759,11 @@ private:
     MouseEventFilterFunc mouseEventFilter_;
     std::mutex touchEventFilterMutex_;
     TouchEventFilterFunc touchEventFilter_;
+
+    /*
+     * Window Scene
+     */
+    WSError NotifyWindowAttachStateChange(bool isAttach) override { return WSError::WS_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -202,6 +202,24 @@ napi_value JsScreenUtils::CreateJsSuperFoldStatus(napi_env env)
     return objValue;
 }
 
+napi_value JsScreenUtils::CreateJsExtendScreenConnectStatus(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        WLOGFE("Failed to create object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "UNKNOWN", CreateJsValue(env,
+        static_cast<int32_t>(ExtendScreenConnectStatus::UNKNOWN)));
+    napi_set_named_property(env, objValue, "CONNECT", CreateJsValue(env,
+        static_cast<int32_t>(ExtendScreenConnectStatus::CONNECT)));
+    napi_set_named_property(env, objValue, "DISCONNECT", CreateJsValue(env,
+        static_cast<int32_t>(ExtendScreenConnectStatus::DISCONNECT)));
+    return objValue;
+}
+
 bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 {
     napi_value jsLeft = nullptr, jsTop = nullptr, jsWidth = nullptr, jsHeight = nullptr, jsRadius = nullptr;
@@ -256,7 +274,10 @@ bool ConvertRRectFromJs(napi_env env, napi_value jsObject, RRect& bound)
 
 bool ConvertScreenDirectionInfoFromJs(napi_env env, napi_value jsObject, ScreenDirectionInfo& directionInfo)
 {
-    napi_value jsNotifyRotation = nullptr, jsScreenRotation = nullptr, jsRotation = nullptr, jsPhyRotation = nullptr;
+    napi_value jsNotifyRotation = nullptr;
+    napi_value jsScreenRotation = nullptr;
+    napi_value jsRotation = nullptr;
+    napi_value jsPhyRotation = nullptr;
     napi_get_named_property(env, jsObject, "notifyRotation", &jsNotifyRotation);
     napi_get_named_property(env, jsObject, "screenRotation", &jsScreenRotation);
     napi_get_named_property(env, jsObject, "rotation", &jsRotation);

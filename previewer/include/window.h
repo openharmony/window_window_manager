@@ -166,6 +166,12 @@ public:
     virtual WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea) = 0;
     virtual WMError SetAvoidAreaOption(uint32_t avoidAreaOption) { return WMError::WM_OK; }
     virtual WMError GetAvoidAreaOption(uint32_t& avoidAreaOption) { return WMError::WM_OK; }
+    virtual WMError UpdateSystemBarProperties(
+        const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags)
+        { return WMError::WM_OK; }
+    virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) {}
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) = 0;
     virtual WMError SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
@@ -362,6 +368,7 @@ public:
     virtual WMError SetSingleFrameComposerEnabled(bool enable) = 0;
     virtual WMError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) = 0;
     virtual WMError SetDecorVisible(bool isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError GetDecorVisible(bool& isVisible) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowTitleMoveEnabled(bool enable) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetWindowTitle(const std::string& title) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetTitleButtonVisible(bool isMaximizeVisible, bool isMinimizeVisible, bool isSplitVisible,
@@ -494,7 +501,7 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    
+
     /**
      * @brief Get highlight property of window.
      *
@@ -502,6 +509,21 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Get the api version.
+     *
+     * @return Api version
+     */
+    virtual uint32_t GetApiVersion() const { return 0; }
+    
+    /**
+     * @brief Set the feature of subwindow follow the layout of the parent window.
+     *
+     * @param isFollow true - follow, false - not follow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_SYSTEM_ABNORMALLY; }
 };
 }
 }

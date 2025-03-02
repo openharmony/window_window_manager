@@ -28,8 +28,7 @@ public:
     virtual ~ScreenSessionManagerClientProxy() = default;
 
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) override;
+    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -50,8 +49,11 @@ public:
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override;
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
+    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerClientProxy> delegator_;

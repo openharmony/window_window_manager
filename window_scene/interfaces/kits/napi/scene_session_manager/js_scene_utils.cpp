@@ -999,6 +999,21 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     return objValue;
 }
 
+napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "needRemoveSession",
+        CreateJsValue(env, exceptionInfo.needRemoveSession));
+    napi_set_named_property(env, objValue, "needClearCallerLink",
+        CreateJsValue(env, exceptionInfo.needClearCallerLink));
+    return objValue;
+}
+
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {
@@ -1184,9 +1199,36 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
     napi_set_named_property(env, objValue, "FLOATING_TO_FULL", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::FLOATING_TO_FULL)));
     CreatePiPSizeChangeReason(env, objValue);
+    napi_set_named_property(env, objValue, "MAXIMIZE_TO_SPLIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::MAXIMIZE_TO_SPLIT)));
+    napi_set_named_property(env, objValue, "SPLIT_TO_MAXIMIZE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_TO_MAXIMIZE)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
+    return objValue;
+}
+
+napi_value CreateJsRSUIFirstSwitch(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::NONE)));
+    napi_set_named_property(env, objValue, "MODAL_WINDOW_CLOSE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::MODAL_WINDOW_CLOSE)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE_LIMIT)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE_NONFOCUS", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS)));
     return objValue;
 }
 
@@ -1671,8 +1713,8 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
-    SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
+    SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     return objValue;
 }
 

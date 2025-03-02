@@ -292,6 +292,9 @@ DMError ScreenManagerLite::RegisterScreenModeChangeListener(sptr<IScreenModeChan
         WLOGFE("RegisterScreenListener listener is nullptr.");
         return DMError::DM_ERROR_NULLPTR;
     }
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    GetPhysicalScreenInfos(screenInfos);
+    listener->NotifyScreenModeChange(screenInfos);
     return pImpl_->RegisterScreenModeChangeListener(listener);
 }
 
@@ -417,6 +420,21 @@ DMError ScreenManagerLite::GetPhysicalScreenIds(std::vector<uint64_t>& screenIds
         auto id = screenInfo->GetScreenId();
         if (screenInfo->GetType() == ScreenType::REAL && id != SCREEN_ID_INVALID) {
             screenIds.push_back(id);
+        }
+    }
+    return DMError::DM_OK;
+}
+
+DMError ScreenManagerLite::GetPhysicalScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+{
+    std::vector<sptr<ScreenInfo>> allScreenInfos;
+    DMError ret = SingletonContainer::Get<ScreenManagerAdapterLite>().GetAllScreenInfos(allScreenInfos);
+    if (ret != DMError::DM_OK) {
+        return ret;
+    }
+    for (const auto& screenInfo : allScreenInfos) {
+        if (screenInfo->GetType() == ScreenType::REAL) {
+            screenInfos.push_back(screenInfo);
         }
     }
     return DMError::DM_OK;

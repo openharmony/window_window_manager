@@ -205,7 +205,6 @@ public:
     void SetSCBUnfocusedListener(const NotifySCBAfterUpdateFocusFunc& func);
     void SetCallingSessionIdSessionListenser(const ProcessCallingSessionIdChangeFunc& func);
     void SetDumpUITreeFunc(const DumpUITreeFunc& func);
-    void RegisterSessionFoldStateChangeListener();
     const AppWindowSceneConfig& GetWindowSceneConfig() const;
 
     /*
@@ -295,7 +294,7 @@ public:
      * Multi User
      */
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
-    void NotifySwitchingUser(const bool isUserActive);
+    void HandleUserSwitch(const UserSwitchEventType type, const bool isUserActive);
     int32_t GetCurrentUserId() const;
 
     void StartWindowInfoReportLoop();
@@ -420,7 +419,7 @@ public:
     void NotifyUpdateRectAfterLayout();
     void FlushUIParams(ScreenId screenId, std::unordered_map<int32_t, SessionUIParam>&& uiParams);
     WSError UpdateSessionWindowVisibilityListener(int32_t persistentId, bool haveListener) override;
-    WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType);
+    WMError SetSystemAnimatedScenes(SystemAnimatedSceneType sceneType, bool isRegularAnimation = false);
 
     std::shared_ptr<Media::PixelMap> GetSessionSnapshotPixelMap(const int32_t persistentId, const float scaleParam);
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
@@ -622,8 +621,10 @@ public:
     /*
      * Window Pattern
      */
+    void InitSnapshotCache();
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
+    void RemoveSnapshotFromCache(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -719,7 +720,7 @@ private:
      */
     WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    WSError RequestSessionFocusImmediately(int32_t persistentId);
+    WSError RequestSessionFocusImmediately(int32_t persistentId, bool blockNotifyUntilVisible = true);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
     WSError RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup);
@@ -811,7 +812,7 @@ private:
         REQUIRES(SCENE_GUARD);
     WSError SetBrightness(const sptr<SceneSession>& sceneSession, float brightness);
     void PostBrightnessTask(float brightness);
-    WSError UpdateBrightness(int32_t persistentId);
+    WSError UpdateBrightness(int32_t persistentId, bool onBackGround);
     void SetDisplayBrightness(float brightness);
     float GetDisplayBrightness() const;
     void HandleHideNonSystemFloatingWindows(const sptr<WindowSessionProperty>& property,
@@ -900,6 +901,9 @@ private:
     bool IsPcSceneSessionLifecycle(const sptr<SceneSession>& sceneSession);
     bool IsNeedChangeLifeCycleOnUserSwitch(const sptr<SceneSession>& sceneSession, int32_t pid);
     WSError StartOrMinimizeUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isUserActive);
+    void ProcessUIAbilityOnUserSwitch(bool isUserActive);
+    void HandleUserSwitching(bool isUserActive);
+    void HandleUserSwitched(bool isUserActive);
 
     /*
      * Window Recover
@@ -1308,6 +1312,7 @@ private:
      * Window Pattern
      */
     std::unique_ptr<LRUCache> snapshotLRUCache_;
+    std::size_t snapCapacity_ = 0;
 };
 } // namespace OHOS::Rosen
 

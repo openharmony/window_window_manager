@@ -39,6 +39,7 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
+    void Resume() override;
 
     /*
      * Window Layout
@@ -52,6 +53,7 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError ResizeAsync(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
@@ -60,12 +62,7 @@ public:
     WMError ResetAspectRatio() override;
     WMError SetGlobalMaximizeMode(MaximizeMode mode) override;
     MaximizeMode GetGlobalMaximizeMode() const override;
-    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
-        int32_t apiVersion = API_VERSION_INVALID) override;
-    SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
-    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
-    WMError SetLayoutFullScreen(bool status) override;
-    WMError SetFullScreen(bool status) override;
+
     WMError BindDialogTarget(sptr<IRemoteObject> targetToken) override;
     WMError SetDialogBackGestureEnabled(bool isEnabled) override;
     WMError GetWindowLimits(WindowLimits& windowLimits) override;
@@ -218,6 +215,7 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
+    uint32_t GetApiVersion() const override;
 
     /*
      * Window Decor
@@ -232,6 +230,27 @@ public:
      * Starting Window
      */
     WMError NotifyRemoveStartingWindow() override;
+
+    /*
+     * Window Scene
+     */
+    WMError RegisterWindowAttachStateChangeListener(
+        const sptr<IWindowAttachStateChangeListner>& listener) override;
+    WMError UnregisterWindowAttachStateChangeListener() override;
+
+    /*
+     * Window Immersive
+     */
+    WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) override;
+    SystemBarProperty GetSystemBarPropertyByType(WindowType type) const override;
+    WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetLayoutFullScreen(bool status) override;
+    WMError SetFullScreen(bool status) override;
+    WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
+        SystemBarProperty& property) override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -251,7 +270,7 @@ protected:
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
-    
+
     /*
      * Window Recover
      */
@@ -272,6 +291,7 @@ private:
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     void UpdateWindowState();
     void UpdateNewSize();
+    void UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& info, const DMRect& availableArea);
     void fillWindowLimits(WindowLimits& windowLimits);
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
@@ -375,7 +395,7 @@ private:
      * Move Drag
      */
     bool CalcWindowShouldMove();
-    
+
     /*
      * PC Window
      */
@@ -388,6 +408,19 @@ private:
      * Window Input Event
      */
     int32_t superFoldOffsetY_ = -1; // calculate the total height of the display_B area and crease area.
+
+    /*
+     * Window Scene
+     */
+    static std::mutex windowAttachStateChangeListenerMutex_;
+    sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
+    WSError NotifyWindowAttachStateChange(bool isAttach) override;
+
+    /*
+     * Window Lifecycle
+     */
+    bool isColdStart_ = true;
+    void NotifyFreeMultiWindowModeResume();
 };
 } // namespace Rosen
 } // namespace OHOS

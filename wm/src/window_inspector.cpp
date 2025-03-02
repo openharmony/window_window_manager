@@ -65,7 +65,12 @@ WindowInspector::WindowInspector()
 
 void WindowInspector::ConnectServer()
 {
-    handlerConnectServerSo_ = dlopen(ARK_CONNECT_LIB_PATH, RTLD_NOW);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "start connect");
+    handlerConnectServerSo_ = dlopen(ARK_CONNECT_LIB_PATH, RTLD_NOLOAD);
+    if (handlerConnectServerSo_ == nullptr) {
+        handlerConnectServerSo_ = dlopen(ARK_CONNECT_LIB_PATH, RTLD_NOW);
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "noload fail: %{public}s", ARK_CONNECT_LIB_PATH);
+    }
     if (handlerConnectServerSo_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "can't open %{public}s", ARK_CONNECT_LIB_PATH);
         return;
@@ -73,7 +78,6 @@ void WindowInspector::ConnectServer()
     setWMSCallbackFunc_ = reinterpret_cast<SetWMSCallbackFunc>(dlsym(handlerConnectServerSo_, SET_WMS_CALLBACK));
     sendWMSMessageFunc_ = reinterpret_cast<SendWMSMessageFunc>(dlsym(handlerConnectServerSo_, SEND_WMS_MESSAGE));
     if (setWMSCallbackFunc_ == nullptr || sendWMSMessageFunc_ == nullptr) {
-        CloseConnectFromServer();
         setWMSCallbackFunc_ = nullptr;
         sendWMSMessageFunc_ = nullptr;
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "load failed: %{public}s", dlerror());
@@ -86,13 +90,7 @@ void WindowInspector::ConnectServer()
         }
     });
     isConnectServerSuccess_ = true;
-    CloseConnectFromServer();
-}
-
-void WindowInspector::CloseConnectFromServer()
-{
-    dlclose(handlerConnectServerSo_);
-    handlerConnectServerSo_ = nullptr;
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "end connect");
 }
 
 bool WindowInspector::IsConnectServerSuccess() const
@@ -129,6 +127,10 @@ bool WindowInspector::ProcessArkUIInspectorMessage(const std::string& message, s
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "receive callback");
     nlohmann::json jsonMessage = nlohmann::json::parse(message, nullptr, false);
+    if (jsonMessage.is_discarded()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "json::parse err");
+        return false;
+    }
     if (!jsonMessage.contains("method") || jsonMessage["method"].get<std::string>() != METHOD_NAME) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "received method err");
         return false;
