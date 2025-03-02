@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./sts",
+    "paths": {
+      "std": [
+        "../../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/std"
+      ],
+      "escompat": [
+        "../../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/escompat"
+      ],
+      "@ohos.window": [
+        "./window.ets"
+      ]
+    },
+    "outDir": "./cache",
+    "package": "@ohos"
+  },
+  "files": [
+    "./sts/window.ets",
+    "./sts/window_entry.ets"
+  ]
+}
