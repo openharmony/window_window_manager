@@ -2163,9 +2163,13 @@ void WindowSceneSessionImpl::HookDecorButtonStyleInCompatibleMode(uint32_t color
     if (!property_->GetCompatibleModeInPc()) {
         return;
     }
+    // alpha Color Channel
     auto alpha = (color >> 24) & 0xFF;
+    // R Color Channel
     auto red = (color >> 16) & 0xFF;
+    // G Color Channel
     auto green = (color >> 8) & 0xFF;
+    // B Color Channel
     auto blue = color & 0xFF;
     // calculate luminance, Identify whether a color is more black or more white.
     double luminance = 0.299 * red + 0.587 * green + 0.114 * blue;

@@ -1014,6 +1014,19 @@ HWTEST_F(ScreenSessionManagerClientTest, UpdateDisplayHookInfo, Function | Small
 }
 
 /**
+ * @tc.name: GetDisplayHookInfo
+ * @tc.desc: GetDisplayHookInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, GetDisplayHookInfo, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    DMHookInfo hookInfo;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->GetDisplayHookInfo(uid, hookInfo);
+}
+
+/**
  * @tc.name: OnFoldStatusChangedReportUE
  * @tc.desc: OnFoldStatusChangedReportUE test
  * @tc.type: FUNC
