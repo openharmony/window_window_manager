@@ -47,6 +47,8 @@ ohos_shared_library("embeddablewindowstageani_kit") {
   sources = [
     "src/ani_embeddable_window_stage.cpp",
     "src/ani_extension_window.cpp",
+    "src/ani_extension_window_listener.cpp",
+    "src/ani_extension_window_register_manager.cpp",
   ]
 
   configs = [

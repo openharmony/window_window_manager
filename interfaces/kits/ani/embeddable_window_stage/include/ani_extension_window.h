@@ -17,6 +17,8 @@
 #define OHOS_ANI_EXTENSION_WINDOW_H
 
 #include "ani.h"
+#include "ani_extension_window_register_manager.h"
+#include "extension_window.h"
 #include "extension_window.h"
 #include "session_info.h"
 
@@ -36,11 +38,14 @@ public:
     static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId);
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea);
     WMError GetRect(Rect&);
+    WMError RegisterListener(const std::string& cbType, ani_env* env, ani_object fn, ani_object fnArg);
+    WMError UnregisterListener(const std::string& cbType, ani_env* env, ani_object fn);
 private:
     bool WindowIsValid();
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
+    std::unique_ptr<AniExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;
 };
 
 }  // namespace Rosen
