@@ -71,7 +71,8 @@ using NotifyTerminateSessionFuncNew =
 using NotifyTerminateSessionFuncTotal = std::function<void(const SessionInfo& info, TerminateType terminateType)>;
 using NofitySessionLabelUpdatedFunc = std::function<void(const std::string& label)>;
 using NofitySessionIconUpdatedFunc = std::function<void(const std::string& iconPath)>;
-using NotifySessionExceptionFunc = std::function<void(const SessionInfo& info, bool needRemoveSession, bool startFail)>;
+using NotifySessionExceptionFunc =
+    std::function<void(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail)>;
 using NotifySessionSnapshotFunc = std::function<void(const int32_t& persistentId)>;
 using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInfo& info)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
@@ -96,6 +97,7 @@ using NofitySessionLabelAndIconUpdatedFunc =
     std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, KeyboardViewMode mode)>;
 using NotifyHighlightChangeFunc = std::function<void(bool isHighlight)>;
+using NotifySurfaceBoundsChangeFunc = std::function<void(const WSRect& rect, bool isGlobal, bool needFlush)>;
 
 class ILifecycleListener {
 public:
@@ -229,11 +231,29 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+
+    /*
+     * Window Scene Snapshot
+     */
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt, bool needPersist = true);
+    void SetSaveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            saveSnapshotCallback_ = std::move(task);
+        }
+    };
+
+    void SetRemoveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            removeSnapshotCallback_ = std::move(task);
+        }
+    };
+    
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -521,6 +541,7 @@ public:
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+    void SetNeedNotifyAttachState(bool needNotify);
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
@@ -589,6 +610,8 @@ public:
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
     void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
+    virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
+    virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
 
     /*
      * Screen Lock
@@ -920,7 +943,7 @@ private:
     bool enableRemoveStartingWindow_ { false };
     bool appBufferReady_ { false };
     bool useStartingWindowAboveLocked_ { false };
-
+    
     /*
      * Window Layout
      */
@@ -932,6 +955,13 @@ private:
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };
+
+    /*
+     * Window Scene Snapshot
+     */
+    Task saveSnapshotCallback_ = []() {};
+    Task removeSnapshotCallback_ = []() {};
+    std::atomic<bool> needNotifyAttachState_ = { false };
 };
 } // namespace OHOS::Rosen
 

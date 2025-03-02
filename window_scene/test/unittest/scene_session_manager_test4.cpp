@@ -857,7 +857,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateRootSceneSessionAvoidArea, Function | S
 {
     ASSERT_NE(nullptr, ssm_);
     int32_t persistentId = 1;
-    ssm_->rootSceneSession_ = ssm_->GetRootSceneSession();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ASSERT_NE(nullptr, ssm_->rootSceneSession_);
     bool needUpdate = false;
     ssm_->UpdateRootSceneSessionAvoidArea(persistentId, needUpdate);
@@ -1526,7 +1526,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateBrightness, Function | SmallTest | Leve
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    WSError result = ssm_->UpdateBrightness(1);
+    WSError result = ssm_->UpdateBrightness(1, false);
     EXPECT_EQ(result, WSError::WS_DO_NOTHING);
 
     SessionInfo sessionInfo02;
@@ -1538,7 +1538,7 @@ HWTEST_F(SceneSessionManagerTest4, UpdateBrightness, Function | SmallTest | Leve
     ssm_->sceneSessionMap_.insert(std::make_pair(2, sceneSession02));
     sceneSession02->property_->SetBrightness(50.f);
     ssm_->SetDisplayBrightness(40.f);
-    result = ssm_->UpdateBrightness(2);
+    result = ssm_->UpdateBrightness(2, false);
     EXPECT_EQ(ssm_->displayBrightness_, 50);
     EXPECT_EQ(result, WSError::WS_OK);
 }
@@ -1562,31 +1562,32 @@ HWTEST_F(SceneSessionManagerTest4, RegisterSessionExceptionFunc, Function | Smal
         std::make_shared<SessionListenerController>();
     ssm_->listenerController_ = listenerController;
     ASSERT_NE(ssm_->listenerController_, nullptr);
+    ExceptionInfo exceptionInfo;
     ssm_->RegisterSessionExceptionFunc(sceneSession);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo, nullptr);
-    WSError result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    WSError result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     abilitySessionInfo->errorCode = 1;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     abilitySessionInfo->errorCode = 0;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     sessionInfo.isSystem_ = false;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     ssm_->listenerController_ = nullptr;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
 
     sessionInfo.persistentId_ = 2;
-    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, false, false);
+    result = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false);
     EXPECT_EQ(result, WSError::WS_OK);
     usleep(WAIT_SYNC_IN_NS);
 }

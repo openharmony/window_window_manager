@@ -13,30 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_LRUCACHE_H
-#define OHOS_ROSEN_LRUCACHE_H
+#ifndef SCREEN_POWER_UTILS_H
+#define SCREEN_POWER_UTILS_H
 
-#include <list>
-#include <unordered_map>
+#include <atomic>
 #include <mutex>
 
-namespace OHOS::Rosen {
-namespace {
-constexpr int32_t UNDEFINED_REMOVED_KEY = -1;
-} // namespace
-class LRUCache {
+namespace OHOS {
+namespace Rosen {
+class ScreenPowerUtils {
 public:
-    LRUCache(std::size_t capacity) : capacity_(capacity) {}
-
-    bool Visit(int32_t key);
-    int32_t Put(int32_t key);
-    void Remove(int32_t key);
+    ScreenPowerUtils() {}
+    ~ScreenPowerUtils() {}
+    static void EnablePowerForceTimingOut();
+    static void DisablePowerForceTimingOut();
+    static void LightAndLockScreen(const std::string& detail);
+    static bool GetEnablePowerForceTimingOut();
 
 private:
-    const std::size_t capacity_;
-    std::list<int32_t> cacheList_;
-    std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
-    mutable std::mutex LRUCacheMutex_;
+    static std::mutex powerTimingMutex_;
+    static bool isEnablePowerForceTimingOut_;
 };
-} // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_LRUCACHE_H
+} // Rosen
+} // OHOS
+#endif
+

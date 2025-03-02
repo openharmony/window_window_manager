@@ -256,7 +256,7 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | Small
     rect = {0, 2000, 100, 100};
     auto rect2 = rect;
     session_->UpdateClientRectPosYAndDisplayId(rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_ / 2);
+    EXPECT_EQ(rect.posY_, rect2.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_);
 }
 
 /**

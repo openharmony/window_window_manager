@@ -86,8 +86,9 @@ enum class ApiWindowType : uint32_t {
     TYPE_DIVIDER,
     TYPE_GLOBAL_SEARCH,
     TYPE_HANDWRITE,
-    TYPE_SCREEN_CONTROL,
     TYPE_WALLET_SWIPE_CARD,
+    TYPE_SCREEN_CONTROL,
+    TYPE_MAIN = 32,
     TYPE_END
 };
 
@@ -124,8 +125,9 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DOCK_SLICE,          ApiWindowType::TYPE_DIVIDER           },
     { WindowType::WINDOW_TYPE_GLOBAL_SEARCH,       ApiWindowType::TYPE_GLOBAL_SEARCH     },
     { WindowType::WINDOW_TYPE_HANDWRITE,           ApiWindowType::TYPE_HANDWRITE         },
-    { WindowType::WINDOW_TYPE_SCREEN_CONTROL,      ApiWindowType::TYPE_SCREEN_CONTROL    },
     { WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD,   ApiWindowType::TYPE_WALLET_SWIPE_CARD },
+    { WindowType::WINDOW_TYPE_SCREEN_CONTROL,      ApiWindowType::TYPE_SCREEN_CONTROL    },
+    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     ApiWindowType::TYPE_MAIN              },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -151,8 +153,9 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_DIVIDER,             WindowType::WINDOW_TYPE_DOCK_SLICE          },
     { ApiWindowType::TYPE_GLOBAL_SEARCH,       WindowType::WINDOW_TYPE_GLOBAL_SEARCH       },
     { ApiWindowType::TYPE_HANDWRITE,           WindowType::WINDOW_TYPE_HANDWRITE           },
-    { ApiWindowType::TYPE_SCREEN_CONTROL,      WindowType::WINDOW_TYPE_SCREEN_CONTROL      },
     { ApiWindowType::TYPE_WALLET_SWIPE_CARD,   WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD   },
+    { ApiWindowType::TYPE_SCREEN_CONTROL,      WindowType::WINDOW_TYPE_SCREEN_CONTROL      },
+    { ApiWindowType::TYPE_MAIN,                WindowType::WINDOW_TYPE_APP_MAIN_WINDOW     },
 };
 
 enum class ApiWindowMode : uint32_t {
@@ -274,6 +277,8 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::SPLIT_TO_FULL,         RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::FULL_TO_FLOATING,      RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::FLOATING_TO_FULL,      RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::MAXIMIZE_TO_SPLIT,     RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::SPLIT_TO_MAXIMIZE,     RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::END,                   RectChangeReason::UNDEFINED  },
 };
 
@@ -315,17 +320,17 @@ public:
     napi_value CreateJsWindowPropertiesObject(napi_env env, sptr<Window>& window, const Rect& drawableRect);
     napi_value CreateJsSystemBarPropertiesObject(napi_env env, sptr<Window>& window);
     bool GetSystemBarPropertiesFromJs(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool SetWindowStatusBarContentColor(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool SetWindowNavigationBarContentColor(napi_env env, napi_value jsObject,
-        std::map<WindowType, SystemBarProperty>& properties,
-        std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& properties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& propertyFlags);
     bool GetSystemBarStatus(napi_env env, napi_callback_info info,
-        std::map<WindowType, SystemBarProperty>& systemBarProperties,
-        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
+        std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
+        std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags);
     napi_value GetStatusBarPropertyObject(napi_env env, sptr<Window>& window);
     bool ParseColorMetrics(napi_env env, napi_value value, uint32_t& colorValue);
     bool GetWindowBackgroundColorFromJs(napi_env env, napi_value value, std::string& colorStr);

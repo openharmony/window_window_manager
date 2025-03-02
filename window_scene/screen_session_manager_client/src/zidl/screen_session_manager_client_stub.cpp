@@ -108,6 +108,14 @@ void ScreenSessionManagerClientStub::InitScreenChangeMap()
         [this](MessageParcel& data, MessageParcel& reply) {
         return HandleOnSecondaryReflexionChanged(data, reply);
     };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnCameraBackSelfieChanged(data, reply);
+    };
+    HandleScreenChangeMap_[ScreenSessionManagerClientMessage::TRANS_ID_ON_EXTEND_SCREEN_CONNECT_STATUS_CHANGED] =
+        [this](MessageParcel& data, MessageParcel& reply) {
+        return HandleOnExtendScreenConnectStatusChanged(data, reply);
+    };
 }
 
 ScreenSessionManagerClientStub::ScreenSessionManagerClientStub()
@@ -148,12 +156,20 @@ int ScreenSessionManagerClientStub::HandleSwitchUserCallback(MessageParcel& data
 int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParcel& data, MessageParcel& reply)
 {
     WLOGD("HandleOnScreenConnectionChanged");
-    auto screenId = static_cast<ScreenId>(data.ReadUint64());
-    auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
     auto rsId = static_cast<ScreenId>(data.ReadUint64());
     auto name = data.ReadString();
     bool isExtend = data.ReadBool();
-    OnScreenConnectionChanged(screenId, screenEvent, rsId, name, isExtend);
+    auto innerName = data.ReadString();
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto screenEvent = static_cast<ScreenEvent>(data.ReadUint8());
+    SessionOption option = {
+        .rsId_ = rsId,
+        .name_ = name,
+        .isExtend_ = isExtend,
+        .innerName_ = innerName,
+        .screenId_ = screenId,
+    };
+    OnScreenConnectionChanged(option, screenEvent);
     return ERR_NONE;
 }
 
@@ -325,6 +341,15 @@ int ScreenSessionManagerClientStub::HandleScreenCaptureNotify(MessageParcel& dat
     return ERR_NONE;
 }
 
+int ScreenSessionManagerClientStub::HandleOnCameraBackSelfieChanged(MessageParcel& data, MessageParcel& reply)
+{
+    WLOGD("HandleOnCameraBackSelfieChanged");
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    bool isCameraBackSelfie = data.ReadBool();
+    OnCameraBackSelfieChanged(screenId, isCameraBackSelfie);
+    return ERR_NONE;
+}
+
 int ScreenSessionManagerClientStub::HandleOnSuperFoldStatusChanged(MessageParcel& data, MessageParcel& reply)
 {
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
@@ -342,6 +367,16 @@ int ScreenSessionManagerClientStub::HandleOnSecondaryReflexionChanged(MessagePar
     WLOGI("secondary reflexion screenId=%{public}" PRIu64", isSecondaryReflexion=%{public}d.",
         screenId, static_cast<uint32_t>(isSecondaryReflexion));
     OnSecondaryReflexionChanged(screenId, isSecondaryReflexion);
+    return ERR_NONE;
+}
+
+int ScreenSessionManagerClientStub::HandleOnExtendScreenConnectStatusChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto screenId = static_cast<ScreenId>(data.ReadUint64());
+    auto extendScreenConnectStatus = static_cast<ExtendScreenConnectStatus>(data.ReadUint32());
+    WLOGI("extendScreenConnectStatus screenId=%{public}" PRIu64", extendScreenConnectStatus=%{public}d.",
+        screenId, static_cast<uint32_t>(extendScreenConnectStatus));
+    OnExtendScreenConnectStatusChanged(screenId, extendScreenConnectStatus);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

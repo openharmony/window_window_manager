@@ -16,8 +16,10 @@
 #ifndef OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 #define OHOS_WM_INCLUDE_WINDOW_MANAGER_HILOG_H
 
-#include "hilog/log.h"
+#include <cstdint>
 #include <unordered_map>
+#include "hilog/log.h"
+
 namespace OHOS {
 namespace Rosen {
 static constexpr unsigned int HILOG_DOMAIN_WINDOW = 0xD004200;
@@ -67,6 +69,8 @@ enum class WmsLogTag : uint8_t {
     WMS_LAYOUT_PC,             // C0421A
     WMS_STARTUP_PAGE,          // C0421B
     WMS_COMPAT,                // C0421C
+    WMS_ROTATION,              // C0421D
+    WMS_ANIMATION,             // C0421E
     END = 256,                 // Last one, do not use
 };
 

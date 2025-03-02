@@ -15,6 +15,7 @@
 
 #include "session/screen/include/screen_property.h"
 #include "parameters.h"
+#include "fold_screen_state_internel.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -68,6 +69,12 @@ float ScreenProperty::GetScreenComponentRotation() const
 void ScreenProperty::SetBounds(const RRect& bounds)
 {
     bounds_ = bounds;
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
+        physicalTouchBounds_.rect_.left_ = bounds_.rect_.left_;
+        physicalTouchBounds_.rect_.top_ = bounds_.rect_.top_;
+    }
     UpdateXDpi();
     UpdateYDpi();
 }
@@ -546,6 +553,32 @@ void ScreenProperty::SetScreenShape(ScreenShape screenShape)
 ScreenShape ScreenProperty::GetScreenShape() const
 {
     return screenShape_;
+}
+
+void ScreenProperty::SetX(int32_t x)
+{
+    x_ = x;
+}
+
+int32_t ScreenProperty::GetX() const
+{
+    return x_;
+}
+
+void ScreenProperty::SetY(int32_t y)
+{
+    y_ = y;
+}
+
+int32_t ScreenProperty::GetY() const
+{
+    return y_;
+}
+
+void ScreenProperty::SetXYPosition(int32_t x, int32_t y)
+{
+    x_ = x;
+    y_ = y;
 }
 
 RRect ScreenProperty::GetPhysicalTouchBounds()

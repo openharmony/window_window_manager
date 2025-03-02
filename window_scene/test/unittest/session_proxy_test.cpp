@@ -417,7 +417,9 @@ HWTEST_F(SessionProxyTest, SetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_NE(sProxy, nullptr);
     bool isAutoStartValid = true;
     uint32_t priority = 0;
-    ASSERT_EQ(WSError::WS_OK, sProxy->SetAutoStartPiP(isAutoStartValid, priority));
+    uint32_t width = 0;
+    uint32_t height = 0;
+    ASSERT_EQ(WSError::WS_OK, sProxy->SetAutoStartPiP(isAutoStartValid, priority, width, height));
     GTEST_LOG_(INFO) << "SetAutoStartPiP: SetAutoStartPiP end";
 }
 
@@ -1280,7 +1282,7 @@ HWTEST_F(SessionProxyTest, NotifySubModalTypeChange, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: SetWindowCornerRadius
+ * @tc.name: GetCrossAxisState
  * @tc.desc: normal function
  * @tc.type: FUNC
  */

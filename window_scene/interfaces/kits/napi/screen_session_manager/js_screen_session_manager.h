@@ -49,6 +49,7 @@ private:
     static napi_value GetPhyScreenProperty(napi_env env, napi_callback_info info);
     static napi_value NotifyScreenLockEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateAvailableArea(napi_env env, napi_callback_info info);
+    static napi_value ExtraDestroyScreen(napi_env env, napi_callback_info info);
     static napi_value UpdateSuperFoldAvailableArea(napi_env env, napi_callback_info info);
     static napi_value UpdateSuperFoldExpandAvailableArea(napi_env env, napi_callback_info info);
     static napi_value SetScreenOffDelayTime(napi_env env, napi_callback_info info);
@@ -60,6 +61,7 @@ private:
     static napi_value GetSuperFoldStatus(napi_env env, napi_callback_info info);
     static napi_value GetScreenSnapshot(napi_env env, napi_callback_info info);
     static napi_value GetDeviceScreenConfig(napi_env env, napi_callback_info info);
+    static napi_value GetExtendScreenConnectStatus(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
@@ -69,6 +71,7 @@ private:
     napi_value OnGetPhyScreenProperty(napi_env env, const napi_callback_info info);
     napi_value OnNotifyScreenLockEvent(napi_env env, const napi_callback_info info);
     napi_value OnUpdateAvailableArea(napi_env env, const napi_callback_info info);
+    napi_value OnExtraDestroyScreen(napi_env env, const napi_callback_info info);
     napi_value OnUpdateSuperFoldAvailableArea(napi_env env, const napi_callback_info info);
     napi_value OnUpdateSuperFoldExpandAvailableArea(napi_env env, const napi_callback_info info);
     napi_value OnSetScreenOffDelayTime(napi_env env, const napi_callback_info info);
@@ -80,6 +83,7 @@ private:
     napi_value OnGetSuperFoldStatus(napi_env env, const napi_callback_info info);
     napi_value OnGetScreenSnapshot(napi_env env, const napi_callback_info info);
     napi_value OnGetDeviceScreenConfig(napi_env env, const napi_callback_info info);
+    napi_value OnGetExtendScreenConnectStatus(napi_env env, napi_callback_info info);
 
     std::shared_ptr<NativeReference> screenConnectionCallback_;
     std::shared_ptr<NativeReference> shutdownCallback_;

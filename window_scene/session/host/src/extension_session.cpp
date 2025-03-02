@@ -65,6 +65,12 @@ void RemoveExtensionPersistentId(int32_t persistentId)
 }
 } // namespace
 
+bool IsExtensionSessionInvalid(int32_t persistentId)
+{
+    std::lock_guard lock(g_extensionPersistentIdMutex);
+    return g_extensionPersistentIdSet.count(persistentId) == 0;
+}
+
 void WindowEventChannelListener::SetTransferKeyEventForConsumedParams(int32_t keyEventId, bool isPreImeEvent,
     const std::shared_ptr<std::promise<bool>>& isConsumedPromise, const std::shared_ptr<WSError>& retCode)
 {

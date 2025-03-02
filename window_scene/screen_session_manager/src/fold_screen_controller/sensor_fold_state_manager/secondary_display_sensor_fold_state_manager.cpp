@@ -36,7 +36,7 @@ constexpr uint8_t ANGLES_AXIS_SIZE = 3;
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float GRL_HALF_FOLDED_MAX_THRESHOLD = 140.0F;
 constexpr float CLOSE_GRL_HALF_FOLDED_MIN_THRESHOLD = 70.0F;
-constexpr float OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD = 25.0F;
+constexpr float OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD = 45.0F;
 constexpr float GRL_HALF_FOLDED_BUFFER = 10.0F;
 constexpr float LARGER_BOUNDARY_FOR_GRL_THRESHOLD = 90.0F;
 constexpr int32_t LARGER_BOUNDARY_FLAG = 1;
@@ -57,19 +57,20 @@ void SecondaryDisplaySensorFoldStateManager::HandleAngleOrHallChange(const std::
     HandleSensorChange(nextState, angles, foldScreenPolicy);
     if (angles.size() != ANGLES_AXIS_SIZE) {
         TLOGE(WmsLogTag::DMS, "angles size is not right, angles size %{public}zu", angles.size());
+        return;
     }
     bool isSecondaryReflexion = static_cast<bool>(angles[REFLEXION_VALUE]);
     if (isSecondaryReflexion) {
-        TLOGW(WmsLogTag::DMS, "SecondaryReflexion:%{public}d", isSecondaryReflexion);
+        TLOGW(WmsLogTag::DMS, "Secondary is reflexion");
+        isHasReflexioned = true;
         ReportSecondaryReflexion(static_cast<int32_t>(nextState), static_cast<int32_t>(nextState),
             isSecondaryReflexion);
-        auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
-        if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screen session is null!");
-            return;
-        }
-        ScreenId screenId = screenSession->GetScreenId();
-        ScreenSessionManager::GetInstance().OnSecondaryReflexionChange(screenId, isSecondaryReflexion);
+        SendReflexionResult(isSecondaryReflexion);
+    }
+    if (isHasReflexioned && !isSecondaryReflexion) {
+        TLOGW(WmsLogTag::DMS, "Secondary recover from reflexion");
+        isHasReflexioned = false;
+        SendReflexionResult(isSecondaryReflexion);
     }
 }
 
@@ -139,7 +140,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetNextFoldStateHalf(float an
     FoldStatus state = FoldStatus::UNKNOWN;
 
     if (allowUserSensorForLargeFoldDevice == SMALLER_BOUNDARY_FLAG) {
-        if (std::islessequal(angle, OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD) && hall == HALL_FOLDED_THRESHOLD) {
+        if (std::islessequal(angle, OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD)) {
             state = FoldStatus::FOLDED;
         } else if (std::isgreaterequal(angle, OPEN_GRL_HALF_FOLDED_MIN_THRESHOLD + GRL_HALF_FOLDED_BUFFER) &&
             hall == HALL_FOLDED_THRESHOLD) {
@@ -195,6 +196,7 @@ FoldStatus SecondaryDisplaySensorFoldStateManager::GetGlobalFoldState(FoldStatus
 
 FoldStatus SecondaryDisplaySensorFoldStateManager::GetFoldStateUnpower(const std::vector<uint16_t> &halls)
 {
+    TLOGW(WmsLogTag::DMS, "The screen is not currently lit");
     FoldStatus state = FoldStatus::UNKNOWN;
     int hall1 = halls[0];
     int hall2 = halls[1];
@@ -225,5 +227,16 @@ void SecondaryDisplaySensorFoldStateManager::ReportSecondaryReflexion(int32_t cu
     if (ret != 0) {
         TLOGE(WmsLogTag::DMS, "Write HiSysEvent error, ret: %{public}d", ret);
     }
+}
+
+void SecondaryDisplaySensorFoldStateManager::SendReflexionResult(bool isSecondaryReflexion)
+{
+    auto screenSession = ScreenSessionManager::GetInstance().GetDefaultScreenSession();
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null!");
+        return;
+    }
+    ScreenId screenId = screenSession->GetScreenId();
+    ScreenSessionManager::GetInstance().OnSecondaryReflexionChange(screenId, isSecondaryReflexion);
 }
 } // namespace OHOS::Rosen

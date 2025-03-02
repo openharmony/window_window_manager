@@ -44,7 +44,7 @@ public:
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
+        const sptr<AAFwk::SessionInfo> abilitySessionInfo, const ExceptionInfo& exceptionInfo) override;
     WSError OnSessionEvent(SessionEvent event) override;
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
@@ -95,7 +95,7 @@ public:
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
-    WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
+    WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -144,6 +144,16 @@ public:
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+
+    /*
+     * Window Pattern
+     */
+    void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+
+    /**
+     * Window layout
+     */
+    WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

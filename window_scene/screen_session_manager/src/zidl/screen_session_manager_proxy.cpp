@@ -1769,7 +1769,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetVisibleAreaDisplayInfoById(Displ
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        WLOGFW(": remote is nullptr");
+        WLOGFW("remote is nullptr");
         return nullptr;
     }
 
@@ -1777,22 +1777,22 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetVisibleAreaDisplayInfoById(Displ
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        WLOGFE(": WriteInterfaceToken failed");
+        WLOGFE("WriteInterfaceToken failed");
         return nullptr;
     }
     if (!data.WriteUint64(displayId)) {
-        WLOGFW(": WriteUint64 displayId failed");
+        WLOGFW("WriteUint64 displayId failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_VISIBLE_AREA_DISPLAY_INFO_BY_ID),
         data, reply, option) != ERR_NONE) {
-        WLOGFW(": SendRequest failed");
+        WLOGFW("SendRequest failed");
         return nullptr;
     }
 
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
-        WLOGFW(": SendRequest nullptr.");
+        WLOGFW("SendRequest nullptr.");
         return nullptr;
     }
     return info;
@@ -2258,7 +2258,7 @@ void ScreenSessionManagerProxy::SetFoldDisplayMode(const FoldDisplayMode display
 }
 
 //SetFoldDisplayModeFromJs add DMError to return DMErrorCode for js
-DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode)
+DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2274,6 +2274,10 @@ DMError ScreenSessionManagerProxy::SetFoldDisplayModeFromJs(const FoldDisplayMod
     }
     if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
         WLOGFE("Write displayMode failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(reason)) {
+        WLOGFE("Write reason failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS),
@@ -2502,6 +2506,29 @@ SuperFoldStatus ScreenSessionManagerProxy::GetSuperFoldStatus()
         return SuperFoldStatus::UNKNOWN;
     }
     return static_cast<SuperFoldStatus>(reply.ReadUint32());
+}
+
+ExtendScreenConnectStatus ScreenSessionManagerProxy::GetExtendScreenConnectStatus()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("remote is null");
+        return ExtendScreenConnectStatus::UNKNOWN;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return ExtendScreenConnectStatus::UNKNOWN;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_EXTEND_SCREEN_CONNECT_STATUS),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return ExtendScreenConnectStatus::UNKNOWN;
+    }
+    return static_cast<ExtendScreenConnectStatus>(reply.ReadUint32());
 }
 
 sptr<FoldCreaseRegion> ScreenSessionManagerProxy::GetCurrentFoldCreaseRegion()

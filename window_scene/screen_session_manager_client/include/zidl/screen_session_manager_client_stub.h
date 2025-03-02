@@ -52,8 +52,10 @@ private:
     int HandleOnScreenExtendChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnHoverStatusChanged(MessageParcel& data, MessageParcel& reply);
     int HandleScreenCaptureNotify(MessageParcel& data, MessageParcel& reply);
+    int HandleOnCameraBackSelfieChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnSuperFoldStatusChanged(MessageParcel& data, MessageParcel& reply);
     int HandleOnSecondaryReflexionChanged(MessageParcel& data, MessageParcel& reply);
+    int HandleOnExtendScreenConnectStatusChanged(MessageParcel& data, MessageParcel& reply);
 
     HandleScreenChangeMap HandleScreenChangeMap_ {};
 };

@@ -855,7 +855,8 @@ HWTEST_F(SceneSessionTest4, IsPcOrPadEnableActivation01, Function | SmallTest | 
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(false, sceneSession->IsPcOrPadEnableActivation());
+    sceneSession->SetIsPcAppInPad(true);
+    ASSERT_EQ(true, sceneSession->IsPcOrPadEnableActivation());
 }
 
 /**
@@ -910,7 +911,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP01, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = false;
-    auto result = sceneSession->SetAutoStartPiP(true, 0);
+    auto result = sceneSession->SetAutoStartPiP(true, 0, 1, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -930,11 +931,11 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP02, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag, uint32_t status) {
+    NotifyAutoStartPiPStatusChangeFunc func = [](bool flag, uint32_t status, uint32_t width, uint32_t height) {
         return;
     };
     sceneSession->autoStartPiPStatusChangeFunc_ = func;
-    auto result = sceneSession->SetAutoStartPiP(true, 1);
+    auto result = sceneSession->SetAutoStartPiP(true, 1, 1, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -954,7 +955,7 @@ HWTEST_F(SceneSessionTest4, SetAutoStartPiP03, Function | SmallTest | Level2)
     property->SetWindowType(WindowType::WINDOW_TYPE_GLOBAL_SEARCH);
     sceneSession->SetSessionProperty(property);
     sceneSession->isTerminating_ = true;
-    auto result = sceneSession->SetAutoStartPiP(true, 0);
+    auto result = sceneSession->SetAutoStartPiP(true, 0, 1, 1);
     ASSERT_EQ(result, WSError::WS_OK);
 }
 
@@ -1051,29 +1052,6 @@ HWTEST_F(SceneSessionTest4, SetMovable01, Function | SmallTest | Level2)
     sceneSession->moveDragController_->isStartDrag_ = true;
     auto result = sceneSession->OnSessionEvent(event);
     ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: TerminateSession01
- * @tc.desc: TerminateSession
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, TerminateSession01, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "TerminateSession01";
-    info.bundleName_ = "TerminateSession01";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    sceneSession->isTerminating_ = true;
-    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
-
-    sceneSession->isTerminating_ = false;
-    sceneSession->SetTerminateSessionListener([sceneSession](const SessionInfo& info) {});
-    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 
 /**

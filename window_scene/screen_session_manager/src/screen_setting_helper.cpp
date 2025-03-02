@@ -28,6 +28,7 @@ sptr<SettingObserver> ScreenSettingHelper::castObserver_;
 sptr<SettingObserver> ScreenSettingHelper::rotationObserver_;
 sptr<SettingObserver> ScreenSettingHelper::halfScreenObserver_;
 sptr<SettingObserver> ScreenSettingHelper::screenSkipProtectedWindowObserver_;
+sptr<SettingObserver> ScreenSettingHelper::wireCastObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
 constexpr uint32_t EXPECT_RELATIVE_POSITION_SIZE = 3;
@@ -562,6 +563,39 @@ bool ScreenSettingHelper::GetSettingscreenSkipProtectedWindow(bool& enable, cons
     }
     enable = (value == 1);
     return true;
+}
+
+void ScreenSettingHelper::RegisterSettingWireCastObserver(SettingObserver::UpdateFunc func)
+{
+    if (wireCastObserver_) {
+        TLOGD(WmsLogTag::DMS, "setting wire cast observer is registered");
+        return;
+    }
+    SettingProvider& wireCastProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    wireCastObserver_ = wireCastProvider.CreateObserver(SETTING_CAST_KEY, func);
+    if (wireCastObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = wireCastProvider.RegisterObserver(wireCastObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        wireCastObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingWireCastObserver()
+{
+    if (wireCastObserver_ == nullptr) {
+        TLOGD(WmsLogTag::DMS, "wireCastObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& wireCastProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = wireCastProvider.UnregisterObserver(wireCastObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    wireCastObserver_ = nullptr;
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -23,6 +23,7 @@
 #include "singleton_container.h"
 
 #include "session/host/include/extension_session.h"
+#include "perform_reporter.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -94,7 +95,6 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
             persistentId, newSessionInfo.bundleName_.c_str(), newSessionInfo.moduleName_.c_str(),
             newSessionInfo.abilityName_.c_str(), newSessionInfo.config_.isDensityFollowHost_,
             newSessionInfo.config_.density_);
-        extensionSessionMap_.insert({ persistentId, extensionSession });
         return extensionSession;
     };
 
@@ -114,7 +114,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         auto persistentId = extSession->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_UIEXT, "Activate session with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionActivation");
-        if (extensionSessionMap_.count(persistentId) == 0) {
+        if (IsExtensionSessionInvalid(persistentId)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
                 where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
@@ -124,6 +124,19 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
         TLOGNI(WmsLogTag::WMS_UIEXT, "Activate ret:%{public}d, persistentId:%{public}d", errorCode, persistentId);
+        if (errorCode != ERR_OK) {
+            std::ostringstream oss;
+            oss << "Start UIExtensionAbility failed" << ",";
+            oss << " provider windowName: " << extSession->GetWindowName() << ",";
+            oss << " errorCode: " << errorCode << ";";
+            int32_t ret = WindowInfoReporter::GetInstance().ReportUIExtensionException(
+                static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL),
+                getpid(), persistentId, oss.str()
+            );
+            if (ret != 0) {
+                TLOGNI(WmsLogTag::WMS_UIEXT, "ReportUIExtensionException message failed, ret: %{public}d", ret);
+            }
+        }
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
             callback(ret);
@@ -150,7 +163,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionBackground");
         extSession->SetActive(false);
         extSession->Background();
-        if (extensionSessionMap_.count(persistentId) == 0) {
+        if (IsExtensionSessionInvalid(persistentId)) {
             WLOGFE("RequestExtensionSessionBackground Session is invalid! persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
@@ -182,14 +195,13 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
         TLOGNI(WmsLogTag::WMS_UIEXT, "Destroy session with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:RequestExtensionSessionDestruction");
         extSession->Disconnect();
-        if (extensionSessionMap_.count(persistentId) == 0) {
+        if (IsExtensionSessionInvalid(persistentId)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s Session is invalid! persistentId:%{public}d",
                 where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
-        extensionSessionMap_.erase(persistentId);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED;
             callback(ret);
@@ -213,14 +225,13 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sp
         auto persistentId = extSession->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_UIEXT, "Destroy session done with persistentId: %{public}d", persistentId);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "esm:%{public}s", where);
-        if (extensionSessionMap_.count(persistentId) == 0) {
+        if (IsExtensionSessionInvalid(persistentId)) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s session is invalid! persistentId: %{public}d",
                 where, persistentId);
             return;
         }
         auto extSessionInfo = SetAbilitySessionInfo(extSession);
         AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
-        extensionSessionMap_.erase(persistentId);
     };
     taskScheduler_->PostAsyncTask(task, __func__);
     return WSError::WS_OK;

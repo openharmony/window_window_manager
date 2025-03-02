@@ -254,6 +254,36 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetDecorVisible
+ * @tc.desc: GetDecorVisible and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetDecorVisible, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorVisible start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDecorVisible");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    bool isVisible = true;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetDecorVisible(isVisible));
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorVisible(isVisible));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetDecorVisible(isVisible));
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleVisible(_)).WillRepeatedly(Return(false));
+    window->uiContent_ = std::move(uiContent);
+    ASSERT_EQ(WMError::WM_OK, window->GetDecorVisible(isVisible));
+    ASSERT_FALSE(isVisible);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorVisible end";
+}
+
+/**
  * @tc.name: SetWindowTitleMoveEnabled
  * @tc.desc: SetWindowTitleMoveEnabled and check the retCode
  * @tc.type: FUNC
@@ -1426,9 +1456,11 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
     window->hostSession_ = session;
     bool isAutoStart = true;
     uint32_t priority = 1;
-    window->SetAutoStartPiP(isAutoStart, priority);
+    uint32_t width = 1;
+    uint32_t height = 1;
+    window->SetAutoStartPiP(isAutoStart, priority, width, height);
     window->hostSession_ = nullptr;
-    window->SetAutoStartPiP(isAutoStart, priority);
+    window->SetAutoStartPiP(isAutoStart, priority, width, height);
 }
 
 /**
@@ -2558,6 +2590,7 @@ HWTEST_F(WindowSessionImplTest4, NotifyWindowCrossAxisChange, Function | SmallTe
     EXPECT_CALL(*crossListener, OnCrossAxisChange(CrossAxisState::STATE_CROSS)).Times(1);
     window->NotifyWindowCrossAxisChange(CrossAxisState::STATE_CROSS);
     EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
+    WindowSessionImpl::windowCrossAxisListeners_[window->property_->persistentId_].clear();
 }
 
 /**
@@ -2581,6 +2614,26 @@ HWTEST_F(WindowSessionImplTest4, GetCrossAxisState, Function | SmallTest | Level
     EXPECT_CALL(*mockHostSession, GetCrossAxisState(_))
         .WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
     EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
+}
+
+/**
+ * @tc.name: SendContainerModalEvent
+ * @tc.desc: SendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SendContainerModalEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendContainerModalEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SendContainerModalEvent("scb_back_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("scb_back_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

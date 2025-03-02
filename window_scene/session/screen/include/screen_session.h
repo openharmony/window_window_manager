@@ -52,8 +52,11 @@ public:
     virtual void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId extendScreenId) = 0;
     virtual void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
+    virtual void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) = 0;
     virtual void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) = 0;
     virtual void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) = 0;
+    virtual void OnExtendScreenConnectStatusChange(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
 };
 
 enum class MirrorScreenType : int32_t {
@@ -73,6 +76,7 @@ struct ScreenSessionConfig {
     ScreenId defaultScreenId {0};
     ScreenId mirrorNodeId {0};
     std::string name = "UNKNOWN";
+    std::string innerName = "UNKNOWN";
     ScreenProperty property;
     std::shared_ptr<RSDisplayNode> displayNode;
 };
@@ -135,6 +139,7 @@ public:
     void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX, float translateY);
 
     std::string GetName();
+    std::string GetInnerName();
     ScreenId GetScreenId();
     ScreenId GetRSScreenId();
     ScreenProperty GetScreenProperty() const;
@@ -170,6 +175,7 @@ public:
 
     void HandleSensorRotation(float sensorRotation);
     void HandleHoverStatusChange(int32_t hoverStatus, bool needRotate = true);
+    void HandleCameraBackSelfieChange(bool isCameraBackSelfie);
     float ConvertRotationToFloat(Rotation sensorRotation);
 
     bool HasPrivateSessionForeground() const;
@@ -190,14 +196,16 @@ public:
     void UpdatePropertyOnly(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdateRotationOrientation(int rotation, FoldDisplayMode foldDisplayMode, bool isChanged);
     void UpdatePropertyByFakeInUse(bool isFakeInUse);
-    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty);
+    ScreenProperty UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
+        FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN);
     void UpdateDisplayState(DisplayState displayState);
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
     void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
-    void Resize(uint32_t width, uint32_t height);
+    void SetInnerName(std::string innerName);
+    void Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync = true);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
@@ -235,6 +243,8 @@ public:
     int32_t GetValidHeight() const;
     int32_t GetValidWidth() const;
     float GetSensorRotation() const;
+    DisplaySourceMode GetDisplaySourceMode() const;
+    void SetXYPosition(int32_t x, int32_t y);
 
     bool isPrimary_ { false };
     bool isInternal_ { false };
@@ -262,6 +272,7 @@ public:
     void SensorRotationChange(float sensorRotation);
     float GetValidSensorRotation();
     void HoverStatusChange(int32_t hoverStatus, bool needRotate = true);
+    void CameraBackSelfieChange(bool isCameraBackSelfie);
     void ScreenOrientationChange(Orientation orientation, FoldDisplayMode foldDisplayMode);
     void ScreenOrientationChange(float orientation);
     void ScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId);
@@ -288,6 +299,7 @@ public:
     void SuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus);
     void SecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion);
     void EnableMirrorScreenRegion();
+    void ExtendScreenConnectStatusChange(ScreenId screenId, ExtendScreenConnectStatus extendScreenConnectStatus);
 
 private:
     ScreenProperty property_;
@@ -322,6 +334,7 @@ private:
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
     std::mutex mirrorScreenRegionMutex_;
     void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
+    std::string innerName_ {"UNKOWN"};
 };
 
 class ScreenSessionGroup : public ScreenSession {

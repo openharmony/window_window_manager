@@ -26,10 +26,10 @@
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 public:
-    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession);
+    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
     virtual ~JsScreenSession();
 
-    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession);
+    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
     static void Finalizer(napi_env env, void* data, void* hint);
 
 private:
@@ -62,8 +62,11 @@ private:
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) override;
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;
+    void OnExtendScreenConnectStatusChange(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override;
 
     napi_env env_;
     sptr<ScreenSession> screenSession_;

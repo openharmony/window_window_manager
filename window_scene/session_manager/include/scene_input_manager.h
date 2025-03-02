@@ -44,6 +44,7 @@ public:
     std::optional<ExtensionWindowEventInfo> GetConstrainedModalExtWindowInfo(const sptr<SceneSession>& sceneSession);
     using FlushWindowInfoCallback = std::function<void()>;
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
+    void ResetSessionDirty();
     std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
         GetFullWindowInfoList();
 

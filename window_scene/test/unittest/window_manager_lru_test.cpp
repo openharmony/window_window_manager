@@ -81,5 +81,23 @@ HWTEST_F(LRUCacheTest, Put, Function | SmallTest | Level2)
     res = testLRUCache_->Put(33);
     ASSERT_EQ(res, 30);
 }
+
+/**
+ * @tc.name: Remove
+ * @tc.desc: test function Remove
+ * @tc.type: FUNC
+ */
+HWTEST_F(LRUCacheTest, Remove, Function | SmallTest | Level2)
+{
+    testLRUCache_ = std::make_unique<LRUCache>(TEST_CACHE_CAPACITY);
+    int32_t res = testLRUCache_->Put(30);
+    ASSERT_EQ(res, -1);
+
+    testLRUCache_->Put(31);
+    testLRUCache_->Put(32);
+    testLRUCache_->Remove(32);
+    res = testLRUCache_->Put(33);
+    ASSERT_EQ(res, -1);
+}
 }
 }

@@ -120,29 +120,29 @@ private:
             return NapiGetUndefined(env);
         }
 
-        NapiAsyncTask::CompleteCallback complete =
-            [weak = context_, want, startOptions](napi_env env, NapiAsyncTask& task, int32_t status) {
-                WLOGI("startAbility begin");
-                auto context = weak.lock();
-                if (!context) {
-                    WLOGFW("context is released");
-                    task.Reject(env, CreateJsError(env,
-                        static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
-                    return;
-                }
-
-                WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(context->StartAbility(want, startOptions));
-                if (ret == WmErrorCode::WM_OK) {
-                    task.Resolve(env, NapiGetUndefined(env));
-                } else {
-                    task.Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
-                }
-            };
-
         napi_value lastParam = (argc <= 2) ? nullptr : argv[2]; // at least two argc
         napi_value result = nullptr;
-        NapiAsyncTask::Schedule("JSServiceExtensionContext::OnStartAbility",
-            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+        auto asyncTask = [weak = context_, want, startOptions, env, task = napiAsyncTask] {
+            WLOGI("startAbility begin");
+            auto context = weak.lock();
+            if (!context) {
+                WLOGW("context is released");
+                task->Reject(env, CreateJsError(env,
+                    static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY)));
+                return;
+            }
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(context->StartAbility(want, startOptions));
+            if (ret == WmErrorCode::WM_OK) {
+                task->Resolve(env, NapiGetUndefined(env));
+            } else {
+                task->Reject(env, CreateJsError(env, static_cast<int32_t>(ret)));
+            }
+        };
+        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+            napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY), "send event failed"));
+        }
         return result;
     }
 };

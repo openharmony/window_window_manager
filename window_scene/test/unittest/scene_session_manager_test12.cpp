@@ -401,7 +401,8 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDisconnectSpecificSessionInner02, 
     std::vector<int32_t> recoveredPersistentIds = {0, 1, 2};
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -505,12 +506,15 @@ HWTEST_F(SceneSessionManagerTest12, DestroyAndDisconnectSpecificSessionInner, Fu
     ssm_->SetAlivePersistentIds(recoveredPersistentIds);
     ProcessShiftFocusFunc shiftFocusFunc_;
     property->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    auto ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     property->SetPersistentId(1);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 
     property->SetWindowType(WindowType::WINDOW_TYPE_TOAST);
-    ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    ret = ssm_->DestroyAndDisconnectSpecificSessionInner(1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
 /**
@@ -1492,6 +1496,27 @@ HWTEST_F(SceneSessionManagerTest12, RemoveLifeCycleTaskByPersistentId, Function 
     ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
     ssm_->RemoveLifeCycleTaskByPersistentId(3, LifeCycleTaskType::START);
     ASSERT_EQ(sceneSession->lifeCycleTaskQueue_.size(), 1);
+}
+
+/**
+ * @tc.name: SetStatusBarAvoidHeight
+ * @tc.desc: test function : SetStatusBarAvoidHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, SetStatusBarAvoidHeight, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    int32_t height = 10;
+    ssm_->SetStatusBarAvoidHeight(height);
+    WSRect barArea;
+    ssm_->GetStatusBarAvoidHeight(barArea);
+    ASSERT_EQ(barArea.height_, height);
 }
 }
 } // namespace Rosen

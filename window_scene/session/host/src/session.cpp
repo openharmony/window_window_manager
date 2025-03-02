@@ -1192,6 +1192,7 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     property->SetFullScreenStart(GetSessionInfo().fullScreenStart_);
     property->SetSupportedWindowModes(GetSessionInfo().supportedWindowModes);
     property->SetWindowSizeLimits(GetSessionInfo().windowSizeLimits);
+    property->SetIsAtomicService(GetSessionInfo().isAtomicService_);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "Id: %{public}d, requestedOrientation: %{public}u,"
@@ -1578,6 +1579,9 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
+        if (session->needNotifyAttachState_.load() && session->sessionStage_) {
+            session->sessionStage_->NotifyWindowAttachStateChange(isAttach);
+        }
         TLOGND(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
             session->GetPersistentId());
         if (!isAttach && session->detachCallback_ != nullptr) {
@@ -1587,6 +1591,11 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
     }, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
+}
+
+void Session::SetNeedNotifyAttachState(bool needNotify)
+{
+    needNotifyAttachState_.store(needNotify);
 }
 
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
@@ -1670,56 +1679,61 @@ void Session::SetTerminateSessionListener(NotifyTerminateSessionFunc&& func)
 
 void Session::RemoveLifeCycleTask(const LifeCycleTaskType& taskType)
 {
-    std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
-    if (lifeCycleTaskQueue_.empty()) {
-        return;
-    }
-    sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
-    if (currLifeCycleTask->type != taskType) {
-        TLOGW(WmsLogTag::WMS_LIFE, "not match, current running taskName=%{public}s, PersistentId=%{public}d",
+    sptr<SessionLifeCycleTask> frontLifeCycleTask = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+        if (lifeCycleTaskQueue_.empty()) {
+            return;
+        }
+        sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
+        if (currLifeCycleTask->type != taskType) {
+            TLOGW(WmsLogTag::WMS_LIFE,
+                "not match, current running taskName=%{public}s, PersistentId=%{public}d",
+                currLifeCycleTask->name.c_str(), persistentId_);
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "Removed lifeCyleTask %{public}s. PersistentId=%{public}d",
             currLifeCycleTask->name.c_str(), persistentId_);
-        return;
+        lifeCycleTaskQueue_.pop_front();
+        if (lifeCycleTaskQueue_.empty()) {
+            return;
+        }
+        frontLifeCycleTask = lifeCycleTaskQueue_.front();
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "Removed lifeCyleTask %{public}s. PersistentId=%{public}d",
-        currLifeCycleTask->name.c_str(), persistentId_);
-    lifeCycleTaskQueue_.pop_front();
-    if (lifeCycleTaskQueue_.empty()) {
-        return;
-    }
-    StartLifeCycleTask(lifeCycleTaskQueue_.front());
+    StartLifeCycleTask(frontLifeCycleTask);
 }
 
 void Session::PostLifeCycleTask(Task&& task, const std::string& name, const LifeCycleTaskType& taskType)
 {
-    std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
-    if (!lifeCycleTaskQueue_.empty()) {
+    sptr<SessionLifeCycleTask> frontlifeCycleTask = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(lifeCycleTaskQueueMutex_);
+        if (!lifeCycleTaskQueue_.empty()) {
         // remove current running task if expired
-        sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
-        std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-        bool isCurrentTaskExpired =
-            std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime).count() >
-            LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT;
-        if (isCurrentTaskExpired) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
-                currLifeCycleTask->name.c_str(), persistentId_);
-            lifeCycleTaskQueue_.pop_front();
+            sptr<SessionLifeCycleTask> currLifeCycleTask = lifeCycleTaskQueue_.front();
+            std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+            bool isCurrentTaskExpired =
+                std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - currLifeCycleTask->startTime)
+                    .count() > LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT;
+            if (isCurrentTaskExpired) {
+                TLOGE(WmsLogTag::WMS_LIFE, "Remove expired LifeCycleTask %{public}s. PersistentId=%{public}d",
+                    currLifeCycleTask->name.c_str(), persistentId_);
+                lifeCycleTaskQueue_.pop_front();
+            }
         }
-    }
 
-    if (lifeCycleTaskQueue_.size() == MAX_LIFE_CYCLE_TASK_IN_QUEUE) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
-        return;
+        if (lifeCycleTaskQueue_.size() == MAX_LIFE_CYCLE_TASK_IN_QUEUE) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to add task %{public}s to life cycle queue", name.c_str());
+            return;
+        }
+        sptr<SessionLifeCycleTask> lifeCycleTask =
+            sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
+        lifeCycleTaskQueue_.push_back(lifeCycleTask);
+        TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
+            name.c_str(), persistentId_);
+        frontlifeCycleTask = lifeCycleTaskQueue_.front();
     }
-    sptr<SessionLifeCycleTask> lifeCycleTask = sptr<SessionLifeCycleTask>::MakeSptr(std::move(task), name, taskType);
-    lifeCycleTaskQueue_.push_back(lifeCycleTask);
-    TLOGI(WmsLogTag::WMS_LIFE, "Add task %{public}s to life cycle queue, PersistentId=%{public}d",
-        name.c_str(), persistentId_);
-    if (lifeCycleTaskQueue_.size() == 1) {
-        StartLifeCycleTask(lifeCycleTask);
-        return;
-    }
-
-    StartLifeCycleTask(lifeCycleTaskQueue_.front());
+    StartLifeCycleTask(frontlifeCycleTask);
 }
 
 void Session::StartLifeCycleTask(sptr<SessionLifeCycleTask> lifeCycleTask)
@@ -2403,10 +2417,15 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
         }
+        session->saveSnapshotCallback_();
         if (!requirePersist) {
             return;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap);
+        if (!session->scenePersistence_) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence_ is null");
+            return;
+        }
+        session->scenePersistence_->SaveSnapshot(pixelMap, session->removeSnapshotCallback_);
     };
     if (!useFfrt) {
         task();
@@ -2678,6 +2697,8 @@ WSError Session::NotifyFocusStatus(bool isFocused)
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Session stage is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_->UpdateFocus(isFocused);
@@ -3490,7 +3511,7 @@ void Session::CreateWindowStateDetectTask(bool isAttach, WindowMode windowMode)
 
 void Session::SetBufferAvailable(bool bufferAvailable)
 {
-    WLOGFI("SetBufferAvailable: %{public}d", bufferAvailable);
+    TLOGD(WmsLogTag::DEFAULT, "Set:%{public}d", bufferAvailable);
     if (bufferAvailableChangeFunc_) {
         bufferAvailableChangeFunc_(bufferAvailable);
     }

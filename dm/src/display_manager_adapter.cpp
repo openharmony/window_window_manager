@@ -679,11 +679,11 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
-DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode);
+    return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode, reason);
 }
 
 void DisplayManagerAdapter::SetDisplayScale(ScreenId screenId,

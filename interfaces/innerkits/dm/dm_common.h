@@ -135,6 +135,17 @@ enum class ScreenShape : uint32_t {
 };
 
 /**
+ * @brief displayed soure mode
+ */
+enum class DisplaySourceMode : uint32_t {
+    NONE = 0,
+    MAIN = 1,
+    MIRROR = 2,
+    EXTEND = 3,
+    ALONE = 4,
+};
+
+/**
  * @brief Enumerates the state of the display.
  */
 enum class DisplayState : uint32_t {
@@ -415,6 +426,15 @@ enum class SuperFoldStatus : uint32_t {
 };
 
 /**
+ * @brief Enumerates the extend screen connect status.
+ */
+enum class ExtendScreenConnectStatus: uint32_t {
+    UNKNOWN = 0,
+    CONNECT,
+    DISCONNECT,
+};
+
+/**
  * @brief Enumerates the fold display mode.
  */
 enum class FoldDisplayMode: uint32_t {
@@ -553,6 +573,17 @@ struct DMRect {
     {
         return {0, 0, 0, 0};
     }
+};
+
+/**
+ * @brief Session option when connect
+ */
+struct SessionOption {
+    ScreenId rsId_;
+    std::string name_;
+    bool isExtend_;
+    std::string innerName_;
+    ScreenId screenId_;
 };
 }
 }

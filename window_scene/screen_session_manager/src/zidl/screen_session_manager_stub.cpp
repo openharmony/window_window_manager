@@ -672,7 +672,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS: {
             FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
-            DMError ret = SetFoldDisplayModeFromJs(displayMode);
+            std::string reason = data.ReadString();
+            DMError ret = SetFoldDisplayModeFromJs(displayMode, reason);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
@@ -711,6 +712,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_SUPER_FOLD_STATUS: {
             static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetSuperFoldStatus())));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_EXTEND_SCREEN_CONNECT_STATUS: {
+            static_cast<void>(reply.WriteUint32(static_cast<uint32_t>(GetExtendScreenConnectStatus())));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_GET_CURRENT_FOLD_CREASE_REGION: {

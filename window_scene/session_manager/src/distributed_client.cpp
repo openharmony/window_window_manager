@@ -164,7 +164,7 @@ bool DistributedClient::ReadMissionInfosFromParcel(Parcel& parcel,
 int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState& state,
     int32_t callingUid)
 {
-    TLOGI(WmsLogTag::DEFAULT, "Mission id: %{public}d, state: %{public}d, callingUid: %{public}d",
+    TLOGI(WmsLogTag::DEFAULT, "missionId:%{public}d,state:%{public}d,callingUid:%{public}d",
         missionId, state, callingUid);
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
