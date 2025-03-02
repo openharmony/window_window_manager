@@ -1146,7 +1146,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         (GetType(env, argv[2]) == napi_function ? argv[2] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [env, task = napiAsyncTask] {
+    auto asyncTask = [env, pixelMap, isShow, task = napiAsyncTask] {
         RSInterfaces::GetInstance().ShowWatermark(pixelMap, isShow);
         task->Resolve(env, NapiGetUndefined(env));
         WLOGD("OnSetWaterMarkImage success");
