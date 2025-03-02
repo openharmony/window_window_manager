@@ -66,6 +66,8 @@ napi_value JsScreenSession::Create(napi_env env, const sptr<ScreenSession>& scre
     napi_set_named_property(env, objValue, "name",
         CreateJsValue(env, static_cast<std::string>(screenSession->GetName())));
     napi_set_named_property(env, objValue, "isExtend", CreateJsValue(env, screenSession->GetIsExtend()));
+    napi_set_named_property(env, objValue, "innerName",
+        CreateJsValue(env, static_cast<std::string>(screenSession->GetInnerName())));
 
     const char* moduleName = "JsScreenSession";
     BindNativeFunction(env, objValue, "on", moduleName, JsScreenSession::RegisterCallback);
