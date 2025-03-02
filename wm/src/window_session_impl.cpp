@@ -1433,8 +1433,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         uiContent_ = std::move(uiContent);
         // compatibleMode app in pc, need change decor title to float title bar
         if (property_->GetCompatibleModeInPc()) {
-            uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
+            uiContent_->SetContainerModalTitleVisible(false, true);
         }
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());

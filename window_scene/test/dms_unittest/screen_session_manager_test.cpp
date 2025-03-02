@@ -1321,6 +1321,19 @@ HWTEST_F(ScreenSessionManagerTest, UpdateDisplayHookInfo002, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetDisplayHookInfo
+ * @tc.desc: GetDisplayHookInfo by uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Level2)
+{
+    int32_t uid = 0;
+    DMHookInfo hookInfo;
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->GetDisplayHookInfo(uid, hookInfo);
+}
+
+/**
  * @tc.name: SetVirtualPixelRatio
  * @tc.desc: SetVirtualPixelRatio virtual screen
  * @tc.type: FUNC

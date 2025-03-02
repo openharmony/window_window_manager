@@ -968,7 +968,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteUint32(hookInfo.width_));
             static_cast<void>(reply.WriteUint32(hookInfo.height_));
             static_cast<void>(reply.WriteFloat(hookInfo.density_));
-            static_cast<void>(reply.WriteUint32(hookInfo.width_));
+            static_cast<void>(reply.WriteUint32(hookInfo.rotation_));
             static_cast<void>(reply.WriteBool(hookInfo.enableHookRotation_));
             break;
         }

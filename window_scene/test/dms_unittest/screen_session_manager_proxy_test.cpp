@@ -2192,6 +2192,32 @@ HWTEST_F(ScreenSessionManagerProxyTest, UpdateDisplayHookInfo, Function | SmallT
 }
 
 /**
+ * @tc.name: GetDisplayHookInfo
+ * @tc.desc: GetDisplayHookInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayHookInfo, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+    int resultValue = 0;
+    int32_t uid = 0;
+    DMHookInfo hookInfo;
+    hookInfo.density_ = 160;
+    hookInfo.height_ = 1344;
+    hookInfo.width_ = 2772;
+    std::function<void()> func = [&]()
+    {
+        screenSessionManagerProxy->GetDisplayHookInfo(uid, hookInfo);
+        resultValue = 1;
+    };
+    func();
+    EXPECT_EQ(resultValue, 1);
+}
+
+/**
  * @tc.name: GetSupportedColorSpaces
  * @tc.desc: GetSupportedColorSpaces
  * @tc.type: FUNC
