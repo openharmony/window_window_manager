@@ -1578,6 +1578,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onUpdateGestureBackEnabled_ = [this](int32_t persistentId) {
         this->UpdateGestureBackEnabled(persistentId);
     };
+    specificCb->onGetSceneSessionByIdCallback_ = [this](int32_t persistentId) {
+        return this->GetSceneSession(persistentId);
+    };
     return specificCb;
 }
 
@@ -3881,6 +3884,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
             TLOGE(WmsLogTag::WMS_DIALOG, "Dialog not bind parent");
         } else {
             parentSession->RemoveDialogToParentSession(sceneSession);
+            parentSession->UnregisterNotifySurfaceBoundsChangeFunc(persistentId);
         }
     } else if (windowType == WindowType::WINDOW_TYPE_TOAST) {
         auto parentSession = GetSceneSession(sceneSession->GetParentPersistentId());
@@ -3901,6 +3905,7 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int3
         if (parentSession != nullptr) {
             TLOGD(WmsLogTag::WMS_SUB, "Find parentSession, id: %{public}d", persistentId);
             parentSession->RemoveSubSession(sceneSession->GetPersistentId());
+            parentSession->UnregisterNotifySurfaceBoundsChangeFunc(persistentId);
         } else {
             TLOGW(WmsLogTag::WMS_SUB, "ParentSession is nullptr, id: %{public}d", persistentId);
         }
