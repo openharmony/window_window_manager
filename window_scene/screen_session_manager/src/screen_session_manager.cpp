@@ -109,7 +109,7 @@ static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
 static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 static bool g_isPcDevice = false;
-static uint32_t g_internalWidth = 3120;
+static uint32_t g_internalWidth = 3000;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
@@ -2121,23 +2121,6 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetScreenRealDPI();
 }
 
-void ScreenSessionManager::GetInternalWidth()
-{
-    ScreenId screenId = GetInternalScreenId();
-    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screen session is null");
-        return;
-    }
-    ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    uint32_t screenWidth = screenProperty.GetScreenRealWidth();
-    uint32_t screenHeight = screenProperty.GetScreenRealHeight();
-    g_internalWidth = (screenWidth > screenHeight) ? screenWidth : screenHeight;
-    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64", g_internalWidth is:%{public}u",
-        screenId, static_cast<uint32_t>(g_internalWidth));
-    return;
-}
-
 void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session,
     ScreenProperty property)
 {
@@ -2150,8 +2133,6 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         TLOGW(WmsLogTag::DMS, "xml isSupportOffScreenRendering is fasle");
         return;
     }
-    GetInternalWidth();
-    TLOGD(WmsLogTag::DMS, "g_internalWidth: %{public}u", static_cast<uint32_t>(g_internalWidth));
     float offScreenPPIThreshold = static_cast<float>(ScreenSceneConfig::GetOffScreenPPIThreshold());
     uint32_t screenWidth = property.GetBounds().rect_.GetWidth();
     uint32_t screenHeight = property.GetBounds().rect_.GetHeight();
