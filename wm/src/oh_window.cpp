@@ -311,9 +311,6 @@ int32_t OH_WindowManager_Snapshot(int32_t windowId, OH_PixelmapNative* pixelMap)
         }
         *pixelMap = OH_PixelmapNative(window->Snapshot());
     }, __func__);
-    if (errCode == WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL) {
-        return errCode;
-    }
     return pixelMap != nullptr ? WindowManager_ErrorCode::OK : errCode;
 }
 
