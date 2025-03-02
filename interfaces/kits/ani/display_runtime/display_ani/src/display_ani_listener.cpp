@@ -49,8 +49,8 @@ void DisplayAniListener::RemoveCallback(ani_env* env, const std::string& type, a
     }
     auto& listeners = it->second;
     for (auto iter = listeners.begin(); iter != listeners.end();) {
-        bool isEquals = false;
-        env->Reference_StrictEquals(callback, (*iter).get(), &isEquals);
+        ani_boolean isEquals = 0;
+        env->Reference_StrictEquals(callback, *iter, &isEquals);
         if (isEquals) {
             listeners.erase(iter);
         } else {
@@ -90,7 +90,7 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area){
 }
 
 void DisplayAniListener::RemoveAllCallback(){
-    
+
 }
 
 }

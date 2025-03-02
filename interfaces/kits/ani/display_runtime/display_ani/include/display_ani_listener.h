@@ -52,7 +52,7 @@ private:
     // void CallJsMethod(const std::string& methodName, napi_value const * argv = nullptr, size_t argc = 0);
     ani_env* env_;
     std::mutex mtx_;
-    std::map<std::string, std::vector<std::unique_ptr<ani_ref>>> aniCallBack_;
+    std::map<std::string, std::vector<ani_ref>> aniCallBack_;
     wptr<DisplayAniListener> weakRef_  = nullptr;
     // std::map<std::string, std::vector<std::unique_ptr<NativeReference>>> jsCallBack_;
     // napi_value CreateDisplayIdArray(napi_env env, const std::vector<DisplayId>& data);
