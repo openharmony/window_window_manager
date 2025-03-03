@@ -17,7 +17,8 @@
 #include "singleton_container.h"
 #include "display_manager.h"
 #include "window_manager_hilog.h"
-#include "display_ani_util.h"
+#include "display_ani_utils.h"
+#include "ani_err_utils.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -80,7 +81,7 @@ ani_object DisplayAniRegisterManager::UnregisterListener(std::string type, ani_e
         WLOGFW("failed to unregister display listener with type");
         std::string errMsg = "failed to unregister display listener with type";
         ani_object aniErr = AniErrUtils::CreateAniError(env, errCode, errMsg);
-        env->ThrowError(aniErr);
+        env->ThrowError(static_cast<ani_error>(aniErr));
     }
     return DisplayAniUtils::CreateAniUndefined(env);
 }
@@ -94,7 +95,7 @@ DMError DisplayAniRegisterManager::UnRegisterDisplayListenerWithType(std::string
     DMError ret = DMError::DM_OK;
     for (auto it = jsCbMap_[type].begin(); it != jsCbMap_[type].end(); it++) {
         ani_boolean isEquals = 0;
-        env->Reference_StrictEquals(callback, it->first(), &isEquals);
+        env->Reference_StrictEquals(callback, it->first, &isEquals);
         if (isEquals) {
             it->second->RemoveCallback(env, type, callback);
             if (type == EVENT_ADD || type == EVENT_REMOVE || type == EVENT_CHANGE) {

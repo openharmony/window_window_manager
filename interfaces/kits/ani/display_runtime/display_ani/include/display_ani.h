@@ -15,7 +15,7 @@
 #ifndef DISPLAY_ANI_H
 #define DISPLAY_ANI_H
 
-#include "../../common/ani.h"
+#include "ani.h"
 #include "display.h"
 #include "display_ani_register_manager.h"
 
@@ -33,12 +33,12 @@ public:
     static ani_int getFoldStatus(ani_env* env, ani_object obj);
     static ani_object getCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
 
-    static ani_fixedarray_ref getAllDisplaysAni(ani_env* env, ani_object obj);
+    static ani_array_ref getAllDisplaysAni(ani_env* env, ani_object obj);
     static ani_object getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId);
     static ani_object getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
 
     static ani_object registerCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback, ani_long nativeObj);
-    static ani_object unRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback);
+    static ani_object unRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback, ani_long nativeObj);
 
 private:
     std::mutex mtx_;

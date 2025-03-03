@@ -20,7 +20,7 @@
 #include "dm_common.h"
 #include "refbase.h"
 #include "display_manager.h"
-#include "../../common/ani.h"
+#include "ani.h"
 
 namespace OHOS {
 namespace Rosen {
