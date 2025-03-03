@@ -255,7 +255,7 @@ public:
         const std::string& bundleName, bool isRelease) { return WMError::WM_OK; }
     virtual WMError IsPcWindow(bool& isPcWindow) { return WMError::WM_OK; }
     virtual WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) { return WMError::WM_OK; }
-    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) { return WMError::WM_OK; }
+    virtual WMError IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId) { return WMError::WM_OK; }
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) { return WMError::WM_OK; }
     virtual WMError SetGlobalDragResizeType(DragResizeType dragResizeType) { return WMError::WM_OK; }

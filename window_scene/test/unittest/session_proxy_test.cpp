@@ -1139,6 +1139,24 @@ HWTEST_F(SessionProxyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: UpdateFlag
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, UpdateFlag, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateFlag start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    std::string flag = "test";
+    WSError res = sProxy->UpdateFlag(flag);
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: UpdateFlag end";
+}
+
+/**
  * @tc.name: ProcessPointDownSession
  * @tc.desc: ProcessPointDownSession test
  * @tc.type: FUNC

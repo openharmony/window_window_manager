@@ -993,6 +993,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue, "specifiedFlag",
+        CreateJsValue(env, sessionInfo.specifiedFlag_));  
     if (sessionInfo.want != nullptr) {
         napi_set_named_property(env, objValue, "want", AppExecFwk::WrapWant(env, *sessionInfo.want));
     }

@@ -12974,10 +12974,12 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
     return WSError::WS_OK;
 }
 
-WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled)
+WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId)
 {
     std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
-    if (auto iter = isWindowRectAutoSaveMap_.find(key); iter != isWindowRectAutoSaveMap_.end()) {
+    std::string specifiedKey = key + GetSceneSession(persistentId)->GetSessionInfo().specifiedFlag_;
+    TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
+    if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {
         enabled = iter->second;
     } else {
         enabled = false;

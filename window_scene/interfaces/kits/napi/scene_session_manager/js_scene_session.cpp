@@ -91,6 +91,7 @@ const std::string KEYBOARD_STATE_CHANGE_CB = "keyboardStateChange";
 const std::string KEYBOARD_VIEW_MODE_CHANGE_CB = "keyboardViewModeChange";
 const std::string SET_WINDOW_CORNER_RADIUS_CB = "setWindowCornerRadius";
 const std::string HIGHLIGHT_CHANGE_CB = "highlightChange";
+const std::string UPDATE_FLAG_CB = "updateFlag";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -169,6 +170,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SET_WINDOW_CORNER_RADIUS_CB,           ListenerFuncType::SET_WINDOW_CORNER_RADIUS_CB},
     {HIGHLIGHT_CHANGE_CB,                   ListenerFuncType::HIGHLIGHT_CHANGE_CB},
     {FOLLOW_PARENT_RECT_CB,                 ListenerFuncType::FOLLOW_PARENT_RECT_CB},
+    {UPDATE_FLAG_CB,                        ListenerFuncType::UPDATE_FLAG_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -2638,6 +2640,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::FOLLOW_PARENT_RECT_CB):
             ProcessFollowParentRectRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::UPDATE_FLAG_CB):
+            ProcessUpdateFlagRegister();
             break;
         default:
             break;
@@ -6515,5 +6520,47 @@ napi_value JsSceneSession::OnSetSidebarMaskColorModifier(napi_env env, napi_call
     }
     session->SetSidebarMaskColorModifier(needBlur);
     return NapiGetUndefined(env);
+}
+
+void JsSceneSession::ProcessUpdateFlagRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetNotifyUpdateFlagCallback([weakThis = wptr(this), where](const std::string& flag) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnUpdateFlag(flag);
+    });
+    TLOGD(WmsLogTag::WMS_MAIN, "success");
+}
+
+void JsSceneSession::OnUpdateFlag(const std::string& flag)
+{
+    const char* const where = __func__;
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_,
+        flag, env = env_, where] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession id:%{public}d has been destroyed",
+                where, persistentId);
+            return;
+        }
+        TLOGND(WmsLogTag::WMS_MAIN, "%{public}s: flag is %{public}s", where, flag.c_str());
+        auto jsCallBack = jsSceneSession->GetJSCallback(UPDATE_FLAG_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsCallBack is nullptr", where);
+            return;
+        }
+        napi_value jsFlag = CreateJsValue(env, flag);
+        napi_value argv[] = { jsFlag };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
 }
 } // namespace OHOS::Rosen

@@ -2304,7 +2304,9 @@ HWTEST_F(SceneSessionManagerStubTest, HandleIsWindowRectAutoSave, Function | Sma
     MessageParcel data;
     MessageParcel reply;
     std::string key = "com.example.recposentryEntryAbility";
+    int persistentId = 1;
     data.WriteString(key);
+    data.WriteInt32(persistentId);
     int res = stub_->HandleIsWindowRectAutoSave(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }

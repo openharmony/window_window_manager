@@ -497,6 +497,31 @@ HWTEST_F(MainSessionTest, NotifySessionLockStateChange, Function | SmallTest | L
     session->NotifySessionLockStateChange(true);
     EXPECT_EQ(session->GetSessionLockState(), true);
 }
+
+/**
+ * @tc.name: UpdateFlag
+ * @tc.desc: UpdateFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, UpdateFlag, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateFlag";
+    info.bundleName_ = "UpdateFlag";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    std::string flag = "test";
+    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
+
+    session->onUpdateFlagFunc_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
+
+    NotifyUpdateFlagFunc func = [](const std::string& flag) {
+        return;
+    };
+    session->onUpdateFlagFunc_ = func;
+    EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
+}
 }
 }
 }

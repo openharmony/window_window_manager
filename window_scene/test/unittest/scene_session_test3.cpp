@@ -1200,6 +1200,25 @@ HWTEST_F(SceneSessionTest3, RegisterRequestedOrientationChangeCallback, Function
     sceneSession->RegisterRequestedOrientationChangeCallback(std::move(func));
     EXPECT_NE(sceneSession, nullptr);
 }
+
+/**
+ * @tc.name: SetNotifyUpdateFlagCallback
+ * @tc.desc: SetNotifyUpdateFlagCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetNotifyUpdateFlagCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetNotifyUpdateFlagCallback";
+    info.bundleName_ = "SetNotifyUpdateFlagCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    NotifyUpdateFlagFunc func1 = [](const std::string& flag) {
+        return;
+    };
+    sceneSession->SetNotifyUpdateFlagCallback(std::move(func1));
+    ASSERT_NE(nullptr, sceneSession->onUpdateFlagFunc_);
+}
 }
 }
 }

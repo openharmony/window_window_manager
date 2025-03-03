@@ -2722,7 +2722,8 @@ WMError WindowSceneSessionImpl::IsWindowRectAutoSave(bool& enabled)
         bundleName = context_->GetBundleName();
     }
     std::string key = bundleName + moduleName + abilityName;
-    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled);
+    int persistentId = GetPersistentId();
+    auto ret = SingletonContainer::Get<WindowAdapter>().IsWindowRectAutoSave(key, enabled, persistentId);
     return ret;
 }
 
