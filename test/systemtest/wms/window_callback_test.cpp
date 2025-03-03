@@ -361,8 +361,7 @@ HWTEST_F(WindowCallbackTest, MainWindowClose01, Function | MediumTest | Level0)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterMainWindowCloseListeners(listener));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterMainWindowCloseListeners(listener));
 
-    sptr<IMainWindowCloseListener> listener1 =
-     sptr<IMainWindowCloseListener>::MakeSptr();
+    sptr<IMainWindowCloseListener> listener1 = sptr<IMainWindowCloseListener>::MakeSptr();
     ASSERT_NE(listener1, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterMainWindowCloseListeners(listener1));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterMainWindowCloseListeners(listener1));
@@ -391,8 +390,7 @@ HWTEST_F(WindowCallbackTest, MainWindowClose02, Function | MediumTest | Level0)
     window->property_->SetPersistentId(10032);
     window->hostSession_ = session;
 
-    sptr<IMainWindowCloseListener> listener =
-     sptr<IMainWindowCloseListener>::MakeSptr();
+    sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
