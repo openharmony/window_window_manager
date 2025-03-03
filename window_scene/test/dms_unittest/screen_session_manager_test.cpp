@@ -3719,7 +3719,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, Function |
     }
     std::vector<ScreenId> allUniqueScreenIds = {screenId, 99};
     std::vector<DisplayId> displayIds = {};
-    ssm_->DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds);
+    ssm_->DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds, false);
     ASSERT_EQ(displayIds.size(), 1);
 }
 
