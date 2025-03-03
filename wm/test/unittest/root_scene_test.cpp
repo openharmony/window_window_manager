@@ -502,7 +502,7 @@ HWTEST_F(RootSceneTest, UnregisterWaterfallModeChangeListener, Function | SmallT
     ASSERT_EQ(WMError::WM_OK, ret);
     auto listeners = rootScene.GetWaterfallModeChangeListeners();
     ASSERT_EQ(listeners.size(), 1);
-    auto ret = rootScene.UnregisterWaterfallModeChangeListener(listener);
+    ret = rootScene.UnregisterWaterfallModeChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
     listeners = rootScene.GetWaterfallModeChangeListeners();
     ASSERT_EQ(listeners.size(), 0);
