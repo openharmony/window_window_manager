@@ -1376,6 +1376,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
             TLOGE(WmsLogTag::DMS, "error, fakeDisplayInfo is nullptr.");
             continue;
         }
+        fakeDisplayInfo = HookDisplayInfoByUid(fakeDisplayInfo, fakeScreenSession);
         DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
         if (displayId == fakeDisplayId) {
             TLOGD(WmsLogTag::DMS, "find fake success");
