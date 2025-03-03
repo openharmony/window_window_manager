@@ -1241,6 +1241,29 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatus, Function | Small
 }
 
 /**
+ * @tc.name: HandleRequestFocusStatusBySA
+ * @tc.desc: test HandleRequestFocusStatusBySA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatusBySA, Function | SmallTest | Level2)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t persistentId = 65535;
+    data.WriteInt32(persistentId);
+    bool isFocused = true;
+    data.WriteBool(isFocused);
+
+    int res = stub_->HandleRequestFocusStatusBySA(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleRegisterWindowManagerAgent
  * @tc.desc: test HandleRegisterWindowManagerAgent
  * @tc.type: FUNC

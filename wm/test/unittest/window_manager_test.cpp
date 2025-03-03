@@ -1584,6 +1584,23 @@ HWTEST_F(WindowManagerTest, OnWMSConnectionChanged, Function | SmallTest | Level
     ASSERT_NE(WMError::WM_OK, ret_2);
     WindowManager::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected);
 }
+
+/**
+ * @tc.name: RequestFocus
+ * @tc.desc: check RequestFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RequestFocus, Function | SmallTest | Level2)
+{
+    WindowManager windowManager;
+    int32_t persistentId = 1;
+    bool isFocused = true;
+    bool byForeground = true;
+    int32_t reason = 100;
+    auto result = windowManager.RequestFocus(
+        persistentId, isFocused, byForeground, reason);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
