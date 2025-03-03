@@ -32,8 +32,10 @@ class DisplayAniRegisterManager {
 public:
     DisplayAniRegisterManager();
     ~DisplayAniRegisterManager();
-    DMError RegisterListener(std::string type, ani_env* env, ani_ref callback);
-    DMError UnregisterListener(sptr<DisplayManager::IDisplayListener> listener, std::string type, ani_env* env, ani_ref value);
+    ani_object RegisterListener(std::string type, ani_env* env, ani_ref callback);
+    ani_object UnregisterListener(std::string type, ani_env* env, ani_ref callback);
+    DMError UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback);
+    DMError UnregisterAllDisplayListenerWithType(std::string type);
 private:
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
     std::set<sptr<DisplayManager::IDisplayListener>> displayListeners_;

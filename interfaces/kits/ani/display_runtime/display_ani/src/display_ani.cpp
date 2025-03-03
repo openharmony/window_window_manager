@@ -227,11 +227,15 @@ ani_object DisplayAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref
     return DisplayAniUtils::CreateAniUndefined(env);
 }
 
-ani_object DisplayAni::unRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback) {
-    return DisplayAniUtils::CreateAniUndefined(env);
+ani_object DisplayAni::unRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback, ani_long nativeObj) {
+    DisplayAni* displayAni = reinterpret_cast<DisplayAni*>(nativeObj);
+    return displayAni != nullptr ? displayAni->onUnRegisterCallback(env, type, callback) : nullptr;
 }
 
 ani_object DisplayAni::onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback) {
+    std::string typeString;
+    DisplayAniUtils::GetStdString(env, type, typeString);
+    registerManager_->UnregisterListener(typeString, env, callback);
     return DisplayAniUtils::CreateAniUndefined(env);
 }
 
@@ -259,6 +263,15 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayAni::isFoldableAni)},
         ani_native_function {"getFoldDisplayModeAni", ":I", reinterpret_cast<void *>(DisplayAni::getFoldDisplayModeAni)},
         ani_native_function {"getFoldStatus", ":I", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+
+        ani_native_function {"getCurrentFoldCreaseRegion", ":L@ohos/display/display/FoldCreaseRegionImpl;", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+        ani_native_function {"getDisplayByIdSync", "I:L@ohos/display/display/DisplayImpl;", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+        ani_native_function {"getDefaultDisplaySync", ":L@ohos/display/display/DisplayImpl;", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+        // 函数签名问题
+        ani_native_function {"getAllDisplays", ":", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+
+        ani_native_function {"on", "Lstd/core/String;L@ohos/display/display/Callback;:V", reinterpret_cast<void *>(DisplayAni::registerCallback)},
+        ani_native_function {"off", "Lstd/core/String;L@ohos/display/display/Callback;:V", reinterpret_cast<void *>(DisplayAni::unRegisterCallback)}
     };
     // 绑定（指定nsp和func
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
@@ -268,14 +281,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 
     // class函数绑定
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/display/display/Display;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("L@ohos/display/display/DisplayImpl;", &cls)) != ANI_OK) {
         WLOGFE("[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"getCutoutInfo", ":L@ohos/display/display/CutoutInfo", reinterpret_cast<void *>(DisplayAni::getCutoutInfo)},
-        ani_native_function {"on", "Lstd/core/String;L@ohos/display/Callback:V", reinterpret_cast<void *>(DisplayAni::registerCallback)},
-        ani_native_function {"off", "Lstd/core/String;L@ohos/display/Callback:V", reinterpret_cast<void *>(DisplayAni::unRegisterCallback)}
+        ani_native_function {"getCutoutInfo", ":L@ohos/display/display/CutoutInfoImpl;", reinterpret_cast<void *>(DisplayAni::getCutoutInfo)},
     };
     // 通过class和methodname绑定到特定的class.mtd上
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {

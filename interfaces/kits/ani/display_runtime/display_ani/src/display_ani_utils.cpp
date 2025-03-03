@@ -31,7 +31,7 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsDisplayManager"};
 }
 
 enum class DisplayStateMode : uint32_t {
