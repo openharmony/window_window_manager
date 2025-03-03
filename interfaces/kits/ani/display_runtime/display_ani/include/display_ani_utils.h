@@ -14,7 +14,7 @@
  */
 #include <hitrace_meter.h>
 
-#include "../../common/ani.h"
+#include "ani.h"
 #include "display_ani.h"
 #include "singleton_container.h"
 #include "display_manager.h"
@@ -30,11 +30,11 @@ class DisplayAniUtils {
 public:
 static ani_object convertRect(DMRect rect, ani_env* env);
 
-static ani_fixedarray_ref convertRects(std::vector<DMRect> rects, ani_env* env);
+static ani_array_ref convertRects(std::vector<DMRect> rects, ani_env* env);
 
 static ani_object convertDisplay(sptr<Display> display, ani_env* env);
 
-static ani_fixedarray_ref convertDisplays(std::vector<sptr<Display>> displays, ani_env* env);
+static ani_array_ref convertDisplays(std::vector<sptr<Display>> displays, ani_env* env);
 
 static void GetStdString(ani_env *env, ani_string str, std::string &result);
 

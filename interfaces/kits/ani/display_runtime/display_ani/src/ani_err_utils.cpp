@@ -15,10 +15,16 @@
 
 #include "ani_err_utils.h"
 #include "display_ani_utils.h"
+#include "window_manager_hilog.h"
+
 
 #include <map>
 
 namespace OHOS::Rosen {
+
+namespace {
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AniErrUtils"};
+}
 constexpr const char* WM_ERROR_MSG_OK = "ok";
 constexpr const char* WM_ERROR_MSG_DO_NOTHING = "do nothing";
 constexpr const char* WM_ERROR_MSG_NO_MEM = "no mem";
@@ -224,7 +230,6 @@ ani_object AniErrUtils::CreateAniError(ani_env* env, const WMError& errorCode, s
     ani_class cls;
     if (ANI_OK != env->FindClass("Lescompat/Error", &cls)) {
         WLOGFE("[ANI] null class FoldCreaseRegionImpl");
-        return objRet;
     }
     DisplayAniUtils::NewAniObject(env, cls, "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniError, aniMsg);
     return aniError;
@@ -236,7 +241,11 @@ ani_object AniErrUtils::CreateAniError(ani_env* env, const WmErrorCode& errorCod
     ani_string aniMsg;
     env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg);
     ani_object aniError = nullptr;
-    DisplayAniUtils::NewAniObject(env, "Lescompat/Error", "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniError, aniMsg);
+    ani_class cls;
+    if (ANI_OK != env->FindClass("Lescompat/Error", &cls)) {
+        WLOGFE("[ANI] null class FoldCreaseRegionImpl");
+    }
+    DisplayAniUtils::NewAniObject(env, cls, "Lstd/core/String;Lescompat/ErrorOptions;:V", &aniError, aniMsg);
     return aniError;
 }
 

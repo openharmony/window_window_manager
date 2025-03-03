@@ -18,7 +18,7 @@
 
 #include <hitrace_meter.h>
  
-#include "../../common/ani.h"
+#include "ani.h"
 #include "display_ani.h"
 #include "display_info.h"
 #include "display.h"
@@ -97,7 +97,7 @@ ani_object DisplayAni::getCurrentFoldCreaseRegion(ani_env* env, ani_object obj)
     }
     ani_int displayId = static_cast<ani_int>(region->GetDisplayId());
     std::vector<DMRect> rects = region->GetCreaseRects();
-    ani_fixedarray_ref aniRects = DisplayAniUtils::convertRects(rects, env);
+    ani_array_ref aniRects = DisplayAniUtils::convertRects(rects, env);
     env->Object_SetField_Int(objRet, displayIdFld, displayId);
     env->Object_SetField_Ref(objRet, creaseRectsFld, aniRects);
     return objRet;
@@ -123,7 +123,7 @@ ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
         return objRet;
     }
     // set boundingRects field
-    ani_fixedarray_ref arrayRef = DisplayAniUtils::convertRects(cutoutInfo->GetBoundingRects(), env);
+    ani_array_ref arrayRef = DisplayAniUtils::convertRects(cutoutInfo->GetBoundingRects(), env);
     env->Object_SetField_Ref(objRet, boundingRectsFld, arrayRef);
     
     ani_object waterfallObj = nullptr;
@@ -181,13 +181,13 @@ ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
     return objRet;
 }
  
-ani_fixedarray_ref DisplayAni::getAllDisplaysAni(ani_env* env, ani_object obj) {
+ani_array_ref DisplayAni::getAllDisplaysAni(ani_env* env, ani_object obj) {
     std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
     if (displays.size() == 0) {
         WLOGE("[ANI] Invalid displays, size equals 0");
         return nullptr;
     }
-    ani_fixedarray_ref ret = DisplayAniUtils::convertDisplays(displays, env);
+    ani_array_ref ret = DisplayAniUtils::convertDisplays(displays, env);
     return ret;
 }
  

@@ -15,7 +15,7 @@
 
 #include <hitrace_meter.h>
 
-#include "../../common/ani.h"
+#include "ani.h"
 #include "display_ani_utils.h"
 #include "display_ani.h"
 #include "display_info.h"
@@ -99,16 +99,16 @@ ani_object DisplayAniUtils::convertRect(DMRect rect, ani_env* env)
     return obj;
 }
  
-ani_fixedarray_ref DisplayAniUtils::convertRects(std::vector<DMRect> rects, ani_env* env)
+ani_array_ref DisplayAniUtils::convertRects(std::vector<DMRect> rects, ani_env* env)
 {
-    ani_fixedarray_ref arrayres = nullptr;
+    ani_array_ref arrayres = nullptr;
     int size = rects.size();
     ani_ref* aniRects = new ani_ref[size];
     for (int i = 0; i < size; i++) {
         DMRect rect = rects[i];
         aniRects[i] = convertRect(rect, env);
     }
-    if (ANI_OK != env->FixedArray_New_Ref(rects.size(), aniRects, &arrayres)) {
+    if (ANI_OK != env->Array_New_Ref(rects.size(), aniRects, &arrayres)) {
         WLOGFE("[ANI] create rect array error");
     }
     delete[] aniRects;
@@ -238,17 +238,17 @@ ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
     env->Object_SetField_Float(obj, yDPIFld, info->GetYDpi());
 
     // enum array
-    ani_fixedarray_int colorSpacesAni = nullptr;
-    ani_fixedarray_int hdrFormatsAni = nullptr;
+    ani_array_int colorSpacesAni = nullptr;
+    ani_array_int hdrFormatsAni = nullptr;
     ani_field colorSpacesFld = nullptr;
     ani_field hdrFormatsld = nullptr;
     auto colorSpaces = info->GetColorSpaces();
-    if (ANI_OK != env->FixedArray_New_Int(colorSpaces.size(), &colorSpacesAni)) {
+    if (ANI_OK != env->Array_New_Int(colorSpaces.size(), &colorSpacesAni)) {
         WLOGFE("[ANI] create colorSpace array error");
     }
     env->FixedArray_SetRegion_Int(colorSpacesAni, 0, colorSpaces.size(), reinterpret_cast<ani_int *>(colorSpaces.data()));
     auto hdrFormats = info->GetHdrFormats();
-    if (ANI_OK != env->FixedArray_New_Int(hdrFormats.size(), &hdrFormatsAni)) {
+    if (ANI_OK != env->Array_New_Int(hdrFormats.size(), &hdrFormatsAni)) {
         WLOGFE("[ANI] create colorSpace array error");
     }
     env->FixedArray_SetRegion_Int(hdrFormatsAni, 0, hdrFormats.size(), reinterpret_cast<ani_int *>(hdrFormats.data()));
@@ -259,14 +259,14 @@ ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
     return obj;
 }
  
-ani_fixedarray_ref DisplayAniUtils::convertDisplays(std::vector<sptr<Display>> displays, ani_env* env){
-    ani_fixedarray_ref arrayres = nullptr;
+ani_array_ref DisplayAniUtils::convertDisplays(std::vector<sptr<Display>> displays, ani_env* env){
+    ani_array_ref arrayres = nullptr;
     ani_ref* displaysAni = new ani_ref[displays.size()];
     for (unsigned int i = 0; i < displays.size(); i++) {
         sptr<Display> display = displays[i];
         displaysAni[i] = convertDisplay(display, env);
     }
-    if (ANI_OK != env->FixedArray_New_Ref(displays.size(), displaysAni, &arrayres)) {
+    if (ANI_OK != env->Array_New_Ref(displays.size(), displaysAni, &arrayres)) {
         WLOGFE("[ANI] create rect array error");
     }
     delete[] displaysAni;

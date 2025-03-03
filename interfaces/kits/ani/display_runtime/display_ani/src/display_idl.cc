@@ -21,7 +21,7 @@
 #include "window_manager_hilog.h"
 #include "dm_common.h"
 #include "refbase.h"
-#include "../../common/ani.h"
+#include "ani.h"
 
 using namespace OHOS::Rosen;
 namespace OHOS {
