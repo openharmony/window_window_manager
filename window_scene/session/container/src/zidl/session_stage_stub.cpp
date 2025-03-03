@@ -839,5 +839,4 @@ int SessionStageStub::HandleNotifyWindowAttachStateChange(MessageParcel& data, M
     NotifyWindowAttachStateChange(isAttach);
     return ERR_NONE;
 }
-
 } // namespace OHOS::Rosen

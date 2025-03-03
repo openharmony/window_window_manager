@@ -173,8 +173,10 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
+        displayMode == FoldDisplayMode::GLOBAL_FULL ||
         (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN &&
-        FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+        (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()))) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
         if (!NearZero(singleHandData.singleHandY)) {
@@ -763,6 +765,9 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
     SingleHandData singleHandData;
     auto sessionProperty = sceneSession->GetSessionProperty();
     auto displayId = sessionProperty->GetDisplayId();
+    if (displayId != ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
+        return singleHandData;
+    }
     const std::map<ScreenId, ScreenProperty>& screensProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     auto screenPropertyIter = screensProperties.find(displayId);

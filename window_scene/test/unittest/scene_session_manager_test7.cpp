@@ -1104,6 +1104,7 @@ HWTEST_F(SceneSessionManagerTest7, UpdateAvoidArea, Function | SmallTest | Level
     int32_t persistentId = 0;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->UpdateAvoidArea(persistentId);
 }
 
@@ -1117,6 +1118,7 @@ HWTEST_F(SceneSessionManagerTest7, UpdateAvoidArea01, Function | SmallTest | Lev
     int32_t persistentId = 0;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->UpdateAvoidArea(persistentId);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -1139,6 +1141,7 @@ HWTEST_F(SceneSessionManagerTest7, UpdateAvoidArea02, Function | SmallTest | Lev
     int32_t persistentId = 0;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->UpdateAvoidArea(persistentId);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";

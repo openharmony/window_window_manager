@@ -1072,6 +1072,45 @@ public:
 };
 
 /**
+ * @struct ExceptionInfo
+ *
+ * @brief Exception info.
+ */
+struct ExceptionInfo : public Parcelable {
+    /**
+     * @brief Marshalling ExceptionInfo.
+     *
+     * @param parcel Package of ExceptionInfo.
+     * @return True means marshall success, false means marshall failed.
+     */
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteBool(needRemoveSession) &&
+               parcel.WriteBool(needClearCallerLink);
+    }
+
+    /**
+     * @brief Unmarshalling ExceptionInfo.
+     *
+     * @param parcel Package of ExceptionInfo.
+     * @return ExceptionInfo object.
+     */
+    static ExceptionInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new ExceptionInfo();
+        if (!parcel.ReadBool(info->needRemoveSession) ||
+            !parcel.ReadBool(info->needClearCallerLink)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    bool needRemoveSession = false;
+    bool needClearCallerLink = true;
+};
+
+/**
  * @brief Enumerates window update type.
  */
 enum class WindowUpdateType : int32_t {

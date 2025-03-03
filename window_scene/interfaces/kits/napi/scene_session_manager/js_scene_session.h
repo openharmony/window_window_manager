@@ -91,6 +91,7 @@ enum class ListenerFuncType : uint32_t {
     KEYBOARD_VIEW_MODE_CHANGE_CB,
     SET_WINDOW_CORNER_RADIUS_CB,
     HIGHLIGHT_CHANGE_CB,
+    FOLLOW_PARENT_RECT_CB,
 };
 
 class SceneSession;
@@ -127,7 +128,7 @@ private:
     void TerminateSession(const SessionInfo& info);
     void TerminateSessionNew(const SessionInfo& info, bool needStartCaller, bool isFromBroker);
     void TerminateSessionTotal(const SessionInfo& info, TerminateType terminateType);
-    void OnSessionException(const SessionInfo& info, bool needRemoveSession, bool startFail);
+    void OnSessionException(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail);
     void PendingSessionToForeground(const SessionInfo& info);
     void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
@@ -343,6 +344,7 @@ private:
     void ProcessKeyboardStateChangeRegister();
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
+    void ProcessFollowParentRectRegister();
 
     /*
      * Window Property
@@ -409,6 +411,7 @@ private:
     void OnKeyboardStateChange(SessionState state, KeyboardViewMode mode);
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
     void NotifyHighlightChange(bool isHighlight);
+    void NotifyFollowParentRect(bool isFollow);
 
     /*
      * Window Property

@@ -217,6 +217,7 @@ public:
     static napi_value IsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
+    static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
 
 private:
     std::string GetWindowName();
@@ -407,6 +408,7 @@ private:
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
 };
 }  // namespace Rosen
 }  // namespace OHOS

@@ -28,6 +28,8 @@
 namespace OHOS {
 namespace Rosen {
 napi_valuetype GetType(napi_env env, napi_value value);
+napi_value CallJsMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0,
+    napi_env env = nullptr, napi_value value = nullptr);
 class JsWindowExtension : public WindowExtension {
 public:
     explicit JsWindowExtension(AbilityRuntime::JsRuntime& jsRuntime);
@@ -84,7 +86,6 @@ public:
     virtual void OnStart(const AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 private:
     void GetSrcPath(std::string& srcPath) const;
-    napi_value CallJsMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0) const;
     void OnWindowCreated() const;
     void BindContext(napi_env env, napi_value obj);
 

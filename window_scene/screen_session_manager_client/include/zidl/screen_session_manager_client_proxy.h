@@ -28,8 +28,7 @@ public:
     virtual ~ScreenSessionManagerClientProxy() = default;
 
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) override;
+    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,

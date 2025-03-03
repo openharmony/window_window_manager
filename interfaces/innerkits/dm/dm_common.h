@@ -574,6 +574,17 @@ struct DMRect {
         return {0, 0, 0, 0};
     }
 };
+
+/**
+ * @brief Session option when connect
+ */
+struct SessionOption {
+    ScreenId rsId_;
+    std::string name_;
+    bool isExtend_;
+    std::string innerName_;
+    ScreenId screenId_;
+};
 }
 }
 #endif // OHOS_ROSEN_DM_COMMON_H

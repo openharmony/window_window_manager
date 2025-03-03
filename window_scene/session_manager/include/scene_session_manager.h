@@ -720,7 +720,7 @@ private:
      */
     WSError RequestSessionFocus(int32_t persistentId, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
-    WSError RequestSessionFocusImmediately(int32_t persistentId);
+    WSError RequestSessionFocusImmediately(int32_t persistentId, bool blockNotifyUntilVisible = true);
     WSError RequestSessionUnfocus(int32_t persistentId, FocusChangeReason reason = FocusChangeReason::DEFAULT);
     WSError RequestAllAppSessionUnfocusInner();
     WSError RequestFocusBasicCheck(int32_t persistentId, const sptr<FocusGroup>& focusGroup);

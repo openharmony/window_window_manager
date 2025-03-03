@@ -39,6 +39,7 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
+    void Resume() override;
 
     /*
      * Window Layout
@@ -52,6 +53,7 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError ResizeAsync(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
@@ -213,6 +215,7 @@ public:
     float GetCustomDensity() const override;
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
+    uint32_t GetApiVersion() const override;
 
     /*
      * Window Decor
@@ -267,7 +270,7 @@ protected:
     WMError NotifySpecificWindowSessionProperty(WindowType type, const SystemBarProperty& property);
     using SessionMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
     sptr<WindowSessionImpl> FindParentMainSession(uint32_t parentId, const SessionMap& sessionMap);
-    
+
     /*
      * Window Recover
      */
@@ -392,7 +395,7 @@ private:
      * Move Drag
      */
     bool CalcWindowShouldMove();
-    
+
     /*
      * PC Window
      */
@@ -412,6 +415,12 @@ private:
     static std::mutex windowAttachStateChangeListenerMutex_;
     sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+
+    /*
+     * Window Lifecycle
+     */
+    bool isColdStart_ = true;
+    void NotifyFreeMultiWindowModeResume();
 };
 } // namespace Rosen
 } // namespace OHOS
