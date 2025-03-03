@@ -127,7 +127,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
-constexpr int32_t API_VERSION_16 = 16;
+constexpr int32_t API_VERSION_18 = 18;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -1954,7 +1954,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
 {
     apiVersion = apiVersion == API_VERSION_INVALID ?
         static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion()) : apiVersion;
-    if (apiVersion < API_VERSION_16 && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
+    if (apiVersion < API_VERSION_18 && WindowHelper::IsSystemWindow(property_->GetWindowType())) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d api version not supported",
             GetWindowId(), type);
         return WMError::WM_OK;
