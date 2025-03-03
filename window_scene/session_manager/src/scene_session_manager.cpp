@@ -12125,8 +12125,8 @@ WMError SceneSessionManager::LockSessionByAbilityInfo(const AbilityInfoBase& abi
         GetMainSessionByAbilityInfo(abilityInfo, mainSessions);
         if (!mainSessions.empty()) {
             for (const auto& mainSession : mainSessions) {
-                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, set isLockedState true, persistentId:%{public}d",
-                    where, mainSession->GetPersistentId());
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, set isLocked %{public}d, persistentId:%{public}d",
+                    where, isLock, mainSession->GetPersistentId());
                 mainSession->NotifySessionLockStateChange(isLock);
             }
             if (isLock) {
