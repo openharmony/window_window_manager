@@ -194,6 +194,28 @@ WSRect MoveDragController::GetTargetRectByDisplayId(DisplayId displayId) const
             moveDragProperty_.targetRect_.height_};
 }
 
+void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragController>& followedController,
+    const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    if (surfaceNode == nullptr || followedController == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "surfaceNode or followedController is null");
+        return;
+    }
+    auto type = followedController->GetAreaType();
+    if (type == AreaType::UNDEFINED) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "type undefined");
+        return;
+    }
+    Gravity dragGravity = GRAVITY_MAP.at(type);
+    if (dragGravity >= Gravity::TOP && dragGravity <= Gravity::BOTTOM_RIGHT) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "begin SetFrameGravity when follow, gravity:%{public}d, type:%{public}d",
+            dragGravity, type);
+        surfaceNode->SetFrameGravity(dragGravity);
+        RSTransaction::FlushImplicitTransaction();
+    }
+}
+
+
 /** @note @window.drag */
 void MoveDragController::InitMoveDragProperty()
 {

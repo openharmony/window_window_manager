@@ -128,6 +128,7 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_16 = 16;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -1125,6 +1126,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
         NotifyAfterForeground(true, false);
+        NotifyAfterDidForeground(reason);
         return WMError::WM_OK;
     }
     const auto type = GetType();
@@ -1144,12 +1146,13 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     property_->SetDecorEnable(isDecorEnable);
 
     if (state_ == WindowState::STATE_SHOWN) {
-        TLOGD(WmsLogTag::WMS_LIFE, "window is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
+        TLOGI(WmsLogTag::WMS_LIFE, "window is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
         if (WindowHelper::IsMainWindow(type)) {
             hostSession->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
+        NotifyAfterDidForeground(reason);
         RefreshNoInteractionTimeoutMonitor();
         return WMError::WM_OK;
     }
@@ -1203,6 +1206,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
         state_ = WindowState::STATE_SHOWN;
         requestState_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground(true, true);
+        NotifyAfterDidForeground(reason);
+        NotifyFreeMultiWindowModeResume();
         RefreshNoInteractionTimeoutMonitor();
         TLOGI(WmsLogTag::WMS_LIFE, "Window show success [name:%{public}s, id:%{public}d, type:%{public}u]",
             property_->GetWindowName().c_str(), GetPersistentId(), type);
@@ -1228,11 +1233,32 @@ WMError WindowSceneSessionImpl::ShowKeyboard(KeyboardViewMode mode)
     return Show();
 }
 
+void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
+{
+    TLOGI(WmsLogTag::WMS_MAIN, "api version %{public}u, IsPcMode %{public}d, isColdStart %{public}d",
+        GetTargetAPIVersion(), IsPcOrPadCapabilityEnabled(), isColdStart_);
+    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION && IsPcOrPadCapabilityEnabled() && !isColdStart_) {
+        isDidForeground_ = true;
+        NotifyForegroundInteractiveStatus(true);
+    }
+}
+
+void WindowSceneSessionImpl::Resume()
+{
+    if (GetTargetAPIVersion() >= LIFECYCLE_ISOLATE_VERSION) {
+        isDidForeground_ = true;
+        isColdStart_ = false;
+        TLOGI(WmsLogTag::WMS_LIFE, "in");
+        NotifyForegroundInteractiveStatus(true);
+    }
+}
+
 WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerkits)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to another user, NotifyAfterBackground");
         NotifyAfterBackground(true, false);
+        NotifyAfterDidBackground(reason);
         return WMError::WM_OK;
     }
 
@@ -1283,8 +1309,10 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     if (res == WMError::WM_OK) {
         // update sub window state if this is main window
         UpdateSubWindowState(type);
+        NotifyAfterDidBackground(reason);
         state_ = WindowState::STATE_HIDDEN;
         requestState_ = WindowState::STATE_HIDDEN;
+        isDidForeground_ = false;
         if (!interactive_) {
             hasFirstNotifyInteractive_ = false;
         }
@@ -4655,13 +4683,16 @@ WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
 WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
     const sptr<IWindowAttachStateChangeListner>& listener)
 {
-    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d, listener is null", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     windowAttachStateChangeListener_ = listener;
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->NotifyWindowAttachStateListenerRegistered(true);
     return WMError::WM_OK;
 }
 
@@ -4669,13 +4700,17 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 {
     std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     windowAttachStateChangeListener_ = nullptr;
-    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener unregistered", GetPersistentId());
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->NotifyWindowAttachStateListenerRegistered(false);
     return WMError::WM_OK;
 }
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (!windowAttachStateChangeListener_) {
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -5196,6 +5231,25 @@ float WindowSceneSessionImpl::GetMainWindowCustomDensity()
 float WindowSceneSessionImpl::GetCustomDensity() const
 {
     return customDensity_;
+}
+
+WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& property = GetProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        !WindowHelper::IsDialogWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (property->GetSubWindowLevel() > 1) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    WSError ret = GetHostSession()->SetFollowParentWindowLayoutEnabled(isFollow);
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)

@@ -67,6 +67,7 @@ ohos_shared_library("screen_session_manager") {
     "src/publish/screen_session_publish.cpp",
     "src/screen_cutout_controller.cpp",
     "src/screen_edid_parse.cpp",
+    "src/screen_power_utils.cpp",
     "src/screen_rotation_property.cpp",
     "src/screen_scene_config.cpp",
     "src/screen_sensor_connector.cpp",

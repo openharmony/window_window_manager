@@ -39,6 +39,7 @@ public:
     void StartMove() override;
     bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
+    void Resume() override;
 
     /*
      * Window Layout
@@ -52,6 +53,7 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError ResizeAsync(uint32_t width, uint32_t height,
         const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
@@ -412,6 +414,12 @@ private:
     static std::mutex windowAttachStateChangeListenerMutex_;
     sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
     WSError NotifyWindowAttachStateChange(bool isAttach) override;
+
+    /*
+     * Window Lifecycle
+     */
+    bool isColdStart_ = true;
+    void NotifyFreeMultiWindowModeResume();
 };
 } // namespace Rosen
 } // namespace OHOS

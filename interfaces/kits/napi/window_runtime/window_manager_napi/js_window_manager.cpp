@@ -1144,45 +1144,46 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
 
 napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_info info)
 {
-    WLOGFD("OnShiftAppWindowFocus");
+    TLOGD(WmsLogTag::WMS_FOCUS, "OnShiftAppWindowFocus");
     WMError errCode = WMError::WM_OK;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 2) { // 2: params num
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_FOCUS, "Argc is invalid: %{public}zu", argc);
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     int32_t sourcePersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
     int32_t targetPersistentId = static_cast<int32_t>(INVALID_WINDOW_ID);
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(env, argv[0], sourcePersistentId)) {
-        WLOGFE("Failed to convert parameter to source window Id");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to source window Id");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WMError::WM_OK && !ConvertFromJsValue(env, argv[1], targetPersistentId)) {
-        WLOGFE("Failed to convert parameter to target window Id");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to convert parameter to target window Id");
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WMError::WM_ERROR_INVALID_PARAM) {
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
-    NapiAsyncTask::CompleteCallback complete =
-        [=](napi_env env, NapiAsyncTask& task, int32_t status) {
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-                SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
-            if (ret == WmErrorCode::WM_OK) {
-                task.Resolve(env, NapiGetUndefined(env));
-                WLOGD("OnShiftAppWindowFocus success");
-            } else {
-                task.Reject(env, JsErrUtils::CreateJsError(env, ret, "ShiftAppWindowFocus failed"));
-            }
-        };
     // only return promiss<void>
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowManager::OnShiftAppWindowFocus",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [env, task = napiAsyncTask, sourcePersistentId, targetPersistentId] {
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourcePersistentId, targetPersistentId));
+            if (ret == WmErrorCode::WM_OK) {
+                task->Resolve(env, NapiGetUndefined(env));
+                TLOGND(WmsLogTag::WMS_FOCUS, "OnShiftAppWindowFocus success");
+            } else {
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "ShiftAppWindowFocus failed"));
+            }
+        };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "window state is abnormal!");
+    }
     return result;
 }
 

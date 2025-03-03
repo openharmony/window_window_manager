@@ -3719,8 +3719,83 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenSkipProtectedWindowInner, Function |
     }
     std::vector<ScreenId> allUniqueScreenIds = {screenId, 99};
     std::vector<DisplayId> displayIds = {};
-    ssm_->DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds);
+    ssm_->DoMakeUniqueScreenOld(allUniqueScreenIds, displayIds, false);
     ASSERT_EQ(displayIds.size(), 1);
+}
+
+/**
+ * @tc.name: SetCastPrivacyFromSettingData
+ * @tc.desc: SetCastPrivacyFromSettingData test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyFromSettingData, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    ScreenId id = 2;
+    sptr<ScreenSession> newSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ASSERT_NE(newSession, nullptr);
+    ssm_->screenSessionMap_[id] = newSession;
+    ssm_->SetCastPrivacyFromSettingData();
+}
+
+/**
+ * @tc.name: SetCastPrivacyToRS
+ * @tc.desc: SetCastPrivacyToRS test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyToRS, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    sptr<ScreenSession> defScreen = ssm_->GetScreenSession(DEFAULT_SCREEN_ID);
+    ASSERT_EQ(ssm_->SetCastPrivacyToRS(defScreen, true), false);
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> virtualSession = ssm_->GetScreenSession(virtualScreenId);
+    ASSERT_EQ(ssm_->SetCastPrivacyToRS(virtualSession, true), false);
+    ScreenId id = 2;
+    sptr<ScreenSession> newSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ASSERT_NE(newSession, nullptr);
+    newSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
+    ASSERT_EQ(ssm_->SetCastPrivacyToRS(newSession, true), true);
+}
+
+/**
+ * @tc.name: RegisterSettingWireCastObserver
+ * @tc.desc: RegisterSettingWireCastObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RegisterSettingWireCastObserver, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    ScreenId id = 2;
+    sptr<ScreenSession> newSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ASSERT_NE(newSession, nullptr);
+    ssm_->screenSessionMap_[id] = newSession;
+    ssm_->RegisterSettingWireCastObserver(newSession);
+}
+
+/**
+ * @tc.name: UnregisterSettingWireCastObserver
+ * @tc.desc: UnregisterSettingWireCastObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    ASSERT_NE(displayManagerAgent, nullptr);
+    ScreenId id = 2;
+    sptr<ScreenSession> newSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ASSERT_NE(newSession, nullptr);
+    ssm_->screenSessionMap_[id] = newSession;
+    ssm_->UnregisterSettingWireCastObserver(id);
 }
 }
 } // namespace Rosen

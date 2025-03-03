@@ -142,6 +142,16 @@ public:
      * @brief Notify caller that window is destroyed.
      */
     virtual void AfterDestroyed() {}
+
+    /**
+     * @brief Notify caller that window is already foreground.
+     */
+    virtual void AfterDidForeground() {}
+
+    /**
+     * @brief Notify caller that window is already background.
+     */
+    virtual void AfterDidBackground() {}
 };
 
 /**
@@ -1065,6 +1075,11 @@ public:
      */
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
                          bool withFocus = true) { return WMError::WM_OK; }
+
+    /**
+     * @brief resume window
+     */
+    virtual void Resume() {}
 
     /**
      * @brief Hide window
@@ -3293,6 +3308,14 @@ public:
      * @return Api version
      */
     virtual uint32_t GetApiVersion() const { return 0; }
+
+    /**
+     * @brief Set the feature of subwindow follow the layout of the parent window.
+     *
+     * @param isFollow true - follow, false - not follow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 };
 }
 }

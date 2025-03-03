@@ -1448,11 +1448,13 @@ HWTEST_F(MoveDragControllerTest, UpdateMoveAvailableArea, Function | SmallTest |
 {
     moveDragController->UpdateMoveAvailableArea(-1);
     ASSERT_EQ(moveDragController->moveAvailableArea_.posX_, 0);
-    ScreenId screenId = 0;
+    SessionOption option = {
+        .rsId_ = 0,
+        .isExtend_ = false,
+        .screenId_ = 0,
+    };
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
-    ScreenId rsId = 0;
-    std::string name;
-    ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
+    ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(option, screenEvent);
     moveDragController->UpdateMoveAvailableArea(0);
     ASSERT_EQ(moveDragController->moveAvailableArea_.posX_, 0);
 }
@@ -1475,11 +1477,13 @@ HWTEST_F(MoveDragControllerTest, GetMoveInputBarStartDisplayId, Function | Small
  */
 HWTEST_F(MoveDragControllerTest, SetCurrentScreenProperty, Function | SmallTest | Level1)
 {
-    ScreenId screenId = 0;
+    SessionOption option = {
+        .rsId_ = 0,
+        .isExtend_ = false,
+        .screenId_ = 0,
+    };
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
-    ScreenId rsId = 0;
-    std::string name;
-    ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
+    ScreenSessionManagerClient::GetInstance().OnScreenConnectionChanged(option, screenEvent);
     moveDragController->SetCurrentScreenProperty(-1);
     ASSERT_EQ(moveDragController->screenSizeProperty_.currentDisplayStartX, 0);
     moveDragController->SetCurrentScreenProperty(0);
