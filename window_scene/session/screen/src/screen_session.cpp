@@ -873,10 +873,9 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
 
 void ScreenSession::UpdateTouchBoundsAndOffset()
 {
-    bool isSecondaryDevice = FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
-    property_.SetPhysicalTouchBounds(isSecondaryDevice);
-    property_.SetInputOffsetY(isSecondaryDevice);
-    if (isSecondaryDevice) {
+    property_.SetPhysicalTouchBounds();
+    property_.SetInputOffsetY();
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         property_.SetValidHeight(property_.GetBounds().rect_.GetHeight());
         property_.SetValidWidth(property_.GetBounds().rect_.GetWidth());
     }
@@ -1881,10 +1880,9 @@ void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offset
     property_.SetBounds(RRect(rect, 0.0f, 0.0f));
 }
 
-void ScreenSession::SetExtendProperty(RRect bounds, bool isPhysicalTouchBounds, bool isCurrentOffScreenRendering)
+void ScreenSession::SetExtendProperty(RRect bounds, bool isCurrentOffScreenRendering)
 {
     property_.SetBounds(bounds);
-    property_.SetPhysicalTouchBounds(isPhysicalTouchBounds);
     property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
 }
 
