@@ -208,7 +208,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
     window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
-    wndow->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     res = window->SetMainWindowTopmost(true);
     ASSERT_EQ(WMError::WM_OK, res);
 }
