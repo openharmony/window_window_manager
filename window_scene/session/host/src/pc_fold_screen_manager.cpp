@@ -120,6 +120,15 @@ bool PcFoldScreenManager::IsHalfFoldedOnMainDisplay(DisplayId displayId) const
     return screenFoldStatus_ == SuperFoldStatus::HALF_FOLDED && displayId == DEFAULT_DISPLAY_ID;
 }
 
+bool PcFoldScreenManager::IsPcFoldDevice()
+{
+    auto currScreenFoldStatus = GetScreenFoldStatus();
+    if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
+        return false;
+    }
+    return true;
+}
+
 bool PcFoldScreenManager::IsPcFoldScreen(DisplayId displayId) const
 {
     return displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID;

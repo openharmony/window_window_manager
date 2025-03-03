@@ -968,9 +968,6 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 
 WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
-    if (displayId == clientDisplayId_) {
-        return WSError::WS_DO_NOTHING;
-    }
     if (sessionStage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
@@ -1156,9 +1153,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) && clientDisplayId_ == VIRTUAL_DISPLAY_ID) {
-        property->SetDisplayId(clientDisplayId_);
-    }
     return WSError::WS_OK;
 }
 
