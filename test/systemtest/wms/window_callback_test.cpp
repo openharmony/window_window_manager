@@ -18,9 +18,9 @@
 
 #include "ability_context_impl.h"
 
-#include "window_test_utils.h"
 #include "mock_session.h"
 #include "window_scene_session_impl.h"
+#include "window_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,15 +65,14 @@ HWTEST_F(WindowCallbackTest, WindowRectChange01, Function | MediumTest | Level0)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     sptr<IWindowRectChangeListener> listener = nullptr;
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->RegisterWindowRectChangeListener(listener));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->UnregisterWindowRectChangeListener(listener));
 
-    sptr<IWindowRectChangeListener> listener1 =
-     new (std::nothrow) IWindowRectChangeListener();
+    sptr<IWindowRectChangeListener> listener1 = sptr<IWindowRectChangeListener>::MakeSptr();
     ASSERT_NE(listener1, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener1));
     ASSERT_EQ(WMError::WM_OK, window->UnregisterWindowRectChangeListener(listener1));
@@ -96,11 +95,10 @@ HWTEST_F(WindowCallbackTest, WindowRectChange02, Function | MediumTest | Level0)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
-    sptr<IWindowRectChangeListener> listener =
-     new (std::nothrow) IWindowRectChangeListener();
+    sptr<IWindowRectChangeListener> listener = sptr<IWindowRectChangeListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -133,11 +131,10 @@ HWTEST_F(WindowCallbackTest, WindowRectChange03, Function | MediumTest | Level0)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
-    sptr<IWindowRectChangeListener> listener =
-     new (std::nothrow) IWindowRectChangeListener();
+    sptr<IWindowRectChangeListener> listener = sptr<IWindowRectChangeListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -170,11 +167,10 @@ HWTEST_F(WindowCallbackTest, WindowRectChange04, Function | MediumTest | Level0)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
-    sptr<IWindowRectChangeListener> listener =
-     new (std::nothrow) IWindowRectChangeListener();
+    sptr<IWindowRectChangeListener> listener = sptr<IWindowRectChangeListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -207,7 +203,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, Function | MediumTes
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     sptr<IWindowTitleButtonRectChangedListener> listener = nullptr;
@@ -215,7 +211,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, Function | MediumTes
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener));
 
     sptr<IWindowTitleButtonRectChangedListener> listener1 =
-     new (std::nothrow) IWindowTitleButtonRectChangedListener();
+     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
     ASSERT_NE(listener1, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterWindowTitleButtonRectChangeListener(listener1));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener1));
@@ -238,14 +234,14 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, Function | MediumTes
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10022);
     window->hostSession_ = session;
 
     sptr<IWindowTitleButtonRectChangedListener> listener =
-     new (std::nothrow) IWindowTitleButtonRectChangedListener();
+     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -278,14 +274,14 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, Function | MediumTes
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10023);
     window->hostSession_ = session;
 
     sptr<IWindowTitleButtonRectChangedListener> listener =
-     new (std::nothrow) IWindowTitleButtonRectChangedListener();
+     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -318,14 +314,14 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, Function | MediumTes
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10024);
     window->hostSession_ = session;
 
     sptr<IWindowTitleButtonRectChangedListener> listener =
-     new (std::nothrow) IWindowTitleButtonRectChangedListener();
+     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
@@ -358,7 +354,7 @@ HWTEST_F(WindowCallbackTest, MainWindowClose01, Function | MediumTest | Level0)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     sptr<IMainWindowCloseListener> listener = nullptr;
@@ -366,7 +362,7 @@ HWTEST_F(WindowCallbackTest, MainWindowClose01, Function | MediumTest | Level0)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterMainWindowCloseListeners(listener));
 
     sptr<IMainWindowCloseListener> listener1 =
-     new (std::nothrow) IMainWindowCloseListener();
+     sptr<IMainWindowCloseListener>::MakeSptr();
     ASSERT_NE(listener1, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterMainWindowCloseListeners(listener1));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterMainWindowCloseListeners(listener1));
@@ -389,14 +385,14 @@ HWTEST_F(WindowCallbackTest, MainWindowClose02, Function | MediumTest | Level0)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     window->property_->SetPersistentId(10032);
     window->hostSession_ = session;
 
     sptr<IMainWindowCloseListener> listener =
-     new (std::nothrow) IMainWindowCloseListener();
+     sptr<IMainWindowCloseListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
