@@ -117,6 +117,7 @@ using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
+using NotifyPcScreenFoldStatusChangeFunc = std::function<void(SuperFoldStatus foldStatus)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -151,6 +152,7 @@ public:
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
         GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
+        NotifyPcScreenFoldStatusChangeFunc onNotifyScreenFoldStatusChange_;
     };
 
     // func for change window scene pattern property
