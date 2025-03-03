@@ -2007,6 +2007,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleX,
         .scaleY = scaleY,
+        .useDma = true,
     };
     SetScreenSnapshotRect(config);
     {
