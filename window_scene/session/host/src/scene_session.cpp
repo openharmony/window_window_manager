@@ -140,6 +140,10 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
+        if (PcFoldScreenManager::GetInstance().IsPcFoldDevice()) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "initialConnect");
+            session->NotifyClientToUpdateRect("initialConnect", nullptr);
+        }
         return ret;
     }, __func__);
 }
@@ -1606,8 +1610,8 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             GetPersistentId(), GetScreenId());
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lastRect: %{public}s, currRect: %{public}s",
-        GetPersistentId(), winRect_.ToString().c_str(), rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, reason: %{public}u, lastRect: %{public}s, currRect: %{public}s",
+        GetPersistentId(), reason, winRect_.ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
@@ -1618,6 +1622,8 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
         return;
     }
     auto clientDisplayId = clientDisplayId_;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, clientDisplayId: %{public}" PRIu64,
+        GetPersistentId(), clientDisplayId);
     if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
         UpdateDisplayIdByParentSession(clientDisplayId);
     }
