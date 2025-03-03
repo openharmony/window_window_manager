@@ -518,6 +518,7 @@ public:
      */
     WMError ReportScreenFoldStatusChange(const std::vector<std::string>& screenFoldInfo);
     void RegisterNotifyScreenFoldStatusChangeFunc(NotifyScreenFoldStatusChangeFunc&& func);
+    SuperFoldStatus GetPcScreenFoldStatus();
 
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
