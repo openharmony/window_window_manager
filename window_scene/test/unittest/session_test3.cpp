@@ -842,7 +842,7 @@ HWTEST_F(WindowSessionTest3, NotifyRequestFocusStatusNotifyManager, Function | S
     int resultValue = 0;
     NotifyRequestFocusStatusNotifyManagerFunc func = [&resultValue](int32_t persistentId,
         const bool isFocused, const bool byForeground, FocusChangeReason reason) {
-        resultValue = 1;
+        resultValue += 1;
     };
     session_->SetRequestFocusStatusNotifyManagerListener(func);
     FocusChangeReason reason = FocusChangeReason::SCB_SESSION_REQUEST;
