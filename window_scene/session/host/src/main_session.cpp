@@ -453,4 +453,23 @@ void MainSession::SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIcon
         session->updateSessionLabelAndIconFunc_ = std::move(func);
     }, __func__);
 }
+
+WSError MainSession::UpdateFlag(const std::string& flag)
+{
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), flag, where] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
+            return;
+        }
+        session->sessionInfo_.specifiedFlag_ = flag;
+        if (session->onUpdateFlagFunc_) {
+            session->onUpdateFlagFunc_(flag);
+            TLOGND(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d flag: %{public}s",
+                where, session->GetPersistenetId(), flag.c_str());
+        }
+    }, __func__);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen

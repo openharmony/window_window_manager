@@ -117,6 +117,7 @@ using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
+using NotifyUpdateFlagFunc = std::function<void(const std::string& flag)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -337,6 +338,7 @@ public:
     void CloneWindow(NodeId surfaceNodeId);
     void AddSidebarMaskColorModifier();
     void SetSidebarMaskColorModifier(bool needBlur);
+    void SetNotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
      * PC Window Layout
@@ -742,6 +744,7 @@ protected:
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
     NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
+    NotifyUpdateFlagFunc onUpdateFlagFunc_;
 
     /*
      * PiP Window

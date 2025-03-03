@@ -144,6 +144,7 @@ public:
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+    WSError UpdateFlag(const std::string& flag) override;
 
     /*
      * Window Pattern

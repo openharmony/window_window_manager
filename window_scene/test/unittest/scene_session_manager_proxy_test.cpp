@@ -1057,7 +1057,8 @@ HWTEST_F(sceneSessionManagerProxyTest, IsWindowRectAutoSave, Function | SmallTes
         sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
     bool enabled = false;
     std::string key = "com.example.recposentryEntryAbility";
-    ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled), WMError::WM_ERROR_IPC_FAILED);
+    int persistentId = 1;
+    ASSERT_EQ(sceneSessionManagerProxy->IsWindowRectAutoSave(key, enabled, persistentId), WMError::WM_ERROR_IPC_FAILED);
 }
 
 /**

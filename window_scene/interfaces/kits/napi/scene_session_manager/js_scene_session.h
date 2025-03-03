@@ -92,6 +92,7 @@ enum class ListenerFuncType : uint32_t {
     SET_WINDOW_CORNER_RADIUS_CB,
     HIGHLIGHT_CHANGE_CB,
     FOLLOW_PARENT_RECT_CB,
+    UPDATE_FLAG_CB,
 };
 
 class SceneSession;
@@ -345,6 +346,7 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessFollowParentRectRegister();
+    void ProcessUpdateFlagRegister();
 
     /*
      * Window Property
@@ -412,6 +414,7 @@ private:
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyFollowParentRect(bool isFollow);
+    void OnUpdateFlag(const std::string& flag);
 
     /*
      * Window Property

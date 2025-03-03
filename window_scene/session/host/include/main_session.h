@@ -60,6 +60,7 @@ public:
     WSError NotifyMainModalTypeChange(bool isModal) override;
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WSError UpdateFlag(const std::string& flag) override;
 
     /*
      * Window LifeCycle

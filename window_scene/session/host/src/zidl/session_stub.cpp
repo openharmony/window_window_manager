@@ -250,6 +250,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLAG):
+            return HandleUpdateFlag(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1571,6 +1573,18 @@ int SessionStub::HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& 
     }
     TLOGD(WmsLogTag::WMS_PATTERN, "registered: %{public}d", registered);
     NotifyWindowAttachStateListenerRegistered(registered);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateFlag(MessageParcel& data, MessageParcel& reply)
+{
+    std::string flag;
+    if (!data.ReadString(flag)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read flag failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "specifiedFlag: %{public}s", flag.c_str());
+    UpdateFlag(flag);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

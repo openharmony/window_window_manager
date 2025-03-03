@@ -2710,7 +2710,7 @@ WMError SceneSessionManagerProxy::GetDisplayIdByWindowId(const std::vector<uint6
     return static_cast<WMError>(reply.ReadInt32());
 }
 
-WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, bool& enabled)
+WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2721,6 +2721,10 @@ WMError SceneSessionManagerProxy::IsWindowRectAutoSave(const std::string& key, b
     }
     if (!data.WriteString(key)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write key failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Write persistentId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
