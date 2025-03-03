@@ -5374,12 +5374,12 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
         return nullptr;
     }
-    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false) && errorCode) {
         TLOGI(WmsLogTag::DMS, "snapshot disabled by edm!");
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return nullptr;
     }
-    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist() && errorCode) {
         *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
         return nullptr;
@@ -5415,7 +5415,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
         TLOGI(WmsLogTag::DMS, "snapshot was disabled by edm!");
         return nullptr;
     }
-    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist() && errorCode) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
         *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         return nullptr;
