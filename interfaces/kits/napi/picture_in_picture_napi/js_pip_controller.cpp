@@ -222,8 +222,12 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
             napi_delete_reference(env, typeNodeRef);
             return;
         }
+        napi_ref oldTypeNodeRef = pipController->GetTypeNode();
         pipController->UpdateContentNodeRef(typeNodeRef);
-        napi_delete_reference(env, typeNodeRef);
+        if (oldTypeNodeRef != nulltpr) {
+            napi_delete_reference(env, oldTypeNodeRef);
+            oldTypeNodeRef = nullptr;
+        }
         task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
