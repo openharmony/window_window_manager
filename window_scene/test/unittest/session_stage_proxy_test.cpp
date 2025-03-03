@@ -573,6 +573,27 @@ HWTEST_F(SessionStageProxyTest, CompatibleFullScreenClose, Function | SmallTest 
 }
 
 /**
+ * @tc.name: PcAppInPadNormalClose
+ * @tc.desc: test function : PcAppInPadNormalClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, PcAppInPadNormalClose, Function | SmallTest | Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    auto res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_NE(WSError::WS_ERROR_INVALID_WINDOW, res);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    res = sessionStage_->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    res = sessionStage->PcAppInPadNormalClose();
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: SetUniqueVirtualPixelRatio
  * @tc.desc: test function : SetUniqueVirtualPixelRatio
  * @tc.type: FUNC

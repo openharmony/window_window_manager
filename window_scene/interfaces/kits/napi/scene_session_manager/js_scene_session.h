@@ -178,6 +178,7 @@ private:
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForCompatiblePcMode(napi_env env, napi_value objValue, const char* moduleName);
+    static void BindNativeMethodForPcAppInPadNormal(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForSCBSystemSession(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForFocus(napi_env env, napi_value objValue, const char* moduleName);
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
@@ -198,6 +199,7 @@ private:
     static napi_value CompatibleFullScreenRecover(napi_env env, napi_callback_info info);
     static napi_value CompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
     static napi_value CompatibleFullScreenClose(napi_env env, napi_callback_info info);
+    static napi_value PcAppInPadNormalClose(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
@@ -270,6 +272,7 @@ private:
     napi_value OnCompatibleFullScreenRecover(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenMinimize(napi_env env, napi_callback_info info);
     napi_value OnCompatibleFullScreenClose(napi_env env, napi_callback_info info);
+    napi_value OnPcAppInPadNormalClose(napi_env env, napi_callback_info info);
     napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);

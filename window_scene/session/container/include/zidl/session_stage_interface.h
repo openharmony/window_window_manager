@@ -183,6 +183,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WSError PcAppInPadNormalClose()
+    {
+        return WSError::WS_OK;
+    }
     virtual WSError NotifyCompatibleModeEnableInPad(bool enable)
     {
         return WSError::WS_OK;
