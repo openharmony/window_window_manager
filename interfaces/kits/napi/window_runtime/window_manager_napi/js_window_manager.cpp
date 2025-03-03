@@ -652,8 +652,7 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Window name=%{public}s, err=%{public}d", windowName.c_str(), errCode);
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
+    napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [errCode, windowName, env, task = napiAsyncTask] {
@@ -670,8 +669,7 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
             sptr<Window> window = Window::Find(windowName);
             if (window == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "Cannot find window: %{public}s", windowName.c_str());
-                task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
-                    "Cannot find window"));
+                task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Cannot find window"));
             } else {
                 task->Resolve(env, CreateJsWindowObject(env, window));
                 TLOGNI(WmsLogTag::WMS_LIFE, "Find window: %{public}s, create js window", windowName.c_str());
