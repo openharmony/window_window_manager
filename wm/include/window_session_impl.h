@@ -39,6 +39,7 @@
 #include "window_helper.h"
 #include "window_option.h"
 #include "wm_common.h"
+#include "wm_common_inner.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -221,6 +222,8 @@ public:
     int32_t GetFloatingWindowParentId();
     void NotifyAfterForeground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
     void NotifyAfterBackground(bool needNotifyListeners = true, bool needNotifyUiContent = true);
+    void NotifyAfterDidForeground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
+    void NotifyAfterDidBackground(uint32_t reason = static_cast<uint32_t>(WindowStateChangeReason::NORMAL));
     void NotifyForegroundFailed(WMError ret);
     void NotifyBackgroundFailed(WMError ret);
     WSError MarkProcessed(int32_t eventId) override;
@@ -517,6 +520,7 @@ protected:
      */
     bool hasFirstNotifyInteractive_ = false;
     bool interactive_ = true;
+    bool isDidForeground_ = false;
 
     /*
      * Window Layout

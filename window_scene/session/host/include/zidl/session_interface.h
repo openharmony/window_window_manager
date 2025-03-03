@@ -387,6 +387,14 @@ public:
     virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) { return WSError::WS_OK; }
     virtual WSError GetCrossAxisState(CrossAxisState& state) { return WSError::WS_OK; };
+
+    /**
+     * @brief Notify the window attach state listener is registered or not.
+     *
+     * @param registered true means register success.
+     */
+    virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
+    virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 

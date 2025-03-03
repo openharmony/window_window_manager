@@ -53,8 +53,7 @@ public:
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
-    virtual void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) = 0;
+    virtual void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) = 0;
     virtual void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) = 0;
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
