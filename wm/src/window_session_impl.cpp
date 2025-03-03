@@ -1853,7 +1853,7 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsAppWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window type is not supported");
+        TLOGE(WmsLogTag::WMS_FOCUS, "window type is not supported");
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     property_->SetWindowDelayRaiseEnabled(isEnabled);
