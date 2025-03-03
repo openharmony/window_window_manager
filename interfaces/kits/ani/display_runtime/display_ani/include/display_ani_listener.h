@@ -47,6 +47,8 @@ public:
     void OnCaptureStatusChanged(bool isCapture) override;
     void OnDisplayModeChanged(FoldDisplayMode displayMode) override;
     void OnAvailableAreaChanged(DMRect area) override;
+    ani_status CallAniMethodVoid(ani_object object, const char* cls,
+        const char* method, const char* signature, ...);
 
 private:
     // void CallJsMethod(const std::string& methodName, napi_value const * argv = nullptr, size_t argc = 0);

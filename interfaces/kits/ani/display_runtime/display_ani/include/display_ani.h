@@ -27,24 +27,9 @@ public:
     explicit DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display);
 
     static ani_object getCutoutInfo(ani_env* env, ani_object obj);
-
-    static ani_int getFoldDisplayModeAni(ani_env* env, ani_object obj);
-    static ani_boolean isFoldableAni(ani_env* env, ani_object obj);
-    static ani_int getFoldStatus(ani_env* env, ani_object obj);
-    static ani_object getCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
-
-    static ani_array_ref getAllDisplaysAni(ani_env* env, ani_object obj);
-    static ani_object getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId);
-    static ani_object getDefaultDisplaySyncAni(ani_env* env, ani_object obj);
-
-    static ani_object registerCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback, ani_long nativeObj);
-    static ani_object unRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback, ani_long nativeObj);
-
 private:
     std::mutex mtx_;
-    ani_object onRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
-    ani_object onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback);
-    std::unique_ptr<DisplayAniRegisterManager> registerManager_ = nullptr;
+    std::unique_ptr<OHOS::Rosen::DisplayAniRegisterManager> registerManager_ = nullptr;
 };
 }  // namespace Rosen
 }  // namespace OHOS

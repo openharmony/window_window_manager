@@ -12,10 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef OHOS_JS_DISPLAY_MANAGER_H
-#define OHOS_JS_DISPLAY_MANAGER_H
-
 #include <hitrace_meter.h>
  
 #include "ani.h"
@@ -28,6 +24,7 @@
 #include "dm_common.h"
 #include "display_ani_utils.h"
 #include "refbase.h"
+#include "display_manager_ani.h"
 
 
 
@@ -45,64 +42,6 @@ DisplayAni::DisplayAni(const std::shared_ptr<OHOS::Rosen::Display>& display)
 
 }
 
-ani_int DisplayAni::getFoldDisplayModeAni(ani_env* env, ani_object obj)
-{
-    auto mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayMode();
-    WLOGD("[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
-    return static_cast<ani_int>(mode);
-}
- 
-ani_boolean DisplayAni::isFoldableAni(ani_env* env, ani_object obj)
-{
-    bool foldable = SingletonContainer::Get<DisplayManager>().IsFoldable();
-    WLOGD("[NAPI]" PRIu64", isFoldable = %{public}u", foldable);
-    return static_cast<ani_boolean>(foldable);
-}
- 
-ani_int DisplayAni::getFoldStatus(ani_env* env, ani_object obj)
-{
-    auto status = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
-    WLOGD("[NAPI]" PRIu64", getFoldStatus = %{public}u", status);
-    return static_cast<ani_int>(status);
-}
- 
-ani_object DisplayAni::getCurrentFoldCreaseRegion(ani_env* env, ani_object obj)
-{
-    ani_object objRet = nullptr;
-    auto region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
-    WLOGI("[NAPI]" PRIu64", getCurrentFoldCreaseRegion");
-    ani_class cls;
-    ani_class rectCls;
-    if (ANI_OK != env->FindClass("L@ohos/display/display/FoldCreaseRegionImpl", &cls)) {
-        WLOGFE("[ANI] null class FoldCreaseRegionImpl");
-        return objRet;
-    }
-    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &objRet)) {
-        WLOGFE("[ANI] create object fail");
-        return objRet;
-    }
-    if (ANI_OK != env->FindClass("L@ohos/display/display/RectImpl", &rectCls)) {
-        WLOGFE("[ANI] null class RectImpl");
-        return objRet;
-    }
-    ani_field displayIdFld;
-    ani_field creaseRectsFld;
-    if (ANI_OK != env->Class_GetField(cls, "displayId", &displayIdFld)) {
-        WLOGFE("[ANI] null field displayIdFld");
-        return objRet;
-    }
-    if (ANI_OK != env->Class_GetField(cls, "creaseRects", &creaseRectsFld)) {
-        WLOGFE("[ANI] null field creaseRectsFld");
-        return objRet;
-    }
-    ani_int displayId = static_cast<ani_int>(region->GetDisplayId());
-    std::vector<DMRect> rects = region->GetCreaseRects();
-    ani_array_ref aniRects = DisplayAniUtils::convertRects(rects, env);
-    env->Object_SetField_Int(objRet, displayIdFld, displayId);
-    env->Object_SetField_Ref(objRet, creaseRectsFld, aniRects);
-    return objRet;
-}
-
 ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
@@ -118,7 +57,7 @@ ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
         return objRet;
     }
     ani_field boundingRectsFld;
-    if (ANI_OK != env->Class_GetField(cls, "boundingRects", &boundingRectsFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "boundingRects", &boundingRectsFld)) {
         WLOGFE("[ANI] null field boundingRectsFld");
         return objRet;
     }
@@ -129,7 +68,7 @@ ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
     ani_object waterfallObj = nullptr;
     ani_field waterfallFld;
 
-    if (ANI_OK != env->Class_GetField(cls, "waterfallDisplayAreaRects", &waterfallFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "waterfallDisplayAreaRects", &waterfallFld)) {
         WLOGFE("[ANI] null field waterfallFld");
         return objRet;
     }
@@ -150,19 +89,19 @@ ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
         WLOGFE("[ANI] find class fail");
         return objRet;
     }
-    if (ANI_OK != env->Class_GetField(cls, "left", &leftFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "left", &leftFld)) {
         WLOGFE("[ANI] null field left");
         return objRet;
     }
-    if (ANI_OK != env->Class_GetField(cls, "right", &rightFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "right", &rightFld)) {
         WLOGFE("[ANI] null field right");
         return objRet;
     }
-    if (ANI_OK != env->Class_GetField(cls, "top", &topFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "top", &topFld)) {
         WLOGFE("[ANI] null field top");
         return objRet;
     }
-    if (ANI_OK != env->Class_GetField(cls, "bottom", &bottomFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "bottom", &bottomFld)) {
         WLOGFE("[ANI] null field bottom");
         return objRet;
     }
@@ -180,64 +119,6 @@ ani_object DisplayAni::getCutoutInfo(ani_env* env, ani_object obj)
     env->Object_SetField_Ref(objRet, waterfallFld, waterfallObj);
     return objRet;
 }
- 
-ani_array_ref DisplayAni::getAllDisplaysAni(ani_env* env, ani_object obj) {
-    std::vector<sptr<Display>> displays = SingletonContainer::Get<DisplayManager>().GetAllDisplays();
-    if (displays.size() == 0) {
-        WLOGE("[ANI] Invalid displays, size equals 0");
-        return nullptr;
-    }
-    ani_array_ref ret = DisplayAniUtils::convertDisplays(displays, env);
-    return ret;
-}
- 
-ani_object DisplayAni::getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId) {
-    if (displayId < 0) {
-        WLOGE("[ANI] Invalid displayId, less than 0");
-        return nullptr;
-    }
-    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
-    if (display == nullptr) {
-        WLOGE("[ANI] Display null");
-        return nullptr;
-    }
-    ani_object ret = DisplayAniUtils::convertDisplay(display, env);
-    return ret;
-}
- 
-ani_object DisplayAni::getDefaultDisplaySyncAni(ani_env* env, ani_object obj) {
-    sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync(true);
-    if (display == nullptr) {
-        WLOGE("[ANI] Display null");
-        return nullptr;
-    }
-    ani_object ret = DisplayAniUtils::convertDisplay(display, env);
-    return ret;
-}
-
-ani_object DisplayAni::registerCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback, ani_long nativeObj) {
-    DisplayAni* displayAni = reinterpret_cast<DisplayAni*>(nativeObj);
-    return displayAni != nullptr ? displayAni->onRegisterCallback(env, type, callback) : nullptr;
-}
-
-ani_object DisplayAni::onRegisterCallback(ani_env* env, ani_string type, ani_ref callback) {
-    std::string typeString;
-    DisplayAniUtils::GetStdString(env, type, typeString);
-    registerManager_->RegisterListener(typeString, env, callback);
-    return DisplayAniUtils::CreateAniUndefined(env);
-}
-
-ani_object DisplayAni::unRegisterCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback, ani_long nativeObj) {
-    DisplayAni* displayAni = reinterpret_cast<DisplayAni*>(nativeObj);
-    return displayAni != nullptr ? displayAni->onUnRegisterCallback(env, type, callback) : nullptr;
-}
-
-ani_object DisplayAni::onUnRegisterCallback(ani_env* env, ani_string type, ani_ref callback) {
-    std::string typeString;
-    DisplayAniUtils::GetStdString(env, type, typeString);
-    registerManager_->UnregisterListener(typeString, env, callback);
-    return DisplayAniUtils::CreateAniUndefined(env);
-}
 
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
@@ -250,7 +131,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         WLOGFE("[ANI] null env");
         return ANI_NOT_FOUND;
     }
-
+    DisplayManagerAni::setAniEnv(env);
     // namespace函数绑定
     ani_namespace nsp;
     // 找namespace
@@ -260,18 +141,18 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     // ts->c++的映射
     std::array funcs = {
-        ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayAni::isFoldableAni)},
-        ani_native_function {"getFoldDisplayModeAni", ":I", reinterpret_cast<void *>(DisplayAni::getFoldDisplayModeAni)},
-        ani_native_function {"getFoldStatus", ":I", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+        ani_native_function {"isFoldable", ":Z", reinterpret_cast<void *>(DisplayManagerAni::isFoldableAni)},
+        ani_native_function {"getFoldDisplayModeAni", ":I", reinterpret_cast<void *>(DisplayManagerAni::getFoldDisplayModeAni)},
+        ani_native_function {"getFoldStatus", ":I", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
 
-        ani_native_function {"getCurrentFoldCreaseRegion", ":L@ohos/display/display/FoldCreaseRegionImpl;", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
-        ani_native_function {"getDisplayByIdSync", "I:L@ohos/display/display/DisplayImpl;", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
-        ani_native_function {"getDefaultDisplaySync", ":L@ohos/display/display/DisplayImpl;", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+        ani_native_function {"getCurrentFoldCreaseRegion", ":L@ohos/display/display/FoldCreaseRegionImpl;", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
+        ani_native_function {"getDisplayByIdSync", "I:L@ohos/display/display/DisplayImpl;", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
+        ani_native_function {"getDefaultDisplaySync", ":L@ohos/display/display/DisplayImpl;", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
         // 函数签名问题
-        ani_native_function {"getAllDisplays", ":", reinterpret_cast<void *>(DisplayAni::getFoldStatus)},
+        ani_native_function {"getAllDisplays", ":", reinterpret_cast<void *>(DisplayManagerAni::getFoldStatus)},
 
-        ani_native_function {"on", "Lstd/core/String;L@ohos/display/display/Callback;:V", reinterpret_cast<void *>(DisplayAni::registerCallback)},
-        ani_native_function {"off", "Lstd/core/String;L@ohos/display/display/Callback;:V", reinterpret_cast<void *>(DisplayAni::unRegisterCallback)}
+        ani_native_function {"syncOn", "Lstd/core/String;L@ohos/display/display/Callback;J:V", reinterpret_cast<void *>(DisplayManagerAni::registerCallback)},
+        ani_native_function {"syncOff", "Lstd/core/String;L@ohos/display/display/Callback;J:V", reinterpret_cast<void *>(DisplayManagerAni::unRegisterCallback)}
     };
     // 绑定（指定nsp和func
     if ((ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size()))) {
@@ -280,8 +161,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     // class函数绑定
-    ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/display/display/DisplayImpl;", &cls)) != ANI_OK) {
+    ani_class cutoutCls = nullptr;
+    if ((ret = env->FindClass("L@ohos/display/display/CoutoutImpl;", &cutoutCls)) != ANI_OK) {
+        WLOGFE("[ANI] null env %{public}u", ret);
+        return ANI_NOT_FOUND;
+    }
+    ani_class displayCls = nullptr;
+    if ((ret = env->FindClass("L@ohos/display/display/DisplayImpl;", &displayCls)) != ANI_OK) {
         WLOGFE("[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -289,7 +175,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"getCutoutInfo", ":L@ohos/display/display/CutoutInfoImpl;", reinterpret_cast<void *>(DisplayAni::getCutoutInfo)},
     };
     // 通过class和methodname绑定到特定的class.mtd上
-    if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
+    if ((ret = env->Class_BindNativeMethods(cutoutCls, methods.data(), methods.size())) != ANI_OK) {
         WLOGFE("[ANI] bind fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -302,5 +188,3 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
  
 }  // namespace Rosen
 }  // namespace OHOS
- 
-#endif
