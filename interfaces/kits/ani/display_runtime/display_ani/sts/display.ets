@@ -127,6 +127,10 @@ export interface Callback<T> {
   (data: T): void;
 }
 
+export class CallbackImpl<T> implements Callback<T>{
+  (data: T): void;
+}
+
 export class DisplayImpl implements Display {
     static { loadLibrary("displayani_kit.z"); }
 
@@ -151,4 +155,7 @@ export native function getDefaultDisplaySync(): Display;
 export native function getAllDisplays(): Array<Display>;
 
 export native function on(type: 'add' | 'remove' | 'change', callback: Callback<number>): void;
+
+export native function off(type: 'foldDisplayModeChange' | 'foldStatusChange'
+    , callback?: Callback<number>): void;
 }
