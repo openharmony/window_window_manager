@@ -2627,9 +2627,9 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     bool onlySupportFullScreen =
         WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN) &&
         !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FLOATING);
-    if (onlySupportFullScreen && !property_->IsLayoutFullScreen()) {
+    if (onlySupportFullScreen && !IsLayoutFullScreen()) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
-            onlySupportFullScreen, property_->IsLayoutFullScreen());
+            onlySupportFullScreen, IsLayoutFullScreen());
         Maximize(MaximizePresentation::ENTER_IMMERSIVE);
         return WMError::WM_OK;
     }
