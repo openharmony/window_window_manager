@@ -409,14 +409,6 @@ static bool isConfigOptionWindowTypeValid(napi_env env, WindowOption& option)
     return true;
 }
 
-static void NapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask,
-    const std::function<void()>& asyncTask)
-{
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
-    }
-}
-
 napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
@@ -464,7 +456,9 @@ napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
             return CreateSubWindowTask(parentId, windowName, winType, env, *task);
         }
     };
-    NapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -582,7 +576,9 @@ napi_value JsWindowManager::OnCreateWindow(napi_env env, napi_callback_info info
             return CreateNewSubWindowTask(windowOption, env, *task);
         }
     };
-    NapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -682,7 +678,9 @@ napi_value JsWindowManager::OnFindWindow(napi_env env, napi_callback_info info)
             }
         }
     };
-    NapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -771,7 +769,9 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "OnMinimizeAll failed"));
         }
     };
-    NapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 

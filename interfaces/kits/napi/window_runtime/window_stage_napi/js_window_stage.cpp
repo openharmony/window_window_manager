@@ -219,14 +219,6 @@ napi_value JsWindowStage::OnSetUIContent(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
-static void StageNapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyncTask> napiAsyncTask,
-    const std::function<void()>& asyncTask)
-{
-    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
-    }
-}
-
 napi_value JsWindowStage::OnGetMainWindow(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -253,7 +245,9 @@ napi_value JsWindowStage::OnGetMainWindow(napi_env env, napi_callback_info info)
                 "Get main window failed."));
         }
     };
-    StageNapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -441,7 +435,9 @@ napi_value JsWindowStage::OnLoadContent(napi_env env, napi_callback_info info, b
         }
         LoadContentTask(contentStorage, contextUrl, win, env, *task, isLoadedByName);
     };
-    StageNapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -477,7 +473,9 @@ napi_value JsWindowStage::OnGetWindowMode(napi_env env, napi_callback_info info)
             TLOGNE(WmsLogTag::WMS_LIFE, "Get mode %{public}u, but not in apimode", mode);
         }
     };
-    StageNapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -520,7 +518,9 @@ napi_value JsWindowStage::OnCreateSubWindow(napi_env env, napi_callback_info inf
         task->Resolve(env, CreateJsWindowObject(env, window));
         TLOGNI(WmsLogTag::WMS_LIFE, "Create sub window %{public}s end", windowName.c_str());
     };
-    StageNapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
@@ -559,7 +559,9 @@ napi_value JsWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
         task->Resolve(env, CreateJsSubWindowArrayObject(env, subWindowVec));
         TLOGNI(WmsLogTag::WMS_LIFE, "Get sub windows, size = %{public}zu", subWindowVec.size());
     };
-    StageNapiSendEvent(env, napiAsyncTask, asyncTask);
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
