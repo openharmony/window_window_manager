@@ -85,6 +85,10 @@ private:
 
     NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
     bool isLockedState_ = false;
+    /*
+     * Window Layout
+     */
+    void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) override;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

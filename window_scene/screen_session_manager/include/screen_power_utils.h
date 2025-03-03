@@ -13,20 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_FOLD_SCREEN_COMMON_H
-#define OHOS_ROSEN_FOLD_SCREEN_COMMON_H
+#ifndef SCREEN_POWER_UTILS_H
+#define SCREEN_POWER_UTILS_H
+
+#include <atomic>
+#include <mutex>
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-    /**
-     * ACE call to native event name, use for fold screen
-     */
-    const std::string WINDOW_WATERFALL_EVENT = "win_waterfall_window_event";
-    const std::string WINDOW_RELOCATION_EVENT = "win_relocation_to_top";
-    const std::string WINDOW_WATERFALL_VISIBILITY_EVENT = "win_waterfall_visibility";
-}
+class ScreenPowerUtils {
+public:
+    ScreenPowerUtils() {}
+    ~ScreenPowerUtils() {}
+    static void EnablePowerForceTimingOut();
+    static void DisablePowerForceTimingOut();
+    static void LightAndLockScreen(const std::string& detail);
+    static bool GetEnablePowerForceTimingOut();
+
+private:
+    static std::mutex powerTimingMutex_;
+    static bool isEnablePowerForceTimingOut_;
+};
 } // Rosen
 } // OHOS
-#endif // OHOS_ROSEN_FOLD_SCREEN_COMMON_H
+#endif
 

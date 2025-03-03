@@ -76,6 +76,7 @@ struct ScreenSessionConfig {
     ScreenId defaultScreenId {0};
     ScreenId mirrorNodeId {0};
     std::string name = "UNKNOWN";
+    std::string innerName = "UNKNOWN";
     ScreenProperty property;
     std::shared_ptr<RSDisplayNode> displayNode;
 };
@@ -138,6 +139,7 @@ public:
     void SetScreenScale(float scaleX, float scaleY, float pivotX, float pivotY, float translateX, float translateY);
 
     std::string GetName();
+    std::string GetInnerName();
     ScreenId GetScreenId();
     ScreenId GetRSScreenId();
     ScreenProperty GetScreenProperty() const;
@@ -153,7 +155,7 @@ public:
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode,
         bool IsOrientationNeedChanged) const;
     void FillScreenInfo(sptr<ScreenInfo> info) const;
-    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint);
+    void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
@@ -202,6 +204,7 @@ public:
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
     void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
+    void SetInnerName(std::string innerName);
     void Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync = true);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
@@ -331,6 +334,7 @@ private:
     bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight);
     std::mutex mirrorScreenRegionMutex_;
     void OptimizeSecondaryDisplayMode(const RRect &bounds, FoldDisplayMode &foldDisplayMode);
+    std::string innerName_ {"UNKOWN"};
 };
 
 class ScreenSessionGroup : public ScreenSession {
@@ -341,7 +345,8 @@ public:
     ~ScreenSessionGroup();
 
     bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint);
-    bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint, sptr<ScreenSession> defaultScreenSession);
+    bool AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
+        sptr<ScreenSession> defaultScreenSession, bool isExtend = false);
     bool AddChildren(std::vector<sptr<ScreenSession>>& smsScreens, std::vector<Point>& startPoints);
     bool RemoveChild(sptr<ScreenSession>& smsScreen);
     bool HasChild(ScreenId childScreen) const;

@@ -88,10 +88,14 @@ public:
     WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
     int32_t GetOriginalPointerPosX();
     int32_t GetOriginalPointerPosY();
+    int32_t GetPointerType() const;
     void SetWindowDragHotAreaFunc(const NotifyWindowDragHotAreaFunc& func);
     void UpdateGravityWhenDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode);
+    void UpdateSubWindowGravityWhenFollow(const sptr<MoveDragController>& followedController,
+        const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     void OnLostFocus();
+    AreaType GetAreaType() const { return type_; };
 
     /*
      * Cross Display Move Drag

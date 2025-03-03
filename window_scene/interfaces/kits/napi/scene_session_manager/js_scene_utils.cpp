@@ -999,6 +999,21 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     return objValue;
 }
 
+napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "needRemoveSession",
+        CreateJsValue(env, exceptionInfo.needRemoveSession));
+    napi_set_named_property(env, objValue, "needClearCallerLink",
+        CreateJsValue(env, exceptionInfo.needClearCallerLink));
+    return objValue;
+}
+
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {

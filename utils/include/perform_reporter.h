@@ -34,6 +34,10 @@ enum class WindowDFXHelperType : uint32_t {
     WINDOW_TRANSPARENT_CHECK,
     WINDOW_MODAL_UIEXTENSION_UICONTENT_CHECK,
     WINDOW_MODAL_UIEXTENSION_SUBWINDOW_CHECK,
+    WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL,
+    WINDOW_UIEXTENSION_START_ABILITY_FAIL,
+    WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION,
+    WINDOW_FLUSH_EMPTY_WINDOW_INFO_TO_MMI_EXCEPTION,
 };
 
 struct WindowProfileInfo {
@@ -87,6 +91,9 @@ public:
     void ReportContainerStartBegin(int32_t missionId, const std::string& bundleName, int64_t timestamp);
     int32_t ReportWindowProfileInfo(const WindowProfileInfo& windowProfileInfo);
     void ReportWindowException(int32_t detectionType, int32_t pid, const std::string& windowInfo);
+    int32_t ReportUIExtensionException(int32_t exceptionType, int32_t pid, int32_t persistentId,
+        const std::string& uiextInfo);
+    int32_t ReportEventDispatchException(int32_t exceptionType, int32_t pid, const std::string& flushInfo);
 
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,

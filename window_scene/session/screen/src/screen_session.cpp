@@ -55,7 +55,7 @@ ScreenCache g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
     : name_(config.name), screenId_(config.screenId), rsId_(config.rsId), defaultScreenId_(config.defaultScreenId),
-    property_(config.property), displayNode_(config.displayNode)
+    property_(config.property), displayNode_(config.displayNode), innerName_(config.innerName)
 {
     TLOGI(WmsLogTag::DMS,
         "[DPNODE]Create Session, reason: %{public}d, screenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
@@ -512,6 +512,16 @@ std::string ScreenSession::GetName()
 void ScreenSession::SetName(std::string name)
 {
     name_ = name;
+}
+
+std::string ScreenSession::GetInnerName()
+{
+    return innerName_;
+}
+
+void ScreenSession::SetInnerName(std::string innerName)
+{
+    innerName_ = innerName;
 }
 
 void ScreenSession::SetMirrorScreenType(MirrorScreenType mirrorType)
@@ -1637,7 +1647,7 @@ void ScreenSession::SetPrivateSessionForeground(bool hasPrivate)
     hasPrivateWindowForeground_ = hasPrivate;
 }
 
-void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
+void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend)
 {
     std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
@@ -1658,10 +1668,15 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     displayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     uint32_t width = 0;
     uint32_t height = 0;
-    sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
-    if (abstractScreenModes != nullptr) {
-        height = abstractScreenModes->height_;
-        width = abstractScreenModes->width_;
+    if (isExtend) {
+        width = property_.GetBounds().rect_.GetWidth();
+        height = property_.GetBounds().rect_.GetHeight();
+    } else {
+        sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
+        if (abstractScreenModes != nullptr) {
+            height = abstractScreenModes->height_;
+            width = abstractScreenModes->width_;
+        }
     }
     RSScreenType screenType;
     DmsXcollie dmsXcollie("DMS:InitRSDisplayNode:GetScreenType", XCOLLIE_TIMEOUT_5S);
@@ -1743,7 +1758,7 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
 }
 
 bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
-                                  sptr<ScreenSession> defaultScreenSession)
+                                  sptr<ScreenSession> defaultScreenSession, bool isExtend)
 {
     if (smsScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "AddChild, smsScreen is nullptr.");
@@ -1759,7 +1774,7 @@ bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPo
     if (!GetRSDisplayNodeConfig(smsScreen, config, defaultScreenSession)) {
         return false;
     }
-    smsScreen->InitRSDisplayNode(config, startPoint);
+    smsScreen->InitRSDisplayNode(config, startPoint, isExtend);
     smsScreen->lastGroupSmsId_ = smsScreen->groupSmsId_;
     smsScreen->groupSmsId_ = screenId_;
     screenSessionMap_.insert(std::make_pair(screenId, std::make_pair(smsScreen, startPoint)));

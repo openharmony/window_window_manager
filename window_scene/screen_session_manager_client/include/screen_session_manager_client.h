@@ -52,8 +52,10 @@ public:
     void RegisterScreenConnectionListener(IScreenConnectionListener* listener);
     void RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener);
     void RegisterScreenConnectionChangeListener(const sptr<IScreenConnectionChangeListener>& listener);
+    void ExtraDestroyScreen(ScreenId screenId);
 
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
+    sptr<ScreenSession> GetScreenSessionExtra(ScreenId screenId) const;
     std::map<ScreenId, ScreenProperty> GetAllScreensProperties() const;
     FoldDisplayMode GetFoldDisplayMode() const;
 
@@ -106,9 +108,8 @@ protected:
 
 private:
     void ConnectToServer();
-    bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) override;
+    bool CheckIfNeedConnectScreen(SessionOption option);
+    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -129,9 +130,11 @@ private:
 
     void NotifyScreenConnect(const sptr<ScreenSession>& screenSession);
     void NotifyScreenDisconnect(const sptr<ScreenSession>& screenSession);
-
+    void UpdatePropertyWhenSwitchUser(const sptr <ScreenSession>& screenSession,
+        float rotation, RRect bounds, ScreenId screenId);
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
+    std::map<ScreenId, sptr<ScreenSession>> extraScreenSessionMap_;
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
 
     sptr<IScreenSessionManager> screenSessionManager_;

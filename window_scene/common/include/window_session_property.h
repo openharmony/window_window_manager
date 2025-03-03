@@ -102,6 +102,7 @@ public:
     void SetIsSupportDragInPcCompatibleMode(bool isSupportDragInPcCompatibleMode);
     void SetIsPcAppInPad(bool isPcAppInPad);
     void SetCompatibleModeEnableInPad(bool enable);
+    void SetIsAtomicService(bool isAtomicService);
     
     /*
      * Window Immersive
@@ -167,6 +168,7 @@ public:
     bool GetIsPcAppInPad() const;
     bool GetIsSupportDragInPcCompatibleMode() const;
     bool GetCompatibleModeEnableInPad() const;
+    bool GetIsAtomicService() const;
 
     bool MarshallingWindowLimits(Parcel& parcel) const;
     static void UnmarshallingWindowLimits(Parcel& parcel, WindowSessionProperty* property);
@@ -204,6 +206,8 @@ public:
     void Read(Parcel& parcel, WSPropertyChangeAction action);
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
+    void SetApiVersion(uint32_t version);
+    uint32_t GetApiVersion() const;
 
     /*
      * Sub Window
@@ -412,6 +416,9 @@ private:
     mutable std::mutex compatibleModeMutex_;
     bool compatibleModeEnableInPad_ = false;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
+    mutable std::mutex atomicServiceMutex_;
+    bool isAtomicService_ = false;
+    uint32_t apiVersion_ = 0;
 
     /*
      * Sub Window

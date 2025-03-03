@@ -44,7 +44,7 @@ public:
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
+        const sptr<AAFwk::SessionInfo> abilitySessionInfo, const ExceptionInfo& exceptionInfo) override;
     WSError OnSessionEvent(SessionEvent event) override;
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
@@ -144,6 +144,16 @@ public:
     WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY) override;
     WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+
+    /*
+     * Window Pattern
+     */
+    void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+
+    /**
+     * Window layout
+     */
+    WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

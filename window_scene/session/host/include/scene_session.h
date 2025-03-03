@@ -115,6 +115,8 @@ using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
+using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
+using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -148,6 +150,7 @@ public:
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
+        GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
     };
 
     // func for change window scene pattern property
@@ -187,6 +190,7 @@ public:
         uint32_t& screenWidth, uint32_t& screenHeight);
     void NotifyTargetScreenWidthAndHeight(bool isScreenAngleMismatch, uint32_t screenWidth,
         uint32_t screenHeight);
+    sptr<SceneSession> GetSceneSessionById(int32_t sessionId) const;
 
     WSError UpdateActiveStatus(bool isActive) override;
     WSError OnSessionEvent(SessionEvent event) override;
@@ -220,6 +224,8 @@ public:
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
     void SetWinRectWhenUpdateRect(const WSRect& rect);
+    void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
+    void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
 
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
@@ -230,9 +236,9 @@ public:
         bool canStartAbilityFromBackground, bool isFromAncoAndToAnco);
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> info) override;
     WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false) override;
+        const sptr<AAFwk::SessionInfo> info, const ExceptionInfo& exceptionInfo) override;
     WSError NotifySessionExceptionInner(
-        const sptr<AAFwk::SessionInfo> info, bool needRemoveSession = false,
+        const sptr<AAFwk::SessionInfo> info, const ExceptionInfo& exceptionInfo,
         bool isFromClient = false, bool startFail = false);
 
     WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -488,6 +494,7 @@ public:
     virtual void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) {}
     virtual void NotifySessionLockStateChange(bool isLockedState) {}
     virtual void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) {}
+    bool UpdateInteractiveInner(bool interactive);
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -615,6 +622,9 @@ public:
     void SetBehindWindowFilterEnabled(bool enabled); // Only accessed on main thread
     WSError GetCrossAxisState(CrossAxisState& state) override;
     virtual void UpdateCrossAxis();
+    bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
+    sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
+    void NotifyUpdateGravity();
 
     /*
      * Gesture Back
@@ -648,7 +658,9 @@ public:
      */
     bool IsSameMainSession(const sptr<SceneSession>& prevSession);
     void SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc& func);
-    
+    void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
+    WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
+
     /*
      * Window Property
     */
@@ -656,6 +668,11 @@ public:
     WSError SetWindowCornerRadius(float cornerRadius) override;
     void SetPrivacyModeChangeNotifyFunc(NotifyPrivacyModeChangeFunc&& func);
 
+    /*
+     * Window Pattern
+    */
+    void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+    
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     void SetMoveDragCallback();
@@ -674,7 +691,6 @@ protected:
      * Window Pipeline
      */
     bool UpdateVisibilityInner(bool visibility) REQUIRES(SCENE_GUARD);
-    bool UpdateInteractiveInner(bool interactive);
     virtual void NotifyClientToUpdateInteractive(bool interactive) {}
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
@@ -737,6 +753,12 @@ protected:
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
     sptr<MoveDragController> moveDragController_ = nullptr;
+    std::mutex followParentRectFuncMutex_;
+    NotifyFollowParentRectFunc followParentRectFunc_ = nullptr;
+    std::mutex registerNotifySurfaceBoundsChangeMutex_;
+    std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
+    bool isFollowParentLayout_ = false;
+
     virtual void NotifySessionRectChange(const WSRect& rect,
         SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
         const RectAnimationConfig& rectAnimationConfig = {});
@@ -1048,6 +1070,7 @@ private:
     void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
     virtual void UpdateCrossAxisOfLayout(const WSRect& rect);
     NotifyLayoutFullScreenChangeFunc onLayoutFullScreenChangeFunc_;
+    virtual void NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush) {};
     std::atomic<bool> shouldFollowParentWhenShow_ = true;
     std::shared_ptr<RSBehindWindowFilterEnabledModifier>
         behindWindowFilterEnabledModifier_; // Only accessed on main thread

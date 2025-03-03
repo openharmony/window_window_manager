@@ -1437,6 +1437,20 @@ HWTEST_F(WindowSessionPropertyTest, SetWindowCornerRadius, Function | SmallTest 
     property->SetWindowCornerRadius(cornerRadius);
     ASSERT_EQ(cornerRadius, property->GetWindowCornerRadius());
 }
+
+/**
+ * @tc.name: GetIsAtomicService
+ * @tc.desc: GetIsAtomicService
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isAtomicService = true;
+    property->SetIsAtomicService(isAtomicService);
+    auto result = property->GetIsAtomicService();
+    ASSERT_EQ(result, isAtomicService);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

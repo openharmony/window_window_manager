@@ -161,7 +161,11 @@ void WindowManagerService::OnAddSystemAbility(int32_t systemAbilityId, const std
             break;
         case MULTIMODAL_INPUT_SERVICE_ID:
             WLOGI("MULTIMODAL_INPUT_SERVICE_ID");
-            SetWindowInputEventConsumer();
+            if (windowRoot_ == nullptr) {
+                WLOGFE("windowRoot_ is nullptr.");
+                return;
+            }
+            windowRoot_->NotifyMMIServiceOnline();
             break;
         default:
             WLOGFW("unhandled sysabilityId: %{public}d", systemAbilityId);

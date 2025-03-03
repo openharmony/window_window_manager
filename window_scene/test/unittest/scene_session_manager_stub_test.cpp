@@ -1952,6 +1952,14 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
     data.WriteRemoteObject(token);
     data.WriteUint64(12345);
     res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteRemoteObject(sessionStage->AsObject());
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteUint64(12345);
+    data.WriteBool(false);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1976,6 +1984,15 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, F
     stub->remoteExtSessionMap_.clear();
     stub->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), token));
     int res = stub->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    ASSERT_NE(sessionStage, nullptr);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteBool(false);
+    res = stub->HandleRemoveExtensionWindowStageFromSCB(data, reply);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(res, ERR_NONE);
 }
