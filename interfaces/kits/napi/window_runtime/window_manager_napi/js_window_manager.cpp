@@ -413,8 +413,7 @@ static void NapiSendEvent(napi_env env, std::shared_ptr<AbilityRuntime::NapiAsyn
     const std::function<void()>& asyncTask)
 {
     if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
-            "send event failed"));
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
 }
 
