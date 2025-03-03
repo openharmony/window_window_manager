@@ -61,7 +61,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
 constexpr int32_t API_VERSION_15 = 15;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 
 /*
  * DFX

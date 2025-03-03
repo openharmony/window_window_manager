@@ -134,7 +134,7 @@ constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 24;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
