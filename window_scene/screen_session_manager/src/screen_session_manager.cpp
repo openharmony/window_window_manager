@@ -6570,7 +6570,7 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
     if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         foldStatus == FoldStatus::FOLDED) {
-            // sub screen default rotation off set
+            // sub screen default rotation offset is 270
             screenSession->SetDefaultDeviceRotationOffset(270);
     }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
