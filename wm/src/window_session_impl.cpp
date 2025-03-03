@@ -1852,6 +1852,10 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
         TLOGE(WmsLogTag::WMS_FOCUS, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
     property_->SetWindowDelayRaiseEnabled(isEnabled);
     TLOGI(WmsLogTag::WMS_FOCUS, "isEnabled: %{public}d", isEnabled);
     return WMError::WM_OK;
