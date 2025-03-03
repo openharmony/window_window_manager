@@ -478,7 +478,7 @@ napi_value JsWindow::SetDimBehind(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetFocusable(napi_env env, napi_callback_info info)
 {
-    WLOGI("SetFocusable");
+    TLOGI(WmsLogTag::WMS_FOCUS, "SetFocusable");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetFocusable(env, info) : nullptr;
 }

@@ -5149,7 +5149,9 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
         return WSError::WS_OK;
     }
-
+    if (nextSession && !nextSession->IsSessionForeground() && !nextSession->GetSessionInfo().isSystem_) {
+        needBlockNotifyFocusStatusUntilForeground_ = true;
+    }
     return ShiftFocus(nextSession, true, reason);
 }
 
