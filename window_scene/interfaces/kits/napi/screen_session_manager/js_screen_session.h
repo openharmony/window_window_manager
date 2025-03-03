@@ -26,10 +26,10 @@
 namespace OHOS::Rosen {
 class JsScreenSession : public IScreenChangeListener {
 public:
-    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const int& type);
+    JsScreenSession(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
     virtual ~JsScreenSession();
 
-    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession, const int& type);
+    static napi_value Create(napi_env env, const sptr<ScreenSession>& screenSession, const ScreenEvent screenEvent);
     static void Finalizer(napi_env env, void* data, void* hint);
 
 private:

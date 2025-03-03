@@ -4683,13 +4683,16 @@ WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
 WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
     const sptr<IWindowAttachStateChangeListner>& listener)
 {
-    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d, listener is null", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
     }
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     windowAttachStateChangeListener_ = listener;
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->NotifyWindowAttachStateListenerRegistered(true);
     return WMError::WM_OK;
 }
 
@@ -4697,13 +4700,17 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 {
     std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     windowAttachStateChangeListener_ = nullptr;
-    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener unregistered", GetPersistentId());
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    hostSession->NotifyWindowAttachStateListenerRegistered(false);
     return WMError::WM_OK;
 }
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
     TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
     if (!windowAttachStateChangeListener_) {
         TLOGW(WmsLogTag::WMS_SUB, "listener is null");
         return WSError::WS_ERROR_NULLPTR;
@@ -5222,6 +5229,25 @@ float WindowSceneSessionImpl::GetMainWindowCustomDensity()
 float WindowSceneSessionImpl::GetCustomDensity() const
 {
     return customDensity_;
+}
+
+WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    const auto& property = GetProperty();
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) &&
+        !WindowHelper::IsDialogWindow(property->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (property->GetSubWindowLevel() > 1) {
+        TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    WSError ret = GetHostSession()->SetFollowParentWindowLayoutEnabled(isFollow);
+    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetCustomDensity(float density)

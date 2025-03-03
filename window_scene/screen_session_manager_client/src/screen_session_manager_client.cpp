@@ -111,9 +111,9 @@ void ScreenSessionManagerClient::NotifyScreenDisconnect(const sptr<ScreenSession
     }
 }
 
-bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name)
+bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(SessionOption option)
 {
-    if (rsId == SCREEN_ID_INVALID) {
+    if (option.rsId_ == SCREEN_ID_INVALID) {
         WLOGFE("rsId is invalid");
         return false;
     }
@@ -121,8 +121,9 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
         WLOGFE("screenSessionManager_ is nullptr");
         return false;
     }
-    if (screenSessionManager_->GetScreenProperty(screenId).GetScreenType() == ScreenType::VIRTUAL) {
-        if (name == "HiCar" || name == "SuperLauncher" || name == "CastEngine" || name == "DevEcoViewer") {
+    if (screenSessionManager_->GetScreenProperty(option.screenId_).GetScreenType() == ScreenType::VIRTUAL) {
+        if (option.name_ == "HiCar" || option.name_ == "SuperLauncher" || option.name_ == "CastEngine" ||
+            option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen") {
             WLOGFI("HiCar or SuperLauncher or CastEngine or DevEcoViewer, need to connect the screen");
             return true;
         } else {
@@ -133,43 +134,43 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(ScreenId screenId, Scr
     return true;
 }
 
-void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-    ScreenId rsId, const std::string& name, bool isExtend)
+void ScreenSessionManagerClient::OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent)
 {
-    WLOGFI("screenId: %{public}" PRIu64 " screenEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s",
-        screenId, static_cast<int>(screenEvent), rsId, name.c_str());
+    WLOGFI("sId: %{public}" PRIu64 " sEvent: %{public}d rsId: %{public}" PRIu64 " name: %{public}s iName: %{public}s",
+        option.screenId_, static_cast<int>(screenEvent), option.rsId_, option.name_.c_str(), option.innerName_.c_str());
     if (screenEvent == ScreenEvent::CONNECTED) {
-        if (!CheckIfNeedConnectScreen(screenId, rsId, name)) {
+        if (!CheckIfNeedConnectScreen(option)) {
             WLOGFE("There is no need to connect the screen");
             return;
         }
         ScreenSessionConfig config = {
-            .screenId = screenId,
-            .rsId = rsId,
-            .name = name,
+            .screenId = option.screenId_,
+            .rsId = option.rsId_,
+            .name = option.name_,
+            .innerName = option.innerName_,
         };
-        config.property = screenSessionManager_->GetScreenProperty(screenId);
-        config.displayNode = screenSessionManager_->GetDisplayNode(screenId);
+        config.property = screenSessionManager_->GetScreenProperty(option.screenId_);
+        config.displayNode = screenSessionManager_->GetDisplayNode(option.screenId_);
         sptr<ScreenSession> screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-        screenSession->SetScreenCombination(screenSessionManager_->GetScreenCombination(screenId));
+        screenSession->SetScreenCombination(screenSessionManager_->GetScreenCombination(option.screenId_));
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-            screenSessionMap_.emplace(screenId, screenSession);
-            extraScreenSessionMap_[screenId] = screenSession;
+            screenSessionMap_.emplace(option.screenId_, screenSession);
+            extraScreenSessionMap_[option.screenId_] = screenSession;
         }
-        screenSession->SetIsExtend(isExtend);
-        screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(screenId));
+        screenSession->SetIsExtend(option.isExtend_);
+        screenSession->SetIsRealScreen(screenSessionManager_->GetIsRealScreen(option.screenId_));
         NotifyScreenConnect(screenSession);
         if (screenConnectionListener_) {
             WLOGFI("screenId: %{public}" PRIu64 " density: %{public}f ",
-                screenId, config.property.GetDensity());
+                option.screenId_, config.property.GetDensity());
             screenSession->SetScreenSceneDpi(config.property.GetDensity());
         }
         screenSession->Connect();
         return;
     }
     if (screenEvent == ScreenEvent::DISCONNECTED) {
-        auto screenSession = GetScreenSession(screenId);
+        auto screenSession = GetScreenSession(option.screenId_);
         if (!screenSession) {
             WLOGFE("screenSession is null");
             return;
@@ -178,7 +179,7 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
         NotifyScreenDisconnect(screenSession);
         {
             std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-            screenSessionMap_.erase(screenId);
+            screenSessionMap_.erase(option.screenId_);
         }
         screenSession->Disconnect();
     }
@@ -187,13 +188,16 @@ void ScreenSessionManagerClient::OnScreenConnectionChanged(ScreenId screenId, Sc
 void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
 {
     auto screenSession = GetScreenSessionExtra(screenId);
-        if (!screenSession) {
-            WLOGFE("extra screenSession is null");
-            return;
-        }
-        screenSession->DestroyScreenScene();
+    if (!screenSession) {
+        WLOGFE("extra screenSession is null");
+        return;
+    }
+    screenSession->DestroyScreenScene();
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         extraScreenSessionMap_.erase(screenId);
-        WLOGFI("ExtraDestroyScreen end");
+    }
+    WLOGFI("ExtraDestroyScreen end");
 }
 
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)

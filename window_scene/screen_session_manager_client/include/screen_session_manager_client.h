@@ -108,9 +108,8 @@ protected:
 
 private:
     void ConnectToServer();
-    bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) override;
+    bool CheckIfNeedConnectScreen(SessionOption option);
+    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
