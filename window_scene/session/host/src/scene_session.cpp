@@ -1733,7 +1733,6 @@ void SceneSession::UpdateScreenFoldStatus(SuperFoldStatus foldStatus)
         return;
     }
     specificCallback_->onNotifyScreenFoldStatusChange_(foldStatus);
-    return;
 }
 
 /** @note @window.layout */

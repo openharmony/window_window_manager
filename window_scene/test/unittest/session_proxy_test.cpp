@@ -1313,6 +1313,22 @@ HWTEST_F(SessionProxyTest, OnContainerModalEvent, Function | SmallTest | Level2)
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: OnContainerModalEvent end";
 }
+
+/**
+ * @tc.name: GetWaterfallMode
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetWaterfallMode, Function | SmallTest | Level2)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    bool isWaterfallMode = false;
+    WSError res = sProxy->GetWaterfallMode(isWaterfallMode);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
