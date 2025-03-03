@@ -161,6 +161,10 @@ void JsWindowExtension::BindContext(napi_env env, napi_value obj)
         return;
     }
     auto shellContextRef = jsRuntime_.LoadSystemModule("application.WindowExtensionContext", &contextObj, 1);
+    if (shellContextRef == nullptr) {
+        WLOGFE("Failed to get shell context");
+        return;
+    }
     contextObj = shellContextRef->GetNapiValue();
     if (contextObj == nullptr) {
         WLOGFE("Failed to get context native object");
