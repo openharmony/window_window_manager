@@ -159,8 +159,15 @@ int32_t Session::GetPersistentId() const
     return persistentId_;
 }
 
+void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
+{
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    surfaceNode_ = surfaceNode;
+}
+
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 {
+    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     return surfaceNode_;
 }
 
@@ -1025,7 +1032,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     }
     sessionStage_ = sessionStage;
     windowEventChannel_ = eventChannel;
-    surfaceNode_ = surfaceNode;
+    SetSurfaceNode(surfaceNode);
     abilityToken_ = token;
     systemConfig = systemConfig_;
     InitSessionPropertyWhenConnect(property);
@@ -1122,7 +1129,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
-    surfaceNode_ = surfaceNode;
+    SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
     SetSessionProperty(property);
@@ -1259,7 +1266,12 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     bufferAvailable_ = false;
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_)]() mutable {
+        std::shared_ptr<RSSurfaceNode> surfaceNode;
+        {
+            std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+            surfaceNode_.swap(surfaceNode);
+        }
+        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode)]() mutable {
             surfaceNode.reset();
         });
     }
@@ -2174,7 +2186,8 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float s
     if (scenePersistence_ == nullptr) {
         return nullptr;
     }
-    if (!surfaceNode_ || !surfaceNode_->IsBufferAvailable()) {
+    auto surfaceNode = GetSurfaceNode();
+    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
         scenePersistence_->SetHasSnapshot(false);
         return nullptr;
     }
@@ -2188,7 +2201,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, const float s
         .useDma = true,
         .useCurWindow = false,
     };
-    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
+    bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
     if (!ret) {
         TLOGE(WmsLogTag::WMS_MAIN, "TakeSurfaceCapture failed");
         return nullptr;
@@ -2703,13 +2716,14 @@ WSError Session::UpdateWindowMode(WindowMode mode)
 
 void Session::UpdateGravityWhenUpdateWindowMode(WindowMode mode)
 {
-    if ((systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode_ != nullptr) {
+    auto surfaceNode = GetSurfaceNode();
+    if ((systemConfig_.uiType_ == UI_TYPE_PC || systemConfig_.IsFreeMultiWindowMode()) && surfaceNode != nullptr) {
         if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
-            surfaceNode_->SetFrameGravity(Gravity::LEFT);
+            surfaceNode->SetFrameGravity(Gravity::LEFT);
         } else if (mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            surfaceNode_->SetFrameGravity(Gravity::RIGHT);
+            surfaceNode->SetFrameGravity(Gravity::RIGHT);
         } else if (mode == WindowMode::WINDOW_MODE_FLOATING || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-            surfaceNode_->SetFrameGravity(Gravity::RESIZE);
+            surfaceNode->SetFrameGravity(Gravity::RESIZE);
         }
     }
 }
