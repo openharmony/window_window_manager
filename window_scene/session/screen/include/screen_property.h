@@ -204,13 +204,13 @@ public:
 
     RRect GetPhysicalTouchBounds();
 
-    void SetPhysicalTouchBounds(bool isSecondaryDevice);
+    void SetPhysicalTouchBounds();
 
     int32_t GetInputOffsetX();
 
     int32_t GetInputOffsetY();
 
-    void SetInputOffsetY(bool isSecondaryDevice);
+    void SetInputOffsetY();
 
     float CalculatePPI();
     uint32_t CalculateDPI();

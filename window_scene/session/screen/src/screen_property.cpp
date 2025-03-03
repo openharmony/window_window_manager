@@ -586,9 +586,9 @@ RRect ScreenProperty::GetPhysicalTouchBounds()
     return physicalTouchBounds_;
 }
 
-void ScreenProperty::SetPhysicalTouchBounds(bool isSecondaryDevice)
+void ScreenProperty::SetPhysicalTouchBounds()
 {
-    if (!isSecondaryDevice) {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
         physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
         return;
@@ -617,10 +617,10 @@ static inline bool IsWidthHeightMatch(float width, float height, float targetWid
     return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
 }
 
-void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice)
+void ScreenProperty::SetInputOffsetY()
 {
     inputOffsetX_ = 0;
-    if (!isSecondaryDevice) {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         return;
     }
     if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(), FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
