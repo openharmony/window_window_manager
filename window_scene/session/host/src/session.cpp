@@ -2860,6 +2860,22 @@ WSError Session::CompatibleFullScreenClose()
     return sessionStage_->CompatibleFullScreenClose();
 }
 
+WSError Session::PcAppInPadNormalClose()
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "windowId:%{public}d", GetPersistentId());
+    if (!IsSessionValid()) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (sessionStage_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session stage is nullptr id: %{public}d state: %{public}u",
+              GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->PcAppInPadNormalClose();
+}
+
 WSError Session::UpdateWindowMode(WindowMode mode)
 {
     WLOGFD("Session update window mode, id: %{public}d, mode: %{public}d", GetPersistentId(),

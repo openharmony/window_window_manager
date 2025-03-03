@@ -366,6 +366,7 @@ public:
     WSError CompatibleFullScreenRecover();
     WSError CompatibleFullScreenMinimize();
     WSError CompatibleFullScreenClose();
+    WSError PcAppInPadNormalClose();
     WSError SetIsPcAppInPad(bool enable);
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);

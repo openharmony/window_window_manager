@@ -413,6 +413,10 @@ HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, Function | Sm
     window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window_->RegisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->RegisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners end";
 }
 
@@ -442,6 +446,10 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, Function | 
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
+
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ret = window_->UnregisterMainWindowCloseListeners(listener);
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners end";
 }
 
