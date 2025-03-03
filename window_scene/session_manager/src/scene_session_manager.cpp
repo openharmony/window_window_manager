@@ -2503,7 +2503,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
                 static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
         }
     }
-    if (*isColdStart) {
+    if (isColdStart.load()) {
         TLOGI(WmsLogTag::WMS_MAIN, "Cold start, identityToken:%{public}s, bundleName:%{public}s",
             sceneSessionInfo->identityToken.c_str(), sceneSession->GetSessionInfo().bundleName_.c_str());
         sceneSession->SetClientIdentityToken(sceneSessionInfo->identityToken);
