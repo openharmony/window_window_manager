@@ -37,7 +37,7 @@ public:
     DMError UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback);
     DMError UnregisterAllDisplayListenerWithType(std::string type);
 private:
-    std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
+    std::map<std::string, std::map<ani_ref, sptr<OHOS::Rosen::DisplayAniListener>>> jsCbMap_;
     std::set<sptr<DisplayManager::IDisplayListener>> displayListeners_;
     std::mutex mutex_;
 };

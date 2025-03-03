@@ -75,19 +75,19 @@ ani_object DisplayAniUtils::convertRect(DMRect rect, ani_env* env)
         WLOGFE("[ANI] create rect obj fail");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "left", &leftFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "left", &leftFld)) {
         WLOGFE("[ANI] null field left");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "width", &widthFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "width", &widthFld)) {
         WLOGFE("[ANI] null field right");
        return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "top", &topFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "top", &topFld)) {
         WLOGFE("[ANI] null field top");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "height", &heightFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "height", &heightFld)) {
         WLOGFE("[ANI] null field bottom");
         return obj;
     }
@@ -103,15 +103,23 @@ ani_array_ref DisplayAniUtils::convertRects(std::vector<DMRect> rects, ani_env* 
 {
     ani_array_ref arrayres = nullptr;
     int size = rects.size();
-    ani_ref* aniRects = new ani_ref[size];
-    for (int i = 0; i < size; i++) {
-        DMRect rect = rects[i];
-        aniRects[i] = convertRect(rect, env);
+    ani_class cls = nullptr;
+    if (ANI_OK != env->FindClass("L@ohos/display/display/RectImpl", &cls)) {
+        WLOGFE("[ANI] null class CutoutInfoImpl");
     }
-    if (ANI_OK != env->Array_New_Ref(rects.size(), aniRects, &arrayres)) {
+    ani_ref undefinedRef = nullptr;
+    if(ANI_OK != env->GetUndefined(&undefinedRef)){
+        WLOGFE("[ANI] get undefined error");
+    }
+    if (ANI_OK != env->Array_New_Ref(cls, size, undefinedRef, &arrayres)) {
         WLOGFE("[ANI] create rect array error");
     }
-    delete[] aniRects;
+    for (int i = 0; i < size; i++) {
+        DMRect rect = rects[i];
+        if (ANI_OK != env->Array_Set_Ref(arrayres, i, convertRect(rect, env))) {
+            WLOGFE("[ANI] set rect array error");
+        }
+    }
     return arrayres;
 }
  
@@ -143,67 +151,67 @@ ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
     ani_field scaledDensityFld;
     ani_field xDPIFld;
     ani_field yDPIFld;
-    if (ANI_OK != env->Class_GetField(cls, "id", &displayIdFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "id", &displayIdFld)) {
         WLOGFE("[ANI] null field id");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "name", &nameFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "name", &nameFld)) {
         WLOGFE("[ANI] null field name");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "alive", &aliveFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "alive", &aliveFld)) {
         WLOGFE("[ANI] null field alive");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "state", &stateFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "state", &stateFld)) {
         WLOGFE("[ANI] null field state");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "refreshRate", &refreshRateFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "refreshRate", &refreshRateFld)) {
         WLOGFE("[ANI] null field refreshRate");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "rotation", &rotationFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "rotation", &rotationFld)) {
         WLOGFE("[ANI] null field rotation");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "width", &widthFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "width", &widthFld)) {
         WLOGFE("[ANI] null field width");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "height", &heightFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "height", &heightFld)) {
         WLOGFE("[ANI] null field height");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "availableWidth", &availableWidthFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "availableWidth", &availableWidthFld)) {
         WLOGFE("[ANI] null field availableWidth");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "availableHeight", &availableHeightFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "availableHeight", &availableHeightFld)) {
         WLOGFE("[ANI] null field availableHeight");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "densityDPI", &densityDPIFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "densityDPI", &densityDPIFld)) {
         WLOGFE("[ANI] null field densityDPI");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "orientation", &orientationFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "orientation", &orientationFld)) {
         WLOGFE("[ANI] null field orientation");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "densityPixelsFld", &heightFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "densityPixelsFld", &heightFld)) {
         WLOGFE("[ANI] null field densityPixelsFld");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "scaledDensity", &scaledDensityFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "scaledDensity", &scaledDensityFld)) {
         WLOGFE("[ANI] null field scaledDensity");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "xDPI", &xDPIFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "xDPI", &xDPIFld)) {
         WLOGFE("[ANI] null field xDPI");
         return obj;
     }
-    if (ANI_OK != env->Class_GetField(cls, "yDPI", &yDPIFld)) {
+    if (ANI_OK != env->Class_FindField(cls, "yDPI", &yDPIFld)) {
         WLOGFE("[ANI] null field yDPI");
         return obj;
     }
@@ -246,12 +254,12 @@ ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
     if (ANI_OK != env->Array_New_Int(colorSpaces.size(), &colorSpacesAni)) {
         WLOGFE("[ANI] create colorSpace array error");
     }
-    env->FixedArray_SetRegion_Int(colorSpacesAni, 0, colorSpaces.size(), reinterpret_cast<ani_int *>(colorSpaces.data()));
+    env->Array_SetRegion_Int(colorSpacesAni, 0, colorSpaces.size(), reinterpret_cast<ani_int *>(colorSpaces.data()));
     auto hdrFormats = info->GetHdrFormats();
     if (ANI_OK != env->Array_New_Int(hdrFormats.size(), &hdrFormatsAni)) {
         WLOGFE("[ANI] create colorSpace array error");
     }
-    env->FixedArray_SetRegion_Int(hdrFormatsAni, 0, hdrFormats.size(), reinterpret_cast<ani_int *>(hdrFormats.data()));
+    env->Array_SetRegion_Int(hdrFormatsAni, 0, hdrFormats.size(), reinterpret_cast<ani_int *>(hdrFormats.data()));
 
     env->Object_SetField_Ref(obj, colorSpacesFld, colorSpacesAni);
     env->Object_SetField_Ref(obj, hdrFormatsld, hdrFormatsAni);
@@ -261,15 +269,24 @@ ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
  
 ani_array_ref DisplayAniUtils::convertDisplays(std::vector<sptr<Display>> displays, ani_env* env){
     ani_array_ref arrayres = nullptr;
-    ani_ref* displaysAni = new ani_ref[displays.size()];
-    for (unsigned int i = 0; i < displays.size(); i++) {
+    int size = displays.size();
+    ani_class cls = nullptr;
+    if (ANI_OK != env->FindClass("L@ohos/display/display/DisplayImpl;", &cls)) {
+        WLOGFE("[ANI] null class DisplayImpl");
+    }
+    ani_ref undefinedRef = nullptr;
+    if(ANI_OK != env->GetUndefined(&undefinedRef)){
+        WLOGFE("[ANI] get undefined error");
+    }
+    if (ANI_OK != env->Array_New_Ref(cls, size, undefinedRef, &arrayres)) {
+        WLOGFE("[ANI] create display array error");
+    }
+    for (int i = 0; i < size; i++) {
         sptr<Display> display = displays[i];
-        displaysAni[i] = convertDisplay(display, env);
+        if (ANI_OK != env->Array_Set_Ref(arrayres, i, convertDisplay(display, env))) {
+            WLOGFE("[ANI] set display array error");
+        }
     }
-    if (ANI_OK != env->Array_New_Ref(displays.size(), displaysAni, &arrayres)) {
-        WLOGFE("[ANI] create rect array error");
-    }
-    delete[] displaysAni;
     return arrayres;
 }
 
@@ -283,7 +300,7 @@ void DisplayAniUtils::GetStdString(ani_env *env, ani_string str, std::string &re
 ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char *signature, ani_object* result, ...)
 {
     ani_method aniCtor;
-    auto ret = env->Class_GetMethod(cls, "<ctor>", signature, &aniCtor);
+    auto ret = env->Class_FindMethod(cls, "<ctor>", signature, &aniCtor);
     if (ret != ANI_OK) {
         return ret;
     }
@@ -297,7 +314,7 @@ ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char
 ani_status DisplayAniUtils::NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object)
 {
     ani_method aniCtor;
-    auto ret = env->Class_GetMethod(cls, "<ctor>", "V:V", &aniCtor);
+    auto ret = env->Class_FindMethod(cls, "<ctor>", "V:V", &aniCtor);
     if (ret != ANI_OK) {
         return ret;
     }

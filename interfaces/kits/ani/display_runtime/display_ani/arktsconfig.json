@@ -27,7 +27,8 @@
     "outDir": "../out", 
     "package": "@ohos"
   },
-  "include": [
-    "./sts/*.ets"
+  "files": [
+    "./sts/display.ets",
+    "./sts/display_entry.ets"
   ]
 }

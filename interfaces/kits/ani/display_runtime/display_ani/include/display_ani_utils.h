@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef OHOS_ANI_DISPLAY_UTILS_H
+#define OHOS_ANI_DISPLAY_UTILS_H
 #include <hitrace_meter.h>
 
 #include "ani.h"
@@ -21,7 +23,6 @@
 #include "window_manager_hilog.h"
 #include "dm_common.h"
 #include "refbase.h"
-
 
 namespace OHOS {
 namespace Rosen {
@@ -47,3 +48,4 @@ static ani_object CreateAniUndefined(ani_env* env);
 };
 }
 }
+#endif
