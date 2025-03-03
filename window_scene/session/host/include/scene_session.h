@@ -115,6 +115,8 @@ using NotifySetSupportedWindowModesFunc = std::function<void(
     std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes)>;
 using GetStatusBarAvoidHeightFunc = std::function<void(WSRect& barArea)>;
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
+using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
+using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -148,6 +150,7 @@ public:
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
+        GetSceneSessionByIdCallback onGetSceneSessionByIdCallback_;
     };
 
     // func for change window scene pattern property
