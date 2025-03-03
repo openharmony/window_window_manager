@@ -633,7 +633,7 @@ public:
      *
      * @param isWaterfallMode new waterfall mode.
      */
-    virtual void OnWaterfallModeChange(const bool isWaterfallMode) {}
+    virtual void OnWaterfallModeChange(bool isWaterfallMode) {}
 };
 
 static WMError DefaultCreateErrCode = WMError::WM_OK;

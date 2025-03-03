@@ -29,6 +29,7 @@ public:
     MOCK_METHOD(void, SetScreenId, (uint64_t screenId), (override));
     MOCK_METHOD(void, UpdateCrossAxisOfLayout, (const WSRect& rect), (override));
     MOCK_METHOD(void, UpdateCrossAxis, (), (override));
+    MOCK_METHOD(void, UpdateScreenFoldStatus, (SuperFoldStatus foldStatus), (override));
 };
 }
 }
