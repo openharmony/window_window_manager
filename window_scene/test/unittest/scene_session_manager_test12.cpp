@@ -1466,7 +1466,6 @@ HWTEST_F(SceneSessionManagerTest12, NotifyFoldScreenStatusChange, Function | Sma
     sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
-    EXPECT_CALL(*sceneSession, UpdateScreenFoldStatus(SuperFoldStatus::EXPANDED)).Times(1);
     ssm_->NotifyFoldScreenStatusChange(10, SuperFoldStatus::EXPANDED, SuperFoldStatus::FOLDED);
 }
 

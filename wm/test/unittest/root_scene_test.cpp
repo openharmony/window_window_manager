@@ -470,6 +470,60 @@ HWTEST_F(RootSceneTest, NotifyOccupiedAreaChangeForRoot, Function | SmallTest | 
     ASSERT_NE(nullptr, info);
     rootScene->NotifyOccupiedAreaChangeForRoot(info);
 }
+
+/**
+ * @tc.name: RegisterWaterfallModeChangeListener
+ * @tc.desc: RegisterWaterfallModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, RegisterWaterfallModeChangeListener, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
+    auto ret = rootScene.RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listener = nullptr;
+    ret = rootScene.RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    auto listeners = rootScene.GetWaterfallModeChangeListeners();
+    ASSERT_EQ(listeners.size(), 1);
+}
+
+/**
+ * @tc.name: UnregisterWaterfallModeChangeListener
+ * @tc.desc: UnregisterWaterfallModeChangeListener Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, UnregisterWaterfallModeChangeListener, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
+    auto ret = rootScene.RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    auto listeners = rootScene.GetWaterfallModeChangeListeners();
+    ASSERT_EQ(listeners.size(), 1);
+    auto ret = rootScene.UnregisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    listeners = rootScene.GetWaterfallModeChangeListeners();
+    ASSERT_EQ(listeners.size(), 0);
+    listener = nullptr;
+    ret = rootScene.UnregisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+}
+
+/**
+ * @tc.name: NotifyWaterfallModeChange
+ * @tc.desc: NotifyWaterfallModeChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RootSceneTest, NotifyWaterfallModeChange, Function | SmallTest | Level3)
+{
+    RootScene rootScene;
+    sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
+    auto ret = rootScene.RegisterWaterfallModeChangeListener(listener);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    rootScene.NotifyWaterfallModeChange(true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

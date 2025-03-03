@@ -1991,6 +1991,46 @@ HWTEST_F(SceneSessionTest5, GetCrossAxisState, Function | SmallTest | Level2)
     sceneSession->GetCrossAxisState(state);
     EXPECT_EQ(state, CrossAxisState::STATE_CROSS);
 }
+
+/**
+ * @tc.name: UpdateScreenFoldStatus
+ * @tc.desc: UpdateScreenFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateScreenFoldStatus, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateScreenFoldStatus";
+    info.bundleName_ = "UpdateScreenFoldStatus";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    sptr<SceneSession::SpecificSessionCallback> specificCb =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    SuperFoldStatus status = SuperFoldStatus::UNKNOWN;
+    specificCb->onNotifyScreenFoldStatusChange_ = [&status](SuperFoldStatus foldStatus) {
+        status = foldStatus;
+    };
+    session->specificCallback_ = specificCb;
+    session->UpdateScreenFoldStatus(SuperFoldStatus::HALF_FOLDED);
+    EXPECT_EQ(status, SuperFoldStatus::HALF_FOLDED);
+}
+
+/**
+ * @tc.name: GetWaterfallMode
+ * @tc.desc: GetWaterfallMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, GetWaterfallMode, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetWaterfallMode";
+    info.bundleName_ = "GetWaterfallMode";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+    bool isWaterfallMode = true;
+    session->GetWaterfallMode(isWaterfallMode);
+    EXPECT_EQ(isWaterfallMode, false);
+}
 }
 }
 }
