@@ -540,6 +540,7 @@ public:
     void SetAttachState(bool isAttach, WindowMode windowMode = WindowMode::WINDOW_MODE_UNDEFINED);
     bool GetAttachState() const;
     void RegisterDetachCallback(const sptr<IPatternDetachCallback>& callback);
+    void SetNeedNotifyAttachState(bool needNotify);
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
@@ -838,12 +839,6 @@ protected:
      */
     NotifyKeyboardStateChangeFunc keyboardStateChangeFunc_;
 
-    /*
-     * Window Pattern
-     */
-    std::atomic<bool> isAttach_ { false };
-    std::atomic<bool> needNotifyAttachState_ = { false };
-
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
@@ -931,6 +926,7 @@ private:
     /*
      * Window Lifecycle
      */
+    std::atomic<bool> isAttach_ { false };
     std::atomic<bool> isPendingToBackgroundState_ { false };
     std::atomic<bool> isActivatedAfterScreenLocked_ { true };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
@@ -966,6 +962,7 @@ private:
     Task removeSnapshotCallback_ = []() {};
     std::mutex saveSnapshotCallbackMutex_;
     std::mutex removeSnapshotCallbackMutex_;
+    std::atomic<bool> needNotifyAttachState_ = { false };
 };
 } // namespace OHOS::Rosen
 
