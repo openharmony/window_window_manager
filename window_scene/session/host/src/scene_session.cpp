@@ -6192,11 +6192,11 @@ void SceneSession::SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc&
 
 void SceneSession::RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func)
 {
-    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
     if (!func) {
         TLOGE(WmsLogTag::WMS_SUB, "func is null");
         return;
     }
+    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
     notifySurfaceBoundsChangeFuncMap_[sessionId] = func;
 }
 
@@ -6221,9 +6221,15 @@ void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
         TLOGW(WmsLogTag::WMS_SUB, "func is null");
         return;
     }
-    func(isFollowParentLayout_);
-    std::lock_guard lock(followParentRectFuncMutex_);
-    followParentRectFunc_ = func;
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        func(session->isFollowParentLayout_);
+        session->followParentRectFunc_ = std::move(func);
+    });
 }
 
 WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
@@ -6244,34 +6250,37 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
         TLOGW(WmsLogTag::WMS_SUB, "not surppot more than 1 level window");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    isFollowParentLayout_ = isFollow;
-    {
-        std::lock_guard lock(followParentRectFuncMutex_);
-        if (!followParentRectFunc_) {
-            TLOGW(WmsLogTag::WMS_SUB, "func is null");
-            return WSError::WS_ERROR_INVALID_OPERATION;
-        }
-        followParentRectFunc_(isFollow);
-    }
-
-    // if parent is null, don't need follow move drag
-    if (!parentSession_) {
-        TLOGW(WmsLogTag::WMS_SUB, "parent is null");
-        return WSError::WS_OK;
-    }
-    if (!isFollow) {
-        parentSession_->UnregisterNotifySurfaceBoundsChangeFunc(GetPersistentId());
-        return WSError::WS_OK;
-    }
-    auto task =  [weak = wptr<SceneSession>(this)](const WSRect& rect, bool isGlobal, bool needFlush) {
-        auto session = weak.promote();
+    PostTask([weakThis = wptr(this), isFollow = isFollow,  where = __func__] {
+        auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_SUB, "session has been destroy");
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
             return;
         }
-        session->SetSurfaceBounds(rect, isGlobal, needFlush);
-    };
-    parentSession_->RegisterNotifySurfaceBoundsChangeFunc(GetPersistentId(), std::move(task));
+        session->isFollowParentLayout_ = isFollow;
+        if (session->followParentRectFunc_) {
+            session->followParentRectFunc_(isFollow);
+        } else {
+            TLOGI(WmsLogTag::WMS_SUB, "func is null");
+        }
+        // if parent is null, don't need follow move drag
+        if (!session->parentSession_) {
+            TLOGW(WmsLogTag::WMS_SUB, "parent is null");
+            return;
+        }
+        if (!isFollow) {
+            session->parentSession_->UnregisterNotifySurfaceBoundsChangeFunc(session->GetPersistentId());
+            return;
+        }
+        auto task = [weak = weakThis](const WSRect& rect, bool isGlobal, bool needFlush) {
+            auto session = weak.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_SUB, "session has been destroy");
+                return;
+            }
+            session->SetSurfaceBounds(rect, isGlobal, needFlush);
+        };
+        session->parentSession_->RegisterNotifySurfaceBoundsChangeFunc(session->GetPersistentId(), std::move(task));
+    });
     return WSError::WS_OK;
 }
 

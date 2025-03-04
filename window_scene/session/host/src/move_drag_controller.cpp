@@ -215,7 +215,6 @@ void MoveDragController::UpdateSubWindowGravityWhenFollow(const sptr<MoveDragCon
     }
 }
 
-
 /** @note @window.drag */
 void MoveDragController::InitMoveDragProperty()
 {
