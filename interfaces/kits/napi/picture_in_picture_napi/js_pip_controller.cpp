@@ -224,7 +224,7 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         }
         napi_ref oldTypeNodeRef = pipController->GetTypeNode();
         pipController->UpdateContentNodeRef(typeNodeRef);
-        if (oldTypeNodeRef != nulltpr) {
+        if (oldTypeNodeRef != nullptr) {
             napi_delete_reference(env, oldTypeNodeRef);
             oldTypeNodeRef = nullptr;
         }
