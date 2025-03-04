@@ -38,8 +38,8 @@ template("generate_and_build") {
 
   # input-file
   #idlize_idl2peer(target_name) {
-  #  input_dir = "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani/idl/"
-  #  output = "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani"
+  #  input_dir = "./idl"
+  #  output = "./"
   #  dirmode = "delete"
   #  default_package = "window"
   #  mode = "dts2peer"
@@ -75,15 +75,15 @@ template("generate_and_build") {
   }
 
   idlize_shared_library(target_name) {
-    generated = "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani/generated"
+    generated = "./generated"
     classpath_prefix = "@ohos/window/WINDOWNativeModule/"
     relative_install_dir = "module/application"
     module_install_dir = "module/application"
     deps = [
+      ":windowstageidl_sourceset",
       "../../../../../utils:libwmutil",
       "../../../../../utils:libwmutil_base",
       "../../../../../wm:libwm",
-      "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani:windowstageidl_sourceset",
     ]
 
     configs = [
