@@ -6972,9 +6972,6 @@ void SceneSession::SetSidebarMaskColorModifier(bool needBlur)
 
 void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
 {
-    needNotifyAttachState_.store(registered);
-    if (sessionStage_ && registered) {
-        sessionStage_->NotifyWindowAttachStateChange(isAttach_);
-    }
+    SetNeedNotifyAttachState(registered);
 }
 } // namespace OHOS::Rosen
