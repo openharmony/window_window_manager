@@ -479,6 +479,7 @@ private:
     WMError InitUIContent(const std::string& contentInfo, void* env, void* storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
         OHOS::Ace::UIContentErrorCode& aceRet, int isAni = 0);
+    void UpdateConfigWhenSetUIContent();
     WMError SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
         int isAni = 0);
