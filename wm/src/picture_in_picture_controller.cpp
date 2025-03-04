@@ -21,6 +21,7 @@
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "singleton_container.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Rosen {
