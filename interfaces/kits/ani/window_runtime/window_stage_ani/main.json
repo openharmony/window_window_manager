@@ -12,10 +12,11 @@
         "./window.ets"
       ]
     },
-    "outDir": "./cache",
+    "outDir": "./cache/window",
     "package": "@ohos"
   },
   "files": [
+    "./sts/window_entry.ets",
     "./sts/window.ets"
   ]
 }

@@ -15,10 +15,11 @@
         "./uiExtensionHost.ets"
       ]
     },
-    "outDir": "./cache",
+    "outDir": "./cache/uiExtensionHost",
     "package": "@ohos"
   },
   "files": [
+    "./sts/uiExtensionHost_entry.ets",
     "./sts/uiExtensionHost.ets"
   ]
 }

@@ -716,21 +716,3 @@ export native function CreateWindow(window: long): WindowInternal;
 }
 
 export default window;
-
-function main() {
-    loadLibrary('windowstageani_kit.z')
-    let ws = window.CreateWindowStage(0);
-    let callback:AsyncCallback = (err) => {
-      if (err.code) {
-        console.error(`Failed to load the content. Cause code: ${err.code}, message: ${err.message}`);
-        return;
-      }
-      console.info('Succeeded in loading the content.');
-    }
-    ws.loadContent('ohos.test', callback);
-
-    let w = window.CreateWindow(0);
-    w.getWindowDecorHeight();
-    w.setWindowBackgroundColorSync('0xFFFFFF');
-    console.println('ok');
-}

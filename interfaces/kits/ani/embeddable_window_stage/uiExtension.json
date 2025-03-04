@@ -12,10 +12,11 @@
         "../../window_runtime/window_stage_ani/sts/window.ets"
       ]
     },
-    "outDir": "./cache",
+    "outDir": "./cache/uiExtension",
     "package": "@ohos.arkui"
   },
   "files": [
+    "./sts/uiExtension_entry.ets",
     "./sts/uiExtension.ets"
   ]
 }
