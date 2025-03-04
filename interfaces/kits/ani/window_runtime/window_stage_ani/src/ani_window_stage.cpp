@@ -55,7 +55,8 @@ void AniWindowStage::LoadContent(void* env, std::string content)
     win->NapiSetUIContent(content, reinterpret_cast<void*>(env), nullptr);
 }
 
-ani_object AniWindowStage::GetMainWindow(ani_env* env) {
+ani_object AniWindowStage::GetMainWindow(ani_env* env)
+{
     std::shared_ptr<WindowScene> weakScene = windowScene_.lock();
     ani_object aniMainWindow = CreateAniWindowStage(env, weakScene);
     return aniMainWindow;
