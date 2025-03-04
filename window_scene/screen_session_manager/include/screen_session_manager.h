@@ -355,6 +355,11 @@ public:
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
+    std::string GetDisplayCapability() override;
+    std::string GetSecondaryDisplayCapability();
+    std::string GetFoldableDeviceCapability();
+    std::string GetSuperFoldCapability();
+
     void OnScreenExtendChange(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChange(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
     void OnSecondaryReflexionChange(ScreenId screenId, bool isSecondaryReflexion) override;

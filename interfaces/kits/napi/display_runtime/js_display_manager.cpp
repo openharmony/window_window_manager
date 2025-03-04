@@ -85,6 +85,12 @@ static napi_value GetAllDisplayPhysicalResolution(napi_env env, napi_callback_in
     return (me != nullptr) ? me->OnGetAllDisplayPhysicalResolution(env, info) : nullptr;
 }
 
+static napi_value GetDisplayCapability(napi_env env, napi_callback_info info)
+{
+    JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
+    return (me != nullptr) ? me->OnGetDisplayCapability(env, info) : nullptr;
+}
+
 static napi_value GetAllDisplays(napi_env env, napi_callback_info info)
 {
     JsDisplayManager* me = CheckParamsAndGetThis<JsDisplayManager>(env, info);
@@ -788,6 +794,21 @@ napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
     return CreateJsValue(env, mode);
 }
 
+napi_value OnGetDisplayCapability(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc >= ARGC_ONE) {
+        WLOGFE("Params not match %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    std::string capabilitInfo = SingletonContainer::Get<DisplayManager>().GetDisplayCapability();
+    WLOGD("[NAPI]" PRIu64", getDisplayCapability = %{public}s", capabilitInfo.c_str());
+    return CreateJsValue(env, capabilitInfo);
+}
+
 napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -1227,6 +1248,8 @@ napi_value JsDisplayManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "off", moduleName, JsDisplayManager::UnregisterDisplayManagerCallback);
     BindNativeFunction(env, exportObj, "getAllDisplayPhysicalResolution", moduleName,
         JsDisplayManager::GetAllDisplayPhysicalResolution);
+    BindNativeFunction(env, exportObj, "getDisplayCapability", moduleName,
+        JsDisplayManager::GetDisplayCapability);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
