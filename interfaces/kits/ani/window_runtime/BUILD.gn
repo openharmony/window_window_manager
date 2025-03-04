@@ -20,7 +20,6 @@ config("window_common_config") {
 
   include_dirs = [
     "../common",
-    "../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani",
     "../../../innerkits/wm",
     "../../../innerkits/dm",
     "../../../../wm/include",
@@ -85,7 +84,7 @@ ohos_shared_library("windowstageani_kit") {
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
-    #"static_core:ani",
+    "runtime_core:ani"
   ]
 
   innerapi_tags = [ "platformsdk" ]

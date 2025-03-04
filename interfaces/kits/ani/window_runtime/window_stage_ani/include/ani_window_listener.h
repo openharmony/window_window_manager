@@ -53,23 +53,23 @@ const std::string SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 
 class AniWindowListener : public IWindowChangeListener,
-                         public ISystemBarChangedListener,
-                         public IAvoidAreaChangedListener,
-                         public IWindowLifeCycle,
-                         public IOccupiedAreaChangeListener,
-                         public ITouchOutsideListener,
-                         public IScreenshotListener,
-                         public IDialogTargetTouchListener,
-                         public IDialogDeathRecipientListener,
-                         public IWaterMarkFlagChangedListener,
-                         public IGestureNavigationEnabledChangedListener,
-                         public IWindowVisibilityChangedListener,
-                         public IWindowTitleButtonRectChangedListener,
-                         public IWindowStatusChangeListener,
-                         public IWindowNoInteractionListener,
-                         public IWindowRectChangeListener,
-                         public IMainWindowCloseListener,
-                         public ISubWindowCloseListener {
+                          public ISystemBarChangedListener,
+                          public IAvoidAreaChangedListener,
+                          public IWindowLifeCycle,
+                          public IOccupiedAreaChangeListener,
+                          public ITouchOutsideListener,
+                          public IScreenshotListener,
+                          public IDialogTargetTouchListener,
+                          public IDialogDeathRecipientListener,
+                          public IWaterMarkFlagChangedListener,
+                          public IGestureNavigationEnabledChangedListener,
+                          public IWindowVisibilityChangedListener,
+                          public IWindowTitleButtonRectChangedListener,
+                          public IWindowStatusChangeListener,
+                          public IWindowNoInteractionListener,
+                          public IWindowRectChangeListener,
+                          public IMainWindowCloseListener,
+                          public ISubWindowCloseListener {
 public:
     AniWindowListener(ani_env* env, ani_ref callback, CaseType caseType)
         : env_(env), aniCallBack_(callback), caseType_(caseType), weakRef_(wptr<AniWindowListener> (this)) {}

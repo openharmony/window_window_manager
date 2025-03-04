@@ -38,23 +38,23 @@ public:
     static ani_status NewAniObject(ani_env *env, const std::string& cls, ani_object* object);
     static ani_object CreateWindowsProperties(ani_env *env, const sptr<Window> &window);
     static uint32_t GetColorFromAni(ani_env *env, const char *name,
-      uint32_t defaultColor, bool& flag, const ani_object& aniObject);
+        uint32_t defaultColor, bool& flag, const ani_object& aniObject);
     static bool SetWindowStatusBarContentColor(ani_env* env, ani_object aniObject,
-      std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>&
+        propertyFlags);
     static bool SetWindowNavigationBarContentColor(ani_env* env, ani_object aniObject,
-      std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>& propertyFlags);
+        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>&
+        propertyFlags);
     static bool SetSystemBarPropertiesFromAni(ani_env *env,
-                                              std::map<WindowType, SystemBarProperty> &windowBarProperties,
-                                              std::map<WindowType, SystemBarPropertyFlag> &windowPropertyFlags,
-                                              const ani_object &aniProperties,
-                                              const sptr<Window>& window);
+        std::map<WindowType, SystemBarProperty> &windowBarProperties,
+        std::map<WindowType, SystemBarPropertyFlag> &windowPropertyFlags,
+        const ani_object &aniProperties,
+        const sptr<Window>& window);
     static bool SetSpecificSystemBarEnabled(ani_env *env,
-                                            std::map<WindowType, SystemBarProperty> &systemBarProperties,
-                                            ani_string aniName,
-                                            ani_boolean aniEnable,
-                                            ani_boolean aniEnableAnimation);
-
-
+        std::map<WindowType, SystemBarProperty> &systemBarProperties,
+        ani_string aniName,
+        ani_boolean aniEnable,
+        ani_boolean aniEnableAnimation);
 };
 }
 }

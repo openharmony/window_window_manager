@@ -12,7 +12,7 @@ function main() {
       }
       console.info('Succeeded in loading the content.');
     }
-    ws.loadContent("ohos.test", callback);
+    ws.loadContent('ohos.test', callback);
 
     let w = window.CreateWindow(0);
     w.getWindowDecorHeight();

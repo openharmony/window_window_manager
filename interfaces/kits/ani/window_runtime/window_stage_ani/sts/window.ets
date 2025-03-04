@@ -649,14 +649,8 @@ export class WindowStageInternal implements WindowStage {
 }
 
 export interface WindowStage {
-//    loadContent(path: string, storage: LocalStorage, callback: AsyncCallback): void;
-//    loadContent(path: string, storage?: LocalStorage): Promise<void>;
     loadContent(path: string, callback: AsyncCallback): void;
-//    loadContentByName(name: string, storage: LocalStorage, callback: AsyncCallback): void;
-//    loadContentByName(name: string, storage?: LocalStorage): Promise<void>;
     loadContentByName(name: string, callback: AsyncCallback): void;
-//    disableWindowDecor(): void;
-//    setShowOnLockScreen(showOnLockScreen: boolean): void;
 }
 
 export class WindowInternal implements Window {
@@ -687,47 +681,16 @@ export class WindowInternal implements Window {
 
     public getLastWindow(ctx: BaseContext): Promise<Window> {
         return new Promise<Window>((resolve: (window: Window) => void, reject: (error: BusinessError) => void ) => {
-            // taskpool.excute(this.getLastWindowInternal).then((result: Result<Window, BusinessError>) => {
-            //     if (result.error.code != 0) {
-            //         reject(result.error);
-            //     } else {
-            //         resolve(result.result);
-            //     }
-            // });
         });
     }
 
     public getLastWindow(ctx: BaseContext, callback: AsyncCallback): void {
-        // taskpool.excute(this.getLastWindowInternal).then((result: Result<Window, BusinessError>) => {
-        //     callback(result.error, result.result);
-        // });
     }
-
-    // public setPreferredOrientation(orientation: Orientation): Promise<void> {
-    //     return new Promise<void>((resolve: () => void, reject: (error: BusinessError) => void ) => {
-    //         taskpool.excute(this.setPreferredOrientationInternal).then((result: Result<void, BusinessError>) => {
-    //             if (result.error.code != 0) {
-    //                 reject(result.error);
-    //             } else {
-    //                 resolve(result.result);
-    //             }
-    //         });
-    //     });
-    // }
 
     public setPreferredOrientation(orientation: Orientation, callback: AsyncCallback): void {
-        // taskpool.excute(this.setPreferredOrientationInternal).then((result: Result<void, BusinessError>) => {
-        //     callback(result.error, result.result);
-        // });
     }
 
-    // public setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void> {
-    // }
-
     public setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback): void {
-        // taskpool.excute(this.setWindowPrivacyModeInternal).then((result: Result<void, BusinessError>) => {
-        //     callback(result.error, result.result);
-        // });
     }
 
     public setWindowBackgroundColorSync(color: string): int {
@@ -743,14 +706,11 @@ export interface Window {
     getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
     getLastWindow(ctx: BaseContext): Promise<Window>;
     getLastWindow(ctx: BaseContext, callback: AsyncCallback): void;
-    // setPreferredOrientation(orientation: Orientation): Promise<void>;
     setPreferredOrientation(orientation: Orientation, callback: AsyncCallback): void;
-    // setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void>;
     setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
-// export native function CreateSystemBarProperties(scene: long): SystemBarPropertiesInternal;
 export function CreateWindowStageApi(scene: long): WindowStage { return CreateWindowStage(scene); }
 export native function CreateWindow(window: long): WindowInternal;
 }

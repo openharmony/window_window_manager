@@ -109,7 +109,8 @@ ani_object AniCommonUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
     if (AniCommonUtils::NewAniObjectNoParams(env, "L@ohos/window/window/AvoidArea", &aniAvoidArea) != ANI_OK) {
         return AniCommonUtils::CreateAniUndefined(env);
     }
-    env->Object_SetFieldByName_Boolean(aniAvoidArea, "visible", static_cast<ani_boolean>(type != AvoidAreaType::TYPE_CUTOUT));
+    env->Object_SetFieldByName_Boolean(aniAvoidArea, "visible",
+        static_cast<ani_boolean>(type != AvoidAreaType::TYPE_CUTOUT));
     env->Object_SetFieldByName_Ref(aniAvoidArea, "leftRect", CreateAniRect(env, avoidArea.leftRect_));
     env->Object_SetFieldByName_Ref(aniAvoidArea, "topRect", CreateAniRect(env, avoidArea.topRect_));
     env->Object_SetFieldByName_Ref(aniAvoidArea, "rightRect", CreateAniRect(env, avoidArea.rightRect_));
@@ -295,34 +296,28 @@ bool AniCommonUtils::SetWindowNavigationBarContentColor(ani_env* env, ani_object
     env->Object_GetPropertyByName_Ref(aniObject, "navigationBarContentColor", &aniNaviGationBarColor);
     ani_boolean aniNavigationIcon;
     env->Object_GetPropertyByName_Boolean(aniObject, "isNavigationBarLightIcon", &aniNavigationIcon);
-    // if (GetType(env, jsStatusContentColor) != napi_undefined) {
-        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =  GetColorFromAni(
-            env,
-            "navigationBarContentColor",
-            navProperty.contentColor_,
-            propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag,
-            aniObject);
-    // } else if (GetType(env, jsStatusIcon) != napi_undefined) {
-        // bool isStatusBarLightIcon;
-        // if (!ConvertFromJsValue(env, aniStatusIcon, isStatusBarLightIcon)) {
-            TLOGE(WmsLogTag::DEFAULT, "Convert navigation icon value failed");
-            return false;
-        // }
-      if (aniNavigationIcon) {
-          properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
-      } else {
-          properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
-      }
-      propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
-    // }
+    properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ =  GetColorFromAni(
+        env,
+        "navigationBarContentColor",
+        navProperty.contentColor_,
+        propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag,
+        aniObject);
+    TLOGE(WmsLogTag::DEFAULT, "Convert navigation icon value failed");
+    if (aniNavigationIcon) {
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
+    } else {
+        properties[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColor_ = SYSTEM_COLOR_BLACK;
+    }
+    propertyFlags[WindowType::WINDOW_TYPE_NAVIGATION_BAR].contentColorFlag = true;
     return true;
 }
 
 bool AniCommonUtils::SetSystemBarPropertiesFromAni(ani_env *env,
-                                            std::map<WindowType, SystemBarProperty> &windowBarProperties,
-                                            std::map<WindowType, SystemBarPropertyFlag> &windowPropertyFlags,
-                                            const ani_object &aniProperties,
-                                            const sptr<Window>& window) {
+    std::map<WindowType, SystemBarProperty> &windowBarProperties,
+    std::map<WindowType, SystemBarPropertyFlag> &windowPropertyFlags,
+    const ani_object &aniProperties,
+    const sptr<Window>& window)
+{
     auto statusProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     auto navProperty = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
     windowBarProperties[WindowType::WINDOW_TYPE_STATUS_BAR] = statusProperty;
@@ -374,10 +369,11 @@ bool AniCommonUtils::SetSystemBarPropertiesFromAni(ani_env *env,
 }
 
 bool AniCommonUtils::SetSpecificSystemBarEnabled(ani_env *env,
-                                          std::map<WindowType, SystemBarProperty> &systemBarProperties,
-                                          ani_string aniName,
-                                          ani_boolean aniEnable,
-                                          ani_boolean aniEnableAnimation) {
+    std::map<WindowType, SystemBarProperty> &systemBarProperties,
+    ani_string aniName,
+    ani_boolean aniEnable,
+    ani_boolean aniEnableAnimation)
+{
     std::string barName;
     GetStdString(env, aniName, barName);
     bool enable = static_cast<bool>(aniEnable);
