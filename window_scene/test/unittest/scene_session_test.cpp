@@ -2041,7 +2041,6 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | 
         isLayoutFinished = true;
         return WSError::WS_OK;
     };
-
     sceneSession->specificCallback_ = nullptr;
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
 }
