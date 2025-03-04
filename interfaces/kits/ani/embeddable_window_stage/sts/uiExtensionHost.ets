@@ -28,7 +28,33 @@ type Callback_Size = (data: window.Size) => void;
  */
 namespace uiExtensionHost {
   export native function createExtentionWindow(win: long, hostId: int): UIExtensionHostWindowProxy;
+  class UIERect implements window.Rect {
+    left: double;
+    top: double;
+    width: double;
+    height: double;
+  };
+  class UIEProperties implements UIExtensionHostWindowProxyProperties {
+    constructor() {
+        this.uiExtensionHostWindowProxyRect = new UIERect();
+    }
+    uiExtensionHostWindowProxyRect: window.Rect;
+  }
+  class UIEAvoidArea implements window.AvoidArea {
+    constructor() {
+        this.leftRect = new UIERect();
+        this.topRect = new UIERect();
+        this.rightRect = new UIERect();
+        this.bottomRect = new UIERect();
+    }
+    visible: boolean;
+    leftRect: window.Rect;
+    topRect: window.Rect;
+    rightRect: window.Rect;
+    bottomRect: window.Rect;
+  }
   export class UIExtensionHostInternal implements UIExtensionHostWindowProxy {
+    static { loadLibrary("embeddablewindowstageani_kit.z") }
     private nativeObj: long = 0;
     private setNativeObj(nativeObj: long): void {
         this.nativeObj = nativeObj;
@@ -37,16 +63,22 @@ namespace uiExtensionHost {
         obj.visible = visible;
     }
 
-    public native getProperties(nativeObj: long): UIExtensionHostWindowProxyProperties;
-    public native setProperties(nativeObj: long, property: UIExtensionHostWindowProxyProperties): void;
-    public native getWindowAvoidArea(nativeObj: long, type: window.AvoidAreaType, area: window.AvoidArea): int;
+    public native getProperties(nativeObj: long, property: object): int;
+    public native setProperties(nativeObj: long, property: object): int;
+    public native getWindowAvoidArea(nativeObj: long, type: int, area: object): int;
     public native onAvoidAreaChange(nativeObj: long, callback: Callback_Area): void;
     public native offAvoidAreaChange(nativeObj: long, callback?: Callback_Area): void;
     public native onWindowSizeChange(nativeObj: long, callback: Callback_Size): void;
     public native offWindowSizeChange(nativeObj: long, callback?: Callback_Size): void;
 
-    get properties(): UIExtensionHostWindowProxyProperties { return this.getProperties(this.nativeObj); }
-    set properties(property: UIExtensionHostWindowProxyProperties) { this.setProperties(this.nativeObj, property); }
+    get properties(): UIExtensionHostWindowProxyProperties {
+        let property = new UIEProperties();
+        let ret = this.getProperties(this.nativeObj, property as object);
+        return property;
+    }
+    set properties(property: UIExtensionHostWindowProxyProperties) {
+        this.setProperties(this.nativeObj, property as object);
+    }
     on(type: 'avoidAreaChange' | 'windowSizeChange', callback: Callback_Size | Callback_Area): void {
         if (type == 'avoidAreaChange') {
             this.onAvoidAreaChange(this.nativeObj, callback as Callback_Area);
@@ -62,8 +94,8 @@ namespace uiExtensionHost {
         }
     }
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
-        let area: window.AvoidArea;
-        let ret = this.getWindowAvoidArea(this.nativeObj, type, area);
+        let area: window.AvoidArea = new UIEAvoidArea();
+        let ret = this.getWindowAvoidArea(this.nativeObj, type as int, area as object);
         return area;
     }
   }

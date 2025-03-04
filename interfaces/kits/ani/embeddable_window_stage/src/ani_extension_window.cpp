@@ -78,46 +78,89 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
         WLOGFE("[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
-    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniExtensionWindow.get()));
+    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniExtensionWindow.release()));
     return obj;
 }
+
 WMError AniExtensionWindow::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea)
 {
-    if (extensionWindow_ == nullptr) {
-        return WMError::WM_ERROR_INVALID_PARAM;
+    if (!WindowIsValid()) {
+        WLOGFE("[ANI] window not available");
+        return WMError::WM_DO_NOTHING;
     }
     return extensionWindow_->GetAvoidAreaByType(type, avoidArea);
 }
 
-static ani_int ExtWindowGetProperties(ani_env* env, ani_object obj, ani_object propertyRef)
+bool AniExtensionWindow::WindowIsValid()
 {
-    return (ani_int)(0u);
+    if (extensionWindow_ == nullptr) {
+        return false;
+    }
+    sptr<Rosen::Window> window = extensionWindow_->GetWindow();
+    if (window == nullptr) {
+        return false;
+    }
+    return true;
 }
-static ani_int ExtWindowSetProperties(ani_env* env, ani_object obj, ani_object propertyRef)
+
+WMError AniExtensionWindow::GetRect(Rect& rect)
 {
-    return (ani_int)(0u);
-}
-static WMError ExtWindowSetAvoidArea2Ts(ani_env* env, ani_object obj, ani_int areaType, AvoidArea avoidArea)
-{
-    bool visible = (areaType != (int)AvoidAreaType::TYPE_CUTOUT);
-    ani_class cls = nullptr;
-    ani_status ret;
-    if ((ret = env->FindClass("L@ohos/uiExtensionHost/uiExtensionHost/UIExtensionHostInternal;", &cls)) != ANI_OK) {
-        WLOGFE("[ANI] find cls %{public}u", ret);
+    if (!WindowIsValid()) {
+        WLOGFE("[ANI] window not available");
         return WMError::WM_DO_NOTHING;
     }
-    //ani_field visibleField {};
-    //if ((ret = env->Class_FindField(cls, "visible", &visibleField)) != ANI_OK) {
-    //    WLOGFE("[ANI] null env %{public}u", ret);
-    //    return ANI_NOT_FOUND;
-    //}
-    ani_method method {};
-    if ((ret = env->Class_FindMethod(cls, "setAreaVisible", "", &method)) != ANI_OK) {
-        WLOGFE("[ANI] find setAreaVisible failed %{public}u", ret);
-        return WMError::WM_DO_NOTHING;
-    }
-    env->Object_CallMethod_Void(obj, method, visible);
+    rect = extensionWindow_->GetWindow()->GetRect();
     return WMError::WM_OK;
+}
+
+static ani_int ExtWindowSetRect(ani_env* env, ani_object obj, OHOS::Rosen::Rect& rect)
+{
+    ani_status ret {};
+    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>left", rect.posX_)) != ANI_OK) {
+        WLOGFE("[ANI] set left field %{public}u", ret);
+        return (ani_int)WMError::WM_DO_NOTHING;
+    }
+    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>top", rect.posY_)) != ANI_OK) {
+        WLOGFE("[ANI] set top field %{public}u", ret);
+        return (ani_int)WMError::WM_DO_NOTHING;
+    }
+    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>width", rect.width_)) != ANI_OK) {
+        WLOGFE("[ANI] set width field %{public}u", ret);
+        return (ani_int)WMError::WM_DO_NOTHING;
+    }
+    if ((ret = env->Object_SetFieldByName_Double(obj, "<property>height", rect.height_)) != ANI_OK) {
+        WLOGFE("[ANI] set height field %{public}u", ret);
+        return (ani_int)WMError::WM_DO_NOTHING;
+    }
+    return (ani_int)WMError::WM_OK;
+}
+
+static ani_int ExtWindowSetRectMember(ani_env* env, ani_object obj, const char* member, OHOS::Rosen::Rect& rect)
+{
+    ani_status ret {};
+    ani_ref rectRef {};
+    if ((ret = env->Object_GetFieldByName_Ref(obj, member, &rectRef)) != ANI_OK) {
+        WLOGFE("[ANI] get field %{public}s %{public}u", member, ret);
+        return (ani_int)WMError::WM_DO_NOTHING;
+    };
+    return ExtWindowSetRect(env, (ani_object)rectRef, rect);
+
+}
+
+static ani_int ExtWindowGetProperties(ani_env* env, ani_object obj, ani_long nativeObj, ani_object propertyRef)
+{
+    WMError retCode = WMError::WM_OK;
+    AniExtensionWindow* aniExt = reinterpret_cast<AniExtensionWindow*>(nativeObj);
+    Rect rect {};
+    if ((retCode = aniExt->GetRect(rect)) != WMError::WM_OK) {
+        return (ani_int)retCode;
+    };
+    return ExtWindowSetRectMember(env, propertyRef, "<property>uiExtensionHostWindowProxyRect", rect);
+}
+
+static ani_int ExtWindowSetProperties(ani_env* env, ani_object obj, ani_long nativeObj, ani_object propertyRef)
+{
+    return (ani_int)WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_long win,
@@ -126,32 +169,55 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     bool err = ((areaType > (int)AvoidAreaType::TYPE_NAVIGATION_INDICATOR) ||
         (areaType < (int)AvoidAreaType::TYPE_SYSTEM));
     if (err) {
-        return (int)WMError::WM_ERROR_INVALID_PARAM;
+        return (ani_int)WMError::WM_ERROR_INVALID_PARAM;
+    }
+    AvoidArea avoidArea {};
+    ani_status ret {};
+    ret = env->Object_SetFieldByName_Boolean(area, "<property>visible", areaType != (int)AvoidAreaType::TYPE_CUTOUT);
+    if (ret != ANI_OK) {
+        WLOGFI("[ANI] set visible faild %{public}d", (int)ret);
+        return (ani_int)WMError::WM_DO_NOTHING;
     }
     AniExtensionWindow* winPtr = reinterpret_cast<AniExtensionWindow*>(win);
-    AvoidArea avoidArea;
-    WMError ret = winPtr->GetAvoidAreaByType((AvoidAreaType)areaType, avoidArea);
-    if (ret == WMError::WM_OK) {
-        return (ani_int)ExtWindowSetAvoidArea2Ts(env, area, areaType, avoidArea);
+    WMError retCode = winPtr->GetAvoidAreaByType((AvoidAreaType)areaType, avoidArea);
+    if (retCode != WMError::WM_OK) {
+        return (ani_int)retCode;
     }
-    return (ani_int)ret;
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>leftRect", avoidArea.leftRect_)) !=
+        WMError::WM_OK) {
+        return (ani_int)retCode;
+    }
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>rightRect", avoidArea.rightRect_)) !=
+        WMError::WM_OK) {
+        return (ani_int)retCode;
+    }
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>topRect", avoidArea.topRect_)) !=
+        WMError::WM_OK) {
+        return (ani_int)retCode;
+    }
+    if ((retCode = (WMError)ExtWindowSetRectMember(env, area, "<property>bottomRect", avoidArea.bottomRect_)) !=
+        WMError::WM_OK) {
+        return (ani_int)retCode;
+    }
+    return (ani_int)WMError::WM_OK;
 }
-static ani_int ExtWindowOnAvoidAreaChange(ani_env* env, ani_object obj, ani_object callback)
-{
-    return (ani_int)(0u);
-}
-static ani_int ExtWindowOffAvoidAreaChange(ani_env* env, ani_object obj, ani_object callback)
-{
-    return (ani_int)(0u);
-}
-static ani_int ExtWindowOnWindowSizeChange(ani_env* env, ani_object obj, ani_object callback)
-{
-    return (ani_int)(0u);
-}
-static ani_int ExtWindowOffWindowSizeChange(ani_env* env, ani_object obj, ani_object callback)
-{
-    return (ani_int)(0u);
-}
+
+//static ani_int ExtWindowOnAvoidAreaChange(ani_env* env, ani_object obj, ani_object callback)
+//{
+//    return (ani_int)(0u);
+//}
+//static ani_int ExtWindowOffAvoidAreaChange(ani_env* env, ani_object obj, ani_object callback)
+//{
+//    return (ani_int)(0u);
+//}
+//static ani_int ExtWindowOnWindowSizeChange(ani_env* env, ani_object obj, ani_object callback)
+//{
+//    return (ani_int)(0u);
+//}
+//static ani_int ExtWindowOffWindowSizeChange(ani_env* env, ani_object obj, ani_object callback)
+//{
+//    return (ani_int)(0u);
+//}
 
 // test from ts
 ani_object createExtentionWindow(ani_env* env, ani_long win, ani_int hostId)
@@ -181,14 +247,16 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
         return ANI_NOT_FOUND;
     }
     std::array methods = {
-        ani_native_function {"getProperties", "J:Lstd/core/Object;", reinterpret_cast<void *>(ExtWindowGetProperties)},
-        ani_native_function {"setProperties", "Lstd/core/Object;:V", reinterpret_cast<void *>(ExtWindowSetProperties)},
-        ani_native_function {"getWindowAvoidArea", nullptr, reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-        ani_native_function {"onAvoidAreaChange", nullptr, reinterpret_cast<void *>(ExtWindowOnAvoidAreaChange)},
-        ani_native_function {"offAvoidAreaChange", nullptr, reinterpret_cast<void *>(ExtWindowOffAvoidAreaChange)},
-        ani_native_function {"onWindowSizeChange", nullptr, reinterpret_cast<void *>(ExtWindowOnWindowSizeChange)},
-        ani_native_function {"offWindowSizeChange", nullptr, reinterpret_cast<void *>(ExtWindowOffWindowSizeChange)},
+        ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
+        ani_native_function {"setProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowSetProperties)},
+        ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
+            reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
+        //ani_native_function {"onAvoidAreaChange", nullptr, reinterpret_cast<void *>(ExtWindowOnAvoidAreaChange)},
+        //ani_native_function {"offAvoidAreaChange", nullptr, reinterpret_cast<void *>(ExtWindowOffAvoidAreaChange)},
+        //ani_native_function {"onWindowSizeChange", nullptr, reinterpret_cast<void *>(ExtWindowOnWindowSizeChange)},
+        //ani_native_function {"offWindowSizeChange", nullptr, reinterpret_cast<void *>(ExtWindowOffWindowSizeChange)},
     };
+
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         WLOGFE("[ANI] bind fail %{public}u", ret);
         return ANI_NOT_FOUND;
