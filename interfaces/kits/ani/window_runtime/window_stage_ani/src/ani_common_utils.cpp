@@ -132,32 +132,6 @@ void AniCommonUtils::GetAniString(ani_env *env, const std::string &str, ani_stri
     env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 
-// ani_status AniCommonUtils::NewAniObject(ani_env *env, ani_object* object,
-//     const std::string& clsFullName, const char* signature = "V:V") {
-//     ani_class aniClass;
-
-//     size_t pos = clsFullName.rfind('/');
-//     std::string clsName = clsFullName;
-//     if (pos != std::string::npos) {
-//         clsName = clsFullName.substr(pos + 1);
-//     }
-
-//     ani_status ret = env->FindClass(clsFullName.c_str(), &aniClass);
-//     if (ret != ANI_OK) {
-//         TLOGE(WmsLogTag::WMS_IMMS, "Get %{public}s class failed", clsName.c_str());
-//         return ret;
-//     }
-
-//     ani_method aniCtor;
-//     ret = env->Class_FindMethod(aniClass, "<ctor>", signature, &aniCtor);
-//     if (ret != ANI_OK) {
-//         TLOGE(WmsLogTag::WMS_IMMS, "Get %{public}s object failed", clsName.c_str());
-//         return ret;
-//     }
-
-//     return env->Object_New(aniClass, aniCtor, object);
-// }
-
 ani_object AniCommonUtils::CreateWindowsProperties(ani_env *env, const sptr<Window> &window) {
     if (window == nullptr) {
         WLOGFW("window is nullptr or get invalid param");
@@ -167,13 +141,6 @@ ani_object AniCommonUtils::CreateWindowsProperties(ani_env *env, const sptr<Wind
     static const char* className = "Lani_interface/SystemBarPropertiesInner";
     ani_object aniSystemBarProperties;
     NewAniObjectNoParams(env, className, &aniSystemBarProperties);
-
-    // ani_object windowProperties;
-    // if (NewAniObject(env, "LWindowProperties", &windowProperties) != ANI_OK) {
-    //   ani_ref ref {};
-    //   env->GetUndefined(&ref);
-    //   return static_cast<ani_object>(ref);
-    // }
 
     // windowRect
     Rect rect = window->GetRect();
@@ -199,11 +166,6 @@ ani_object AniCommonUtils::CreateWindowsProperties(ani_env *env, const sptr<Wind
 
     // windowType
     WindowType aniWindowType = window->GetType();
-    // if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(type) != 0) {
-    //     napi_set_named_property(env, objValue, "type", CreateJsValue(env, NATIVE_JS_TO_WINDOW_TYPE_MAP.at(type)));
-    // } else {
-    //     napi_set_named_property(env, objValue, "type", CreateJsValue(env, type));
-    // }
     env->Object_SetPropertyByName_Ref(aniSystemBarProperties, "type", reinterpret_cast<ani_type>(aniWindowType));
 
     // windowIsLayoutFullScreen
@@ -308,19 +270,13 @@ bool AniCommonUtils::SetWindowStatusBarContentColor(ani_env* env, ani_object ani
     env->Object_GetPropertyByName_Ref(aniObject, "statusBarContentColor", &aniStatusContentColor);
     ani_boolean aniStatusIcon;
     env->Object_GetPropertyByName_Boolean(aniObject, "isStatusBarLightIcon", &aniStatusIcon);
-    // if (GetType(env, jsStatusContentColor) != napi_undefined) {
         properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ =  GetColorFromAni(
             env,
             "statusBarContentColor",
             statusProperty.contentColor_,
-            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag,
-            aniObject);
-    // } else if (GetType(env, jsStatusIcon) != napi_undefined) {
-        // bool isStatusBarLightIcon;
-        // if (!ConvertFromJsValue(env, aniStatusIcon, isStatusBarLightIcon)) {
+            propertyFlags[WindowType::WINDOW_TYPE_STATUS_BAR].contentColorFlag, aniObject);
             TLOGE(WmsLogTag::DEFAULT, "Convert status icon value failed");
             return false;
-        // }
         if (aniStatusIcon) {
             properties[WindowType::WINDOW_TYPE_STATUS_BAR].contentColor_ = SYSTEM_COLOR_WHITE;
         } else {

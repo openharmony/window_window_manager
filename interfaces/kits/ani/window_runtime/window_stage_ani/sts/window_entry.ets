@@ -1,10 +1,9 @@
 import window from '@ohos.window'
 import { AsyncCallback } from '@ohos.window'
 
-loadLibrary("windowstageani_kit.z")
+loadLibrary('windowstageani_kit.z')
 
-function main()
-{
+function main() {
     let ws = window.CreateWindowStage(0);
     let callback:AsyncCallback = (err) => {
       if (err.code) {
@@ -17,11 +16,7 @@ function main()
 
     let w = window.CreateWindow(0);
     w.getWindowDecorHeight();
-    w.setWindowBackgroundColorSync("0xFFFFFF");
-    console.println("ok");
-    //window.setImmersiveModeEnabledState(false);
-    //window.setWindowDecorVisible(false);
-    //window.setWindowDecorHeight(100);
-    //window.getWindowProperties();
+    w.setWindowBackgroundColorSync('0xFFFFFF');
+    console.println('ok');
 }
 
