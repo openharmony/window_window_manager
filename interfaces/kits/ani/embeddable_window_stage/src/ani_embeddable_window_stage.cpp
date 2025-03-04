@@ -36,7 +36,8 @@ void AniEmbeddableWindowStage::LoadContent(void* env, std::string content)
 {
 }
 
-void DropEmbeddableWindowStageByAni(ani_object aniObj) {
+void DropEmbeddableWindowStageByAni(ani_object aniObj)
+{
     auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj != localObjs.end()) {
         delete obj->second;
@@ -44,7 +45,8 @@ void DropEmbeddableWindowStageByAni(ani_object aniObj) {
     localObjs.erase(obj);
 }
 
-AniEmbeddableWindowStage* GetEmbeddableWindowStageFromAni(void* aniObj) {
+AniEmbeddableWindowStage* GetEmbeddableWindowStageFromAni(void* aniObj)
+{
     auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj == localObjs.end()) {
         return nullptr;
@@ -99,7 +101,8 @@ ani_object CreateAniEmbeddableWindowStage(ani_env* env, sptr<Rosen::Window> wind
     return obj;
 }
 
-AniEmbeddableWindowStage* GetEmbeddableWindowStageFromEnv(ani_env* env, ani_class cls, ani_object obj) {
+AniEmbeddableWindowStage* GetEmbeddableWindowStageFromEnv(ani_env* env, ani_class cls, ani_object obj)
+{
     ani_field nativeObjName {};
     ani_status ret;
     if ((ret = env->Class_FindField(cls, "nativeObj", &nativeObjName)) != ANI_OK) {

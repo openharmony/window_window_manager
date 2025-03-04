@@ -120,7 +120,8 @@ void AniCommonUtils::GetNativeContext(ani_env* env, ani_object nativeContext, vo
 {
 }
 
-void AniCommonUtils::GetAniString(ani_env *env, const std::string &str, ani_string *result) {
+void AniCommonUtils::GetAniString(ani_env *env, const std::string &str, ani_string *result)
+{
     env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
 }
 } // namespace Rosen

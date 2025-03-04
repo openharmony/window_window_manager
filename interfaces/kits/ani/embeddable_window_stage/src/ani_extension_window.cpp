@@ -29,13 +29,15 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AniExtW
 }
 
 AniExtensionWindow::AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
-    int32_t hostWindowId) : extensionWindow_(extensionWindow), hostWindowId_(hostWindowId) {
+    int32_t hostWindowId) : extensionWindow_(extensionWindow), hostWindowId_(hostWindowId)
+{
         TLOGI(WmsLogTag::WMS_UIEXT, "%{public}d", hostWindowId_);
 }
 
 AniExtensionWindow::AniExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
     sptr<AAFwk::SessionInfo> sessionInfo)
-    : extensionWindow_(extensionWindow), hostWindowId_(-1), sessionInfo_(sessionInfo) {
+    : extensionWindow_(extensionWindow), hostWindowId_(-1), sessionInfo_(sessionInfo)
+{
 }
 
 ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId)
@@ -233,10 +235,6 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
         ani_native_function {"setProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowSetProperties)},
         ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
             reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-        //ani_native_function {"onAvoidAreaChange", nullptr, reinterpret_cast<void *>(ExtWindowOnAvoidAreaChange)},
-        //ani_native_function {"offAvoidAreaChange", nullptr, reinterpret_cast<void *>(ExtWindowOffAvoidAreaChange)},
-        //ani_native_function {"onWindowSizeChange", nullptr, reinterpret_cast<void *>(ExtWindowOnWindowSizeChange)},
-        //ani_native_function {"offWindowSizeChange", nullptr, reinterpret_cast<void *>(ExtWindowOffWindowSizeChange)},
     };
 
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
