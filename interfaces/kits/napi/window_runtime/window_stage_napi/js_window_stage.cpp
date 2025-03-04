@@ -771,7 +771,7 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
 {
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "WindowScene is null");
+        TLOGE(WmsLogTag::WMS_LIFE, "WindowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
@@ -780,51 +780,52 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     std::string windowName;
     if (!ConvertFromJsValue(env, argv[0], windowName)) {
-        WLOGFE("Failed to convert parameter to windowName");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to windowName");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     sptr<WindowOption> option = new WindowOption();
     if (!ParseSubWindowOptions(env, argv[1], option)) {
-        WLOGFE("Get invalid options param");
+        TLOGE(WmsLogTag::WMS_LIFE, "Get invalid options param");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     if ((option->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
         !windowScene->GetMainWindow()->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        TLOGE(WmsLogTag::WMS_LIFE, "device not support");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
         return NapiGetUndefined(env);
     }
 
     if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
+        TLOGE(WmsLogTag::WMS_LIFE, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
         return NapiGetUndefined(env);
     }
 
     const char* const where = __func__;
-    NapiAsyncTask::CompleteCallback complete =
-        [where, windowScene, windowName = std::move(windowName), option]
-            (napi_env env, NapiAsyncTask& task, int32_t status) mutable {
+    napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
+    auto asyncTask = [where, windowScene, windowName = std::move(windowName), option, env,
+        task = napiAsyncTask]() mutable {
         option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
         option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
         option->SetOnlySupportSceneBoard(true);
         auto window = windowScene->CreateWindow(windowName, option);
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s Get window failed", where);
-            task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s Get window failed", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "Get window failed"));
             return;
         }
-        task.Resolve(env, CreateJsWindowObject(env, window));
-        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s Create sub window %{public}s end",
+        task->Resolve(env, CreateJsWindowObject(env, window));
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Create sub window %{public}s end",
             where, windowName.c_str());
     };
-    napi_value callback = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
-    napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsWindowStage::OnCreateSubWindowWithOptions",
-        env, CreateAsyncTaskWithLastParam(env, callback, nullptr, std::move(complete), &result));
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 

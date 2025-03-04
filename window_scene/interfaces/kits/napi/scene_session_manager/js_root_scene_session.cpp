@@ -136,12 +136,12 @@ napi_value JsRootSceneSession::OnRegisterCallback(napi_env env, napi_callback_in
 
 napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info info)
 {
-    WLOGFD("[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
-        WLOGFE("Argc is invalid: %{public}zu", argc);
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
@@ -150,14 +150,14 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     napi_value context = argv[1];
     napi_value storage = argc < 3 ? nullptr : argv[2];
     if (!ConvertFromJsValue(env, argv[0], contentUrl)) {
-        WLOGFE("Failed to convert parameter to content url");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to content url");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
     if (context == nullptr) {
-        WLOGFE("Failed to get context object");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get context object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -165,7 +165,7 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
     napi_unwrap(env, context, &pointerResult);
     auto contextNativePointer = static_cast<std::weak_ptr<Context>*>(pointerResult);
     if (contextNativePointer == nullptr) {
-        WLOGFE("Failed to get context pointer from js object");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get context pointer from js object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
         return NapiGetUndefined(env);
     }
@@ -178,20 +178,21 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
         napi_create_reference(env, storage, 1, &ref);
         contentStorage = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref));
     }
-
-    NapiAsyncTask::CompleteCallback complete = [rootSceneSession = rootSceneSession_,
-        contentUrl, contextWeakPtr, contentStorage](napi_env env, NapiAsyncTask& task, int32_t status) {
+    napi_value lastParam = nullptr, result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [rootSceneSession = rootSceneSession_, contentUrl, contextWeakPtr, contentStorage, env,
+        task = napiAsyncTask] {
         if (rootSceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "rootSceneSession is nullptr");
-            task.Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
             return;
         }
         napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
         rootSceneSession->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
     };
-    napi_value lastParam = nullptr, result = nullptr;
-    NapiAsyncTask::Schedule("JsRootSceneSession::OnLoadContent", env,
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+    if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+    }
     return result;
 }
 
