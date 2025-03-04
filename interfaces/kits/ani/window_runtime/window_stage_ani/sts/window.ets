@@ -621,6 +621,7 @@ export interface WindowLimits {
 }
 
 export class WindowStageInternal implements WindowStage {
+    static { loadLibrary('windowstageani_kit.z') }
     setNativeObj(nativeObj: long):void {
         this.nativeObj = nativeObj;
         console.println(nativeObj);
@@ -659,6 +660,7 @@ export interface WindowStage {
 }
 
 export class WindowInternal implements Window {
+    static { loadLibrary('windowstageani_kit.z') }
     private nativeObj: long;
 
     public setNativeObj(nativeObj: long): void {

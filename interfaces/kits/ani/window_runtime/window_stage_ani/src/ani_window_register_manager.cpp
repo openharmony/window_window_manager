@@ -251,18 +251,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<An
     }
 
     int64_t timeout = 0;
-    // if (parameter == nullptr || !ConvertFromJsNumber(env, parameter, timeout)) {
-    //     WLOGFE("Failed to convert parameter to timeout");
-    //     return WmErrorCode::WM_ERROR_INVALID_PARAM;
-    // }
-
     constexpr int64_t secToMicrosecRatio = 1000;
-    // constexpr int64_t noInteractionMax = LLONG_MAX / secToMicrosecRatio;
-    // if (timeout <= 0 || (timeout > noInteractionMax)) {
-    //     WLOGFE("invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in(0s~%{public}" PRId64,
-    //         timeout, noInteractionMax);
-    //     return WmErrorCode::WM_ERROR_INVALID_PARAM;
-    // }
 
     thisListener->SetTimeout(timeout * secToMicrosecRatio);
 
