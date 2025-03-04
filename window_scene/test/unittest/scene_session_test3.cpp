@@ -1200,6 +1200,39 @@ HWTEST_F(SceneSessionTest3, RegisterRequestedOrientationChangeCallback, Function
     sceneSession->RegisterRequestedOrientationChangeCallback(std::move(func));
     EXPECT_NE(sceneSession, nullptr);
 }
+
+/**
+ * @tc.name: IsShowOnLockScreen
+ * @tc.desc: IsShowOnLockScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, IsShowOnLockScreen, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsShowOnLockScreen";
+    info.bundleName_ = "IsShowOnLockScreen";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->SetZOrder(2005);
+    sceneSession->GetSessionProperty()->SetDisplayId(-2);
+    EXPECT_FALSE(sceneSession->IsShowOnLockScreen(2000));
+    sceneSession->GetSessionProperty()->SetDisplayId(-1);
+    EXPECT_TRUE(sceneSession->IsShowOnLockScreen(2000));
+
+    sceneSession->SetZOrder(0);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_TRUE(sceneSession->IsShowOnLockScreen(2000));
+
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSession->SetZOrder(2004);
+    sceneSession->parentSession_ = parentSession;
+    EXPECT_TRUE(sceneSession->IsShowOnLockScreen(2000));
+
+    sceneSession->SetZOrder(1000);
+    EXPECT_FALSE(sceneSession->IsShowOnLockScreen(2000));
+
+    sceneSession->property_ = nullptr;
+    EXPECT_FALSE(sceneSession->IsShowOnLockScreen(2000));
+}
 }
 }
 }
