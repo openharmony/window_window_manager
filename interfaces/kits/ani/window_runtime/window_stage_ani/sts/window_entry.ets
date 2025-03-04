@@ -1,9 +1,8 @@
 import window from '@ohos.window'
 import { AsyncCallback } from '@ohos.window'
 
-loadLibrary('windowstageani_kit.z')
-
 function main() {
+    loadLibrary('windowstageani_kit.z')
     let ws = window.CreateWindowStage(0);
     let callback:AsyncCallback = (err) => {
       if (err.code) {
