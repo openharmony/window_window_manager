@@ -19,7 +19,6 @@
 #include <memory>
 
 #include "ani.h"
-#include "ani_common_utils.h"
 #include "ani_window.h"
 #include "window_manager_hilog.h"
 #include "permission.h"

@@ -40,10 +40,8 @@ private:
 };
 
 ani_object CreateAniWindowStage(ani_env* env, std::shared_ptr<Rosen::WindowScene>& windowScene);
-/* window scene obj stored in ANI */
 AniWindowStage* GetWindowStageFromAni(void* aniObj);
 void DropWindowStageByAni(ani_object obj);
-
 }  // namespace Rosen
 }  // namespace OHOS
 #endif  // OHOS_ANI_WINDOW_STAGE_H

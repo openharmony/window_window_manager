@@ -18,7 +18,6 @@
 
 #include "ani.h"
 #include "window.h"
-#include "ani_window_register_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -37,19 +36,7 @@ public:
 
     /* window obj stored in ANI */
     static AniWindow* GetWindowObjectFromEnv(ani_env* env, ani_object obj);
-
-    static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_int type);
-    static ani_object SetWindowColorSpace(ani_env* env, ani_object obj, ani_int colorSpace);
-    static void SetPreferredOrientation(ani_env* env, ani_object obj, ani_int orientation);
-    static void SetWindowPrivacyMode(ani_env* env, ani_object obj, ani_boolean isPrivacyMode);
-    static void Recover(ani_env* env, ani_object obj);
-    static void SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_boolean isKeepScreenOn);
-    static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_boolean enable);
-    static void LoadContent(ani_env* env, ani_object obj, ani_string path);
-    static void LoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage);
-    static ani_object GetUIContext(ani_env* env, ani_object obj);
-    static ani_object RegisterWindowCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback);
-    static ani_object UnregisterWindowCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback);
+    
     ani_int GetWindowDecorHeight(ani_env* env);
     ani_object SetWindowBackgroundColorSync(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);
@@ -62,21 +49,7 @@ public:
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable, ani_boolean enableAnimation);
 
 private:
-    ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
-    ani_object OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
-    void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
-    void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
-    void OnRecover(ani_env* env);
-    void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
-    void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
-    void OnLoadContent(ani_env* env, ani_string path);
-    void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
-    ani_object OnGetUIContext(ani_env* env);
-    ani_object OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
-    ani_object OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
-
     sptr<Window> windowToken_ = nullptr;
-    std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
 };
 
 /* window obj stored in ANI */
