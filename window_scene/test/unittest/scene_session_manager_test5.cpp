@@ -917,6 +917,7 @@ HWTEST_F(SceneSessionManagerTest5, RequestSessionFocusImmediately, Function | Sm
     ret = ssm_->RequestSessionFocusImmediately(1);
     ASSERT_EQ(ret, WSError::WS_ERROR_INVALID_SESSION);
     ssm_->RequestFocusBasicCheck(1, focusGroup);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
