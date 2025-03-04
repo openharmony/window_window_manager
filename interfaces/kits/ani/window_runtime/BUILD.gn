@@ -44,8 +44,8 @@ ohos_shared_library("windowstageani_kit") {
   }
   sources = [
     "window_stage_ani/src/ani_common_utils.cpp",
+    "window_stage_ani/src/ani_window.cpp",
     "window_stage_ani/src/ani_window_stage.cpp",
-    "window_stage_ani/src/ani_window.cpp"
   ]
 
   configs = [
@@ -79,7 +79,7 @@ ohos_shared_library("windowstageani_kit") {
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "runtime_core:ani"
+    "runtime_core:ani",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -91,12 +91,15 @@ ohos_shared_library("windowstageani_kit") {
 generate_static_abc("window_stage_abc") {
   arktsconfig = "./window_stage_ani/main.json"
   dst_file = "$target_out_dir/window_stage_ani.abc"
-  in_puts = ["./window_stage_ani/main.json",
-             "./window_stage_ani/sts/window.ets",
-             "./window_stage_ani/sts/window_entry.ets" ]
+  in_puts = [
+    "./window_stage_ani/main.json",
+    "./window_stage_ani/sts/window.ets",
+    "./window_stage_ani/sts/window_entry.ets",
+  ]
   out_puts = [ "$target_out_dir/window_stage_ani.abc" ]
-#  is_boot_abc = true
-#  device_dst_file = "/system/etc/window/window_stage_ani.abc"
+
+  #  is_boot_abc = true
+  #  device_dst_file = "/system/etc/window/window_stage_ani.abc"
   extra_visibility = [ ":*" ]
 }
 

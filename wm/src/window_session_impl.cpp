@@ -1291,7 +1291,6 @@ Ace::UIContentErrorCode WindowSessionImpl::UIContentInit(Ace::UIContent* uiConte
     } else {
         return uiContent->Initialize(this, contentInfo, (napi_value)storage);
     }
-
 }
 
 Ace::UIContentErrorCode WindowSessionImpl::UIContentRestore(Ace::UIContent* uiContent, const std::string& contentInfo,
