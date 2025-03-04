@@ -275,8 +275,6 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path)
     AniCommonUtils::GetStdString(env, path, contextUrl);
     AppExecFwk::Ability* ability = nullptr;
     AniCommonUtils::GetAPI7Ability(env, ability);
-    // TODO 依赖arkui
-    //window->NapiSetUIContent(contextUrl, env, nullptr, BackupAndRestoreType::NONE, nullptr, ability);
 }
 
 
@@ -373,10 +371,8 @@ ani_int AniWindow::GetWindowDecorHeight(ani_env* env)
     WMError ret = windowToken_->GetDecorHeight(height);
     if (ret != WMError::WM_OK) {
         if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
-            // return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
             return 0;
         }
-        // return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return 0;
     }
     WLOGI("Window [%{public}u, %{public}s] OnGetDecorHeight end, height = %{public}d",
@@ -436,14 +432,12 @@ ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_int height)
 {
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         WLOGFE("height should greater than 37 or smaller than 112");
-        // return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return 0;
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorHeight(static_cast<int32_t>(height)));
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("Set window decor height failed");
-        // return AniCommonUtils::AniThrowError(env, ret);
         return 0;
     }
     WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}d",
@@ -490,9 +484,7 @@ ani_object AniWindow::SetSystemBarProperties(ani_env* env, ani_object aniSystemB
     if (!AniCommonUtils::SetSystemBarPropertiesFromAni(env, properties, jsSystemBarPropertyFlags,
         aniSystemBarProperties, windowToken_)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
-        // errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
-    // todo: callback
     return 0;
 }
 
@@ -501,11 +493,9 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
     WLOGI("SetSystemBarEnable");
     std::map<WindowType, SystemBarProperty> systemBarProperties;
     if (!AniCommonUtils::SetSpecificSystemBarEnabled(env, systemBarProperties, name, enable, enableAnimation)) {
-        // TLOGE(WmsLogTag::WMS_IMMS, "invalid param or argc:%{public}zu", argc);
         return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
-    // todo: callback
     return 0;
 }
 }  // namespace Rosen
@@ -583,7 +573,6 @@ static ani_object WindowCreate(ani_env* env, ani_long window)
 {
     using namespace OHOS::Rosen;
     WLOGFI("[ANI] create window with scene 0x%{public}p %{public}d", reinterpret_cast<void*>(env), (int32_t)window);
-    // std::shared_ptr<Window> windowPtr;
     OHOS::sptr<Window> windowPtr;
     return CreateAniWindow(env, windowPtr); // just for test
 }

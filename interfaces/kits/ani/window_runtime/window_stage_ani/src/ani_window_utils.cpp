@@ -16,7 +16,6 @@
 #include <iomanip>
 #include <regex>
 #include <sstream>
-// #include "accesstoken_kit.h"
 #include "bundle_constants.h"
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"

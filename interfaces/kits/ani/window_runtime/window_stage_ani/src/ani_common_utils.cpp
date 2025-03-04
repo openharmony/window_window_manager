@@ -19,7 +19,6 @@
 
 #include "ani.h"
 #include "ani_err_utils.h"
-
 #include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ui_content.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -120,121 +119,15 @@ ani_object AniCommonUtils::CreateAniAvoidArea(ani_env* env, const AvoidArea& avo
 
 bool AniCommonUtils::GetAPI7Ability(ani_env* env, AppExecFwk::Ability* &ability)
 {
-    // TODO
     return true;
 }
 
 void AniCommonUtils::GetNativeContext(ani_env* env, ani_object nativeContext, void*& contextPtr, WMError& errCode)
 {
-    // TODO
 }
 
 void AniCommonUtils::GetAniString(ani_env *env, const std::string &str, ani_string *result) {
     env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
-}
-
-ani_object AniCommonUtils::CreateWindowsProperties(ani_env *env, const sptr<Window> &window) {
-    if (window == nullptr) {
-        WLOGFW("window is nullptr or get invalid param");
-        // return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return 0;
-    }
-    static const char* className = "Lani_interface/SystemBarPropertiesInner";
-    ani_object aniSystemBarProperties;
-    NewAniObjectNoParams(env, className, &aniSystemBarProperties);
-
-    // windowRect
-    Rect rect = window->GetRect();
-    ani_object aniWindowRect = CreateAniRect(env, rect);
-    env->Object_SetPropertyByName_Ref(aniSystemBarProperties, "windowRect", aniWindowRect);
-    if (aniWindowRect== nullptr) {
-        WLOGFE("GetWindowRect failed!");
-    }
-
-    // drawableRect
-    Ace::UIContent* uiContent = window->GetUIContent();
-    Rect drawableRect {};
-    if (uiContent == nullptr) {
-        WLOGFW("uicontent is nullptr");
-    } else {
-        uiContent->GetWindowPaintSize(drawableRect);
-    }
-    ani_object aniDrawableRect = CreateAniRect(env, drawableRect);
-    env->Object_SetPropertyByName_Ref(aniSystemBarProperties, "drawableRect", aniDrawableRect);
-    if (aniDrawableRect == nullptr) {
-        WLOGFE("GetDrawableRect failed!");
-    }
-
-    // windowType
-    WindowType aniWindowType = window->GetType();
-    env->Object_SetPropertyByName_Ref(aniSystemBarProperties, "type", reinterpret_cast<ani_type>(aniWindowType));
-
-    // windowIsLayoutFullScreen
-    bool isLayotFullScreen = window->IsLayoutFullScreen();
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "isLayoutFullScreen",
-        static_cast<ani_boolean>(isLayotFullScreen));
-
-    // windowIsFullScreen
-    bool isFullScreen = window->IsFullScreen();
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "isFullScreen",
-        static_cast<ani_boolean>(isFullScreen));
-
-    // windowTouchable
-    bool windowTouchable = window->GetTouchable();
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "touchable",
-        static_cast<ani_boolean>(windowTouchable));
-
-    // windowFousable
-    bool windowFousable = window->GetFocusable();
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "focusable",
-        static_cast<ani_boolean>(windowFousable));
-
-    // windowName
-    std::string windowName = window->GetWindowName();
-    ani_string* aniWindowName {};
-    GetAniString(env, windowName, aniWindowName);
-    env->Object_SetPropertyByName_Ref(aniSystemBarProperties, "name", reinterpret_cast<ani_ref>(aniWindowName));
-
-    // windowIsPrivacyMode
-    bool windowIsPrivacyMode = window->IsPrivacyMode();
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "isPrivacyMode", windowIsPrivacyMode);
-
-    // windowIsKeepScreenOn
-    bool windowIsKeepScreenOn = window->IsKeepScreenOn();
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "focusable", windowIsKeepScreenOn);
-
-    // windowBrightness
-    float windowBrightness = window->GetBrightness();
-    env->Object_SetPropertyByName_Float(aniSystemBarProperties, "focusable", static_cast<ani_float>(windowBrightness));
-
-    // windowIsTransparent
-    bool isTransparent = window->IsTransparent();
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "focusable", isTransparent);
-
-    // windowIsRoundCorner
-    bool windowIsRoundCorner {false};
-    env->Object_SetPropertyByName_Boolean(aniSystemBarProperties, "focusable", windowIsRoundCorner);
-
-    // windowDimBehindValue
-    int windowDimBehindValue {0};
-    env->Object_SetPropertyByName_Int(aniSystemBarProperties, "dimBehindValue", windowDimBehindValue);
-
-    // windowId
-    uint32_t windowId = window->GetWindowId();
-    env->Object_SetPropertyByName_Int(aniSystemBarProperties, "id", windowId);
-
-    // displayId
-    uint32_t displayId = window->GetDisplayId();
-    env->Object_SetPropertyByName_Int(aniSystemBarProperties, "displayId", displayId);
-
-    WLOGI("Window [%{public}u, %{public}s] get properties end",
-        window->GetWindowId(), window->GetWindowName().c_str());
-    if (aniSystemBarProperties!= nullptr) {
-        return aniSystemBarProperties;
-    } else {
-        // return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return 0;
-    }
 }
 
 uint32_t AniCommonUtils::GetColorFromAni(ani_env *env, const char *name,
