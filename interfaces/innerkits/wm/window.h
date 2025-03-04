@@ -3249,6 +3249,13 @@ public:
      * @return Api version
      */
     virtual uint32_t GetApiVersion() const { return 0; }
+
+     /**
+     * @brief Get is subwindow support maximize.
+     *
+     * @return Api version
+     */
+    virtual bool IsSubWindowMaximizeSupported(WindowType windowType) const { return false; }
 };
 }
 }
