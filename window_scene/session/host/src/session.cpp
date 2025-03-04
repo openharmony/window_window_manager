@@ -2417,7 +2417,10 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
         }
-        session->saveSnapshotCallback_();
+        {
+            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
+            session->saveSnapshotCallback_();
+        }
         if (!requirePersist) {
             return;
         }
@@ -2425,7 +2428,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence_ is null");
             return;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, session->removeSnapshotCallback_);
+        Task removeSnapshotCallback = []() {};
+        {
+            std::lock_guard lock(session->removeSnapshotCallbackMutex_);
+            removeSnapshotCallback = session->removeSnapshotCallback_;
+        }
+        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback);
     };
     if (!useFfrt) {
         task();

@@ -1311,8 +1311,8 @@ private:
     /*
      * Window Pattern
      */
-    std::unique_ptr<LRUCache> snapshotLRUCache_;
-    std::size_t snapCapacity_ = 0;
+    std::unique_ptr<LruCache> snapshotLruCache_;
+    std::size_t snapshotCapacity_ = 0;
 };
 } // namespace OHOS::Rosen
 
