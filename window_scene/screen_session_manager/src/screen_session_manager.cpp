@@ -7604,6 +7604,142 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
     return allDisplayPhysicalResolution_;
 }
 
+std::string ScreenSessionManager::GetDisplayCapability()
+{
+    if (g_foldScreenFlag) {
+        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            return GetSecondaryDisplayCapability();
+        }
+        return GetFoldableDeviceCapability();
+    }
+
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return GetSuperFoldCapability();
+    }
+
+    std::vector<std::string> rotation = {"0", "1", "2", "3"};
+    std::vector<std::string> orientation = {"0", "1", "2", "3"};
+    if (g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        orientation = {"1", "0", "3", "2"};
+    }
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    nlohmann::ordered_json capabilityInfo;
+    capabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(FoldStatus::UNKNOWN));
+    capabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(FoldDisplayMode::UNKNOWN));
+    capabilityInfo["rotation"] = rotation;
+    capabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(capabilityInfo));
+
+    return jsonDisplayCapabilityList.dump();
+}
+
+std::string ScreenSessionManager::GetSecondaryDisplayCapability()
+{
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    std::vector<std::string> rotation = {"0", "1", "2", "3"};
+    std::vector<std::string> orientation = {"0", "1", "2", "3"};
+    nlohmann::ordered_json fCapabilityInfo;
+    fCapabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(FoldStatus::FOLDED));
+    fCapabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(FoldDisplayMode::MAIN));
+    fCapabilityInfo["rotation"] = rotation;
+    fCapabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(fCapabilityInfo));
+
+    nlohmann::ordered_json nCapability;
+    nCapability["foldStatus"] = std::to_string(static_cast<int32_t>(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND));
+    nCapability["foldDisplayMode"] = std::to_string(static_cast<int32_t>(FoldDisplayMode::MAIN));
+    nCapability["rotation"] = rotation;
+    nCapability["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(nCapability));
+
+    nlohmann::ordered_json mCapabilityInfo;
+    mCapabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(FoldStatus::EXPAND));
+    mCapabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(FoldDisplayMode::FULL));
+    mCapabilityInfo["rotation"] = rotation;
+    mCapabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(mCapabilityInfo));
+
+    nlohmann::ordered_json gCapability;
+    gCapability["foldStatus"] = std::to_string(static_cast<int32_t>(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND));
+    gCapability["foldDisplayMode"] = std::to_string(static_cast<int32_t>(FoldDisplayMode::FULL));
+    gCapability["rotation"] = rotation;
+    orientation = {"3", "0", "1", "2"};
+    gCapability["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(gCapability));
+
+    std::string jsonStr = jsonDisplayCapabilityList.dump();
+    return jsonStr;
+}
+
+std::string ScreenSessionManager::GetFoldableDeviceCapability()
+{
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    std::vector<std::string> rotation = {"0", "1", "2", "3"};
+    std::vector<std::string> orientation = {"0", "1", "2", "3"};
+    FoldStatus expandStatus = FoldStatus::EXPAND;
+    FoldStatus foldStatus = FoldStatus::FOLDED;
+    FoldDisplayMode expandDisplayMode = FoldDisplayMode::FULL;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        expandDisplayMode = FoldDisplayMode::MAIN;
+        foldDisplayMode = FoldDisplayMode::SUB;
+    }
+    nlohmann::ordered_json expandCapabilityInfo;
+    expandCapabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(expandStatus));
+    expandCapabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(expandDisplayMode));
+    expandCapabilityInfo["rotation"] = rotation;
+    expandCapabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(expandCapabilityInfo));
+
+    nlohmann::ordered_json foldCapabilityInfo;
+    foldCapabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(foldStatus));
+    foldCapabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(foldDisplayMode));
+    foldCapabilityInfo["rotation"] = rotation;
+    foldCapabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(foldCapabilityInfo));
+
+    std::string jsonStr = jsonDisplayCapabilityList.dump();
+    return jsonStr;
+}
+
+std::string ScreenSessionManager::GetSuperFoldCapability()
+{
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    std::vector<std::string> rotation = {"0", "1", "2", "3"};
+    std::vector<std::string> orientation = {"0", "1", "2", "3"};
+    FoldStatus expandStatus = FoldStatus::EXPAND;
+    FoldStatus foldStatus = FoldStatus::FOLDED;
+    FoldStatus halfFoldStatus = FoldStatus::HALF_FOLD;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::UNKNOWN;
+    nlohmann::ordered_json expandCapabilityInfo;
+    expandCapabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(expandStatus));
+    expandCapabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(foldDisplayMode));
+    expandCapabilityInfo["rotation"] = rotation;
+    expandCapabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(expandCapabilityInfo));
+
+    nlohmann::ordered_json foldCapabilityInfo;
+    foldCapabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(foldStatus));
+    foldCapabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(foldDisplayMode));
+    foldCapabilityInfo["rotation"] = rotation;
+    foldCapabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(foldCapabilityInfo));
+
+    nlohmann::ordered_json halfFoldCapabilityInfo;
+    halfFoldCapabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(halfFoldStatus));
+    halfFoldCapabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(foldDisplayMode));
+    halfFoldCapabilityInfo["rotation"] = rotation;
+    halfFoldCapabilityInfo["orientation"] = orientation;
+    jsonDisplayCapabilityList["capability"].push_back(std::move(halfFoldCapabilityInfo));
+
+    std::string jsonStr = jsonDisplayCapabilityList.dump();
+    return jsonStr;
+}
+
 bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
