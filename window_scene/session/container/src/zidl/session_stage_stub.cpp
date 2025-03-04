@@ -227,8 +227,8 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     }
     for (uint32_t i = 0; i < size; i++) {
         uint32_t type = data.ReadUint32();
-        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
-            type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_SYSTEM) ||
+            type > static_cast<uint32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)) {
             TLOGE(WmsLogTag::WMS_IMMS, "read avoid area type failed");
             return -1;
         }
