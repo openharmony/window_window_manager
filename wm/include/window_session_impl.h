@@ -665,6 +665,7 @@ private:
     /*
      * PC Fold Screen
      */
+    bool waterfallModeWhenEnterBackground_ { false };
     static std::mutex waterfallModeChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> waterfallModeChangeListeners_;
     std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
