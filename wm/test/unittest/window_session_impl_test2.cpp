@@ -806,7 +806,7 @@ HWTEST_F(WindowSessionImplTest2, WindowSessionCreateCheck, Function | SmallTest 
     int32_t nullWindowTestId = 1001;
     int32_t displayId = 1003;
     int32_t cameraId = 1004;
-
+    
     window->windowSessionMap_.clear();
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_CAMERA);
     window->windowSessionMap_.insert(
@@ -938,10 +938,10 @@ HWTEST_F(WindowSessionImplTest2, SetRequestedOrientation, Function | SmallTest |
     ASSERT_NE(window, nullptr);
     window->property_->SetRequestedOrientation(Orientation::BEGIN);
     window->SetRequestedOrientation(Orientation::END);
-
+    
     window->property_->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
     window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT);
-
+    
     window->property_->SetRequestedOrientation(Orientation::BEGIN);
     window->SetRequestedOrientation(Orientation::BEGIN);
     window->Destroy();
@@ -956,7 +956,7 @@ HWTEST_F(WindowSessionImplTest2, GetContentInfo, Function | SmallTest | Level2)
 {
     auto window = GetTestWindowImpl("GetContentInfo");
     ASSERT_NE(window, nullptr);
-
+    
     ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::CONTINUATION), "");
     ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::APP_RECOVERY), "");
     ASSERT_EQ(window->GetContentInfo(BackupAndRestoreType::NONE), "");
@@ -1937,8 +1937,8 @@ HWTEST_F(WindowSessionImplTest2, SetRestoredRouterStack_0100, Function | SmallTe
     ASSERT_NE(window, nullptr);
     std::string routerStack = "stackInfo:{}";
     EXPECT_EQ(window->SetRestoredRouterStack(routerStack), WMError::WM_OK);
-    EXPECT_EQ(window->NapiSetUIContent("info", (napi_env)nullptr, (napi_value)nullptr, BackupAndRestoreType::NONE,
-        nullptr, nullptr), WMError::WM_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(window->NapiSetUIContent("info", nullptr, nullptr, BackupAndRestoreType::NONE, nullptr, nullptr),
+        WMError::WM_ERROR_INVALID_WINDOW);
 }
 }
 } // namespace Rosen
