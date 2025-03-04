@@ -1192,7 +1192,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
             WLOGFW("uiContent is null!");
             return;
         }
-        uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreasToUpdate, lastAvoidAreaMap_);
+        uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_);
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d reason:%{public}d windowRect:[%{public}d,%{public}d,"
