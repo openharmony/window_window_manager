@@ -68,7 +68,6 @@ constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
-constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 constexpr WSRectF VELOCITY_RELOCATION_TO_TOP = {0.0f, -10.0f, 0.0f, 0.0f};
 constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
 constexpr int32_t API_VERSION_16 = 16;
@@ -1632,8 +1631,7 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     if (rect.posY_ >= 0) {
         const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
             PcFoldScreenManager::GetInstance().GetDisplayRects();
-        auto lowerScreenPosY =
-            defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+        auto lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
         if (rect.posY_ < lowerScreenPosY) {
             rect.posY_ += lowerScreenPosY;
         }
