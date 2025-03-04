@@ -16,7 +16,6 @@
     "package": "@ohos"
   },
   "files": [
-    "./sts/window.ets",
-    "./sts/window_entry.ets"
+    "./sts/window.ets"
   ]
 }

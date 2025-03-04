@@ -1225,6 +1225,14 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     }
 }
 
+WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, void* env, void* storage,
+    BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
+{
+    return SetUIContentInner(contentInfo, (napi_env)env, (napi_value)storage,
+        type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
+        type, ability, 1u);
+}
+
 WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
@@ -1256,11 +1264,17 @@ void WindowSessionImpl::DestroyExistUIContent()
 
 WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
-    OHOS::Ace::UIContentErrorCode& aceRet)
+    OHOS::Ace::UIContentErrorCode& aceRet, int isAni)
 {
     DestroyExistUIContent();
-    std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
-        Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    std::unique_ptr<Ace::UIContent> uiContent;
+    if (isAni) {
+        uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::CreateWithAniEnv(context_.get(), reinterpret_cast<ani_env*>(env));
+    } else {
+        uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
+            Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
+    }
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "uiContent nullptr id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_NULLPTR;
@@ -1276,23 +1290,39 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
                 auto routerStack = GetRestoredRouterStack();
                 auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
                 if (!routerStack.empty() &&
-                    uiContent->Restore(this, routerStack, storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
+                    uiContent->Restore(this, routerStack, (ani_object)storage, type) == Ace::UIContentErrorCode::NO_ERRORS) {
                     TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                     break;
                 }
             }
-            aceRet = uiContent->Initialize(this, contentInfo, storage);
+            if (isAni) {
+                aceRet = uiContent->InitializeWithAniStorage(this, contentInfo, (ani_object)storage);
+            } else {
+                aceRet = uiContent->Initialize(this, contentInfo, storage);
+            }
             break;
         }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+            if (isAni) {
+                aceRet = uiContent->Restore(this, contentInfo, (ani_object)storage, GetAceContentInfoType(restoreType));
+            } else {
+                aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+            }
             break;
         case WindowSetUIContentType::BY_NAME:
-            aceRet = uiContent->InitializeByName(this, contentInfo, storage);
+            if (isAni) {
+                aceRet = uiContent->InitializeByNameWithAniStorage(this, contentInfo, (ani_object)storage);
+            } else {
+                aceRet = uiContent->InitializeByName(this, contentInfo, storage);
+            }
             break;
         case WindowSetUIContentType::BY_ABC:
             auto abcContent = GetAbcContent(contentInfo);
-            aceRet = uiContent->Initialize(this, abcContent, storage);
+            if (isAni) {
+                aceRet = uiContent->InitializeWithAniStorage(this, abcContent, (ani_object)storage);
+            } else {
+                aceRet = uiContent->Initialize(this, abcContent, storage);
+            }
             break;
     }
     // make uiContent available after Initialize/Restore
@@ -1306,7 +1336,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
 }
 
 WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
-    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability)
+    WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
+    int isAni)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "%{public}s state:%{public}u", contentInfo.c_str(), state_);
     if (IsWindowSessionInvalid()) {
@@ -1315,7 +1346,8 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, nap
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     OHOS::Ace::UIContentErrorCode aceRet = OHOS::Ace::UIContentErrorCode::NO_ERRORS;
-    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet);
+    WMError initUIContentRet = InitUIContent(contentInfo, env, storage, setUIContentType, restoreType, ability, aceRet,
+        isAni);
     if (initUIContentRet != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "Init UIContent fail, ret:%{public}u", initUIContentRet);
         return initUIContentRet;
@@ -1596,7 +1628,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         TLOGE(WmsLogTag::DEFAULT, "Session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    
+
     WLOGFD("%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;

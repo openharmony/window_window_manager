@@ -16,7 +16,6 @@
     "package": "@ohos.arkui"
   },
   "files": [
-    "./sts/uiExtension.ets",
-    "./sts/uiExtension_entry.ets"
+    "./sts/uiExtension.ets"
   ]
 }
