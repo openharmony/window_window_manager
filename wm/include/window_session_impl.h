@@ -547,6 +547,7 @@ protected:
     std::atomic_bool isFullScreenWaterfallMode_ { false };
     std::atomic_bool isValidWaterfallMode_ { false };
     void NotifyWaterfallModeChange(bool isWaterfallMode);
+    std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
 
     /*
      * Window Property
@@ -668,7 +669,6 @@ private:
     bool waterfallModeWhenEnterBackground_ { false };
     static std::mutex waterfallModeChangeListenerMutex_;
     static std::map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> waterfallModeChangeListeners_;
-    std::vector<sptr<IWaterfallModeChangeListener>> GetWaterfallModeChangeListeners();
     bool InitWaterfallMode();
 
     static std::recursive_mutex lifeCycleListenerMutex_;
