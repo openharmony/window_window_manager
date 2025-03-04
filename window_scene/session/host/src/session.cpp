@@ -52,7 +52,6 @@ constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
-constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -968,9 +967,6 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 
 WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
-    if (displayId == clientDisplayId_) {
-        return WSError::WS_DO_NOTHING;
-    }
     if (sessionStage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
@@ -1156,9 +1152,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) && clientDisplayId_ == VIRTUAL_DISPLAY_ID) {
-        property->SetDisplayId(clientDisplayId_);
-    }
     return WSError::WS_OK;
 }
 
