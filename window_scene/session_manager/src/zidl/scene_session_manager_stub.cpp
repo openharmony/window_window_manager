@@ -52,6 +52,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocusStatus(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA):
+            return HandleRequestFocusStatusBySA(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT):
             return HandleRegisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT):
@@ -379,6 +381,35 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, Messa
         return ERR_INVALID_DATA;
     }
     WMError ret = RequestFocusStatus(persistentId, isFocused, true, FocusChangeReason::CLIENT_REQUEST);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRequestFocusStatusBySA(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
+    bool byForeground = false;
+    if (!data.ReadBool(byForeground)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read byForeground failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t reason = static_cast<int32_t>(FocusChangeReason::SA_REQUEST);
+    if (!data.ReadInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read reason failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RequestFocusStatusBySA(persistentId, isFocused, byForeground,
+        static_cast<FocusChangeReason>(reason));
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
