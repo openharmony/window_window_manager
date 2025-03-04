@@ -2381,27 +2381,27 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
 int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
     std::shared_ptr<std::atomic<bool>> isColdStart, bool isUserSwitch)
 {
-    auto retCode = std::make_shared<int32_t>(0);
+    std::shared_ptr<std::atomic<int32_t>> retCode = std::make_shared<std::atomic<int32_t>>(0);
     bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([abilitySessionInfo, isColdStart, retCode, isUserSwitch] {
         bool coldStartFlag = false;
         if (isUserSwitch) {
             auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
                 coldStartFlag, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
-            *retCode = static_cast<int32_t>(result);
+            retCode->store(static_cast<int32_t>(result));
         } else {
             auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
                 coldStartFlag, static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
-            *retCode = static_cast<int32_t>(result);
+            retCode->store(static_cast<int32_t>(result));
         }
         isColdStart->store(coldStartFlag);
-        TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability retCode: %{public}d", *retCode);
+        TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability retCode: %{public}d", retCode->load());
     }, START_UI_ABILITY_TIMEOUT);
 
     if (isTimeout) {
         TLOGE(WmsLogTag::WMS_LIFE, "start ui ability timeout, currentUserId: %{public}d", currentUserId_.load());
         return static_cast<int32_t>(WSError::WS_ERROR_START_UI_ABILITY_TIMEOUT);
     }
-    return *retCode;
+    return retCode->load();
 }
 
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSession)
@@ -10206,20 +10206,20 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
             return BrokerStates::BROKER_UNKOWN;
         }
         sessionInfo.want->SetParam("oh_persistentId", persistentId);
-        auto ret = std::make_shared<int32_t>(0);
+        std::shared_ptr<std::atomic<int32_t>> ret = std::make_shared<std::atomic<int32_t>>(0);
         bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, &sessionInfo, accessTokenIDEx,
             ret] {
             auto result = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_,
                 *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
-            *ret = static_cast<int32_t>(result);
+            ret->store(static_cast<int32_t>(result));
         }, NOTIFY_START_ABILITY_TIMEOUT);
 
         if (isTimeout) {
             TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_.load());
             return BrokerStates::BROKER_NOT_START;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
-        if (*ret == 0) {
+        TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", ret->load());
+        if (ret->load() == 0) {
             return BrokerStates::BROKER_STARTED;
         } else {
             return BrokerStates::BROKER_NOT_START;
