@@ -44,6 +44,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getPiPWindowInfo", moduleName, JsPipController::GetPiPWindowInfo);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsPipController::UnregisterCallback);
+    // test api
+    BindNativeFunction(env, object, "isPiPPossible", moduleName, JsPipController::PictureInPicturePossible);
 }
 
 napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureController>& pipController)
@@ -658,6 +660,39 @@ WmErrorCode JsPipController::UnRegisterListener(const std::string& type,
             break;
     }
     return WmErrorCode::WM_OK;
+}
+
+napi_value JsPipController::PictureInPicturePossible(napi_env env, napi_callback_info info)
+{
+    JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnPictureInPicturePossible(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnPictureInPicturePossible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [this, env, task = napiAsyncTask,
+        weak = wptr<PictureInPictureController>(pipController_)]() {
+        auto pipController = weak.promote();
+        if (pipController == nullptr) {
+            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                "PiP internal error."));
+            return;
+        }
+        bool isPiPPossible = false;
+        pipController->GetPipPossible(isPiPPossible);
+        task->Resolve(env, CreateJsValue(env, isPiPPossible));
+        if (isPiPPossible) {
+            TLOGI(WmsLogTag::WMS_PIP, "OnPictureInPicturePossible device is supported");
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    }
+    return result;
 }
 } // namespace Rosen
 } // namespace OHOS
