@@ -63,7 +63,6 @@ HWTEST_F(WindowCallbackTest, WindowRectChange01, Function | MediumTest | Level0)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
@@ -73,7 +72,6 @@ HWTEST_F(WindowCallbackTest, WindowRectChange01, Function | MediumTest | Level0)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->UnregisterWindowRectChangeListener(listener));
 
     sptr<IWindowRectChangeListener> listener1 = sptr<IWindowRectChangeListener>::MakeSptr();
-    ASSERT_NE(listener1, nullptr);
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener1));
     ASSERT_EQ(WMError::WM_OK, window->UnregisterWindowRectChangeListener(listener1));
 
@@ -93,13 +91,11 @@ HWTEST_F(WindowCallbackTest, WindowRectChange02, Function | MediumTest | Level0)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     sptr<IWindowRectChangeListener> listener = sptr<IWindowRectChangeListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
@@ -129,13 +125,11 @@ HWTEST_F(WindowCallbackTest, WindowRectChange03, Function | MediumTest | Level0)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     sptr<IWindowRectChangeListener> listener = sptr<IWindowRectChangeListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
@@ -165,13 +159,11 @@ HWTEST_F(WindowCallbackTest, WindowRectChange04, Function | MediumTest | Level0)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
 
     sptr<IWindowRectChangeListener> listener = sptr<IWindowRectChangeListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowRectChangeListener(listener));
@@ -201,7 +193,6 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, Function | MediumTes
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
@@ -211,8 +202,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange01, Function | MediumTes
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener));
 
     sptr<IWindowTitleButtonRectChangedListener> listener1 =
-     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
-    ASSERT_NE(listener1, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterWindowTitleButtonRectChangeListener(listener1));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterWindowTitleButtonRectChangeListener(listener1));
 
@@ -232,7 +222,6 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, Function | MediumTes
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
@@ -241,8 +230,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange02, Function | MediumTes
     window->hostSession_ = session;
 
     sptr<IWindowTitleButtonRectChangedListener> listener =
-     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -272,7 +260,6 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, Function | MediumTes
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
@@ -281,8 +268,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange03, Function | MediumTes
     window->hostSession_ = session;
 
     sptr<IWindowTitleButtonRectChangedListener> listener =
-     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -312,7 +298,6 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, Function | MediumTes
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
@@ -321,8 +306,7 @@ HWTEST_F(WindowCallbackTest, WindowTitleButtonRectChange04, Function | MediumTes
     window->hostSession_ = session;
 
     sptr<IWindowTitleButtonRectChangedListener> listener =
-     sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
+    sptr<IWindowTitleButtonRectChangedListener>::MakeSptr();
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->RegisterWindowTitleButtonRectChangeListener(listener));
@@ -352,7 +336,6 @@ HWTEST_F(WindowCallbackTest, MainWindowClose01, Function | MediumTest | Level0)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
@@ -362,7 +345,6 @@ HWTEST_F(WindowCallbackTest, MainWindowClose01, Function | MediumTest | Level0)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterMainWindowCloseListeners(listener));
 
     sptr<IMainWindowCloseListener> listener1 = sptr<IMainWindowCloseListener>::MakeSptr();
-    ASSERT_NE(listener1, nullptr);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->RegisterMainWindowCloseListeners(listener1));
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UnregisterMainWindowCloseListeners(listener1));
 
@@ -382,7 +364,6 @@ HWTEST_F(WindowCallbackTest, MainWindowClose02, Function | MediumTest | Level0)
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
@@ -391,7 +372,6 @@ HWTEST_F(WindowCallbackTest, MainWindowClose02, Function | MediumTest | Level0)
     window->hostSession_ = session;
 
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
-    ASSERT_NE(listener, nullptr);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->RegisterMainWindowCloseListeners(listener));
