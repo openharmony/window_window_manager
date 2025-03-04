@@ -771,7 +771,7 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
 {
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "WindowScene is null");
+        TLOGE(WmsLogTag::WMS_SUB, "WindowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY));
         return NapiGetUndefined(env);
     }
@@ -780,25 +780,25 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     std::string windowName;
     if (!ConvertFromJsValue(env, argv[0], windowName)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to windowName");
+        WLOGFE("Failed to convert parameter to windowName");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     sptr<WindowOption> option = new WindowOption();
     if (!ParseSubWindowOptions(env, argv[1], option)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Get invalid options param");
+        WLOGFE("Get invalid options param");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return NapiGetUndefined(env);
     }
     if ((option->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL)) &&
         !windowScene->GetMainWindow()->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "device not support");
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT));
         return NapiGetUndefined(env);
     }
 
     if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Modal subwindow has topmost, but no system permission");
+        TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP));
         return NapiGetUndefined(env);
     }
@@ -814,17 +814,17 @@ napi_value JsWindowStage::OnCreateSubWindowWithOptions(napi_env env, napi_callba
         option->SetOnlySupportSceneBoard(true);
         auto window = windowScene->CreateWindow(windowName, option);
         if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s Get window failed", where);
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s Get window failed", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "Get window failed"));
             return;
         }
         task->Resolve(env, CreateJsWindowObject(env, window));
-        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Create sub window %{public}s end",
+        TLOGNI(WmsLogTag::WMS_SUB, "%{public}s Create sub window %{public}s end",
             where, windowName.c_str());
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+        TLOGE(WmsLogTag::WMS_SUB, "napi send event failed, window state is abnormal");
     }
     return result;
 }
