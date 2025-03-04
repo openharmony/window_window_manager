@@ -35,7 +35,9 @@ public:
         sptr<AAFwk::SessionInfo> sessionInfo);
     static ani_object CreateAniExtensionWindow(ani_env* env, sptr<Rosen::Window> window, int32_t hostWindowId);
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea);
+    WMError GetRect(Rect&);
 private:
+    bool WindowIsValid();
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
