@@ -61,7 +61,8 @@ ani_object AniWindowStage::GetMainWindow(ani_env* env) {
     return aniMainWindow;
 }
 
-void DropWindowStageByAni(ani_object aniObj) {
+void DropWindowStageByAni(ani_object aniObj)
+{
     auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj != localObjs.end()) {
         delete obj->second;
@@ -69,7 +70,8 @@ void DropWindowStageByAni(ani_object aniObj) {
     localObjs.erase(obj);
 }
 
-AniWindowStage* GetWindowStageFromAni(void* aniObj) {
+AniWindowStage* GetWindowStageFromAni(void* aniObj)
+{
     auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj == localObjs.end()) {
         return nullptr;
@@ -77,7 +79,8 @@ AniWindowStage* GetWindowStageFromAni(void* aniObj) {
     return obj->second;
 }
 
-static void GetStdString(ani_env *env, ani_string str, std::string &result) {
+static void GetStdString(ani_env *env, ani_string str, std::string &result)
+{
     ani_size sz {};
     env->String_GetUTF8Size(str, &sz);
     result.resize(sz + 1);
@@ -132,7 +135,8 @@ __attribute__((no_sanitize("cfi")))
     return obj;
 }
 
-AniWindowStage* GetWindowStageFromEnv(ani_env* env, ani_class cls, ani_object obj) {
+AniWindowStage* GetWindowStageFromEnv(ani_env* env, ani_class cls, ani_object obj)
+{
     ani_field nativeObjName {};
     ani_status ret;
     if ((ret = env->Class_FindField(cls, "nativeObj", &nativeObjName)) != ANI_OK) {
