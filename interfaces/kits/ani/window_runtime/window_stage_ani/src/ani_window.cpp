@@ -65,7 +65,8 @@ AniWindow* AniWindow::GetWindowObjectFromEnv(ani_env* env, ani_object obj)
     return reinterpret_cast<AniWindow*>(nativeObj);
 }
 
-void DropWindowObjectByAni(ani_object aniObj) {
+void DropWindowObjectByAni(ani_object aniObj)
+{
     auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj != localObjs.end()) {
         delete obj->second;
@@ -73,7 +74,8 @@ void DropWindowObjectByAni(ani_object aniObj) {
     localObjs.erase(obj);
 }
 
-AniWindow* GetWindowObjectFromAni(void* aniObj) {
+AniWindow* GetWindowObjectFromAni(void* aniObj)
+{
     auto obj = localObjs.find(reinterpret_cast<ani_object>(aniObj));
     if (obj == localObjs.end()) {
         return nullptr;
@@ -298,8 +300,6 @@ void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
     AniCommonUtils::GetStdString(env, path, contextUrl);
     AppExecFwk::Ability* ability = nullptr;
     AniCommonUtils::GetAPI7Ability(env, ability);
-    // TODO 依赖arkui
-    //window->NapiSetUIContent(contextUrl, env, storage, BackupAndRestoreType::NONE, nullptr, ability);
 }
 
 ani_object AniWindow::GetUIContext(ani_env* env, ani_object obj)
@@ -320,14 +320,6 @@ ani_object AniWindow::OnGetUIContext(ani_env* env)
         TLOGE(WmsLogTag::WMS_MAIN, "uicontent is nullptr");
         return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    // 依赖arkui
-    // napi_value uiContext = uicontent->GetUINapiContext();
-    // if (uiContext == nullptr) {
-    //     WLOGFE("uiContext obtained from jsEngine is nullptr");
-    //     return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    // } else {
-    //     return uiContext;
-    // }
     return nullptr;
 }
 
@@ -538,81 +530,6 @@ static ani_int WindowSetWindowBackgroundColorSync(ani_env* env, ani_object obj, 
     return ANI_OK;
 }
 
-// static ani_int WindowSetImmersiveModeEnabledState(ani_env* env, ani_object obj,
-//     ani_long nativeObj, ani_boolean enable)
-// {
-//     using namespace OHOS::Rosen;
-//     TLOGD(WmsLogTag::WMS_IMMS, "[ANI]SetImmersiveModeEnabledState");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     aniWindow->SetImmersiveModeEnabledState(env, static_cast<bool>(enable));
-//     return ANI_OK;
-// }
-
-// static ani_int WindowSetWindowDecorVisible(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isVisible)
-// {
-//     using namespace OHOS::Rosen;
-//     WLOGI("[ANI]SetWindowDecorVisible");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     aniWindow->SetImmersiveModeEnabledState(env, static_cast<bool>(isVisible));
-//     return ANI_OK;
-// }
-
-// static ani_int WindowSetWindowDecorHeight(ani_env* env, ani_object obj, ani_int height, ani_long nativeObj)
-// {
-//     using namespace OHOS::Rosen;
-//     WLOGI("[ANI]SetWindowDecorHeight");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     aniWindow->SetWindowDecorHeight(env, height);
-//     return ANI_OK;
-// }
-
-// // need to setting interface
-// static ani_object WindowGetWindowProperties(ani_env* env, ani_object obj, ani_long nativeObj)
-// {
-//     using namespace OHOS::Rosen;
-//     WLOGD("[ANI]GetProperties");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     return aniWindow->GetWindowPropertiesSync(env);
-// }
-
-// static ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_object obj, ani_long nativeObj)
-// {
-//     using namespace OHOS::Rosen;
-//     WLOGI("[ANI]IsSupportWideGamut");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     return aniWindow->IsWindowSupportWideGamut(env);
-// }
-
-// static ani_int WindowSetWindowLayoutFullScreen(ani_env* env, ani_object obj,
-//     ani_long nativeObj, ani_boolean isLayoutFullScreen)
-// {
-//     using namespace OHOS::Rosen;
-//     TLOGD(WmsLogTag::WMS_IMMS, "[ANI]SetWindowLayoutFullScreen");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     aniWindow->SetWindowLayoutFullScreen(env, isLayoutFullScreen);
-//     return ANI_OK;
-// }
-
-// static ani_int WindowSetSystemBarProperties(ani_env* env, ani_object obj,
-//     ani_long nativeObj, ani_object aniSystemBarProperties)
-// {
-//     using namespace OHOS::Rosen;
-//     TLOGD(WmsLogTag::WMS_IMMS, "[ANI]SetSystemBarProperties");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     aniWindow->SetSystemBarProperties(env, aniSystemBarProperties);
-//     return ANI_OK;
-// }
-
-// static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
-//     ani_string name, ani_boolean enable, ani_boolean enableAnimation)
-// {
-//     using namespace OHOS::Rosen;
-//     WLOGI("[ANI]SetSystemBarEnable");
-//     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-//     aniWindow->SetSpecificSystemBarEnabled(env, name, enable, enableAnimation);
-//     return ANI_OK;
-// }
-
 ani_object CreateAniWindow(ani_env* env, OHOS::sptr<OHOS::Rosen::Window>& window)
 __attribute__((no_sanitize("cfi")))
 {
@@ -691,39 +608,6 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"getWindowDecorHeight", "J:I", reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
         ani_native_function {"setWindowBackgroundColorSync", "JLstd/core/String;:I",
             reinterpret_cast<void *>(WindowSetWindowBackgroundColorSync)},
-        //// ani_native_function {"setImmersiveModeEnabledState", "JLstd/core/Boolean;:V",
-        //reinterpret_cast<void *>(WindowSetImmersiveModeEnabledState)},
-        //// ani_native_function {"setWindowDecorVisible", "JLstd/core/Boolean;:V",
-        //reinterpret_cast<void *>(WindowSetWindowDecorVisible)},
-        //// ani_native_function {"setWindowDecorHeight", "JLstd/core/Int;:V",
-        //reinterpret_cast<void *>(WindowSetWindowDecorHeight)},
-        //// ani_native_function {"getWindowProperties", "J;:[", reinterpret_cast<void *>(WindowGetWindowProperties)},
-        //// ani_native_function {"isWindowSupportWideGamut", "JLstd/core/Int;:Z",
-        //reinterpret_cast<void *>(WindowIsWindowSupportWideGamut)},
-        //// ani_native_function {"setWindowLayoutFullScreen", "JLstd/core/Boolean;:I",
-        //reinterpret_cast<void *>(WindowSetWindowLayoutFullScreen)},
-        //// ani_native_function {"setSystemBarProperties", "JL@ohos/window/window/SystemBarProperties;:I",
-        //reinterpret_cast<void *>(WindowSetSystemBarProperties)},
-        //// ani_native_function {"setSpecificSystemBarEnabled",
-        //"JLstd/core/StringLstd/core/BooleanLstd/core/Boolean;:I",
-        //reinterpret_cast<void *>(WindowSetSpecificSystemBarEnabled)},
-        //// ani_native_function {"getWindowAvoidArea",
-        //"L@ohos/window/window/AvoidAreaType;:L@ohos/window/window/AvoidArea",
-        //reinterpret_cast<void *>(AniWindow::GetWindowAvoidArea)},
-        //// ani_native_function {"setWindowColorSpace", "L@ohos/window/window/ColorSpace;:V",
-        //reinterpret_cast<void *>(AniWindow::SetWindowColorSpace)},
-        //// ani_native_function {"setPreferredOrientation", "L@ohos/window/window/Orientation;:V",
-        //reinterpret_cast<void *>(AniWindow::SetPreferredOrientation)},
-        //// ani_native_function {"setWindowPrivacyMode", "Z:V",
-        //reinterpret_cast<void *>(AniWindow::SetWindowPrivacyMode)},
-        //// ani_native_function {"recover", "V:V", reinterpret_cast<void *>(AniWindow::Recover)},
-        //// ani_native_function {"setWindowKeepScreenOn", "Z:V",
-        //reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
-        //// ani_native_function {"setWaterMarkFlag", "Z:V", reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
-        //// ani_native_function {"on", "Lstd/core/String;L@ohos/window/Callback:V",
-        //reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
-        //// ani_native_function {"off", "Lstd/core/String;L@ohos/window/Callback:V",
-        //reinterpret_cast<void *>(AniWindow::UnregisterWindowCallback)},
     };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
         WLOGFE("[ANI] bind window method fail %{public}u", ret);

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-#import("//build/ohos/idlize/arkts_idlize.gni")
 import("../../../../windowmanager_aafwk.gni")
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
@@ -21,7 +20,6 @@ config("window_common_config") {
 
   include_dirs = [
     "../common",
-    "../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani",
     "../extension_window",
     "../window_runtime/window_napi",
     "../../../innerkits/wm",
@@ -37,87 +35,6 @@ config("windowstage_ani_public_config") {
 
   include_dirs = [ "include" ]
 }
-
-#template("generate_and_build") {
-#  forward_variables_from(invoker, "*")
-#
-#  # input-file
-#  #idlize_idl2peer(target_name) {
-#  #  input_dir = "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani/idl/"
-#  #  output = "//foundation/window/window_manager/interfaces/kits/ani/window_runtime/window_stage_ani"
-#  #  dirmode = "delete"
-#  #  default_package = "window"
-#  #  mode = "dts2peer"
-#  #}
-#
-#  ohos_source_set("embeddablewindowstageidl_sourceset") {
-#    visibility = [ ":*" ]
-#    include_dirs = [
-#      "../common",
-#      "../extension_window",
-#      "../window_runtime/window_napi",
-#      "../../../innerkits/wm",
-#      "../../../innerkits/dm",
-#      "../../../../utils/include",
-#      "../../../../wm/include",
-#      "../../../../wmserver/include",
-#      "./include",
-#      "./generated/"
-#    ]
-#
-#    external_deps = [
-#      "ability_runtime:ability_manager",
-#      "ability_runtime:runtime",
-#      "c_utils:utils",
-#      "hilog:libhilog",
-#      "napi:ace_napi",
-#    ]
-#    sources = [ "./src/ani_embeddable_window_stage.cpp",
-#                "./src/ani_extension_window.cpp" ]
-#    subsystem_name = "window"
-#    part_name = "window_manager"
-#  }
-#
-#  idlize_shared_library(target_name) {
-#    generated = "//foundation/window/window_manager/interfaces/kits/ani/embeddable_window_stage/generated"
-#    classpath_prefix = "@ohos/window/WINDOWNativeModule/"
-#    relative_install_dir = "module/application"
-#    module_install_dir = "module/application"
-#    deps = [
-#      "../../../../utils:libwmutil",
-#      "../../../../utils:libwmutil_base",
-#      "../../../../wm:libwm",
-#      ":embeddablewindowstageidl_sourceset",
-#    ]
-#
-#    configs = [
-#      ":window_common_config",
-#      ":windowstage_ani_public_config",
-#      "../../../../resources/config/build:coverage_flags",
-#    ]
-#
-#    public_configs = [ ":windowstage_ani_public_config" ]
-#
-#    external_deps = [
-#      "ability_runtime:ability_manager",
-#      "ability_runtime:runtime",
-#      "c_utils:utils",
-#      "hilog:libhilog",
-#    ]
-#    subsystem_name = "window"
-#    part_name = "window_manager"
-#    version_script = "window.map"
-#  }
-#}
-#
-#generate_and_build("embeddablewindowstage_idl") {
-#  sanitize = {
-#    cfi = true
-#    cfi_cross_dso = true
-#    cfi_vcall_icall_only = true
-#    debug = false
-#  }
-#}
 
 # lib generate
 ohos_shared_library("embeddablewindowstageani_kit") {
@@ -155,6 +72,7 @@ ohos_shared_library("embeddablewindowstageani_kit") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "napi:ace_napi",
+    "runtime_core:ani"
   ]
 
   innerapi_tags = [ "platformsdk" ]

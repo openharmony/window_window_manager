@@ -59,7 +59,7 @@ public:
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
     ani_object SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
-    ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string , ani_boolean enable, ani_boolean enableAnimation);
+    ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable, ani_boolean enableAnimation);
 
 private:
     ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);

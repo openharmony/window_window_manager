@@ -240,16 +240,12 @@ ani_object AniErrUtils::CreateAniError(ani_env* env, const WmErrorCode& errorCod
 ani_object AniErrUtils::CreateAniError(ani_env* env, const DMError& errorCode, std::string msg)
 {
     ani_object result = nullptr;
-    // napi_create_error(env, CreateJsValue(env, static_cast<int32_t>(errorCode)),
-    //     CreateJsValue(env, msg == "" ? GetErrorMsg(errorCode) : msg), &result);
     return result;
 }
 
 ani_object AniErrUtils::CreateAniError(ani_env* env, const DmErrorCode& errorCode, std::string msg)
 {
     ani_object result = nullptr;
-    // napi_create_error(env, CreateJsValue(env, static_cast<int32_t>(errorCode)),
-    //     CreateJsValue(env, msg == "" ? GetErrorMsg(errorCode) : msg), &result);
     return result;
 }
 } // namespace OHOS::Rosen

@@ -144,7 +144,6 @@ static ani_int ExtWindowSetRectMember(ani_env* env, ani_object obj, const char* 
         return (ani_int)WMError::WM_DO_NOTHING;
     };
     return ExtWindowSetRect(env, (ani_object)rectRef, rect);
-
 }
 
 static ani_int ExtWindowGetProperties(ani_env* env, ani_object obj, ani_long nativeObj, ani_object propertyRef)

@@ -213,14 +213,6 @@ static ani_object WindowStageCreate(ani_env* env, ani_long scene)
     return CreateAniWindowStage(env, scenePtr); // just for test
 }
 
-// static ani_object WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
-// {
-//     using namespace OHOS::Rosen;
-//     WLOGFD("[ANI]GetMainWindow");
-//     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-//     return windowStage->GetMainWindow(env);
-// }
-
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
