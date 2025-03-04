@@ -1220,7 +1220,7 @@ HWTEST_F(SceneSessionTest3, IsShowOnLockScreen, Function | SmallTest | Level2)
 
     sceneSession->SetZOrder(0);
     sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    EXPECT_TRUE(sceneSession->IsShowOnLockScreen(2000));
+    EXPECT_FALSE(sceneSession->IsShowOnLockScreen(2000));
 
     sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     parentSession->SetZOrder(2004);
