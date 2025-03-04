@@ -200,6 +200,7 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
     WLOGFD("UpdateRect!");
     WSRect rect = { data.ReadInt32(), data.ReadInt32(), data.ReadUint32(), data.ReadUint32() };
     SizeChangeReason reason = static_cast<SizeChangeReason>(data.ReadUint32());
+    SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = 0 };
     bool hasRSTransaction = data.ReadBool();
     if (hasRSTransaction) {
         std::shared_ptr<RSTransaction> transaction(data.ReadParcelable<RSTransaction>());
@@ -207,14 +208,39 @@ int SessionStageStub::HandleUpdateRect(MessageParcel& data, MessageParcel& reply
             WLOGFE("transaction unMarsh failed");
             return -1;
         }
-        SceneAnimationConfig config { .rsTransaction_ = transaction, .animationDuration_ = data.ReadInt32() };
-        WSError errCode = UpdateRect(rect, reason, config);
-        reply.WriteUint32(static_cast<uint32_t>(errCode));
-    } else {
-        SceneAnimationConfig config { .rsTransaction_ = nullptr, .animationDuration_ = data.ReadInt32() };
-        WSError errCode = UpdateRect(rect, reason, config);
-        reply.WriteUint32(static_cast<uint32_t>(errCode));
+        config.rsTransaction_ = transaction;
     }
+    if (!data.ReadInt32(config.animationDuration_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read animationDuration failed");
+        return -1;
+    }
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    uint32_t size = 0;
+    if (!data.ReadUint32(size)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "read avoid area size failed");
+        return -1;
+    }
+    constexpr uint32_t AVOID_AREA_TYPE_MAX_SIZE = 100;
+    if (size > AVOID_AREA_TYPE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "avoid area size is invalid");
+        return -1;
+    }
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t type = data.ReadUint32();
+        if (type < static_cast<uint32_t>(AvoidAreaType::TYPE_START) ||
+            type >= static_cast<uint32_t>(AvoidAreaType::TYPE_END)) {
+            TLOGE(WmsLogTag::WMS_IMMS, "read avoid area type failed");
+            return -1;
+        }
+        sptr<AvoidArea> area = data.ReadParcelable<AvoidArea>();
+        if (area == nullptr) {
+            TLOGE(WmsLogTag::WMS_IMMS, "read avoid area failed");
+            return -1;
+        }
+        avoidAreas[static_cast<AvoidAreaType>(type)] = *area;
+    }
+    WSError errCode = UpdateRect(rect, reason, config, avoidAreas);
+    reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
 

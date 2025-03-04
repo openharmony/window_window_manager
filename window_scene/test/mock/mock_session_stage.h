@@ -27,8 +27,8 @@ public:
     ~SessionStageMocker() {};
 
     MOCK_METHOD1(SetActive, WSError(bool active));
-    MOCK_METHOD3(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
-        const SceneAnimationConfig& config));
+    MOCK_METHOD4(UpdateRect, WSError(const WSRect& rect, SizeChangeReason reason,
+        const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas));
     MOCK_METHOD0(UpdateDensity, void(void));
     MOCK_METHOD0(UpdateOrientation, WSError(void));
     MOCK_METHOD0(HandleBackEvent, WSError(void));

@@ -830,6 +830,9 @@ HWTEST_F(SceneSessionTest2, UpdateAvoidArea, Function | SmallTest | Level2)
     EXPECT_NE(nullptr, scensession->sessionStage_);
     result = scensession->UpdateAvoidArea(nullptr, AvoidAreaType::TYPE_SYSTEM);
     EXPECT_EQ(WSError::WS_OK, result);
+    sceneSession->foregroundInteractiveStatus_.store(false);
+    result = sceneSession->UpdateAvoidArea(nullptr, AvoidAreaType::TYPE_SYSTEM);
+    EXPECT_EQ(WSError::WS_DO_NOTHING, result);
 }
 
 /**
