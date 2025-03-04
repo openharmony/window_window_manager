@@ -956,5 +956,19 @@ napi_ref PictureInPictureController::GetTypeNode() const
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
 }
+
+void PictureInPictureController::GetPipPossible(bool& pipPossible)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
+        return;
+    }
+    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    auto isPad = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
+    pipPossible = isPC || isPhone || isPad;
+    return;
+}
 } // namespace Rosen
 } // namespace OHOS
