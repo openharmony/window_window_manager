@@ -7344,9 +7344,9 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setWindowDecorHeight", moduleName, JsWindow::SetWindowDecorHeight);
     BindNativeFunction(env, object, "getWindowDecorHeight", moduleName, JsWindow::GetWindowDecorHeight);
     BindNativeFunction(env, object, "getTitleButtonRect", moduleName, JsWindow::GetTitleButtonRect);
+    BindNativeFunction(env, object, "setWindowTitleButtonVisible", moduleName, JsWindow::SetWindowTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
-    BindNativeFunction(env, object, "setWindowTitleButtonVisible", moduleName, JsWindow::SetWindowTitleButtonVisible);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);
     BindNativeFunction(env, object, "setImmersiveModeEnabledState", moduleName, JsWindow::SetImmersiveModeEnabledState);
     BindNativeFunction(env, object, "getImmersiveModeEnabledState", moduleName, JsWindow::GetImmersiveModeEnabledState);
