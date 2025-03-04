@@ -98,22 +98,22 @@ generate_static_abc("window_stage_abc") {
   ]
   out_puts = [ "$target_out_dir/window_stage_ani.abc" ]
 
-  is_boot_abc = "True"
-  device_dst_file = "/system/etc/window/window_stage_ani.abc"
+  #  is_boot_abc = true
+  #  device_dst_file = "/system/etc/window/window_stage_ani.abc"
   extra_visibility = [ ":*" ]
 }
 
-ohos_prebuilt_etc("window_stage_etc") {
-  source = "$target_out_dir/window_stage_ani.abc"
-  deps = [ ":window_stage_abc" ]
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window"
-}
+#ohos_prebuild_etc("window_stage_etc") {
+#  source = "$target_out_dir/window_stage_ani.abc"
+#  deps = [ ":window_stage_abc" ]
+#  part_name = "window_manager"
+#  subsystem_name = "window"
+#  relative_install_dir = "window"
+#}
 
 group("window_stage_ani") {
   deps = [
-    ":window_stage_etc",
+    ":window_stage_abc",
     ":windowstageani_kit",
   ]
 }
