@@ -1596,10 +1596,10 @@ HWTEST_F(WindowManagerTest, RequestFocus, Function | SmallTest | Level2)
     int32_t persistentId = 1;
     bool isFocused = true;
     bool byForeground = true;
-    int32_t reason = 100;
+    WindowFocusChangeReason reason = WindowFocusChangeReason::CLICK;
     auto result = windowManager.RequestFocus(
         persistentId, isFocused, byForeground, reason);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PARAM);
+    ASSERT_NE(result, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

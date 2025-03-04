@@ -1039,7 +1039,7 @@ public:
      * @return WM_OK means request focus success, others means failed.
      */
     WMError RequestFocus(int32_t persistentId, bool isFocused = true,
-        bool byForeground = true, int32_t reason = 19);
+        bool byForeground = true, WindowFocusChangeReason reason = WindowFocusChangeReason::SA_REQUEST);
 
 private:
     WindowManager();
