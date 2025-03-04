@@ -1474,6 +1474,12 @@ WMError WindowExtensionSessionImpl::OnWaterfallModeChange(AAFwk::Want&& data, st
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WATERFALL_MODE),
             data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
     }
+    auto waterfallModeChangeListeners = GetWaterfallModeChangeListeners();
+    for (const auto& listener : waterfallModeChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWaterfallModeChange(isWaterfallMode);
+        }
+    }
     return WMError::WM_OK;
 }
 

@@ -3318,6 +3318,10 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
+
+    if (isFullScreenWaterfallMode_.load() != waterfallModeWhenEnterBackground_) {
+        NotifyWaterfallModeChange(isFullScreenWaterfallMode_.load());
+    }
 }
 
 void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
@@ -3367,6 +3371,8 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
     } else {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
     }
+
+    waterfallModeWhenEnterBackground_ = isFullScreenWaterfallMode_.load();
 }
 
 void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
