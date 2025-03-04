@@ -201,23 +201,6 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     return (ani_int)WMError::WM_OK;
 }
 
-//static ani_int ExtWindowOnAvoidAreaChange(ani_env* env, ani_object obj, ani_object callback)
-//{
-//    return (ani_int)(0u);
-//}
-//static ani_int ExtWindowOffAvoidAreaChange(ani_env* env, ani_object obj, ani_object callback)
-//{
-//    return (ani_int)(0u);
-//}
-//static ani_int ExtWindowOnWindowSizeChange(ani_env* env, ani_object obj, ani_object callback)
-//{
-//    return (ani_int)(0u);
-//}
-//static ani_int ExtWindowOffWindowSizeChange(ani_env* env, ani_object obj, ani_object callback)
-//{
-//    return (ani_int)(0u);
-//}
-
 // test from ts
 ani_object createExtentionWindow(ani_env* env, ani_long win, ani_int hostId)
 {
