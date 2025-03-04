@@ -31,7 +31,7 @@ class AniWindowStage {
 public:
     explicit AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& windowScene);
     ~AniWindowStage();
-    void LoadContent(void* env, std::string content);
+    void LoadContent(ani_env* env, const std::string& content);
     std::weak_ptr<WindowScene> GetWindowScene() { return windowScene_; }
     ani_object GetMainWindow(ani_env* env);
     ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_class cls, ani_object obj);
