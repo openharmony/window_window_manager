@@ -85,6 +85,9 @@ generate_static_abc("extension_window_abc_ani") {
   arktsconfig = "./uiExtension.json"
   dst_file = "$target_out_dir/extension_window_ani.abc"
   out_puts = [ "$target_out_dir/extension_window_ani.abc" ]
+  in_puts = ["./uiExtension.json",
+             "./sts/uiExtension.ets",
+             "./sts/uiExtension_entry.ets" ]
   timeout_limit = "120"
   extra_visibility = [ ":*" ]
 }
