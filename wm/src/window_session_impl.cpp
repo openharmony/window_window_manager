@@ -2993,6 +2993,9 @@ std::vector<sptr<IWaterfallModeChangeListener>> WindowSessionImpl::GetWaterfallM
 void WindowSessionImpl::NotifyWaterfallModeChange(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, waterfall: %{public}d", GetWindowId(), isWaterfallMode);
+    if (state_ != WindowState::STATE_SHOWN) {
+        return;
+    }
     AAFwk::Want want;
     want.SetParam(Extension::WATERFALL_MODE_FIELD, isWaterfallMode);
     if (auto uiContent = GetUIContentSharedPtr()) {
