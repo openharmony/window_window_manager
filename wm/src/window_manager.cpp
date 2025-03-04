@@ -27,6 +27,7 @@
 #include "window_manager_hilog.h"
 #include "window_display_change_adapter.h"
 #include "wm_common.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1521,6 +1522,24 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
         sourceWindowId, targetWindowId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::RequestFocus(int32_t persistentId, bool isFocused,
+    bool byForeground, WindowFocusChangeReason reason)
+{
+    int32_t curReason = static_cast<int32_t>(reason);
+    int32_t reasonStart = static_cast<int32_t>(FocusChangeReason::DEFAULT);
+    int32_t reasonEnd = static_cast<int32_t>(FocusChangeReason::MAX);
+    if (curReason < reasonStart || curReason > reasonEnd) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "could not find focus reason");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RequestFocusStatusBySA(persistentId,
+        isFocused, byForeground, static_cast<FocusChangeReason>(curReason));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed");
     }
     return ret;
 }

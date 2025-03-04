@@ -35,6 +35,7 @@ private:
     int HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocusStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleRequestFocusStatusBySA(MessageParcel& data, MessageParcel& reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverAndReconnectSceneSession(MessageParcel& data, MessageParcel& reply);

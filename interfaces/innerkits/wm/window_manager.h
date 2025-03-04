@@ -1029,6 +1029,18 @@ public:
      */
     WMError ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId);
 
+    /**
+     * @brief Request focus.
+     *
+     * @param persistentId previous window id
+     * @param isFocused true if request focus, otherwise false, default is true
+     * @param byForeground true if by foreground, otherwise false, default is true
+     * @param reason the reason for requesting focus, default is SA_REQUEST
+     * @return WM_OK means request focus success, others means failed.
+     */
+    WMError RequestFocus(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, WindowFocusChangeReason reason = WindowFocusChangeReason::SA_REQUEST);
+
 private:
     WindowManager();
     ~WindowManager();
