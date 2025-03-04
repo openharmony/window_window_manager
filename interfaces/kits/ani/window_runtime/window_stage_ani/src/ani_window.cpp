@@ -30,9 +30,6 @@ using OHOS::Rosen::WindowScene;
 
 namespace OHOS {
 namespace Rosen {
-constexpr int32_t MIN_DECOR_HEIGHT = 37;
-constexpr int32_t MAX_DECOR_HEIGHT = 112;
-
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AniWindow"};
 /* used for free, ani has no destructor right now, only free when aniObj freed */
@@ -152,112 +149,6 @@ ani_object AniWindow::SetWindowBackgroundColorSync(ani_env* env, const std::stri
     } else {
         return AniCommonUtils::AniThrowError(env, ret);
     }
-}
-
-ani_object AniWindow::SetImmersiveModeEnabledState(ani_env* env, bool enable)
-{
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType()) &&
-        !WindowHelper::IsSubWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "[ANI]OnSetImmersiveModeEnabledState is not allowed since invalid window type");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-    }
-    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
-        return AniCommonUtils::CreateAniUndefined(env);
-    }
-
-    TLOGI(WmsLogTag::WMS_IMMS, "[ANI]OnSetImmersiveModeEnabledState to %{public}d", static_cast<int32_t>(enable));
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetImmersiveModeEnabledState(static_cast<bool>(enable)));
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Window immersive mode set enabled failed, ret = %{public}d", ret);
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
-    }
-
-    TLOGI(WmsLogTag::WMS_IMMS, "window [%{public}u, %{public}s] OnSetImmersiveModeEnabledState end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
-    return AniCommonUtils::CreateAniUndefined(env);
-}
-
-ani_object AniWindow::SetWindowDecorVisible(ani_env* env, bool isVisible)
-{
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorVisible(static_cast<bool>(isVisible)));
-    if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Window decor set visible failed");
-        return AniCommonUtils::AniThrowError(env, ret);
-    }
-    WLOGI("Window [%{public}u, %{public}s] OnSetWindowDecorVisible end",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
-    return AniCommonUtils::CreateAniUndefined(env);
-}
-
-ani_object AniWindow::SetWindowDecorHeight(ani_env* env, ani_int height)
-{
-    if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
-        WLOGFE("height should greater than 37 or smaller than 112");
-        return 0;
-    }
-
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorHeight(static_cast<int32_t>(height)));
-    if (ret != WmErrorCode::WM_OK) {
-        WLOGFE("Set window decor height failed");
-        return 0;
-    }
-    WLOGI("Window [%{public}u, %{public}s] OnSetDecorHeight end, height = %{public}d",
-        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), height);
-    return AniCommonUtils::CreateAniUndefined(env);
-}
-
-ani_object AniWindow::GetWindowPropertiesSync(ani_env* env)
-{
-    return AniCommonUtils::CreateWindowsProperties(env, windowToken_);
-}
-
-ani_boolean AniWindow::IsWindowSupportWideGamut(ani_env* env) {
-    return static_cast<ani_boolean>(windowToken_->IsSupportWideGamut());
-}
-
-ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen) {
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-
-    if (windowToken_->IsPcOrPadFreeMultiWindowMode()) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device not support");
-        return AniCommonUtils::CreateAniUndefined(env);
-    }
-
-    WMError ret = windowToken_->SetLayoutFullScreen(static_cast<bool>(isLayoutFullScreen));
-    if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_IMMS, "fullscreen set error");
-        return AniCommonUtils::CreateAniUndefined(env);
-    }
-    return 0;
-}
-
-ani_object AniWindow::SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties) {
-    if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
-        return AniCommonUtils::CreateAniUndefined(env);
-    }
-    std::map<WindowType, SystemBarProperty> properties;
-    std::map<WindowType, SystemBarPropertyFlag> jsSystemBarPropertyFlags;
-
-    if (!AniCommonUtils::SetSystemBarPropertiesFromAni(env, properties, jsSystemBarPropertyFlags,
-        aniSystemBarProperties, windowToken_)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to systemBarProperties");
-    }
-    return 0;
-}
-
-ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name, ani_boolean enable,
-    ani_boolean enableAnimation) {
-    WLOGI("SetSystemBarEnable");
-    std::map<WindowType, SystemBarProperty> systemBarProperties;
-    if (!AniCommonUtils::SetSpecificSystemBarEnabled(env, systemBarProperties, name, enable, enableAnimation)) {
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-    }
-    return 0;
 }
 }  // namespace Rosen
 }  // namespace OHOS
