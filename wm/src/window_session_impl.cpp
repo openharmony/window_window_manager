@@ -1225,10 +1225,10 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     }
 }
 
-WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, void* env, void* storage,
+WMError WindowSessionImpl::NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
     BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability)
 {
-    return SetUIContentInner(contentInfo, (napi_env)env, (napi_value)storage,
+    return SetUIContentInner(contentInfo, env, storage,
         type == BackupAndRestoreType::NONE ? WindowSetUIContentType::DEFAULT : WindowSetUIContentType::RESTORE,
         type, ability, 1u);
 }
@@ -1303,7 +1303,7 @@ Ace::UIContentErrorCode WindowSessionImpl::UIContentRestore(Ace::UIContent* uiCo
     }
 }
 
-WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* env, void* storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
     OHOS::Ace::UIContentErrorCode& aceRet, int isAni)
 {
@@ -1323,24 +1323,23 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             } else {
                 auto routerStack = GetRestoredRouterStack();
                 auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
-                if (!routerStack.empty() && UIContentRestore(uiContent.get(), routerStack, (void*)storage, type,
+                if (!routerStack.empty() && UIContentRestore(uiContent.get(), routerStack, storage, type,
                     isAni) == Ace::UIContentErrorCode::NO_ERRORS) {
                     TLOGI(WmsLogTag::WMS_LIFE, "Restore router stack succeed.");
                     break;
                 }
             }
-            aceRet = UIContentInit(uiContent.get(), contentInfo, (void*)storage, isAni);
+            aceRet = UIContentInit(uiContent.get(), contentInfo, storage, isAni);
             break;
         }
         case WindowSetUIContentType::RESTORE:
-            aceRet = UIContentRestore(uiContent.get(), contentInfo, (void*)storage,
-                GetAceContentInfoType(restoreType), isAni);
+            aceRet = UIContentRestore(uiContent.get(), contentInfo, storage, GetAceContentInfoType(restoreType), isAni);
             break;
         case WindowSetUIContentType::BY_NAME:
-            aceRet = UIContentInitByName(uiContent.get(), contentInfo, (void*)storage, isAni);
+            aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             break;
         case WindowSetUIContentType::BY_ABC:
-            aceRet = UIContentInit(uiContent.get(), GetAbcContent(contentInfo), (void*)storage, isAni);
+            aceRet = UIContentInit(uiContent.get(), GetAbcContent(contentInfo), storage, isAni);
             break;
     }
     // make uiContent available after Initialize/Restore
@@ -1353,7 +1352,7 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     return WMError::WM_OK;
 }
 
-WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, napi_env env, napi_value storage,
+WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, void* env, void* storage,
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
     int isAni)
 {
