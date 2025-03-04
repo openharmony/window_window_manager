@@ -422,6 +422,7 @@ private:
     void CreateScreenProperty(ScreenId screenId, ScreenProperty& property);
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
+    void GetInternalWidth();
     void InitExtendScreenDensity(sptr<ScreenSession> session, ScreenProperty property);
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
