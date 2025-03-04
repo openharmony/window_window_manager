@@ -13227,8 +13227,8 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
         property->SetDisplayId(DEFAULT_DISPLAY_ID);
         initClientDisplayId = VIRTUAL_DISPLAY_ID;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winName:%{public}s, type: %{public}d, displayId:%{public}" PRIu64
-        ", clientDisplayId: %{public}", PRIu64, property->GetWindowName().c_str(), property->GetWindowType(),
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winName:%{public}s, type:%{public}u, displayId:%{public}" PRIu64
+        ", clientDisplayId: %{public}" PRIu64, property->GetWindowName().c_str(), property->GetWindowType(),
         property->GetDisplayId(), initClientDisplayId);
     return initClientDisplayId;
 }
