@@ -131,7 +131,7 @@ constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
 constexpr uint32_t DEFAULT_LOCK_SCREEN_ZORDER = 2000;
 constexpr int32_t MAX_LOCK_STATUS_CACHE_SIZE = 1000;
-constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 24;
+constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
@@ -2521,19 +2521,19 @@ void SceneSessionManager::InitSnapshotCache()
         {WindowUIType::INVALID_WINDOW, MAX_SNAPSHOT_IN_RECENT_PHONE},
     };
 
+    snapshotCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(WindowUIType::INVALID_WINDOW);
     auto uiType = systemConfig_.windowUIType_;
-    snapCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(WindowUIType::INVALID_WINDOW);
     if (SNAPSHOT_CACHE_CAPACITY_MAP.find(uiType) != SNAPSHOT_CACHE_CAPACITY_MAP.end()) {
-        snapCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(uiType);
+        snapshotCapacity_ = SNAPSHOT_CACHE_CAPACITY_MAP.at(uiType);
     }
-    TLOGI(WmsLogTag::WMS_PATTERN, "type: %{public}hhu, capacity: %{public}u", uiType, snapCapacity_);
-    snapshotLRUCache_ = std::make_unique<LRUCache>(snapCapacity_);
+    TLOGI(WmsLogTag::WMS_PATTERN, "type: %{public}hhu, capacity: %{public}u", uiType, snapshotCapacity_);
+    snapshotLruCache_ = std::make_unique<LruCache>(snapshotCapacity_);
 }
 
 void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    if (int32_t removedCacheId = snapshotLRUCache_->Put(persistentId);
+    if (int32_t removedCacheId = snapshotLruCache_->Put(persistentId);
         removedCacheId != UNDEFINED_REMOVED_KEY) {
         if (auto removedCacheSession = GetSceneSession(removedCacheId)) {
             removedCacheSession->ResetSnapshot();
@@ -2546,7 +2546,7 @@ void SceneSessionManager::PutSnapshotToCache(int32_t persistentId)
 void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    if (!snapshotLRUCache_->Visit(persistentId)) {
+    if (!snapshotLruCache_->Visit(persistentId)) {
         TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d not in cache", persistentId);
     }
 }
@@ -2554,7 +2554,7 @@ void SceneSessionManager::VisitSnapshotFromCache(int32_t persistentId)
 void SceneSessionManager::RemoveSnapshotFromCache(int32_t persistentId)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "session:%{public}d", persistentId);
-    snapshotLRUCache_->Remove(persistentId);
+    snapshotLruCache_->Remove(persistentId);
     if (auto sceneSession = GetSceneSession(persistentId)) {
         sceneSession->ResetSnapshot();
     }
