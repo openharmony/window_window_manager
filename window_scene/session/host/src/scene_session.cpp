@@ -140,10 +140,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
         }
-        if (PcFoldScreenManager::GetInstance().IsPcFoldDevice()) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "initialConnect");
-            session->NotifyClientToUpdateRect("initialConnect", nullptr);
-        }
         return ret;
     }, __func__);
 }
