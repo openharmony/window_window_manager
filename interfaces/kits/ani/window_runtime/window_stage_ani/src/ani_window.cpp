@@ -20,8 +20,8 @@
 #include <memory>
 
 #include "ani.h"
-#include "ani_window.h"
 #include "ani_common_utils.h"
+#include "window_helper.h"
 #include "window_scene.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
@@ -40,7 +40,7 @@ static std::map<ani_object, AniWindow*> localObjs;
 } // namespace
 
 AniWindow::AniWindow(const sptr<Window>& window)
-    : windowToken_(window), registerManager_(std::make_unique<AniWindowRegisterManager>())
+    : windowToken_(window)
 {
 }
 
@@ -119,244 +119,6 @@ __attribute__((no_sanitize("cfi")))
     env->Object_CallMethod_Void(obj, setObjFunc, aniWindow.get());
     localObjs.insert(std::pair(obj, aniWindow.release()));
     return obj;
-}
-
-ani_object AniWindow::GetWindowAvoidArea(ani_env* env, ani_object obj, ani_int type)
-{
-    auto aniWindow = OHOS::Rosen::AniWindow::GetWindowObjectFromEnv(env, obj);
-    return aniWindow != nullptr ? aniWindow->OnGetWindowAvoidArea(env, type) : nullptr;
-}
-
-ani_object AniWindow::OnGetWindowAvoidArea(ani_env* env, ani_int type)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    AvoidArea avoidArea;
-    window->GetAvoidAreaByType(static_cast<AvoidAreaType>(type), avoidArea);
-    return AniCommonUtils::CreateAniAvoidArea(env, avoidArea, static_cast<AvoidAreaType>(type));
-}
-
-ani_object AniWindow::SetWindowColorSpace(ani_env* env, ani_object obj, ani_int colorSpace)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    return aniWindow != nullptr ? aniWindow->OnSetWindowColorSpace(env, colorSpace) : nullptr;
-}
-
-ani_object AniWindow::OnSetWindowColorSpace(ani_env* env, ani_int colorSpace)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    window->SetColorSpace(static_cast<ColorSpace>(colorSpace));
-    return AniCommonUtils::CreateAniUndefined(env);
-}
-
-void AniWindow::SetPreferredOrientation(ani_env* env, ani_object obj, ani_int orientation)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnSetPreferredOrientation(env, orientation);
-    }
-}
-
-void AniWindow::OnSetPreferredOrientation(ani_env* env, ani_int orientation)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    window->SetRequestedOrientation(static_cast<Orientation>(orientation));
-}
-
-void AniWindow::SetWindowPrivacyMode(ani_env* env, ani_object obj, ani_boolean isPrivacyMode)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnSetWindowPrivacyMode(env, isPrivacyMode);
-    }
-}
-
-void AniWindow::OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    window->SetPrivacyMode(static_cast<bool>(isPrivacyMode));
-}
-
-void AniWindow::Recover(ani_env* env, ani_object obj)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnRecover(env);
-    }
-}
-
-void AniWindow::OnRecover(ani_env* env)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    window->Recover(1);
-}
-
-void AniWindow::SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_boolean isKeepScreenOn)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnSetWindowKeepScreenOn(env, isKeepScreenOn);
-    }
-}
-
-void AniWindow::OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    window->SetKeepScreenOn(static_cast<bool>(isKeepScreenOn));
-}
-
-void AniWindow::SetWaterMarkFlag(ani_env* env, ani_object obj, ani_boolean enable)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnSetWaterMarkFlag(env, enable);
-    }
-}
-
-void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    if (enable) {
-        window->AddWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    } else {
-        window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK);
-    }
-}
-
-void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_string path)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnLoadContent(env, path);
-    }
-}
-
-void AniWindow::OnLoadContent(ani_env* env, ani_string path)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string contextUrl;
-    AniCommonUtils::GetStdString(env, path, contextUrl);
-    AppExecFwk::Ability* ability = nullptr;
-    AniCommonUtils::GetAPI7Ability(env, ability);
-}
-
-
-void AniWindow::LoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnLoadContent(env, path, storage);
-    }
-}
-
-void AniWindow::OnLoadContent(ani_env* env, ani_string path, ani_object storage)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string contextUrl;
-    AniCommonUtils::GetStdString(env, path, contextUrl);
-    AppExecFwk::Ability* ability = nullptr;
-    AniCommonUtils::GetAPI7Ability(env, ability);
-}
-
-ani_object AniWindow::GetUIContext(ani_env* env, ani_object obj)
-{
-    auto aniWindow = GetWindowObjectFromEnv(env, obj);
-    return aniWindow != nullptr ? aniWindow->OnGetUIContext(env) : nullptr;
-}
-
-ani_object AniWindow::OnGetUIContext(ani_env* env)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    auto uicontent = window->GetUIContent();
-    if (uicontent == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "uicontent is nullptr");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    return nullptr;
-}
-
-ani_object AniWindow::RegisterWindowCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback)
-{
-    auto aniWindow = OHOS::Rosen::AniWindow::GetWindowObjectFromEnv(env, obj);
-    return aniWindow != nullptr ? aniWindow->OnRegisterWindowCallback(env, type, callback) : nullptr;
-}
-
-ani_object AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    std::string typeString;
-    AniCommonUtils::GetStdString(env, type, typeString);
-    registerManager_->RegisterListener(window, typeString, CaseType::CASE_WINDOW, env, callback);
-    return AniCommonUtils::CreateAniUndefined(env);
-}
-
-ani_object AniWindow::UnregisterWindowCallback(ani_env* env, ani_object obj, ani_string type, ani_ref callback)
-{
-    auto aniWindow = OHOS::Rosen::AniWindow::GetWindowObjectFromEnv(env, obj);
-    return aniWindow != nullptr ? aniWindow->OnUnregisterWindowCallback(env, type, callback) : nullptr;
-}
-
-ani_object AniWindow::OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback)
-{
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
-        return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-    }
-    std::string typeString;
-    AniCommonUtils::GetStdString(env, type, typeString);
-    registerManager_->UnregisterListener(window, typeString, CaseType::CASE_WINDOW, env, callback);
-    return AniCommonUtils::CreateAniUndefined(env);
 }
 
 ani_int AniWindow::GetWindowDecorHeight(ani_env* env)
@@ -495,7 +257,6 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
     if (!AniCommonUtils::SetSpecificSystemBarEnabled(env, systemBarProperties, name, enable, enableAnimation)) {
         return AniCommonUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
     return 0;
 }
 }  // namespace Rosen
