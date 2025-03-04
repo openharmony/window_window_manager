@@ -470,6 +470,12 @@ private:
     void NotifyAfterResumed();
     void NotifyAfterPaused();
 
+    std::unique_ptr<Ace::UIContent> UIContentCreate(AppExecFwk::Ability* ability, void* env, int isAni);
+    Ace::UIContentErrorCode UIContentInitByName(Ace::UIContent*, const std::string&, void* storage, int isAni);
+    template<typename T>
+    Ace::UIContentErrorCode UIContentInit(Ace::UIContent*, T contentInfo, void* storage, int isAni);
+    Ace::UIContentErrorCode UIContentRestore(Ace::UIContent*, const std::string& contentInfo, void* storage,
+        Ace::ContentInfoType infoType, int isAni);
     WMError InitUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
         WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
         OHOS::Ace::UIContentErrorCode& aceRet, int isAni = 0);
