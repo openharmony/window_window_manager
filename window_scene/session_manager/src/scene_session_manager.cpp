@@ -9605,11 +9605,11 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d layout finished %{public}d",
                 persistentId, isLastFrameLayoutFinished);
             if (isLastFrameLayoutFinished) {
-                sceneSession->UpdateAvoidArea(
-                    new AvoidArea(sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
+                rootSceneSession_->UpdateAvoidArea(
+                    new AvoidArea(rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
                     AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
             } else {
-                sceneSession->MarkAvoidAreaAsDirty();
+                rootSceneSession_->MarkAvoidAreaAsDirty();
             }
         }
     }, __func__);
