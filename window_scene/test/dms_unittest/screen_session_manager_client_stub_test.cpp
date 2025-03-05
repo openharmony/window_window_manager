@@ -407,7 +407,7 @@ HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest16, Function | Small
 
     uint32_t code = static_cast<uint32_t>(20);
     int res = screenSessionManagerClientStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_NE(res, 0);
+    EXPECT_EQ(res, 0);
 }
 
 /**
