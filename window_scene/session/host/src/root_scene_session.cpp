@@ -176,6 +176,11 @@ void RootSceneSession::SetRootSessionRect(const WSRect& rect)
     }
 }
 
+void SceneSession::MarkAvoidAreaAsDirty()
+{
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
+}
+
 WSError RootSceneSession::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     if (specificCallback_ == nullptr || specificCallback_->onNotifyAvoidAreaChange_ == nullptr) {
