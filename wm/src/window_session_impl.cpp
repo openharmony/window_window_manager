@@ -1341,18 +1341,15 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     TLOGI(WmsLogTag::WMS_DECOR, "[hideSplit, hideMaximize, hideMinimizeButton, hideCloseButton]:"
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+    bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-            uiContent->HideWindowTitleButton(true, true, hideMinimizeButton, hideCloseButton);
-        } else {
-            uiContent->HideWindowTitleButton(true, false, hideMinimizeButton, hideCloseButton);
-        }
+        uiContent->HideWindowTitleButton(true, isSuperFoldDisplayDevice, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent("scb_back_visibility", "true");
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent("scb_back_visibility", "false");
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
             auto window = weakThis.promote();
             if (window == nullptr) {
