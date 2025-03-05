@@ -5131,7 +5131,7 @@ WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
         isFullScreenWaterfallMode_.load(), isWaterfallMode, GetWindowId());
-    if (isFullScreenWaterfallMode_.load() == isWaterfallMode && isValidWaterfallMode_.load()) {
+    if (isValidWaterfallMode_.load() && isFullScreenWaterfallMode_.load() == isWaterfallMode) {
         return WSError::WS_DO_NOTHING;
     }
     isFullScreenWaterfallMode_.store(isWaterfallMode);
