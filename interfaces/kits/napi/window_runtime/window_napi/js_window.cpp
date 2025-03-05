@@ -4369,27 +4369,26 @@ napi_value JsWindow::OnSetTouchable(napi_env env, napi_callback_info info)
         (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask =
-        [weakToken, touchable, errCode, where, env, task = napiAsyncTask] {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                WLOGFE("window is nullptr");
-                task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
-                return;
-            }
-            if (errCode != WMError::WM_OK) {
-                task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
-                return;
-            }
-            WMError ret = weakWindow->SetTouchable(touchable);
-            if (ret == WMError::WM_OK) {
-                task->Resolve(env, NapiGetUndefined(env));
-            } else {
-                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set touchable failed"));
-            }
-            WLOGI("%{public}s end, window [%{public}u, %{public}s]",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-        };
+    auto asyncTask = [weakToken, touchable, errCode, where, env, task = napiAsyncTask] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            WLOGFE("window is nullptr");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
+            return;
+        }
+        if (errCode != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
+            return;
+        }
+        WMError ret = weakWindow->SetTouchable(touchable);
+        if (ret == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set touchable failed"));
+        }
+        WLOGI("%{public}s end, window [%{public}u, %{public}s]",
+            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -4417,24 +4416,23 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask =
-        [weakToken, touchableAreas, where, env, task = napiAsyncTask] {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is nullptr", where);
-                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                return;
-            }
-            WMError ret = weakWindow->SetTouchHotAreas(touchableAreas);
-            if (ret == WMError::WM_OK) {
-                task->Resolve(env, NapiGetUndefined(env));
-            } else {
-                WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
-                task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "OnSetTouchableAreas failed"));
-            }
-            TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s Window [%{public}u, %{public}s] end",
-                where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-        };
+    auto asyncTask = [weakToken, touchableAreas, where, env, task = napiAsyncTask] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        WMError ret = weakWindow->SetTouchHotAreas(touchableAreas);
+        if (ret == WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode, "OnSetTouchableAreas failed"));
+        }
+        TLOGNI(WmsLogTag::WMS_EVENT, "%{public}s Window [%{public}u, %{public}s] end",
+            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
@@ -4788,23 +4786,22 @@ napi_value JsWindow::OnSetWindowTouchable(napi_env env, napi_callback_info info)
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask =
-        [weakToken, touchable, env, task = napiAsyncTask] {
-            auto weakWindow = weakToken.promote();
-            if (weakWindow == nullptr) {
-                task->Reject(env,
-                    JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Invalidate params."));
-                return;
-            }
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTouchable(touchable));
-            if (ret == WmErrorCode::WM_OK) {
-                task->Resolve(env, NapiGetUndefined(env));
-            } else {
-                task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set touchable failed"));
-            }
-            WLOGI("Window [%{public}u, %{public}s] set touchable end",
-                weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
-        };
+    auto asyncTask = [weakToken, touchable, env, task = napiAsyncTask] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            task->Reject(env,
+                JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Invalidate params."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetTouchable(touchable));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set touchable failed"));
+        }
+        WLOGI("Window [%{public}u, %{public}s] set touchable end",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+    };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
