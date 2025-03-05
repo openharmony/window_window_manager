@@ -446,8 +446,8 @@ protected:
     /*
      * Window Layout
      */
-    void FlushLayoutSize(int32_t width, int32_t height) override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
+    void FlushLayoutSize(int32_t width, int32_t height) override;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
     mutable std::recursive_mutex transformMutex_;
 
