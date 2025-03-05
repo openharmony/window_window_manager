@@ -173,6 +173,8 @@ private:
      * PC Fold Screen
      */
     GetPcScreenFoldStatusCallback getPcScreenFoldStatusCallback_ = nullptr;
+    std::atomic_bool isFullScreenWaterfallMode_ { false };
+    std::atomic_bool isValidWaterfallMode_ { false };
     mutable std::mutex waterfallModeMutex_;
     std::unordered_set<sptr<IWaterfallModeChangeListener>, SptrHash<IWaterfallModeChangeListener>>
         waterfallModeChangeListeners_;
