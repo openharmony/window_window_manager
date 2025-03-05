@@ -639,6 +639,57 @@ HWTEST_F(ScreenPropertyTest, GetScreenShape, Function | SmallTest | Level2)
     delete property;
     GTEST_LOG_(INFO) << "ScreenPropertyTest: GetScreenShape end";
 }
+/**
+* @tc.name: SetX
+* @tc.desc: normal function
+* @tc.type: FUNC
+*/
+HWTEST_F(ScreenPropertyTest, SetX, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    int32_t ret = -1000;
+    int32_t ret_copy = property->GetX();
+    property->SetX(ret);
+    ASSERT_EQ(ret, property->GetX());
+    property->SetX(ret_copy);
+}
+
+/**
+* @tc.name: SetY
+* @tc.desc: normal function
+* @tc.type: FUNC
+*/
+HWTEST_F(ScreenPropertyTest, SetY, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    int32_t ret = -1000;
+    int32_t ret_copy = property->GetY();
+    property->SetY(ret);
+    ASSERT_EQ(ret, property->GetY());
+    property->SetY(ret_copy);
+}
+
+/**
+* @tc.name: SetXYPosition
+* @tc.desc: normal function
+* @tc.type: FUNC
+*/
+HWTEST_F(ScreenPropertyTest, SetXYPosition, Function | SmallTest | Level2)
+{
+    ScreenProperty* property = new(std::nothrow) ScreenProperty();
+    ASSERT_NE(property, nullptr);
+    int32_t ret_x = 1000;
+    int32_t ret_y = 2000;
+    int32_t retx_copy = property->GetX();
+    int32_t rety_copy = property->GetY();
+    property->SetXYPosition(ret_x, ret_y);
+    ASSERT_EQ(1000, property->GetX());
+    ASSERT_EQ(2000, property->GetY());
+    property->SetXYPosition(retx_copy, rety_copy);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
