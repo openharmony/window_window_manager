@@ -27,12 +27,12 @@ namespace {
     constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsDisplayManager"};
 }
 
-DisplayAniRegisterManager::DisplayAniRegisterManager(){
-
+DisplayAniRegisterManager::DisplayAniRegisterManager()
+{
 }
 
-DisplayAniRegisterManager::~DisplayAniRegisterManager(){
-
+DisplayAniRegisterManager::~DisplayAniRegisterManager()
+{
 }
 
 ani_object DisplayAniRegisterManager::RegisterListener(std::string type, ani_env* env, ani_ref callback)
@@ -42,13 +42,14 @@ ani_object DisplayAniRegisterManager::RegisterListener(std::string type, ani_env
     env->Reference_IsNull(callback, &callbackNotNull);
     DmErrorCode ret;
     if (callbackNotNull) {
-        sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env); 
+        sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env);
         if (type == EVENT_ADD) {
             // add callback to listener
             displayAniListener->AddCallback(type, callback);
             // add listener to map
             jsCbMap_[type][callback] = displayAniListener;
-            ret = DM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayAniListener));
+            ret = DM_JS_TO_ERROR_CODE_MAP.at(
+                SingletonContainer::Get<DisplayManager>().RegisterDisplayListener(displayAniListener));
             DmErrorCode errCode = DmErrorCode::DM_ERROR_INVALID_PARAM;
             if (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
                 errCode = ret;

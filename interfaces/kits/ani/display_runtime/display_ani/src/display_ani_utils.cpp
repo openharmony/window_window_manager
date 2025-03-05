@@ -31,7 +31,7 @@ namespace OHOS {
 namespace Rosen {
 
 namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsDisplayManager"};
+    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayAniUtils"};
 }
 
 enum class DisplayStateMode : uint32_t {
@@ -71,7 +71,7 @@ ani_object DisplayAniUtils::convertRect(DMRect rect, ani_env* env)
         WLOGFE("[ANI] null class CutoutInfoImpl");
         return obj;
     }
-    if(ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls , &obj)) {
+    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls , &obj)) {
         WLOGFE("[ANI] create rect obj fail");
         return obj;
     }
@@ -81,7 +81,7 @@ ani_object DisplayAniUtils::convertRect(DMRect rect, ani_env* env)
     }
     if (ANI_OK != env->Class_FindField(cls, "width", &widthFld)) {
         WLOGFE("[ANI] null field right");
-       return obj;
+        return obj;
     }
     if (ANI_OK != env->Class_FindField(cls, "top", &topFld)) {
         WLOGFE("[ANI] null field top");
@@ -108,7 +108,7 @@ ani_array_ref DisplayAniUtils::convertRects(std::vector<DMRect> rects, ani_env* 
         WLOGFE("[ANI] null class CutoutInfoImpl");
     }
     ani_ref undefinedRef = nullptr;
-    if(ANI_OK != env->GetUndefined(&undefinedRef)){
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
         WLOGFE("[ANI] get undefined error");
     }
     if (ANI_OK != env->Array_New_Ref(cls, size, undefinedRef, &arrayres)) {
@@ -120,177 +120,68 @@ ani_array_ref DisplayAniUtils::convertRects(std::vector<DMRect> rects, ani_env* 
             WLOGFE("[ANI] set rect array error");
         }
     }
+    WLOGFE("arrayres size = %{public}d", size);
     return arrayres;
 }
  
-ani_object DisplayAniUtils::convertDisplay(sptr<Display> display, ani_env* env){
-    ani_object obj = nullptr;
+ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj)
+{
     sptr<DisplayInfo> info = display->GetDisplayInfoByJs();
-    ani_class cls;
-    if (ANI_OK != env->FindClass("L@ohos/display/display/DisplayImpl", &cls)) {
-        WLOGFE("[ANI] null class CutoutInfoImpl");
-        return obj;
-    }
-    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &obj)) {
-        WLOGFE("[ANI] create object fail");
-        return obj;
-    }
-    ani_field displayIdFld;
-    ani_field nameFld;
-    ani_field aliveFld;
-    ani_field stateFld;
-    ani_field refreshRateFld;
-    ani_field rotationFld;
-    ani_field widthFld;
-    ani_field heightFld;
-    ani_field availableWidthFld;
-    ani_field availableHeightFld;
-    ani_field densityDPIFld;
-    ani_field orientationFld;
-    ani_field densityPixelsFld = nullptr;
-    ani_field scaledDensityFld;
-    ani_field xDPIFld;
-    ani_field yDPIFld;
-    if (ANI_OK != env->Class_FindField(cls, "id", &displayIdFld)) {
-        WLOGFE("[ANI] null field id");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "name", &nameFld)) {
-        WLOGFE("[ANI] null field name");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "alive", &aliveFld)) {
-        WLOGFE("[ANI] null field alive");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "state", &stateFld)) {
-        WLOGFE("[ANI] null field state");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "refreshRate", &refreshRateFld)) {
-        WLOGFE("[ANI] null field refreshRate");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "rotation", &rotationFld)) {
-        WLOGFE("[ANI] null field rotation");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "width", &widthFld)) {
-        WLOGFE("[ANI] null field width");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "height", &heightFld)) {
-        WLOGFE("[ANI] null field height");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "availableWidth", &availableWidthFld)) {
-        WLOGFE("[ANI] null field availableWidth");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "availableHeight", &availableHeightFld)) {
-        WLOGFE("[ANI] null field availableHeight");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "densityDPI", &densityDPIFld)) {
-        WLOGFE("[ANI] null field densityDPI");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "orientation", &orientationFld)) {
-        WLOGFE("[ANI] null field orientation");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "densityPixelsFld", &heightFld)) {
-        WLOGFE("[ANI] null field densityPixelsFld");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "scaledDensity", &scaledDensityFld)) {
-        WLOGFE("[ANI] null field scaledDensity");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "xDPI", &xDPIFld)) {
-        WLOGFE("[ANI] null field xDPI");
-        return obj;
-    }
-    if (ANI_OK != env->Class_FindField(cls, "yDPI", &yDPIFld)) {
-        WLOGFE("[ANI] null field yDPI");
-        return obj;
-    }
-    env->Object_SetField_Int(obj, displayIdFld, static_cast<uint32_t>(info->GetDisplayId()));
+    env->Object_SetFieldByName_Int(obj, "id",  static_cast<uint32_t>(info->GetDisplayId()));
     const ani_size stringLength = info->GetName().size();
     ani_string str = nullptr;
     env->String_NewUTF8(info->GetName().data(), stringLength, &str);
-    env->Object_SetField_Ref(obj, nameFld, str);
-    env->Object_SetField_Boolean(obj, aliveFld, info->GetAliveStatus()); 
-    // enum
+    env->Object_SetFieldByName_Ref(obj, "name", str);
+    env->Object_SetFieldByName_Boolean(obj, "alive", info->GetAliveStatus());
     if (NATIVE_TO_JS_DISPLAY_STATE_MAP.count(info->GetDisplayState()) != 0) {
-        env->Object_SetField_Int(obj, stateFld, static_cast<uint32_t>(info->GetDisplayState()));
+        env->Object_SetFieldByName_Int(obj, "state", static_cast<uint32_t>(info->GetDisplayState()));
     } else {
-        env->Object_SetField_Int(obj, stateFld, 0);
+        env->Object_SetFieldByName_Int(obj, "state", 0);
     }
-    env->Object_SetField_Int(obj, refreshRateFld, info->GetRefreshRate());
-    // enum
-    env->Object_SetField_Int(obj, rotationFld, static_cast<uint32_t>(info->GetRotation()));
-
-    env->Object_SetField_Int(obj, widthFld, info->GetWidth());
-    env->Object_SetField_Int(obj, heightFld, display->GetHeight());
-    env->Object_SetField_Int(obj, availableWidthFld, info->GetAvailableWidth());
-    env->Object_SetField_Int(obj, availableHeightFld, info->GetAvailableHeight());
-
-    env->Object_SetField_Float(obj, densityDPIFld, info->GetVirtualPixelRatio() * 160);
-    // enum
-    env->Object_SetField_Int(obj, orientationFld, static_cast<uint32_t>(info->GetDisplayOrientation()));
-    env->Object_SetField_Float(obj, densityPixelsFld, info->GetVirtualPixelRatio());
-    env->Object_SetField_Float(obj, scaledDensityFld, info->GetVirtualPixelRatio());
-
-    env->Object_SetField_Float(obj, xDPIFld, info->GetXDpi());
-    env->Object_SetField_Float(obj, yDPIFld, info->GetYDpi());
-
-    // enum array
-    ani_array_int colorSpacesAni = nullptr;
-    ani_array_int hdrFormatsAni = nullptr;
-    ani_field colorSpacesFld = nullptr;
-    ani_field hdrFormatsld = nullptr;
+    env->Object_SetFieldByName_Int(obj, "refreshRate", info->GetRefreshRate());
+    env->Object_SetFieldByName_Int(obj, "rotation", static_cast<uint32_t>(info->GetRotation()));
+    env->Object_SetFieldByName_Int(obj, "width", info->GetWidth());
+    env->Object_SetFieldByName_Int(obj, "height", display->GetHeight());
+    env->Object_SetFieldByName_Int(obj, "availableWidth", info->GetAvailableWidth());
+    env->Object_SetFieldByName_Int(obj, "availableHeight", info->GetAvailableHeight());
+    env->Object_SetFieldByName_Float(obj, "densityDPI", info->GetVirtualPixelRatio() * DOT_PER_INCH);
+    env->Object_SetFieldByName_Int(obj, "orientation", static_cast<uint32_t>(info->GetDisplayOrientation()));
+    env->Object_SetFieldByName_Float(obj, "densityPixels", info->GetVirtualPixelRatio());
+    env->Object_SetFieldByName_Float(obj, "scaledDensity", info->GetVirtualPixelRatio());
+    env->Object_SetFieldByName_Float(obj, "xDPI", info->GetXDpi());
+    env->Object_SetFieldByName_Float(obj, "yDPI", info->GetYDpi());
     auto colorSpaces = info->GetColorSpaces();
-    if (ANI_OK != env->Array_New_Int(colorSpaces.size(), &colorSpacesAni)) {
-        WLOGFE("[ANI] create colorSpace array error");
-    }
-    env->Array_SetRegion_Int(colorSpacesAni, 0, colorSpaces.size(), reinterpret_cast<ani_int *>(colorSpaces.data()));
     auto hdrFormats = info->GetHdrFormats();
-    if (ANI_OK != env->Array_New_Int(hdrFormats.size(), &hdrFormatsAni)) {
-        WLOGFE("[ANI] create colorSpace array error");
-    }
-    env->Array_SetRegion_Int(hdrFormatsAni, 0, hdrFormats.size(), reinterpret_cast<ani_int *>(hdrFormats.data()));
-
-    env->Object_SetField_Ref(obj, colorSpacesFld, colorSpacesAni);
-    env->Object_SetField_Ref(obj, hdrFormatsld, hdrFormatsAni);
-
-    return obj;
-}
- 
-ani_array_ref DisplayAniUtils::convertDisplays(std::vector<sptr<Display>> displays, ani_env* env){
-    ani_array_ref arrayres = nullptr;
-    int size = displays.size();
-    ani_class cls = nullptr;
-    if (ANI_OK != env->FindClass("L@ohos/display/display/DisplayImpl;", &cls)) {
-        WLOGFE("[ANI] null class DisplayImpl");
-    }
-    ani_ref undefinedRef = nullptr;
-    if(ANI_OK != env->GetUndefined(&undefinedRef)){
-        WLOGFE("[ANI] get undefined error");
-    }
-    if (ANI_OK != env->Array_New_Ref(cls, size, undefinedRef, &arrayres)) {
-        WLOGFE("[ANI] create display array error");
-    }
-    for (int i = 0; i < size; i++) {
-        sptr<Display> display = displays[i];
-        if (ANI_OK != env->Array_Set_Ref(arrayres, i, convertDisplay(display, env))) {
-            WLOGFE("[ANI] set display array error");
+    if (colorSpaces.size() != 0) {
+        ani_array_int colorSpacesAni;
+        CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
+        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "colorSpaces", static_cast<ani_ref>(colorSpacesAni))) {
+            WLOGFE("[ANI] Array set colorSpaces field error");
         }
     }
-    return arrayres;
+    if (hdrFormats.size() != 0) {
+        ani_array_int hdrFormatsAni;
+        CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
+        if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "hdrFormats", static_cast<ani_ref>(hdrFormatsAni))) {
+            WLOGFE("[ANI] Array set hdrFormats field error");
+        }
+    }
+    return ANI_OK;
 }
 
-void DisplayAniUtils::GetStdString(ani_env *env, ani_string str, std::string &result){
+void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec)
+{
+    if (ANI_OK != env->Array_New_Int(size, aniArray)) {
+        WLOGFE("[ANI] create colorSpace array error");
+    }
+    ani_int* aniArrayBuf = reinterpret_cast<ani_int *>(vec.data());
+    if (ANI_OK != env->Array_SetRegion_Int(*aniArray, 0, size, aniArrayBuf)) {
+        WLOGFE("[ANI] Array set region int error");
+    }
+}
+
+void DisplayAniUtils::GetStdString(ani_env *env, ani_string str, std::string &result)
+{
     ani_size sz {};
     env->String_GetUTF8Size(str, &sz);
     result.resize(sz + 1);
@@ -314,8 +205,9 @@ ani_status DisplayAniUtils::NewAniObject(ani_env* env, ani_class cls, const char
 ani_status DisplayAniUtils::NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* object)
 {
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(cls, "<ctor>", "V:V", &aniCtor);
+    auto ret = env->Class_FindMethod(cls, "<ctor>", ":V", &aniCtor);
     if (ret != ANI_OK) {
+        WLOGFE("[ANI] find ctor method fail");
         return ret;
     }
     return env->Object_New(cls, aniCtor, object);

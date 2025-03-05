@@ -91,7 +91,7 @@ void DisplayAniListener::OnCreate(DisplayId id)
         for (auto oneAniCallback : it->second) {
             //mtd是否是上层ts写的？
             ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
-                "L@ohos/display/display/Callback", "invoke","I:V", id);
+                "L@ohos/display/display/Callback", "invoke", "I:V", id);
             if (ret != ANI_OK) {
                 WLOGFE("OnCreate: Failed to SendEvent.");
                 break;
@@ -101,16 +101,17 @@ void DisplayAniListener::OnCreate(DisplayId id)
         WLOGFE("OnCreate: env is nullptr");
     }
 }
-void DisplayAniListener::OnDestroy(DisplayId id){
-
+void DisplayAniListener::OnDestroy(DisplayId id)
+{
 }
-void DisplayAniListener::OnChange(DisplayId id){
-    
+void DisplayAniListener::OnChange(DisplayId id)
+{
 }
-void DisplayAniListener::OnPrivateWindow(bool hasPrivate){
-    
+void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
+{
 }
-void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus){
+void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
+{
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGI("OnFoldStatusChanged is called, foldStatus: %{public}u", static_cast<uint32_t>(foldStatus));
     if (aniCallBack_.empty()) {
@@ -131,7 +132,7 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus){
         for (auto oneAniCallback : it->second) {
             // 修改实现方法（"invoke"在的这个字段）
             ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
-                "L@ohos/display/display/Callback", "invoke","I:V", static_cast<uint32_t>(foldStatus));
+                "L@ohos/display/display/Callback", "invoke", "I:V", static_cast<uint32_t>(foldStatus));
             if (ret != ANI_OK) {
                 WLOGFE("OnCreate: Failed to SendEvent.");
                 break;
@@ -141,13 +142,14 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus){
         WLOGFE("OnCreate: env is nullptr");
     }
 }
-void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles){
-    
+void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
+{
 }
-void DisplayAniListener::OnCaptureStatusChanged(bool isCapture){
-    
+void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
+{
 }
-void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode displayMode){
+void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
+{
     std::lock_guard<std::mutex> lock(mtx_);
     WLOGI("OnFoldStatusChanged is called, foldStatus: %{public}u", static_cast<uint32_t>(displayMode));
     if (aniCallBack_.empty()) {
@@ -168,7 +170,7 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode displayMode){
         for (auto oneAniCallback : it->second) {
             // 修改实现方法（"invoke"在的这个字段）
             ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
-                "L@ohos/display/display/Callback", "invoke","I:V", static_cast<ani_int>(displayMode));
+                "L@ohos/display/display/Callback", "invoke", "I:V", static_cast<ani_int>(displayMode));
             if (ret != ANI_OK) {
                 WLOGFE("OnDisplayModeChanged: Failed to SendEvent.");
                 break;
@@ -178,8 +180,8 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode displayMode){
         WLOGFE("OnDisplayModeChanged: env is nullptr");
     }
 }
-void DisplayAniListener::OnAvailableAreaChanged(DMRect area){
-    
+void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
+{
 }
 
 ani_status DisplayAniListener::CallAniMethodVoid(ani_object object, const char* cls,
