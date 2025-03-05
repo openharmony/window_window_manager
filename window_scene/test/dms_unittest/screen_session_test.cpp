@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "scene_board_judgement.h"
+#include "fold_screen_state_internel.h"
 
 // using namespace FRAME_TRACE;
 using namespace testing;
@@ -462,7 +463,9 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
  */
 HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest | Level2)
 {
-#ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        GTEST_SKIP();
+    }
     GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode start";
     ScreenSessionConfig config = {
         .screenId = 100,
@@ -487,7 +490,6 @@ HWTEST_F(ScreenSessionTest, OptimizeSecondaryDisplayMode01, Function | SmallTest
     EXPECT_EQ(foldDisplayMode, FoldDisplayMode::GLOBAL_FULL);
 
     GTEST_LOG_(INFO) << "OptimizeSecondaryDisplayMode end";
-#endif
 }
 
 /**
