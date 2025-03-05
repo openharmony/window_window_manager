@@ -56,6 +56,7 @@
 #include "window_focus_controller.h"
 #include "window_scene_config.h"
 #include "wm_single_instance.h"
+#include "session_lifecycle_listener_interface.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -623,6 +624,12 @@ public:
     void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         std::vector<sptr<SceneSession>>& mainSessions) const;
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
+    WMError RegisterSessionLifecycleListener(
+        const sptr<ISessionLifecycleListener>& listener, const std::vector<int32_t>& persistentIdList);
+    WMError RegisterSessionLifecycleListener(
+        const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList);
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
+    bool isMainWindowByPersistentId(int32_t persistentId);
 
     /*
      * Window Pattern

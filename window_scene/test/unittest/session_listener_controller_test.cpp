@@ -317,12 +317,17 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | Small
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTest | Level2)
 {
-    int32_t persistentId = -1;
-    slController->NotifySessionClosed(persistentId);
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    info.moduleName_ = "moduleName";
+    info.abilityName_ = "abilityName";
+    info.appIndex_ = 0;
+    info.persistentId_ = -1;
+    slController->NotifySessionClosed(info);
 
-    persistentId = 1;
-    slController->NotifySessionClosed(persistentId);
-    ASSERT_EQ(persistentId, 1);
+    info.persistentId_ = 1;
+    slController->NotifySessionClosed(info);
+    ASSERT_EQ(info.persistentId_, 1);
 }
 
 /**
