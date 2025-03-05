@@ -2143,6 +2143,7 @@ HWTEST_F(WindowSessionImplTest, UnregisterWaterfallModeChangeListener, Function 
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("waterfall");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->waterfallModeChangeListeners_.clear();
     sptr<IWaterfallModeChangeListener> listener = sptr<IWaterfallModeChangeListener>::MakeSptr();
     auto ret = window->RegisterWaterfallModeChangeListener(listener);
     ASSERT_EQ(WMError::WM_OK, ret);
