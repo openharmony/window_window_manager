@@ -680,7 +680,7 @@ napi_value JsPipController::OnPictureInPicturePossible(napi_env env, napi_callba
     }
     pipController_->GetPipPossible(isPiPSupported);
     if (isPiPSupported) {
-        TLOGI(WmsLogTag::WMS_PIP, "OnPictureInPicturePossible device is supported");
+        TLOGI(WmsLogTag::WMS_PIP, "device is supported");
     }
     return CreateJsValue(env, isPiPSupported);
 }
