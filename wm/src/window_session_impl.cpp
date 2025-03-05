@@ -1342,7 +1342,11 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        uiContent->HideWindowTitleButton(true, false, hideMinimizeButton, hideCloseButton);
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            uiContent->HideWindowTitleButton(true, true, hideMinimizeButton, hideCloseButton);
+        } else {
+            uiContent->HideWindowTitleButton(true, false, hideMinimizeButton, hideCloseButton);
+        }
         uiContent->OnContainerModalEvent("scb_back_visibility", "true");
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
