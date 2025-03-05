@@ -1711,6 +1711,7 @@ ohos_unittest("ws_dfx_hisysevent_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
   ]
 }
 
