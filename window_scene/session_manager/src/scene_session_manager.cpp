@@ -9597,9 +9597,19 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         if (isNeedUpdate) {
             TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isVisible %{public}u bar area %{public}s",
                 where, isVisible, barArea.ToString().c_str());
-            NotifySessionAINavigationBarChange(rootSceneSession_->GetPersistentId());
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
+            }
+            bool isLastFrameLayoutFinished = true;
+            IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
+            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d layout finished %{public}d",
+                persistentId, isLastFrameLayoutFinished);
+            if (isLastFrameLayoutFinished) {
+                sceneSession->UpdateAvoidArea(
+                    new AvoidArea(sceneSession->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
+                    AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+            } else {
+                sceneSession->MarkAvoidAreaAsDirty();
             }
         }
     }, __func__);
