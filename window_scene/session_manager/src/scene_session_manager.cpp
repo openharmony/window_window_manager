@@ -9602,8 +9602,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             }
             bool isLastFrameLayoutFinished = true;
             IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
-            TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d layout finished %{public}d",
-                persistentId, isLastFrameLayoutFinished);
+            TLOGI(WmsLogTag::WMS_IMMS, "rootscene layout finished %{public}d", isLastFrameLayoutFinished);
             if (isLastFrameLayoutFinished) {
                 rootSceneSession_->UpdateAvoidArea(
                     new AvoidArea(rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
