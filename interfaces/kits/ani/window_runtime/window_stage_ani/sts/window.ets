@@ -582,18 +582,421 @@ export enum ModalityType {
     APPLICATION_MODALITY = 1
 }
 
-export interface SystemBarProperties {
-    statusBarColor?: string;
-    isStatusBarLightIcon?: boolean;
-    statusBarContentColor?: string;
-    navigationBarColor?: string;
-    isNavigationBarLightIcon?: boolean;
-    navigationBarContentColor?: string;
-    enableStatusBarAnimation?: boolean;
-    enableNavigationBarAnimation?: boolean;
+interface SystemBarProperties {
+    /**
+     * The color of the status bar.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 6
+     */
+    /**
+     * The color of the status bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    statusBarColor: string;
+
+    /**
+     * The light icon of the status bar.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The light icon of the status bar.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    isStatusBarLightIcon: boolean;
+
+    /**
+     * The content color of the status bar
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 8
+     */
+    /**
+     * The content color of the status bar
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    statusBarContentColor: string;
+
+    /**
+     * The color of the navigation bar.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 6
+     */
+    /**
+     * The color of the navigation bar.
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    navigationBarColor: string;
+
+    /**
+     * The light icon of the navigation bar.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The light icon of the navigation bar.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    isNavigationBarLightIcon: boolean;
+
+    /**
+     * The content color of the navigation bar
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 8
+     */
+    /**
+     * The content color of the navigation bar
+     *
+     * @type { ?string }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    navigationBarContentColor: string;
+
+    /**
+     * Enable the animation of the status bar.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    enableStatusBarAnimation: boolean;
+
+    /**
+     * Enable the animation of the navigation bar.
+     *
+     * @type { ?boolean }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    enableNavigationBarAnimation: boolean;
 }
 
+export class SystemBarPropertiesInternal implements SystemBarProperties {
+    statusBarColor: string = "";
+    isStatusBarLightIcon: boolean;
+    statusBarContentColor: string = "";
+    navigationBarColor: string = "";
+    isNavigationBarLightIcon: boolean;
+    navigationBarContentColor: string = "";
+    enableStatusBarAnimation: boolean;
+    enableNavigationBarAnimation: boolean;
+}
+
+/**
+ * Properties of window, it couldn't update automatically
+ *
+ * @interface WindowProperties
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @since 6
+ */
+/**
+ * Properties of window, it couldn't update automatically
+ *
+ * @interface WindowProperties
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @crossplatform
+ * @since 10
+ */
+/**
+ * Properties of window, it couldn't update automatically
+ *
+ * @interface WindowProperties
+ * @syscap SystemCapability.WindowManager.WindowManager.Core
+ * @crossplatform
+ * @atomicservice
+ * @since 11
+ */
 export interface WindowProperties {
+    /**
+     * The position and size of the window
+     *
+     * @type { Rect }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * The position and size of the window
+     *
+     * @type { Rect }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * The position and size of the window
+     *
+     * @type { Rect }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
+    windowRect: Rect;
+
+    /**
+     * The position relative to the window and size of drawable area
+     *
+     * @type { Rect } 
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 11
+     */
+    /**
+     * The position relative to the window and size of drawable area
+     *
+     * @type { Rect } 
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    drawableRect: Rect;
+    
+    /**
+     * Window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * Window type
+     *
+     * @type { WindowType }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    type: WindowType;
+
+    /**
+     * Whether the window is displayed in full screen mode. The default value is false.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 6
+     */
+    /**
+     * Whether the window is displayed in full screen mode. The default value is false.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    isFullScreen: boolean;
+
+    /**
+     * Whether the window layout is in full screen mode(whether the window is immersive). The default value is false.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * Whether the window layout is in full screen mode(whether the window is immersive). The default value is false.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    isLayoutFullScreen: boolean;
+
+    /**
+     * Whether the window can gain focus. The default value is true
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * Whether the window can gain focus. The default value is true
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    focusable: boolean;
+
+    /**
+     * Whether the window is touchable. The default value is false
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * Whether the window is touchable. The default value is false
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    touchable: boolean;
+
+    /**
+     * Brightness value of window.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 6
+     */
+    /**
+     * Brightness value of window.
+     *
+     * @type { number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * Brightness value of window.
+     *
+     * @type { number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
+    brightness: number;
+
+    /**
+     * The dimbehind value of window.
+     *
+     * @type { number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     * @deprecated since 9
+     */
+    dimBehindValue: number;
+
+    /**
+     * Whether keep screen on.
+     *
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 6
+     */
+    /**
+     * Whether keep screen on.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @since 10
+     */
+    /**
+     * Whether keep screen on.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @crossplatform
+     * @atomicservice
+     * @since 11
+     */
+    isKeepScreenOn: boolean;
+
+    /**
+     * Whether make window in privacy mode or not.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * Whether make window in privacy mode or not.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    isPrivacyMode: boolean;
+
+    /**
+     * Whether is round corner or not.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     * @deprecated since 9
+     */
+    isRoundCorner: boolean;
+
+    /**
+     * Whether is transparent or not.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 7
+     */
+    /**
+     * Whether is transparent or not.
+     *
+     * @type { boolean }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    isTransparent: boolean;
+
+    /**
+     * Window id.
+     *
+     * @type { number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @since 9
+     */
+    /**
+     * Window id.
+     *
+     * @type { number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    id: number;
+
+    /**
+     * display id.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.WindowManager.WindowManager.Core
+     * @atomicservice
+     * @since 12
+     */
+    displayId: number;
+}
+
+export class WindowPropertiesInternal implements WindowProperties {
     windowRect: Rect;
     drawableRect: Rect;
     type: WindowType;
@@ -608,11 +1011,11 @@ export interface WindowProperties {
     isRoundCorner: boolean;
     isTransparent: boolean;
     id: number;
-    displayId?: number;
+    displayId: number;
 }
 
 export interface MoveConfiguration {
-    displayId?: number;
+    displayId: number;
 }
 
 export interface WindowDensityInfo {
@@ -636,18 +1039,96 @@ export interface TransitionController {
     animationForHidden(context: window.TransitionContext): void;
 }
 
+/**
+ * Limits of window.
+ *
+ * @interface WindowLimits
+ * @syscap SystemCapability.Window.SessionManager
+ * @since 11
+ */
+/**
+ * Limits of window.
+ *
+ * @interface WindowLimits
+ * @syscap SystemCapability.Window.SessionManager
+ * @atomicservice
+ * @since 12
+ */
 export interface WindowLimits {
-    maxWidth?: number;
-    maxHeight?: number;
-    minWidth?: number;
-    minHeight?: number;
+
+    /**
+     * The maximum width of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The maximum width of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    maxWidth: number;
+
+    /**
+     * The maximum height of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The maximum height of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    maxHeight: number;
+
+    /**
+     * The minimum width of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The minimum width of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    minWidth: number;
+
+    /**
+     * The minimum height of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @since 11
+     */
+    /**
+     * The minimum height of the window.
+     *
+     * @type { ?number }
+     * @syscap SystemCapability.Window.SessionManager
+     * @atomicservice
+     * @since 12
+     */
+    minHeight: number;
 }
 
 export class WindowStageInternal implements WindowStage {
     static { loadLibrary('windowstageani_kit.z') }
     setNativeObj(nativeObj: long):void {
         this.nativeObj = nativeObj;
-        console.println(nativeObj);
     }
 
     private nativeObj : long;
@@ -655,10 +1136,10 @@ export class WindowStageInternal implements WindowStage {
     public native loadContent(nativeObj:long, path: String): int;
     public native disableWindowDecor(nativeObj:long): int;
     public native setShowOnLockScreen(nativeObj:long, showOnLockScreen: boolean): int;
+    public native getMainWindowSync(nativeObj: long): Window;
 
     public loadContent(path: string, callback: AsyncCallback<int>): void {
         let ret = this.loadContent(this.nativeObj, String(path));
-        console.println(ret);
     }
     public loadContentByName(name: string, callback: AsyncCallback<int>): void {
         let ret = this.loadContent(this.nativeObj, name);
@@ -669,11 +1150,45 @@ export class WindowStageInternal implements WindowStage {
     public setShowOnLockScreen(showOnLockScreen: boolean): void {
         let ret = this.setShowOnLockScreen(this.nativeObj, showOnLockScreen);
     }
+
+    public getMainWindowSync(): Window {
+        let ret = this.getMainWindowSync(this.nativeObj);
+        return ret;
+    }
+
+    public getMainWindow(): Promise<Window> {
+        return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): Window => {
+                let window = this.getMainWindowSync(this.nativeObj);
+                return window;
+            }).then((ret: NullishType) => {
+                resolve(ret as Window);
+                return false;
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+                return false;
+            });
+        });
+    }
+
+    public getMainWindow(callback: AsyncCallback<int>): void {
+        taskpool.execute((): Window => {
+            let res = this.getMainWindowSync(this.nativeObj);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
 }
 
 export interface WindowStage {
     loadContent(path: string, callback: AsyncCallback<int>): void;
     loadContentByName(name: string, callback: AsyncCallback<int>): void;
+    getMainWindowSync(): Window;
+    getMainWindow(): Promise<Window>;
+    getMainWindow(callback: AsyncCallback<int>): void;
 }
 
 export class WindowInternal implements Window {
@@ -686,7 +1201,19 @@ export class WindowInternal implements Window {
     }
 
     private native getWindowDecorHeight(nativeObj:long): int;
-    public native setWindowBackgroundColorSync(nativeObj: long, color: string): int;
+    private native setWindowBackgroundColorSync(nativeObj: long, color: string): int;
+    private native setImmersiveModeEnabledState(nativeObj: long, enable: boolean): int;
+    private native setWindowDecorVisible(nativeObj: long, isVisible: boolean): int;
+    private native setWindowDecorHeight(nativeObj: long, height: int): int;
+    private native getWindowProperties(nativeObj: long): WindowProperties;
+    private native isWindowSupportWideGamut(nativeObj: long): boolean;
+    private native setWindowLayoutFullScreen(nativeObj: long, isLayoutFullScreen: boolean): int;
+    private native setSystemBarProperties(nativeObj: long, systemBarProperties: SystemBarProperties): int;
+    private native setSpecificSystemBarEnabled(nativeObj: long, name: String, enable: boolean, enableAnimation: boolean): int;
+    private native getWindowAvoidAreaInternal(nativeObj: long, type: AvoidAreaType): AvoidArea;
+    private native getLastWindowInternal(nativeObj: long, ctx: BaseContext): Window;
+    private native setPreferredOrientationInternal(nativeObj: long, orientation: Orientation): void;
+    private native setWindowPrivacyModeInternal(isPrivacyMode: boolean): void;
 
     private native setColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
@@ -708,15 +1235,126 @@ export class WindowInternal implements Window {
 
     public getWindowDecorHeight(): int {
        let ret = this.getWindowDecorHeight(this.nativeObj);
-       console.println(ret);
        return ret;
     }
 
     public setWindowBackgroundColorSync(color: string): int {
-        let ret = this.setWindowBackgroundColorSync(this.nativeObj, color);
-        console.println(ret);
+       let ret = this.setWindowBackgroundColorSync(this.nativeObj, color);
+       return ret;
+    }
+
+    public setImmersiveModeEnabledState(enable: boolean): int {
+        let ret = this.setImmersiveModeEnabledState(this.nativeObj, enable);
         return ret;
-     }
+    }
+
+    public setWindowDecorVisible(isVisible: boolean): int {
+        let ret = this.setWindowDecorVisible(this.nativeObj, isVisible);
+        return ret;
+    }
+
+    public setWindowDecorHeight(height: int): int {
+        let ret = this.setWindowDecorHeight(this.nativeObj, height);
+        return ret;
+    }
+
+    public getWindowProperties(): WindowProperties {
+        let windowProperties = this.getWindowProperties(this.nativeObj);
+        return windowProperties ;
+    }
+
+    public isWindowSupportWideGamut(): Promise<boolean> {
+        return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): boolean => {
+                let res = this.isWindowSupportWideGamut(this.nativeObj);
+                return res;
+            }).then((ret: NullishType) => {
+                resolve(ret as boolean);
+                return false;
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+                return false;
+            });
+        });
+    }
+
+    public isWindowSupportWideGamut(callback: AsyncCallback<boolean>): void {
+        taskpool.execute((): boolean => {
+            let res = this.isWindowSupportWideGamut(this.nativeObj);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as boolean);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, false);
+        });
+    }
+
+    public setWindowLayoutFullScreen(isLayoutFullScreen: boolean): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                let res = this.setWindowLayoutFullScreen(this.nativeObj, isLayoutFullScreen);
+                return res;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+                return false;
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+                return false;
+            });
+        });
+    }
+
+    public setWindowLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            let res = this.setWindowLayoutFullScreen(this.nativeObj, isLayoutFullScreen);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public setSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                let res = this.setSystemBarProperties(this.nativeObj, systemBarProperties);
+                return res;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+                return false;
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+                return false;
+            });
+        });
+    }
+
+    public setSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            let res = this.setSystemBarProperties(this.nativeObj, systemBarProperties);
+            return res;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation: boolean): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                let res = this.setSpecificSystemBarEnabled(this.nativeObj, name, enable, enableAnimation);
+                return res;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+                return false;
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+                return false;
+            });
+        });
+    }
 
     public setColorSpace(colorSpace: ColorSpace): Promise<int> {
         return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
@@ -776,7 +1414,7 @@ export class WindowInternal implements Window {
             });
         });
     }
-    
+
     public setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<int>): void {
         taskpool.execute((): int => {
             this.setPreferredOrientationSync(this.nativeObj, orientation as int);
@@ -991,7 +1629,17 @@ export class WindowInternal implements Window {
 export interface Window {
     getWindowDecorHeight(): int;
     setWindowBackgroundColorSync(color: string): int;
-
+    setImmersiveModeEnabledState(enable: boolean): int;
+    setWindowDecorVisible(isVisible: boolean): int;
+    setWindowDecorHeight(height: int): int;
+    getWindowProperties(): WindowProperties;
+    isWindowSupportWideGamut(): Promise<boolean>;
+    isWindowSupportWideGamut(callback: AsyncCallback<boolean>): void;
+    setWindowLayoutFullScreen(isLayoutFullScreen: boolean): Promise<int>;
+    setWindowLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<int>): void;
+    setSystemBarProperties(systemBarProperties: SystemBarProperties): Promise<int>;
+    setSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<int>): void;
+    setSpecificSystemBarEnabled(name: String, enable: boolean, enableAnimation: boolean): Promise<int>;
     setColorSpace(colorSpace: ColorSpace): Promise<int>;
     setColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<int>): void;
     getLastWindow(ctx: BaseContext): Promise<Window>;

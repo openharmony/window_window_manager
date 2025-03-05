@@ -20,7 +20,58 @@ function main() {
     }
     ws.loadContent('ohos.test', callback);
 
+    ws.getMainWindowSync();
+
+    ws.getMainWindow().then((res:window.Window)=>{
+      console.println('[ANI]getMainWindow primise');
+    }).catch((e:NullishType)=>{
+      console.println('[ANI]getMainWindow catch');
+    });
+
+    ws.getMainWindow(()=>{
+      console.println('[ANI]getMainWindow callback');
+    });
+
     let w = window.CreateWindow(0);
+
+    w.isWindowSupportWideGamut().then((res:boolean)=>{
+      console.println('[ANI]isWindowSupportWideGamut primise' + res);
+    }).catch((e:NullishType)=>{
+      console.println('[ANI]isWindowSupportWideGamut catch');
+    });
+
+    w.isWindowSupportWideGamut(()=>{
+      console.println('[ANI]wideGamut callback');
+    });
+
+    w.setWindowLayoutFullScreen(true).then((res:int)=>{
+      console.println('[ANI]setWindowLayoutFullScree primise' + res);
+    }).catch((e:NullishType)=>{
+      console.println('[ANI]setWindowLayoutFullScreen catch');
+    });
+
+    w.setWindowLayoutFullScreen(false, ()=>{
+      console.println('[ANI]setWindowLayoutFullScreen callback');
+    });
+
+    let systemBarProperties = new window.SystemBarPropertiesInternal();
+    w.setSystemBarProperties(systemBarProperties).then((res:int)=>{
+      console.println('[ANI]setSystemBarProperties primise' + res);
+    }).catch((e:NullishType)=>{
+      console.println('[ANI]setSystemBarProperties catch');
+    });
+
+    w.setSystemBarProperties(systemBarProperties, ()=>{
+      console.println('[ANI]setSystemBarProperties callback');
+    });
+
+    w.setSpecificSystemBarEnabled('w', false, false).then((res:int)=>{
+      console.println('[ANI]setSpecificSystemBarEnabled primise' + res);
+    }).catch((e:NullishType)=>{
+      console.println('[ANI]setSpecificSystemBarEnabled catch');
+    });
+
+
     w.getWindowDecorHeight();
     w.setWindowBackgroundColorSync('0xFFFFFF');
     w.setColorSpace(window.ColorSpace.DEFAULT).then((ret: int) => {
@@ -57,6 +108,13 @@ function main() {
     w.off('windowSizeChange', cb);
     w.on('windowStatusChange', cb);
     w.off('windowStatusChange', cb);
+
+    w.setImmersiveModeEnabledState(false);
+    w.setWindowDecorVisible(false);
+    w.setWindowDecorHeight(100);
+    w.getWindowProperties();
+    w.setSystemBarProperties(systemBarProperties);
+    w.setSpecificSystemBarEnabled('w', false, false);
     console.println('ok');
 }
 
