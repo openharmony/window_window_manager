@@ -790,6 +790,9 @@ void NapiSetNamedProperty(napi_env env, napi_value objValue, sptr<DisplayInfo> i
         info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
         napi_set_named_property(env, objValue, "x", CreateJsValue(env, info->GetX()));
         napi_set_named_property(env, objValue, "y", CreateJsValue(env, info->GetY()));
+    } else {
+        napi_set_named_property(env, objValue, "x", NapiGetUndefined(env));
+        napi_set_named_property(env, objValue, "y", NapiGetUndefined(env));
     }
     napi_set_named_property(env, objValue, "sourceMode", CreateJsValue(env, info->GetDisplaySourceMode()));
 }
