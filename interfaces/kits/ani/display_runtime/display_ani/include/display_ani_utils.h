@@ -33,9 +33,7 @@ static ani_object convertRect(DMRect rect, ani_env* env);
 
 static ani_array_ref convertRects(std::vector<DMRect> rects, ani_env* env);
 
-static ani_object convertDisplay(sptr<Display> display, ani_env* env);
-
-static ani_array_ref convertDisplays(std::vector<sptr<Display>> displays, ani_env* env);
+static ani_status cvtDisplay(sptr<Display> display, ani_env* env, ani_object obj);
 
 static void GetStdString(ani_env *env, ani_string str, std::string &result);
 
@@ -45,6 +43,7 @@ static ani_status NewAniObjectNoParams(ani_env* env, ani_class cls, ani_object* 
 
 static ani_object CreateAniUndefined(ani_env* env);
 
+static void CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec);
 };
 }
 }

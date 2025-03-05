@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("../../../../windowmanager_aafwk.gni")
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
 
 config("display_common_config") {
   visibility = [ ":*" ]
@@ -24,7 +24,7 @@ config("display_common_config") {
     "../../../../utils/include",
     "../../../innerkits/wm",
     "../../../innerkits/dm",
-    "../../../../wm/include"
+    "../../../../wm/include",
   ]
 }
 
@@ -44,12 +44,12 @@ ohos_shared_library("displayani_kit") {
     debug = false
   }
   sources = [
-    "display_ani/src/display_ani_utils.cpp",
+    "display_ani/src/ani_err_utils.cpp",
     "display_ani/src/display_ani.cpp",
     "display_ani/src/display_ani_listener.cpp",
+    "display_ani/src/display_ani_manager.cpp",
     "display_ani/src/display_ani_register_manager.cpp",
-    "display_ani/src/ani_err_utils.cpp",
-    "display_ani/src/display_manager_ani.cpp"
+    "display_ani/src/display_ani_utils.cpp",
   ]
 
   configs = [
@@ -61,9 +61,9 @@ ohos_shared_library("displayani_kit") {
   public_configs = [ ":display_kit_public_config" ]
 
   deps = [
+    "../../../../dm:libdm",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
-    "../../../../dm:libdm",
   ]
 
   external_deps = [
@@ -82,9 +82,11 @@ ohos_shared_library("displayani_kit") {
 # abc generate
 generate_static_abc("display_abc") {
   arktsconfig = "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani/arktsconfig.json"
-  in_puts = ["./display_ani/arktsconfig.json",
-             "./display_ani/sts/display.ets",
-             "./display_ani/sts/display_entry.ets" ]
+  in_puts = [
+    "./display_ani/arktsconfig.json",
+    "./display_ani/sts/display.ets",
+    "./display_ani/sts/display_entry.ets",
+  ]
   dst_file = "$target_out_dir/display.abc"
   out_puts = [ "$target_out_dir/display.abc" ]
   timeout_limit = "120"
@@ -92,6 +94,8 @@ generate_static_abc("display_abc") {
 }
 
 group("display_ani") {
-  deps = [ #":displayani_kit",
-           ":display_abc" ]
+  deps = [
+    ":display_abc",
+    ":displayani_kit",
+  ]
 }

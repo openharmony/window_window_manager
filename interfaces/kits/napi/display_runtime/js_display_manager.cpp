@@ -25,7 +25,6 @@
 #include "js_display_listener.h"
 #include "js_display.h"
 #include "js_display_manager.h"
-#include "ani.h"
 
 namespace OHOS {
 namespace Rosen {

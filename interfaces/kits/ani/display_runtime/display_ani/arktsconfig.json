@@ -1,30 +1,30 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./sts",
     "paths": {
       "std": [
-        "../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/std"
+        "../../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/std"
       ],
       "escompat": [
-        "../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/escompat"
+        "../../../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/stdlib/escompat"
       ],
       "@koalaui/common": [
-        "../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/common/src"
+        "../../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/common/src"
       ],
       "@koalaui/compat": [
-        "../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/compat/src/arkts"
+        "../../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/compat/src/arkts"
       ],
       "@koalaui/interop": [
-        "../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/interop/src/arkts"
+        "../../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/interop/src/arkts"
       ],
       "@koalaui/runtime": [
-        "../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/runtime/src"
+        "../../../../../../../../../third_party/musl/temp_idlize/node_modules/@koalaui/runtime/src"
       ],
       "@ohos.display": [
-        "./sts/display.ets"
+        "./display.ets"
       ]
     },
-    "outDir": "../out", 
+    "outDir": "../cache", 
     "package": "@ohos"
   },
   "files": [

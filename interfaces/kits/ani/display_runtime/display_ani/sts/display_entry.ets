@@ -2,8 +2,7 @@ import display from '@ohos.display'
 
 loadLibrary('displayani_kit.z');
 
-function main()
-{
+function main() {
     let testout = display.isFoldable();
     console.log(testout);
 }

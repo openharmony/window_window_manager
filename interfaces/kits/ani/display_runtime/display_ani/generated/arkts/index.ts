@@ -1,5 +1,0 @@
-export * from "./OHDisplayNamespace"
-export * from "./OHGlobalScopeOhosDisplayMaterialized"
-export * from "./GlobalScope"
-export * from "././peers/type_check"
-export * from "././DISPLAYNativeModule"
