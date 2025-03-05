@@ -659,6 +659,24 @@ HWTEST_F(sceneSessionManagerProxyTest, RequestFocusStatus01, Function | SmallTes
 }
 
 /**
+ * @tc.name: RequestFocusStatusBySA01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RequestFocusStatusBySA01, Function | SmallTest | Level2)
+{
+    FocusChangeReason reason = FocusChangeReason::CLICK;
+    int32_t persistendId = 0;
+    bool isFocused = true;
+    bool byForeground = true;
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    auto result = sceneSessionManagerProxy->SceneSessionManagerProxy::RequestFocusStatusBySA(
+        persistendId, isFocused, byForeground, reason);
+    ASSERT_EQ(WMError::WM_OK, result);
+}
+
+/**
  * @tc.name: RaiseWindowToTop
  * @tc.desc: normal function
  * @tc.type: FUNC

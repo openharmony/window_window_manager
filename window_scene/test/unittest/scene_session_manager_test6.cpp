@@ -1957,6 +1957,7 @@ HWTEST_F(SceneSessionManagerTest6, UpdateAvoidArea, Function | SmallTest | Level
     int32_t persistentId = 0;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->UpdateAvoidArea(persistentId);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest6";

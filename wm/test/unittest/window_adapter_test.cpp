@@ -95,6 +95,24 @@ HWTEST_F(WindowAdapterTest, RequestFocus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: RequestFocusStatusBySA
+ * @tc.desc: WindowAdapter/RequestFocusStatusBySA
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, RequestFocusStatusBySA, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = 1;
+    bool isFocused = true;
+    bool byForeground = true;
+    FocusChangeReason reason = FocusChangeReason::CLICK;
+ 
+    auto result = windowAdapter.RequestFocusStatusBySA(
+        persistentId, isFocused, byForeground, reason);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: GetUIContentRemoteObj
  * @tc.desc: WindowAdapter/GetUIContentRemoteObj
  * @tc.type: FUNC

@@ -114,6 +114,8 @@ public:
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
+    virtual WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST);
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
         const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false);
     virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,

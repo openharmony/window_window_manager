@@ -2417,7 +2417,7 @@ WSError SessionProxy::SetFollowParentWindowLayoutEnabled(bool isFollow)
     TLOGD(WmsLogTag::WMS_SUB, "isFollow: %{public}d", isFollow);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_SUB, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -2438,7 +2438,7 @@ WSError SessionProxy::SetFollowParentWindowLayoutEnabled(bool isFollow)
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "read ret failed");
+        TLOGE(WmsLogTag::WMS_SUB, "read ret failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);

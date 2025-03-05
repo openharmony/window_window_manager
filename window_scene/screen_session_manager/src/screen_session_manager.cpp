@@ -110,7 +110,7 @@ static const int NOTIFY_EVENT_FOR_DUAL_FAILED = 0;
 static const int NOTIFY_EVENT_FOR_DUAL_SUCESS = 1;
 static const int NO_NEED_NOTIFY_EVENT_FOR_DUAL = 2;
 static bool g_isPcDevice = false;
-static uint32_t g_internalWidth = 3000;
+static uint32_t g_internalWidth = 3120;
 const unsigned int XCOLLIE_TIMEOUT_10S = 10;
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
 constexpr int32_t CAST_WIRED_PROJECTION_STOP = 1007;
@@ -123,6 +123,7 @@ constexpr bool REMOVE_VOTE = false;
 constexpr uint32_t OLED_60_HZ = 60;
 #endif
 constexpr uint32_t FOUR_K_WIDTH = 3840;
+constexpr uint32_t THREE_K_WIDTH = 3000;
 constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
@@ -130,6 +131,8 @@ constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
+const std::vector<std::string> ROTATION_DEFAULT = {"0", "1", "2", "3"};
+const std::vector<std::string> ORIENTATION_DEFAULT = {"0", "1", "2", "3"};
 
 const std::string SCREEN_UNKNOWN = "unknown";
 #ifdef WM_MULTI_SCREEN_ENABLE
@@ -1491,7 +1494,6 @@ std::vector<DisplayId> ScreenSessionManager::GetAllDisplayIds()
                 sessionIt.first);
             continue;
         }
-        CalculateXYPosition(screenSession);
         sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
         if (displayInfo == nullptr) {
             TLOGE(WmsLogTag::DMS, "error, displayInfo is nullptr.");
@@ -1520,7 +1522,7 @@ void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> screenSession
         TLOGI(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
-    if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && !screenSession->isInternal_) {
+    if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->isInternal_) {
         screenSession->SetXYPosition(0, 0);
     } else {
         ScreenId internalScreenId = GetInternalScreenId();
@@ -1538,16 +1540,6 @@ void ScreenSessionManager::CalculateXYPosition(sptr<ScreenSession> screenSession
         secondaryX = secondaryX + ~internalX + 1;
         secondaryY = secondaryY + ~internalY + 1;
         screenSession->SetXYPosition(secondaryX, secondaryY);
-    }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->GetScreenProperty().GetIsFakeInUse()) {
-        sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
-        if (fakeScreenSession == nullptr) {
-            TLOGI(WmsLogTag::DMS, "fakeScreenSession is nullptr");
-            return;
-        }
-        int32_t secondaryX = fakeScreenSession->GetScreenProperty().GetStartX();
-        fakeScreenSession->SetXYPosition(secondaryX, DISPLAY_B_HEIGHT);
-        fakeScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     }
 }
 
@@ -2109,13 +2101,30 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetPhyBounds(screenBounds);
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
-    property.SetPhysicalTouchBounds(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
-    property.SetInputOffsetY(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice());
+    property.SetPhysicalTouchBounds();
+    property.SetInputOffsetY();
     property.SetCurrentOffScreenRendering(false);
     property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
     property.SetScreenRealDPI();
+}
+
+void ScreenSessionManager::GetInternalWidth()
+{
+    ScreenId screenId = GetInternalScreenId();
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screen session is null");
+        return;
+    }
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    uint32_t screenWidth = screenProperty.GetScreenRealWidth();
+    uint32_t screenHeight = screenProperty.GetScreenRealHeight();
+    g_internalWidth = (screenWidth > screenHeight) ? screenWidth : screenHeight;
+    TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64", g_internalWidth is:%{public}u",
+        screenId, static_cast<uint32_t>(g_internalWidth));
+    return;
 }
 
 void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session,
@@ -2130,6 +2139,8 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         TLOGW(WmsLogTag::DMS, "xml isSupportOffScreenRendering is fasle");
         return;
     }
+    GetInternalWidth();
+    TLOGD(WmsLogTag::DMS, "g_internalWidth: %{public}u", static_cast<uint32_t>(g_internalWidth));
     float offScreenPPIThreshold = static_cast<float>(ScreenSceneConfig::GetOffScreenPPIThreshold());
     uint32_t screenWidth = property.GetBounds().rect_.GetWidth();
     uint32_t screenHeight = property.GetBounds().rect_.GetHeight();
@@ -2142,14 +2153,14 @@ void ScreenSessionManager::InitExtendScreenProperty(ScreenId screenId, sptr<Scre
         float scale = static_cast<float>(FOUR_K_WIDTH) / screenWidth;
         uint32_t screenAdjustHeight = static_cast<uint32_t>(std::round(screenHeight * scale));
         auto screenBounds = RRect({ 0, 0, FOUR_K_WIDTH, screenAdjustHeight }, 0.0f, 0.0f);
-        session->SetExtendProperty(screenBounds, false, false);
+        session->SetExtendProperty(screenBounds, false);
         session->SetAvailableArea({0, 0, FOUR_K_WIDTH, screenAdjustHeight});
         TLOGD(WmsLogTag::DMS, "screenWidth > 4K, screenId:%{public}" PRIu64"", screenId);
-    } else if (screenWidth < g_internalWidth && screenPPI < offScreenPPIThreshold) {
+    } else if (screenWidth < THREE_K_WIDTH && screenPPI < offScreenPPIThreshold) {
         float scale = static_cast<float>(g_internalWidth) / screenWidth;
         uint32_t screenAdjustHeight = static_cast<uint32_t>(std::round(screenHeight * scale));
         auto screenBounds = RRect({ 0, 0, g_internalWidth, screenAdjustHeight }, 0.0f, 0.0f);
-        session->SetExtendProperty(screenBounds, false, true);
+        session->SetExtendProperty(screenBounds, true);
         session->SetAvailableArea({0, 0, g_internalWidth, screenAdjustHeight});
         TLOGD(WmsLogTag::DMS, "screenWidth < g_internalWidth, screenId:%{public}" PRIu64"", screenId);
     } else {
@@ -5013,7 +5024,8 @@ sptr<ScreenSessionGroup> ScreenSessionManager::AddAsFirstScreenLocked(sptr<Scree
             point = {newScreen->GetScreenProperty().GetStartX(), newScreen->GetScreenProperty().GetStartY()};
         }
     }
-    if (!screenGroup->AddChild(newScreen, point, GetScreenSession(GetDefaultScreenId()))) {
+    if (!screenGroup->AddChild(newScreen, point, GetScreenSession(GetDefaultScreenId()),
+        IsExtendMode() && g_isPcDevice)) {
         TLOGE(WmsLogTag::DMS, "fail to add screen to group. screen=%{public}" PRIu64"", newScreen->screenId_);
         screenIdManager_.DeleteScreenId(smsGroupScreenId);
         return nullptr;
@@ -5384,12 +5396,12 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshot(Displa
         *errorCode = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
         return nullptr;
     }
-    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false)) {
+    if (system::GetBoolParameter("persist.edm.disallow_screenshot", false) && errorCode) {
         TLOGI(WmsLogTag::DMS, "snapshot disabled by edm!");
         *errorCode = DmErrorCode::DM_ERROR_NO_PERMISSION;
         return nullptr;
     }
-    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+    if (displayId == DISPLAY_ID_FAKE && !IsFakeDisplayExist() && errorCode) {
         *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
         return nullptr;
@@ -5425,7 +5437,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
         TLOGI(WmsLogTag::DMS, "snapshot was disabled by edm!");
         return nullptr;
     }
-    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist()) {
+    if (option.displayId_ == DISPLAY_ID_FAKE && !IsFakeDisplayExist() && errorCode) {
         TLOGE(WmsLogTag::DMS, "fake display not exist!");
         *errorCode = DmErrorCode::DM_ERROR_INVALID_SCREEN;
         return nullptr;
@@ -6569,7 +6581,7 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
     }
     if (screenSession != nullptr && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() &&
         foldStatus == FoldStatus::FOLDED) {
-            // sub screen default rotation off set
+            // sub screen default rotation offset is 270
             screenSession->SetDefaultDeviceRotationOffset(270);
     }
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
@@ -7614,6 +7626,107 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManager::GetAllDisplayPhysic
     return allDisplayPhysicalResolution_;
 }
 
+nlohmann::ordered_json ScreenSessionManager::GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,
+    std::vector<std::string> rotation, std::vector<std::string> orientation)
+{
+    nlohmann::ordered_json capabilityInfo;
+    capabilityInfo["foldStatus"] = std::to_string(static_cast<int32_t>(foldStatus));
+    capabilityInfo["foldDisplayMode"] = std::to_string(static_cast<int32_t>(displayMode));
+    capabilityInfo["rotation"] = rotation;
+    capabilityInfo["orientation"] = orientation;
+    return capabilityInfo;
+}
+
+std::string ScreenSessionManager::GetDisplayCapability()
+{
+    if (g_foldScreenFlag) {
+        if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+            return GetSecondaryDisplayCapability();
+        }
+        return GetFoldableDeviceCapability();
+    }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        return GetSuperFoldCapability();
+    }
+
+    std::vector<std::string> orientation = ORIENTATION_DEFAULT;
+    if (g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        orientation = {"1", "0", "3", "2"};
+    }
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    nlohmann::ordered_json capabilityInfo = GetCapabilityJson(FoldStatus::UNKNOWN, FoldDisplayMode::UNKNOWN,
+        ROTATION_DEFAULT, orientation);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(capabilityInfo));
+
+    return jsonDisplayCapabilityList.dump();
+}
+
+std::string ScreenSessionManager::GetSecondaryDisplayCapability()
+{
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    
+    nlohmann::ordered_json fCapabilityInfo = GetCapabilityJson(FoldStatus::FOLDED, FoldDisplayMode::MAIN,
+        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(fCapabilityInfo));
+    nlohmann::ordered_json nCapability = GetCapabilityJson(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND,
+        FoldDisplayMode::MAIN, ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(nCapability));
+    nlohmann::ordered_json mCapabilityInfo = GetCapabilityJson(FoldStatus::EXPAND, FoldDisplayMode::FULL,
+        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(mCapabilityInfo));
+    std::vector<std::string> orientation = {"3", "0", "1", "2"};
+    nlohmann::ordered_json gCapability = GetCapabilityJson(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND,
+        FoldDisplayMode::FULL, ROTATION_DEFAULT, orientation);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(gCapability));
+
+    std::string jsonStr = jsonDisplayCapabilityList.dump();
+    return jsonStr;
+}
+
+std::string ScreenSessionManager::GetFoldableDeviceCapability()
+{
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    FoldStatus expandStatus = FoldStatus::EXPAND;
+    FoldStatus foldStatus = FoldStatus::FOLDED;
+    FoldDisplayMode expandDisplayMode = FoldDisplayMode::FULL;
+    FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
+    if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+        expandDisplayMode = FoldDisplayMode::MAIN;
+        foldDisplayMode = FoldDisplayMode::SUB;
+    }
+    nlohmann::ordered_json expandCapabilityInfo = GetCapabilityJson(expandStatus, expandDisplayMode,
+        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(expandCapabilityInfo));
+    nlohmann::ordered_json foldCapabilityInfo = GetCapabilityJson(foldStatus, foldDisplayMode,
+        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(foldCapabilityInfo));
+
+    std::string jsonStr = jsonDisplayCapabilityList.dump();
+    return jsonStr;
+}
+
+std::string ScreenSessionManager::GetSuperFoldCapability()
+{
+    nlohmann::ordered_json jsonDisplayCapabilityList;
+    jsonDisplayCapabilityList["capability"] = nlohmann::json::array();
+    
+    nlohmann::ordered_json expandCapabilityInfo = GetCapabilityJson(FoldStatus::EXPAND, FoldDisplayMode::UNKNOWN,
+        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(expandCapabilityInfo));
+    nlohmann::ordered_json foldCapabilityInfo = GetCapabilityJson(FoldStatus::FOLDED, FoldDisplayMode::UNKNOWN,
+        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(foldCapabilityInfo));
+    nlohmann::ordered_json halfFoldCapabilityInfo = GetCapabilityJson(FoldStatus::HALF_FOLD, FoldDisplayMode::UNKNOWN,
+        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+    jsonDisplayCapabilityList["capability"].push_back(std::move(halfFoldCapabilityInfo));
+
+    std::string jsonStr = jsonDisplayCapabilityList.dump();
+    return jsonStr;
+}
+
 bool ScreenSessionManager::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -7672,10 +7785,11 @@ void ScreenSessionManager::InitFakeScreenSession(sptr<ScreenSession> screenSessi
         fakeScreenHeight = screenHeight - (static_cast<uint32_t>(creaseRect.posY_) + creaseRect.height_);
     }
     fakeScreenSession->UpdatePropertyByResolution(screenWidth, fakeScreenHeight);
+    fakeScreenSession->SetXYPosition(0, DISPLAY_B_HEIGHT);
+    fakeScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
     screenSession->UpdatePropertyByFakeBounds(screenWidth, fakeScreenHeight);
     screenSession->SetFakeScreenSession(fakeScreenSession);
     screenSession->SetIsFakeInUse(true);
-    CalculateXYPosition(screenSession);
 }
 
 DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

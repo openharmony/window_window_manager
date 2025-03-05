@@ -44,6 +44,8 @@ public:
     WSError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken) override;
     WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
+    WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
 
     WMError RegisterWindowManagerAgent(WindowManagerAgentType type,
