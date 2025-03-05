@@ -1001,7 +1001,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, StartUIAbilityBySCBTimeoutCheck, Func
     sceneSession->SetScbCoreEnabled(true);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = ssm_->SetAbilitySessionInfo(sceneSession);
     ASSERT_NE(abilitySessionInfo, nullptr);
-    std::shared_ptr<std::atomic<bool>> isColdStart = std::make_shared<std::atomic<bool>>(true);
+    bool isColdStart = true;
     ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo, isColdStart,
         static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)), 2097202);
     ASSERT_EQ(ssm_->StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo, isColdStart,
