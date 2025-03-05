@@ -215,6 +215,12 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         bool& hasFloatingShowing) override { return WMError::WM_OK; }
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         bool isLock) override { return WMError::WM_OK; }
+    WMError RegisterSessionLifecycleListenerById(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList) override { return WMError::WM_OK; }
+    WMError RegisterSessionLifecycleListenerByBundle(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList) override { return WMError::WM_OK; }
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
+        override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {

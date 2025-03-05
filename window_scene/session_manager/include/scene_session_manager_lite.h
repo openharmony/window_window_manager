@@ -84,6 +84,11 @@ public:
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override;
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override;
+    WMError RegisterSessionLifecycleListenerById(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList) override;
+    WMError RegisterSessionLifecycleListenerByBundle(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList) override;
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
 };
 } // namespace OHOS::Rosen
 
