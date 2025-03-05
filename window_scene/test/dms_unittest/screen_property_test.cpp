@@ -689,7 +689,6 @@ HWTEST_F(ScreenPropertyTest, SetXYPosition, Function | SmallTest | Level2)
     ASSERT_EQ(2000, property->GetY());
     property->SetXYPosition(retx_copy, rety_copy);
 }
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
