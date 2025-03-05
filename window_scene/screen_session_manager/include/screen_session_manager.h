@@ -352,6 +352,8 @@ public:
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
 
     std::string GetDisplayCapability() override;
+    nlohmann::ordered_json GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,
+        std::vector<std::string> rotation, std::vector<std::string> orientation);
     std::string GetSecondaryDisplayCapability();
     std::string GetFoldableDeviceCapability();
     std::string GetSuperFoldCapability();
