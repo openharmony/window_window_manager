@@ -46,7 +46,6 @@ public:
     virtual void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     virtual void NotifyDisplayModeChanged(FoldDisplayMode) override;
     virtual void NotifyAvailableAreaChanged(DMRect) override;
-    virtual void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override;
 private:
     static inline BrokerDelegator<DisplayManagerAgentProxy> delegator_;
 };
