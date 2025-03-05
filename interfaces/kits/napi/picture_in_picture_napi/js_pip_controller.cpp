@@ -671,28 +671,18 @@ napi_value JsPipController::PictureInPicturePossible(napi_env env, napi_callback
 napi_value JsPipController::OnPictureInPicturePossible(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [this, env, task = napiAsyncTask,
-        weak = wptr<PictureInPictureController>(pipController_)]() {
-        auto pipController = weak.promote();
-        if (pipController == nullptr) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
-                "PiP internal error."));
-            return;
-        }
-        bool isPiPPossible = false;
-        pipController->GetPipPossible(isPiPPossible);
-        task->Resolve(env, CreateJsValue(env, isPiPPossible));
-        if (isPiPPossible) {
-            TLOGI(WmsLogTag::WMS_PIP, "OnPictureInPicturePossible device is supported");
-        }
-    };
-    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+    bool isPiPSupported = false;
+    if (pipController_ == nullptr) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+            "PiP internal error."));
+        TLOGE(WmsLogTag::WMS_PIP, "error, controller is nullptr");
+        return CreateJsValue(env, isPiPSupported);
     }
-    return result;
+    pipController_->GetPipPossible(isPiPSupported);
+    if (isPiPSupported) {
+        TLOGI(WmsLogTag::WMS_PIP, "OnPictureInPicturePossible device is supported");
+    }
+    return CreateJsValue(env, isPiPSupported);
 }
 } // namespace Rosen
 } // namespace OHOS
