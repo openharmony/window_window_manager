@@ -26,6 +26,7 @@
 
 #include "ability_context.h"
 #include "app_mgr_client.h"
+#include "extension/extension_business_info.h"
 #include "fold_screen_state_internel.h"
 #include "input_transfer_station.h"
 #include "singleton.h"
