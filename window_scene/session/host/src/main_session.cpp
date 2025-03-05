@@ -467,7 +467,7 @@ WSError MainSession::UpdateFlag(const std::string& flag)
         if (session->onUpdateFlagFunc_) {
             session->onUpdateFlagFunc_(flag);
             TLOGND(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d flag: %{public}s",
-                where, session->GetPersistenetId(), flag.c_str());
+                where, session->GetPersistentId(), flag.c_str());
         }
     }, __func__);
     return WSError::WS_OK;
