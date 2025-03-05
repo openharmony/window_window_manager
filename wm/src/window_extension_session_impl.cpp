@@ -972,6 +972,21 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
     return WMError::WM_OK;
 }
 
+void WindowSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
+{
+    TLOGI(WmsLogTag::WMS_IMMS,
+          "win [%{public}d %{public}s] type %{public}d area %{public}s",
+          GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
+    version = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
+    if (version < 18 && WindowHelper::IsSystemWindow(GetParentWindowType())) {
+        TLOGI(WmsLogTag::WMS_IMMS,
+            "win [%{public}d %{public}s] type %{public}d api %{public}d not supported",
+            GetPersistentId(), GetWindowName().c_str(), type, version);
+        return;
+    }
+    WindowSessionImpl::NotifyAvoidAreaChange(avoidArea, type);
+}
+
 WMError WindowExtensionSessionImpl::RegisterAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener)
 {
     return RegisterExtensionAvoidAreaChangeListener(listener);
