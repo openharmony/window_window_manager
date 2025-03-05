@@ -9597,6 +9597,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
         if (isNeedUpdate) {
             TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isVisible %{public}u bar area %{public}s",
                 where, isVisible, barArea.ToString().c_str());
+            UpdateRootSceneAvoidArea();
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionAINavigationBarChange(persistentId);
             }
