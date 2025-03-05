@@ -23,29 +23,29 @@ namespace OHOS {
 namespace Rosen {
 constexpr std::size_t TEST_CACHE_CAPACITY = 3;
 
-class LRUCacheTest : public testing::Test {
+class LruCacheTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
 private:
-    std::unique_ptr<LRUCache> testLRUCache_;
+    std::unique_ptr<LruCache> testLruCache_;
 };
 
-void LRUCacheTest::SetUpTestCase()
+void LruCacheTest::SetUpTestCase()
 {
 }
 
-void LRUCacheTest::TearDownTestCase()
+void LruCacheTest::TearDownTestCase()
 {
 }
 
-void LRUCacheTest::SetUp()
+void LruCacheTest::SetUp()
 {
 }
 
-void LRUCacheTest::TearDown()
+void LruCacheTest::TearDown()
 {
 }
 
@@ -54,14 +54,14 @@ void LRUCacheTest::TearDown()
  * @tc.desc: test function Visit
  * @tc.type: FUNC
  */
-HWTEST_F(LRUCacheTest, Visit, Function | SmallTest | Level2)
+HWTEST_F(LruCacheTest, Visit, Function | SmallTest | Level2)
 {
-    testLRUCache_ = std::make_unique<LRUCache>(TEST_CACHE_CAPACITY);
-    bool res = testLRUCache_->Visit(30);
+    testLruCache_ = std::make_unique<LruCache>(TEST_CACHE_CAPACITY);
+    bool res = testLruCache_->Visit(30);
     ASSERT_EQ(res, false);
 
-    testLRUCache_->Put(30);
-    res = testLRUCache_->Visit(30);
+    testLruCache_->Put(30);
+    res = testLruCache_->Visit(30);
     ASSERT_EQ(res, true);
 }
 
@@ -70,15 +70,15 @@ HWTEST_F(LRUCacheTest, Visit, Function | SmallTest | Level2)
  * @tc.desc: test function Put
  * @tc.type: FUNC
  */
-HWTEST_F(LRUCacheTest, Put, Function | SmallTest | Level2)
+HWTEST_F(LruCacheTest, Put, Function | SmallTest | Level2)
 {
-    testLRUCache_ = std::make_unique<LRUCache>(TEST_CACHE_CAPACITY);
-    int32_t res = testLRUCache_->Put(30);
+    testLruCache_ = std::make_unique<LruCache>(TEST_CACHE_CAPACITY);
+    int32_t res = testLruCache_->Put(30);
     ASSERT_EQ(res, -1);
 
-    testLRUCache_->Put(31);
-    testLRUCache_->Put(32);
-    res = testLRUCache_->Put(33);
+    testLruCache_->Put(31);
+    testLruCache_->Put(32);
+    res = testLruCache_->Put(33);
     ASSERT_EQ(res, 30);
 }
 
@@ -87,16 +87,16 @@ HWTEST_F(LRUCacheTest, Put, Function | SmallTest | Level2)
  * @tc.desc: test function Remove
  * @tc.type: FUNC
  */
-HWTEST_F(LRUCacheTest, Remove, Function | SmallTest | Level2)
+HWTEST_F(LruCacheTest, Remove, Function | SmallTest | Level2)
 {
-    testLRUCache_ = std::make_unique<LRUCache>(TEST_CACHE_CAPACITY);
-    int32_t res = testLRUCache_->Put(30);
+    testLruCache_ = std::make_unique<LruCache>(TEST_CACHE_CAPACITY);
+    int32_t res = testLruCache_->Put(30);
     ASSERT_EQ(res, -1);
 
-    testLRUCache_->Put(31);
-    testLRUCache_->Put(32);
-    testLRUCache_->Remove(32);
-    res = testLRUCache_->Put(33);
+    testLruCache_->Put(31);
+    testLruCache_->Put(32);
+    testLruCache_->Remove(32);
+    res = testLruCache_->Put(33);
     ASSERT_EQ(res, -1);
 }
 }

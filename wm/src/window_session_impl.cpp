@@ -60,8 +60,8 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
-constexpr int32_t API_VERSION_15 = 15;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
+constexpr int32_t API_VERSION_18 = 18;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 
 /*
  * DFX
@@ -1852,6 +1852,10 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
         TLOGE(WmsLogTag::WMS_FOCUS, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
     property_->SetWindowDelayRaiseEnabled(isEnabled);
     TLOGI(WmsLogTag::WMS_FOCUS, "isEnabled: %{public}d", isEnabled);
     return WMError::WM_OK;
@@ -2403,7 +2407,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return err;
     }
     height = static_cast<int32_t>(height / vpr);
-    if (GetTargetAPIVersion() >= 15) { // 15: isolated version
+    if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
         // SetDecorHeight and GetDecorHeight round down twice, resulting in a 1vp precision loss.
         if (decorHeight_ - height == 1) {
             height = decorHeight_;
@@ -2472,7 +2476,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     res = uiContent->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
         TLOGE(WmsLogTag::WMS_DECOR, "GetContainerModalButtonsRect failed");
-        if (GetTargetAPIVersion() >= API_VERSION_15) { // 15: isolated version
+        if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
             titleButtonRect.ResetRect();
         }
         return WMError::WM_OK;
@@ -2533,7 +2537,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
                 return;
             }
             TitleButtonRect titleButtonRect;
-            if (window->GetTargetAPIVersion() >= API_VERSION_15 && // 15: isolated version
+            if (window->GetTargetAPIVersion() >= API_VERSION_18 && // 18: isolated version
                 titleButtonLeftRect.IsUninitializedRect()) {
                 window->NotifyWindowTitleButtonRectChange(titleButtonRect);
                 return;
@@ -3833,18 +3837,18 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    auto task = [this, avoidArea, type] {
-        if (lastAvoidAreaMap_[type] != *avoidArea) {
-            lastAvoidAreaMap_[type] = *avoidArea;
-            NotifyAvoidAreaChange(avoidArea, type);
-            UpdateViewportConfig(GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
+    auto task = [weak = wptr(this), avoidArea, type] {
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        if (window->lastAvoidAreaMap_[type] != *avoidArea) {
+            window->lastAvoidAreaMap_[type] = *avoidArea;
+            window->NotifyAvoidAreaChange(avoidArea, type);
+            window->UpdateViewportConfig(window->GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
         }
     };
-    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        task();
-    } else {
-        handler_->PostSyncTask(std::move(task), __func__);
-    }
+    handler_->PostImmediateTask(std::move(task), __func__);
     return WSError::WS_OK;
 }
 

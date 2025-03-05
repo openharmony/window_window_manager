@@ -873,10 +873,9 @@ void ScreenSession::SetVirtualScreenFlag(VirtualScreenFlag screenFlag)
 
 void ScreenSession::UpdateTouchBoundsAndOffset()
 {
-    bool isSecondaryDevice = FoldScreenStateInternel::IsSecondaryDisplayFoldDevice();
-    property_.SetPhysicalTouchBounds(isSecondaryDevice);
-    property_.SetInputOffsetY(isSecondaryDevice);
-    if (isSecondaryDevice) {
+    property_.SetPhysicalTouchBounds();
+    property_.SetInputOffsetY();
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         property_.SetValidHeight(property_.GetBounds().rect_.GetHeight());
         property_.SetValidWidth(property_.GetBounds().rect_.GetWidth());
     }
@@ -1647,7 +1646,7 @@ void ScreenSession::SetPrivateSessionForeground(bool hasPrivate)
     hasPrivateWindowForeground_ = hasPrivate;
 }
 
-void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint)
+void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend)
 {
     std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
@@ -1668,10 +1667,15 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
     displayNode_->SetDisplayOffset(startPoint.posX_, startPoint.posY_);
     uint32_t width = 0;
     uint32_t height = 0;
-    sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
-    if (abstractScreenModes != nullptr) {
-        height = abstractScreenModes->height_;
-        width = abstractScreenModes->width_;
+    if (isExtend) {
+        width = property_.GetBounds().rect_.GetWidth();
+        height = property_.GetBounds().rect_.GetHeight();
+    } else {
+        sptr<SupportedScreenModes> abstractScreenModes = GetActiveScreenMode();
+        if (abstractScreenModes != nullptr) {
+            height = abstractScreenModes->height_;
+            width = abstractScreenModes->width_;
+        }
     }
     RSScreenType screenType;
     DmsXcollie dmsXcollie("DMS:InitRSDisplayNode:GetScreenType", XCOLLIE_TIMEOUT_5S);
@@ -1753,7 +1757,7 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
 }
 
 bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPoint,
-                                  sptr<ScreenSession> defaultScreenSession)
+                                  sptr<ScreenSession> defaultScreenSession, bool isExtend)
 {
     if (smsScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "AddChild, smsScreen is nullptr.");
@@ -1769,7 +1773,7 @@ bool ScreenSessionGroup::AddChild(sptr<ScreenSession>& smsScreen, Point& startPo
     if (!GetRSDisplayNodeConfig(smsScreen, config, defaultScreenSession)) {
         return false;
     }
-    smsScreen->InitRSDisplayNode(config, startPoint);
+    smsScreen->InitRSDisplayNode(config, startPoint, isExtend);
     smsScreen->lastGroupSmsId_ = smsScreen->groupSmsId_;
     smsScreen->groupSmsId_ = screenId_;
     screenSessionMap_.insert(std::make_pair(screenId, std::make_pair(smsScreen, startPoint)));
@@ -1876,10 +1880,9 @@ void ScreenSession::SetDisplayBoundary(const RectF& rect, const uint32_t& offset
     property_.SetBounds(RRect(rect, 0.0f, 0.0f));
 }
 
-void ScreenSession::SetExtendProperty(RRect bounds, bool isPhysicalTouchBounds, bool isCurrentOffScreenRendering)
+void ScreenSession::SetExtendProperty(RRect bounds, bool isCurrentOffScreenRendering)
 {
     property_.SetBounds(bounds);
-    property_.SetPhysicalTouchBounds(isPhysicalTouchBounds);
     property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
 }
 
@@ -2002,6 +2005,7 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleX,
         .scaleY = scaleY,
+        .useDma = true,
     };
     SetScreenSnapshotRect(config);
     {

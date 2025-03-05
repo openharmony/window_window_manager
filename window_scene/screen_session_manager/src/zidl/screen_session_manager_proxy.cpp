@@ -3642,6 +3642,29 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManagerProxy::GetAllDisplayP
     return allPhysicalSize;
 }
 
+std::string ScreenSessionManagerProxy::GetDisplayCapability()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return std::string {};
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return std::string {};
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPABILITY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return std::string {};
+    }
+    return reply.ReadString();
+}
+
 bool ScreenSessionManagerProxy::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)
 {
     sptr<IRemoteObject> remote = Remote();

@@ -17,26 +17,27 @@
 #define OHOS_ROSEN_LRUCACHE_H
 
 #include <list>
-#include <unordered_map>
 #include <mutex>
+#include <unordered_map>
 
 namespace OHOS::Rosen {
 namespace {
 constexpr int32_t UNDEFINED_REMOVED_KEY = -1;
 } // namespace
-class LRUCache {
+class LruCache {
 public:
-    LRUCache(std::size_t capacity) : capacity_(capacity) {}
+    LruCache(std::size_t capacity) : capacity_(capacity) {}
 
     bool Visit(int32_t key);
     int32_t Put(int32_t key);
     void Remove(int32_t key);
 
 private:
+    bool LocalVisit(int32_t key);
     const std::size_t capacity_;
     std::list<int32_t> cacheList_;
     std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
-    mutable std::mutex LRUCacheMutex_;
+    mutable std::mutex lruCacheMutex_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_LRUCACHE_H

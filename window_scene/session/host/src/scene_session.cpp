@@ -68,10 +68,9 @@ constexpr const char* APP_CLONE_INDEX = "ohos.extra.param.key.appCloneIndex";
 constexpr float MINI_FLOAT_SCALE = 0.3f;
 constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
-constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 constexpr WSRectF VELOCITY_RELOCATION_TO_TOP = {0.0f, -10.0f, 0.0f, 0.0f};
 constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
-constexpr int32_t API_VERSION_16 = 16;
+constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 
@@ -230,10 +229,16 @@ bool SceneSession::IsShowOnLockScreen(uint32_t lockScreenZOrder)
 
     // current window on lock screen jurded by zorder
     if (zOrder_ >= lockScreenZOrder) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is no more than lockScreenZOrder");
+        TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: zOrder_ is more than lockScreenZOrder");
         return true;
     }
 
+    if (zOrder_ == 0) {
+        if (auto mainSession = GetMainSession()) {
+            TLOGI(WmsLogTag::WMS_UIEXT, "UIExtOnLock: mainSession zOrder_: %{public}d", mainSession->GetZOrder());
+            return mainSession->GetZOrder() >= lockScreenZOrder;
+        }
+    }
     return false;
 }
 
@@ -1606,8 +1611,8 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
             GetPersistentId(), GetScreenId());
         return;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, lastRect: %{public}s, currRect: %{public}s",
-        GetPersistentId(), winRect_.ToString().c_str(), rect.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, reason: %{public}u, lastRect: %{public}s, currRect: %{public}s",
+        GetPersistentId(), reason, winRect_.ToString().c_str(), rect.ToString().c_str());
     if (reason != SizeChangeReason::RESIZE) {
         configDisplayId_ = configDisplayId;
     }
@@ -1618,6 +1623,8 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
         return;
     }
     auto clientDisplayId = clientDisplayId_;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "winId: %{public}d, clientDisplayId: %{public}" PRIu64,
+        GetPersistentId(), clientDisplayId);
     if (WindowHelper::IsSubWindow(GetWindowType()) || WindowHelper::IsSystemWindow(GetWindowType())) {
         UpdateDisplayIdByParentSession(clientDisplayId);
     }
@@ -1630,8 +1637,7 @@ void SceneSession::UpdateSessionRectPosYFromClient(SizeChangeReason reason, Disp
     if (rect.posY_ >= 0) {
         const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
             PcFoldScreenManager::GetInstance().GetDisplayRects();
-        auto lowerScreenPosY =
-            defaultDisplayRect.height_ - foldCreaseRect.height_ / SUPER_FOLD_DIVIDE_FACTOR + foldCreaseRect.height_;
+        auto lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
         if (rect.posY_ < lowerScreenPosY) {
             rect.posY_ += lowerScreenPosY;
         }
@@ -2235,7 +2241,7 @@ bool SceneSession::CheckGetAvoidAreaAvailable(AvoidAreaType type, int32_t apiVer
     WindowMode mode = GetWindowMode();
     WindowType winType = GetWindowType();
     if (WindowHelper::IsSubWindow(winType)) {
-        if (apiVersion >= API_VERSION_16 &&
+        if (apiVersion >= API_VERSION_18 &&
             GetSessionProperty()->GetAvoidAreaOption() &
             static_cast<uint32_t>(AvoidAreaOption::ENABLE_APP_SUB_WINDOW)) {
             TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d option %{public}d",
@@ -6192,11 +6198,11 @@ void SceneSession::SetHighlightChangeNotifyFunc(const NotifyHighlightChangeFunc&
 
 void SceneSession::RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func)
 {
-    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
     if (!func) {
         TLOGE(WmsLogTag::WMS_SUB, "func is null");
         return;
     }
+    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
     notifySurfaceBoundsChangeFuncMap_[sessionId] = func;
 }
 
@@ -6221,9 +6227,15 @@ void SceneSession::SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func)
         TLOGW(WmsLogTag::WMS_SUB, "func is null");
         return;
     }
-    func(isFollowParentLayout_);
-    std::lock_guard lock(followParentRectFuncMutex_);
-    followParentRectFunc_ = func;
+    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
+            return;
+        }
+        func(session->isFollowParentLayout_);
+        session->followParentRectFunc_ = std::move(func);
+    });
 }
 
 WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
@@ -6244,34 +6256,37 @@ WSError SceneSession::SetFollowParentWindowLayoutEnabled(bool isFollow)
         TLOGW(WmsLogTag::WMS_SUB, "not surppot more than 1 level window");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    isFollowParentLayout_ = isFollow;
-    {
-        std::lock_guard lock(followParentRectFuncMutex_);
-        if (!followParentRectFunc_) {
-            TLOGW(WmsLogTag::WMS_SUB, "func is null");
-            return WSError::WS_ERROR_INVALID_OPERATION;
-        }
-        followParentRectFunc_(isFollow);
-    }
-
-    // if parent is null, don't need follow move drag
-    if (!parentSession_) {
-        TLOGW(WmsLogTag::WMS_SUB, "parent is null");
-        return WSError::WS_OK;
-    }
-    if (!isFollow) {
-        parentSession_->UnregisterNotifySurfaceBoundsChangeFunc(GetPersistentId());
-        return WSError::WS_OK;
-    }
-    auto task =  [weak = wptr<SceneSession>(this)](const WSRect& rect, bool isGlobal, bool needFlush) {
-        auto session = weak.promote();
+    PostTask([weakThis = wptr(this), isFollow = isFollow,  where = __func__] {
+        auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_SUB, "session has been destroy");
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
             return;
         }
-        session->SetSurfaceBounds(rect, isGlobal, needFlush);
-    };
-    parentSession_->RegisterNotifySurfaceBoundsChangeFunc(GetPersistentId(), std::move(task));
+        session->isFollowParentLayout_ = isFollow;
+        if (session->followParentRectFunc_) {
+            session->followParentRectFunc_(isFollow);
+        } else {
+            TLOGI(WmsLogTag::WMS_SUB, "func is null");
+        }
+        // if parent is null, don't need follow move drag
+        if (!session->parentSession_) {
+            TLOGW(WmsLogTag::WMS_SUB, "parent is null");
+            return;
+        }
+        if (!isFollow) {
+            session->parentSession_->UnregisterNotifySurfaceBoundsChangeFunc(session->GetPersistentId());
+            return;
+        }
+        auto task = [weak = weakThis](const WSRect& rect, bool isGlobal, bool needFlush) {
+            auto session = weak.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_SUB, "session has been destroy");
+                return;
+            }
+            session->SetSurfaceBounds(rect, isGlobal, needFlush);
+        };
+        session->parentSession_->RegisterNotifySurfaceBoundsChangeFunc(session->GetPersistentId(), std::move(task));
+    });
     return WSError::WS_OK;
 }
 
