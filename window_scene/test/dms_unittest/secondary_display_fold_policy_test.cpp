@@ -421,6 +421,74 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetSecondaryDisplayModeChangeStatus01, 
     policy.SetSecondaryDisplayModeChangeStatus(false);
     EXPECT_EQ(policy.secondaryPengdingTask_, 0);
 }
+
+/**
+ * @tc.name: GetScreenSnapshotRect
+ * @tc.desc: test function : GetScreenSnapshotRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, GetScreenSnapshotRect, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    Drawing::Rect targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
+    snapshotRect = {0, 0, 2232, 1008};
+    targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::FULL;
+    snapshotRect = {0, 1136, 2232, 3184};
+    targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    snapshotRect = {0, 0, 2232, 3184};
+    targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+}
+
+/**
+ * @tc.name: SetMainScreenRegion
+ * @tc.desc: test function : SetMainScreenRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SetMainScreenRegion, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    DMRect mainScreenRegion = {0, 0, 0, 0};
+    DMRect targetMainScreenRegion = {0, 0, 0, 0};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
+    mainScreenRegion = {0, 0, 0, 0};
+    targetMainScreenRegion = {0, 0, 2232, 3184};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::FULL;
+    mainScreenRegion = {0, 0, 0, 0};
+    targetMainScreenRegion = {0, 1136, 2232, 2048};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    mainScreenRegion = {0, 0, 0, 0};
+    targetMainScreenRegion = {0, 0, 2232, 3184};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -134,6 +134,8 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PC = 50;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 8;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 3;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
+constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 3000;
+constexpr uint64_t START_UI_ABILITY_TIMEOUT = 3000;
 
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
@@ -337,6 +339,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 
     listenerController_ = std::make_shared<SessionListenerController>();
     windowFocusController_ = sptr<WindowFocusController>::MakeSptr();
+    ffrtQueueHelper_ = std::make_shared<FfrtQueueHelper>();
 }
 
 SceneSessionManager::~SceneSessionManager()
@@ -2374,6 +2377,27 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
     }
 }
 
+int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+    const uint32_t& windowStateChangeReason, bool& isColdStart)
+{
+    std::shared_ptr<int32_t> retCode = std::make_shared<int32_t>(0);
+    std::shared_ptr<bool> coldStartFlag = std::make_shared<bool>(false);
+    bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([abilitySessionInfo, coldStartFlag, retCode,
+        windowStateChangeReason] {
+        auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
+            *coldStartFlag, windowStateChangeReason);
+        *retCode = static_cast<int32_t>(result);
+        TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability retCode: %{public}d", *retCode);
+    }, START_UI_ABILITY_TIMEOUT);
+
+    if (isTimeout) {
+        TLOGE(WmsLogTag::WMS_LIFE, "start ui ability timeout, currentUserId: %{public}d", currentUserId_.load());
+        return static_cast<int32_t>(WSError::WS_ERROR_START_UI_ABILITY_TIMEOUT);
+    }
+    isColdStart = *coldStartFlag;
+    return *retCode;
+}
+
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSession)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession);
@@ -2383,8 +2407,8 @@ int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<SceneSession>& sceneSessio
 int32_t SceneSessionManager::StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo)
 {
     bool isColdStart = false;
-    return AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, isColdStart,
-        static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+    return StartUIAbilityBySCBTimeoutCheck(abilitySessionInfo,
+        static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
 }
 
 int32_t SceneSessionManager::ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession,
@@ -2449,8 +2473,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     if (!systemConfig_.backgroundswitch || sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc()) {
         TLOGI(WmsLogTag::WMS_MAIN, "Begin StartUIAbility: %{public}d system: %{public}u", persistentId,
             static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-        errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sceneSessionInfo, isColdStart,
-            static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+        errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
+            static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
     } else {
         TLOGI(WmsLogTag::WMS_MAIN, "Background switch on, isNewActive %{public}d state %{public}u",
             isNewActive, sceneSession->GetSessionState());
@@ -2458,8 +2482,8 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             sceneSession->GetSessionState() == SessionState::STATE_END) {
             TLOGI(WmsLogTag::WMS_MAIN, "Call StartUIAbility: %{public}d system: %{public}u", persistentId,
                 static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
-            errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sceneSessionInfo, isColdStart,
-                static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+            errCode = StartUIAbilityBySCBTimeoutCheck(sceneSessionInfo,
+                static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), isColdStart);
         } else {
             TLOGI(WmsLogTag::WMS_MAIN, "NotifySessionForeground: %{public}d", persistentId);
             sceneSession->NotifySessionForeground(1, true);
@@ -3613,6 +3637,25 @@ void SceneSessionManager::RegisterBindDialogTargetListener(const sptr<SceneSessi
     }, __func__);
 }
 
+void SceneSessionManager::SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession)
+{
+    if (newSession->GetSessionProperty()->GetDisplayId() == DISPLAY_ID_INVALID) {
+        uint64_t defaultDisplayId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
+        int32_t focusSessionId = windowFocusController_->GetFocusedSessionId(defaultDisplayId);
+        auto focusedSession = GetSceneSession(focusSessionId);
+        DisplayId displayId = defaultDisplayId;
+        if (focusedSession != nullptr && focusedSession->GetSessionProperty()->GetDisplayId() != DISPLAY_ID_INVALID) {
+            displayId = focusedSession->GetSessionProperty()->GetDisplayId();
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "id: %{public}d, focus id %{public}d, display id: %{public}" PRIu64,
+                newSession->GetPersistentId(), focusedSession->GetPersistentId(), displayId);
+        } else {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get focus id failed, use default displayId %{public}" PRIu64, displayId);
+        }
+        newSession->SetScreenId(displayId);
+        newSession->GetSessionProperty()->SetDisplayId(displayId);
+    }
+}
+
 void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,
     sptr<WindowSessionProperty> property, const WindowType& type)
 {
@@ -3637,6 +3680,8 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
                 && createKeyboardSessionFunc_) {
                 createKeyboardSessionFunc_(newSession, newSession->GetKeyboardPanelSession());
             } else if (createSystemSessionFunc_) {
+                SetFocusedSessionDisplayIdIfNeeded(newSession);
+                property->SetDisplayId(newSession->GetSessionProperty()->GetDisplayId());
                 createSystemSessionFunc_(newSession);
             }
             TLOGD(WmsLogTag::WMS_LIFE, "Create system session, id:%{public}d, type: %{public}d",
@@ -4105,8 +4150,8 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             sceneSession->GetWindowType(), sceneSession->GetSessionState());
         sceneSession->SetMinimizedFlagByUserSwitch(false);
         bool isColdStart = false;
-        int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(
-            abilitySessionInfo, isColdStart, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH));
+        int32_t errCode = StartUIAbilityBySCBTimeoutCheck(
+            abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH), isColdStart);
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
             ExceptionInfo exceptionInfo;
@@ -4857,13 +4902,13 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (auto sceneSession = GetSceneSession(focusGroup->GetFocusedSessionId())) {
-            TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             focusInfo.windowId_ = sceneSession->GetWindowId();
             focusInfo.displayId_ = focusGroup->GetDisplayGroupId();
             focusInfo.pid_ = sceneSession->GetCallingPid();
             focusInfo.uid_ = sceneSession->GetCallingUid();
             focusInfo.windowType_ = sceneSession->GetWindowType();
             focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+            TLOGNI(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_DESTROYED_OBJECT;
@@ -5781,7 +5826,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
         return WSError::WS_OK;
     }
-    if (nextSession && !nextSession->IsSessionForeground()) {
+    if (nextSession && !nextSession->IsSessionForeground() && !nextSession->GetSessionInfo().isSystem_) {
         focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     }
     return ShiftFocus(displayId, nextSession, true, reason);
@@ -10183,13 +10228,21 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
 BrokerStates SceneSessionManager::NotifyStartAbility(
     int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
+<<<<<<< HEAD
     TLOGI(WmsLogTag::DEFAULT, "type %{public}d id %{public}d", collaboratorType, persistentId);
+=======
+    TLOGI(WmsLogTag::WMS_LIFE, "type %{public}d id %{public}d", collaboratorType, persistentId);
+>>>>>>> upstream/master
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator = GetCollaboratorByType(collaboratorType);
     if (collaborator == nullptr) {
         return BrokerStates::BROKER_UNKOWN;
     }
     if (sessionInfo.want == nullptr) {
+<<<<<<< HEAD
         TLOGI(WmsLogTag::DEFAULT, "sessionInfo.want is nullptr, init");
+=======
+        TLOGI(WmsLogTag::WMS_LIFE, "sessionInfo.want is nullptr, init");
+>>>>>>> upstream/master
         sessionInfo.want = std::make_shared<AAFwk::Want>();
         sessionInfo.want->SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
@@ -10201,6 +10254,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
 
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
         if (!affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
+<<<<<<< HEAD
             TLOGI(WmsLogTag::DEFAULT, "want affinity exit %{public}s.", affinity.c_str());
             return BrokerStates::BROKER_UNKOWN;
         }
@@ -10209,6 +10263,26 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
             currentUserId_, *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
         TLOGI(WmsLogTag::DEFAULT, "collaborator ret: %{public}d", ret);
         if (ret == 0) {
+=======
+            TLOGI(WmsLogTag::WMS_LIFE, "want affinity exit %{public}s.", affinity.c_str());
+            return BrokerStates::BROKER_UNKOWN;
+        }
+        sessionInfo.want->SetParam("oh_persistentId", persistentId);
+        std::shared_ptr<int32_t> ret = std::make_shared<int32_t>(0);
+        bool isTimeout = ffrtQueueHelper_->SubmitTaskAndWait([this, collaborator, &sessionInfo, accessTokenIDEx,
+            ret] {
+            auto result = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo), currentUserId_,
+                *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
+            *ret = static_cast<int32_t>(result);
+        }, NOTIFY_START_ABILITY_TIMEOUT);
+
+        if (isTimeout) {
+            TLOGE(WmsLogTag::WMS_LIFE, "notify start ability timeout, current userId: %{public}d", currentUserId_.load());
+            return BrokerStates::BROKER_NOT_START;
+        }
+        TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
+        if (*ret == 0) {
+>>>>>>> upstream/master
             return BrokerStates::BROKER_STARTED;
         } else {
             return BrokerStates::BROKER_NOT_START;
