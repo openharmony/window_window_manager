@@ -19,24 +19,22 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "AniListener"};
-}
+
 DisplayAniListener::~DisplayAniListener()
 {
-    WLOGI("[ANI]~AniWindowListener");
+    TLOGI(WmsLogTag::DMS, "[ANI]~AniWindowListener");
 }
 
 void DisplayAniListener::AddCallback(const std::string& type, ani_ref callback)
 {
-    WLOGD("[ANI] AddCallback is called");
+    TLOGD(WmsLogTag::DMS, "[ANI] AddCallback is called");
     if (env_ == nullptr) {
-        WLOGFE("env_ nullptr");
+        TLOGE(WmsLogTag::DMS, "env_ nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(mtx_);
     aniCallBack_[type].emplace_back(callback);
-    WLOGD("[ANI] AddCallback success aniCallBack_ size: %{public}u!",
+    TLOGD(WmsLogTag::DMS, "[ANI] AddCallback success aniCallBack_ size: %{public}u!",
         static_cast<uint32_t>(aniCallBack_[type].size()));
 }
 
@@ -45,7 +43,7 @@ void DisplayAniListener::RemoveCallback(ani_env* env, const std::string& type, a
     std::lock_guard<std::mutex> lock(mtx_);
     auto it = aniCallBack_.find(type);
     if (it == aniCallBack_.end()) {
-        WLOGE("JsDisplayListener::RemoveCallback no callback to remove");
+        TLOGE(WmsLogTag::DMS, "[ANI] Listener no callback to remove");
         return;
     }
     auto& listeners = it->second;
@@ -58,7 +56,7 @@ void DisplayAniListener::RemoveCallback(ani_env* env, const std::string& type, a
             iter++;
         }
     }
-    WLOGD("JsDisplayListener::RemoveCallback success jsCallBack_ size: %{public}u!",
+    TLOGD(WmsLogTag::DMS, "[ANI] Success remove callback, jsCallBack_ size: %{public}u!",
         static_cast<uint32_t>(listeners.size()));
 }
 
@@ -71,34 +69,33 @@ void DisplayAniListener::RemoveAllCallback()
 void DisplayAniListener::OnCreate(DisplayId id)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGI("JsDisplayListener::OnCreate is called, displayId: %{public}d", static_cast<uint32_t>(id));
+    TLOGI(WmsLogTag::DMS, "[ANI] OnCreate is called, displayId: %{public}d", static_cast<uint32_t>(id));
     if (aniCallBack_.empty()) {
-        WLOGFE("JsDisplayListener::OnCreate not register!");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnCreate not register!");
         return;
     }
     if (aniCallBack_.find(EVENT_ADD) == aniCallBack_.end()) {
-        WLOGE("JsDisplayListener::OnCreate not this event, return");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnCreate not this event, return");
         return;
     }
-    WLOGI("JsDisplayListener::OnCreate is called, displayId: %{public}llu", id);
+    TLOGI(WmsLogTag::DMS, "[ANI] OnCreate is called, displayId: %{public}llu", id);
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
-        WLOGFE("[NAPI] this listener or env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] This listener or env is nullptr");
         return;
     }
     if (env_ != nullptr) {
         auto it = aniCallBack_.find(EVENT_ADD);
         for (auto oneAniCallback : it->second) {
-            //mtd是否是上层ts写的？
             ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
                 "L@ohos/display/display/Callback", "invoke", "I:V", id);
             if (ret != ANI_OK) {
-                WLOGFE("OnCreate: Failed to SendEvent.");
+                TLOGE(WmsLogTag::DMS, "[ANI] OnCreate: Failed to SendEvent.");
                 break;
             }
         }
     } else {
-        WLOGFE("OnCreate: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnCreate: env is nullptr");
     }
 }
 void DisplayAniListener::OnDestroy(DisplayId id)
@@ -113,18 +110,19 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
 void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGI("OnFoldStatusChanged is called, foldStatus: %{public}u", static_cast<uint32_t>(foldStatus));
+    TLOGI(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged is called, foldStatus: %{public}u",
+        static_cast<uint32_t>(foldStatus));
     if (aniCallBack_.empty()) {
-        WLOGFE("OnFoldStatusChanged not register!");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not register!");
         return;
     }
     if (aniCallBack_.find(EVENT_FOLD_STATUS_CHANGED) == aniCallBack_.end()) {
-        WLOGE("OnFoldStatusChanged not this event, return");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not this event, return");
         return;
     }
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
-        WLOGFE("[NAPI] this listener or env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
         return;
     }
     if (env_ != nullptr) {
@@ -134,12 +132,12 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
             ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
                 "L@ohos/display/display/Callback", "invoke", "I:V", static_cast<uint32_t>(foldStatus));
             if (ret != ANI_OK) {
-                WLOGFE("OnCreate: Failed to SendEvent.");
+                TLOGE(WmsLogTag::DMS, "[ANI] OnCreate: Failed to SendEvent.");
                 break;
             }
         }
     } else {
-        WLOGFE("OnCreate: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnCreate: env is nullptr");
     }
 }
 void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
@@ -151,18 +149,19 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
 void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
 {
     std::lock_guard<std::mutex> lock(mtx_);
-    WLOGI("OnFoldStatusChanged is called, foldStatus: %{public}u", static_cast<uint32_t>(displayMode));
+    TLOGI(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged is called, foldStatus: %{public}u",
+        static_cast<uint32_t>(displayMode));
     if (aniCallBack_.empty()) {
-        WLOGFE("OnFoldStatusChanged not register!");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not register!");
         return;
     }
     if (aniCallBack_.find(EVENT_DISPLAY_MODE_CHANGED) == aniCallBack_.end()) {
-        WLOGE("OnFoldStatusChanged not this event, return");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not this event, return");
         return;
     }
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr || env_ == nullptr) {
-        WLOGFE("[NAPI] this listener or env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
         return;
     }
     if (env_ != nullptr) {
@@ -172,12 +171,12 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode displayMode)
             ani_status ret = thisListener->CallAniMethodVoid(static_cast<ani_object>(oneAniCallback),
                 "L@ohos/display/display/Callback", "invoke", "I:V", static_cast<ani_int>(displayMode));
             if (ret != ANI_OK) {
-                WLOGFE("OnDisplayModeChanged: Failed to SendEvent.");
+                TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged: Failed to SendEvent.");
                 break;
             }
         }
     } else {
-        WLOGFE("OnDisplayModeChanged: env is nullptr");
+        TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged: env is nullptr");
     }
 }
 void DisplayAniListener::OnAvailableAreaChanged(DMRect area)

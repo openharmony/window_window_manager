@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef WINDOW_WINDOW_MANAGER_ANI_ERROR_UTILS_H
-#define WINDOW_WINDOW_MANAGER_ANI_ERROR_UTILS_H
+#ifndef DISPLAY_MANAGER_ANI_ERROR_UTILS_H
+#define DISPLAY_MANAGER_ANI_ERROR_UTILS_H
 
 #include "ani.h"
 #include "dm_common.h"
@@ -23,14 +23,10 @@
 namespace OHOS::Rosen {
 class AniErrUtils {
 public:
-    static ani_object CreateAniError(ani_env* env, const WMError& errorCode, std::string msg = "");
-    static ani_object CreateAniError(ani_env* env, const WmErrorCode& errorCode, std::string msg = "");
     static ani_object CreateAniError(ani_env* env, const DMError& errorCode, std::string msg = "");
     static ani_object CreateAniError(ani_env* env, const DmErrorCode& errorCode, std::string msg = "");
 
 private:
-    static std::string GetErrorMsg(const WMError& errorCode);
-    static std::string GetErrorMsg(const WmErrorCode& errorCode);
     static std::string GetErrorMsg(const DMError& errorCode);
     static std::string GetErrorMsg(const DmErrorCode& errorCode);
 };

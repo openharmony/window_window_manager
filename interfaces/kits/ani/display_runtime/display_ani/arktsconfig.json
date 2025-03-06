@@ -24,7 +24,7 @@
         "./display.ets"
       ]
     },
-    "outDir": "../cache", 
+    "outDir": "../cache",
     "package": "@ohos"
   },
   "files": [

@@ -20,7 +20,6 @@ config("display_common_config") {
 
   include_dirs = [
     "../common",
-    "../../../../../../../arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani",
     "../../../../utils/include",
     "../../../innerkits/wm",
     "../../../innerkits/dm",
@@ -72,6 +71,7 @@ ohos_shared_library("displayani_kit") {
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "runtime_core:ani",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -79,23 +79,9 @@ ohos_shared_library("displayani_kit") {
   subsystem_name = "window"
 }
 
-# abc generate
-generate_static_abc("display_abc") {
-  arktsconfig = "//foundation/window/window_manager/interfaces/kits/ani/display_runtime/display_ani/arktsconfig.json"
-  in_puts = [
-    "./display_ani/arktsconfig.json",
-    "./display_ani/sts/display.ets",
-    "./display_ani/sts/display_entry.ets",
-  ]
-  dst_file = "$target_out_dir/display.abc"
-  out_puts = [ "$target_out_dir/display.abc" ]
-  timeout_limit = "120"
-  extra_visibility = [ ":*" ]
-}
-
 group("display_ani") {
   deps = [
-    ":display_abc",
     ":displayani_kit",
+    "display_ani:display_etc",
   ]
 }

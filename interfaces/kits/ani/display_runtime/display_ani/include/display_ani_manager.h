@@ -27,9 +27,9 @@ public:
     explicit DisplayManagerAni();
     static void setAniEnv(ani_env* env);
 
-    static ani_int getFoldDisplayModeAni(ani_env* env, ani_object obj);
-    static ani_boolean isFoldableAni(ani_env* env, ani_object obj);
-    static ani_int getFoldStatus(ani_env* env, ani_object obj);
+    static ani_int getFoldDisplayModeAni(ani_env* env);
+    static ani_boolean isFoldableAni(ani_env* env);
+    static ani_int getFoldStatus(ani_env* env);
     static ani_object getCurrentFoldCreaseRegion(ani_env* env, ani_object obj);
 
     static ani_array_ref getAllDisplaysAni(ani_env* env);

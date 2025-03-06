@@ -16,6 +16,10 @@ export default namespace display {
 
 loadLibrary('displayani_kit.z');
 
+export class BusinessError extends Error {
+  code: number;
+}
+
 export interface Rect {
     left: number;
 
@@ -62,7 +66,7 @@ export class WaterfallDisplayAreaRectsImpl implements WaterfallDisplayAreaRects 
     readonly bottom: Rect;
 }
 
-interface CutoutInfo {
+export interface CutoutInfo {
     readonly boundingRects: Array<Rect>;
 
     readonly waterfallDisplayAreaRects: WaterfallDisplayAreaRects;
@@ -270,17 +274,11 @@ export interface Display {
     getCutoutInfo(callback: AsyncCallback): void;
 }
 
-// export interface Callback<T> {
-  // (data: T): void;
-// }
+export type Callback = (err: BusinessError, data : number) => void;
 
-// export class CallbackImpl<T> implements Callback<T>{
-  // (data: T): void;
-// }
+export type AsyncCallback = (err: BusinessError, data : CutoutInfo) => void;
 
-type Callback = (data : number) => void;
-
-type AsyncCallback = (data : CutoutInfo) => void;
+export type AsyncCallBackByArray = (err: BusinessError, data: Array<Display>) => void
 
 export class DisplayImpl implements Display {
     static { loadLibrary("displayani_kit.z"); }
@@ -340,7 +338,13 @@ export native function getFoldDisplayMode(): FoldDisplayMode;
 
 export native function getFoldStatus(): FoldStatus;
 
-export native function getCurrentFoldCreaseRegion(): FoldCreaseRegion;
+export function getCurrentFoldCreaseRegion(): FoldCreaseRegion {
+    let foldCreaseRegion:FoldCreaseRegion = new FoldCreaseRegionImpl();
+    // getCurrentFoldCreaseRegionNative(foldCreaseRegion);
+    return foldCreaseRegion;
+}
+
+export native function getCurrentFoldCreaseRegionNative(foldCreaseRegion : FoldCreaseRegion): int;
 
 // display sync interfaces
 export function getDisplayByIdSync(displayId: int): Display {
@@ -359,8 +363,11 @@ export function getDefaultDisplaySync(): Display {
 
 export native function getDefaultDisplaySyncNative(obj: object): int;
 
-// encapsulate to async callback function!
-export native function getAllDisplays(): Array<Display>;
+export native function getAllDisplaysSyncNative(): Array<Display>;
+
+export function getAllDisplays(callback: AsyncCallBackByArray): void {
+    let displayArr : Array<Display> = getAllDisplaysSyncNative();
+}
 
 export function getNewDisplay(): DisplayImpl {
     return new DisplayImpl();
@@ -383,19 +390,4 @@ export let displayMgrRef: long;
 export function setDisplayMgrRef(nativeObj : long) : void{
     displayMgrRef = nativeObj;
 }
-}
-
-loadLibrary('displayani_kit.z');
-
-function main()
-{
-    let isFoldable = display.isFoldable();
-    console.log("[ANI] isfoldable test, result = " + isFoldable);
-    display.getFoldDisplayMode();
-    display.getFoldStatus();
-    let disret : display.Display = display.getDefaultDisplaySync();
-    display.getDisplayByIdSync(0);
-    display.getAllDisplays();
-    display.getCurrentFoldCreaseRegion();
-    console.log("[ANI] getDefaultDisplaySync test, result = " + disret.id);
 }

@@ -23,10 +23,6 @@
 namespace OHOS {
 namespace Rosen {
 
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsDisplayManager"};
-}
-
 DisplayAniRegisterManager::DisplayAniRegisterManager()
 {
 }
@@ -54,8 +50,8 @@ ani_object DisplayAniRegisterManager::RegisterListener(std::string type, ani_env
             if (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
                 errCode = ret;
             }
-            WLOGFW("failed to unregister display listener with type");
-            std::string errMsg = "failed to register display listener with type";
+            TLOGW(WmsLogTag::DMS, "[ANI] failed to unregister display listener with type");
+            std::string errMsg = "[ANI] failed to register display listener with type";
             ani_object aniErr = AniErrUtils::CreateAniError(env, errCode, errMsg);
             env->ThrowError(static_cast<ani_error>(aniErr));
         }
@@ -79,8 +75,8 @@ ani_object DisplayAniRegisterManager::UnregisterListener(std::string type, ani_e
         if (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) {
             errCode = ret;
         }
-        WLOGFW("failed to unregister display listener with type");
-        std::string errMsg = "failed to unregister display listener with type";
+        TLOGW(WmsLogTag::DMS, "[ANI] failed to unregister display listener with type");
+        std::string errMsg = "[ANI] failed to unregister display listener with type";
         ani_object aniErr = AniErrUtils::CreateAniError(env, errCode, errMsg);
         env->ThrowError(static_cast<ani_error>(aniErr));
     }
@@ -90,7 +86,7 @@ ani_object DisplayAniRegisterManager::UnregisterListener(std::string type, ani_e
 DMError DisplayAniRegisterManager::UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGI("UnRegisterDisplayListenerWithType methodName %{public}s not registered!", type.c_str());
+        TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!", type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
@@ -117,7 +113,7 @@ DMError DisplayAniRegisterManager::UnRegisterDisplayListenerWithType(std::string
 DMError DisplayAniRegisterManager::UnregisterAllDisplayListenerWithType(std::string type)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        WLOGI("UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
+        TLOGI(WmsLogTag::DMS, "[ANI] UnregisterAllDisplayListenerWithType methodName %{public}s not registered!",
             type.c_str());
         return DMError::DM_OK;
     }

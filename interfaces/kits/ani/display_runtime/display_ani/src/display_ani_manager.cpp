@@ -28,10 +28,7 @@
 
 namespace OHOS {
 namespace Rosen {
-     
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayAniManager"};
-}
+
 ani_env* DisplayManagerAni::env_ = nullptr;
 DisplayManagerAni::DisplayManagerAni()
     : registerManager_(std::make_unique<DisplayAniRegisterManager>())
@@ -39,15 +36,15 @@ DisplayManagerAni::DisplayManagerAni()
     ani_namespace nsp;
     if (env_ != nullptr) {
         if (env_->FindNamespace("L@ohos/display/display;", &nsp) != ANI_OK) {
-            WLOGFE("[ANI] null env");
+            TLOGE(WmsLogTag::DMS, "[ANI] null env");
         }
         ani_function aniFunc;
         if (env_->Namespace_FindFunction(nsp, "setDisplayMgrRef", "J:V", &aniFunc) != ANI_OK) {
-            WLOGFE("[ANI] null aniFunc");
+            TLOGE(WmsLogTag::DMS, "[ANI] null aniFunc");
         }
         // 向ts侧注册this指针
         if (env_->Function_Call_Void(aniFunc, (long)this) != ANI_OK) {
-            WLOGFE("[ANI] call ts func failed");
+            TLOGE(WmsLogTag::DMS, "[ANI] call ts func failed");
         }
     }
 }
@@ -57,55 +54,45 @@ void DisplayManagerAni::setAniEnv(ani_env* env)
     env_ = env;
 }
 
-ani_int DisplayManagerAni::getFoldDisplayModeAni(ani_env* env, ani_object obj)
+ani_int DisplayManagerAni::getFoldDisplayModeAni(ani_env* env)
 {
     auto mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayMode();
-    WLOGI("[ANI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
+    TLOGI(WmsLogTag::DMS, "[ANI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
     return static_cast<ani_int>(mode);
 }
  
-ani_boolean DisplayManagerAni::isFoldableAni(ani_env* env, ani_object obj)
+ani_boolean DisplayManagerAni::isFoldableAni(ani_env* env)
 {
     bool foldable = SingletonContainer::Get<DisplayManager>().IsFoldable();
-    WLOGI("[ANI]" PRIu64", isFoldable = %{public}u", foldable);
+    TLOGI(WmsLogTag::DMS, "[ANI]" PRIu64", isFoldable = %{public}u", foldable);
     return static_cast<ani_boolean>(foldable);
 }
  
-ani_int DisplayManagerAni::getFoldStatus(ani_env* env, ani_object obj)
+ani_int DisplayManagerAni::getFoldStatus(ani_env* env)
 {
     auto status = SingletonContainer::Get<DisplayManager>().GetFoldStatus();
-    WLOGI("[ANI]" PRIu64", getFoldStatus = %{public}u", status);
+    TLOGI(WmsLogTag::DMS, "[ANI]" PRIu64", getFoldStatus = %{public}u", status);
     return static_cast<ani_int>(status);
 }
  
 ani_object DisplayManagerAni::getCurrentFoldCreaseRegion(ani_env* env, ani_object obj)
 {
-    ani_object objRet = nullptr;
     auto region = SingletonContainer::Get<DisplayManager>().GetCurrentFoldCreaseRegion();
-    ani_class cls;
     ani_class rectCls;
-    if (ANI_OK != env->FindClass("L@ohos/display/display/FoldCreaseRegionImpl;", &cls)) {
-        WLOGFE("[ANI] null class FoldCreaseRegionImpl");
-        return objRet;
-    }
-    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &objRet)) {
-        WLOGFE("[ANI] create object fail");
-        return objRet;
-    }
     if (ANI_OK != env->FindClass("L@ohos/display/display/RectImpl;", &rectCls)) {
-        WLOGFE("[ANI] null class RectImpl");
-        return objRet;
+        TLOGE(WmsLogTag::DMS, "[ANI] null class RectImpl");
+        return obj;
     }
     ani_int displayId = static_cast<ani_int>(region->GetDisplayId());
     std::vector<DMRect> rects = region->GetCreaseRects();
     ani_array_ref aniRects = DisplayAniUtils::convertRects(rects, env);
-    if (ANI_OK != env->Object_SetFieldByName_Int(objRet, "displayId", displayId)) {
-        WLOGFE("[ANI] set displayId field fail");
+    if (ANI_OK != env->Object_SetFieldByName_Int(obj, "displayId", displayId)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] set displayId field fail");
     }
-    if (ANI_OK != env->Object_SetFieldByName_Ref(objRet, "creaseRects", aniRects)) {
-        WLOGFE("[ANI] set creaseRects field fail");
+    if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "creaseRects", aniRects)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] set creaseRects field fail");
     }
-    return objRet;
+    return obj;
 }
 
 ani_array_ref DisplayManagerAni::getAllDisplaysAni(ani_env* env)
@@ -118,20 +105,20 @@ ani_array_ref DisplayManagerAni::getAllDisplaysAni(ani_env* env)
         for (int i = 0; i < displays.size(); i++) {
             ani_namespace nsp;
             if (env->FindNamespace("L@ohos/display/display;", &nsp) != ANI_OK) {
-                WLOGFE("[ANI] null env");
+                TLOGE(WmsLogTag::DMS, "[ANI] null env");
             }
             ani_function fn;
             if (ANI_OK != env->Namespace_FindFunction(nsp, "getNewDisplay",
                 ":L@ohos/display/display/DisplayImpl;", &fn)) {
-                WLOGFE("[ANI] find nsp fail");
+                TLOGE(WmsLogTag::DMS, "[ANI] find nsp fail");
             }
             ani_ref displayObj;
             if (ANI_OK != env->Function_Call_Ref(fn, &displayObj)) {
-                WLOGFE("[ANI] function call fail");
+                TLOGE(WmsLogTag::DMS, "[ANI] function call fail");
             }
             DisplayAniUtils::cvtDisplay(displays[i], env, static_cast<ani_object>(displayObj));
             if (ANI_OK != env->Array_Set_Ref(arrayRef, i, displayObj)) {
-                WLOGFE("[ANI] null field displayIdFld");
+                TLOGE(WmsLogTag::DMS, "[ANI] null field displayIdFld");
             }
         }
     }
@@ -141,23 +128,23 @@ ani_array_ref DisplayManagerAni::getAllDisplaysAni(ani_env* env)
 ani_status DisplayManagerAni::getDisplayByIdSyncAni(ani_env* env, ani_object obj, ani_int displayId)
 {
     if (displayId < 0) {
-        WLOGE("[ANI] Invalid displayId, less than 0");
+        TLOGE(WmsLogTag::DMS, "[ANI] Invalid displayId, less than 0");
         return ANI_ERROR;
     }
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<DisplayId>(displayId));
     if (display == nullptr) {
-        WLOGE("[ANI] Display null");
+        TLOGE(WmsLogTag::DMS, "[ANI] Display null");
         return ANI_ERROR;
     }
     ani_status ret = DisplayAniUtils::cvtDisplay(display, env, obj);
     return ret;
 }
  
-ani_status DisplayManagerAni::getDefaultDisplaySyncAni(ani_env* env, ani_object obj)
+ani_status DisplayManagerAni::getDefaultDisplaySyncAni(ani_env* env,ani_object obj)
 {
     sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplaySync(true);
     if (display == nullptr) {
-        WLOGE("[ANI] Display null");
+        TLOGE(WmsLogTag::DMS, "[ANI] Display null");
         return ANI_ERROR;
     }
     ani_status ret = DisplayAniUtils::cvtDisplay(display, env, obj);
@@ -167,6 +154,7 @@ ani_status DisplayManagerAni::getDefaultDisplaySyncAni(ani_env* env, ani_object 
 ani_object DisplayManagerAni::registerCallback(ani_env* env, ani_object obj,
     ani_string type, ani_ref callback, ani_long nativeObj)
 {
+    TLOGI(WmsLogTag::DMS, "[ANI] start to register");
     DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
     return displayManagerAni != nullptr ? displayManagerAni->onRegisterCallback(env, type, callback) : nullptr;
 }
