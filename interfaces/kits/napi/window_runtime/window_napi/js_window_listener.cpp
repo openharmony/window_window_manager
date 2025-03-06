@@ -286,21 +286,17 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
 void JsWindowListener::OnTouchOutside() const
 {
     WLOGI("CALLED");
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
-                return;
-            }
-            thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
+    auto jsCallback = [self = weakRef_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnOutsidePressed",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnScreenshot()
@@ -325,21 +321,17 @@ void JsWindowListener::OnScreenshot()
 
 void JsWindowListener::OnDialogTargetTouch() const
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
-                return;
-            }
-            thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
+    auto jsCallback = [self = weakRef_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnDialogTargetTouch",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnDialogDeathRecipient() const
@@ -413,21 +405,17 @@ int64_t JsWindowListener::GetTimeout() const
 
 void JsWindowListener::OnWindowNoInteractionCallback()
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
-                return;
-            }
-            thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
+    auto jsCallback = [self = weakRef_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWindowNoInteractionCallback", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
