@@ -1102,7 +1102,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTe
 HWTEST_F(WindowSessionPropertyTest, MarshallingKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
     Parcel parcel;
-    WindowSessionProperty *property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas hotAreas;
     for (int i = 0; i < 55; i++) {
         Rect rect { i, i, i, i };
