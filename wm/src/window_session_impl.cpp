@@ -2510,7 +2510,7 @@ WMError WindowSessionImpl::RegisterMainWindowCloseListeners(const sptr<IMainWind
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!(isPC|| IsFreeMultiWindowMode())) {
+    if (!(isPC || IsFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2529,7 +2529,7 @@ WMError WindowSessionImpl::UnregisterMainWindowCloseListeners(const sptr<IMainWi
         return WMError::WM_ERROR_NULLPTR;
     }
     auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!(isPC|| IsFreeMultiWindowMode())) {
+    if (!(isPC || IsFreeMultiWindowMode())) {
         TLOGE(WmsLogTag::DEFAULT, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4328,15 +4328,14 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         windowStatus = WindowStatus::WINDOW_STATUS_SPLITSCREEN;
+    }
+    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         if (IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14) { // 14: isolated version
             windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
                 WindowStatus::WINDOW_STATUS_MAXIMIZE;
         } else {
             windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
         }
-    }
-    if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
     }
     if (state_ == WindowState::STATE_HIDDEN) {
         windowStatus = WindowStatus::WINDOW_STATUS_MINIMIZE;
