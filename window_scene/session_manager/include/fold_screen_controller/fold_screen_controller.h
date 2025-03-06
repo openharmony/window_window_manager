@@ -55,6 +55,7 @@ public:
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
+    void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     void SetMainScreenRegion(DMRect& mainScreenRegion);
     /*
      *    Avoid fold to expand process queues public interface

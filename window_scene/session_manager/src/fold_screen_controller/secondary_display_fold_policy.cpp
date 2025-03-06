@@ -226,7 +226,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     } else {
         TLOGW(WmsLogTag::DMS, "unKnown displayMode");
     }
-    screenSession->UpdatePropertyByFoldControl(screenProperty_);
+    screenSession->UpdatePropertyByFoldControl(screenProperty_, displayMode);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
     if (displayMode == FoldDisplayMode::MAIN) {
         screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
@@ -234,8 +234,6 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
           screenSession->GetScreenProperty().GetBounds().rect_.width_,
           screenSession->GetScreenProperty().GetBounds().rect_.height_);
-    ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
-        DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
 }
 
 void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(ScreenProperty &screenProperty)
@@ -344,6 +342,26 @@ void SecondaryDisplayFoldPolicy::InitScreenParams()
 std::vector<uint32_t> SecondaryDisplayFoldPolicy::GetScreenParams()
 {
     return screenParams_;
+}
+
+void SecondaryDisplayFoldPolicy::SetScreenSnapshotRect(RSSurfaceCaptureConfig& config)
+{
+    if (currentDisplayMode_ == FoldDisplayMode::MAIN) {
+        config.screenLeft = 0;
+        config.screenTop = 0;
+        config.screenWidth = static_cast<float>(screenParams_[SCREEN_HEIGHT]);
+        config.screenHeight = static_cast<float>(screenParams_[MAIN_STATUS_WIDTH]);
+    } else if (currentDisplayMode_ == FoldDisplayMode::FULL) {
+        config.screenLeft = 0;
+        config.screenTop = static_cast<float>(screenParams_[FULL_STATUS_OFFSET_X]);
+        config.screenWidth = static_cast<float>(screenParams_[SCREEN_HEIGHT]);
+        config.screenHeight = static_cast<float>(screenParams_[FULL_STATUS_WIDTH]);
+    } else if (currentDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
+        config.screenLeft = 0;
+        config.screenTop = 0;
+        config.screenWidth = static_cast<float>(screenParams_[SCREEN_HEIGHT]);
+        config.screenHeight = static_cast<float>(screenParams_[GLOBAL_FULL_STATUS_WIDTH]);
+    }
 }
 
 void SecondaryDisplayFoldPolicy::SetMainScreenRegion(DMRect& mainScreenRegion)
