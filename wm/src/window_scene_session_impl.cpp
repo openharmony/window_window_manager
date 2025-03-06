@@ -2202,7 +2202,7 @@ WMError WindowSceneSessionImpl::SetFullScreen(bool status)
         return WMError::WM_OK;
     }
 
-    if (IsFreeMultiWindowMode() || (WindowHelper::IsMainWindow(GetType()) &&
+    if (WindowHelper::IsMainWindow(GetType()) || (IsFreeMultiWindowMode() &&
         windowSystemConfig_.uiType_ != UI_TYPE_PHONE && windowSystemConfig_.uiType_ != UI_TYPE_PAD)) {
         if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
             WindowMode::WINDOW_MODE_FULLSCREEN)) {
@@ -2416,8 +2416,7 @@ WMError WindowSceneSessionImpl::Recover()
         WLOGFE("session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
-        WindowMode::WINDOW_MODE_FLOATING)) {
+    if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
@@ -2589,18 +2588,18 @@ WMError WindowSceneSessionImpl::SetSupportedWindowModes(
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    auto size = supportedWindowModes.size();
-    if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-
     return SetSupportedWindowModesInner(supportedWindowModes);
 }
 
 WMError WindowSceneSessionImpl::SetSupportedWindowModesInner(
     const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes)
 {
+    auto size = supportedWindowModes.size();
+    if (size <= 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is invalid");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
     uint32_t windowModeSupportType = WindowHelper::ConvertSupportModesToSupportType(supportedWindowModes);
     if (windowModeSupportType == 0) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "mode param is 0");
