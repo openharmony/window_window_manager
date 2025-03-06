@@ -1360,7 +1360,6 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     bool maximizeSupported = false;
     if (!ParseJsValue(jsObject, env, "maximizeSupported", maximizeSupported)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to maximizeSupported");
-        return false;
     }
 
     windowOption->SetSubWindowTitle(title);
