@@ -4132,8 +4132,7 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_SEARCHING_BAR:
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
-        case WindowType::WINDOW_TYPE_DIALOG:
-        case WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD: {
+        case WindowType::WINDOW_TYPE_DIALOG: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
         }
