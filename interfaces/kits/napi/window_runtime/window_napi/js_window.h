@@ -132,6 +132,8 @@ public:
     static napi_value StartMoving(napi_env env, napi_callback_info info);
     static napi_value StopMoving(napi_env env, napi_callback_info info);
     static napi_value GetWindowDensityInfo(napi_env env, napi_callback_info info);
+    static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
+    static napi_value IsWindowHighlighted(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -172,8 +174,6 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
-    static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
-    static napi_value IsWindowHighlighted(napi_env env, napi_callback_info info);
 
     /**
      * Sub Window
