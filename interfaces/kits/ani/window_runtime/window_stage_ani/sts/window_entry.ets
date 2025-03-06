@@ -1,10 +1,17 @@
-import window from '@ohos.window'
-import { AsyncCallback } from '@ohos.window'
+import window from '@ohos.window';
+import {
+  AsyncCallback,
+  BaseContext,
+  LocalStorage,
+  Callback,
+  BusinessError,
+  UIContext,
+} from '@ohos.window';
 
 function main() {
     loadLibrary('windowstageani_kit.z')
     let ws = window.CreateWindowStage(0);
-    let callback:AsyncCallback = (err) => {
+    let callback:AsyncCallback<int> = (err, data: int) => {
       if (err.code) {
         console.error(`Failed to load the content. Cause code: ${err.code}, message: ${err.message}`);
         return;
@@ -16,6 +23,40 @@ function main() {
     let w = window.CreateWindow(0);
     w.getWindowDecorHeight();
     w.setWindowBackgroundColorSync('0xFFFFFF');
+    w.setColorSpace(window.ColorSpace.DEFAULT).then((ret: int) => {
+      console.println('[ANI] in ret:' + ret);
+    }).catch((e: NullishType) => {
+      let err = e as BusinessError;
+      console.println('[ANI] in code:' + err?.code + ' err:' + err?.message);
+    });
+    w.setColorSpace(window.ColorSpace.DEFAULT, (err, data) => {
+      console.println('[ANI] setColorSpace data:' + data + ' err:' + err);
+    });
+    w.setPreferredOrientation(window.Orientation.UNSPECIFIED);
+    w.setWindowPrivacyMode(true);
+    w.recover();
+    w.setUIContent('path');
+    w.loadContent('path');
+    w.loadContent('path', new LocalStorage());
+    w.setWindowKeepScreenOn(true);
+    let value: 'status' | 'navigation' = 'status';
+    w.setWindowSystemBarEnable(Array.of(value));
+    try {
+      let ctx = w.getUIContext();
+      console.println('[ANI] getUIContext ctx:'+ctx);
+    } catch (e: Error) {
+      console.println('[ANI] in e:' + e);
+    }
+    let avoidArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+    console.println('[ANI] avoidArea:' + JSON.stringify(avoidArea));
+    w.setWaterMarkFlag(true);
+    let cb = new Callback<window.WindowEventType | window.Size | window.WindowStatusType>();
+    w.on('windowEvent', cb);
+    w.off('windowEvent', cb);
+    w.on('windowSizeChange', cb);
+    w.off('windowSizeChange', cb);
+    w.on('windowStatusChange', cb);
+    w.off('windowStatusChange', cb);
     console.println('ok');
 }
 

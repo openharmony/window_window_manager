@@ -36,7 +36,24 @@ public:
 
     /* window obj stored in ANI */
     static AniWindow* GetWindowObjectFromEnv(ani_env* env, ani_object obj);
-    
+
+    static void SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace);
+    static void SetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj, ani_int orientation);
+    static void SetWindowPrivacyMode(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isPrivacyMode);
+    static void Recover(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void SetUIContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
+    static void SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn);
+    static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
+    static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
+    static void LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path, ani_object storage);
+    static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
+    static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
+    static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
+    static ani_object RegisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+        ani_ref callback);
+    static ani_object UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
+        ani_ref callback);
+
     ani_int GetWindowDecorHeight(ani_env* env);
     ani_object SetWindowBackgroundColorSync(ani_env* env, const std::string& color);
     ani_object SetImmersiveModeEnabledState(ani_env* env, bool enable);
@@ -47,8 +64,29 @@ public:
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
     ani_object SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
     ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable, ani_boolean enableAnimation);
-
 private:
+    void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
+    void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
+    void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
+    void OnRecover(ani_env* env);
+    void OnSetUIContent(ani_env* env, ani_string path);
+    void OnSetWindowKeepScreenOn(ani_env* env, ani_boolean isKeepScreenOn);
+    void OnSetWaterMarkFlag(ani_env* env, ani_boolean enable);
+    void OnLoadContent(ani_env* env, ani_string path);
+    void OnLoadContent(ani_env* env, ani_string path, ani_object storage);
+    void OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry);
+    ani_object OnGetUIContext(ani_env* env);
+    ani_object OnGetWindowAvoidArea(ani_env* env, ani_int type);
+    ani_object OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    ani_object OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback);
+    bool GetSystemBarStatus(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        std::map<WindowType, SystemBarPropertyFlag>& systemBarpropertyFlags,
+        const std::vector<std::string>& names, sptr<Window>& window);
+    void UpdateSystemBarProperties(std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        const std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags, sptr<Window> windowToken);
+    WMError SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags,
+        std::map<WindowType, SystemBarProperty>& systemBarProperties, sptr<Window> windowToken);
+
     sptr<Window> windowToken_ = nullptr;
 };
 
