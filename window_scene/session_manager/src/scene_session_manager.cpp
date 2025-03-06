@@ -2620,6 +2620,16 @@ void SceneSessionManager::SendCancelEventBeforeEraseSession(const sptr<SceneSess
     mainHandler_->PostTask(std::move(task), "wms:sendCancelBeforeEraseSession", 0, AppExecFwk::EventQueue::Priority::VIP);
 }
 
+void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
+{
+    auto sceneSession = GetSceneSession(persistentId);
+    std::unique_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    EraseSceneSessionAndMarkDirtyLocked(persistentId);
+    systemTopSceneSessionMap_.erase(persistentId);
+    nonSystemFloatSceneSessionMap_.erase(persistentId);
+    SendCancelEventBeforeEraseSession(sceneSession);
+}
+
 /**
  * if visible session is erased, mark dirty
  * lock-free
