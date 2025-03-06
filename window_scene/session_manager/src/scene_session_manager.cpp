@@ -4216,6 +4216,9 @@ void SceneSessionManager::HandleUserSwitched(bool isUserActive)
 
 void SceneSessionManager::HandleUserSwitch(const UserSwitchEventType type, const bool isUserActive)
 {
+    if (type == UserSwitchEventType::SWITCHING && !isUserActive) {
+        ScreenSessionManagerClient::GetInstance().DisconnectAllExternalScreen();
+    }
     taskScheduler_->PostSyncTask([this, type, isUserActive, where = __func__] {
         TLOGNI(WmsLogTag::WMS_MULTI_USER,
                "%{public}s: currentUserId: %{public}d, switchEventType: %{public}u, isUserActive: %{public}u",
