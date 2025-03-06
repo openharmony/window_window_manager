@@ -2801,6 +2801,21 @@ HWTEST_F(WindowTest, UnRegisterWindowWillCloseListeners, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    bool isMidScene = false;
+    WMError res = window->GetIsMidScene(isMidScene);
+    EXPECT_EQ(WMError::WM_OK, res);
+    ASSERT_EQ(isMidScene, false);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: GetLayoutTransform
  * @tc.desc: get
  * @tc.type: FUNC
