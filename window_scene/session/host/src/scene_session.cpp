@@ -7001,7 +7001,7 @@ void SceneSession::SetNotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
         }
         session->onUpdateFlagFunc_ = std::move(func);
         session->onUpdateFlagFunc_(session->sessionInfo_.specifiedFlag_);
-        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d specifiedFlag: %{public}s", where,
+        TLOGND(WmsLogTag::WMS_MAIN, "%{public}s id: %{public}d specifiedFlag: %{public}s", where,
             session->GetPersistentId(), session->sessionInfo_.specifiedFlag_.c_str());
     }, __func__);
 }
