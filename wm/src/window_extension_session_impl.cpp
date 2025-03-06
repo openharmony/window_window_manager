@@ -975,9 +975,7 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
 
 void WindowExtensionSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    TLOGI(WmsLogTag::WMS_IMMS,
-          "win [%{public}d %{public}s] type %{public}d area %{public}s",
-          GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
+    uint32_t version = 0;
     version = static_cast<int32_t>(SysCapUtil::GetApiCompatibleVersion());
     if (version < API_VERSION_18 && WindowHelper::IsSystemWindow(GetParentWindowType())) {
         TLOGI(WmsLogTag::WMS_IMMS,
@@ -985,6 +983,9 @@ void WindowExtensionSessionImpl::NotifyAvoidAreaChange(const sptr<AvoidArea>& av
             GetPersistentId(), GetWindowName().c_str(), type, version);
         return;
     }
+    TLOGI(WmsLogTag::WMS_IMMS,
+        "win [%{public}d %{public}s] type %{public}d area %{public}s",
+        GetPersistentId(), GetWindowName().c_str(), type, avoidArea->ToString().c_str());
     WindowSessionImpl::NotifyAvoidAreaChange(avoidArea, type);
 }
 
