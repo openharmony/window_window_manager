@@ -1270,7 +1270,14 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
             TLOGE(WmsLogTag::WMS_LAYOUT, "session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        return session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
+        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        if (session->specificCallback_ && session->specificCallback_->onUpdateOccupiedAreaIfNeed_) {
+            session->specificCallback_->onUpdateOccupiedAreaIfNeed_(session->GetPersistentId());
+        }
+        return ret;
     };
     PostTask(task, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
