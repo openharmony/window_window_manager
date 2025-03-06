@@ -134,6 +134,10 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio) override
+    {
+        return DMError::DM_OK;
+    }
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
         float virtualPixelRatio) override { return DMError::DM_OK; }
     virtual DMError GetDensityInCurResolution(ScreenId screenId,
