@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("../../../../windowmanager_aafwk.gni")
 
@@ -80,39 +79,10 @@ ohos_shared_library("embeddablewindowstageani_kit") {
   subsystem_name = "window"
 }
 
-# abc generate
-generate_static_abc("extension_window_abc_ani") {
-  arktsconfig = "./uiExtension.json"
-  dst_file = "$target_out_dir/extension_window_ani.abc"
-  out_puts = [ "$target_out_dir/extension_window_ani.abc" ]
-  in_puts = [
-    "./uiExtension.json",
-    "./sts/uiExtension.ets",
-    "./sts/uiExtension_entry.ets",
-  ]
-  cache_path = "./cache/uiExtension"
-  timeout_limit = "120"
-  extra_visibility = [ ":*" ]
-}
-
-generate_static_abc("extension_window_host_abc_ani") {
-  arktsconfig = "./uiExtensionHost.json"
-  dst_file = "$target_out_dir/extension_window_host_ani.abc"
-  out_puts = [ "$target_out_dir/extension_window_host_ani.abc" ]
-  in_puts = [
-    "./uiExtensionHost.json",
-    "./sts/uiExtensionHost.ets",
-    "./sts/uiExtensionHost_entry.ets",
-  ]
-  cache_path = "./cache/uiExtensionHost"
-  timeout_limit = "120"
-  extra_visibility = [ ":*" ]
-}
-
 group("embeddable_window_stage_ani") {
   deps = [
     ":embeddablewindowstageani_kit",
-    ":extension_window_abc_ani",
-    ":extension_window_host_abc_ani",
+    "sts:extension_window_abc_ani_etc",
+    "sts:extension_window_host_abc_ani_etc",
   ]
 }
