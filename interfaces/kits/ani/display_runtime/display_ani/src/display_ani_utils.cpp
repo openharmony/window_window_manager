@@ -26,13 +26,8 @@
 #include "dm_common.h"
 #include "refbase.h"
 
-
 namespace OHOS {
 namespace Rosen {
-
-namespace {
-    constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "DisplayAniUtils"};
-}
 
 enum class DisplayStateMode : uint32_t {
     STATE_UNKNOWN = 0,
@@ -68,27 +63,27 @@ ani_object DisplayAniUtils::convertRect(DMRect rect, ani_env* env)
     ani_field heightFld;
 
     if (ANI_OK != env->FindClass("L@ohos/display/display/rectImpl", &cls)) {
-        WLOGFE("[ANI] null class CutoutInfoImpl");
+        TLOGE(WmsLogTag::DMS, "[ANI] null class CutoutInfoImpl");
         return obj;
     }
-    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls , &obj)) {
-        WLOGFE("[ANI] create rect obj fail");
+    if (ANI_OK != DisplayAniUtils::NewAniObjectNoParams(env, cls, &obj)) {
+        TLOGE(WmsLogTag::DMS, "[ANI] create rect obj fail");
         return obj;
     }
     if (ANI_OK != env->Class_FindField(cls, "left", &leftFld)) {
-        WLOGFE("[ANI] null field left");
+        TLOGE(WmsLogTag::DMS, "[ANI] null field left");
         return obj;
     }
     if (ANI_OK != env->Class_FindField(cls, "width", &widthFld)) {
-        WLOGFE("[ANI] null field right");
+        TLOGE(WmsLogTag::DMS, "[ANI] null field right");
         return obj;
     }
     if (ANI_OK != env->Class_FindField(cls, "top", &topFld)) {
-        WLOGFE("[ANI] null field top");
+        TLOGE(WmsLogTag::DMS, "[ANI] null field top");
         return obj;
     }
     if (ANI_OK != env->Class_FindField(cls, "height", &heightFld)) {
-        WLOGFE("[ANI] null field bottom");
+        TLOGE(WmsLogTag::DMS, "[ANI] null field bottom");
         return obj;
     }
     env->Object_SetField_Int(obj, leftFld, rect.posX_);
@@ -105,22 +100,22 @@ ani_array_ref DisplayAniUtils::convertRects(std::vector<DMRect> rects, ani_env* 
     int size = rects.size();
     ani_class cls = nullptr;
     if (ANI_OK != env->FindClass("L@ohos/display/display/RectImpl", &cls)) {
-        WLOGFE("[ANI] null class CutoutInfoImpl");
+        TLOGE(WmsLogTag::DMS, "[ANI] null class CutoutInfoImpl");
     }
     ani_ref undefinedRef = nullptr;
     if (ANI_OK != env->GetUndefined(&undefinedRef)) {
-        WLOGFE("[ANI] get undefined error");
+        TLOGE(WmsLogTag::DMS, "[ANI] get undefined error");
     }
     if (ANI_OK != env->Array_New_Ref(cls, size, undefinedRef, &arrayres)) {
-        WLOGFE("[ANI] create rect array error");
+        TLOGE(WmsLogTag::DMS, "[ANI] create rect array error");
     }
     for (int i = 0; i < size; i++) {
         DMRect rect = rects[i];
         if (ANI_OK != env->Array_Set_Ref(arrayres, i, convertRect(rect, env))) {
-            WLOGFE("[ANI] set rect array error");
+            TLOGE(WmsLogTag::DMS, "[ANI] set rect array error");
         }
     }
-    WLOGFE("arrayres size = %{public}d", size);
+    TLOGI(WmsLogTag::DMS, "[ANI] arrayres size = %{public}d", size);
     return arrayres;
 }
  
@@ -156,14 +151,14 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
         ani_array_int colorSpacesAni;
         CreateAniArrayInt(env, colorSpaces.size(), &colorSpacesAni, colorSpaces);
         if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "colorSpaces", static_cast<ani_ref>(colorSpacesAni))) {
-            WLOGFE("[ANI] Array set colorSpaces field error");
+            TLOGE(WmsLogTag::DMS, "[ANI] Array set colorSpaces field error");
         }
     }
     if (hdrFormats.size() != 0) {
         ani_array_int hdrFormatsAni;
         CreateAniArrayInt(env, hdrFormats.size(), &hdrFormatsAni, hdrFormats);
         if (ANI_OK != env->Object_SetFieldByName_Ref(obj, "hdrFormats", static_cast<ani_ref>(hdrFormatsAni))) {
-            WLOGFE("[ANI] Array set hdrFormats field error");
+            TLOGE(WmsLogTag::DMS, "[ANI] Array set hdrFormats field error");
         }
     }
     return ANI_OK;
@@ -172,11 +167,11 @@ ani_status DisplayAniUtils::cvtDisplay(sptr<Display> display, ani_env* env, ani_
 void DisplayAniUtils::CreateAniArrayInt(ani_env* env, ani_size size, ani_array_int *aniArray, std::vector<uint32_t> vec)
 {
     if (ANI_OK != env->Array_New_Int(size, aniArray)) {
-        WLOGFE("[ANI] create colorSpace array error");
+        TLOGE(WmsLogTag::DMS, "[ANI] create colorSpace array error");
     }
     ani_int* aniArrayBuf = reinterpret_cast<ani_int *>(vec.data());
     if (ANI_OK != env->Array_SetRegion_Int(*aniArray, 0, size, aniArrayBuf)) {
-        WLOGFE("[ANI] Array set region int error");
+        TLOGE(WmsLogTag::DMS, "[ANI] Array set region int error");
     }
 }
 
@@ -207,7 +202,7 @@ ani_status DisplayAniUtils::NewAniObjectNoParams(ani_env* env, ani_class cls, an
     ani_method aniCtor;
     auto ret = env->Class_FindMethod(cls, "<ctor>", ":V", &aniCtor);
     if (ret != ANI_OK) {
-        WLOGFE("[ANI] find ctor method fail");
+        TLOGE(WmsLogTag::DMS, "[ANI] find ctor method fail");
         return ret;
     }
     return env->Object_New(cls, aniCtor, object);
