@@ -55,6 +55,7 @@ public:
     WMError RestoreSplitWindowMode(uint32_t mode) override;
     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
+    void NotifyMMIServiceOnline(uint32_t winId) override;
 
 private:
     static inline BrokerDelegator<WindowProxy> delegator_;
