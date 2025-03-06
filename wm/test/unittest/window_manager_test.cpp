@@ -1531,7 +1531,7 @@ HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
  * @tc.desc: test EffectiveDragResizeType
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, EffectiveDragResizeType, Function | SmallTest | Level2)
+HWTEST_F(WindowManagerTest, EffectiveDragResizeType, Function | SmallTest | Level2)
 {
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     const std::string bundleName = "test";
