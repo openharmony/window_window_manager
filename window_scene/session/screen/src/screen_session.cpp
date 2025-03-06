@@ -1388,11 +1388,18 @@ void ScreenSession::FillScreenInfo(sptr<ScreenInfo> info) const
     info->SetIsExtend(GetIsExtend());
     uint32_t width = 0;
     uint32_t height = 0;
-    sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
-    if (screenSessionModes != nullptr) {
-        height = screenSessionModes->height_;
-        width = screenSessionModes->width_;
+    if (isPcUse_) {
+        RRect bounds = property_.GetBounds();
+        width = bounds.rect_.GetWidth();
+        height = bounds.rect_.GetHeight();
+    } else {
+        sptr<SupportedScreenModes> screenSessionModes = GetActiveScreenMode();
+        if (screenSessionModes != nullptr) {
+            height = screenSessionModes->height_;
+            width = screenSessionModes->width_;
+        }
     }
+    
     float virtualPixelRatio = property_.GetVirtualPixelRatio();
     // "< 1e-set6" means virtualPixelRatio is 0.
     if (fabsf(virtualPixelRatio) < 1e-6) {

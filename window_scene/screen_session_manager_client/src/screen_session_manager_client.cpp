@@ -605,6 +605,27 @@ void ScreenSessionManagerClient::SwitchingCurrentUser()
     WLOGFI("switch to current user end");
 }
 
+void ScreenSessionManagerClient::DisconnectAllExternalScreen()
+{
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt = screenSessionMap_.rbegin(); sessionIt != screenSessionMap_.rend(); ++sessionIt) {
+        auto screenSession = sessionIt->second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->GetIsExtend()) {
+            TLOGI(WmsLogTag::DMS, "disconnect extend screen, screenId = %{public}" PRIu64, sessionIt->first);
+            screenSession->DestroyScreenScene();
+            NotifyScreenDisconnect(screenSession);
+            ScreenId screenId = sessionIt->first;
+            screenSessionMap_.erase(screenId);
+            screenSession->Disconnect();
+            break;
+        }
+    }
+}
+
 FoldStatus ScreenSessionManagerClient::GetFoldStatus()
 {
     if (!screenSessionManager_) {
