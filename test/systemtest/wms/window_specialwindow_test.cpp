@@ -414,6 +414,5 @@ HWTEST_F(WindowSpecialWindowTest, SetWindowModal03, Function | MediumTest | Leve
 }
 
 }
-
 } // namespace Rosen
 } // namespace OHOS
