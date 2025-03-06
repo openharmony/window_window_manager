@@ -279,6 +279,7 @@ public:
     DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyAvailableAreaChanged(DMRect area);
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    void RecordEventFromScb(std::string description, bool needRecordEvent) override;
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
     bool GetSnapshotArea(Media::Rect &rect, DmErrorCode* errorCode, ScreenId &screenId);
     int32_t GetCameraStatus();

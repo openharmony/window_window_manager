@@ -274,24 +274,23 @@ void JsScreenSession::RegisterScreenChangeListener()
     WLOGFI("register screen change listener success.");
 }
 
-napi_value JsScreenSession::RegisterCallback(napi_env env, napi_callback_info info)
-{
-    WLOGD("Register callback.");
-    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
-    return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
-}
-
 void JsScreenSession::UnRegisterScreenChangeListener()
 {
     if (screenSession_ == nullptr) {
         WLOGFE("Failed to unregister screen change listener, session is null!");
         return;
     }
- 
+
     screenSession_->UnregisterScreenChangeListener(this);
     WLOGFI("unregister screen change listener success.");
 }
 
+napi_value JsScreenSession::RegisterCallback(napi_env env, napi_callback_info info)
+{
+    WLOGD("Register callback.");
+    JsScreenSession* me = CheckParamsAndGetThis<JsScreenSession>(env, info);
+    return (me != nullptr) ? me->OnRegisterCallback(env, info) : nullptr;
+}
 
 napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info info)
 {
@@ -341,12 +340,10 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
         WLOGFE("Callback is unregistered!");
         return;
     }
-
     if (callbackType == ON_DISCONNECTION_CALLBACK) {
         WLOGFE("Call js callback %{public}s start", callbackType.c_str());
         UnRegisterScreenChangeListener();
     }
-
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto complete = std::make_unique<NapiAsyncTask::CompleteCallback>(
@@ -635,7 +632,7 @@ void JsScreenSession::OnHoverStatusChange(int32_t hoverStatus, bool needRotate, 
         WLOGFE("Callback %{public}s is unregistered!", callbackType.c_str());
         return;
     }
- 
+
     auto jsCallbackRef = mCallback_[callbackType];
     wptr<ScreenSession> screenSessionWeak(screenSession_);
     auto napiTask = [jsCallbackRef, callbackType, screenSessionWeak, hoverStatus, needRotate, env = env_]() {
