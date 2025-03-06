@@ -4879,13 +4879,13 @@ void SceneSessionManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Display
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         if (auto sceneSession = GetSceneSession(focusGroup->GetFocusedSessionId())) {
-            TLOGND(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             focusInfo.windowId_ = sceneSession->GetWindowId();
             focusInfo.displayId_ = focusGroup->GetDisplayGroupId();
             focusInfo.pid_ = sceneSession->GetCallingPid();
             focusInfo.uid_ = sceneSession->GetCallingUid();
             focusInfo.windowType_ = sceneSession->GetWindowType();
             focusInfo.abilityToken_ = sceneSession->GetAbilityToken();
+            TLOGNI(WmsLogTag::WMS_FOCUS, "Get focus session info success");
             return WSError::WS_OK;
         }
         return WSError::WS_ERROR_DESTROYED_OBJECT;
@@ -5802,7 +5802,7 @@ WSError SceneSessionManager::RequestSessionUnfocus(int32_t persistentId, FocusCh
     if (CheckLastFocusedAppSessionFocus(focusedSession, nextSession)) {
         return WSError::WS_OK;
     }
-    if (nextSession && !nextSession->IsSessionForeground()) {
+    if (nextSession && !nextSession->IsSessionForeground() && !nextSession->GetSessionInfo().isSystem_) {
         focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     }
     return ShiftFocus(displayId, nextSession, true, reason);
