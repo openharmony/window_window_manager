@@ -251,7 +251,7 @@ HWTEST_F(WindowSpecialWindowTest, SetSubWindowModal08, Function | MediumTest | L
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     WMError res1 = window->SetSubWindowModal(true, ModalityType::APPLICATION_MODALITY);
-    ASSERT_EQ(res1, WMError::WM_ERROR_DEVICE_NOT_SUPPORT)
+    ASSERT_EQ(res1, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(WMError::WM_OK, window->SetSubWindowModal(false, ModalityType::APPLICATION_MODALITY));
