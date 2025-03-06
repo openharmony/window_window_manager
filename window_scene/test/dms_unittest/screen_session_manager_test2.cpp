@@ -145,6 +145,41 @@ HWTEST_F(ScreenSessionManagerTest, SwitchScrollParam02, Function | SmallTest | L
         EXPECT_EQ(ret2, scrollFrictionParam[displayMode]);
     }
 }
+
+/**
+ * @tc.name: WakeUpPictureFrameBlock
+ * @tc.desc: WakeUpPictureFrameBlock test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->pictureFrameReady_ = false;
+    ssm_->pictureFrameBreak_ = false;
+    ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_START_DREAM);
+    ASSERT_EQ(ssm_->pictureFrameReady_, true);
+    ssm_->WakeUpPictureFrameBlock(DisplayEvent::SCREEN_LOCK_END_DREAM);
+    ASSERT_EQ(ssm_->pictureFrameBreak_, true);
+}
+
+/**
+ * @tc.name: BlockScreenWaitPictureFrameByCV
+ * @tc.desc: BlockScreenWaitPictureFrameByCV test
+ * @tc.type: FUNC
+ */
+ HWTEST_F(ScreenSessionManagerTest, BlockScreenWaitPictureFrameByCV, Function | SmallTest | Level3)
+ {
+     ASSERT_NE(ssm_, nullptr);
+     ssm_->pictureFrameReady_ = true;
+     ssm_->pictureFrameBreak_ = true;
+     bool result = ssm_->BlockScreenWaitPictureFrameByCV(true);
+     ASSERT_EQ(result, true);
+     result = ssm_->WakeUpPictureFrameBlock(false);
+     ASSERT_EQ(result, true);
+
+     ASSERT_EQ(ssm_->pictureFrameReady_, false);
+     ASSERT_EQ(ssm_->pictureFrameBreak_, false);
+}
 }
 }
 }
