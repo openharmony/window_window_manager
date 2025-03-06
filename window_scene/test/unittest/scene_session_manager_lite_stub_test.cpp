@@ -785,14 +785,14 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlList, Functio
     std::string bundleName = "appbundleName";
     int32_t appIndex = 1;
     bool isControl = true;
- 
+
     data.WriteUint8(typeId);
     data.WriteInt32(userId);
     data.WriteInt32(size);
     data.WriteString(bundleName);
     data.WriteInt32(appIndex);
     data.WriteBool(isControl);
- 
+
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleNotifyAppUseControlList(data, reply);
     EXPECT_EQ(ERR_NONE, res);

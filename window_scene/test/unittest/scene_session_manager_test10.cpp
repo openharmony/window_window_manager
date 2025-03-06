@@ -545,7 +545,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifyAppUseControlList, Function | SmallTes
     controlList.emplace_back();
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PERMISSION,
         ssm_->NotifyAppUseControlList(ControlAppType::APP_LOCK, -1, controlList));
- 
+
     AppUseControlInfo appUseControlInfo;
     appUseControlInfo.bundleName_ = "bundleName";
     appUseControlInfo.appIndex_ = 1;

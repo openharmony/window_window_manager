@@ -1013,7 +1013,7 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible02, Function | SmallTest |
  * @tc.name: SetTitleButtonVisible03
  * @tc.desc: SetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible03, Function | SmallTest | Level2)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible03 start";
@@ -1041,7 +1041,7 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible03, Function | SmallTest |
  * @tc.name: GetTitleButtonVisible01
  * @tc.desc: GetTitleButtonVisible
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionImplTest4, GetTitleButtonVisible01, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = new (std::nothrow) WindowOption();
@@ -1735,7 +1735,6 @@ HWTEST_F(WindowSessionImplTest4, GetLayoutTransform, Function | SmallTest | Leve
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 
-
 /**
  * @tc.name: SetExclusivelyHighlighted
  * @tc.desc: SetExclusivelyHighlighted
@@ -1829,6 +1828,6 @@ HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, Function | SmallTest | Lev
     ASSERT_EQ(isHighlighted, true);
 }
 
-}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS
