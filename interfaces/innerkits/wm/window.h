@@ -2052,6 +2052,14 @@ public:
     virtual std::shared_ptr<Media::PixelMap> Snapshot() { return nullptr; }
 
     /**
+     * @brief window snapshotSkipPrivacy
+     *
+     * @param pixelMap pixel map
+     * @return std::shared_ptr<Media::PixelMap> snapshot pixel
+     */
+    virtual WMError snapshotSkipPrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
+
+    /**
      * @brief Handle and notify memory level.
      *
      * @param level memory level

@@ -3779,6 +3779,28 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
     return pixelMap;
 }
 
+WMError WindowSceneSessionImpl::SnapshotSkipPrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    RSSurfaceCaptureConfig config = { .captureType = SurfaceCaptureType::UICAPTURE }; // captureType SELF_CAPTURE
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback, config);
+    if (!isSucceeded) {
+        WLOGFE("Failed to TakeSurfaceCapture!");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    pixelMap = callback->GetResult(2000); // wait for <= 2000ms
+    if (pixelMap != nullptr) {
+        WLOGFD("SnapshotSkipPrivacy succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+    } else {
+        WLOGFE("Failed to get pixelmap, return nullptr!");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
 {
     TLOGI(WmsLogTag::DEFAULT, "id: %{public}u, level: %{public}d", GetWindowId(), level);
