@@ -806,7 +806,7 @@ HWTEST_F(SceneSessionManagerLifecycleTest, RemoveFailRecoveredSession, Function 
     ssm_->failRecoveredPersistentIdSet_.insert(2);
     ssm_->failRecoveredPersistentIdSet_.insert(3);
     ssm_->RemoveFailRecoveredSession();
-    EXPECT_EQ(ssm->failRecoveredPersistentIdSet_.size(), 0);
+    EXPECT_EQ(ssm_->failRecoveredPersistentIdSet_.size(), 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
 }
 
