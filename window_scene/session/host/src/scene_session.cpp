@@ -6990,7 +6990,7 @@ void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
     SetNeedNotifyAttachState(registered);
 }
 
-void SceneSession::SetNotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
+void SceneSession::NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func)
 {
     const char* const where = __func__;
     PostTask([weakThis = wptr(this), where, func = std::move(func)] {

@@ -338,7 +338,7 @@ public:
     void CloneWindow(NodeId surfaceNodeId);
     void AddSidebarMaskColorModifier();
     void SetSidebarMaskColorModifier(bool needBlur);
-    void SetNotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
+    void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
 
     /*
      * PC Window Layout
