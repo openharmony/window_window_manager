@@ -1457,7 +1457,7 @@ WMError WindowExtensionSessionImpl::OnCrossAxisStateChange(AAFwk::Want&& data, s
     auto windowCrossAxisListeners = GetListeners<IWindowCrossAxisListener>();
     for (const auto& listener : windowCrossAxisListeners) {
         if (listener != nullptr) {
-            listener->OnCrossAxisChange(state);
+            listener->OnCrossAxisChange(static_cast<CrossAxisState>(state));
         }
     }
     return WMError::WM_OK;
