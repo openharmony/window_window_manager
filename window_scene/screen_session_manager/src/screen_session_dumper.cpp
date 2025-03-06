@@ -153,6 +153,7 @@ void ScreenSessionDumper::ExecuteDumpCmd()
         ShowHelpInfo();
     } else if (params_[0] == ARG_DUMP_ALL) {
         ShowAllScreenInfo();
+        ShowVisibleAreaDisplayInfo();
     } else if (params_[0] == ARG_DUMP_FOLD_STATUS) {
         DumpFoldStatus();
     }
@@ -299,6 +300,17 @@ void ScreenSessionDumper::ShowAllScreenInfo()
         DumpScreenInfoById(screenId);
         DumpScreenPropertyById(screenId);
         DumpFoldCreaseRegion();
+    }
+}
+
+void ScreenSessionDumper::ShowVisibleAreaDisplayInfo()
+{
+    std::vector<DisplayId> displayIds = ScreenSessionManager::GetInstance().GetAllDisplayIds();
+    for (auto displayId : displayIds) {
+        std::ostringstream oss;
+        oss << "-------------- Display ID: " << displayId << " --------------" << std::endl;
+        dumpInfo_.append(oss.str());
+        DumpVisibleAreaDisplayInfoById(displayId);
     }
 }
 
@@ -563,6 +575,22 @@ void ScreenSessionDumper::DumpScreenInfoById(ScreenId id)
         << static_cast<int32_t>(screenInfo->GetSourceMode()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenType: "
         << static_cast<int32_t>(screenInfo->GetType()) << std::endl;
+    dumpInfo_.append(oss.str());
+}
+
+void ScreenSessionDumper::DumpVisibleAreaDisplayInfoById(DisplayId id)
+{
+    std::ostringstream oss;
+    oss << "[DISPLAY INFO]" << std::endl;
+    auto displayInfo = ScreenSessionManager::GetInstance().GetVisibleAreaDisplayInfoById(id);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo nullptr. display id: %{public}" PRIu64"", id);
+        return;
+    }
+    oss << std::left << std::setw(LINE_WIDTH) << "visibleAreaWidth: "
+        << displayInfo->GetWidth() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "visibleAreaHeight: "
+        << displayInfo->GetHeight() << std::endl;
     dumpInfo_.append(oss.str());
 }
 
