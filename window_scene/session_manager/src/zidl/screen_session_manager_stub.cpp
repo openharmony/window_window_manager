@@ -873,6 +873,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             SetCameraStatus(cameraStatus, cameraPosition);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_RECORD_EVENT_FROM_SCB: {
+            std::string description = data.ReadString();
+            bool needRecordEvent = data.ReadBool();
+            RecordEventFromScb(description, needRecordEvent);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
