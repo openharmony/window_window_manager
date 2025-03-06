@@ -2055,7 +2055,7 @@ public:
      * @brief window snapshotSkipPrivacy
      *
      * @param pixelMap pixel map
-     * @return std::shared_ptr<Media::PixelMap> snapshot pixel
+     * @return the error code of this operation
      */
     virtual WMError SnapshotSkipPrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) { return WMError::WM_OK; }
 
