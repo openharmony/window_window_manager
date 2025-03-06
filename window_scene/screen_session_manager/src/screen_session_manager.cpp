@@ -924,6 +924,10 @@ std::string ScreenSessionManager::ConvertEdidToString(const struct BaseEdid edid
 bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> screenSession)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
+    if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::REAL) {
+        TLOGI(WmsLogTag::DMS, "not real screen, no need recover");
+        return true;
+    }
     std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
     if (multiScreenInfoMap.empty()) {
         TLOGE(WmsLogTag::DMS, "no restored screen, use default mode!");
@@ -952,8 +956,13 @@ bool ScreenSessionManager::RecoverRestoredMultiScreenMode(sptr<ScreenSession> sc
         ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_MIRROR);
         return true;
     }
-    clientProxy_->OnScreenConnectionChanged(GetSessionOption(screenSession), ScreenEvent::CONNECTED);
-    SetMultiScreenRelativePosition(info.mainScreenOption, info.secondaryScreenOption);
+    if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        SetMultiScreenMode(info.mainScreenOption.screenId_, info.secondaryScreenOption.screenId_,
+            info.multiScreenMode);
+    } else {
+        clientProxy_->OnScreenConnectionChanged(GetSessionOption(screenSession, screenSession->GetScreenId()),
+            ScreenEvent::CONNECTED);
+    }
     auto ret = SetMultiScreenRelativePosition(info.mainScreenOption, info.secondaryScreenOption);
     if (ret != DMError::DM_OK) {
         SetMultiScreenDefaultRelativePosition();
@@ -2192,8 +2201,8 @@ void ScreenSessionManager::SetExtendedScreenFallbackPlan(ScreenId screenId)
         TLOGI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64", propertyCurrentOffScreenRendering is false", screenId);
         return;
     }
-    uint32_t screenAdjustWidth;
-    uint32_t screenAdjustHeight;
+    uint32_t screenAdjustWidth = 0;
+    uint32_t screenAdjustHeight = 0;
     if (screenSession ->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
         TLOGD(WmsLogTag::DMS, "Screen is mirror");
         screenAdjustWidth = screenProperty.GetScreenRealWidth();
@@ -2212,6 +2221,9 @@ void ScreenSessionManager::SetExtendedScreenFallbackPlan(ScreenId screenId)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetPhysicalScreenResolution(%" PRIu64")", screenId);
     res = rsInterface_.SetPhysicalScreenResolution(rsScreenId, screenAdjustWidth, screenAdjustHeight);
     screenSession->Resize(screenAdjustWidth, screenAdjustHeight, false);
+    if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    }
     if (res != StatusCode::SUCCESS) {
         TLOGE(WmsLogTag::DMS, "RS SetPhysicalScreenResolution failed.");
         screenEventTracker_.RecordEvent("SetPhysicalScreenResolution failed.");
@@ -2220,8 +2232,7 @@ void ScreenSessionManager::SetExtendedScreenFallbackPlan(ScreenId screenId)
         screenEventTracker_.RecordEvent("SetPhysicalScreenResolution success.");
     }
     std::ostringstream oss;
-    oss << "screenId:" << screenId
-        << ", screenAdjustWidth: " <<  screenAdjustWidth
+    oss << "screenId:" << screenId << ", screenAdjustWidth: " <<  screenAdjustWidth
         << ", screenAdjustHeight: " << screenAdjustHeight;
     TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
 }
@@ -6886,6 +6897,7 @@ void ScreenSessionManager::SwitchUser()
     }
     auto userId = GetUserIdByCallingUid();
     auto newScbPid = IPCSkeleton::GetCallingPid();
+    currentUserIdForSettings_ = userId;
     SwitchScbNodeHandle(userId, newScbPid, false);
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, GetDefaultScreenId(), false);
 #endif
@@ -6929,10 +6941,40 @@ void ScreenSessionManager::ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> 
         screenSession->UpdateValidRotationToScb();
     }
     auto task = [=] {
+        if (!clientProxy_) {
+            TLOGE(WmsLogTag::DMS, "ScbStatusRecoveryWhenSwitchUser clientProxy_ is null");
+            return;
+        }
         clientProxy_->SwitchUserCallback(oldScbPids, newScbPid);
+        RecoverMultiScreenModeWhenSwitchUser();
     };
     taskScheduler_->PostAsyncTask(task, "clientProxy_ SwitchUserCallback task", delayTime);
 #endif
+}
+
+void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser()
+{
+    std::map<std::string, MultiScreenInfo> multiScreenInfoMap = ScreenSettingHelper::GetMultiScreenInfo();
+    if (multiScreenInfoMap.empty()) {
+        TLOGE(WmsLogTag::DMS, "no restored screen, use default mode!");
+        return;
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        for (auto sessionIt : screenSessionMap_) {
+            auto screenSession = sessionIt.second;
+            if (screenSession == nullptr) {
+                TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+                continue;
+            }
+            if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL &&
+                screenSession->GetIsExtend()) {
+                TLOGI(WmsLogTag::DMS, "recover extend screen, screenId = %{public}" PRIu64"",
+                sessionIt.first);
+                RecoverMultiScreenMode(screenSession);
+            }
+        }
+    }
 }
 
 void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& client)
@@ -7047,6 +7089,7 @@ void ScreenSessionManager::SetClientInner()
         }
         if (iter.second->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
             TLOGI(WmsLogTag::DMS, "current screen is extend and mirror, return before OnScreenConnectionChanged");
+            RecoverMultiScreenMode(iter.second);
             continue;
         }
         if (g_isPcDevice && g_outerOnly == ONLY_OUTER_SCREEN_VALUE && !iter.second->GetIsExtend()) {
@@ -7056,6 +7099,7 @@ void ScreenSessionManager::SetClientInner()
             clientProxy_->OnScreenConnectionChanged(GetSessionOption(iter.second, iter.first),
                 ScreenEvent::CONNECTED);
         } else {
+            TLOGI(WmsLogTag::DMS, "recover screen, id: %{public}" PRIu64, iter.first);
             RecoverMultiScreenMode(iter.second);
         }
     }
@@ -7075,6 +7119,9 @@ void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSess
         if (screenSession->GetScreenCombination() != ScreenCombination::SCREEN_MAIN) {
             ReportHandleScreenEvent(ScreenEvent::CONNECTED, ScreenCombination::SCREEN_EXTEND);
         }
+    }
+    if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+        screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
     }
 }
 
