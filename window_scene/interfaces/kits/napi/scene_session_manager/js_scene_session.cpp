@@ -6530,7 +6530,7 @@ void JsSceneSession::ProcessUpdateFlagRegister()
         return;
     }
     const char* const where = __func__;
-    session->SetNotifyUpdateFlagCallback([weakThis = wptr(this), where](const std::string& flag) {
+    session->NotifyUpdateFlagCallback([weakThis = wptr(this), where](const std::string& flag) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s: jsSceneSession is null", where);

@@ -509,7 +509,6 @@ HWTEST_F(MainSessionTest, UpdateFlag, Function | SmallTest | Level2)
     info.abilityName_ = "UpdateFlag";
     info.bundleName_ = "UpdateFlag";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
     std::string flag = "test";
     EXPECT_EQ(WSError::WS_OK, session->UpdateFlag(flag));
 

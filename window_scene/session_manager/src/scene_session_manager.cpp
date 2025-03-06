@@ -13021,7 +13021,6 @@ WSError SceneSessionManager::IsLastFrameLayoutFinished(bool& isLayoutFinished)
 
 WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& enabled, int persistentId)
 {
-    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
@@ -13029,6 +13028,7 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
     }
     std::string specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
     TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
+    std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
     if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {
         enabled = iter->second;
     } else {
