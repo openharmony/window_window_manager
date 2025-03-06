@@ -853,7 +853,7 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
     return true;
 }
 
-bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector)
+bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
         WLOGFE("array is nullptr!");
