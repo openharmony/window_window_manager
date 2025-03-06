@@ -286,7 +286,7 @@ void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
 void JsWindowListener::OnTouchOutside() const
 {
     WLOGI("CALLED");
-    auto jsCallback =[self = weakRef_] {
+    auto jsCallback = [self = weakRef_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr) {
             WLOGFE("this listener is nullptr");
@@ -321,7 +321,7 @@ void JsWindowListener::OnScreenshot()
 
 void JsWindowListener::OnDialogTargetTouch() const
 {
-    auto jsCallback =[self = weakRef_] {
+    auto jsCallback = [self = weakRef_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr) {
             WLOGFE("this listener is nullptr");
