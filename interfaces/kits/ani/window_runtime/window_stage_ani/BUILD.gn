@@ -12,106 +12,27 @@
 # limitations under the License.
 
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
-import("//build/ohos.gni")
-import("//build/ohos/idlize/arkts_idlize.gni")
 
-config("window_common_config") {
-  visibility = [ ":*" ]
-
-  include_dirs = [
-    "../../common",
-    "../../../../innerkits/wm",
-    "../../../../innerkits/dm",
-    "../../../../../wm/include",
-    "../../../../../utils/include",
+# abc generate
+generate_static_abc("window_stage_abc") {
+  arktsconfig = "./main.json"
+  dst_file = "$target_out_dir/window_stage_ani.abc"
+  in_puts = [
+    "./main.json",
+    "./sts/window.ets",
+    "./sts/window_entry.ets",
   ]
+  out_puts = [ "$target_out_dir/window_stage_ani.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/window_stage_ani.abc"
+  extra_visibility = [ ":*" ]
 }
 
-config("windowstage_ani_public_config") {
-  visibility = [ ":*" ]
-
-  include_dirs = [ "include" ]
-}
-
-template("generate_and_build") {
-  forward_variables_from(invoker, "*")
-
-  # input-file
-  #idlize_idl2peer(target_name) {
-  #  input_dir = "./idl"
-  #  output = "./"
-  #  dirmode = "delete"
-  #  default_package = "window"
-  #  mode = "dts2peer"
-  #}
-
-  ohos_source_set("windowstageidl_sourceset") {
-    visibility = [ ":*" ]
-    include_dirs = [
-      "../../common",
-      "../../../../innerkits/wm",
-      "../../../../innerkits/dm",
-      "../../../../../wm/include",
-      "../../../../../utils/include",
-      "./include",
-      "./generated/",
-    ]
-
-    external_deps = [
-      "ability_runtime:ability_manager",
-      "ability_runtime:runtime",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "napi:ace_napi",
-    ]
-    sources = [
-      "./src/ani_utils.cpp",
-      "./src/ani_window.cpp",
-      "./src/ani_window_stage.cpp",
-      "./src/idl_window_stage.cpp",
-    ]
-    subsystem_name = "window"
-    part_name = "window_manager"
-  }
-
-  idlize_shared_library(target_name) {
-    generated = "./generated"
-    classpath_prefix = "@ohos/window/WINDOWNativeModule/"
-    relative_install_dir = "module/application"
-    module_install_dir = "module/application"
-    deps = [
-      ":windowstageidl_sourceset",
-      "../../../../../utils:libwmutil",
-      "../../../../../utils:libwmutil_base",
-      "../../../../../wm:libwm",
-    ]
-
-    configs = [
-      ":window_common_config",
-      ":windowstage_ani_public_config",
-      "../../../../../resources/config/build:coverage_flags",
-    ]
-
-    public_configs = [ ":windowstage_ani_public_config" ]
-
-    external_deps = [
-      "ability_runtime:ability_manager",
-      "ability_runtime:runtime",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "napi:ace_napi",
-    ]
-    subsystem_name = "window"
-    part_name = "window_manager"
-    version_script = "window.map"
-  }
-}
-
-generate_and_build("window_stage_idl") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
+ohos_prebuilt_etc("window_stage_etc") {
+  source = "$target_out_dir/window_stage_ani.abc"
+  deps = [ ":window_stage_abc" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+  relative_install_dir = "framework"
 }

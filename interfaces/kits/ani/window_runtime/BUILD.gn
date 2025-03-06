@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("../../../../windowmanager_aafwk.gni")
 
@@ -87,33 +86,9 @@ ohos_shared_library("windowstageani_kit") {
   subsystem_name = "window"
 }
 
-# abc generate
-generate_static_abc("window_stage_abc") {
-  arktsconfig = "./window_stage_ani/main.json"
-  dst_file = "$target_out_dir/window_stage_ani.abc"
-  in_puts = [
-    "./window_stage_ani/main.json",
-    "./window_stage_ani/sts/window.ets",
-    "./window_stage_ani/sts/window_entry.ets",
-  ]
-  out_puts = [ "$target_out_dir/window_stage_ani.abc" ]
-
-  is_boot_abc = "True"
-  device_dst_file = "/system/etc/window/window_stage_ani.abc"
-  extra_visibility = [ ":*" ]
-}
-
-ohos_prebuilt_etc("window_stage_etc") {
-  source = "$target_out_dir/window_stage_ani.abc"
-  deps = [ ":window_stage_abc" ]
-  part_name = "window_manager"
-  subsystem_name = "window"
-  relative_install_dir = "window"
-}
-
 group("window_stage_ani") {
   deps = [
-    ":window_stage_etc",
     ":windowstageani_kit",
+    "window_stage_ani:window_stage_etc",
   ]
 }
