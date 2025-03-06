@@ -1302,9 +1302,7 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
         if (ret != WSError::WS_OK) {
             return ret;
         }
-        if (Session::IsScbCoreEnabled() &&
-            session->specificCallback_ &&
-            session->specificCallback_->onUpdateOccupiedAreaIfNeed_) {
+        if (session->specificCallback_ && session->specificCallback_->onUpdateOccupiedAreaIfNeed_) {
             session->specificCallback_->onUpdateOccupiedAreaIfNeed_(session->GetPersistentId());
         }
         return ret;
