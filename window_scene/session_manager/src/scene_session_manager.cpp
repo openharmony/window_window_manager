@@ -10228,21 +10228,13 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
 BrokerStates SceneSessionManager::NotifyStartAbility(
     int32_t collaboratorType, const SessionInfo& sessionInfo, int32_t persistentId)
 {
-<<<<<<< HEAD
-    TLOGI(WmsLogTag::DEFAULT, "type %{public}d id %{public}d", collaboratorType, persistentId);
-=======
     TLOGI(WmsLogTag::WMS_LIFE, "type %{public}d id %{public}d", collaboratorType, persistentId);
->>>>>>> upstream/master
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator = GetCollaboratorByType(collaboratorType);
     if (collaborator == nullptr) {
         return BrokerStates::BROKER_UNKOWN;
     }
     if (sessionInfo.want == nullptr) {
-<<<<<<< HEAD
-        TLOGI(WmsLogTag::DEFAULT, "sessionInfo.want is nullptr, init");
-=======
         TLOGI(WmsLogTag::WMS_LIFE, "sessionInfo.want is nullptr, init");
->>>>>>> upstream/master
         sessionInfo.want = std::make_shared<AAFwk::Want>();
         sessionInfo.want->SetElementName("", sessionInfo.bundleName_, sessionInfo.abilityName_,
             sessionInfo.moduleName_);
@@ -10254,16 +10246,6 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
 
         std::string affinity = sessionInfo.want->GetStringParam(Rosen::PARAM_KEY::PARAM_MISSION_AFFINITY_KEY);
         if (!affinity.empty() && FindSessionByAffinity(affinity) != nullptr) {
-<<<<<<< HEAD
-            TLOGI(WmsLogTag::DEFAULT, "want affinity exit %{public}s.", affinity.c_str());
-            return BrokerStates::BROKER_UNKOWN;
-        }
-        sessionInfo.want->SetParam("oh_persistentId", persistentId);
-        int32_t ret = collaborator->NotifyStartAbility(*(sessionInfo.abilityInfo),
-            currentUserId_, *(sessionInfo.want), static_cast<uint64_t>(accessTokenIDEx));
-        TLOGI(WmsLogTag::DEFAULT, "collaborator ret: %{public}d", ret);
-        if (ret == 0) {
-=======
             TLOGI(WmsLogTag::WMS_LIFE, "want affinity exit %{public}s.", affinity.c_str());
             return BrokerStates::BROKER_UNKOWN;
         }
@@ -10282,7 +10264,6 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
         }
         TLOGI(WmsLogTag::WMS_LIFE, "collaborator ret: %{public}d", *ret);
         if (*ret == 0) {
->>>>>>> upstream/master
             return BrokerStates::BROKER_STARTED;
         } else {
             return BrokerStates::BROKER_NOT_START;
