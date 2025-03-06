@@ -3276,7 +3276,7 @@ public:
      /**
      * @brief Get is subwindow support maximize.
      *
-     * @return Api version
+     * @return true means subwindow support maximize, others means do not support.
      */
     virtual bool IsSubWindowMaximizeSupported(WindowType windowType) const { return false; }
 };
