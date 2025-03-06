@@ -2203,7 +2203,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     }
     if (height == -1) {
         height = 0;
-        TLOGD(WmsLogTag::WMS_DECOR, "Get app window decor height failed");
+        TLOGW(WmsLogTag::WMS_DECOR, "Get app window decor height failed");
         return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
