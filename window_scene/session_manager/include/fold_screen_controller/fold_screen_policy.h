@@ -52,6 +52,7 @@ public:
     virtual void BootAnimationFinishPowerInit() {};
     virtual void ChangeOnTentMode(FoldStatus currentState);
     virtual void ChangeOffTentMode();
+    virtual void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config);
     virtual void SetMainScreenRegion(DMRect& mainScreenRegion);
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();

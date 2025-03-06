@@ -46,9 +46,9 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_POCKET_DEVICE);
         sensorFoldStateManager_ = new SingleDisplaySensorPocketFoldStateManager();
         TLOGI(WmsLogTag::DMS, "fold polocy: SINGLE_DISPLAY_POCKET_DEVICE");
-    } else if (FoldScreenStateInternel::IsSingleDisplayFoldDevice()) {
+    } else if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         foldScreenPolicy_ = GetFoldScreenPolicy(DisplayDeviceType::SECONDARY_DISPLAY_DEVICE);
-        sensorFoldStateManager_ = new SingleDisplaySensorPocketFoldStateManager();
+        sensorFoldStateManager_ = new SecondaryDisplaySensorFoldStateManager();
         TLOGI(WmsLogTag::DMS, "fold polocy: SECONDARY_DISPLAY_DEVICE");
     }
     if (foldScreenPolicy_ == nullptr) {
@@ -288,6 +288,15 @@ void FoldScreenController::AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32
         return;
     }
     foldScreenPolicy_->AddOrRemoveDisplayNodeToTree(screenId, command);
+}
+
+void FoldScreenController::SetScreenSnapshotRect(RSSurfaceCaptureConfig& config)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetScreenSnapshotRect(config);
 }
 
 void FoldScreenController::SetMainScreenRegion(DMRect& mainScreenRegion)

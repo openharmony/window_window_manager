@@ -36,6 +36,7 @@ public:
     void SetOnBootAnimation(bool onBootAnimation) override;
     FoldDisplayMode GetModeMatchStatus() override;
     std::vector<uint32_t> GetScreenParams() override;
+    void SetScreenSnapshotRect(RSSurfaceCaptureConfig& config) override;
     void SetMainScreenRegion(DMRect& mainScreenRegion) override;
     void SetSecondaryDisplayModeChangeStatus(bool status) override;
 private:
