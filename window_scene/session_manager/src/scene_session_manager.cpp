@@ -11647,7 +11647,7 @@ void SceneSessionManager::UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIEx
         return;
     }
     if (constrainedModalUIExtData == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "invalid constrainedModalUIExtData");
+        TLOGE(WmsLogTag::WMS_UIEXT, "invalid constrainedModalUIExtData");
         return;
     }
     const auto& constrainedModalUIExtInfoMap = constrainedModalUIExtData->GetSecData();
