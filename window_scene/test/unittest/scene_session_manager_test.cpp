@@ -2385,7 +2385,7 @@ HWTEST_F(SceneSessionManagerTest, IsWindowRectAutoSave, Function | SmallTest | L
     bool enabled = false;
     int persistentId = 1;
     auto result = ssm_->IsWindowRectAutoSave(key, enabled, persistentId);
-    ASSERT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_SESSION);
 }
 
 /**

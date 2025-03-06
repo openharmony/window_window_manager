@@ -1123,7 +1123,7 @@ HWTEST_F(SessionProxyTest, SetSessionLabelAndIcon, Function | SmallTest | Level2
 
 /**
  * @tc.name: SetWindowCornerRadius
- * @tc.desc: normal function
+ * @tc.desc: SetWindowCornerRadius
  * @tc.type: FUNC
  */
 HWTEST_F(SessionProxyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
@@ -1140,7 +1140,7 @@ HWTEST_F(SessionProxyTest, SetWindowCornerRadius, Function | SmallTest | Level2)
 
 /**
  * @tc.name: UpdateFlag
- * @tc.desc: normal function
+ * @tc.desc: UpdateFlag
  * @tc.type: FUNC
  */
 HWTEST_F(SessionProxyTest, UpdateFlag, Function | SmallTest | Level2)

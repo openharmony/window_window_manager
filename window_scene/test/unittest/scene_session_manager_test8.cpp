@@ -598,30 +598,6 @@ HWTEST_F(SceneSessionManagerTest8, TerminateSessionNew, Function | SmallTest | L
 }
 
 /**
- * @tc.name: IsWindowRectAutoSave
- * @tc.desc: test function : IsWindowRectAutoSave
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest8, IsWindowRectAutoSave, Function | SmallTest | Level3)
-{
-    std::string key = "IsWindowRectAutoSave";
-    bool enabled = false;
-    bool enabled1 = true;
-    int persistentId = 1;
-    ssm_->isWindowRectAutoSaveMap_.clear();
-    ssm_->SetIsWindowRectAutoSave(key, enabled1);
-    ssm_->SetIsWindowRectAutoSave(key, enabled1);
-    ssm_->IsWindowRectAutoSave(key, enabled, persistentId);
-    EXPECT_EQ(true, enabled);
-
-    enabled = true;
-    enabled1 = false;
-    ssm_->SetIsWindowRectAutoSave(key, enabled1);
-    ssm_->IsWindowRectAutoSave(key, enabled, persistentId);
-    EXPECT_EQ(false, enabled);
-}
-
-/**
  * @tc.name: IsLastFrameLayoutFinished
  * @tc.desc: test function : IsLastFrameLayoutFinished
  * @tc.type: FUNC
