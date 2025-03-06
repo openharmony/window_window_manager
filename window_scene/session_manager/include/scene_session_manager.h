@@ -1015,7 +1015,7 @@ private:
      */
     std::mutex isWindowRectAutoSaveMapMutex_;
     std::unordered_map<std::string, bool> isWindowRectAutoSaveMap_;
-    
+
     /*
      * Move Drag
      */
