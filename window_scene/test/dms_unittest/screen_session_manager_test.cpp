@@ -1351,6 +1351,21 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualPixelRatioSystem, Function | SmallT
 }
 
 /**
+ * @tc.name: SetDefaultDensityDpi
+ * @tc.desc: SetDefaultDensityDpi virtual screen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetDefaultDensityDpi, Function | SmallTest | Level3)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "SetDefaultDensityDpi";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(DMError::DM_OK, ssm_->SetDefaultDensityDpi(screenId, 0.1));
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
  * @tc.name: SetResolution
  * @tc.desc: SetResolution virtual screen
  * @tc.type: FUNC
