@@ -1298,7 +1298,16 @@ WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        return session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
+        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
+        if (ret != WSError::WS_OK) {
+            return ret;
+        }
+        if (Session::IsScbCoreEnabled() &&
+            session->specificCallback_ &&
+            session->specificCallback_->onUpdateOccupiedAreaIfNeed_) {
+            session->specificCallback_->onUpdateOccupiedAreaIfNeed_(session->GetPersistentId());
+        }
+        return ret;
     }, __func__);
     return WSError::WS_OK;
 }
