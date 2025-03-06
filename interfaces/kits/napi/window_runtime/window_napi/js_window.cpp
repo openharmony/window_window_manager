@@ -5232,7 +5232,7 @@ napi_value JsWindow::OnSnapshotSkipPrivacy(napi_env env, napi_callback_info info
             }
 
             std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SnapshotSkipPrivacy(pixelMap));
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SnapshotSkipPrivacy(pixelMap));
             if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, ret));
                 WLOGFE("device not support");
