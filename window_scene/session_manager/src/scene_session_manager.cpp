@@ -4274,11 +4274,11 @@ bool SceneSessionManager::GetIconFromDesk(const SessionInfo& sessionInfo, std::s
 {
     auto& want = sessionInfo.want;
     if (want == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "want is nullPtr");
+        TLOGI(WmsLogTag::WMS_PATTERN, "want is nullPtr");
         return false;
     }
     startupPagePath = want->GetStringParam("realAppIcon");
-    if (std::string() == startupPagePath) {
+    if (startupPagePath.empty()) {
         return false;
     }
     return true;
@@ -4287,7 +4287,7 @@ bool SceneSessionManager::GetIconFromDesk(const SessionInfo& sessionInfo, std::s
 void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, std::string& path, uint32_t& bgColor)
 {
     if (GetIconFromDesk(sessionInfo, path)) {
-        TLOGI(WmsLogTag::DEFAULT, "get GetStartupPage from desk suc");
+        TLOGI(WmsLogTag::WMS_PATTERN, "get from desk suc");
         return;
     }
 
