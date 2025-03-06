@@ -22,8 +22,7 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_DISPLAY, "ScreenSessionManagerClientProxy" };
 } // namespace
 
-void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-    ScreenId rsId, const std::string& name, bool isExtend)
+void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(SessionOption SessionOption, ScreenEvent screenEvent)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -38,24 +37,28 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(ScreenId screenI
         WLOGFE("WriteInterfaceToken failed");
         return;
     }
-    if (!data.WriteUint64(screenId)) {
+    if (!data.WriteUint64(SessionOption.rsId_)) {
+        WLOGFE("Write rsId failed");
+        return;
+    }
+    if (!data.WriteString(SessionOption.name_)) {
+        WLOGFE("Write name failed");
+        return;
+    }
+    if (!data.WriteBool(SessionOption.isExtend_)) {
+        WLOGFE("Write isExtended failed");
+        return;
+    }
+    if (!data.WriteString(SessionOption.innerName_)) {
+        WLOGFE("Write innerName failed");
+        return;
+    }
+    if (!data.WriteUint64(SessionOption.screenId_)) {
         WLOGFE("Write screenId failed");
         return;
     }
     if (!data.WriteUint8(static_cast<uint8_t>(screenEvent))) {
         WLOGFE("Write screenEvent failed");
-        return;
-    }
-    if (!data.WriteUint64(rsId)) {
-        WLOGFE("Write rsId failed");
-        return;
-    }
-    if (!data.WriteString(name)) {
-        WLOGFE("Write name failed");
-        return;
-    }
-    if (!data.WriteBool(isExtend)) {
-        WLOGFE("Write isExtended failed");
         return;
     }
     if (remote->SendRequest(

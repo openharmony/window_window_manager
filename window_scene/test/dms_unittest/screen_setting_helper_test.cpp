@@ -378,6 +378,45 @@ namespace {
         auto ret = screenSettingHelper.IsNumber(test_str);
         ASSERT_FALSE(ret);
     }
+
+    /**
+     * @tc.name: RegisterSettingWireCastObserver01
+     * @tc.desc: RegisterSettingWireCastObserver01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingWireCastObserver01, Function | SmallTest | Level3)
+    {
+        auto func = [] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+        };
+        ScreenSettingHelper::wireCastObserver_ = new SettingObserver;
+        ScreenSettingHelper::RegisterSettingWireCastObserver(func);
+        ASSERT_NE(ScreenSettingHelper::wireCastObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingWireCastObserver01
+     * @tc.desc: UnregisterSettingWireCastObserver01
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingWireCastObserver01, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper::wireCastObserver_ = nullptr;
+        ScreenSettingHelper::UnregisterSettingWireCastObserver();
+        ASSERT_EQ(ScreenSettingHelper::wireCastObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: UnregisterSettingWireCastObserver02
+     * @tc.desc: UnregisterSettingWireCastObserver02
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingWireCastObserver02, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper::wireCastObserver_ = new SettingObserver;
+        ScreenSettingHelper::UnregisterSettingWireCastObserver();
+        ASSERT_EQ(ScreenSettingHelper::wireCastObserver_, nullptr);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

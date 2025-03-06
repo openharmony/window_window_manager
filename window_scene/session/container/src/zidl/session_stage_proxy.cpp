@@ -1643,7 +1643,7 @@ WSError SessionStageProxy::NotifyWindowAttachStateChange(bool isAttach)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_ASYNC | MessageOption::TF_ASYNC_WAKEUP_LATER);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_SUB, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;

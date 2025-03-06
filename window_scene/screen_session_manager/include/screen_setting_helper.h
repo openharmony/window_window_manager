@@ -62,6 +62,8 @@ public:
     static void UnregisterSettingscreenSkipProtectedWindowObserver();
     static bool GetSettingscreenSkipProtectedWindow(bool& enable,
         const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
+    static void RegisterSettingWireCastObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingWireCastObserver();
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
@@ -76,6 +78,7 @@ private:
     static sptr<SettingObserver> rotationObserver_;
     static sptr<SettingObserver> halfScreenObserver_;
     static sptr<SettingObserver> screenSkipProtectedWindowObserver_;
+    static sptr<SettingObserver> wireCastObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

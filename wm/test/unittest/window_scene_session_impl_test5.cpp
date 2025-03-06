@@ -20,9 +20,11 @@
 #include "display_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
+#include "mock_window.h"
 #include "mock_window_adapter.h"
 #include "pointer_event.h"
 #include "singleton_mocker.h"
+#include "wm_common_inner.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
 using namespace testing;
@@ -695,6 +697,85 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateSystemBarProperties, Function | Smal
     std::unordered_map<WindowType, SystemBarProperty> systemBarProperties;
     std::unordered_map<WindowType, SystemBarPropertyFlag> systemBarPropertyFlags;
     ASSERT_EQ(WMError::WM_OK, window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
+}
+
+/**
+ * @tc.name: NotifyAfterDidForeground
+ * @tc.desc: NotifyAfterDidForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyAfterDidForeground, Function | SmallTest | Level2)
+{
+    sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
+    sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Test");
+    option->SetDisplayId(0);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->RegisterLifeCycleListener(listener);
+
+    EXPECT_CALL(*mockListener, AfterDidForeground()).Times(1);
+    ASSERT_EQ(WMError::WM_OK, window->Show(static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), false));
+}
+
+/**
+ * @tc.name: NotifyAfterDidBackground
+ * @tc.desc: NotifyAfterDidBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, NotifyAfterDidBackground, Function | SmallTest | Level2)
+{
+    sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
+    sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Test");
+    option->SetDisplayId(0);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->RegisterLifeCycleListener(listener);
+
+    EXPECT_CALL(*mockListener, AfterDidBackground()).Times(1);
+    ASSERT_EQ(WMError::WM_OK, window->Hide(static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), false, false));
+}
+
+/**
+ * @tc.name: Resume
+ * @tc.desc: Resume
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, Resume, Function | SmallTest | Level2)
+{
+    sptr<MockWindowLifeCycleListener> mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
+    sptr<IWindowLifeCycle> listener = static_cast<sptr<IWindowLifeCycle>>(mockListener);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("Test");
+    option->SetDisplayId(0);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = session;
+    window->RegisterLifeCycleListener(listener);
+    window->SetTargetAPIVersion(16);
+
+    EXPECT_CALL(*mockListener, AfterResumed()).Times(1);
+    window->Resume();
 }
 }
 } // namespace Rosen

@@ -357,6 +357,17 @@ void MainSession::RegisterSessionLockStateChangeCallback(NotifySessionLockStateC
     }, __func__);
 }
 
+void MainSession::NotifySubAndDialogFollowRectChange(const WSRect& rect, bool isGlobal, bool needFlush)
+{
+    std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
+    for (const auto& [sessionId, func] : notifySurfaceBoundsChangeFuncMap_) {
+        auto subSession = GetSceneSessionById(sessionId);
+        if (subSession && subSession->GetIsFollowParentLayout() && func) {
+            func(rect, isGlobal, needFlush);
+        }
+    }
+}
+
 void MainSession::NotifySessionLockStateChange(bool isLockedState)
 {
     PostTask([weakThis = wptr(this), isLockedState] {

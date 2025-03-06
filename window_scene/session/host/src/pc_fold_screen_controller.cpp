@@ -66,7 +66,7 @@ void PcFoldScreenController::OnConnect()
                     TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "controller is nullptr");
                     return;
                 }
-                if (status != SuperFoldStatus::KEYBOARD && status != prevStatus) {
+                if (status != prevStatus) {
                     controller->UpdateRect();
                 }
                 controller->FoldStatusChangeForFullScreenWaterfallMode(displayId, status, prevStatus);

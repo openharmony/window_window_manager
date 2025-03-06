@@ -52,7 +52,6 @@ constexpr int64_t LIFE_CYCLE_TASK_EXPIRED_TIME_LIMIT = 350;
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 constexpr int64_t STATE_DETECT_DELAYTIME = 3 * 1000;
 constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
-constexpr int32_t SUPER_FOLD_DIVIDE_FACTOR = 2;
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
     { SessionState::STATE_CONNECT, false },
@@ -968,9 +967,6 @@ WSError Session::UpdateSizeChangeReason(SizeChangeReason reason)
 
 WSError Session::UpdateClientDisplayId(DisplayId displayId)
 {
-    if (displayId == clientDisplayId_) {
-        return WSError::WS_DO_NOTHING;
-    }
     if (sessionStage_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
@@ -1030,7 +1026,7 @@ void Session::UpdateClientRectPosYAndDisplayId(WSRect& rect)
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "lastStatus: %{public}d, curStatus: %{public}d",
         lastScreenFoldStatus_, currScreenFoldStatus);
-    if (currScreenFoldStatus == SuperFoldStatus::EXPANDED) {
+    if (currScreenFoldStatus == SuperFoldStatus::EXPANDED || currScreenFoldStatus == SuperFoldStatus::KEYBOARD) {
         lastScreenFoldStatus_ = currScreenFoldStatus;
         auto ret = UpdateClientDisplayId(DEFAULT_DISPLAY_ID);
         TLOGI(WmsLogTag::WMS_LAYOUT, "JustUpdateId: winId: %{public}d, result: %{public}d",
@@ -1156,9 +1152,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     WindowHelper::IsUIExtensionWindow(GetWindowType()) ? UpdateRect(winRect_, SizeChangeReason::UNDEFINED, "Connect") :
         NotifyClientToUpdateRect("Connect", nullptr);
     NotifyConnect();
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(GetScreenId()) && clientDisplayId_ == VIRTUAL_DISPLAY_ID) {
-        property->SetDisplayId(clientDisplayId_);
-    }
     return WSError::WS_OK;
 }
 
@@ -1579,7 +1572,7 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
             TLOGND(WmsLogTag::WMS_LIFE, "session is null");
             return;
         }
-        if (session->sessionStage_) {
+        if (session->needNotifyAttachState_.load() && session->sessionStage_) {
             session->sessionStage_->NotifyWindowAttachStateChange(isAttach);
         }
         TLOGND(WmsLogTag::WMS_LIFE, "isAttach:%{public}d persistentId:%{public}d", isAttach,
@@ -1591,6 +1584,11 @@ void Session::SetAttachState(bool isAttach, WindowMode windowMode)
         }
     }, "SetAttachState");
     CreateDetectStateTask(isAttach, windowMode);
+}
+
+void Session::SetNeedNotifyAttachState(bool needNotify)
+{
+    needNotifyAttachState_.store(needNotify);
 }
 
 void Session::CreateDetectStateTask(bool isAttach, WindowMode windowMode)
@@ -2412,7 +2410,10 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             std::lock_guard<std::mutex> lock(session->snapshotMutex_);
             session->snapshot_ = pixelMap;
         }
-        session->saveSnapshotCallback_();
+        {
+            std::lock_guard lock(session->saveSnapshotCallbackMutex_);
+            session->saveSnapshotCallback_();
+        }
         if (!requirePersist) {
             return;
         }
@@ -2420,7 +2421,12 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist)
             TLOGNE(WmsLogTag::WMS_PATTERN, "scenePersistence_ is null");
             return;
         }
-        session->scenePersistence_->SaveSnapshot(pixelMap, session->removeSnapshotCallback_);
+        Task removeSnapshotCallback = []() {};
+        {
+            std::lock_guard lock(session->removeSnapshotCallbackMutex_);
+            removeSnapshotCallback = session->removeSnapshotCallback_;
+        }
+        session->scenePersistence_->SaveSnapshot(pixelMap, removeSnapshotCallback);
     };
     if (!useFfrt) {
         task();

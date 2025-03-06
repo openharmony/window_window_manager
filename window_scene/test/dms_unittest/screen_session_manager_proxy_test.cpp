@@ -1835,13 +1835,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, Function | SmallTest |
     
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
     std::vector<DisplayId> displayIds;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
-    }
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
 }
 
 /**
@@ -2331,6 +2325,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, Function |
     };
     func();
     ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: GetDisplayCapability
+ * @tc.desc: GetDisplayCapability test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    std::string res = "";
+    std::function<void()> func = [&]() {
+        res = screenSessionManagerProxy->GetDisplayCapability();
+    };
+    func();
+    ASSERT_NE(res, "");
 }
 }
 }

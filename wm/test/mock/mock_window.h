@@ -41,6 +41,8 @@ public:
     MOCK_METHOD0(AfterResumed, void(void));
     MOCK_METHOD0(AfterPaused, void(void));
     MOCK_METHOD0(AfterDestroyed, void(void));
+    MOCK_METHOD0(AfterDidForeground, void(void));
+    MOCK_METHOD0(AfterDidBackground, void(void));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {

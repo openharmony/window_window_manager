@@ -39,7 +39,7 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "RootScene" };
 const std::string INPUT_AND_VSYNC_THREAD = "InputAndVsyncThread";
-constexpr int32_t API_VERSION_16 = 16;
+constexpr int32_t API_VERSION_18 = 18;
 
 class BundleStatusCallback : public IRemoteStub<AppExecFwk::IBundleStatusCallback> {
 public:
@@ -288,7 +288,7 @@ WMError RootScene::GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, 
         TLOGE(WmsLogTag::WMS_IMMS, "getSessionAvoidAreaByTypeCallback is nullptr");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (apiVersion != API_VERSION_INVALID && apiVersion < API_VERSION_16) {
+    if (apiVersion != API_VERSION_INVALID && apiVersion < API_VERSION_18) {
         TLOGI(WmsLogTag::WMS_IMMS, "api version not supported");
         return WMError::WM_DO_NOTHING;
     }

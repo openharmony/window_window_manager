@@ -516,6 +516,14 @@ public:
      * @return Api version
      */
     virtual uint32_t GetApiVersion() const { return 0; }
+    
+    /**
+     * @brief Set the feature of subwindow follow the layout of the parent window.
+     *
+     * @param isFollow true - follow, false - not follow.
+     * @return WM_OK means set success.
+     */
+    virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_SYSTEM_ABNORMALLY; }
 };
 }
 }

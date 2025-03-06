@@ -246,6 +246,10 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetCrossAxisState(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONTAINER_MODAL_EVENT):
             return HandleContainerModalEvent(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED):
+            return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
+            return HandleSetFollowParentWindowLayoutEnabled(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1487,6 +1491,22 @@ int SessionStub::HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    bool isFollow = false;
+    if (!data.ReadBool(isFollow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read cornerRadius failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_SUB, "isFollow: %{public}d", isFollow);
+    WSError errCode = SetFollowParentWindowLayoutEnabled(isFollow);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleStartMovingWithCoordinate(MessageParcel& data, MessageParcel& reply)
 {
     int32_t offsetX;
@@ -1539,6 +1559,18 @@ int SessionStub::HandleContainerModalEvent(MessageParcel& data, MessageParcel& r
         return ERR_INVALID_DATA;
     }
     OnContainerModalEvent(eventName, eventValue);
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyWindowAttachStateListenerRegistered(MessageParcel& data, MessageParcel& reply)
+{
+    bool registered = false;
+    if (!data.ReadBool(registered)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "read registered failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_PATTERN, "registered: %{public}d", registered);
+    NotifyWindowAttachStateListenerRegistered(registered);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

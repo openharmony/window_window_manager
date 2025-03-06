@@ -352,7 +352,6 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession07, Function
 HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function | SmallTest | Level2)
 {
     constexpr int parentId = 10000;
-    constexpr int displayId = 100;
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     option->SetWindowName("CreateAndConnectSpecificSession08");
@@ -372,9 +371,6 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession08, Function
     windowSceneSession->Create(abilityContext_, nullptr);
     ASSERT_EQ(windowSceneSession->property_->GetParentPersistentId(), option->GetParentId());
 
-    sptr<WindowOption> mainOption = sptr<WindowOption>::MakeSptr();
-    mainOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    mainOption->SetDisplayId(displayId);
     sptr<WindowSceneSessionImpl> mainWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     windowSceneSession->property_->SetPersistentId(parentId);
     // window processing
@@ -417,6 +413,41 @@ HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession09, Function
 
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Create(abilityContext_, session));
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->Destroy(true));
+}
+
+/**
+ * @tc.name: CreateAndConnectSpecificSession10
+ * @tc.desc: CreateAndConnectSpecificSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, CreateAndConnectSpecificSession10, Function | SmallTest | Level2)
+{
+    constexpr int parentId = 1000;
+    constexpr int displayId = 100;
+    sptr<WindowOption> parentOption = sptr<WindowOption>::MakeSptr();
+    parentOption->SetWindowTag(WindowTag::MAIN_WINDOW);
+    parentOption->SetWindowName("MainWindow");
+    parentOption->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentOption->SetDisplayId(displayId);
+    sptr<WindowSceneSessionImpl> parentWindow = sptr<WindowSceneSessionImpl>::MakeSptr(parentOption);
+    ASSERT_NE(nullptr, parentWindow);
+
+    parentWindow->property_->SetPersistentId(parentId);
+    SessionInfo sessionInfo = {"TextMenuTestBundle", "TextMenuTestModule", "TextMenuTestAbility"};
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    WMError error = parentWindow->Create(abilityContext_, session);
+    ASSERT_EQ(error, WMError::WM_OK);
+
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_TEXT_MENU);
+    option->SetWindowName("TextMenu");
+    option->SetParentId(parentId);
+    sptr<WindowSceneSessionImpl> textMenuWindow = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, textMenuWindow);
+    error = textMenuWindow->Create(abilityContext_, nullptr);
+    ASSERT_EQ(error, WMError::WM_OK);
 }
 
 /**

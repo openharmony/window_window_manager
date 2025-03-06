@@ -206,6 +206,8 @@ public:
     void Read(Parcel& parcel, WSPropertyChangeAction action);
     void SetFullScreenStart(bool fullScreenStart);
     bool GetFullScreenStart() const;
+    void SetApiVersion(uint32_t version);
+    uint32_t GetApiVersion() const;
 
     /*
      * Sub Window
@@ -416,6 +418,7 @@ private:
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
+    uint32_t apiVersion_ = 0;
 
     /*
      * Sub Window

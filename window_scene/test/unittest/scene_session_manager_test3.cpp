@@ -1363,6 +1363,22 @@ HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: RequestFocusStatusBySA
+ * @tc.desc: SceneSesionManager request focus status by SA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, RequestFocusStatusBySA, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 3;
+    bool isFocused = true;
+    bool byForeground = true;
+    FocusChangeReason reason = FocusChangeReason::CLICK;
+    auto result = ssm_->SceneSessionManager::RequestFocusStatusBySA(
+        persistentId, isFocused, byForeground, reason);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: NotifyRequestFocusStatusNotifyManager
  * @tc.desc: NotifyRequestFocusStatusNotifyManager test.
  * @tc.type: FUNC

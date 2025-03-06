@@ -275,6 +275,8 @@ public:
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST) override;
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
@@ -344,6 +346,7 @@ public:
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -1311,8 +1314,8 @@ private:
     /*
      * Window Pattern
      */
-    std::unique_ptr<LRUCache> snapshotLRUCache_;
-    std::size_t snapCapacity_ = 0;
+    std::unique_ptr<LruCache> snapshotLruCache_;
+    std::size_t snapshotCapacity_ = 0;
 };
 } // namespace OHOS::Rosen
 

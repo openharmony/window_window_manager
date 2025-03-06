@@ -296,6 +296,16 @@ enum class FocusChangeReason {
     VOICE_INTERACTION,
 
     /**
+     * focus change for SA requerst.19
+     */
+    SA_REQUEST,
+
+    /**
+     * focus on previous window for system keyboard
+     */
+    SYSTEM_KEYBOARD,
+
+    /**
      * focus change max.
      */
     MAX,
