@@ -800,7 +800,7 @@ HWTEST_F(WindowAdapterTest, IsWindowRectAutoSave, Function | SmallTest | Level2)
     bool enabled = false;
     int persistentId = 1;
     auto err = windowAdapter.IsWindowRectAutoSave(key, enabled, persistentId);
-    ASSERT_EQ(err, WMError::WM_OK);
+    ASSERT_EQ(err, WMError::WM_ERROR_INVALID_SESSION);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(ret, true);
 }

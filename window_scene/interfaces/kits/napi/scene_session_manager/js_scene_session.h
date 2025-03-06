@@ -346,7 +346,6 @@ private:
     void ProcessKeyboardViewModeChangeRegister();
     void ProcessSetHighlightChangeRegister();
     void ProcessFollowParentRectRegister();
-    void ProcessUpdateFlagRegister();
 
     /*
      * Window Property
@@ -357,6 +356,7 @@ private:
      * PC Window Layout
      */
     void ProcessSetSupportedWindowModesRegister();
+    void ProcessUpdateFlagRegister();
 
     void ChangeSessionVisibilityWithStatusBar(const SessionInfo& info, bool visible);
     void ChangeSessionVisibilityWithStatusBarInner(std::shared_ptr<SessionInfo> sessionInfo, bool visible);
@@ -414,7 +414,6 @@ private:
     void OnKeyboardViewModeChange(KeyboardViewMode mode);
     void NotifyHighlightChange(bool isHighlight);
     void NotifyFollowParentRect(bool isFollow);
-    void OnUpdateFlag(const std::string& flag);
 
     /*
      * Window Property
@@ -425,6 +424,7 @@ private:
      * PC Window Layout
      */
     void OnSetSupportedWindowModes(std::vector<AppExecFwk::SupportWindowMode>&& supportedWindowModes);
+    void OnUpdateFlag(const std::string& flag);
 
     static void Finalizer(napi_env env, void* data, void* hint);
 
