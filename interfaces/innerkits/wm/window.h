@@ -2735,6 +2735,13 @@ public:
     virtual std::string GetClassType() const { return "Window"; }
 
     /**
+     * @brief Get whether is mid scene.
+     *
+     * @return True - is mid scene, false - is not mid scene.
+     */
+    virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
      * @brief Get layoutTransform of window uiContent.
      *
      * @return UiContent of layoutTransform.

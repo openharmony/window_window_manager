@@ -397,6 +397,7 @@ public:
      */
     void SetIsMidScene(bool isMidScene);
     bool GetIsMidScene() const;
+    WSError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Keyboard Window
