@@ -27,6 +27,13 @@
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
+typedef class __ani_object* ani_object;
+#ifdef __cplusplus
+typedef struct __ani_env ani_env;
+#else
+typedef const struct __ani_interaction_api *ani_env;
+#endif
+
 namespace OHOS::MMI {
 class PointerEvent;
 class KeyEvent;
@@ -1400,6 +1407,12 @@ public:
      * @return WMError
      */
     virtual WMError NapiSetUIContent(const std::string& contentInfo, napi_env env, napi_value storage,
+        BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
+        AppExecFwk::Ability* ability = nullptr)
+    {
+        return WMError::WM_OK;
+    }
+    virtual WMError NapiSetUIContent(const std::string& contentInfo, ani_env* env, ani_object storage,
         BackupAndRestoreType type = BackupAndRestoreType::NONE, sptr<IRemoteObject> token = nullptr,
         AppExecFwk::Ability* ability = nullptr)
     {

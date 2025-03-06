@@ -44,7 +44,7 @@ AniWindowStage::~AniWindowStage()
     WLOGFE("Ani WindowStage died");
 }
 
-void AniWindowStage::LoadContent(void* env, std::string content)
+void AniWindowStage::LoadContent(ani_env* env, const std::string& content)
 {
     auto weakScene = windowScene_.lock();
     sptr<Window> win = weakScene ? weakScene->GetMainWindow() : nullptr;
@@ -52,7 +52,7 @@ void AniWindowStage::LoadContent(void* env, std::string content)
         WLOGFE("[NAPI]Get window failed");
         return;
     }
-    win->NapiSetUIContent(content, reinterpret_cast<napi_env>(env), nullptr);
+    win->NapiSetUIContent(content, env, nullptr);
 }
 
 ani_object AniWindowStage::GetMainWindow(ani_env* env)
