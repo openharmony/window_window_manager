@@ -2444,7 +2444,7 @@ napi_value JsSceneSessionManager::OnSetSystemAnimatedScenes(napi_env env, napi_c
     }
     bool isRegularAnimation = false;
     if (argc >= ARGC_TWO && !ConvertFromJsValue(env, argv[1], isRegularAnimation)) {
-        WLOGFE("Faile to convert parameter to regular animation.");
+        TLOGE(WmsLogTag::WMS_SCB, "Failed to convert parameter to regular animation.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid."));
         return NapiGetUndefined(env);

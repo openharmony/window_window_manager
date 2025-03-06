@@ -32,8 +32,7 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 class TestClient : public IScreenSessionManagerClient {
 public:
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override {};
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) override {};
+    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override {};
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override {};
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -683,7 +682,7 @@ HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, Function | SmallTest | Level1)
     std::vector<ScreenId> screenIds = {1001, 1002};
     std::vector<DisplayId> displayIds;
     DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
-    EXPECT_EQ(ret, DMError::DM_OK);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**

@@ -20,6 +20,7 @@ group("unittest") {
 
   deps = [
     ":ws_screen_cutout_controller_test",
+    ":ws_screen_power_utils_test",
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
     ":ws_screen_scene_config_test",
@@ -192,7 +193,11 @@ ohos_unittest("ws_screen_session_test") {
     "${window_base_path}/window_scene/session:screen_session",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
 
   defines = []
 
@@ -561,6 +566,20 @@ ohos_unittest("ws_screen_session_dumper_test") {
   ]
 }
 
+ohos_unittest("ws_screen_power_utils_test") {
+  module_out_path = module_out_path
+
+  sources = [ "screen_power_utils_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
 ohos_unittest("ws_session_display_power_controller_test") {
   module_out_path = module_out_path
 
@@ -686,6 +705,7 @@ if (window_manager_fold_ability) {
       "ability_runtime:app_manager",
       "c_utils:utils",
       "hilog:libhilog",
+      "init:libbegetutil",
     ]
   }
 
@@ -774,6 +794,7 @@ if (window_manager_fold_ability) {
       "ability_runtime:app_manager",
       "c_utils:utils",
       "hilog:libhilog",
+      "init:libbegetutil",
     ]
   }
 
