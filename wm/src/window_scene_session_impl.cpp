@@ -3793,7 +3793,7 @@ WMError WindowSceneSessionImpl::SnapshotSkipPrivacy(std::shared_ptr<Media::Pixel
     }
     pixelMap = callback->GetResult(2000); // wait for <= 2000ms
     if (pixelMap != nullptr) {
-        WLOGFD("SnapshotSkipPrivacy succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+        WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     } else {
         WLOGFE("Failed to get pixelmap, return nullptr!");
         return WMError::WM_ERROR_NULLPTR;
