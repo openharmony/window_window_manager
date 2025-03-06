@@ -618,7 +618,6 @@ private:
     std::condition_variable screenOffCV_;
     std::mutex screenWaitPictureFrameMutex_;
     std::condition_variable screenWaitPictureFrameCV_;
-    
     int32_t screenOffDelay_ {0};
     int32_t screenOnDelay_ {0};
 
