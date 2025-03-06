@@ -1678,28 +1678,6 @@ HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_03, Function | SmallTest |
 }
 
 /**
- * @tc.name: SetColorSpace
- * @tc.desc: SetColorSpace function01
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, SetColorSpace, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetColorSpace";
-    info.bundleName_ = "SetColorSpace";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(session, nullptr);
-
-    struct RSSurfaceNodeConfig config;
-    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
-    EXPECT_EQ(nullptr, session->GetSurfaceNode());
-    session->surfaceNode_ = surfaceNode;
-    session->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
-    EXPECT_NE(nullptr, session->GetSurfaceNode());
-}
-
-/**
  * @tc.name: IsSameMainSession
  * @tc.desc: test IsSameMainSession
  * @tc.type: FUNC
@@ -1767,6 +1745,28 @@ HWTEST_F(SceneSessionTest5, SetHighlightChangeNotifyFunc, Function | SmallTest |
     EXPECT_NE(session, nullptr);
     session->SetHighlightChangeNotifyFunc([](int32_t persistentId) {});
     EXPECT_NE(session->highlightChangeFunc_, nullptr);
+}
+
+/**
+ * @tc.name: SetColorSpace
+ * @tc.desc: SetColorSpace function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetColorSpace, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetColorSpace";
+    info.bundleName_ = "SetColorSpace";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(session, nullptr);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    session->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    EXPECT_EQ(nullptr, session->GetSurfaceNode());
+    session->surfaceNode_ = surfaceNode;
+    session->SetColorSpace(ColorSpace::COLOR_SPACE_WIDE_GAMUT);
+    EXPECT_NE(nullptr, session->GetSurfaceNode());
 }
 }
 }
