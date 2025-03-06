@@ -28,6 +28,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
 class ScreenTest : public testing::Test {
 public:
@@ -50,6 +53,7 @@ void ScreenTest::SetUpTestCase()
     defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
     defaultScreenId_ = static_cast<ScreenId>(defaultDisplay_->GetId());
     screen_ = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
+    usleep(SLEEP_TIME_IN_US);
 }
 
 void ScreenTest::TearDownTestCase()

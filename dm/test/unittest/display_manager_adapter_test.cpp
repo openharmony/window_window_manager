@@ -601,7 +601,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeMirror, Function | SmallTest | Level2)
     ScreenId screenGroupId;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(0,
         mirrorScreenId, screenGroupId);
-    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
