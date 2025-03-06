@@ -192,7 +192,7 @@ static std::map<DmErrorCode, const char*> DM_ERROR_CODE_TO_ERROR_MSG_MAP {
     {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,           DM_ERROR_CODE_MSG_SYSTEM_INNORMAL    },
 };
 
-ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WMError error, std::string message)
+ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WMError error, const std::string& message)
 {
     ani_object aniError;
     CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
@@ -204,7 +204,7 @@ ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WMError error, std::str
     return ANI_OK;
 }
 
-ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WmErrorCode error, std::string message)
+ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WmErrorCode error, const std::string& message)
 {
     ani_object aniError;
     CreateBusinessError(env, static_cast<int32_t>(error), message == "" ? GetErrorMsg(error) : message, &aniError);
@@ -216,7 +216,7 @@ ani_status AniErrUtils::ThrowBusinessError(ani_env* env, WmErrorCode error, std:
     return ANI_OK;
 }
 
-ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, std::string message, ani_object* err)
+ani_status AniErrUtils::CreateBusinessError(ani_env* env, int32_t error, const std::string& message, ani_object* err)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "[ANI] in");
     ani_class aniClass;
