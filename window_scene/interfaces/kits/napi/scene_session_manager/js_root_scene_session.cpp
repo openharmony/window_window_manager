@@ -187,8 +187,13 @@ napi_value JsRootSceneSession::OnLoadContent(napi_env env, napi_callback_info in
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
             return;
         }
+        auto contextLockPtr = contextWeakPtr.lock().get();
+        if (contextLockPtr == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "context lock ptr is nullptr");
+            return;
+        }
         napi_value nativeStorage = contentStorage ? contentStorage->GetNapiValue() : nullptr;
-        rootSceneSession->LoadContent(contentUrl, env, nativeStorage, contextWeakPtr.lock().get());
+        rootSceneSession->LoadContent(contentUrl, env, nativeStorage, contextLockPtr);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
