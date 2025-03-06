@@ -5310,8 +5310,9 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& i
     if (availableArea.IsUninitializedRect()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "availableArea is uninitialized");
     }
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "fullscreen could not update new size, Id: %{public}u", GetPersistentId());
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING || property_->GetCompatibleModeInPc()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "fullscreen or compatible mode could not update new size, Id: %{public}u",
+            GetPersistentId());
         return;
     }
     float currVpr = virtualPixelRatio_;
