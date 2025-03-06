@@ -2533,7 +2533,7 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
 {
     bool isPcAppInPad = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
     bool isAppSupportPhoneInPc = sceneSession->GetSessionProperty()->GetIsAppSupportPhoneInPc();
-    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || isPcAppInPad;
+    return (systemConfig_.backgroundswitch && !isAppSupportPhoneInPc) || (isPcAppInPad && !IsScreenLocked());
 }
 
 void SceneSessionManager::InitSnapshotCache()
