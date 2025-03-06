@@ -34,5 +34,5 @@ ohos_prebuilt_etc("window_stage_etc") {
   deps = [ ":window_stage_abc" ]
   part_name = "window_manager"
   subsystem_name = "window"
-  relative_install_dir = "framework"
+  module_install_dir = "framework"
 }
