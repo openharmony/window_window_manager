@@ -6243,7 +6243,7 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) ||
-          windowToken_::IsSubWindowMaximizeSupported(windowToken_->GetType()))) {
+          windowToken_->IsSubWindowMaximizeSupported(windowToken_->GetType()))) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only support main or sub Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
