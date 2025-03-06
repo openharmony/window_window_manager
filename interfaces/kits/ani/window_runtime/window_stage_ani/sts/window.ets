@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 export class BusinessError extends Error {
-  code: number;
+  code: int;
+  data: string = '';
 }
-export type AsyncCallback = (err: BusinessError) => void;
-export abstract class BaseContext {
+export type AsyncCallback<T> = (err: BusinessError, data: T) => void;
+export class BaseContext {
   stageMode: boolean;
+}
+export class Callback<T> {
+}
+export class LocalStorage {
+}
+export class UIContext {
 }
 
 namespace window {
@@ -306,6 +313,14 @@ namespace window {
     bottomRect: Rect;
   }
 
+  export class AvoidAreaInternal implements AvoidArea {
+    visible: boolean;
+    leftRect: Rect;
+    topRect: Rect;
+    rightRect: Rect;
+    bottomRect: Rect;
+  }
+
   export interface Rect {
     /**
      * The left of the Rect.
@@ -403,6 +418,14 @@ namespace window {
      */
     height: number;
   }
+
+  export class RectInternal implements Rect {
+    left: double;
+    top: double;
+    width: double;
+    height: double;
+  }
+
 //enum WMError {
     const WMError_WM_OK = 0
     const WMError_WM_DO_NOTHING = 1
@@ -462,7 +485,7 @@ namespace window {
     const WmErrorCode_WM_ERROR_PIP_REPEAT_OPERATION = 1300015
 //}
 
-export enum window_ColorSpace {
+export enum ColorSpace {
     DEFAULT = 0,
     WIDE_GAMUT = 1
 }
@@ -633,11 +656,11 @@ export class WindowStageInternal implements WindowStage {
     public native disableWindowDecor(nativeObj:long): int;
     public native setShowOnLockScreen(nativeObj:long, showOnLockScreen: boolean): int;
 
-    public loadContent(path: string, callback: AsyncCallback): void {
+    public loadContent(path: string, callback: AsyncCallback<int>): void {
         let ret = this.loadContent(this.nativeObj, String(path));
-        console.println(ret)
+        console.println(ret);
     }
-    public loadContentByName(name: string, callback: AsyncCallback): void {
+    public loadContentByName(name: string, callback: AsyncCallback<int>): void {
         let ret = this.loadContent(this.nativeObj, name);
     }
     public disableWindowDecor(): void {
@@ -649,25 +672,39 @@ export class WindowStageInternal implements WindowStage {
 }
 
 export interface WindowStage {
-    loadContent(path: string, callback: AsyncCallback): void;
-    loadContentByName(name: string, callback: AsyncCallback): void;
+    loadContent(path: string, callback: AsyncCallback<int>): void;
+    loadContentByName(name: string, callback: AsyncCallback<int>): void;
 }
 
 export class WindowInternal implements Window {
+    static readonly DEFAULT_RET_VAL = 1;
     static { loadLibrary('windowstageani_kit.z') }
     private nativeObj: long;
 
     public setNativeObj(nativeObj: long): void {
         this.nativeObj = nativeObj;
-        console.println(nativeObj);
     }
 
     private native getWindowDecorHeight(nativeObj:long): int;
     public native setWindowBackgroundColorSync(nativeObj: long, color: string): int;
-    private native getWindowAvoidAreaInternal(nativeObj: long, type: AvoidAreaType): AvoidArea;
-    private native getLastWindowInternal(nativeObj: long, ctx: BaseContext): Window;
-    private native setPreferredOrientationInternal(nativeObj: long, orientation: Orientation): void;
-    private native setWindowPrivacyModeInternal(isPrivacyMode: boolean): void;
+
+    private native setColorSpaceSync(nativeObj: long, colorSpace: int): void;
+    private native getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
+    private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
+    private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
+    private native recoverSync(nativeObj: long): void;
+    private native setUIContentSync(nativeObj: long, path: string): void;
+    private native loadContentSync(nativeObj: long, path: string, storage: LocalStorage): void;
+    private native loadContentSync(nativeObj: long, path: string): void;
+    private native setWindowKeepScreenOnSync(nativeObj: long, isKeepScreenOn: boolean): void;
+    private native setWindowSystemBarEnableSync(nativeObj: long, names: Array<'status' | 'navigation'>): void;
+    private native getUIContextSync(nativeObj: long): UIContext;
+    private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
+    private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
+    private native onSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
+        callback: Callback<WindowEventType | Size | WindowStatusType>): void;
+    private native offSync(nativeObj: long, type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
+        callback: Callback<WindowEventType | Size | WindowStatusType>): void;
 
     public getWindowDecorHeight(): int {
        let ret = this.getWindowDecorHeight(this.nativeObj);
@@ -675,39 +712,313 @@ export class WindowInternal implements Window {
        return ret;
     }
 
-    public getWindowAvoidArea(type: AvoidAreaType): AvoidArea {
-        return this.getWindowAvoidAreaInternal(this.nativeObj, type);
-    }
+    public setWindowBackgroundColorSync(color: string): int {
+        let ret = this.setWindowBackgroundColorSync(this.nativeObj, color);
+        console.println(ret);
+        return ret;
+     }
 
-    public getLastWindow(ctx: BaseContext): Promise<Window> {
-        return new Promise<Window>((resolve: (window: Window) => void, reject: (error: BusinessError) => void ) => {
+    public setColorSpace(colorSpace: ColorSpace): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.setColorSpaceSync(this.nativeObj, colorSpace as int);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
         });
     }
 
-    public getLastWindow(ctx: BaseContext, callback: AsyncCallback): void {
+    public setColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.setColorSpaceSync(this.nativeObj, colorSpace as int);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
     }
 
-    public setPreferredOrientation(orientation: Orientation, callback: AsyncCallback): void {
+    public getLastWindow(ctx: BaseContext): Promise<Window> {
+        return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): Window => {
+                return this.getLastWindowSync(this.nativeObj, ctx);
+            }).then((ret: NullishType) => {
+                resolve(ret as Window);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
     }
 
-    public setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback): void {
+    public getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>): void {
+        taskpool.execute((): Window => {
+            return this.getLastWindowSync(this.nativeObj, ctx);
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as Window);
+        }).catch((err: NullishType) => {
+            //callback(err as BusinessError, undefined);
+        });
     }
 
-    public setWindowBackgroundColorSync(color: string): int {
-       let ret = this.setWindowBackgroundColorSync(this.nativeObj, color);
-       console.println(ret);
-       return ret;
+    public setPreferredOrientation(orientation: Orientation): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.setPreferredOrientationSync(this.nativeObj, orientation as int);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+    
+    public setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.setPreferredOrientationSync(this.nativeObj, orientation as int);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public setWindowPrivacyMode(isPrivacyMode: boolean): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.setWindowPrivacyModeSync(this.nativeObj, isPrivacyMode);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.setWindowPrivacyModeSync(this.nativeObj, isPrivacyMode);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public recover(): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.recoverSync(this.nativeObj);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setUIContent(path: string): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.setUIContentSync(this.nativeObj, path);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setUIContent(path: string, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.setUIContentSync(this.nativeObj, path);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public loadContent(path: string, storage: LocalStorage): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.loadContentSync(this.nativeObj, path, storage);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.loadContentSync(this.nativeObj, path, storage);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public loadContent(path: string): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.loadContentSync(this.nativeObj, path);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public loadContent(path: string, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.loadContentSync(this.nativeObj, path);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public setWindowKeepScreenOn(isKeepScreenOn: boolean): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.setWindowKeepScreenOnSync(this.nativeObj, isKeepScreenOn);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setWindowKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.setWindowKeepScreenOnSync(this.nativeObj, isKeepScreenOn);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public setWindowSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.setWindowSystemBarEnableSync(this.nativeObj, names);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setWindowSystemBarEnable(names: Array<'status' | 'navigation'>, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.setWindowSystemBarEnableSync(this.nativeObj, names);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public getUIContext(): UIContext {
+        return this.getUIContextSync(this.nativeObj);
+    }
+
+    public getWindowAvoidArea(type: AvoidAreaType): AvoidArea {
+        return this.getWindowAvoidAreaSync(this.nativeObj, type as AvoidAreaType);
+    }
+
+    public setWaterMarkFlag(enable: boolean): Promise<int> {
+        return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void ) => {
+            taskpool.execute((): int => {
+                this.setWaterMarkFlagSync(this.nativeObj, enable);
+                return WindowInternal.DEFAULT_RET_VAL;
+            }).then((ret: NullishType) => {
+                resolve(ret as int);
+            }).catch((err: NullishType) => {
+                reject(err as BusinessError);
+            });
+        });
+    }
+
+    public setWaterMarkFlag(enable: boolean, callback: AsyncCallback<int>): void {
+        taskpool.execute((): int => {
+            this.setWaterMarkFlagSync(this.nativeObj, enable);
+            return WindowInternal.DEFAULT_RET_VAL;
+        }).then((ret: NullishType) => {
+            callback(new BusinessError(), ret as int);
+        }).catch((err: NullishType) => {
+            callback(err as BusinessError, 0);
+        });
+    }
+
+    public on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
+        callback: Callback<WindowEventType | Size | WindowStatusType>): void {
+        this.onSync(this.nativeObj, type, callback);
+    }
+
+    public off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
+        callback: Callback<WindowEventType | Size | WindowStatusType>): void {
+        this.offSync(this.nativeObj, type, callback);
     }
 }
 
 export interface Window {
     getWindowDecorHeight(): int;
     setWindowBackgroundColorSync(color: string): int;
-    getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
+
+    setColorSpace(colorSpace: ColorSpace): Promise<int>;
+    setColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<int>): void;
     getLastWindow(ctx: BaseContext): Promise<Window>;
-    getLastWindow(ctx: BaseContext, callback: AsyncCallback): void;
-    setPreferredOrientation(orientation: Orientation, callback: AsyncCallback): void;
-    setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback): void;
+    getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>): void;
+    setPreferredOrientation(orientation: Orientation): Promise<int>;
+    setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<int>): void;
+    setWindowPrivacyMode(isPrivacyMode: boolean): Promise<int>;
+    setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<int>): void;
+    recover(): Promise<int>;
+    setUIContent(path: string): Promise<int>;
+    setUIContent(path: string, callback: AsyncCallback<int>): void;
+    loadContent(path: string, storage: LocalStorage): Promise<int>;
+    loadContent(path: string, storage: LocalStorage, callback: AsyncCallback<int>): void;
+    loadContent(path: string): Promise<int>;
+    loadContent(path: string, callback: AsyncCallback<int>): void;
+    setWindowKeepScreenOn(isKeepScreenOn: boolean): Promise<int>;
+    setWindowKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<int>): void;
+    setWindowSystemBarEnable(names: Array<'status' | 'navigation'>): Promise<int>;
+    setWindowSystemBarEnable(names: Array<'status' | 'navigation'>, callback: AsyncCallback<int>): void;
+    getUIContext(): UIContext;
+    getWindowAvoidArea(type: AvoidAreaType): AvoidArea;
+    setWaterMarkFlag(enable: boolean): Promise<int>;
+    setWaterMarkFlag(enable: boolean, callback: AsyncCallback<int>): void;
+    on(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
+        callback: Callback<WindowEventType | Size | WindowStatusType>): void;
+    off(type: 'windowEvent' | 'windowSizeChange' | 'windowStatusChange',
+        callback: Callback<WindowEventType | Size | WindowStatusType>): void;
 }
 
 export native function CreateWindowStage(scene: long): WindowStageInternal;
