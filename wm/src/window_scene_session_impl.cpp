@@ -129,6 +129,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
+const uint32_t API_VERSION_MOD = 1000;
 }
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -5357,9 +5358,13 @@ void WindowSceneSessionImpl::UpdateNewSizeForPCWindow(const sptr<DisplayInfo>& i
     }
 }
 
-uint32_t WindowSceneSessionImpl::GetApiVersion() const
+uint32_t WindowSceneSessionImpl::GetApiCompatibleVersion() const
 {
-    return SysCapUtil::GetApiCompatibleVersion();
+    uint32_t version = 0;
+    if ((context_ != nullptr) && (context_->GetApplicationInfo() != nullptr)) {
+        version = context_->GetApplicationInfo()->apiCompatibleVersion % API_VERSION_MOD;
+    }
+    return version;
 }
 } // namespace Rosen
 } // namespace OHOS

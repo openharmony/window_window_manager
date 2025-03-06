@@ -3259,11 +3259,11 @@ public:
     }
 
     /**
-     * @brief Get the api version.
+     * @brief Get the api compatible version.
      *
-     * @return Api version
+     * @return Api compatible version
      */
-    virtual uint32_t GetApiVersion() const { return 0; }
+    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
 
     /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
