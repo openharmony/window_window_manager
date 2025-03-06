@@ -533,6 +533,8 @@ protected:
     mutable std::recursive_mutex transformMutex_;
     std::atomic<CrossAxisState> crossAxisState_ = CrossAxisState::STATE_INVALID;
     bool IsValidCrossState(int32_t state) const;
+    template <typename T>
+    EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
 
     /*
      * Window Immersive
@@ -573,8 +575,6 @@ private:
     template<typename T> EnableIfSame<T, IDisplayMoveListener, std::vector<sptr<IDisplayMoveListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowChangeListener, std::vector<sptr<IWindowChangeListener>>> GetListeners();
-    template <typename T>
-    EnableIfSame<T, IWindowCrossAxisListener, std::vector<sptr<IWindowCrossAxisListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IAvoidAreaChangedListener, std::vector<sptr<IAvoidAreaChangedListener>>> GetListeners();
     template<typename T>
