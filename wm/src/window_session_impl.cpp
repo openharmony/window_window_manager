@@ -1299,7 +1299,9 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
-    DestroyExistUIContent();
+    {
+        DestroyExistUIContent();
+    }
     std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
         Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
@@ -1326,7 +1328,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             break;
         }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
+                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -1878,25 +1881,27 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
 
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
 {
-    WLOGFD("GetContentInfo");
+    WLOGFD("in");
     if (type == BackupAndRestoreType::NONE) {
         return "";
     }
+
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}d", GetPersistentId());
         return "";
     }
+
     return uiContent->GetContentInfo(GetAceContentInfoType(type));
 }
-
+ 
 WMError WindowSessionImpl::SetRestoredRouterStack(const std::string& routerStack)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Set restored router stack.");
     restoredRouterStack_ = routerStack;
     return WMError::WM_OK;
 }
-
+ 
 std::string WindowSessionImpl::GetRestoredRouterStack()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Get restored router stack.");
