@@ -45,7 +45,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsPipController::UnregisterCallback);
     // test api
-    BindNativeFunction(env, object, "isPiPPossible", moduleName, JsPipController::PictureInPicturePossible);
+    BindNativeFunction(env, object, "isPiPSupported", moduleName, JsPipController::PictureInPicturePossible);
 }
 
 napi_value CreateJsPipControllerObject(napi_env env, sptr<PictureInPictureController>& pipController)
