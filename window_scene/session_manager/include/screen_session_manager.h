@@ -380,6 +380,7 @@ private:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
+    std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(ScreenId screenId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
