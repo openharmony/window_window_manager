@@ -108,7 +108,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession,
     uint32_t hostWindowId, std::function<void(WSError)>&& resultCallback)
 {
-    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
+    auto abilitySessionInfo = SetAbilitySessionInfo(extensionSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback),
         extSessionInfo = std::move(abilitySessionInfo), where = __func__]() {
@@ -156,7 +156,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
 WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession,
     std::function<void(WSError)>&& resultCallback)
 {
-    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
+    auto abilitySessionInfo = SetAbilitySessionInfo(extensionSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, callback = std::move(resultCallback),
         extSessionInfo = std::move(abilitySessionInfo)]() {
@@ -189,7 +189,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
 WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession,
     std::function<void(WSError)>&& resultCallback)
 {
-    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
+    auto abilitySessionInfo = SetAbilitySessionInfo(extensionSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, callback = std::move(resultCallback),
         extSessionInfo = std::move(abilitySessionInfo), where = __func__]() NO_THREAD_SAFETY_ANALYSIS {
@@ -222,7 +222,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
 WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sptr<ExtensionSession>& extensionSession)
 {
     const char* const where = __func__;
-    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
+    auto abilitySessionInfo = SetAbilitySessionInfo(extensionSession);
     auto task = [this, where, weakExtSession = wptr<ExtensionSession>(extensionSession),
         extSessionInfo = std::move(abilitySessionInfo)] {
         auto extSession = weakExtSession.promote();
