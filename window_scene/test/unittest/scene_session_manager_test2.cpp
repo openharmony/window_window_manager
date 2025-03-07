@@ -18,6 +18,8 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -213,6 +215,16 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, Function | SmallTest | 
                             "<radius>0.5</radius>"
                         "</focused>"
                     "</shadow>"
+                    "<shadowDark>"
+                        "<focused>"
+                            "<elevation>0</elevation>"
+                            "<color>#111111</color>"
+                            "<offsetX>2</offsetX>"
+                            "<offsetY>2</offsetY>"
+                            "<alpha>1</alpha>"
+                            "<radius>1</radius>"
+                        "</focused>"
+                    "</shadowDark>"
                 "</appWindows>"
             "</windowEffect>"
         "</Configs>";
@@ -222,6 +234,11 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect01, Function | SmallTest | 
     ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetX_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.offsetY_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadow_.radius_, 0.5);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.alpha_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetX_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.offsetY_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.radius_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.focusedShadowDark_.color_, "#ff111111");
 }
 
 /**
@@ -277,6 +294,16 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, Function | SmallTest | 
                             "<radius>0.5</radius>"
                         "</unfocused>"
                     "</shadow>"
+                    "<shadowDark>"
+                        "<unfocused>"
+                            "<elevation>0</elevation>"
+                            "<color>#111111</color>"
+                            "<offsetX>2</offsetX>"
+                            "<offsetY>2</offsetY>"
+                            "<alpha>1</alpha>"
+                            "<radius>1</radius>"
+                        "</unfocused>"
+                    "</shadowDark>"
                 "</appWindows>"
             "</windowEffect>"
         "</Configs>";
@@ -286,6 +313,11 @@ HWTEST_F(SceneSessionManagerTest2, ConfigWindowEffect03, Function | SmallTest | 
     ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetX_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.offsetY_, 1);
     ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadow_.radius_, 0.5);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.alpha_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.offsetX_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.offsetY_, 2);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.radius_, 1);
+    ASSERT_EQ(ssm_->appWindowSceneConfig_.unfocusedShadowDark_.color_, "#ff111111");
 }
 
 /**
@@ -1717,30 +1749,6 @@ HWTEST_F(SceneSessionManagerTest2, InitPersistentStorage, Function | SmallTest |
         ssm_->sceneSessionMap_.clear();
     }
     ssm_->InitPersistentStorage();
-}
-
-/**
- * @tc.name: GetSessionSnapshotFilePath
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, GetSessionSnapshotFilePath, Function | SmallTest | Level3)
-{
-    string ret;
-    {
-        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
-        ssm_->sceneSessionMap_.clear();
-    }
-    ret = ssm_->GetSessionSnapshotFilePath(100);
-    ASSERT_EQ("", ret);
-
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({100, sceneSession});
-    ret = ssm_->GetSessionSnapshotFilePath(100);
-    ASSERT_EQ("", ret);
 }
 
 /**

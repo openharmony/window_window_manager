@@ -43,6 +43,9 @@ void RootSceneSession::GetSystemAvoidAreaForRoot(const WSRect& rect, AvoidArea& 
             continue;
         }
         WSRect statusBarRect = statusBar->GetSessionRect();
+        if (onGetStatusBarAvoidHeightFunc_) {
+            onGetStatusBarAvoidHeightFunc_(statusBarRect);
+        }
         CalculateAvoidAreaRect(rect, statusBarRect, avoidArea);
         TLOGI(WmsLogTag::WMS_IMMS, "root scene %{public}s status bar %{public}s area %{public}s",
               rect.ToString().c_str(), statusBarRect.ToString().c_str(), avoidArea.ToString().c_str());
@@ -121,7 +124,7 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
           rect.ToString().c_str(), barArea.ToString().c_str(), avoidArea.ToString().c_str());
 }
 
-AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect)
+AvoidArea RootSceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect, int32_t apiVersion)
 {
     auto task = [weakThis = wptr(this), type]() -> AvoidArea {
         auto session = weakThis.promote();

@@ -37,6 +37,7 @@ struct VirtualScreenOption {
     int32_t flags_;
     bool isForShot_ {true};
     std::vector<uint64_t> missionIds_ {};
+    VirtualScreenType virtualScreenType_ {VirtualScreenType::UNKNOWN};
 };
 
 class Screen : public RefBase {
@@ -121,6 +122,13 @@ public:
     ScreenId GetParentId() const;
 
     /**
+     * @brief Get screen serial number.
+     *
+     * @return Screen serial number.
+     */
+    std::string GetSerialNumber() const;
+
+    /**
      * @brief Get screen mode id.
      *
      * @return Screen mode id.
@@ -165,6 +173,14 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetDensityDpiSystem(uint32_t dpi) const;
+
+    /**
+     * @brief Set the default density dpi of the screen system window.
+     *
+     * @param dpi Default density dpi of the screen.
+     * @return DM_OK means set success, others means set failed.
+     */
+    DMError SetDefaultDensityDpi(uint32_t dpi) const;
 
     /**
      * @brief Get the screen info.

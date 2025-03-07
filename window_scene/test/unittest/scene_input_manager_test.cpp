@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "session_manager/include/scene_session_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "session_manager/include/scene_session_dirty_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -24,6 +25,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 constexpr int MAX_WINDOWINFO_NUM = 15;
+const static uint32_t DISPLAY_B_HEIGHT = 1608;
 class SceneInputManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -289,7 +291,7 @@ HWTEST_F(SceneInputManagerTest, UpdateFocusedSessionId, Function | SmallTest | L
     ExtensionWindowEventInfo extensionInfo {
         .persistentId = 12345
     };
-    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
     sceneInputManager->UpdateFocusedSessionId(sceneSession->GetPersistentId());
     EXPECT_EQ(sceneInputManager->focusedSessionId_, extensionInfo.persistentId);
 
@@ -329,10 +331,12 @@ HWTEST_F(SceneInputManagerTest, ConstructDisplayInfos, Function | SmallTest | Le
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     int ret = displayInfos.size();
     ScreenProperty screenProperty0;
+    screenProperty0.SetValidHeight(DISPLAY_B_HEIGHT);
     Rosen::ScreenSessionManagerClient::GetInstance().screenSessionMap_[0] =
         sptr<ScreenSession>::MakeSptr(0, screenProperty0, 0);
     SceneInputManager::GetInstance().ConstructDisplayInfos(displayInfos);
     ASSERT_EQ(ret + 1, displayInfos.size());
+    ASSERT_EQ(DISPLAY_B_HEIGHT, displayInfos[0].validHeight);
 }
 
 /**
@@ -345,7 +349,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate1, Function | SmallTest | Level3)
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 1;
     bool ret1 = SceneInputManager::GetInstance().CheckNeedUpdate(displayInfos, windowInfoList);
     ASSERT_TRUE(ret1);
@@ -376,7 +380,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate2, Function | SmallTest | Level3)
     displayInfos.emplace_back(displayinfo);
     MMI::WindowInfo windowinfo;
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -442,7 +446,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate3, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -498,7 +502,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate4, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -551,7 +555,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate5, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -603,7 +607,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate6, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -659,7 +663,7 @@ HWTEST_F(SceneInputManagerTest, CheckNeedUpdate7, Function | SmallTest | Level3)
     MMI::WindowInfo windowinfo;
     windowInfoList.emplace_back(windowinfo);
     int32_t focusId = 0;
-    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId);
+    Rosen::SceneSessionManager::GetInstance().SetFocusedSessionId(focusId, DEFAULT_DISPLAY_ID);
     SceneInputManager::GetInstance().lastFocusId_ = 0;
     SceneInputManager::GetInstance().lastDisplayInfos_ = displayInfos;
     SceneInputManager::GetInstance().lastWindowInfoList_ = windowInfoList;
@@ -708,6 +712,27 @@ HWTEST_F(SceneInputManagerTest, UpdateSecSurfaceInfo, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: UpdateConstrainedModalUIExtInfo
+ * @tc.desc: UpdateConstrainedModalUIExtInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, UpdateConstrainedModalUIExtInfo, Function | SmallTest | Level3)
+{
+    std::map<uint64_t, std::vector<SecSurfaceInfo>> testMap;
+    auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
+    ASSERT_NE(oldDirty, nullptr);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
+    SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(testMap);
+
+    SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
+    std::vector<SecSurfaceInfo> surfaceInfoList;
+    SecSurfaceInfo secSurfaceInfo;
+    surfaceInfoList.emplace_back(secSurfaceInfo);
+    testMap[0] = surfaceInfoList;
+    SceneInputManager::GetInstance().UpdateConstrainedModalUIExtInfo(testMap);
+}
+
+/**
  * @tc.name: UpdateDisplayAndWindowInfo
  * @tc.desc: UpdateDisplayAndWindowInfo
  * @tc.type: FUNC
@@ -750,6 +775,40 @@ HWTEST_F(SceneInputManagerTest, FlushEmptyInfoToMMI, Function | SmallTest | Leve
     SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
     SceneInputManager::GetInstance().eventHandler_ = preEventHandler;
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GetConstrainedModalExtWindowInfo
+ * @tc.desc: GetConstrainedModalExtWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, GetConstrainedModalExtWindowInfo, Function | SmallTest | Level3)
+{
+    auto ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(nullptr);
+    ASSERT_EQ(ret, std::nullopt);
+    auto oldDirty = SceneInputManager::GetInstance().sceneSessionDirty_;
+    SceneInputManager::GetInstance().sceneSessionDirty_ = nullptr;
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_EQ(ret, std::nullopt);
+    SceneInputManager::GetInstance().sceneSessionDirty_ = oldDirty;
+    SceneInputManager::GetInstance().sceneSessionDirty_->constrainedModalUIExtInfoMap_.clear();
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_EQ(ret, std::nullopt);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    surfaceNode->SetId(0);
+    sceneSession->surfaceNode_ = surfaceNode;
+    std::vector<SecSurfaceInfo> surfaceInfoList;
+    SecSurfaceInfo secSurfaceInfo;
+    surfaceInfoList.emplace_back(secSurfaceInfo);
+    SceneInputManager::GetInstance().sceneSessionDirty_->constrainedModalUIExtInfoMap_[0] = surfaceInfoList;
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_EQ(ret, std::nullopt);
+    sceneSession->uiExtNodeIdToPersistentIdMap_[0] = 1;
+    ret = SceneInputManager::GetInstance().GetConstrainedModalExtWindowInfo(sceneSession);
+    ASSERT_NE(ret, std::nullopt);
 }
 }
 }

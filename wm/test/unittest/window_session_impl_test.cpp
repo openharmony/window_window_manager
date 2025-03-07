@@ -16,10 +16,13 @@
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <int_wrapper.h>
+#include <want_params_wrapper.h>
 
 #include "ability_context_impl.h"
 #include "accessibility_event_info.h"
 #include "color_parser.h"
+#include "extension/extension_business_info.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
@@ -981,6 +984,11 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowStatusChangeListener(listener5);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    sptr<IWindowCrossAxisListener> listener6 = nullptr;
+    res = window->RegisterWindowCrossAxisListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterWindowCrossAxisListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
@@ -1098,6 +1106,34 @@ HWTEST_F(WindowSessionImplTest, RegisterListener03, Function | SmallTest | Level
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener03 end";
+}
+
+/**
+ * @tc.name: RegisterListener04
+ * @tc.desc: RegisterListener and UnregisterListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RegisterListener04, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener04 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RegisterListener04");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
+    sptr<IWindowWillCloseListener> listener14 = nullptr;
+    WMError res = window->RegisterWindowWillCloseListeners(listener14);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnRegisterWindowWillCloseListeners(listener14);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener04 end";
 }
 
 /**
@@ -1864,9 +1900,7 @@ HWTEST_F(WindowSessionImplTest, NotifySetUIContentComplete, Function | SmallTest
 HWTEST_F(WindowSessionImplTest, SetUIExtensionDestroyComplete, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
     window->SetUIExtensionDestroyComplete();
     EXPECT_EQ(window->setUIExtensionDestroyCompleted_.load(), true);
     window->SetUIExtensionDestroyComplete();
@@ -1881,19 +1915,15 @@ HWTEST_F(WindowSessionImplTest, SetUIExtensionDestroyComplete, Function | SmallT
 HWTEST_F(WindowSessionImplTest, SetUIExtensionDestroyCompleteInSubWindow, Function | SmallTest | Level2)
 {
     sptr<WindowOption> subWindowOption = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(subWindowOption, nullptr);
     subWindowOption->SetWindowName("subWindow");
     sptr<WindowSessionImpl> subWindowSession = sptr<WindowSessionImpl>::MakeSptr(subWindowOption);
-    ASSERT_NE(subWindowSession, nullptr);
     subWindowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     subWindowSession->context_ = abilityContext_;
     subWindowSession->SetUIExtensionDestroyCompleteInSubWindow();
 
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("SetUIExtensionDestroyCompleteInSubWindow");
     sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(windowSession, nullptr);
     ASSERT_TRUE(windowSession->FindExtensionWindowWithContext() == nullptr);
     windowSession->property_->SetPersistentId(12345);
     windowSession->property_->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
@@ -1914,12 +1944,10 @@ HWTEST_F(WindowSessionImplTest, SetUIExtensionDestroyCompleteInSubWindow, Functi
 HWTEST_F(WindowSessionImplTest, AddSetUIExtensionDestroyTimeoutCheck, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    ASSERT_NE(option, nullptr);
     option->SetWindowName("AddSetUIExtensionDestroyTimeoutCheck");
     option->SetBundleName("UTtest");
     option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
     window->AddSetUIExtensionDestroyTimeoutCheck();
     EXPECT_EQ(WindowType::WINDOW_TYPE_UI_EXTENSION, window->property_->GetWindowType());
     EXPECT_EQ(window->startUIExtensionDestroyTimer_.load(), true);
@@ -2015,6 +2043,74 @@ HWTEST_F(WindowSessionImplTest, GetBackgroundColor03, Function | SmallTest | Lev
     option->SetWindowName("GetBackgroundColor03");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     EXPECT_EQ(0xffffffff, window->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: GetExtensionConfig
+ * @tc.desc: GetExtensionConfig test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetExtensionConfig, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetExtensionConfig");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->crossAxisState_ = CrossAxisState::STATE_CROSS;
+    AAFwk::WantParams want;
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_CROSS));
+    window->crossAxisState_ = CrossAxisState::STATE_INVALID;
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_INVALID));
+    window->crossAxisState_ = CrossAxisState::STATE_NO_CROSS;
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_NO_CROSS));
+    window->crossAxisState_ = CrossAxisState::STATE_END;
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::CROSS_AXIS_FIELD, 0), static_cast<int32_t>(CrossAxisState::STATE_END));
+}
+
+/**
+ * @tc.name: UpdateExtensionConfig
+ * @tc.desc: UpdateExtensionConfig test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateExtensionConfig, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateExtensionConfig");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->crossAxisState_ = CrossAxisState::STATE_INVALID;
+    auto want = std::make_shared<AAFwk::Want>();
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_INVALID);
+
+    AAFwk::WantParams configParam;
+    AAFwk::WantParams wantParam(want->GetParams());
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_CROSS)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_INVALID)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_INVALID);
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_NO_CROSS)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
+    configParam.SetParam(Extension::CROSS_AXIS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(CrossAxisState::STATE_END)));
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want->SetParams(wantParam);
+    window->UpdateExtensionConfig(want);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_NO_CROSS);
 }
 } // namespace
 } // namespace Rosen

@@ -244,6 +244,8 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
         napi_value jsSessionInfo = CreateJsSessionInfo(env_ref, *sessionInfo);
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSessionInfo is nullptr");
+            SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+                sessionInfo->persistentId_, LifeCycleTaskType::START);
             return;
         }
         napi_value argv[] = {jsSessionInfo};
@@ -251,6 +253,8 @@ void JsRootSceneSession::PendingSessionActivationInner(std::shared_ptr<SessionIn
             sessionInfo->persistentId_);
         napi_call_function(env_ref, NapiGetUndefined(env_ref),
             jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        SceneSessionManager::GetInstance().RemoveLifeCycleTaskByPersistentId(
+            sessionInfo->persistentId_, LifeCycleTaskType::START);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionActivationInner");
 }
@@ -269,8 +273,9 @@ static int32_t GetRealCallerSessionId(const sptr<SceneSession>& sceneSession)
 void JsRootSceneSession::PendingSessionActivation(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName %{public}s, moduleName %{public}s, abilityName %{public}s, "
-        "appIndex %{public}d, reuse %{public}d", info.bundleName_.c_str(), info.moduleName_.c_str(),
-        info.abilityName_.c_str(), info.appIndex_, info.reuse);
+        "appIndex %{public}d, reuse %{public}d, specifiedFlag %{public}s, requestId %{public}d",
+        info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
+        info.reuse, info.specifiedFlag_.c_str(), info.requestId);
     sptr<SceneSession> sceneSession = GenSceneSession(info);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr");
@@ -326,7 +331,7 @@ void JsRootSceneSession::VerifyCallerToken(SessionInfo& info)
             SessionPermission::VerifyPermissionByBundleName(info.bundleName_,
                                                             "ohos.permission.CALLED_TRANSITION_ON_LOCK_SCREEN",
                                                             SceneSessionManager::GetInstance().GetCurrentUserId());
-        TLOGI(WmsLogTag::WMS_SCB,
+        TLOGD(WmsLogTag::WMS_SCB,
             "root isCalledRightlyByCallerId result is: %{public}d", info.isCalledRightlyByCallerId_);
     }
 }
@@ -341,13 +346,14 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
             return nullptr;
         }
 
-        if (info.reuse || info.isAtomicService_) {
+        if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
             if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
                     info.sessionAffinity);
             } else {
                 SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,
-                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_ };
+                    info.appIndex_, info.appInstanceKey_, info.windowType_, info.isAtomicService_,
+                    info.specifiedFlag_ };
                 sceneSession = SceneSessionManager::GetInstance().GetSceneSessionByIdentityInfo(identityInfo);
             }
         }

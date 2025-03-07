@@ -59,7 +59,6 @@ public:
         ~RssSessionCbInfo() {}
 
         napi_ref callback_ = nullptr;
-        napi_async_work asyncWork_ = nullptr;
         napi_deferred deferred_ = nullptr;
         napi_env nativeEnv_ = nullptr;
         std::unordered_map<std::string, std::string> extraInfo_;
@@ -89,7 +88,7 @@ private:
 
     static void ParseMutex(const std::string& mutexStr, const nlohmann::json& payload, std::string& detailStr);
     static void ParseCallbackMutex(const std::string& mutexStr, std::string& bundleName);
-    static void CompleteCb(napi_env env, napi_status status, void* data);
+    static void CompleteCb(napi_env env, RssSessionCbInfo* info);
 
     // ONLY Accessed on main thread
     std::unordered_map<uint32_t, std::list<CallBackPair>> jsCallBackMap_;

@@ -163,7 +163,7 @@ HWTEST_F(WindowSessionTest, SetActive01, Function | SmallTest | Level2)
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     EXPECT_NE(nullptr, mockSessionStage);
     EXPECT_CALL(*(mockSessionStage), SetActive(_)).WillOnce(Return(WSError::WS_OK));
-    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _)).Times(0).WillOnce(Return(WSError::WS_OK));
+    EXPECT_CALL(*(mockSessionStage), UpdateRect(_, _, _, _)).Times(0).WillOnce(Return(WSError::WS_OK));
     session_->sessionStage_ = mockSessionStage;
     ASSERT_EQ(WSError::WS_ERROR_INVALID_SESSION, session_->SetActive(true));
 
@@ -206,22 +206,32 @@ HWTEST_F(WindowSessionTest, UpdateClientDisplayId01, Function | SmallTest | Leve
 {
     ASSERT_NE(session_, nullptr);
     session_->sessionStage_ = nullptr;
-    session_->lastUpdatedDisplayId_ = 0;
+    session_->clientDisplayId_ = 0;
     DisplayId updatedDisplayId = 0;
-    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 10;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_ERROR_NULLPTR);
-    EXPECT_NE(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    EXPECT_NE(updatedDisplayId, session_->clientDisplayId_);
+}
 
+/**
+ * @tc.name: UpdateClientDisplayId02
+ * @tc.desc: UpdateClientDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateClientDisplayId02, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
     ASSERT_NE(mockSessionStage_, nullptr);
     session_->sessionStage_ = mockSessionStage_;
-    updatedDisplayId = 0;
-    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_DO_NOTHING);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    session_->clientDisplayId_ = 0;
+    DisplayId updatedDisplayId = 0;
+    EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
+    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
     updatedDisplayId = 100;
     EXPECT_EQ(session_->UpdateClientDisplayId(updatedDisplayId), WSError::WS_OK);
-    EXPECT_EQ(updatedDisplayId, session_->lastUpdatedDisplayId_);
+    EXPECT_EQ(updatedDisplayId, session_->clientDisplayId_);
 }
 
 /**
@@ -256,7 +266,7 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId01, Function | Small
     rect = {0, 2000, 100, 100};
     auto rect2 = rect;
     session_->UpdateClientRectPosYAndDisplayId(rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_ / 2);
+    EXPECT_EQ(rect.posY_, rect2.posY_ - defaultDisplayRect.height_ - foldCreaseRect.height_);
 }
 
 /**
@@ -643,6 +653,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent02, Function | SmallTest | Level2)
     sessionConfig.backgroundswitch = true;
     sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -705,6 +717,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent03, Function | SmallTest | Level2)
     sessionConfig.backgroundswitch = true;
     sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -764,6 +778,8 @@ HWTEST_F(WindowSessionTest, ConsumeDragEvent04, Function | SmallTest | Level2)
     sessionConfig.backgroundswitch = true;
     sessionConfig.decorWindowModeSupportType_ = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    sceneSession->moveDragController_->moveDragProperty_.pointerId_ = pointerEvent->GetPointerId();
+    sceneSession->moveDragController_->moveDragProperty_.pointerType_ = pointerEvent->GetSourceType();
     ASSERT_TRUE(pointerEvent);
     pointerEvent->SetAgentWindowId(1);
     pointerEvent->SetPointerId(0);
@@ -849,6 +865,33 @@ HWTEST_F(WindowSessionTest, GetSnapshot, Function | SmallTest | Level2)
     session_->state_ = SessionState::STATE_DISCONNECT;
     std::shared_ptr<Media::PixelMap> snapshot = session_->Snapshot();
     ASSERT_EQ(snapshot, session_->GetSnapshot());
+}
+
+/**
+ * @tc.name: NotifyAddSnapshot
+ * @tc.desc: NotifyAddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyAddSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyAddSnapshot();
+    ASSERT_EQ(session_->GetSnapshot(), nullptr);
+}
+
+/**
+ * @tc.name: NotifyRemoveSnapshot
+ * @tc.desc: NotifyRemoveSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyRemoveSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    session_->state_ = SessionState::STATE_DISCONNECT;
+    session_->NotifyRemoveSnapshot();
+    ASSERT_EQ(session_->GetScenePersistence()->HasSnapshot(), false);
 }
 
 /**
@@ -1590,6 +1633,56 @@ HWTEST_F(WindowSessionTest, UpdateClientRectPosYAndDisplayId03, Function | Small
     WSRect rect = {0, 1000, 100, 100};
     session_->UpdateClientRectPosYAndDisplayId(rect);
     EXPECT_EQ(rect.posY_, 1000);
+}
+
+/**
+ * @tc.name: SetExclusivelyHighlighted
+ * @tc.desc: SetExclusivelyHighlighted Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetExclusivelyHighlighted, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->SetExclusivelyHighlighted(false);
+    bool isExclusivelyHighlighted = session_->GetSessionProperty()->GetExclusivelyHighlighted();
+    ASSERT_EQ(isExclusivelyHighlighted, false);
+    session_->SetExclusivelyHighlighted(true);
+    isExclusivelyHighlighted = session_->GetSessionProperty()->GetExclusivelyHighlighted();
+    ASSERT_EQ(isExclusivelyHighlighted, true);
+}
+ 
+/**
+ * @tc.name: UpdateHighlightStatus
+ * @tc.desc: UpdateHighlightStatus Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateHighlightStatus, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    EXPECT_EQ(session_->UpdateHighlightStatus(false, false), WSError::WS_DO_NOTHING);
+ 
+    EXPECT_EQ(session_->UpdateHighlightStatus(true, false), WSError::WS_OK);
+    session_->isHighlight_ = false;
+    EXPECT_EQ(session_->UpdateHighlightStatus(true, true), WSError::WS_OK);
+}
+ 
+/**
+ * @tc.name: NotifyHighlightChange
+ * @tc.desc: NotifyHighlightChange Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, NotifyHighlightChange, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->sessionInfo_.isSystem_ = true;
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_INVALID_SESSION);
+    session_->sessionInfo_.isSystem_ = false;
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_NULLPTR);
+    session_->sessionStage_ = mockSessionStage_;
+    session_->state_ = SessionState::STATE_CONNECT;
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_OK);
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(session_->NotifyHighlightChange(true), WSError::WS_ERROR_NULLPTR);
 }
 }
 } // namespace Rosen

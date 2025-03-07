@@ -74,10 +74,11 @@ public:
     MOCK_METHOD2(HandleGetStatusBarHeight, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleGetAppForceLandscapeConfig, int(MessageParcel& data, MessageParcel& reply));
     MOCK_METHOD2(HandleGetAllAvoidAreas, int(MessageParcel& data, MessageParcel& reply));
-    MOCK_METHOD2(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect));
+    MOCK_METHOD3(GetAvoidAreaByType, AvoidArea(AvoidAreaType type, const WSRect& rect, int32_t apiVersion));
     MOCK_METHOD1(GetAllAvoidAreas, WSError(std::map<AvoidAreaType, AvoidArea>& avoidAreas));
     MOCK_METHOD2(UpdateSessionPropertyByAction, WMError(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action));
+    MOCK_METHOD1(GetCrossAxisState, WSError(CrossAxisState& state));
 };
 } // namespace Rosen
 } // namespace OHOS

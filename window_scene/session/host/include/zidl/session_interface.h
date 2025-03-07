@@ -134,7 +134,8 @@ public:
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual WMError GetGlobalScaledRect(Rect& globalScaledRect) { return WMError::WM_OK; }
     virtual WSError OnNeedAvoid(bool status) { return WSError::WS_OK; }
-    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) { return {}; }
+    virtual AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) { return {}; }
     virtual WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) { return WSError::WS_OK; }
     virtual WSError RequestSessionBack(bool needMoveToBackground) { return WSError::WS_OK; }
     virtual WSError MarkProcessed(int32_t eventId) { return WSError::WS_OK; }
@@ -146,6 +147,15 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetGlobalMaximizeMode(MaximizeMode mode) { return WSError::WS_OK; }
+
+    /**
+     * @brief this interface is invoked by the ACE to the native host.
+     * @param eventName invoking event name, which is used to distinguish different invoking types.
+     * @param eventValue used to transfer parameters.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WSError OnContainerModalEvent(const std::string& eventName,
+        const std::string& eventValue) { return WSError::WS_OK; }
 
     /**
      * @brief Obtains the global maximization mode of window.
@@ -186,7 +196,8 @@ public:
     virtual WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) { return WSError::WS_OK; }
     virtual WSError GetIsMidScene(bool& isMidScene) { return WSError::WS_OK; }
     virtual WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) { return WSError::WS_OK; }
+        const sptr<AAFwk::SessionInfo> abilitySessionInfo,
+        const ExceptionInfo& exceptionInfo) { return WSError::WS_OK; }
 
     // extension session
     virtual WSError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) { return WSError::WS_OK; }
@@ -208,6 +219,10 @@ public:
     virtual void NotifyTransferAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
         int64_t uiExtensionIdLevel) {}
     virtual void NotifyExtensionEventAsync(uint32_t notifyEvent) {}
+    virtual WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        return WSError::WS_OK;
+    }
 
     /**
      * @brief Close pip window while stopPip is called.
@@ -249,9 +264,14 @@ public:
      *
      * @param isAutoStart Indicates the {@link bool}
      * @param priority Indicates the {@link uint32_t} priority of pip window
+     * @param width Indicates the {@link uint32_t} width of the video content
+     * @param height Indicates the {@link uint32_t} height of the video content
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) { return WSError::WS_OK; }
+    virtual WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height)
+    {
+        return WSError::WS_OK;
+    }
 
     virtual WSError ProcessPointDownSession(int32_t posX, int32_t posY) { return WSError::WS_OK; }
     virtual WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -312,6 +332,14 @@ public:
     virtual WSError OnSetWindowRectAutoSave(bool enabled) { return WSError::WS_OK; }
 
     /**
+     * @brief Callback for setting to radius of window.
+     *
+     * @param cornerRadius corner radius of window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetWindowCornerRadius(float cornerRadius) { return WSError::WS_OK; }
+
+    /**
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
@@ -324,6 +352,41 @@ public:
      */
     virtual WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) { return WSError::WS_OK; }
+
+    /**
+     * @brief set session label and icon
+     *
+     * @param label
+     * @param icon
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     * @permission ohos.permission.SET_ABILITY_INSTANCE_INFO
+     * @scene 15
+     */
+    virtual WSError SetSessionLabelAndIcon(const std::string& label,
+        const std::shared_ptr<Media::PixelMap>& icon) { return WSError::WS_OK; }
+
+    virtual WSError ChangeKeyboardViewMode(KeyboardViewMode mode) { return WSError::WS_OK; };
+
+    /**
+     * @brief Start Moving window with coordinate.
+     *
+     * @param offsetX expected pointer position x-axis offset in window when start moving.
+     * @param offsetY expected pointer position y-axis offset in window when start moving.
+     * @param pointerPosX current pointer position x-axis offset in screen.
+     * @param pointerPosY current pointer position y-axis offset in screen.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) { return WSError::WS_OK; }
+    virtual WSError GetCrossAxisState(CrossAxisState& state) { return WSError::WS_OK; };
+
+    /**
+     * @brief Notify the window attach state listener is registered or not.
+     *
+     * @param registered true means register success.
+     */
+    virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
+    virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
 };
 } // namespace OHOS::Rosen
 

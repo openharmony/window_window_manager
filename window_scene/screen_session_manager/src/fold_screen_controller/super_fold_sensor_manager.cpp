@@ -32,7 +32,7 @@ namespace {
 constexpr float ANGLE_MIN_VAL = 30.0F;
 constexpr float ANGLE_MAX_VAL = 180.0F;
 constexpr float ANGLE_FLAT_THRESHOLD = 160.0F;
-constexpr float ANGLE_SENSOR_THRESHOLD = 177.0F;
+constexpr float ANGLE_SENSOR_THRESHOLD = 160.0F;
 constexpr float ANGLE_HALF_FOLD_THRESHOLD = 135.0F;
 constexpr uint16_t HALL_HAVE_KEYBOARD_THRESHOLD = 0B0100;
 constexpr uint16_t HALL_REMOVE_KEYBOARD_THRESHOLD = 0B0000;
@@ -135,20 +135,22 @@ void SuperFoldSensorManager::HandlePostureData(const SensorEvent * const event)
 
 void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
 {
-    SuperFoldStatusChangeEvents events;
+    SuperFoldStatusChangeEvents events = SuperFoldStatusChangeEvents::UNDEFINED;
     if (std::isgreaterequal(foldAngle, ANGLE_FLAT_THRESHOLD)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Expanded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Expanded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED;
     } else if (std::isless(foldAngle, ANGLE_HALF_FOLD_THRESHOLD) &&
         std::isgreater(foldAngle, ANGLE_MIN_VAL)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Half Folded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Half Folded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
     } else if (std::islessequal(foldAngle, ANGLE_MIN_VAL)) {
-        TLOGI(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is Folded");
         events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_FOLDED;
     } else {
-        TLOGI(WmsLogTag::DMS, "Angle Don't Change!");
-        return;
+        if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::UNKNOWN) {
+            events = SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED;
+        }
+        TLOGD(WmsLogTag::DMS, "NotifyFoldAngleChanged is in BufferArea");
     }
     // notify
     std::vector<float> foldAngles;
@@ -208,7 +210,31 @@ void SuperFoldSensorManager::NotifyHallChanged(uint16_t Hall)
 void SuperFoldSensorManager::HandleSuperSensorChange(SuperFoldStatusChangeEvents events)
 {
     // trigger events
+    if (ScreenSessionManager::GetInstance().GetIsExtendScreenConnected()) {
+        return;
+    }
     SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(events);
+}
+
+void SuperFoldSensorManager::HandleScreenConnectChange()
+{
+    TLOGI(WmsLogTag::DMS, "Screen connect to stop statemachine.");
+    if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::HALF_FOLDED) {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    } else if (SuperFoldStateManager::GetInstance().GetCurrentStatus() == SuperFoldStatus::KEYBOARD) {
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::KEYBOARD_OFF);
+        SuperFoldStateManager::GetInstance().HandleSuperFoldStatusChange(
+            SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED);
+    }
+}
+
+void SuperFoldSensorManager::HandleScreenDisconnectChange()
+{
+    TLOGI(WmsLogTag::DMS, "Screen disconnect to stop statemachine.");
+    NotifyHallChanged(curHall_);
+    NotifyFoldAngleChanged(curAngle_);
 }
 
 float SuperFoldSensorManager::GetCurAngle()

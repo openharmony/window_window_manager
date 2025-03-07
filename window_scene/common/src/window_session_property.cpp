@@ -87,6 +87,10 @@ const std::map<uint64_t, HandlWritePropertyFunc> WindowSessionProperty::writeFun
         &WindowSessionProperty::WriteActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::WriteActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::WriteActionUpdateBackgroundAlpha),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
+        &WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted),
 };
 
 const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncMap_ {
@@ -150,6 +154,10 @@ const std::map<uint64_t, HandlReadPropertyFunc> WindowSessionProperty::readFuncM
         &WindowSessionProperty::ReadActionUpdateMainWindowTopmost),
     std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION),
         &WindowSessionProperty::ReadActionUpdateAvoidAreaOption),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_BACKGROUND_ALPHA),
+        &WindowSessionProperty::ReadActionUpdateBackgroundAlpha),
+    std::make_pair(static_cast<uint64_t>(WSPropertyChangeAction::ACTION_UPDATE_EXCLUSIVE_HIGHLIGHTED),
+        &WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted),
 };
 
 WindowSessionProperty::WindowSessionProperty(const sptr<WindowSessionProperty>& property)
@@ -612,6 +620,16 @@ void WindowSessionProperty::GetSupportedWindowModes(
     supportedWindowModes = supportedWindowModes_;
 }
 
+void WindowSessionProperty::SetWindowSizeLimits(const WindowSizeLimits& windowSizeLimits)
+{
+    windowSizeLimits_ = windowSizeLimits;
+}
+
+WindowSizeLimits WindowSessionProperty::GetWindowSizeLimits() const
+{
+    return windowSizeLimits_;
+}
+
 void WindowSessionProperty::SetAnimationFlag(uint32_t animationFlag)
 {
     animationFlag_ = animationFlag;
@@ -718,6 +736,18 @@ void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMod
 bool WindowSessionProperty::GetIsNeedUpdateWindowMode() const
 {
     return isNeedUpdateWindowMode_;
+}
+
+void WindowSessionProperty::SetWindowCornerRadius(float cornerRadius)
+{
+    std::lock_guard<std::mutex> lock(cornerRadiusMutex_);
+    cornerRadius_ = cornerRadius;
+}
+
+float WindowSessionProperty::GetWindowCornerRadius() const
+{
+    std::lock_guard<std::mutex> lock(cornerRadiusMutex_);
+    return cornerRadius_;
 }
 
 bool WindowSessionProperty::MarshallingWindowLimits(Parcel& parcel) const
@@ -1119,6 +1149,18 @@ bool WindowSessionProperty::GetIsSupportDragInPcCompatibleMode() const
     return isSupportDragInPcCompatibleMode_;
 }
 
+void WindowSessionProperty::SetIsAtomicService(bool isAtomicService)
+{
+    std::lock_guard lock(atomicServiceMutex_);
+    isAtomicService_ = isAtomicService;
+}
+
+bool WindowSessionProperty::GetIsAtomicService() const
+{
+    std::lock_guard lock(atomicServiceMutex_);
+    return isAtomicService_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
@@ -1160,15 +1202,16 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteUint32(static_cast<uint32_t>(uiExtensionUsage_)) &&
         parcel.WriteUint32(static_cast<uint32_t>(parentWindowType_)) &&
         MarshallingWindowMask(parcel) &&
-        parcel.WriteParcelable(&keyboardLayoutParams_) &&
-        parcel.WriteBool(compatibleModeInPc_) &&
+        parcel.WriteParcelable(&keyboardLayoutParams_) && parcel.WriteBool(compatibleModeInPc_) &&
         parcel.WriteInt32(compatibleInPcPortraitWidth_) && parcel.WriteInt32(compatibleInPcPortraitHeight_) &&
         parcel.WriteInt32(compatibleInPcLandscapeWidth_) && parcel.WriteInt32(compatibleInPcLandscapeHeight_) &&
-        parcel.WriteBool(isAppSupportPhoneInPc_) &&
-        parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
+        parcel.WriteBool(isAppSupportPhoneInPc_) && parcel.WriteBool(isSupportDragInPcCompatibleMode_) &&
         parcel.WriteBool(isPcAppInPad_) && parcel.WriteBool(compatibleModeEnableInPad_) &&
         parcel.WriteString(appInstanceKey_) && parcel.WriteBool(isSystemKeyboard_) &&
-        parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_);
+        parcel.WriteUint32(avoidAreaOption_) && parcel.WriteBool(isWindowDelayRaiseEnabled_) &&
+        parcel.WriteUint8(backgroundAlpha_) && parcel.WriteUint32(static_cast<uint32_t>(keyboardViewMode_)) &&
+        parcel.WriteFloat(cornerRadius_) && parcel.WriteBool(isExclusivelyHighlighted_) &&
+        parcel.WriteBool(isAtomicService_) && parcel.WriteUint32(apiVersion_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1251,6 +1294,12 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetIsSystemKeyboard(parcel.ReadBool());
     property->SetAvoidAreaOption(parcel.ReadUint32());
     property->SetWindowDelayRaiseEnabled(parcel.ReadBool());
+    property->SetBackgroundAlpha(parcel.ReadUint8());
+    property->SetKeyboardViewMode(static_cast<KeyboardViewMode>(parcel.ReadUint32()));
+    property->SetWindowCornerRadius(parcel.ReadFloat());
+    property->SetExclusivelyHighlighted(parcel.ReadBool());
+    property->SetIsAtomicService(parcel.ReadBool());
+    property->SetApiVersion(parcel.ReadUint32());
     return property;
 }
 
@@ -1335,6 +1384,12 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isSystemKeyboard_ = property->isSystemKeyboard_;
     avoidAreaOption_ = property->avoidAreaOption_;
     isWindowDelayRaiseEnabled_ = property->isWindowDelayRaiseEnabled_;
+    backgroundAlpha_ = property->backgroundAlpha_;
+    keyboardViewMode_ = property->keyboardViewMode_;
+    isExclusivelyHighlighted_ = property->isExclusivelyHighlighted_;
+    cornerRadius_ = property->cornerRadius_;
+    isAtomicService_ = property->isAtomicService_;
+    apiVersion_ = property->apiVersion_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -1478,6 +1533,16 @@ bool WindowSessionProperty::WriteActionUpdateWindowModeSupportType(Parcel& parce
 bool WindowSessionProperty::WriteActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     return parcel.WriteUint32(avoidAreaOption_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateBackgroundAlpha(Parcel& parcel)
+{
+    return parcel.WriteUint8(backgroundAlpha_);
+}
+
+bool WindowSessionProperty::WriteActionUpdateExclusivelyHighlighted(Parcel& parcel)
+{
+    return parcel.WriteBool(isExclusivelyHighlighted_);
 }
 
 void WindowSessionProperty::Read(Parcel& parcel, WSPropertyChangeAction action)
@@ -1624,6 +1689,16 @@ void WindowSessionProperty::ReadActionUpdateWindowModeSupportType(Parcel& parcel
 void WindowSessionProperty::ReadActionUpdateAvoidAreaOption(Parcel& parcel)
 {
     SetAvoidAreaOption(parcel.ReadUint32());
+}
+
+void WindowSessionProperty::ReadActionUpdateBackgroundAlpha(Parcel& parcel)
+{
+    SetBackgroundAlpha(parcel.ReadUint8());
+}
+
+void WindowSessionProperty::ReadActionUpdateExclusivelyHighlighted(Parcel& parcel)
+{
+    SetExclusivelyHighlighted(parcel.ReadBool());
 }
 
 void WindowSessionProperty::SetTransform(const Transform& trans)
@@ -1819,6 +1894,56 @@ void WindowSessionProperty::SetIsSystemKeyboard(bool isSystemKeyboard)
 bool WindowSessionProperty::IsSystemKeyboard() const
 {
     return isSystemKeyboard_;
+}
+
+void WindowSessionProperty::SetKeyboardViewMode(KeyboardViewMode mode)
+{
+    keyboardViewMode_ = mode;
+}
+
+KeyboardViewMode WindowSessionProperty::GetKeyboardViewMode() const
+{
+    return keyboardViewMode_;
+}
+
+uint8_t WindowSessionProperty::GetBackgroundAlpha() const
+{
+    return backgroundAlpha_;
+}
+
+void WindowSessionProperty::SetBackgroundAlpha(uint8_t alpha)
+{
+    backgroundAlpha_ = alpha;
+}
+
+void WindowSessionProperty::SetExclusivelyHighlighted(bool isExclusivelyHighlighted)
+{
+    isExclusivelyHighlighted_ = isExclusivelyHighlighted;
+}
+
+bool WindowSessionProperty::GetExclusivelyHighlighted() const
+{
+    return isExclusivelyHighlighted_;
+}
+
+void WindowSessionProperty::SetConstrainedModal(bool isConstrained)
+{
+    isConstrainedModal_ = isConstrained;
+}
+
+bool WindowSessionProperty::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
+}
+
+void WindowSessionProperty::SetApiVersion(uint32_t version)
+{
+    apiVersion_ = version;
+}
+
+uint32_t WindowSessionProperty::GetApiVersion() const
+{
+    return apiVersion_;
 }
 } // namespace Rosen
 } // namespace OHOS

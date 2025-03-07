@@ -239,6 +239,16 @@ const std::string WindowOption::GetBundleName() const
     return bundleName_;
 }
 
+void WindowOption::SetSubWindowMaximizeSupported(bool maximizeSupported)
+{
+    subWindowMaximizeSupported_ = maximizeSupported;
+}
+
+bool WindowOption::GetSubWindowMaximizeSupported() const
+{
+    return subWindowMaximizeSupported_;
+}
+
 void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
 {
     subWindowTitle_ = subWindowTitle;
@@ -381,6 +391,16 @@ void WindowOption::SetIsDensityFollowHost(bool isDensityFollowHost)
 bool WindowOption::GetIsDensityFollowHost() const
 {
     return isDensityFollowHost_;
+}
+
+void WindowOption::SetConstrainedModal(bool isConstrainedModal)
+{
+    isConstrainedModal_ = (uiExtensionUsage_ == static_cast<uint32_t>(UIExtensionUsage::MODAL)) && isConstrainedModal;
+}
+
+bool WindowOption::IsConstrainedModal() const
+{
+    return isConstrainedModal_;
 }
 
 } // namespace Rosen

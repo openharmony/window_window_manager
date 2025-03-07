@@ -56,6 +56,9 @@ public:
 
     float GetCurAngle();
 
+    void HandleScreenConnectChange();
+    void HandleScreenDisconnectChange();
+
 private:
     
     std::recursive_mutex mutex_;

@@ -116,6 +116,13 @@ public:
     WMError GoDestroy();
 
     /**
+     * Window go resume.
+     *
+     * @return the error code of window
+     */
+    WMError GoResume();
+
+    /**
      * Window handle new want.
      *
      * @param want ability want.
@@ -136,6 +143,15 @@ public:
      * @param configuration the configuration of ability
      */
     void UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
+
+    /**
+     * @brief Update ability configuration for specified window.
+     *
+     * @param configuration the configuration of ability
+     * @param resourceManager the resource manager
+     */
+    void UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager);
 
     /**
      * Set main window system bar property

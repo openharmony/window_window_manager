@@ -35,6 +35,7 @@ private:
     int HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetUnreliableWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleRequestFocusStatus(MessageParcel& data, MessageParcel& reply);
+    int HandleRequestFocusStatusBySA(MessageParcel& data, MessageParcel& reply);
     int HandleCreateAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverAndConnectSpecificSession(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverAndReconnectSceneSession(MessageParcel& data, MessageParcel& reply);
@@ -87,6 +88,7 @@ private:
     int HandleGetParentMainWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionWindowVisibilityListener(MessageParcel& data, MessageParcel& reply);
     int HandleShiftAppWindowFocus(MessageParcel& data, MessageParcel& reply);
+    int HandleListWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleAddExtensionWindowStageToSCB(MessageParcel& data, MessageParcel& reply);

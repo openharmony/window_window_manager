@@ -494,6 +494,23 @@ HWTEST_F(WindowSessionTest2, Snapshot01, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: ResetSnapshot
+ * @tc.desc: ResetSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, ResetSnapshot, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    session_->snapshot_ = std::make_shared<Media::PixelMap>();
+
+    session_->ResetSnapshot();
+    ASSERT_EQ(nullptr, session_->snapshot_);
+}
+
+/**
  * @tc.name: SaveSnapshot
  * @tc.desc: SaveSnapshot Test
  * @tc.type: FUNC
@@ -1148,6 +1165,7 @@ HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListene
         const SessionInfo& info, const bool visible) {
         resultValue = 1;
     });
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
 
     SessionInfo info;
@@ -1158,6 +1176,7 @@ HWTEST_F(WindowSessionTest2, SetChangeSessionVisibilityWithStatusBarEventListene
         const SessionInfo& info, const bool visible) {
         resultValue = 2;
     });
+    usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(session_->changeSessionVisibilityWithStatusBarFunc_, nullptr);
     session_->changeSessionVisibilityWithStatusBarFunc_(info, true);
     ASSERT_EQ(resultValue, 2);

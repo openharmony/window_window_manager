@@ -999,6 +999,21 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo)
     return objValue;
 }
 
+napi_value CreateJsExceptionInfo(napi_env env, const ExceptionInfo& exceptionInfo)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to get jsObject");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "needRemoveSession",
+        CreateJsValue(env, exceptionInfo.needRemoveSession));
+    napi_set_named_property(env, objValue, "needClearCallerLink",
+        CreateJsValue(env, exceptionInfo.needClearCallerLink));
+    return objValue;
+}
+
 napi_value CreateJsSessionRecoverInfo(
     napi_env env, const SessionInfo& sessionInfo, const sptr<WindowSessionProperty> property)
 {
@@ -1030,9 +1045,30 @@ napi_value CreateJsSessionRecoverInfo(
     return objValue;
 }
 
+static void SetWindowSizeLimits(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
+{
+    if (sessionInfo.windowSizeLimits.maxWindowWidth > 0) {
+        napi_set_named_property(env, objValue, "maxWindowWidth",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowWidth));
+    }
+    if (sessionInfo.windowSizeLimits.minWindowWidth > 0) {
+        napi_set_named_property(env, objValue, "minWindowWidth",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowWidth));
+    }
+    if (sessionInfo.windowSizeLimits.maxWindowHeight > 0) {
+        napi_set_named_property(env, objValue, "maxWindowHeight",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.maxWindowHeight));
+    }
+    if (sessionInfo.windowSizeLimits.minWindowHeight > 0) {
+        napi_set_named_property(env, objValue, "minWindowHeight",
+            CreateJsValue(env, sessionInfo.windowSizeLimits.minWindowHeight));
+    }
+}
+
 void SetJsSessionInfoByWant(napi_env env, const SessionInfo& sessionInfo, napi_value objValue)
 {
     if (sessionInfo.want != nullptr) {
+        SetWindowSizeLimits(env, sessionInfo, objValue);
         napi_set_named_property(env, objValue, "windowTop",
             GetWindowRectIntValue(env,
             sessionInfo.want->GetIntParam(AAFwk::Want::PARAM_RESV_WINDOW_TOP, INVALID_VAL)));
@@ -1163,9 +1199,36 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
     napi_set_named_property(env, objValue, "FLOATING_TO_FULL", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::FLOATING_TO_FULL)));
     CreatePiPSizeChangeReason(env, objValue);
+    napi_set_named_property(env, objValue, "MAXIMIZE_TO_SPLIT", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::MAXIMIZE_TO_SPLIT)));
+    napi_set_named_property(env, objValue, "SPLIT_TO_MAXIMIZE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::SPLIT_TO_MAXIMIZE)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
+    return objValue;
+}
+
+napi_value CreateJsRSUIFirstSwitch(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::NONE)));
+    napi_set_named_property(env, objValue, "MODAL_WINDOW_CLOSE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::MODAL_WINDOW_CLOSE)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE_LIMIT)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE_NONFOCUS", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS)));
     return objValue;
 }
 
@@ -1447,6 +1510,8 @@ napi_value SubWindowModalTypeInit(napi_env env)
         static_cast<int32_t>(SubWindowModalType::TYPE_WINDOW_MODALITY)));
     napi_set_named_property(env, objValue, "TYPE_TOAST", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_TOAST)));
+    napi_set_named_property(env, objValue, "TYPE_TEXT_MENU", CreateJsValue(env,
+        static_cast<int32_t>(SubWindowModalType::TYPE_TEXT_MENU)));
     napi_set_named_property(env, objValue, "TYPE_APPLICATION_MODALITY", CreateJsValue(env,
         static_cast<int32_t>(SubWindowModalType::TYPE_APPLICATION_MODALITY)));
     return objValue;
@@ -1570,6 +1635,33 @@ napi_value KeyboardGravityInit(napi_env env)
     return objValue;
 }
 
+napi_value KeyboardViewModeInit(napi_env env)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "In");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NON_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::NON_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "LIGHT_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::LIGHT_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "DARK_IMMERSIVE_MODE", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::DARK_IMMERSIVE_MODE)));
+    napi_set_named_property(env, objValue, "VIEW_MODE_END", CreateJsValue(env,
+        static_cast<int32_t>(KeyboardViewMode::VIEW_MODE_END)));
+    return objValue;
+}
+
 napi_value SessionTypeInit(napi_env env)
 {
     WLOGFD("in");
@@ -1621,7 +1713,9 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_KEYBOARD_PANEL", JsSessionType::TYPE_KEYBOARD_PANEL);
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
+    SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
     SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
+    SetTypeProperty(objValue, env, "TYPE_FLOAT_NAVIGATION", JsSessionType::TYPE_FLOAT_NAVIGATION);
     return objValue;
 }
 

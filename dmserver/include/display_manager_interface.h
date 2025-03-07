@@ -38,15 +38,21 @@ public:
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo() = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) = 0;
+    virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) = 0;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) = 0;
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) = 0;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) { return false; };
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) {};
+    virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) {};
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) = 0;
     virtual DMError DestroyVirtualScreen(ScreenId screenId) = 0;
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) = 0;
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId, const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool rotate) { return DMError::DM_OK; }
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode)
     {
@@ -138,6 +144,11 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
+    virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        ScreenId& screenGroupId)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         DMRect mainScreenRegion, ScreenId& screenGroupId)
     {
@@ -165,6 +176,10 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual DMError SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) = 0;
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) = 0;
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) { return DMError::DM_OK; }
@@ -173,6 +188,11 @@ public:
     virtual DMError RemoveSurfaceNodeFromDisplay(DisplayId displayId,
         std::shared_ptr<class RSSurfaceNode>& surfaceNode) = 0;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) { return DMError::DM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual bool IsOrientationNeedChanged() {return false;}
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
 
@@ -182,7 +202,7 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
-    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "") { return DMError::DM_OK; }
 
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 
@@ -198,7 +218,8 @@ public:
     }
 
     // unique screen
-    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) { return DMError::DM_OK; }
+    virtual DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds,
+        std::vector<DisplayId>& displayIds) { return DMError::DM_OK; }
 
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId)
     {
@@ -228,6 +249,10 @@ public:
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
+    virtual std::string GetDisplayCapability()
+    {
+        return std::string {};
+    }
     virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) { return false; }
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList)
@@ -256,6 +281,11 @@ public:
     {
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
+    }
+
+    virtual DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable)
+    {
+        return DMError::DM_OK;
     }
 };
 } // namespace OHOS::Rosen

@@ -33,6 +33,7 @@ public:
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
+    virtual DMError SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
 
@@ -77,6 +78,9 @@ public:
     virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
 
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
+    
+    virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
+        const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
 
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
 
@@ -85,6 +89,8 @@ public:
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
 
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        ScreenId& screenGroupId) override;
+    virtual DMError MakeMirrorForRecord(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         DMRect mainScreenRegion, ScreenId& screenGroupId) override;
@@ -108,6 +114,7 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
 
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     virtual std::vector<DisplayId> GetAllDisplayIds() override;
 
@@ -128,12 +135,13 @@ public:
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) override;
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId) override;
     virtual void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo) override;
+    virtual void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) override;
 
     virtual void DumpAllScreensInfo(std::string& dumpInfo) override;
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) override;
     //Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override;
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason = "") override;
 
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY,
         float pivotX, float pivotY) override;
@@ -145,16 +153,17 @@ public:
 
     bool IsFoldable() override;
     bool IsCaptured() override;
+    bool IsOrientationNeedChanged() override;
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
-
+    ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion() override;
 
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition) override;
 
     // unique screen
-    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds) override;
+    DMError MakeUniqueScreen(const std::vector<ScreenId>& screenIds, std::vector<DisplayId>& displayIds) override;
 
     void SetClient(const sptr<IScreenSessionManagerClient>& client) override;
     ScreenProperty GetScreenProperty(ScreenId screenId) override;
@@ -164,6 +173,8 @@ public:
     void UpdateScreenDirectionInfo(ScreenId screenId, float screenComponentRotation, float rotation,
         float phyRotation, ScreenPropertyChangeType screenPropertyChangeType) override;
     void UpdateAvailableArea(ScreenId ScreenId, DMRect area) override;
+    void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea) override;
+    void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area) override;
     int32_t SetScreenOffDelayTime(int32_t delay) override;
     int32_t SetScreenOnDelayTime(int32_t delay) override;
     uint32_t GetCurvedCompressionArea() override;
@@ -173,7 +184,9 @@ public:
     void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) override;
     void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) override;
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area) override;
+    virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area) override;
     void NotifyFoldToExpandCompletion(bool foldToExpand) override;
+    void RecordEventFromScb(std::string description, bool needRecordEvent) override;
     void SwitchUser() override;
 
     VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId) override;
@@ -186,6 +199,7 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
+    std::string GetDisplayCapability() override;
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
@@ -197,6 +211,8 @@ public:
         DmErrorCode* errorCode) override;
     sptr<DisplayInfo> GetPrimaryDisplayInfo() override;
     ScreenCombination GetScreenCombination(ScreenId screenId) override;
+    DMError SetScreenSkipProtectedWindow(const std::vector<ScreenId>& screenIds, bool isEnable) override;
+    bool GetIsRealScreen(ScreenId screenId) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

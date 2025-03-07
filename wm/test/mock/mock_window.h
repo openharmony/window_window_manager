@@ -41,6 +41,8 @@ public:
     MOCK_METHOD0(AfterResumed, void(void));
     MOCK_METHOD0(AfterPaused, void(void));
     MOCK_METHOD0(AfterDestroyed, void(void));
+    MOCK_METHOD0(AfterDidForeground, void(void));
+    MOCK_METHOD0(AfterDidBackground, void(void));
 };
 
 class MockAvoidAreaChangedListener : public IAvoidAreaChangedListener {
@@ -129,9 +131,19 @@ public:
     MOCK_METHOD1(OnMainWindowClose, void(bool&));
 };
 
+class MockIWindowWillCloseListener : public IWindowWillCloseListener {
+public:
+    MOCK_METHOD1(OnWindowWillClose, void(sptr<Window> window));
+};
+
 class MockISwitchFreeMultiWindowListener : public ISwitchFreeMultiWindowListener {
 public:
     MOCK_METHOD1(OnSwitchFreeMultiWindow, void(bool));
+};
+
+class MockIWindowCrossAxisListener : public IWindowCrossAxisListener {
+public:
+    MOCK_METHOD1(OnCrossAxisChange, void(CrossAxisState));
 };
 } // Rosen
 } // OHOS

@@ -64,6 +64,9 @@ namespace {
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeScreenDisplayMode, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
@@ -93,6 +96,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, ChangeScreenDisplayMode, Function | Sma
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, SendSensorResult, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -109,6 +115,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendSensorResult, Function | SmallTest 
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, SetOnBootAnimation, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -127,6 +136,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetOnBootAnimation, Function | SmallTes
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, RecoverWhenBootAnimationExit, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -155,6 +167,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, RecoverWhenBootAnimationExit, Function 
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, GetModeMatchStatus, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -171,7 +186,6 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, GetModeMatchStatus, Function | SmallTes
     policy.currentFoldStatus_ = FoldStatus::HALF_FOLD;
     displayMode = policy.GetModeMatchStatus();
     EXPECT_EQ(FoldDisplayMode::FULL, displayMode);
-
 
     policy.currentFoldStatus_ = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
     displayMode = policy.GetModeMatchStatus();
@@ -274,6 +288,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SendPropertyChangeResult01, Function | 
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusFullActiveRectAndTpFeature, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -290,6 +307,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusFullActiveRectAndTpFeature, Fu
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusMainActiveRectAndTpFeature, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -306,6 +326,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusMainActiveRectAndTpFeature, Fu
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusGlobalFullActiveRectAndTpFeature, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -322,6 +345,9 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusGlobalFullActiveRectAndTpFeatu
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, ReportFoldDisplayModeChange, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
@@ -342,10 +368,13 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, ReportFoldDisplayModeChange, Function |
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, GetCurrentFoldCreaseRegion, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-    
+
     sptr<FoldCreaseRegion> foldCreaseRegion;
     foldCreaseRegion = policy.GetCurrentFoldCreaseRegion();
     EXPECT_EQ(policy.currentFoldCreaseRegion_, foldCreaseRegion);
@@ -358,12 +387,107 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, GetCurrentFoldCreaseRegion, Function | 
  */
 HWTEST_F(SecondaryDisplayFoldPolicyTest, InitScreenParams, Function | SmallTest | Level3)
 {
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-    
+
     policy.InitScreenParams();
     EXPECT_FALSE(policy.onBootAnimation_);
+}
+
+/**
+ * @tc.name: SetSecondaryDisplayModeChangeStatus01
+ * @tc.desc: test function : SetSecondaryDisplayModeChangeStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SetSecondaryDisplayModeChangeStatus01, Function | SmallTest | Level3)
+{
+    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        return;
+    }
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.SetSecondaryDisplayModeChangeStatus(true);
+    EXPECT_EQ(policy.secondaryPengdingTask_, 2);
+
+    policy.SetSecondaryDisplayModeChangeStatus(false);
+    EXPECT_EQ(policy.secondaryPengdingTask_, 1);
+
+    policy.SetSecondaryDisplayModeChangeStatus(false);
+    EXPECT_EQ(policy.secondaryPengdingTask_, 0);
+}
+
+/**
+ * @tc.name: GetScreenSnapshotRect
+ * @tc.desc: test function : GetScreenSnapshotRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, GetScreenSnapshotRect, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    Drawing::Rect snapshotRect = {0, 0, 0, 0};
+    Drawing::Rect targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
+    snapshotRect = {0, 0, 2232, 1008};
+    targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::FULL;
+    snapshotRect = {0, 1136, 2232, 3184};
+    targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    snapshotRect = {0, 0, 2232, 3184};
+    targetSnapshotRect = policy.GetScreenSnapshotRect();
+    EXPECT_EQ(snapshotRect, targetSnapshotRect);
+}
+
+/**
+ * @tc.name: SetMainScreenRegion
+ * @tc.desc: test function : SetMainScreenRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecondaryDisplayFoldPolicyTest, SetMainScreenRegion, Function | SmallTest | Level3)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SecondaryDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    DMRect mainScreenRegion = {0, 0, 0, 0};
+    DMRect targetMainScreenRegion = {0, 0, 0, 0};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::MAIN;
+    mainScreenRegion = {0, 0, 0, 0};
+    targetMainScreenRegion = {0, 0, 2232, 3184};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::FULL;
+    mainScreenRegion = {0, 0, 0, 0};
+    targetMainScreenRegion = {0, 1136, 2232, 2048};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
+
+    policy.currentDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    mainScreenRegion = {0, 0, 0, 0};
+    targetMainScreenRegion = {0, 0, 2232, 3184};
+    policy.SetMainScreenRegion(mainScreenRegion);
+    EXPECT_EQ(mainScreenRegion, targetMainScreenRegion);
 }
 }
 } // namespace Rosen

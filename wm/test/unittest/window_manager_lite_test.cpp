@@ -115,7 +115,7 @@ HWTEST_F(WindowManagerLiteTest, GetFocusWindowInfo, Function | SmallTest | Level
     infosResult.uid_ = 11;
     infosResult.displayId_ = 12;
     infosResult.windowId_ = 13;
-    EXPECT_CALL(m->Mock(), GetFocusWindowInfo(_)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult), Return()));
+    EXPECT_CALL(m->Mock(), GetFocusWindowInfo(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<0>(infosResult), Return()));
     WindowManagerLite::GetInstance().GetFocusWindowInfo(infosInput);
     ASSERT_EQ(infosInput.windowId_, infosResult.windowId_);
     ASSERT_EQ(infosInput.uid_, infosResult.uid_);
@@ -932,7 +932,7 @@ HWTEST_F(WindowManagerLiteTest, RegisterPiPStateChangedListener, Function | Smal
     windowManager.pImpl_->pipStateChangedListeners_.clear();
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(nullptr));
 
-    sptr<IPiPStateChangedListener> listener = sptr<IPiPStateChangedListener>::MakeSptr();
+    sptr<IPiPStateChangedListener> listener = sptr<TestPiPStateChangedListener>::MakeSptr();
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), RegisterWindowManagerAgent(_, _)).Times(1).WillOnce(Return(WMError::WM_ERROR_NULLPTR));
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, windowManager.RegisterPiPStateChangedListener(listener));

@@ -57,6 +57,7 @@ public:
 
 private:
     FoldStatus GetNextFoldState(float angle, int hall);
+    void UpdateHallSwitchAppInfo(FoldStatus foldStatus);
     sptr<ApplicationStateObserver> applicationStateObserver_;
     bool isHallSwitchApp_ = true;
     std::vector<std::string> packageNames_;

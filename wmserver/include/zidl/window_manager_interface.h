@@ -61,6 +61,7 @@ public:
         TRANS_ID_UPDATE_LAYOUT_MODE,
         TRANS_ID_UPDATE_PROPERTY,
         TRANS_ID_GET_ACCESSIBILITY_WINDOW_INFO_ID,
+        TRANS_ID_LIST_WINDOW_INFO,
         TRANS_ID_GET_WINDOW_LAYOUT_INFO,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
         TRANS_ID_ANIMATION_SET_CONTROLLER,
@@ -100,7 +101,8 @@ public:
     virtual WMError RemoveWindow(uint32_t windowId, bool isFromInnerkits) = 0;
     virtual WMError DestroyWindow(uint32_t windowId, bool onlySelf = false) = 0;
     virtual WMError RequestFocus(uint32_t windowId) = 0;
-    virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, const Rect& rect = {0, 0, 0, 0}) = 0;
+    virtual AvoidArea GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type,
+        const Rect& rect = Rect::EMPTY_RECT) = 0;
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId) = 0;
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
         sptr<MoveDragProperty>& moveDragProperty) = 0;
@@ -118,6 +120,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) = 0;
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos) = 0;
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) = 0;
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
+        std::vector<sptr<WindowInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId,
         std::vector<sptr<WindowLayoutInfo>>& infos) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) = 0;
@@ -149,7 +153,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets) = 0;
     virtual void SetMaximizeMode(MaximizeMode maximizeMode) = 0;
     virtual MaximizeMode GetMaximizeMode() = 0;
-    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo) = 0;
+    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid) { return WMError::WM_OK; }
     virtual WSError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener) { return WSError::WS_OK; }
     virtual WSError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener)
@@ -201,14 +205,19 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
     {
         return WMError::WM_OK;
     }
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId) {}
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false) {}
     virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token) {}
+        const sptr<IRemoteObject>& token, bool isConstrainedModal = false) {}
     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect) {}
     virtual void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY) {}
     virtual WSError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide)
@@ -265,6 +274,8 @@ public:
     virtual WMError NotifyWatchFocusActiveChange(bool isActive) { return WMError::WM_OK; }
     virtual WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
         int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasOrNot) { return WMError::WM_OK; }
 };
 }
 }

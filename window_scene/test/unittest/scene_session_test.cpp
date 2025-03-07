@@ -571,9 +571,7 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info1.bundleName_ = "IsSystemSessionAboveApp01";
     info1.windowType_ = 2122;
 
-    sptr<SceneSession> sceneSession1;
-    sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
-    EXPECT_NE(sceneSession1, nullptr);
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info1, nullptr);
     ASSERT_EQ(true, sceneSession1->IsSystemSessionAboveApp());
 
     SessionInfo info2;
@@ -581,9 +579,7 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info2.bundleName_ = "IsSystemSessionAboveApp02";
     info2.windowType_ = 2104;
 
-    sptr<SceneSession> sceneSession2;
-    sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
-    EXPECT_NE(sceneSession2, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
     ASSERT_EQ(true, sceneSession2->IsSystemSessionAboveApp());
 
     SessionInfo info3;
@@ -591,9 +587,7 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info3.bundleName_ = "SCBDropdownPanel13";
     info3.windowType_ = 2109;
 
-    sptr<SceneSession> sceneSession3;
-    sceneSession3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
-    EXPECT_NE(sceneSession3, nullptr);
+    sptr<SceneSession> sceneSession3 = sptr<SceneSession>::MakeSptr(info3, nullptr);
     ASSERT_EQ(true, sceneSession3->IsSystemSessionAboveApp());
 
     SessionInfo info4;
@@ -601,10 +595,16 @@ HWTEST_F(SceneSessionTest, IsSystemSessionAboveApp01, Function | SmallTest | Lev
     info4.bundleName_ = "IsSystemSessionAboveApp04";
     info4.windowType_ = 2109;
 
-    sptr<SceneSession> sceneSession4;
-    sceneSession4 = sptr<SceneSession>::MakeSptr(info4, nullptr);
-    EXPECT_NE(sceneSession4, nullptr);
+    sptr<SceneSession> sceneSession4 = sptr<SceneSession>::MakeSptr(info4, nullptr);
     ASSERT_EQ(false, sceneSession4->IsSystemSessionAboveApp());
+
+    SessionInfo info5;
+    info5.abilityName_ = "HighZOrderGestureDock";
+    info5.bundleName_ = "SCBGestureDock21";
+    info5.windowType_ = 2106;
+
+    sptr<SceneSession> sceneSession5 = sptr<SceneSession>::MakeSptr(info5, nullptr);
+    ASSERT_EQ(true, sceneSession5->IsSystemSessionAboveApp());
 }
 
 /**
@@ -855,7 +855,7 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
     extensionInfo.persistentId = 12345;
     extensionInfo.pid = 1234;
     extensionInfo.windowRect = { 1, 2, 3, 4 };
-    sceneSession->AddModalUIExtension(extensionInfo);
+    sceneSession->AddNormalModalUIExtension(extensionInfo);
 
     auto getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     EXPECT_TRUE(getInfo);
@@ -865,12 +865,12 @@ HWTEST_F(SceneSessionTest, ModalUIExtension, Function | SmallTest | Level2)
 
     Rect windowRect = { 5, 6, 7, 8 };
     extensionInfo.windowRect = windowRect;
-    sceneSession->UpdateModalUIExtension(extensionInfo);
+    sceneSession->UpdateNormalModalUIExtension(extensionInfo);
     getInfo = sceneSession->GetLastModalUIExtensionEventInfo();
     EXPECT_TRUE(getInfo);
     EXPECT_EQ(getInfo.value().windowRect, windowRect);
 
-    sceneSession->RemoveModalUIExtension(extensionInfo.persistentId);
+    sceneSession->RemoveNormalModalUIExtension(extensionInfo.persistentId);
     EXPECT_FALSE(sceneSession->GetLastModalUIExtensionEventInfo());
 }
 
@@ -1405,6 +1405,42 @@ HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: CalcRectForStatusBar
+ * @tc.desc: CalcRectForStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CalcRectForStatusBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalcRectForStatusBar";
+    info.bundleName_ = "CalcRectForStatusBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t width = sceneSession->CalcRectForStatusBar().width_;
+    uint32_t height = sceneSession->CalcRectForStatusBar().height_;
+    EXPECT_EQ(width, 0);
+    EXPECT_EQ(height, 0);
+}
+
+/**
+ * @tc.name: InitializeMoveInputBar
+ * @tc.desc: InitializeMoveInputBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, InitializeMoveInputBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "InitializeMoveInputBar";
+    info.bundleName_ = "InitializeMoveInputBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto property = sceneSession->GetSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    property->SetDisplayId(1);
+
+    auto result = sceneSession->InitializeMoveInputBar();
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
+}
+
+/**
  * @tc.name: OnSessionEvent
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1503,27 +1539,25 @@ HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, Function | SmallTe
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     WSRect rect = {0, 0, 0, 0};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 0);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     rect = {0, 100, 0, 0};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 100);
 
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
         { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    const auto& [defaultDisplayRect, virtualDisplayRect, foldCreaseRect] =
-        PcFoldScreenManager::GetInstance().GetDisplayRects();
-    sceneSession->lastUpdatedDisplayId_ = 0;
+    sceneSession->clientDisplayId_ = 0;
     rect = {0, 100, 100, 100};
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
     EXPECT_EQ(rect.posY_, 100);
-    sceneSession->lastUpdatedDisplayId_ = 999;
+    sceneSession->clientDisplayId_ = 999;
     rect = {0, 100, 100, 100};
     auto rect2 = rect;
-    sceneSession->UpdateSessionRectPosYFromClient(rect);
-    EXPECT_EQ(rect.posY_, rect2.posY_ + defaultDisplayRect.height_ + foldCreaseRect.height_ / 2);
+    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, 0, rect);
+    EXPECT_EQ(rect.posY_, rect2.posY_);
 }
 
 /**
@@ -1771,10 +1805,14 @@ HWTEST_F(SceneSessionTest, HandleCompatibleModeMoveDrag, Function | SmallTest | 
     sceneSession->moveDragController_->moveDragProperty_.originalRect_ = rect;
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::HIDE);
     WSRect rect3 = {1, 1, 2, 1};
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 
     sceneSession->HandleCompatibleModeMoveDrag(rect2, SizeChangeReason::DRAG_MOVE);
-    ASSERT_EQ(rect2, rect3);
+    ASSERT_NE(rect2, rect3);
+    ASSERT_EQ(rect2.posX_, 2);
+    ASSERT_EQ(rect2.posY_, 2);
 }
 
 /**
@@ -1934,11 +1972,75 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | 
         isLayoutFinished = true;
         return WSError::WS_OK;
     };
-    sceneSession->specificCallback_->onUpdateAvoidAreaByType_ = [](int32_t persistentId, AvoidAreaType type) {};
-    EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(true), WSError::WS_OK);
-
     sceneSession->specificCallback_ = nullptr;
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetMousePointerDownEventStatus
+ * @tc.desc: SetMousePointerDownEventStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetMousePointerDownEventStatus, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMousePointerDownEventStatus";
+    info.bundleName_ = "SetMousePointerDownEventStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetMousePointerDownEventStatus(true);
+    EXPECT_EQ(sceneSession->GetMousePointerDownEventStatus(), true);
+}
+
+/**
+ * @tc.name: SetFingerPointerDownStatus
+ * @tc.desc: SetFingerPointerDownStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetFingerPointerDownStatus, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetFingerPointerDownStatus";
+    info.bundleName_ = "SetFingerPointerDownStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetFingerPointerDownStatus(0);
+    sceneSession->SetFingerPointerDownStatus(1);
+    auto fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 2);
+    sceneSession->RemoveFingerPointerDownStatus(0);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 1);
+
+    sceneSession->RemoveFingerPointerDownStatus(1);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 0);
+}
+
+/**
+ * @tc.name: SetUIFirstSwitch
+ * @tc.desc: SetUIFirstSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetUIFirstSwitch, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetUIFirstSwitch";
+    info.bundleName_ = "SetUIFirstSwitch";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS);
 }
 } // namespace
 } // Rosen

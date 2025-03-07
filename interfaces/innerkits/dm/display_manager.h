@@ -211,6 +211,23 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
 
     /**
+     * @brief Get the display object by id.Only for PC.
+     *
+     * @param displayId Id of the target display.
+     * @return Default display object.
+     */
+    sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
+
+    /**
+     * @brief get available area of the display.(the screen area without dock and statusbar)
+     *
+     * @param displayId Id of the target display.
+     * @param area available area of the screen.
+     * @return DMError
+     */
+    DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
+
+    /**
      * @brief Get the display object by corresponding screenId.
      *
      * @param screenId The id of the target screen.
@@ -636,11 +653,25 @@ public:
     FoldStatus GetFoldStatus();
 
     /**
+     * @brief Get current display information, including foldstatus, displaymode, rotation, and orientation information.
+     *
+     * @return information of device.
+     */
+    std::string GetDisplayCapability();
+
+    /**
      * @brief Get the display mode of the foldable device.
      *
      * @return display mode of the foldable device.
      */
     FoldDisplayMode GetFoldDisplayMode();
+
+    /**
+     * @brief Get the display mode of the foldable device for external.
+     *
+     * @return display mode of the foldable device.
+     */
+    FoldDisplayMode GetFoldDisplayModeForExternal();
 
     /**
      * @brief Change the display mode of the foldable device.
@@ -653,9 +684,10 @@ public:
      * @brief Change the display mode of the foldable device from js.
      *
      * @param mode target display mode to change.
+     * @param reason display mode change reason.
      * @return DM_OK means set success, others means set failed.
      */
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode);
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason = "");
 
     /**
      * @brief Set display scale.

@@ -35,7 +35,7 @@ public:
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD0(Destroy, WMError());
     MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
-    MOCK_METHOD2(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority));
+    MOCK_METHOD4(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
 
@@ -434,18 +434,18 @@ HWTEST_F(PictureInPictureControllerTest, SetAutoStartEnabled, Function | SmallTe
     ASSERT_EQ(true, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _, _, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     enable = false;
     pipControl->isAutoStartEnabled_ = enable;
     ASSERT_EQ(false, pipControl->isAutoStartEnabled_);
     pipControl->pipOption_->SetTypeNodeEnabled(true);
     ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _, _, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetTypeNodeEnabled(false);
     ASSERT_EQ(false, pipControl->IsTypeNodeEnabled());
-    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*(mw), SetAutoStartPiP(_, _, _, _)).WillRepeatedly(Return());
     pipControl->SetAutoStartEnabled(enable);
     pipControl->pipOption_->SetNavigationId("");
     ASSERT_EQ("", pipControl->pipOption_->GetNavigationId());
@@ -953,6 +953,81 @@ HWTEST_F(PictureInPictureControllerTest, SetXComponentController, Function | Sma
         .Times(1)
         .WillOnce(Return(XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR));
     ASSERT_EQ(WMError::WM_OK, pipControl->SetXComponentController(xComponentController));
+}
+
+/**
+ * @tc.name: RegisterPipContentListenerWithType
+ * @tc.desc: RegisterPipContentListenerWithType
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, RegisterPipContentListenerWithType, Function | SmallTest | Level2)
+{
+    sptr<MockWindow> mw = new MockWindow();
+    sptr<PipOption> option = new PipOption();
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    pipControl->pipOption_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY,
+        pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
+    pipControl->pipOption_ = option;
+    ASSERT_EQ(WMError::WM_OK, pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr));
+}
+
+/**
+ * @tc.name: UnRegisterPipContentListenerWithType
+ * @tc.desc: UnRegisterPipContentListenerWithType
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, UnRegisterPipContentListenerWithType, Function | SmallTest | Level2)
+{
+    sptr<MockWindow> mw = new MockWindow();
+    sptr<PipOption> option = new PipOption();
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    pipControl->pipOption_ = nullptr;
+    ASSERT_EQ(WMError::WM_ERROR_PIP_STATE_ABNORMALLY, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
+    pipControl->pipOption_ = option;
+    ASSERT_EQ(WMError::WM_OK, pipControl->UnRegisterPipContentListenerWithType("nodeUpdate"));
+}
+
+/**
+ * @tc.name: GetPipContentCallbackRef
+ * @tc.desc: GetPipContentCallbackRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
+{
+    sptr<MockWindow> mw = new MockWindow();
+    sptr<PipOption> option = new PipOption();
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    pipControl->pipOption_ = nullptr;
+    pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
+    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
+    pipControl->pipOption_ = option;
+    pipControl->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
+    ASSERT_EQ(nullptr, pipControl->GetPipContentCallbackRef("nodeUpdate"));
+}
+
+/**
+ * @tc.name: UpdateContentNodeRef
+ * @tc.desc: UpdateContentNodeRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, UpdateContentNodeRef, Function | SmallTest | Level2)
+{
+    sptr<MockWindow> mw = new MockWindow();
+    sptr<PipOption> option = new PipOption();
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+    pipControl->pipOption_ = nullptr;
+    napi_ref nodeRef = nullptr;
+    pipControl->UpdateContentNodeRef(nodeRef);
+    pipControl->pipOption_ = option;
+    pipControl->pipOption_->SetTypeNodeEnabled(true);
+    pipControl->UpdateContentNodeRef(nodeRef);
+    pipControl->pipOption_->SetTypeNodeEnabled(false);
+    pipControl->UpdateContentNodeRef(nodeRef);
+    pipControl->isAutoStartEnabled_ = true;
+    pipControl->UpdateContentNodeRef(nodeRef);
+    pipControl->isAutoStartEnabled_ = false;
+    ASSERT_EQ(true, pipControl->IsTypeNodeEnabled());
 }
 
 /**
