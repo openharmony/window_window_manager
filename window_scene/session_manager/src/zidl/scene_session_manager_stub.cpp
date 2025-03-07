@@ -1793,7 +1793,6 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
 
 int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "lytest start0 scensessionmanager stub GetWindowUIType");
     WindowUIType type = WindowUIType::INVALID_WINDOW;
     WMError errCode = GetWindowUIType(type);
     TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "WindowUIType:%{public}d!", static_cast<int32_t>(type));

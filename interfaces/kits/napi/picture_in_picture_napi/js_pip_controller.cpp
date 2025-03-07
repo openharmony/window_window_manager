@@ -89,7 +89,7 @@ void JsPipController::Finalizer(napi_env env, void* data, void* hint)
 napi_value JsPipController::StartPictureInPicture(napi_env env, napi_callback_info info)
 {
     JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
-    return (me != nullptr) ? me->OnPictureInPicturePossible(env, info) : nullptr;
+    return (me != nullptr) ? me->OnStartPictureInPicture(env, info) : nullptr;
 }
 
 napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_info info)

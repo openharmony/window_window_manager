@@ -340,7 +340,6 @@ public:
      * PC Window
      */
     WMError IsPcWindow(bool& isPcWindow) override;
-    WMError GetWindowUIType(WindowUIType& windowUIType) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
@@ -508,7 +507,8 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
-
+    WMError GetWindowUIType(WindowUIType& windowUIType) override;
+    
     /*
      * Multi Window
      */
