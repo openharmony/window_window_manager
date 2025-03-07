@@ -1983,11 +1983,11 @@ WSError Session::NotifyDestroy()
 void Session::SetParentSession(const sptr<Session>& session)
 {
     if (session == nullptr) {
-        WLOGFW("Session is nullptr");
+        TLOGW(WmsLogTag::WMS_SUB, "Session is nullptr");
         return;
     }
     {
-        std::unique_lock<std::shared_mutex> lock(parentSessionMutex_);
+        std::lock_guard<std::recursive_mutex> lock(parentSessionMutex_);
         parentSession_ = session;
     }
     TLOGD(WmsLogTag::WMS_SUB, "[WMSDialog][WMSSub]Set parent success, parentId: %{public}d, id: %{public}d",
@@ -1996,12 +1996,13 @@ void Session::SetParentSession(const sptr<Session>& session)
 
 sptr<Session> Session::GetParentSession() const
 {
-    std::shared_lock<std::shared_mutex> lock(parentSessionMutex_);
+    std::lock_guard<std::recursive_mutex> lock(parentSessionMutex_);
     return parentSession_;
 }
 
 sptr<Session> Session::GetMainSession() const
 {
+    std::lock_guard<std::recursive_mutex> lock(parentSessionMutex_);
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         return const_cast<Session*>(this);
     } else if (parentSession_) {
@@ -2014,6 +2015,7 @@ sptr<Session> Session::GetMainSession() const
 sptr<Session> Session::GetMainOrFloatSession() const
 {
     auto windowType = GetWindowType();
+    std::lock_guard<std::recursive_mutex> lock(parentSessionMutex_);
     if (SessionHelper::IsMainWindow(windowType) || windowType == WindowType::WINDOW_TYPE_FLOAT) {
         return const_cast<Session*>(this);
     } else if (parentSession_) {
@@ -2021,6 +2023,18 @@ sptr<Session> Session::GetMainOrFloatSession() const
     } else {
         return nullptr;
     }
+}
+
+bool Session::IsAncestorsSession(int ancestorsId) const
+{
+    if (GetSessionProperty()->GetParentPersistentId() == ancestorsId) {
+        return true;
+    }
+    auto parentSession = GetParentSession();
+    if (parentSession != nullptr) {
+        return parentSession->IsAncestorsSession(ancestorsId);
+    }
+    return false;
 }
 
 void Session::BindDialogToParentSession(const sptr<Session>& session)

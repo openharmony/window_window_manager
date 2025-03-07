@@ -456,6 +456,8 @@ protected:
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
     void DestroySubWindow();
     bool IsSubWindowMaximizeSupported() const override;
+    void UpdateSubWindowLevel(uint32_t subWindowLevel);
+
     sptr<WindowOption> windowOption_;
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
@@ -475,7 +477,6 @@ protected:
     static std::set<sptr<WindowSessionImpl>> windowExtensionSessionSet_;
     // protect windowExtensionSessionSet_
     static std::shared_mutex windowExtensionSessionMutex_;
-    static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
     bool isSystembarPropertiesSet_ = false;
     bool isIgnoreSafeAreaNeedNotify_ = false;
     bool isIgnoreSafeArea_ = false;
@@ -498,6 +499,12 @@ protected:
     {
         return windowSystemConfig_.IsFreeMultiWindowMode();
     }
+
+    /*
+     * Sub Window
+     */
+    static std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> subWindowSessionMap_;
+    static std::recursive_mutex subWindowSessionMutex_;
 
     /*
      * DFX

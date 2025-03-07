@@ -349,6 +349,11 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
 
+    /*
+     * Sub Window
+     */
+    WMError SetParentWindow(int32_t subWindowId, int32_t newParentWindowId) override;
+
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
     void InitPersistentStorage();
