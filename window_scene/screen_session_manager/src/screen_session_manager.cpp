@@ -144,6 +144,10 @@ const std::string MULTI_SCREEN_ENTER_STR = "enter";
 const bool IS_COORDINATION_SUPPORT =
     OHOS::system::GetBoolParameter("const.window.foldabledevice.is_coordination_support", false);
 
+const std::string FAULT_DESCRIPTION = "842003014";
+const std::string FAULT_SUGGESTION = "542003014";
+constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
+
 // based on the bundle_util
 inline int32_t GetUserIdByCallingUid()
 {
@@ -359,6 +363,7 @@ void ScreenSessionManager::OnStart()
     }
     TLOGI(WmsLogTag::DMS, "DMS SA AddSystemAbilityListener");
     (void)AddSystemAbilityListener(SENSOR_SERVICE_ABILITY_ID);
+    (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     screenEventTracker_.RecordEvent("Dms AddSystemAbilityListener finished.");
     TLOGI(WmsLogTag::DMS, "end");
     screenEventTracker_.RecordEvent("Dms onstart end.");
@@ -395,6 +400,9 @@ void ScreenSessionManager::OnAddSystemAbility(int32_t systemAbilityId, const std
         TLOGI(WmsLogTag::DMS, "Recover Hall sensor finished");
         screenEventTracker_.RecordEvent("Dms recover Posture and Hall sensor finished.");
 #endif
+    } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        auto task = [this]() { ScreenSessionPublish::GetInstance().RegisterLowTempSubscriber(); };
+        taskScheduler_->PostAsyncTask(task, "RegisterLowTempSubscriber");
     }
 }
 
@@ -6629,7 +6637,23 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
             agent->NotifyFoldStatusChanged(foldStatus);
         }
     }
+    if (lowTemp_ == LowTempMode::LowTempOn) {
+        ScreenSessionPublish::GetInstance().PublishSmartNotificationEvent(FAULT_DESCRIPTION, FAULT_SUGGESTION);
+    }
 #endif
+}
+
+void ScreenSessionManager::SetLowTemp(LowTempMode lowTemp)
+{
+    std::lock_guard<std::mutex> lock(lowTempMutex_);
+    if (lowTemp == LowTempMode::LowTempOn && lowTemp_ != lowTemp) {
+        TLOGI(WmsLogTag::DMS, "device enter low temperature mode.");
+        ScreenSessionPublish::GetInstance().PublishSmartNotificationEvent(FAULT_DESCRIPTION, FAULT_SUGGESTION);
+    }
+    if (lowTemp == LowTempMode::LowTempOff) {
+        TLOGI(WmsLogTag::DMS, "device exit low temperature mode.");
+    }
+    lowTemp_ = lowTemp;
 }
 
 void ScreenSessionManager::NotifyFoldAngleChanged(std::vector<float> foldAngles)
