@@ -2390,7 +2390,7 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
     }
     TLOGI(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin reason: %{public}u", reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
-        LOGI(WmsLogTag::DMS, "[UL_POWER]wakeup cannot start dream");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]wakeup cannot start dream");
         return false;
     }
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
@@ -2437,7 +2437,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     }
     TLOGI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
-        LOGI(WmsLogTag::DMS, "[UL_POWER]suspend cannot end dream");
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]suspend cannot end dream");
         return false;
     }
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
