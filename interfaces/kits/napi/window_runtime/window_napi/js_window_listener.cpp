@@ -295,7 +295,7 @@ void JsWindowListener::OnTouchOutside() const
         thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
 
@@ -330,7 +330,7 @@ void JsWindowListener::OnDialogTargetTouch() const
         thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
 
@@ -414,7 +414,7 @@ void JsWindowListener::OnWindowNoInteractionCallback()
         thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
     };
     if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
     }
 }
 
