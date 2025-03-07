@@ -1102,5 +1102,13 @@ WMError WindowAdapter::NotifyWatchFocusActiveChange(bool isActive)
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->NotifyWatchFocusActiveChange(isActive);
 }
+
+WMError WindowAdapter::GetWindowUIType(WindowUIType& windowUIType)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetWindowUIType(windowUIType);
+}
 } // namespace Rosen
 } // namespace OHOS

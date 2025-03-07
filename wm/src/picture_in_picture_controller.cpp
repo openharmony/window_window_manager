@@ -18,9 +18,10 @@
 #include <refbase.h>
 #include <transaction/rs_sync_transaction_controller.h>
 #include "picture_in_picture_manager.h"
+#include "singleton_container.h"
+#include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
-#include "singleton_container.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -33,7 +34,7 @@ namespace {
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
     const std::string STATE_CHANGE = "stateChange";
     const std::string UPDATE_NODE = "nodeUpdate";
-    const int DEFAULT_ASPECT_RATIO[] = {16, 9};
+    const int DEFAULT_ASPECT_RATIOS[] = {16, 9};
 }
 
 static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
@@ -677,8 +678,8 @@ void PictureInPictureController::UpdateWinRectByComponent()
         uint32_t contentHeight = 0;
         pipOption_->GetContentSize(contentWidth, contentHeight);
         if (contentWidth == 0 || contentHeight == 0) {
-            contentWidth = DEFAULT_ASPECT_RATIO[0];
-            contentHeight = DEFAULT_ASPECT_RATIO[1];
+            contentWidth = DEFAULT_ASPECT_RATIOS[0];
+            contentHeight = DEFAULT_ASPECT_RATIOS[1];
         }
         windowRect_.posX_ = 0;
         windowRect_.posY_ = 0;
@@ -956,5 +957,25 @@ napi_ref PictureInPictureController::GetTypeNode() const
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
 }
+
+void PictureInPictureController::GetPipPossible(bool& pipPossible)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
+        return;
+    }
+    WindowUIType type = WindowUIType::INVALID_WINDOW;
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowUIType(type);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "can't find GetWindowUIType, err: %{public}u",
+            static_cast<uint32_t>(ret));
+        return;
+    }
+    pipPossible = type == WindowUIType::PHONE_WINDOW || type == WindowUIType::PC_WINDOW ||
+        type == WindowUIType::PAD_WINDOW;
+    return;
+}
+
 } // namespace Rosen
 } // namespace OHOS
