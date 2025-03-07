@@ -1181,6 +1181,7 @@ struct SubWindowOptions {
     bool decorEnabled = false;
     bool isModal = false;
     bool isTopmost = false;
+    bool maximizeSupported = false;
     ModalityType modalityType = ModalityType::WINDOW_MODALITY;
 };
 

@@ -2470,7 +2470,10 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "maximize fail, not main window");
+        if (IsSubWindowMaximizeSupported()) {
+            return MaximizeFloating();
+        }
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "maximize fail, not main or sub window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
@@ -2520,8 +2523,10 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (!WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "SetGlobalMaximizeMode fail, not main window");
+    if (!WindowHelper::IsMainWindow(property_->GetWindowType()) && !IsSubWindowMaximizeSupported()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC,
+              "SetGlobalMaximizeMode fail, not main or sub window, id %{public}d",
+              GetPersistentId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
@@ -2562,14 +2567,14 @@ WMError WindowSceneSessionImpl::Recover()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!(WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(), WindowMode::WINDOW_MODE_FLOATING) ||
-          property_->GetCompatibleModeInPc())) {
+    if (!(WindowHelper::IsWindowModeSupported(property_->GetWindowModeSupportType(),
+        WindowMode::WINDOW_MODE_FLOATING) || property_->GetCompatibleModeInPc())) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Recover fail, already MODE_RECOVER");
@@ -2587,7 +2592,7 @@ WMError WindowSceneSessionImpl::Recover()
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
         NotifyWindowStatusChange(GetWindowMode());
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recovery is invalid on sub window");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recovery is invalid, window id: %{public}d", GetPersistentId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     return WMError::WM_OK;
@@ -2637,7 +2642,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Recover fail, already MODE_RECOVER");

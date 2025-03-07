@@ -6248,8 +6248,9 @@ napi_value JsWindow::OnMaximize(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowToken is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only support main Window");
+    if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) ||
+          windowToken_->IsSubWindowMaximizeSupported())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only support main or sub Window");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     size_t argc = FOUR_PARAMS_SIZE;

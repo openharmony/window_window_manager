@@ -1324,8 +1324,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
-        TLOGD(WmsLogTag::WMS_DECOR, "hide other buttons except close");
-        uiContent->HideWindowTitleButton(true, true, true, false);
+        uiContent->HideWindowTitleButton(true, !windowOption_->GetSubWindowMaximizeSupported(), true, false);
         return;
     }
     auto windowModeSupportType = property_->GetWindowModeSupportType();
@@ -5209,6 +5208,18 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
 {
     return state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
         state < static_cast<int32_t>(CrossAxisState::STATE_END);
+}
+
+bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
+{
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Maximize fail not subwindow");
+        return false;
+    }
+    if (windowOption_ != nullptr) {
+        return windowOption_->GetSubWindowMaximizeSupported();
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS

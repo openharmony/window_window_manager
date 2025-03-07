@@ -1359,8 +1359,14 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         return false;
     }
 
+    bool maximizeSupported = false;
+    if (!ParseJsValue(jsObject, env, "maximizeSupported", maximizeSupported)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to maximizeSupported");
+    }
+
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
+    windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }
