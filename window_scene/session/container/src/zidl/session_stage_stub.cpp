@@ -200,6 +200,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyPipSizeChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE):
             return HandleNotifyWindowAttachStateChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
+            return HandleNotifyKeyboardAnimationCompleted(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -837,6 +839,18 @@ int SessionStageStub::HandleNotifyWindowAttachStateChange(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     NotifyWindowAttachStateChange(isAttach);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    sptr<KeyboardPanelInfo> keyboardPanelInfo = data.ReadParcelable<KeyboardPanelInfo>();
+    if (keyboardPanelInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardPanelInfo is nullptr!");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyKeyboardAnimationCompleted(*keyboardPanelInfo);
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen
