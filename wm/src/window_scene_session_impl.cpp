@@ -2469,7 +2469,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
-        if (IsSubWindowMaximizeSupported(GetType())) {
+        if (IsSubWindowMaximizeSupported()) {
             return MaximizeFloating();
         }
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "maximize fail, not main or sub window");
@@ -2522,8 +2522,7 @@ WMError WindowSceneSessionImpl::MaximizeFloating()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (!WindowHelper::IsMainWindow(property_->GetWindowType()) &&
-        !IsSubWindowMaximizeSupported(property_->GetWindowType())) {
+    if (!WindowHelper::IsMainWindow(property_->GetWindowType()) && !IsSubWindowMaximizeSupported()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC,
               "SetGlobalMaximizeMode fail, not main or sub window, id %{public}d",
               GetPersistentId());
@@ -2574,7 +2573,7 @@ WMError WindowSceneSessionImpl::Recover()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Recover fail, already MODE_RECOVER");
@@ -2642,7 +2641,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported(GetType())) {
+    if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {
         if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
             property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
             TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Recover fail, already MODE_RECOVER");

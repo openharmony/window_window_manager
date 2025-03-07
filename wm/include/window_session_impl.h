@@ -448,7 +448,7 @@ protected:
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
     void DestroySubWindow();
-    bool IsSubWindowMaximizeSupported(WindowType windowType) const override;
+    bool IsSubWindowMaximizeSupported() const override;
     sptr<WindowOption> windowOption_;
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
