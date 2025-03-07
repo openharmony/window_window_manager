@@ -4231,8 +4231,7 @@ napi_value JsWindow::OnSetOutsideTouchable(napi_env env, napi_callback_info info
         task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_DEVICE_NOT_SUPPORT));
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+        TLOGE(WmsLogTag::WMS_EVENT, "napi_send_event failed");
     }
     return result;
 }
@@ -4390,8 +4389,7 @@ napi_value JsWindow::OnSetTouchable(napi_env env, napi_callback_info info)
             where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-        napiAsyncTask->Reject(env,
-            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
+        TLOGE(WmsLogTag::WMS_EVENT, "napi_send_event failed");
     }
     return result;
 }
