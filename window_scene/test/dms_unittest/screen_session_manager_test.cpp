@@ -3675,10 +3675,10 @@ HWTEST_F(ScreenSessionManagerTest, GetFoldStatus, Function | SmallTest | Level3)
 HWTEST_F(ScreenSessionManagerTest, SetLowTemp, Function | SmallTest | Level3)
 {
     ASSERT_NE(ssm_, nullptr);
-    ssm_->SetLowTemp(LowTempMode::LowTempOff);
-    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LowTempOff);
-    ssm_->SetLowTemp(LowTempMode::LowTempOn);
-    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LowTempOn);
+    ssm_->SetLowTemp(LowTempMode::LOW_TEMP_OFF);
+    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LOW_TEMP_OFF);
+    ssm_->SetLowTemp(LowTempMode::LOW_TEMP_ON);
+    ASSERT_EQ(ssm_->lowTemp_, LowTempMode::LOW_TEMP_ON);
 }
 
 /**

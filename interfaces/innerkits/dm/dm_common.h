@@ -470,8 +470,8 @@ enum class MultiScreenMode : uint32_t {
  */
 enum class LowTempMode: int32_t {
     UNKNOWN = -1,
-    LowTempOff = 0,
-    LowTempOn = 1,
+    LOW_TEMP_OFF = 0,
+    LOW_TEMP_ON = 1,
 };
 
 /**
