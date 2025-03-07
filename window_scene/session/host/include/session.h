@@ -628,6 +628,7 @@ public:
     sptr<Session> GetMainSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
+    bool IsAncestorsSession(int ancestorsId) const;
 
     /**
      * Window Property
@@ -812,9 +813,13 @@ protected:
     bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
-    mutable std::shared_mutex parentSessionMutex_;
-    sptr<Session> parentSession_;
     sptr<IWindowEventChannel> windowEventChannel_;
+
+    /*
+     * Sub Window
+     */
+    mutable std::recursive_mutex parentSessionMutex_;
+    sptr<Session> parentSession_;
 
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;

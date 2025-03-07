@@ -5394,6 +5394,7 @@ WSError SceneSessionManager::GetSpecifiedSessionDumpInfo(std::string& dumpInfo, 
         << session->GetScaleX() << ", " << session->GetScaleY() << ", "
         << session->GetPivotX() << ", " << session->GetPivotY()
         << " ]" << std::endl;
+    oss << "ParentWindowId: " << session->GetParentPersistentId() << std::endl;
     dumpInfo.append(oss.str());
 
     DumpSessionElementInfo(session, params, dumpInfo);
@@ -13332,5 +13333,53 @@ void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId
         return;
     }
     sceneSession->RemoveLifeCycleTask(taskType);
+}
+
+WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newParentWindowId)
+{
+    return taskScheduler_->PostSyncTask([this, subWindowId, newParentWindowId, where = __func__] {
+        auto subSession = GetSceneSession(subWindowId);
+        if (!subSession || !WindowHelper::IsSubWindow(subSession->GetWindowType())) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s subSession is nullptr or type invalid", where);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        int32_t oldParentWindowId = subSession->GetParentPersistentId();
+        auto oldParentSession = GetSceneSession(oldParentWindowId);
+        if (oldParentSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s oldParentSession is nullptr", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        auto newParentSession = GetSceneSession(newParentWindowId);
+        if (newParentSession == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession is nullptr", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        TLOGND(WmsLogTag::WMS_SUB, "%{public}s subWindowId: %{public}d oldParentWindowId: %{public}d "
+            "newParentWindowId: %{public}d", where, subWindowId, oldParentWindowId, newParentWindowId);
+        auto windowType = newParentSession->GetWindowType();
+        if (!WindowHelper::IsMainWindow(windowType) &&
+            !WindowHelper::IsFloatOrSubWindow(windowType)) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession window type invalid", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        if (newParentSession->IsAncestorsSession(subWindowId)) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession is subsession ancestor", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        uint32_t oldSubWindowLevel = oldParentSession->GetSessionProperty()->GetSubWindowLevel();
+        uint32_t newSubWindowLevel = newParentSession->GetSessionProperty()->GetSubWindowLevel();
+        if (oldSubWindowLevel < newSubWindowLevel &&
+            subSession->GetMaxSubWindowLevel() + newSubWindowLevel > MAX_SUB_WINDOW_LEVEL) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession sub level limit", where);
+            return WMError::WM_ERROR_INVALID_PARENT;
+        }
+        subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+        oldParentSession->RemoveSubSession(subWindowId);
+        newParentSession->AddSubSession(subSession);
+        subSession->SetParentSession(newParentSession);
+        subSession->SetParentPersistentId(newParentWindowId);
+        subSession->UpdateSubWindowLevel(newSubWindowLevel + 1);
+        return WMError::WM_OK;
+    });
 }
 } // namespace OHOS::Rosen

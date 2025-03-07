@@ -211,6 +211,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleShiftAppWindowPointerEvent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
             return HandleGetWindowUIType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_PARENT_WINDOW):
+            return HandleSetParentWindow(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -367,6 +369,28 @@ int SceneSessionManagerStub::HandleDestroyAndDisconnectSpcificSessionWithDetachC
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     const WSError ret = DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId, callback);
     reply.WriteUint32(static_cast<uint32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetParentWindow(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t subWindowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(subWindowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "read subWindowId failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t newParentWindowId = INVALID_WINDOW_ID;
+    if (!data.ReadInt32(newParentWindowId)) {
+        TLOGE(WmsLogTag::WMS_SUB, "read newParentWindowId failed");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_SUB, "subWindowId: %{public}d, newParentWindowId: %{public}d",
+        subWindowId, newParentWindowId);
+    WMError errCode = SetParentWindow(subWindowId, newParentWindowId);
+    if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SUB, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

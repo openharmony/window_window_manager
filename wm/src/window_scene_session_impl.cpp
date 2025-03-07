@@ -221,7 +221,9 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
     // update subWindowSessionMap_
     auto extensionWindow = FindExtensionWindowWithContext();
     if (extensionWindow != nullptr) {
-        subWindowSessionMap_[extensionWindow->GetPersistentId()].push_back(this);
+        auto parentWindowId = extensionWindow->GetPersistentId();
+        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+        subWindowSessionMap_[parentWindowId].push_back(this);
     } else {
         TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
             property_->GetWindowName().c_str());
@@ -299,13 +301,17 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         property_->SetDisplayId(parentSession->GetDisplayId());
         // set parent persistentId
-        property_->SetParentPersistentId(parentSession->GetPersistentId());
+        auto parentWindowId = parentSession->GetPersistentId();
+        property_->SetParentPersistentId(parentWindowId);
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        // update subWindowSessionMap_
-        subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
+        {
+            std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+            // update subWindowSessionMap_
+            subWindowSessionMap_[parentWindowId].push_back(this);
+        }
         SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
@@ -579,6 +585,101 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->GetWindowName().c_str(), property_->GetPersistentId(),
         state_, GetWindowMode(), property_->GetDisplayId());
     return ret;
+}
+
+void WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId, sptr<WindowSessionImpl>& newParentWindow)
+{
+    auto newParentWindowId = newParentWindow->GetProperty()->GetPersistentId();
+    auto subWindowId = property_->GetPersistentId();
+    {
+        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+        auto subIter = subWindowSessionMap_.find(oldParentWindowId);
+        if (subIter != subWindowSessionMap_.end()) {
+            auto& subWindows = subIter->second;
+            for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
+                auto subWindow = *iter;
+                if (subWindow != nullptr && subWindow->GetPersistentId() == subWindowId) {
+                    subWindows.erase(iter);
+                    break;
+                }
+            }
+        }
+        subWindowSessionMap_[newParentWindowId].push_back(this);
+    }
+    property_->SetParentPersistentId(newParentWindowId);
+    UpdateSubWindowLevel(newParentWindow->GetProperty()->GetSubWindowLevel() + 1);
+    if (state_ == WindowState::STATE_SHOWN &&
+        newParentWindow->GetWindowState() == WindowState::STATE_HIDDEN) {
+        UpdateSubWindowStateAndNotify(newParentWindowId, WindowState::STATE_HIDDEN);
+    }
+}
+
+WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SUB, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type %{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    auto subWindowId = GetPersistentId();
+    auto oldParentWindowId = property_->GetParentPersistentId();
+    if (oldParentWindowId == newParentWindowId || subWindowId == newParentWindowId) {
+        TLOGE(WmsLogTag::WMS_SUB, "newParentWindowId is the same as oldParentWindowId or subWindowId");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    auto newParentWindow = GetWindowWithId(newParentWindowId);
+    if (newParentWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "find not new parent window By Id: %{public}d", newParentWindowId);
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    auto windowType = newParentWindow->GetType();
+    if (!WindowHelper::IsMainWindow(windowType) &&
+        !WindowHelper::IsFloatOrSubWindow(windowType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "new parent window type invalid");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "subWindowId: %{public}d, oldParentWindowId: %{public}d, "
+        "newParentWindowId: %{public}d", subWindowId, oldParentWindowId, newParentWindowId);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().SetParentWindow(subWindowId, newParentWindowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "set parent window failed errCode: %{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    SetParentWindowInner(oldParentWindowId, newParentWindow);
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::GetParentWindow(sptr<Window>& parentWindow)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SUB, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (!IsPcWindow()) {
+        TLOGE(WmsLogTag::WMS_SUB, "device not support");
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "called by invalid window type %{public}d", GetType());
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (property_->GetIsUIExtFirstSubWindow()) {
+        TLOGE(WmsLogTag::WMS_SUB, "UIExtension sub window not get parent window");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    parentWindow = FindWindowById(property_->GetParentPersistentId());
+    if (parentWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "parentWindow is nullptr");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    return WMError::WM_OK;
 }
 
 void WindowSceneSessionImpl::InitSystemSessionDragEnable()
@@ -3250,10 +3351,16 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
         uiContent->UpdateConfiguration(configuration);
     }
     UpdateDefaultStatusBarColor();
-    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
-        return;
+    auto persistentId = GetPersistentId();
+    std::vector<sptr<WindowSessionImpl>> subWindows;
+    {
+        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+        if (subWindowSessionMap_.count(persistentId) == 0) {
+            return;
+        }
+        subWindows = subWindowSessionMap_.at(persistentId);
     }
-    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
+    for (auto& subWindowSession : subWindows) {
         subWindowSession->UpdateConfiguration(configuration);
     }
 }
