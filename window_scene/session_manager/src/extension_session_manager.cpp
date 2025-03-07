@@ -207,7 +207,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
                 where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        auto extSessionInfo = SetAbilitySessionInfo(extSession);
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED;
@@ -239,7 +238,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sp
                 where, persistentId);
             return;
         }
-        auto extSessionInfo = SetAbilitySessionInfo(extSession);
         AAFwk::AbilityManagerClient::GetInstance()->TerminateUIExtensionAbility(extSessionInfo);
     };
     taskScheduler_->PostAsyncTask(task, __func__);
