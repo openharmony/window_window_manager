@@ -272,6 +272,59 @@ public:
     static ani_status CallAniMethodVoid(ani_env* env, ani_object object, ani_class cls,
         const char* method, const char* signature, ...);
     static ani_status GetAniString(ani_env* env, const std::string& str, ani_string* result);
+    static ani_object CreateWindowsProperties(ani_env* env, const sptr<Window>& window);
+    static uint32_t GetColorFromAni(ani_env* env, const char* name,
+        uint32_t defaultColor, bool& flag, const ani_object& aniObject);
+    static bool SetWindowStatusBarContentColor(ani_env* env, ani_object aniObject,
+        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>&
+        propertyFlags);
+    static bool SetWindowNavigationBarContentColor(ani_env* env, ani_object aniObject,
+        std::map<WindowType, SystemBarProperty>& properties, std::map<WindowType, SystemBarPropertyFlag>&
+        propertyFlags);
+    static bool SetSystemBarPropertiesFromAni(ani_env* env,
+        std::map<WindowType, SystemBarProperty>& windowBarProperties,
+        std::map<WindowType, SystemBarPropertyFlag>& windowPropertyFlags,
+        const ani_object& aniProperties,
+        const sptr<Window>& window);
+    static bool SetSpecificSystemBarEnabled(ani_env* env,
+        std::map<WindowType, SystemBarProperty>& systemBarProperties,
+        ani_string aniName,
+        ani_boolean aniEnable,
+        ani_boolean aniEnableAnimation);
+
+private:
+    static void SetSystemPropertiesWindowRect(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesDrawableRect(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowType(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowIsLayoutFullScreen(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowIsFullScreen(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowTouchable(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowFousable(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowName(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowIsPrivacyMode(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowIsKeepScreenOn(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowBrightness(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowIsTransparent(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertieswindowIsRoundCorner(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesWindowDimBehindValue(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertieswindowId(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
+    static void SetSystemPropertiesdisplayId(ani_env* env,
+        const sptr<Window>& window, ani_object& systemProperties);
 };
 }
 }
