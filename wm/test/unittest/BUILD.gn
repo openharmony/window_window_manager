@@ -60,6 +60,7 @@ group("unittest") {
     ":wm_window_session_impl_test4",
     ":wm_window_stub_test",
     ":wm_window_test",
+    ":wm_window_input_intercept_test",
     "special_window:window_scene_session_impl_special_window_test",
     "ui_extension:wm_extension_window_impl_test",
     "ui_extension:wm_window_extension_session_impl_test",
@@ -722,6 +723,21 @@ ohos_unittest("wm_oh_window_test") {
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
+  ]
+}
+
+ohos_unittest("wm_window_input_intercept_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_input_intercept_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common"
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }
 
