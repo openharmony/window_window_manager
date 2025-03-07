@@ -14,15 +14,14 @@
  */
 
 #include "picture_in_picture_controller.h"
-#include "parameters.h"
 
 #include <refbase.h>
 #include <transaction/rs_sync_transaction_controller.h>
+#include "window_adapter.h"
 #include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "singleton_container.h"
-#include "window_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
