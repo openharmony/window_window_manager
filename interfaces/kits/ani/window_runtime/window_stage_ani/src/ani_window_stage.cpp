@@ -20,6 +20,7 @@
 
 #include "ani.h"
 #include "ani_window.h"
+#include "ani_window_utils.h"
 #include "window_manager_hilog.h"
 #include "permission.h"
 #include "window_scene.h"
@@ -40,7 +41,7 @@ AniWindowStage::AniWindowStage(const std::shared_ptr<Rosen::WindowScene>& window
 }
 AniWindowStage::~AniWindowStage()
 {
-    TLOGE(WmsLogTag::DEFAULT, "Ani WindowStage died");
+    TLOGE(WmsLogTag::DEFAULT, "[ANI] Ani WindowStage died");
 }
 
 void AniWindowStage::LoadContent(ani_env* env, const std::string& content)
@@ -92,46 +93,46 @@ ani_object CreateAniWindowStage(ani_env* env, std::shared_ptr<Rosen::WindowScene
 __attribute__((no_sanitize("cfi")))
 {
     if (env == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]null env");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
         return nullptr;
     }
-    TLOGD(WmsLogTag::DEFAULT, "[ANI]create wstage");
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] create wstage");
 
     ani_status ret;
     ani_class cls = nullptr;
     if ((ret = env->FindClass("L@ohos/window/window/WindowStageInternal;", &cls)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]null env %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
         return cls;
     }
 
     std::unique_ptr<AniWindowStage> windowStage = std::make_unique<AniWindowStage>(windowScene);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI]native obj %{public}p", windowStage.get());
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] native obj %{public}p", windowStage.get());
 
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]get field fail %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] get field fail %{public}u", ret);
         return nullptr;
     }
 
     ani_method initFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]get ctor fail %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
     ani_object obj = nullptr;
     if ((ret = env->Object_New(cls, initFunc, &obj)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]obj new fail %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] obj new fail %{public}u", ret);
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]get ctor fail %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(windowStage.get()));
     localObjs.insert(std::pair(obj, windowStage.release()));
 
-    TLOGD(WmsLogTag::DEFAULT, "[ANI]window stage created  %{public}p", reinterpret_cast<void*>(obj));
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] window stage created  %{public}p", reinterpret_cast<void*>(obj));
     return obj;
 }
 
@@ -140,12 +141,12 @@ AniWindowStage* GetWindowStageFromEnv(ani_env* env, ani_class cls, ani_object ob
     ani_field nativeObjName {};
     ani_status ret;
     if ((ret = env->Class_FindField(cls, "nativeObj", &nativeObjName)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]obj fetch field %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] obj fetch field %{public}u", ret);
         return nullptr;
     }
     ani_long nativeObj {};
     if ((ret = env->Object_GetField_Long(obj, nativeObjName, &nativeObj)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]obj fetch long %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] obj fetch long %{public}u", ret);
         return nullptr;
     }
     return reinterpret_cast<AniWindowStage*>(nativeObj);
@@ -161,7 +162,7 @@ static ani_int WindowStageLoadContent(ani_env* env, ani_object obj,
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     std::string contentStr;
     GetStdString(env, content, contentStr);
-    TLOGD(WmsLogTag::DEFAULT, "[ANI]loadcontent 0x%{public}p: %{public}s", windowStage, contentStr.c_str());
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] loadcontent 0x%{public}p: %{public}s", windowStage, contentStr.c_str());
     windowStage->LoadContent(env, contentStr);
     return (ani_int)0u;
 }
@@ -210,7 +211,7 @@ static ani_int SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeO
 static ani_object WindowStageCreate(ani_env* env, ani_long scene)
 {
     using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::DEFAULT, "[ANI]create windowstage with scene 0x%{public}p %{public}d",
+    TLOGD(WmsLogTag::DEFAULT, "[ANI] create windowstage with scene 0x%{public}p %{public}d",
         reinterpret_cast<void*>(env), (int32_t)scene);
     std::shared_ptr<WindowScene> scenePtr;
     return CreateAniWindowStage(env, scenePtr); // just for test
@@ -219,10 +220,11 @@ static ani_object WindowStageCreate(ani_env* env, ani_long scene)
 static ani_object WindowGetMainWindow(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     using namespace OHOS::Rosen;
-    TLOGD(WmsLogTag::DEFAULT, "[ANI]GetMainWindow");
+    TLOGD(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (windowStage == nullptr) {
-        TLOGD(WmsLogTag::DEFAULT, "[ANI]windowStage is nullptr");
+    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] windowStage is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     return windowStage->GetMainWindow(env);
 }
@@ -234,13 +236,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_status ret;
     ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]null env");
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] null env");
         return ANI_NOT_FOUND;
     }
 
     ani_class cls = nullptr;
     if ((ret = env->FindClass("L@ohos/window/window/WindowStageInternal;", &cls)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]can't find class %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] can't find class %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array methods = {
@@ -251,7 +253,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowGetMainWindow)},
     };
     if ((ret = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]bind fail %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind fail %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     *result = ANI_VERSION_1;
@@ -259,7 +261,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     // just for test
     ani_namespace ns;
     if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]find ns %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array functions = {
@@ -267,7 +269,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(WindowStageCreate)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]bind ns func %{public}u", ret);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] bind ns func %{public}u", ret);
         return ANI_NOT_FOUND;
     }
 
