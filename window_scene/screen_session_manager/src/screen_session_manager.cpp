@@ -8615,6 +8615,11 @@ bool ScreenSessionManager::GetIsRealScreen(ScreenId screenId)
 
 DMError ScreenSessionManager::SetSystemKeyboardOn(bool isOn)
 {
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
 #ifdef FOLD_ABILITY_ENABLE
     SuperFoldStateManager::GetInstance().SetSystemKeyboardOn(isOn);
     return DMError::DM_OK;
