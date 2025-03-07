@@ -6637,7 +6637,7 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
             agent->NotifyFoldStatusChanged(foldStatus);
         }
     }
-    if (lowTemp_ == LowTempMode::LowTempOn) {
+    if (lowTemp_ == LowTempMode::LOW_TEMP_ON) {
         ScreenSessionPublish::GetInstance().PublishSmartNotificationEvent(FAULT_DESCRIPTION, FAULT_SUGGESTION);
     }
 #endif
@@ -6646,11 +6646,11 @@ void ScreenSessionManager::NotifyFoldStatusChanged(FoldStatus foldStatus)
 void ScreenSessionManager::SetLowTemp(LowTempMode lowTemp)
 {
     std::lock_guard<std::mutex> lock(lowTempMutex_);
-    if (lowTemp == LowTempMode::LowTempOn && lowTemp_ != lowTemp) {
+    if (lowTemp == LowTempMode::LOW_TEMP_ON && lowTemp_ != lowTemp) {
         TLOGI(WmsLogTag::DMS, "device enter low temperature mode.");
         ScreenSessionPublish::GetInstance().PublishSmartNotificationEvent(FAULT_DESCRIPTION, FAULT_SUGGESTION);
     }
-    if (lowTemp == LowTempMode::LowTempOff) {
+    if (lowTemp == LowTempMode::LOW_TEMP_OFF) {
         TLOGI(WmsLogTag::DMS, "device exit low temperature mode.");
     }
     lowTemp_ = lowTemp;
