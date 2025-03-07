@@ -156,6 +156,8 @@ DMError MultiScreenManager::PhysicalScreenUniqueSwitch(const std::vector<ScreenI
             displayNode->RemoveFromTree();
         }
         screenSession->ReleaseDisplayNode();
+        ScreenProperty screenProperty = screenSession->GetScreenProperty();
+        screenSession->SetVirtualPixelRatio(screenProperty.GetDefaultDensity());
         RSDisplayNodeConfig config = { screenSession->screenId_ };
         screenSession->CreateDisplayNode(config);
         ScreenSessionManager::GetInstance().OnVirtualScreenChange(physicalScreenId, ScreenEvent::CONNECTED);
