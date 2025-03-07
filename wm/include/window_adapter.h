@@ -165,6 +165,7 @@ public:
     virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+    virtual WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy);
     virtual WMError GetWindowUIType(WindowUIType& windowUIType);
 
 private:

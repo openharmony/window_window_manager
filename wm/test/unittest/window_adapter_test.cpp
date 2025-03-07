@@ -871,6 +871,21 @@ HWTEST_F(WindowAdapterTest, GetAppDragResizeType, Function | SmallTest | Level2)
     auto err = windowAdapter.GetAppDragResizeType(bundleName, dragResizeType);
     ASSERT_EQ(err, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: WindowAdapter/SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, SetAppKeyFramePolicy, Function | SmallTest | Level2)
+{
+    WindowAdapter windowAdapter;
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    auto err = windowAdapter.SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(err, WMError::WM_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

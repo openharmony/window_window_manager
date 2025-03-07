@@ -2484,6 +2484,25 @@ HWTEST_F(SceneSessionManagerTest, GetAppDragResizeType, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: test function : SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetAppKeyFramePolicy, Function | SmallTest | Level3)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test1";
+    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    ASSERT_EQ(ssm_->SetAppKeyFramePolicy(info.bundleName_, keyFramePolicy), WMError::WM_OK);
+}
+
+/**
  * @tc.name: BuildCancelPointerEvent
  * @tc.desc: test function : BuildCancelPointerEvent
  * @tc.type: FUNC

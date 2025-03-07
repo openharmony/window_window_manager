@@ -29,6 +29,7 @@
 #include <transaction/rs_sync_transaction_controller.h>
 #include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_canvas_node.h>
 
 #include "proxy/include/window_info.h"
 
@@ -73,6 +74,7 @@ constexpr WSRectF VELOCITY_RELOCATION_TO_BOTTOM = {0.0f, 10.0f, 0.0f, 0.0f};
 constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
+constexpr int32_t POW_DOUBLE = 2;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -3114,6 +3116,10 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
     }
     UpdateSizeChangeReason(reason);
     if (reason != SizeChangeReason::DRAG_MOVE) {
+        if (KeyFrameNotifyFilter(rect, reason)) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "filter by KeyFrameNotifyFilter: %{public}d", reason);
+            return;
+        }
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
         nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
@@ -3342,6 +3348,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason)
         OnSessionEvent(SessionEvent::EVENT_DRAG);
         return;
     }
+    UpdateKeyFrameState(reason, rect);
     moveDragController_->SetTargetRect(rect);
     TLOGD(WmsLogTag::WMS_LAYOUT, "Rect: [%{public}d, %{public}d, %{public}u, %{public}u], reason: %{public}d, "
         "isCompatibleMode: %{public}d",
@@ -3374,6 +3381,168 @@ bool SceneSession::IsDragResizeWhenEnd(SizeChangeReason reason)
         WindowHelper::IsMainWindow(property->GetWindowType());
     return reason == SizeChangeReason::DRAG && isPcOrPcModeMainWindow &&
         GetDragResizeTypeDuringDrag() == DragResizeType::RESIZE_WHEN_DRAG_END;
+}
+
+WSError SceneSession::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    if (keyFrameCloneNode_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "keyFrameCloneNode_ already exist");
+        return WSError::WS_OK;
+    }
+    auto surfaceNode = GetSurfaceNode();
+    if (!rsCanvasNode || !surfaceNode || !sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    keyFrameCloneNode_ = rsCanvasNode;
+    keyFrameCloneNode_->SetBounds(0, 0, winRect_.width_, winRect_.height_);
+    keyFrameCloneNode_->SetFrame(0, 0, winRect_.width_, winRect_.height_);
+    surfaceNode->AddChild(keyFrameCloneNode_, -1);
+    sessionStage_->LinkKeyFrameCanvasNode(keyFrameCloneNode_);
+    return WSError::WS_OK;
+}
+
+void SceneSession::SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    keyFramePolicy_ = keyFramePolicy;
+    keyFramePolicy_.running_ = keyFramePolicy.running_;
+}
+
+WSError SceneSession::GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "running %{public}d", keyFramePolicy_.running_);
+    keyFramePolicy = keyFramePolicy_;
+    if (keyFramePolicy_.running_ && reason_ == SizeChangeReason::DRAG_END) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stop");
+        keyFramePolicy_.running_ = false;
+    }
+    return WSError::WS_OK;
+}
+
+void SceneSession::UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    if (!moveDragController_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "no moveDragController");
+        return;
+    }
+    uint64_t timeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    if (reason == SizeChangeReason::DRAG_START && moveDragController_->GetStartDragFlag()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "key frame start check");
+        if (!keyFramePolicy_.enabled() || GetAppDragResizeType() == DragResizeType::RESIZE_WHEN_DRAG_END) {
+            keyFramePolicy_.running_ = false;
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame start");
+        keyFramePolicy_.running_ = true;
+        keyFrameAnimating_ = false;
+        lastKeyFrameStamp_ = timeStamp;
+        lastKeyFrameRect_ = rect;
+        keyFrameVsyncRequestStamp_ = timeStamp;
+        lastKeyFrameDragStamp_ = timeStamp;
+        keyFrameDragPauseNoticed_ = false;
+        RequestKeyFrameNextVsync(keyFrameVsyncRequestStamp_, 0);
+        return;
+    }
+    if (!keyFramePolicy_.running_ || !keyFrameCloneNode_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "key frame not start");
+        return;
+    }
+    if (reason == SizeChangeReason::DRAG) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "reset gravity and resize clone node");
+        lastKeyFrameDragStamp_ = timeStamp;
+        keyFrameDragPauseNoticed_ = false;
+        SetFrameGravity(Gravity::DEFAULT);
+        keyFrameCloneNode_->SetBounds(0, 0, rect.width_, rect.height_);
+        keyFrameCloneNode_->SetFrame(0, 0, rect.width_, rect.height_);
+        RSTransaction::FlushImplicitTransaction();
+    } else if (reason == SizeChangeReason::DRAG_END) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "key frame stopping");
+        keyFrameCloneNode_ = nullptr;
+    }
+}
+
+void SceneSession::RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count)
+{
+    std::shared_ptr<VsyncCallback> callback = std::make_shared<VsyncCallback>();
+    const char* const where = __func__;
+    callback->onCallback = [weakThis = wptr(this), requestStamp, count, where](int64_t, int64_t) {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is nullptr", where);
+            return;
+        }
+        session->OnKeyFrameNextVsync(count);
+        session->RequestKeyFrameNextVsync(requestStamp, count + 1);
+    };
+    if (keyFramePolicy_.running_ && requestNextVsyncFunc_ && requestStamp == keyFrameVsyncRequestStamp_) {
+        requestNextVsyncFunc_(callback);
+    } else {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s stop", where);
+    }
+}
+
+void SceneSession::OnKeyFrameNextVsync(uint64_t count)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "get vsync %{public}" PRIu64, count);
+    uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    uint64_t duration = nowTimeStamp - lastKeyFrameDragStamp_;
+    if (!keyFrameDragPauseNoticed_ && duration >= keyFramePolicy_.interval_) {
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "to notice for key frame drag paused");
+        keyFrameDragPauseNoticed_ = true;
+        lastKeyFrameDragStamp_ = nowTimeStamp;
+        NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+    }
+}
+
+bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason)
+{
+    if (!keyFramePolicy_.running_) {
+        return false;
+    }
+    if (reason == SizeChangeReason::DRAG_START) {
+        NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+        return true;
+    }
+    if (reason != SizeChangeReason::DRAG) {
+        return false;
+    }
+    if (keyFrameAnimating_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "filter for animating");
+        return true;
+    }
+    bool isKeyFrame = false;
+    uint64_t nowTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    uint64_t interval = nowTimeStamp - lastKeyFrameStamp_;
+    bool intervalCheckPass = interval >= keyFramePolicy_.interval_;
+    bool distanceCheckPass = false;
+    double distance = 0;
+    if (keyFramePolicy_.distance_ > 0) {
+        distance = sqrt(pow(rect.width_ - lastKeyFrameRect_.width_, POW_DOUBLE) +
+                        pow(rect.height_ - lastKeyFrameRect_.height_, POW_DOUBLE));
+        distanceCheckPass = distance >= keyFramePolicy_.distance_;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "key frame checking: %{public}" PRIu64 "[%{public}d], %{public}f[%{public}d]",
+        interval, intervalCheckPass, distance, distanceCheckPass);
+    if (intervalCheckPass || distanceCheckPass) {
+        isKeyFrame = true;
+        lastKeyFrameStamp_ = nowTimeStamp;
+        lastKeyFrameRect_ = rect;
+        keyFrameAnimating_ = true;
+    }
+    return !isKeyFrame;
+}
+
+WSError SceneSession::KeyFrameAnimateEnd()
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    keyFrameAnimating_ = false;
+    return WSError::WS_OK;
 }
 
 /** @note @window.drag */

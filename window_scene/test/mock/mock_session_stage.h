@@ -78,6 +78,7 @@ public:
     MOCK_METHOD1(SetDragActivated, WSError(bool dragActivated));
     MOCK_METHOD1(NotifyWindowCrossAxisChange, void(CrossAxisState state));
     MOCK_METHOD3(NotifyPipWindowSizeChange, WSError(uint32_t width, uint32_t height, double scale));
+    MOCK_METHOD1(LinkKeyFrameCanvasNode, WSError(std::shared_ptr<RSCanvasNode>& rsCanvasNode));
 };
 } // namespace Rosen
 } // namespace OHOS

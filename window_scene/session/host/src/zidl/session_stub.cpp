@@ -17,6 +17,7 @@
 
 #include "ability_start_setting.h"
 #include <ipc_types.h>
+#include <ui/rs_canvas_node.h>
 #include <ui/rs_surface_node.h>
 #include "want.h"
 #include "pointer_event.h"
@@ -250,6 +251,12 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyWindowAttachStateListenerRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FOLLOW_PARENT_LAYOUT_ENABLED):
             return HandleSetFollowParentWindowLayoutEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_KEY_FRAME_POLICY):
+            return HandleGetKeyFramePolicy(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END):
+            return HandleKeyFrameAnimateEnd(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE):
+            return HandleUpdateKeyFrameCloneNode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED):
             return HandleNotifyKeyboardDidShowRegistered(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED):
@@ -1508,6 +1515,40 @@ int SessionStub::HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, M
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    KeyFramePolicy keyFramePolicy;
+    const WSError errCode = GetKeyFramePolicy(keyFramePolicy);
+    if (!reply.WriteParcelable(&keyFramePolicy)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write keyFramePolicy failed");
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    const WSError errCode = KeyFrameAnimateEnd();
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "In");
+    auto rsCanvasNode = RSCanvasNode::Unmarshalling(data);
+    if (rsCanvasNode == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
+        return ERR_INVALID_DATA;
+    }
+    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

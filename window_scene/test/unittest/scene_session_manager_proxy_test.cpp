@@ -1160,6 +1160,24 @@ HWTEST_F(sceneSessionManagerProxyTest, GetAppDragResizeType, Function | SmallTes
 }
 
 /**
+ * @tc.name: SetAppKeyFramePolicy
+ * @tc.desc: SetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, SetAppKeyFramePolicy, Function | SmallTest | Level2)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_TRUE(sceneSessionManagerProxy != nullptr);
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    WMError res = sceneSessionManagerProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+    ASSERT_EQ(WMError::WM_OK, res);
+}
+
+/**
  * @tc.name: GetFocusSessionToken
  * @tc.desc: GetFocusSessionToken
  * @tc.type: FUNC

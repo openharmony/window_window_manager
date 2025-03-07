@@ -188,6 +188,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetSupportEnterWaterfallMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_EXTENSION_DATA):
             return HandleExtensionHostData(data, reply, option);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_LINK_KEYFRAME_CANVAS_NODE):
+            return HandleLinkKeyFrameCanvasNode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_CONTAINER_MODAL_EVENT):
             return HandleSendContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
@@ -764,6 +766,18 @@ int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
     static_cast<void>(SendExtensionData(data, reply, option));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleLinkKeyFrameCanvasNode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    auto rsCanvasNode = RSCanvasNode::Unmarshalling(data);
+    if (!rsCanvasNode) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
+        return ERR_INVALID_DATA;
+    }
+    LinkKeyFrameCanvasNode(rsCanvasNode);
     return ERR_NONE;
 }
 

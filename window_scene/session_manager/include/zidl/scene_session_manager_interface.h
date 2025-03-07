@@ -127,6 +127,7 @@ public:
         TRANS_ID_GET_GLOBAL_DRAG_RESIZE_TYPE,
         TRANS_ID_SET_APP_DRAG_RESIZE_TYPE,
         TRANS_ID_GET_APP_DRAG_RESIZE_TYPE,
+        TRANS_ID_SET_APP_KEY_FRAME_POLICY,
         TRANS_ID_WATCH_GESTURE_CONSUME_RESULT,
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
@@ -368,6 +369,8 @@ public:
         DragResizeType dragResizeType) override { return WMError::WM_OK; }
     WMError GetAppDragResizeType(const std::string& bundleName,
         DragResizeType& dragResizeType) override { return WMError::WM_OK; }
+    WMError SetAppKeyFramePolicy(const std::string& bundleName,
+        const KeyFramePolicy& keyFramePolicy) override { return WMError::WM_OK; }
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId,
         int32_t targetPersistentId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,

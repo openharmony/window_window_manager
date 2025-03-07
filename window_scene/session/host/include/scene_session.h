@@ -22,6 +22,7 @@
 #include <pipeline/rs_node_map.h>
 #include <modifier/rs_property.h>
 #include <modifier/rs_property_modifier.h>
+#include <ui/rs_canvas_node.h>
 
 #include "display_manager.h"
 #include "session/host/include/session.h"
@@ -607,6 +608,15 @@ public:
     void SetWindowMovingCallback(NotifyWindowMovingFunc&& func);
     DMRect CalcRectForStatusBar();
     WSError SetMoveAvailableArea(DisplayId displayId);
+    // KeyFrame
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
+    void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
+    WSError GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
+    void UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect);
+    void RequestKeyFrameNextVsync(uint64_t requestStamp, uint64_t count);
+    void OnKeyFrameNextVsync(uint64_t count);
+    bool KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason);
+    WSError KeyFrameAnimateEnd() override;
 
     /*
      * Window Layout
@@ -1035,6 +1045,15 @@ private:
     DragResizeType appDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     DragResizeType dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
     NotifyWindowMovingFunc notifyWindowMovingFunc_;
+    // KeyFrame
+    KeyFramePolicy keyFramePolicy_;
+    std::shared_ptr<RSCanvasNode> keyFrameCloneNode_ = nullptr;
+    bool keyFrameAnimating_ = false;
+    uint64_t lastKeyFrameStamp_ = 0;
+    WSRect lastKeyFrameRect_;
+    uint64_t keyFrameVsyncRequestStamp_ = 0;
+    uint64_t lastKeyFrameDragStamp_ = 0;
+    bool keyFrameDragPauseNoticed_ = false;
 
     /*
      * Gesture Back

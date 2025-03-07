@@ -1934,6 +1934,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
+        sceneSession->SetKeyFramePolicy(GetAppKeyFramePolicy(sessionInfo.bundleName_));
         sceneSession->SetSingleHandTransform(singleHandTransform_);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, displayId: %{public}" PRIu64,
             sceneSession->GetPersistentId(), sceneSession->GetSessionProperty()->GetDisplayId());
@@ -2045,6 +2046,42 @@ WMError SceneSessionManager::GetAppDragResizeTypeInner(const std::string& bundle
     TLOGI(WmsLogTag::WMS_LAYOUT, "dragResizeType: %{public}d, bundleName: %{public}s",
         dragResizeType, bundleName.c_str());
     return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::SetAppKeyFramePolicy(const std::string& bundleName,
+    const KeyFramePolicy& keyFramePolicy)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "keyFramePolicy enabled: %{public}d, bundleName: %{public}s",
+        keyFramePolicy.enabled(), bundleName.c_str());
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "bundleName empty");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> lock(keyFrameMutex_);
+    appKeyFramePolicyMap_[bundleName] = keyFramePolicy;
+    taskScheduler_->PostAsyncTask([this, bundleName, keyFramePolicy, where = __func__] {
+        auto sceneSession = GetSceneSessionByBundleName(bundleName);
+        if (sceneSession != nullptr && systemConfig_.IsPcWindow() &&
+            WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: pc main window id: %{public}d, bundleName: %{public}s",
+                where, sceneSession->GetPersistentId(), bundleName.c_str());
+            sceneSession->SetKeyFramePolicy(keyFramePolicy);
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
+
+KeyFramePolicy SceneSessionManager::GetAppKeyFramePolicy(const std::string& bundleName)
+{
+    std::lock_guard<std::mutex> lock(keyFrameMutex_);
+    if (auto iter = appKeyFramePolicyMap_.find(bundleName); iter != appKeyFramePolicyMap_.end()) {
+        return iter->second;
+    }
+    return *(new KeyFramePolicy());
 }
 
 sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo)

@@ -2412,7 +2412,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetAppDragResizeType, Function | Sma
     EXPECT_EQ(res, ERR_NONE);
 }
 
-
 /**
  * @tc.name: HandleGetAppDragResizeType
  * @tc.desc: test HandleGetAppDragResizeType
@@ -2425,6 +2424,23 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppDragResizeType, Function | Sma
     const std::string bundleName = "test";
     data.WriteString(bundleName);
     int res = stub_->HandleGetAppDragResizeType(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetAppKeyFramePolicy
+ * @tc.desc: test HandleSetAppKeyFramePolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleSetAppKeyFramePolicy, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    const std::string bundleName = "test";
+    KeyFramePolicy keyFramePolicy;
+    data.WriteString(bundleName);
+    data.WriteParcelable(&keyFramePolicy);
+    int res = stub_->HandleSetAppKeyFramePolicy(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 }

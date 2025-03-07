@@ -128,6 +128,11 @@ private:
     // Layout
     int HandleGetCrossAxisState(MessageParcel& data, MessageParcel& reply);
 
+    // KeyFrame
+    int HandleGetKeyFramePolicy(MessageParcel& data, MessageParcel& reply);
+    int HandleKeyFrameAnimateEnd(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParcel& reply);
+
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);

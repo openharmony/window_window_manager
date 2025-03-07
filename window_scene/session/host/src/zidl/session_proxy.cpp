@@ -19,6 +19,7 @@
 #include <ipc_types.h>
 #include <message_option.h>
 #include <ui/rs_surface_node.h>
+#include <ui/rs_canvas_node.h>
 
 #include "parcel/accessibility_event_info_parcel.h"
 #include "process_options.h"
@@ -2441,6 +2442,85 @@ WSError SessionProxy::SetFollowParentWindowLayoutEnabled(bool isFollow)
         TLOGE(WmsLogTag::WMS_SUB, "read ret failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_KEY_FRAME_POLICY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto keyFramePolicyReply = reply.ReadParcelable<KeyFramePolicy>();
+    if (keyFramePolicyReply == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "get keyFramePolicy failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    keyFramePolicy = *keyFramePolicyReply;
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::KeyFrameAnimateEnd()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_KEY_FRAME_ANIMATE_END),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
+WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!rsCanvasNode || !rsCanvasNode->Marshalling(data)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write rsCanvasNode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
 }
 
