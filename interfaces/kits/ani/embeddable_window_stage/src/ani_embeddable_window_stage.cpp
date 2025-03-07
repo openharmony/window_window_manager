@@ -123,7 +123,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     using namespace OHOS::Rosen;
     ani_status ret;
-    ani_env *env;
+    ani_env* env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env");
         return ANI_NOT_FOUND;

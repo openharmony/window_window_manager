@@ -45,7 +45,8 @@ public:
     static void SetWindowKeepScreenOn(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isKeepScreenOn);
     static void SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable);
     static void LoadContent(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path);
-    static void LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj, ani_string path, ani_object storage);
+    static void LoadContentNew(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_string path, ani_object storage);
     static void SetWindowSystemBarEnable(ani_env* env, ani_object obj, ani_long nativeObj, ani_object nameAry);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_object GetWindowAvoidArea(ani_env* env, ani_object obj, ani_long nativeObj, ani_int type);
@@ -63,7 +64,8 @@ public:
     ani_boolean IsWindowSupportWideGamut(ani_env* env);
     ani_object SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayoutFullScreen);
     ani_object SetSystemBarProperties(ani_env* env, ani_object aniSystemBarProperties);
-    ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable, ani_boolean enableAnimation);
+    ani_object SetSpecificSystemBarEnabled(ani_env* env, ani_string, ani_boolean enable,
+        ani_boolean enableAnimation);
 private:
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
