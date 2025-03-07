@@ -304,6 +304,10 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(
         targetBundleList.emplace_back(DEFAULT_ALL);
     }
     for (const std::string bundleName : targetBundleList) {
+        if (bundleName.empty()) {
+            WLOGFW("invalid bundleName");
+            continue;
+        }
         auto it = listenerMapByBundle_.find(bundleName);
         if (it != listenerMapByBundle_.end()) {
             if (it->second.size() >= MAX_LIFECYCLE_LISTENER_LIMIT) {
@@ -328,6 +332,10 @@ WMError SessionListenerController::UnregisterSessionLifecycleListener(const sptr
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     const sptr<IRemoteObject> target = listener->AsObject();
+    if (!target) {
+        WLOGFE("remote listener is invalid.");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     RemoveSessionLifecycleListener(target);
     WLOGFI("Session Lifecycle Listener Unregister Finished.");
     return WMError::WM_OK;

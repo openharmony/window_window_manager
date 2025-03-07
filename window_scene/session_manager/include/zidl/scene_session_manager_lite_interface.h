@@ -88,8 +88,8 @@ public:
         TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO,
         TRANS_ID_HAS_FLOAT_FOREGROUND,
         TRANS_ID_GET_CALLING_WINDOW_INFO,
-        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_ID,
-        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLE,
+        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS,
+        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
     };
 
@@ -211,7 +211,7 @@ public:
      * @param bundleNameList The list of bundle for which the listener should be registered
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
-    virtual WMError RegisterSessionLifecycleListenerById(
+    virtual WMError RegisterSessionLifecycleListenerByIds(
         const sptr<ISessionLifecycleListener>& listener, const std::vector<int32_t>& persistentIdList) = 0;
 
     /**
@@ -227,7 +227,7 @@ public:
      * @param bundleNameList The list of bundle for which the listener should be registered
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
-    virtual WMError RegisterSessionLifecycleListenerByBundle(
+    virtual WMError RegisterSessionLifecycleListenerByBundles(
         const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList) = 0;
 
     /**
