@@ -411,6 +411,7 @@ public:
     void RegisterSettingWireCastObserver(sptr<ScreenSession>& screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession);
     SessionOption GetSessionOption(sptr<ScreenSession> screenSession, ScreenId screenId);
+    virtual DMError SetSystemKeyboardOn(bool isOn = false) override;
 
 protected:
     ScreenSessionManager();
