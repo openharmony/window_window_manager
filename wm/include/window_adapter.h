@@ -165,6 +165,7 @@ public:
     virtual WMError GetGlobalDragResizeType(DragResizeType& dragResizeType);
     virtual WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType);
     virtual WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType);
+    virtual WMError GetWindowUIType(WindowUIType& windowUIType);
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
