@@ -701,21 +701,25 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel& data, M
 int SceneSessionManagerLiteStub::HandleGetCallingWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
-    sptr<CallingWindowInfo> callingWindowInfo = data.ReadParcelable<CallingWindowInfo>();
-    if (callingWindowInfo == nullptr) {
+    int32_t persistentId;
+    int32_t userId;
+    if (!data.ReadInt32(persistentId) || !data.ReadInt32(userId)) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Read persistentId and userId failed.");
         return ERR_INVALID_DATA;
     }
-    WMError ret = GetCallingWindowInfo(*callingWindowInfo);
+    CallingWindowInfo callingWindowInfo;
+    callingWindowInfo.windowId_ = persistentId;
+    callingWindowInfo.userId_ = userId;
+    WMError ret = GetCallingWindowInfo(callingWindowInfo);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, failed to get calling window info",
-            callingWindowInfo->windowId_);
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, failed to get calling window info", persistentId);
         return ERR_INVALID_DATA;
     }
-    if (!(reply.WriteInt32(static_cast<int32_t>(ret)) && reply.WriteParcelable(callingWindowInfo))) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write callingWindowInfo failed, id: %{public}d", callingWindowInfo->windowId_);
-        return ERR_INVALID_DATA;
-    }
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    reply.WriteInt32(callingWindowInfo.windowId_);
+    reply.WriteInt32(callingWindowInfo.callingPid_);
+    reply.WriteUint64(callingWindowInfo.displayId_);
+    reply.WriteInt32(callingWindowInfo.userId_);
     return ERR_NONE;
 }
 

@@ -1093,7 +1093,7 @@ private:
     void NotifyGestureNavigationEnabledResult(bool enable) const;
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     WMError NotifyWindowStyleChange(WindowStyleType type);
-    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const;
 };
 } // namespace Rosen
