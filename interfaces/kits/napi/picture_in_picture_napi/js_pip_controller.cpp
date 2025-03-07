@@ -89,7 +89,7 @@ void JsPipController::Finalizer(napi_env env, void* data, void* hint)
 napi_value JsPipController::StartPictureInPicture(napi_env env, napi_callback_info info)
 {
     JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
-    return (me != nullptr) ? me->OnStartPictureInPicture(env, info) : nullptr;
+    return (me != nullptr) ? me->OnPictureInPicturePossible(env, info) : nullptr;
 }
 
 napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_info info)
@@ -660,6 +660,29 @@ WmErrorCode JsPipController::UnRegisterListener(const std::string& type,
             break;
     }
     return WmErrorCode::WM_OK;
+}
+
+napi_value JsPipController::PictureInPicturePossible(napi_env env, napi_callback_info info)
+{
+    JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnPictureInPicturePossible(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnPictureInPicturePossible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    bool isPiPSupported = false;
+    if (pipController_ == nullptr) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+            "PiP internal error."));
+        TLOGE(WmsLogTag::WMS_PIP, "error, controller is nullptr");
+        return CreateJsValue(env, isPiPSupported);
+    }
+    pipController_->GetPipPossible(isPiPSupported);
+    if (isPiPSupported) {
+        TLOGI(WmsLogTag::WMS_PIP, "device is supported");
+    }
+    return CreateJsValue(env, isPiPSupported);
 }
 
 napi_value JsPipController::PictureInPicturePossible(napi_env env, napi_callback_info info)

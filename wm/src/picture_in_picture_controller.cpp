@@ -15,6 +15,7 @@
 
 #include "picture_in_picture_controller.h"
 #include "parameters.h"
+#include "parameters.h"
 
 #include <refbase.h>
 #include <transaction/rs_sync_transaction_controller.h>
@@ -22,6 +23,7 @@
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "singleton_container.h"
+#include "window_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -34,7 +36,7 @@ namespace {
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
     const std::string STATE_CHANGE = "stateChange";
     const std::string UPDATE_NODE = "nodeUpdate";
-    const int DEFAULT_ASPECT_RATIO[] = {16, 9};
+    const int DEFAULT_ASPECT_RATIOS[] = {16, 9};
 }
 
 static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
@@ -678,8 +680,8 @@ void PictureInPictureController::UpdateWinRectByComponent()
         uint32_t contentHeight = 0;
         pipOption_->GetContentSize(contentWidth, contentHeight);
         if (contentWidth == 0 || contentHeight == 0) {
-            contentWidth = DEFAULT_ASPECT_RATIO[0];
-            contentHeight = DEFAULT_ASPECT_RATIO[1];
+            contentWidth = DEFAULT_ASPECT_RATIOS[0];
+            contentHeight = DEFAULT_ASPECT_RATIOS[1];
         }
         windowRect_.posX_ = 0;
         windowRect_.posY_ = 0;
@@ -965,11 +967,39 @@ void PictureInPictureController::GetPipPossible(bool& pipPossible)
         TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
         return;
     }
-    auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
-    auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
-    auto isPad = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
-    pipPossible = isPC || isPhone || isPad;
+    // auto isPC = system::GetParameter("const.product.devicetype", "unknown") == "2in1";
+    // auto isPhone = system::GetParameter("const.product.devicetype", "unknown") == "phone";
+    // auto isPad = system::GetParameter("const.product.devicetype", "unknown") == "tablet";
+    // TLOGI(WmsLogTag::WMS_PIP, "lytest OnIsPipEnabled info2: isPC %d isPhone %d isPad %d", isPC, isPhone, isPad);
+    // pipPossible = isPC || isPhone || isPad;
+
+    WindowUIType type = WindowUIType::INVALID_WINDOW;
+    // bool isPcWindow = false;
+    TLOGI(WmsLogTag::WMS_PIP, "lytest start0 pip controller GetWindowUIType");
+    WMError ret = SingletonContainer::Get<WindowAdapter>().GetWindowUIType(type);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "lytest can't find GetWindowUIType, err: %{public}u",
+            static_cast<uint32_t>(ret));
+        return;
+    }
+    if (type == WindowUIType::PHONE_WINDOW) {
+        TLOGI(WmsLogTag::WMS_PIP, "lytest isPC is supported");
+    } else {
+        TLOGI(WmsLogTag::WMS_PIP, "lytest isPC is not supported");
+    }
+    if (type == WindowUIType::PC_WINDOW) {
+        TLOGI(WmsLogTag::WMS_PIP, "lytest isPhone is supported");
+    } else {
+        TLOGI(WmsLogTag::WMS_PIP, "lytest isPhone is not supported");
+    }
+    if (type == WindowUIType::PAD_WINDOW) {
+        TLOGI(WmsLogTag::WMS_PIP, "lytest isPad is supported");
+    } else {
+        TLOGI(WmsLogTag::WMS_PIP, "lytest isPad is not supported");
+    }
+    pipPossible = type == WindowUIType::PHONE_WINDOW || type == WindowUIType::PC_WINDOW || type == WindowUIType::PAD_WINDOW;
     return;
 }
+
 } // namespace Rosen
 } // namespace OHOS

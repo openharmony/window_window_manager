@@ -12954,7 +12954,14 @@ WMError SceneSessionManager::RelockScreenLockForApp(const std::string& bundleNam
 
 WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
 {
-    isPcWindow = systemConfig_.IsPcWindow();
+    isPcWindow = systemConfig_.IsPhoneWindow();
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetWindowUIType(WindowUIType& windowUIType)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "lytest start0 scensessionmanager GetWindowUIType");
+    windowUIType = systemConfig_.windowUIType_;
     return WMError::WM_OK;
 }
 
