@@ -40,6 +40,10 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ExtensionSessionManager)
 
 sptr<AAFwk::SessionInfo> ExtensionSessionManager::SetAbilitySessionInfo(const sptr<ExtensionSession>& extensionSession)
 {
+    if (extensionSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "session is nullptr");
+        return nullptr;
+    }
     const auto& sessionInfo = extensionSession->GetSessionInfo();
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->sessionToken = sptr<ISession>(extensionSession)->AsObject();
@@ -104,8 +108,10 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession,
     uint32_t hostWindowId, std::function<void(WSError)>&& resultCallback)
 {
+    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback), where = __func__]() {
+    auto task = [this, weakExtSession, hostWindowId, callback = std::move(resultCallback),
+        extSessionInfo = std::move(abilitySessionInfo), where = __func__]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "session is nullptr");
@@ -119,7 +125,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
                 where, persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        auto extSessionInfo = SetAbilitySessionInfo(extSession);
         extSessionInfo->hostWindowId = hostWindowId;
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->StartUIExtensionAbility(extSessionInfo,
             AAFwk::DEFAULT_INVAL_VALUE);
@@ -151,8 +156,10 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
 WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<ExtensionSession>& extensionSession,
     std::function<void(WSError)>&& resultCallback)
 {
+    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
-    auto task = [this, weakExtSession, callback = std::move(resultCallback)]() {
+    auto task = [this, weakExtSession, callback = std::move(resultCallback),
+        extSessionInfo = std::move(abilitySessionInfo),]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
@@ -167,7 +174,6 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
             WLOGFE("RequestExtensionSessionBackground Session is invalid! persistentId:%{public}d", persistentId);
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        auto extSessionInfo = SetAbilitySessionInfo(extSession);
         auto errorCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIExtensionAbility(extSessionInfo);
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED;
@@ -183,9 +189,10 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
 WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<ExtensionSession>& extensionSession,
     std::function<void(WSError)>&& resultCallback)
 {
+    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, callback = std::move(resultCallback),
-                 where = __func__]() NO_THREAD_SAFETY_ANALYSIS {
+        extSessionInfo = std::move(abilitySessionInfo), where = __func__]() NO_THREAD_SAFETY_ANALYSIS {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "session is nullptr");
@@ -216,7 +223,9 @@ WSError ExtensionSessionManager::RequestExtensionSessionDestruction(const sptr<E
 WSError ExtensionSessionManager::RequestExtensionSessionDestructionDone(const sptr<ExtensionSession>& extensionSession)
 {
     const char* const where = __func__;
-    auto task = [this, where, weakExtSession = wptr<ExtensionSession>(extensionSession)] {
+    auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
+    auto task = [this, where, weakExtSession = wptr<ExtensionSession>(extensionSession),
+        extSessionInfo = std::move(abilitySessionInfo)] {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s session is nullptr", where);
