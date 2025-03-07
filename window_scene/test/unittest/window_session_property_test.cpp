@@ -910,6 +910,7 @@ HWTEST_F(WindowSessionPropertyTest, Read, Function | SmallTest | Level2)
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     property->Read(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     ASSERT_EQ(property->GetPersistentId(), INVALID_SESSION_ID);
@@ -952,6 +953,7 @@ HWTEST_F(WindowSessionPropertyTest, Write, Function | SmallTest | Level2)
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TEXTFIELD_AVOID_INFO);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_TOPMOST);
+    property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_MAIN_WINDOW_TOPMOST);
     property->Write(parcel, WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION);
@@ -1352,6 +1354,32 @@ HWTEST_F(WindowSessionPropertyTest, GetSubWindowLevel, Function | SmallTest | Le
     EXPECT_NE(property, nullptr);
     property->SetSubWindowLevel(1);
     ASSERT_EQ(1, property->GetSubWindowLevel());
+}
+
+/**
+ * @tc.name: GetSubWindowZLevel
+ * @tc.desc: GetSubWindowZLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetSubWindowZLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int zLevel = 1;
+    property->zLevel_ = zLevel;
+    ASSERT_EQ(zLevel, property->GetSubWindowZLevel());
+}
+
+/**
+ * @tc.name: SetSubWindowZLevel
+ * @tc.desc: SetSubWindowZLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetSubWindowZLevel, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    int zLevel = 1;
+    property->SetSubWindowZLevel(zLevel);
+    ASSERT_EQ(zLevel, property->zLevel_);
 }
 
 /**

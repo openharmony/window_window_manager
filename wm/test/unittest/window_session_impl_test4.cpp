@@ -2685,6 +2685,27 @@ HWTEST_F(WindowSessionImplTest4, SendContainerModalEvent, Function | SmallTest |
     ret = window->SendContainerModalEvent("win_waterfall_visibility", "false");
     EXPECT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: SetSubWindowZLevelToProperty
+ * @tc.desc: SetSubWindowZLevelToProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetSubWindowZLevel(1);
+    sptr<WindowSessionImpl> mainWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    mainWindowSessionImpl->SetSubWindowZLevelToProperty();
+    int32_t zLevel = mainWindowSessionImpl->property_->zLevel_;
+    EXPECT_EQ(1, zLevel);
+
+    sptr<WindowSessionImpl> subWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
+    subWindowSessionImpl->SetSubWindowZLevelToProperty();
+    zLevel = subWindowSessionImpl->property_->zLevel_;
+    EXPECT_EQ(1, zLevel); 
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

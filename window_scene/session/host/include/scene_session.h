@@ -65,6 +65,7 @@ using NotifyAutoStartPiPStatusChangeFunc = std::function<void(bool isAutoStart, 
     uint32_t width, uint32_t height)>;
 using NotifySessionEventFunc = std::function<void(int32_t eventId, SessionEventParam param)>;
 using NotifySessionTopmostChangeFunc = std::function<void(const bool topmost)>;
+using NotifySubSessionZLevelChangeFunc = std::function<void(const int32_t zLevel)>;
 using NotifySubModalTypeChangeFunc = std::function<void(SubWindowModalType subWindowModalType)>;
 using NotifyMainModalTypeChangeFunc = std::function<void(bool isModal)>;
 using NotifyRaiseToTopFunc = std::function<void()>;
@@ -324,6 +325,8 @@ public:
     virtual bool IsTopmost() const { return false; }
     virtual WSError SetMainWindowTopmost(bool isTopmost) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual bool IsMainWindowTopmost() const { return false; }
+    virtual WSError SetSubWindowZLevel(int32_t zLevel) { return WSError::WS_ERROR_INVALID_CALLING; }
+    virtual int32_t GetSubWindowZLevel() const { return 0; }
     void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
 
     /*
@@ -500,6 +503,7 @@ public:
     void RegisterRaiseToTopCallback(NotifyRaiseToTopFunc&& callback);
     void RegisterRaiseAboveTargetCallback(NotifyRaiseAboveTargetFunc&& callback);
     void RegisterSessionTopmostChangeCallback(NotifySessionTopmostChangeFunc&& callback);
+    void RegisterSubSessionZLevelChangeCallback(NotifySubSessionZLevelChangeFunc&& callback);
 
     /*
      * Window Lifecycle
@@ -757,6 +761,7 @@ protected:
     NotifyRaiseToTopFunc onRaiseToTop_;
     NotifyRaiseAboveTargetFunc onRaiseAboveTarget_;
     NotifySessionTopmostChangeFunc onSessionTopmostChange_;
+    NotifySubSessionZLevelChangeFunc onSubSessionZLevelChange_;
 
     /*
      * PC Window
@@ -955,6 +960,8 @@ private:
     WMError HandleActionUpdateTopmost(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateMainWindowTopmost(const sptr<WindowSessionProperty>& property,
+        WSPropertyChangeAction action);
+    WMError HandleActionUpdateSubWindowZLevel(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);
     WMError HandleActionUpdateWindowModeSupportType(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action);

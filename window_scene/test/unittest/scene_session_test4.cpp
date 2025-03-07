@@ -572,6 +572,9 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_TOPMOST));
 
+    EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL));
+
     property->SetSystemCalling(false);
     EXPECT_EQ(WMError::WM_ERROR_NOT_SYSTEM_APP, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_MODE_SUPPORT_INFO));
@@ -582,7 +585,7 @@ HWTEST_F(SceneSessionTest4, ProcessUpdatePropertyByAction3, Function | SmallTest
 
     EXPECT_EQ(WMError::WM_DO_NOTHING, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_RECT));
-    
+
     property->SetWindowType(WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
     EXPECT_EQ(WMError::WM_OK, sceneSession->ProcessUpdatePropertyByAction(property,
         WSPropertyChangeAction::ACTION_UPDATE_AVOID_AREA_OPTION));
@@ -1269,6 +1272,30 @@ HWTEST_F(SceneSessionTest4, UpdateAllModalUIExtensions, Function | SmallTest | L
 
     WSRect newGlobalRect = { 150, 150, 100, 100 };
     session->UpdateAllModalUIExtensions(newGlobalRect);
+}
+
+/**
+ * @tc.name: HandleActionUpdateSubWindowZLevel
+ * @tc.desc: HandleActionUpdateSubWindowZLevel Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, HandleActionUpdateSubWindowZLevel, Function | SmallTest | Level2)
+{
+    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL;
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateSubWindowZLevel";
+    info.bundleName_ = "HandleActionUpdateSubWindowZLevel";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> sessionProperty = sptr<WindowSessionProperty>::MakeSptr();
+    sessionProperty->zLevel_ = 0;
+    sceneSession->property_ = sessionProperty;
+    ASSERT_EQ(0, sceneSession->GetSubWindowZLevel());
+    property->zLevel_ = 1;
+    WMError ret = sceneSession->HandleActionUpdateSubWindowZLevel(property,
+        WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
+    sceneSession->GetSubWindowZLevel(1);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**

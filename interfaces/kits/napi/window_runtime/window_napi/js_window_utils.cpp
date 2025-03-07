@@ -22,6 +22,7 @@
 #include "ipc_skeleton.h"
 #include "window_manager_hilog.h"
 #include "js_window.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1342,6 +1343,27 @@ static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowO
     return true;
 }
 
+static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<windowOption> &windowOption)
+{
+    int32_t zLevel = 0;
+    bool isModal = false;
+    if (ParseJsValue(jsObject, env, "zLevel", zLevel)) {
+        if (zLevel < MINIMUN_Z_LEVEL || zLevel > MAXIMUM_Z_LEVEL) {
+            TLOGE(WmsLogTag::WMS_SUB, "zLevel value %{public}d exceeds valid range [-10000, 10000]!", zLevel);
+            return false;
+        }
+    if (ParseJsValue(jsObject, env, "isModal", isModal)) {
+        if (isModal) {
+            TLOGE(WmsLogTag::WMS_SUB, "modal window not support custom zLevel");
+            return false;
+        }
+    }
+    windowOption->SetSubWindowZLevel(zLevel);
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
+    return true;
+}
+
 bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     if (jsObject == nullptr || windowOption == nullptr) {
@@ -1370,7 +1392,10 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }
-    return ParseModalityParam(env, jsObject, windowOption);
+    if (!ParseModalityParam(env, jsObject, windowOption)) {
+        return false;
+    }
+    return ParseZLevelParam(env, jsObject, windowOption);
 }
 
 bool CheckPromise(napi_env env, napi_value promiseObj)

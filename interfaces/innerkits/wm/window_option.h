@@ -274,6 +274,13 @@ public:
     void SetWindowTopmost(bool isTopmost);
 
     /**
+     * @brief Set sub window zLevel.
+     *
+     * @param zLevel zLevel of subwindow to specify the hierarchical relationship among subwindows.
+     */
+    void SetWindowTopmost(bool isTopmost);
+
+    /**
      * @brief Set real parent id of UIExtension
      *
      * @param realParentId real parent id of UIExtension
@@ -470,6 +477,13 @@ public:
     bool GetWindowTopmost() const;
 
     /**
+     * @brief Get subwindow zLevel
+     *
+     * @return Return zLevel of subwindow.
+     */
+    int32_t GetSubWindowZLevel() const;
+
+    /**
      * @brief Get subwindow maximizeSupported
      *
      * @return true means subwindow support maximize, otherwise not.
@@ -595,6 +609,7 @@ private:
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
     bool isTopmost_ = false;
+    int32_t zLevel_ = 0;
     bool isSystemKeyboard_ = false;
 
     /*

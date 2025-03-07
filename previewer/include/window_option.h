@@ -253,6 +253,20 @@ public:
     WindowMode GetWindowMode() const;
 
     /**
+     * @brief Set subwindow zLevel.
+     *
+     * @param zLevel zLevel of subwindow.
+     */
+    void SetSubWindowZLevel(int32_t zLevel);
+
+    /**
+     * @brief Get subwindow zLevel.
+     *
+     * @return The zLevel of subwindow.
+     */
+    int32_t GetSubWindowZLevel() const;
+
+    /**
      * @brief Get window type.
      *
      * @return The type of window.
@@ -446,6 +460,7 @@ private:
     WindowTag windowTag_;
     WindowSessionType sessionType_ { WindowSessionType::SCENE_SESSION };
     float brightness_ = UNDEFINED_BRIGHTNESS;
+    int32_t zLevel_ = 0;
 
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
