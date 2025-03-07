@@ -12960,7 +12960,6 @@ WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
 
 WMError SceneSessionManager::GetWindowUIType(WindowUIType& windowUIType)
 {
-    TLOGI(WmsLogTag::WMS_PIP, "lytest start0 scensessionmanager GetWindowUIType");
     windowUIType = systemConfig_.windowUIType_;
     return WMError::WM_OK;
 }
