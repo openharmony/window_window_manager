@@ -124,7 +124,6 @@ void InputEventListener::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointer
     HandleInputEvent(pointerEvent);
 }
 
-
 void InputTransferStation::AddInputWindow(const sptr<Window>& window)
 {
     uint32_t windowId = window->GetWindowId();

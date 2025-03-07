@@ -731,9 +731,7 @@ ohos_unittest("wm_window_input_intercept_test") {
 
   sources = [ "window_input_intercept_test.cpp" ]
 
-  deps = [
-    ":wm_unittest_common"
-  ]
+  deps = [ ":wm_unittest_common" ]
 
   external_deps = [
     "c_utils:utils",
