@@ -2969,7 +2969,6 @@ WMError SceneSessionManagerProxy::GetWindowUIType(WindowUIType& windowUIType)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    TLOGI(WmsLogTag::WMS_PIP, "lytest start0 proxy GetWindowUIType");
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;

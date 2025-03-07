@@ -12954,7 +12954,7 @@ WMError SceneSessionManager::RelockScreenLockForApp(const std::string& bundleNam
 
 WMError SceneSessionManager::IsPcWindow(bool& isPcWindow)
 {
-    isPcWindow = systemConfig_.IsPhoneWindow();
+    isPcWindow = systemConfig_.IsPcWindow();
     return WMError::WM_OK;
 }
 

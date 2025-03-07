@@ -372,10 +372,6 @@ public:
         int32_t targetPersistentId) override { return WMError::WM_OK; }
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override { return WMError::WM_OK; }
-    // WMError GetWindowUIType(WindowUIType& windowUIType) override
-    // {
-    //     return WSError::WS_OK;
-    // }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
