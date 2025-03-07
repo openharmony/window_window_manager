@@ -448,7 +448,8 @@ protected:
      */
     void UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState);
     void DestroySubWindow();
-
+    bool IsSubWindowMaximizeSupported() const override;
+    sptr<WindowOption> windowOption_;
     sptr<ISession> hostSession_;
     mutable std::mutex hostSessionMutex_;
     std::shared_ptr<Ace::UIContent> uiContent_;
@@ -699,7 +700,6 @@ private:
     std::string subWindowTitle_ = { "" };
     std::string dialogTitle_ = { "" };
     WindowTitleVisibleFlags windowTitleVisibleFlags_;
-    sptr<WindowOption> windowOption_;
 
     std::string restoredRouterStack_; // It was set and get in same thread, which is js thread.
 

@@ -3272,6 +3272,13 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+     /**
+     * @brief Get is subwindow support maximize.
+     *
+     * @return true means subwindow support maximize, others means do not support.
+     */
+    virtual bool IsSubWindowMaximizeSupported() const { return false; }
 };
 }
 }
