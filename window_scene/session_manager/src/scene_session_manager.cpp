@@ -11008,8 +11008,8 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
         }, NOTIFY_CLEAR_SESSION_TIMEOUT);
 
         if (isTimeout) {
-            TLOGE(WmsLogTag::WMS_LIFE, "called NotifyClearMission timeout, current userId: %{public}d",
-                currentUserId_.load());
+            TLOGE(WmsLogTag::WMS_LIFE, "called NotifyClearMission timeout, persistent id: %{public}d",
+                persistentId);
         }
     }
 }
