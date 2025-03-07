@@ -90,8 +90,8 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     return contentInfoType;
 }
 
-Ace::ViewportConfig FillViewportConfig(
-    Rect rect, float density, int32_t orientation, uint32_t transformHint, uint64_t displayId)
+Ace::ViewportConfig FillViewportConfig(Rect rect, float density, int32_t orientation,
+    uint32_t transformHint, uint64_t displayId, KeyFramePolicy& keyFramePolicy)
 {
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
@@ -100,6 +100,8 @@ Ace::ViewportConfig FillViewportConfig(
     config.SetOrientation(orientation);
     config.SetTransformHint(transformHint);
     config.SetDisplayId(displayId);
+    config.SetKeyFrameConfig(keyFramePolicy.running_, keyFramePolicy.animationDuration_,
+        keyFramePolicy.animationDelay_);
     return config;
 }
 }
@@ -1275,7 +1277,11 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     float density = GetVirtualPixelRatio(displayInfo);
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
     virtualPixelRatio_ = density;
-    const auto& config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
+    KeyFramePolicy keyFramePolicy;
+    if (auto hostSession = GetHostSession()) {
+        hostSession->GetKeyFramePolicy(keyFramePolicy);
+    }
+    const auto& config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId(), keyFramePolicy);
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFW("uiContent is null!");
@@ -1452,8 +1458,14 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
         WLOGFI("Initialized, isUIExtensionSubWindow:%{public}d, isUIExtensionAbilityProcess:%{public}d",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
-    RegisterWatchFocusActiveChangeCallback();
+    RegisterUIContenCallback();
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::RegisterUIContenCallback()
+{
+    RegisterWatchFocusActiveChangeCallback();
+    RegisterKeyFrameCallback();
 }
 
 void WindowSessionImpl::RegisterWatchFocusActiveChangeCallback()
@@ -1465,6 +1477,42 @@ void WindowSessionImpl::RegisterWatchFocusActiveChangeCallback()
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
     }
+}
+
+void WindowSessionImpl::RegisterKeyFrameCallback()
+{
+    auto uiContent = GetUIContentSharedPtr();
+    if (!uiContent) {
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent is nullptr");
+        return;
+    }
+    uiContent->AddKeyFrameCanvasNodeCallback([this](std::shared_ptr<RSCanvasNode> rsCanvasNode) {
+        if (auto session = GetHostSession()) {
+            session->UpdateKeyFrameCloneNode(rsCanvasNode);
+        } else {
+            TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
+        }
+    });
+    uiContent->AddKeyFrameAnimateEndCallback([this]() {
+        if (auto session = GetHostSession()) {
+            session->KeyFrameAnimateEnd();
+        } else {
+            TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr");
+        }
+    });
+}
+
+WSError WindowSessionImpl::LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    auto uiContent = GetUIContentSharedPtr();
+    auto session = GetHostSession();
+    if (!uiContent || !session) {
+        TLOGE(WmsLogTag::WMS_EVENT, "uiContent or session is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    uiContent->LinkKeyFrameCanvasNode(rsCanvasNode);
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)

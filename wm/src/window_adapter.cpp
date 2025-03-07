@@ -1087,6 +1087,14 @@ WMError WindowAdapter::GetAppDragResizeType(const std::string& bundleName, DragR
     return wmsProxy->GetAppDragResizeType(bundleName, dragResizeType);
 }
 
+WMError WindowAdapter::SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->SetAppKeyFramePolicy(bundleName, keyFramePolicy);
+}
+
 WMError WindowAdapter::NotifyWatchGestureConsumeResult(int32_t keyCode, bool isConsumed)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);

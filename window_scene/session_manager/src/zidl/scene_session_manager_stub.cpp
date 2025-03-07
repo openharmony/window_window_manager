@@ -203,6 +203,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleSetAppDragResizeType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_APP_DRAG_RESIZE_TYPE):
             return HandleGetAppDragResizeType(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_APP_KEY_FRAME_POLICY):
+            return HandleSetAppKeyFramePolicy(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_GESTURE_CONSUME_RESULT):
             return HandleWatchGestureConsumeResult(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE):
@@ -1704,7 +1706,7 @@ int SceneSessionManagerStub::HandleSetGlobalDragResizeType(MessageParcel& data, 
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
-    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+    if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return ERR_INVALID_DATA;
     }
@@ -1743,7 +1745,7 @@ int SceneSessionManagerStub::HandleSetAppDragResizeType(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragResizeType failed.");
         return ERR_INVALID_DATA;
     }
-    if (dragResizeType > static_cast<uint32_t>(DragResizeType::RESIZE_WHEN_DRAG_END)) {
+    if (dragResizeType >= static_cast<uint32_t>(DragResizeType::RESIZE_MAX_VALUE)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "bad dragResizeType value");
         return ERR_INVALID_DATA;
     }
@@ -1772,6 +1774,23 @@ int SceneSessionManagerStub::HandleGetAppDragResizeType(MessageParcel& data, Mes
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write errCode failed.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSetAppKeyFramePolicy(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read bundleName failed.");
+        return ERR_INVALID_DATA;
+    }
+    auto keyFramePolicy = data.ReadParcelable<KeyFramePolicy>();
+    if (!keyFramePolicy) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read keyFramePolicy failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = SetAppKeyFramePolicy(bundleName, *keyFramePolicy);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 

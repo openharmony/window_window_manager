@@ -18,6 +18,7 @@
 
 #include <iremote_proxy.h>
 #include <transaction/rs_transaction.h>
+#include <ui/rs_canvas_node.h>
 
 #include "interfaces/include/ws_common.h"
 #include "session/container/include/zidl/session_stage_interface.h"
@@ -80,6 +81,8 @@ public:
     // UIExtension
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
+
+    WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
 
     WSError SetDragActivated(bool dragActivated) override;
     WSError SetSplitButtonVisible(bool isVisible) override;

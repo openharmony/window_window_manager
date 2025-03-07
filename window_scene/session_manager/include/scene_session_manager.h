@@ -492,6 +492,8 @@ public:
     WMError SetAppDragResizeType(const std::string& bundleName, DragResizeType dragResizeType) override;
     WMError GetAppDragResizeType(const std::string& bundleName, DragResizeType& dragResizeType) override;
     WMError SetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType dragResizeType);
+    WMError SetAppKeyFramePolicy(const std::string& bundleName, const KeyFramePolicy& keyFramePolicy) override;
+    KeyFramePolicy GetAppKeyFramePolicy(const std::string& bundleName);
 
     /*
      * Window Layout
@@ -1293,6 +1295,8 @@ private:
     std::unordered_map<std::string, DragResizeType> appDragResizeTypeMap_;
     void GetEffectiveDragResizeType(DragResizeType& dragResizeType);
     WMError GetAppDragResizeTypeInner(const std::string& bundleName, DragResizeType& dragResizeType);
+    std::mutex keyFrameMutex_;
+    std::unordered_map<std::string, KeyFramePolicy> appKeyFramePolicyMap_;
 
     /*
      * Specific Window
