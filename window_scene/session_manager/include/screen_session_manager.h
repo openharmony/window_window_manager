@@ -307,6 +307,7 @@ public:
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
     void NotifyCastWhenScreenConnectChange(bool isConnected);
+    void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void SetCoordinationFlag(bool isCoordinationFlag);
 
