@@ -83,6 +83,7 @@ public:
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) override;
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override;
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override;
 };
 } // namespace OHOS::Rosen
 

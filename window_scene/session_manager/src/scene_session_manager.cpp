@@ -10373,6 +10373,20 @@ WSError SceneSessionManager::UpdateSessionDisplayId(int32_t persistentId, uint64
     NotifySessionUpdate(sceneSession->GetSessionInfo(), ActionType::MOVE_DISPLAY, fromScreenId);
     sceneSession->NotifyDisplayMove(fromScreenId, screenId);
     sceneSession->UpdateDensity();
+
+    const auto& keyboardSessionVec = GetSceneSessionVectorByType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    for (const auto& keyboardSession : keyboardSessionVec) {
+        if (keyboardSession) {
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "isSystemKeyboard: %{public}d, callingSessionId: %{public}d",
+                keyboardSession->IsSystemKeyboard(), keyboardSession->GetCallingSessionId());
+        }
+        if (keyboardSession && !keyboardSession->IsSystemKeyboard() &&
+            static_cast<int32_t>(keyboardSession->GetCallingSessionId()) == persistentId) {
+            CallingWindowInfo callingWindowInfo(persistentId, sceneSession->GetCallingPid(), screenId, sceneSession->GetCallingUid());
+            SessionManagerAgentController::GetInstance().NotifyCallingWindowDisplayChanged(callingWindowInfo);
+            break;
+        }
+    }
     return WSError::WS_OK;
 }
 
@@ -12137,6 +12151,28 @@ WMError SceneSessionManager::GetMainWindowInfos(int32_t topNum, std::vector<Main
     };
     TraverseSessionTree(func, true);
 
+    return WMError::WM_OK;
+}
+
+WMError SceneSessionManager::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
+{
+    auto sceneSession = GetSceneSession(callingWindowInfo.windowId_);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr,id: %{public}d", callingWindowInfo.windowId_);
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    int32_t curUserId = sceneSession->GetCallingUid();
+    if (curUserId != callingWindowInfo.userId_) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Target user not exists,targetUserId: %{public}d, curUserId: %{public}d, id: %{public}d",
+            callingWindowInfo.userId_, curUserId, callingWindowInfo.windowId_);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+
+    callingWindowInfo.callingPid_ = sceneSession->GetCallingPid();
+    callingWindowInfo.displayId_ = sceneSession->GetSessionProperty()->GetDisplayId();
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "callingWindow id: %{public}d,pid: %{public}d,displayId: %{public}" PRIu64" , curUserId: %{public}d",
+        callingWindowInfo.windowId_, callingWindowInfo.callingPid_, callingWindowInfo.displayId_, curUserId);
     return WMError::WM_OK;
 }
 

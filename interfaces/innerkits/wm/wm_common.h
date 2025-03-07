@@ -940,6 +940,38 @@ struct KeyboardPanelInfo : public Parcelable {
 };
 
 /**
+ * @struct CallingWindowInfo
+ *
+ * @brief Info of keyboard calling window
+ */
+struct CallingWindowInfo : public Parcelable {
+    int32_t windowId_ = 0;
+    int32_t callingPid_ = -1;
+    DisplayId displayId_ = 0;
+    int32_t userId_ = 0;
+
+    CallingWindowInfo() {}
+    CallingWindowInfo(int32_t windowId, int32_t callingPid, DisplayId displayId, int32_t userId)
+        : windowId_(windowId), callingPid_(callingPid), displayId_(displayId), userId_(userId) {}
+
+    bool Marshalling(Parcel& parcel) const
+    {
+        return parcel.WriteInt32(windowId_) && parcel.WriteInt32(callingPid_) &&
+               parcel.WriteUint64(displayId_) && parcel.WriteInt32(userId_);
+    }
+
+    static CallingWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        sptr<CallingWindowInfo> callingWindowInfo = sptr<CallingWindowInfo>::MakeSptr();
+        if (!(parcel.ReadInt32(callingWindowInfo->windowId_) && parcel.ReadInt32(callingWindowInfo->callingPid_) &&
+            parcel.ReadUint64(callingWindowInfo->displayId_) && parcel.ReadInt32(callingWindowInfo->userId_))) {
+            callingWindowInfo = nullptr;
+        }
+        return callingWindowInfo;
+    }
+};
+
+/**
  * @brief Enumerates avoid area type.
  */
 enum class AvoidAreaType : uint32_t {
