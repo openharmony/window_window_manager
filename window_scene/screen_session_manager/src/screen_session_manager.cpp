@@ -8522,7 +8522,7 @@ void ScreenSessionManager::WakeUpPictureFrameBlock(DisplayEvent event)
     screenWaitPictureFrameCV_.notify_all();
 }
 
-void ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
+bool ScreenSessionManager::BlockScreenWaitPictureFrameByCV(bool isStartDream)
 {
     TLOGI(WmsLogTag::DMS, "[UL_POWER]enter");
     std::unique_lock <std::mutex> lock(screenWaitPictureFrameMutex_);
