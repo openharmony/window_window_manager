@@ -181,12 +181,13 @@ HWTEST_F(SessionProxyLifecycleTest, NotifySessionException, Function | SmallTest
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
     sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     sptr<AAFwk::SessionInfo> abilitySessionInfo = nullptr;
-    WSError res = sProxy->NotifySessionException(abilitySessionInfo);
+    ExceptionInfo exceptionInfo;
+    WSError res = sProxy->NotifySessionException(abilitySessionInfo, exceptionInfo);
     ASSERT_EQ(res, WSError::WS_ERROR_INVALID_SESSION);
 
     sptr<AAFwk::SessionInfo> abilitySessionInfo1 = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(abilitySessionInfo1, nullptr);
-    res = sProxy->NotifySessionException(abilitySessionInfo1);
+    res = sProxy->NotifySessionException(abilitySessionInfo1, exceptionInfo);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyLifecycleTest: NotifySessionException end";
 }

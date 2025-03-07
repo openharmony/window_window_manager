@@ -77,6 +77,8 @@ private:
     int HandleGetAccessibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppUseControlList(MessageParcel& data, MessageParcel& reply);
     int HandleMinimizeMainSession(MessageParcel& data, MessageParcel& reply);
+    int HandleLockSessionByAbilityInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

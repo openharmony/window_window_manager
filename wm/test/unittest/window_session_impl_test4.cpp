@@ -21,6 +21,7 @@
 #include "accessibility_event_info.h"
 #include "color_parser.h"
 #include "mock_session.h"
+#include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
 #include "parameters.h"
@@ -250,6 +251,36 @@ HWTEST_F(WindowSessionImplTest4, SetDecorVisible, Function | SmallTest | Level2)
     res = window->SetDecorVisible(isVisible);
     ASSERT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetDecorVisibletest01 end";
+}
+
+/**
+ * @tc.name: GetDecorVisible
+ * @tc.desc: GetDecorVisible and check the retCode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetDecorVisible, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorVisible start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetDecorVisible");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    bool isVisible = true;
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->GetDecorVisible(isVisible));
+    window->property_->SetPersistentId(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorVisible(isVisible));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, window->GetDecorVisible(isVisible));
+    auto uiContent = std::make_unique<Ace::UIContentMocker>();
+    EXPECT_CALL(*uiContent, GetContainerModalTitleVisible(_)).WillRepeatedly(Return(false));
+    window->uiContent_ = std::move(uiContent);
+    ASSERT_EQ(WMError::WM_OK, window->GetDecorVisible(isVisible));
+    ASSERT_FALSE(isVisible);
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetDecorVisible end";
 }
 
 /**
@@ -707,9 +738,11 @@ HWTEST_F(WindowSessionImplTest4, SetPipActionEvent, Function | SmallTest | Level
     ASSERT_NE(nullptr, session);
     ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    ASSERT_EQ(window->FindWindowById(1), nullptr);
-    ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(window->FindWindowById(1), nullptr);
+        ASSERT_EQ(nullptr, window->GetUIContentWithId(1));
+        ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    }
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetPipActionEvent end";
 }
 
@@ -848,7 +881,7 @@ HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     window->ConsumePointerEvent(pointerEvent);
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->ConsumeKeyEvent(keyEvent);
     ASSERT_EQ(nullptr, window->GetUIContentSharedPtr());
     ASSERT_EQ(false, window->PreNotifyKeyEvent(keyEvent));
@@ -1423,9 +1456,11 @@ HWTEST_F(WindowSessionImplTest4, SetAutoStartPiP, Function | SmallTest | Level2)
     window->hostSession_ = session;
     bool isAutoStart = true;
     uint32_t priority = 1;
-    window->SetAutoStartPiP(isAutoStart, priority);
+    uint32_t width = 1;
+    uint32_t height = 1;
+    window->SetAutoStartPiP(isAutoStart, priority, width, height);
     window->hostSession_ = nullptr;
-    window->SetAutoStartPiP(isAutoStart, priority);
+    window->SetAutoStartPiP(isAutoStart, priority, width, height);
 }
 
 /**
@@ -1501,6 +1536,36 @@ HWTEST_F(WindowSessionImplTest4, NotifyMainWindowClose01, Function | SmallTest |
     EXPECT_EQ(terminateCloseProcess, false);
     EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
     window->UnregisterMainWindowCloseListeners(listener);
+}
+
+/**
+ * @tc.name: NotifyWindowWillClose
+ * @tc.desc: NotifyWindowWillClose
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyWindowWillClose, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWindowWillClose");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+    WMError res = window->NotifyWindowWillClose(window);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IWindowWillCloseListener> listener = sptr<MockIWindowWillCloseListener>::MakeSptr();
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    res = window->RegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->NotifyWindowWillClose(window);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->UnRegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(res, WMError::WM_OK);
+    res = window->NotifyWindowWillClose(window);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
@@ -2097,6 +2162,35 @@ HWTEST_F(WindowSessionImplTest4, ClearListenersById_mainWindowCloseListeners, Fu
 }
 
 /**
+ * @tc.name: ClearListenersById_windowWillCloseListeners
+ * @tc.desc: ClearListenersById_windowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, ClearListenersById_windowWillCloseListeners, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowWillCloseListeners start";
+    sptr<WindowOption> option_ = sptr<WindowOption>::MakeSptr();
+    option_->SetWindowName("ClearListenersById_windowWillCloseListeners");
+    sptr<WindowSessionImpl> window_ = sptr<WindowSessionImpl>::MakeSptr(option_);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    window_->property_->SetPersistentId(1);
+    int persistentId = window_->GetPersistentId();
+    window_->ClearListenersById(persistentId);
+
+    sptr<IWindowWillCloseListener> listener_ = sptr<MockIWindowWillCloseListener>::MakeSptr();
+    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(WMError::WM_OK, window_->RegisterWindowWillCloseListeners(listener_));
+    ASSERT_NE(window_->windowWillCloseListeners_.find(persistentId), window_->windowWillCloseListeners_.end());
+
+    window_->ClearListenersById(persistentId);
+    ASSERT_EQ(window_->windowWillCloseListeners_.find(persistentId), window_->windowWillCloseListeners_.end());
+
+    GTEST_LOG_(INFO) << "WindowSessionImplTest4: ClearListenersById_windowWillCloseListeners end";
+}
+
+/**
  * @tc.name: ClearListenersById_occupiedAreaChangeListeners
  * @tc.desc: ClearListenersById_occupiedAreaChangeListeners
  * @tc.type: FUNC
@@ -2364,6 +2458,182 @@ HWTEST_F(WindowSessionImplTest4, GetIsMidScene, Function | SmallTest | Level2)
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
     ASSERT_EQ(false, isMidScene);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
+ * @tc.name: GetLayoutTransform
+ * @tc.desc: GetLayoutTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetLayoutTransform, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetLayoutTransform");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    Transform transform;
+    transform.scaleX_ = 1.0;
+    transform.scaleY_ = 1.0;
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->NotifyTransformChange(transform);
+    Transform layoutTransform = window->GetLayoutTransform();
+    ASSERT_EQ(transform.scaleX_, layoutTransform.scaleX_);
+    ASSERT_EQ(transform.scaleY_, layoutTransform.scaleY_);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
+ * @tc.name: SetExclusivelyHighlighted
+ * @tc.desc: SetExclusivelyHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SetExclusivelyHighlighted, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetExclusivelyHighlighted");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_DIALOG);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_APPLICATION_MODAL);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_ERROR_INVALID_CALLING);
+    window->property_->flags_ = 0;
+    ASSERT_EQ(window->SetExclusivelyHighlighted(true), WMError::WM_OK);
+    ASSERT_EQ(window->SetExclusivelyHighlighted(false), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: GetExclusivelyHighlighted
+ * @tc.desc: GetExclusivelyHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetExclusivelyHighlighted, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetExclusivelyHighlighted");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_EQ(window->GetExclusivelyHighlighted(), true);
+}
+
+/**
+ * @tc.name: NotifyHighlightChange
+ * @tc.desc: NotifyHighlightChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyHighlightChange01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(1);
+
+    bool highlight = false;
+    WSError res = window->NotifyHighlightChange(highlight);
+    EXPECT_EQ(highlight, false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    sptr<IWindowHighlightChangeListener> listener = sptr<IWindowHighlightChangeListener>::MakeSptr();
+    window->RegisterWindowHighlightChangeListeners(listener);
+    res = window->NotifyHighlightChange(highlight);
+    EXPECT_EQ(highlight, false);
+    EXPECT_EQ(res, WSError::WS_OK);
+    window->UnregisterWindowHighlightChangeListeners(listener);
+}
+
+/**
+ * @tc.name: IsWindowHighlighted
+ * @tc.desc: IsWindowHighlighted
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, IsWindowHighlighted, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("IsWindowHighlighted");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    bool isHighlighted = false;
+    window->IsWindowHighlighted(isHighlighted);
+    ASSERT_EQ(isHighlighted, false);
+    window->property_->SetPersistentId(1);
+    window->isHighlighted_ = true;
+    window->IsWindowHighlighted(isHighlighted);
+    ASSERT_EQ(isHighlighted, true);
+}
+
+/**
+ * @tc.name: NotifyWindowCrossAxisChange
+ * @tc.desc: NotifyWindowCrossAxisChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, NotifyWindowCrossAxisChange, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWindowCrossAxisChange");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<MockIWindowCrossAxisListener> crossListener = sptr<MockIWindowCrossAxisListener>::MakeSptr();
+    WindowSessionImpl::windowCrossAxisListeners_[window->property_->persistentId_].push_back(crossListener);
+    EXPECT_CALL(*crossListener, OnCrossAxisChange(CrossAxisState::STATE_CROSS)).Times(1);
+    window->NotifyWindowCrossAxisChange(CrossAxisState::STATE_CROSS);
+    EXPECT_EQ(window->crossAxisState_.load(), CrossAxisState::STATE_CROSS);
+    WindowSessionImpl::windowCrossAxisListeners_[window->property_->persistentId_].clear();
+}
+
+/**
+ * @tc.name: GetCrossAxisState
+ * @tc.desc: GetCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetCrossAxisState, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetCrossAxisState");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->crossAxisState_ =  CrossAxisState::STATE_CROSS;
+    EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
+    window->crossAxisState_ =  CrossAxisState::STATE_INVALID;
+    window->hostSession_ = nullptr;
+    EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_INVALID);
+    auto mockHostSession = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = mockHostSession;
+    window->property_->persistentId_ = 1234;
+    EXPECT_CALL(*mockHostSession, GetCrossAxisState(_))
+        .WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
+    EXPECT_EQ(window->GetCrossAxisState(), CrossAxisState::STATE_CROSS);
+}
+
+/**
+ * @tc.name: SendContainerModalEvent
+ * @tc.desc: SendContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, SendContainerModalEvent, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendContainerModalEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SendContainerModalEvent("scb_back_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("scb_back_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "true");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ret = window->SendContainerModalEvent("win_waterfall_visibility", "false");
+    EXPECT_EQ(ret, WSError::WS_OK);
 }
 } // namespace
 } // namespace Rosen

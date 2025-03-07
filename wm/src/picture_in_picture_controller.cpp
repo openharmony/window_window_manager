@@ -31,7 +31,24 @@ namespace {
     constexpr uint32_t PIP_HIGH_PRIORITY = 1;
     const std::string PIP_CONTENT_PATH = "/system/etc/window/resources/pip_content.abc";
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
+    const std::string STATE_CHANGE = "stateChange";
+    const std::string UPDATE_NODE = "nodeUpdate";
     const int DEFAULT_ASPECT_RATIO[] = {16, 9};
+}
+
+static napi_value CallJsFunction(napi_env env, napi_value method, napi_value const * argv, size_t argc)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "called.");
+    if (env == nullptr || method == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "env nullptr or method is nullptr");
+        return nullptr;
+    }
+    napi_value result = nullptr;
+    napi_value callResult = nullptr;
+    napi_get_undefined(env, &result);
+    napi_get_undefined(env, &callResult);
+    napi_call_function(env, result, method, argc, argv, &callResult);
+    return callResult;
 }
 
 uint32_t PictureInPictureController::GetPipPriority(uint32_t pipTemplateType)
@@ -125,6 +142,7 @@ WMError PictureInPictureController::ShowPictureInPictureWindow(StartPipType star
             pipOption_->GetPipTemplate(), FAILED, "window is nullptr");
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
+    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_START);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStart();
     }
@@ -279,12 +297,14 @@ WMError PictureInPictureController::StopPictureInPicture(bool destroyWindow, Sto
         return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
     }
     curState_ = PiPWindowState::STATE_STOPPING;
+    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_STOP);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPreparePictureInPictureStop();
     }
     if (!destroyWindow) {
         ResetExtController();
         curState_ = PiPWindowState::STATE_STOPPED;
+        NotifyStateChangeInner(env_, PiPState::STOPPED);
         for (auto& listener : pipLifeCycleListeners_) {
             listener->OnPictureInPictureStop();
         }
@@ -360,6 +380,7 @@ WMError PictureInPictureController::DestroyPictureInPictureWindow()
     mainWindowLifeCycleListener_ = nullptr;
     PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
     window_ = nullptr;
+    NotifyStateChangeInner(env_, PiPState::STOPPED);
     PictureInPictureManager::RemoveActiveController(this);
     return WMError::WM_OK;
 }
@@ -391,7 +412,10 @@ void PictureInPictureController::SetAutoStartEnabled(bool enable)
         return;
     }
     uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
-    mainWindow_->SetAutoStartPiP(enable, priority);
+    uint32_t contentWidth = 0;
+    uint32_t contentHeight = 0;
+    pipOption_->GetContentSize(contentWidth, contentHeight);
+    mainWindow_->SetAutoStartPiP(enable, priority, contentWidth, contentHeight);
     if (isAutoStartEnabled_) {
         // cache navigation here as we cannot get containerId while BG
         if (!IsPullPiPAndHandleNavigation()) {
@@ -432,6 +456,17 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
         TLOGE(WmsLogTag::WMS_PIP, "invalid size");
         return;
     }
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption_ is nullptr");
+        return;
+    }
+    if (mainWindow_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "mainWindow width:%{public}u height:%{public}u", width, height);
+        uint32_t priority = GetPipPriority(pipOption_->GetPipTemplate());
+        uint32_t contentWidth = static_cast<uint32_t>(width);
+        uint32_t contentHeight = static_cast<uint32_t>(height);
+        mainWindow_->SetAutoStartPiP(isAutoStartEnabled_, priority, contentWidth, contentHeight);
+    }
     pipOption_->SetContentSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     if (curState_ != PiPWindowState::STATE_STARTED) {
         TLOGD(WmsLogTag::WMS_PIP, "UpdateContentSize is disabled when state: %{public}u", curState_);
@@ -455,13 +490,67 @@ void PictureInPictureController::UpdateContentSize(int32_t width, int32_t height
             window_->UpdatePiPRect(r, WindowSizeChangeReason::TRANSFORM);
         }
     }
-    TLOGI(WmsLogTag::WMS_PIP, "UpdateContentSize window: %{public}u width:%{public}u height:%{public}u",
+    TLOGI(WmsLogTag::WMS_PIP, "window: %{public}u width:%{public}u height:%{public}u",
         window_->GetWindowId(), width, height);
     Rect rect = {0, 0, width, height};
     window_->UpdatePiPRect(rect, WindowSizeChangeReason::PIP_RATIO_CHANGE);
     SingletonContainer::Get<PiPReporter>().ReportPiPRatio(width, height);
 }
 
+void PictureInPictureController::UpdateContentNodeRef(napi_ref nodeRef)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "option is null");
+        SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+            0, FAILED, "option is null");
+        return;
+    }
+    pipOption_->SetTypeNodeRef(nodeRef);
+    if (IsTypeNodeEnabled()) {
+        NotifyNodeUpdate(nodeRef);
+        return;
+    }
+    ResetExtController();
+    NotifyNodeUpdate(nodeRef);
+    if (isAutoStartEnabled_) {
+        std::string navId = pipOption_->GetNavigationId();
+        if (!navId.empty()) {
+            auto navController = NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+            if (navController) {
+                navController->DeletePIPMode(handleId_);
+                TLOGI(WmsLogTag::WMS_PIP, "Delete pip mode id: %{public}d", handleId_);
+            }
+        }
+    }
+    pipOption_->SetTypeNodeEnabled(true);
+}
+
+void PictureInPictureController::NotifyNodeUpdate(napi_ref nodeRef)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    if (nodeRef == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "invalid nodeRef");
+        SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+            pipOption_->GetPipTemplate(), FAILED, "invalid nodeRef");
+        return;
+    }
+    if (PictureInPictureManager::IsActiveController(weakRef_)) {
+        std::shared_ptr<NativeReference> updateNodeCallbackRef = GetPipContentCallbackRef(UPDATE_NODE);
+        if (updateNodeCallbackRef == nullptr) {
+            TLOGE(WmsLogTag::WMS_PIP, "updateNodeCallbackRef is null");
+            SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+                pipOption_->GetPipTemplate(), FAILED, "updateNodeCallbackRef is null");
+            return;
+        }
+        napi_value typeNode = nullptr;
+        napi_get_reference_value(env_, nodeRef, &typeNode);
+        napi_value value[] = { typeNode };
+        CallJsFunction(env_, updateNodeCallbackRef->GetNapiValue(), value, 1);
+        SingletonContainer::Get<PiPReporter>().ReportPiPUpdateContent(static_cast<int32_t>(IsTypeNodeEnabled()),
+            pipOption_->GetPipTemplate(), PIP_SUCCESS, "updateNode success");
+    }
+}
 
 void PictureInPictureController::UpdatePiPControlStatus(PiPControlType controlType, PiPControlStatus status)
 {
@@ -507,6 +596,7 @@ void PictureInPictureController::PreRestorePictureInPicture()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     curState_ = PiPWindowState::STATE_RESTORING;
+    NotifyStateChangeInner(env_, PiPState::ABOUT_TO_RESTORE);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnRestoreUserInterface();
     }
@@ -524,6 +614,19 @@ void PictureInPictureController::DoControlEvent(PiPControlType controlType, PiPC
         listener->OnControlEvent(controlType, status);
     }
     pipOption_->SetPiPControlStatus(controlType, status);
+}
+
+void PictureInPictureController::PipSizeChange(uint32_t width, uint32_t height, double scale)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "notify size info width: %{public}u, height: %{public}u scale: %{public}f",
+          width, height, scale);
+    PiPWindowSize windowSize;
+    windowSize.width = width;
+    windowSize.height = height;
+    windowSize.scale = scale;
+    for (auto& listener : pipWindowSizeListeners_) {
+        listener->OnPipSizeChange(windowSize);
+    }
 }
 
 void PictureInPictureController::RestorePictureInPictureWindow()
@@ -676,8 +779,47 @@ WMError PictureInPictureController::SetXComponentController(std::shared_ptr<XCom
     return WMError::WM_OK;
 }
 
+WMError PictureInPictureController::RegisterPipContentListenerWithType(const std::string& type,
+    std::shared_ptr<NativeReference> callbackRef)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "Register type:%{public}s", type.c_str());
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    pipOption_->RegisterPipContentListenerWithType(type, callbackRef);
+    return WMError::WM_OK;
+}
+
+WMError PictureInPictureController::UnRegisterPipContentListenerWithType(const std::string& type)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "Unregister type:%{public}s", type.c_str());
+    if (pipOption_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Get PictureInPicture option failed");
+        return WMError::WM_ERROR_PIP_STATE_ABNORMALLY;
+    }
+    pipOption_->UnRegisterPipContentListenerWithType(type);
+    return WMError::WM_OK;
+}
+
+std::shared_ptr<NativeReference> PictureInPictureController::GetPipContentCallbackRef(const std::string& type)
+{
+    return pipOption_ == nullptr ? nullptr : pipOption_->GetPipContentCallbackRef(type);
+}
+
+void PictureInPictureController::NotifyStateChangeInner(napi_env env, PiPState state)
+{
+    std::shared_ptr<NativeReference> innerCallbackRef = GetPipContentCallbackRef(STATE_CHANGE);
+    if (innerCallbackRef == nullptr) {
+        return;
+    }
+    napi_value value[] = {AbilityRuntime::CreateJsValue(env, static_cast<uint32_t>(state))};
+    CallJsFunction(env, innerCallbackRef->GetNapiValue(), value, 1);
+}
+
 void PictureInPictureController::OnPictureInPictureStart()
 {
+    NotifyStateChangeInner(env_, PiPState::STARTED);
     for (auto& listener : pipLifeCycleListeners_) {
         listener->OnPictureInPictureStart();
     }
@@ -703,6 +845,11 @@ WMError PictureInPictureController::RegisterPiPControlObserver(const sptr<IPiPCo
     return RegisterListener(pipControlObservers_, listener);
 }
 
+WMError PictureInPictureController::RegisterPiPWindowSize(const sptr<IPiPWindowSize>& listener)
+{
+    return RegisterListener(pipWindowSizeListeners_, listener);
+}
+
 WMError PictureInPictureController::UnregisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)
 {
     return UnregisterListener(pipLifeCycleListeners_, listener);
@@ -716,6 +863,11 @@ WMError PictureInPictureController::UnregisterPiPActionObserver(const sptr<IPiPA
 WMError PictureInPictureController::UnregisterPiPControlObserver(const sptr<IPiPControlObserver>& listener)
 {
     return UnregisterListener(pipControlObservers_, listener);
+}
+
+WMError PictureInPictureController::UnregisterPiPWindowSize(const sptr<IPiPWindowSize>& listener)
+{
+    return UnregisterListener(pipWindowSizeListeners_, listener);
 }
 
 template<typename T>
@@ -766,14 +918,20 @@ bool PictureInPictureController::IsPullPiPAndHandleNavigation()
     if (navController) {
         if (navController->IsNavDestinationInTopStack()) {
             handleId_ = navController->GetTopHandle();
-            if (handleId_ != -1) {
-                TLOGD(WmsLogTag::WMS_PIP, "Top handle id : %{public}d", handleId_);
-                navController->SetInPIPMode(handleId_);
-                return true;
-            } else {
+            if (handleId_ == -1) {
                 TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
                 return false;
             }
+            if (firstHandleId_ != -1) {
+                handleId_ = firstHandleId_;
+                navController->SetInPIPMode(handleId_);
+                TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
+            } else {
+                TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
+                firstHandleId_ = handleId_;
+                navController->SetInPIPMode(handleId_);
+            }
+            return true;
         } else {
             TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
             return false;

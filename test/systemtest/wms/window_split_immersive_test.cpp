@@ -112,8 +112,8 @@ HWTEST_F(WindowSplitImmersiveTest, SplitImmersive01, Function | MediumTest | Lev
     sleep(SPLIT_TEST_SLEEP_S);
 
     // check is enter split Immersive
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetMode());
-    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_PRIMARY, priWindow->GetWindowMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_SPLIT_SECONDARY, fullWindow->GetWindowMode());
     Rect immersivePriRect = priWindow->GetRect();
     ASSERT_EQ(0, immersivePriRect.posX_);
     ASSERT_EQ(0, immersivePriRect.posY_);

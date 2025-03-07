@@ -1370,7 +1370,8 @@ HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen, Function | SmallTest | Level
     DisplayManagerProxy proxy(remoteMocker);
     EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
     std::vector<ScreenId> screenIds;
-    auto result = proxy.MakeUniqueScreen(screenIds);
+    std::vector<DisplayId> displayIds;
+    auto result = proxy.MakeUniqueScreen(screenIds, displayIds);
     EXPECT_EQ(DMError::DM_OK, result);
 }
 
@@ -1588,7 +1589,8 @@ HWTEST_F(DisplayManagerProxyTest, MakeUniqueScreen02, Function | SmallTest | Lev
     DisplayManagerProxy proxy(remoteMocker);
     EXPECT_EQ(static_cast<sptr<IRemoteObject>>(remoteMocker), proxy.remoteObject_);
     std::vector<ScreenId> screenIds;
-    auto result = proxy.MakeUniqueScreen(screenIds);
+    std::vector<DisplayId> displayIds;
+    auto result = proxy.MakeUniqueScreen(screenIds, displayIds);
     EXPECT_EQ(DMError::DM_OK, result);
 }
 }

@@ -48,7 +48,7 @@ public:
     bool GetTentMode();
     FoldDisplayMode GetModeMatchStatus();
     void SetFoldStatus(FoldStatus foldStatus);
-    void OnTentModeChanged(bool isTentMode);
+    void OnTentModeChanged(bool isTentMode, int32_t hall = -1);
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     ScreenId GetCurrentScreenId();
     void LockDisplayStatus(bool locked);
@@ -56,6 +56,8 @@ public:
     void UpdateForPhyScreenPropertyChange();
     void ExitCoordination();
     Drawing::Rect GetScreenSnapshotRect();
+    void SetMainScreenRegion(DMRect& mainScreenRegion);
+    bool GetCameraMode();
     /*
      *    Avoid fold to expand process queues public interface
      */

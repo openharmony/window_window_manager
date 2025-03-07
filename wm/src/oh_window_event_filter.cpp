@@ -65,6 +65,8 @@ KeyEventFilterFunc convert2Func(OH_NativeWindowManager_KeyEventFilter filter)
         }
         OH_Input_SetKeyEventAction(input, iter->second);
         OH_Input_SetKeyEventActionTime(input, keyEvent.GetActionTime());
+        OH_Input_SetKeyEventWindowId(input, keyEvent.GetTargetWindowId());
+        OH_Input_SetKeyEventDisplayId(input, keyEvent.GetTargetDisplayId());
         return filter(input);
     };
 }
@@ -126,6 +128,8 @@ MouseEventFilterFunc convert2MouseEventFilterFunc(OH_NativeWindowManager_MouseEv
         OH_Input_SetMouseEventDisplayX(mouseEvent, item.GetDisplayX());
         OH_Input_SetMouseEventDisplayY(mouseEvent, item.GetDisplayY());
         OH_Input_SetMouseEventActionTime(mouseEvent, event.GetActionTime());
+        OH_Input_SetMouseEventWindowId(mouseEvent, event.GetTargetWindowId());
+        OH_Input_SetMouseEventDisplayId(mouseEvent, event.GetTargetDisplayId());
         bool res = filter(mouseEvent);
         OH_Input_DestroyMouseEvent(&mouseEvent);
         return res;
@@ -182,6 +186,8 @@ TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEv
         OH_Input_SetTouchEventDisplayX(touchEvent, item.GetDisplayX());
         OH_Input_SetTouchEventDisplayY(touchEvent, item.GetDisplayY());
         OH_Input_SetTouchEventActionTime(touchEvent, event.GetActionTime());
+        OH_Input_SetTouchEventWindowId(touchEvent, event.GetTargetWindowId());
+        OH_Input_SetTouchEventDisplayId(touchEvent, event.GetTargetDisplayId());
         bool res = filter(touchEvent);
         OH_Input_DestroyTouchEvent(&touchEvent);
         return res;

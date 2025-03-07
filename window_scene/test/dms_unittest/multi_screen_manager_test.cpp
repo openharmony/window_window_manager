@@ -19,6 +19,7 @@
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "display_manager_agent_default.h"
 #include "zidl/screen_session_manager_client_interface.h"
+#include "common_test_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -31,8 +32,7 @@ constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 class TestClient : public IScreenSessionManagerClient {
 public:
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override {};
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) override {};
+    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override {};
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override {};
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -54,7 +54,11 @@ public:
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override {};
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override {};
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override {};
+    void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override {}
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override {};
+    void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override {};
+    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override {}
     sptr<IRemoteObject> AsObject() override {return testPtr;};
     sptr<IRemoteObject> testPtr;
 };
@@ -65,10 +69,15 @@ public:
     void SetUp() override;
     void TearDown() override;
     sptr<TestClient> testClient_;
+    void SetAceessTokenPermission(const std::string processName);
 };
 
 void MultiScreenManagerTest::SetUpTestCase()
 {
+    CommonTestUtils::InjectTokenInfoByHapName(0, "com.ohos.systemui", 0);
+    const char** perms = new const char *[1];
+    perms[0] = "ohos.permission.CAPTURE_SCREEN";
+    CommonTestUtils::SetAceessTokenPermission("foundation", perms, 1);
 }
 
 void MultiScreenManagerTest::TearDownTestCase()
@@ -658,7 +667,8 @@ HWTEST_F(MultiScreenManagerTest, VirtualScreenUniqueSwitch12, Function | SmallTe
 HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {};
-    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
+    std::vector<DisplayId> displayIds;
+    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
@@ -670,8 +680,9 @@ HWTEST_F(MultiScreenManagerTest, UniqueSwitch01, Function | SmallTest | Level1)
 HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, Function | SmallTest | Level1)
 {
     std::vector<ScreenId> screenIds = {1001, 1002};
-    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds);
-    EXPECT_EQ(ret, DMError::DM_OK);
+    std::vector<DisplayId> displayIds;
+    DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**

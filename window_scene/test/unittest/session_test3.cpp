@@ -544,22 +544,6 @@ HWTEST_F(WindowSessionTest3, SetBufferAvailableChangeListener, Function | SmallT
 }
 
 /**
- * @tc.name: SetLeashWindowSurfaceNodeChangedListener
- * @tc.desc: SetLeashWindowSurfaceNodeChangedListener Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest3, SetLeashWindowSurfaceNodeChangedListener, Function | SmallTest | Level2)
-{
-    int resultValue = 0;
-    NotifyLeashWindowSurfaceNodeChangedFunc func = [&resultValue]() {
-        resultValue += 1;
-    };
-    session_->SetLeashWindowSurfaceNodeChangedListener(func);
-    session_->SetLeashWinSurfaceNode(nullptr);
-    ASSERT_EQ(resultValue, 1);
-}
-
-/**
  * @tc.name: NotifySessionFocusableChange
  * @tc.desc: NotifySessionFocusableChange Test
  * @tc.type: FUNC
@@ -1145,12 +1129,12 @@ HWTEST_F(WindowSessionTest3, SetFreezeImmediately, Function | SmallTest | Level2
     struct RSSurfaceNodeConfig config;
     session_->surfaceNode_ = RSSurfaceNode::Create(config);
     ASSERT_NE(session_->surfaceNode_, nullptr);
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
     session_->surfaceNode_->bufferAvailable_ = true;
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, true, 1.0f));
     session_->surfaceNode_ = nullptr;
-    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false));
+    ASSERT_EQ(nullptr, session_->SetFreezeImmediately(1.0f, false, 1.0f));
 }
 }
 } // namespace Rosen

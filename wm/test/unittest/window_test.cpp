@@ -284,19 +284,19 @@ HWTEST_F(WindowTest, GetType, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: GetMode
+ * @tc.name: GetWindowMode
  * @tc.desc: get mode
  * @tc.type: FUNC
  */
-HWTEST_F(WindowTest, GetMode, Function | SmallTest | Level2)
+HWTEST_F(WindowTest, GetWindowMode, Function | SmallTest | Level2)
 {
     sptr<Window> window = sptr<Window>::MakeSptr();
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window->GetWindowMode());
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 
     sptr<Window> window2 = sptr<Window>::MakeSptr();
     ASSERT_NE(nullptr, window2);
-    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window2->GetMode());
+    ASSERT_EQ(WindowMode::WINDOW_MODE_UNDEFINED, window2->GetWindowMode());
 }
 
 /**
@@ -1649,7 +1649,7 @@ HWTEST_F(WindowTest, Recover, Function | SmallTest | Level2)
 
 /**
  * @tc.name: Close
- * @tc.desc: get
+ * @tc.desc: Close
  * @tc.type: FUNC
  */
 HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
@@ -1657,6 +1657,19 @@ HWTEST_F(WindowTest, Close, Function | SmallTest | Level2)
     sptr<Window> window = sptr<Window>::MakeSptr();
     auto ret = window->Close();
     ASSERT_EQ(true, ret == WMError::WM_OK);
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: CloseDirectly
+ * @tc.desc: CloseDirectly
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, CloseDirectly, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    auto ret = window->CloseDirectly();
+    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 
@@ -2481,7 +2494,9 @@ HWTEST_F(WindowTest, Test01, Function | SmallTest | Level2)
     sptr<Window> window = sptr<Window>::MakeSptr();
     SystemBarProperty prop;
     ASSERT_EQ(WMError::WM_OK, window->SetSpecificBarProperty(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW, prop));
+    bool isVisble = false;
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetDecorVisible(true));
+    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->GetDecorVisible(isVisble));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetWindowTitleMoveEnabled(true));
     ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetTitleButtonVisible(true, true, true, true));
     auto var = 5;
@@ -2633,6 +2648,20 @@ HWTEST_F(WindowTest, GetWindowStatus, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetCompatibleModeInPc
+ * @tc.desc: GetCompatibleModeInPc
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetCompatibleModeInPc, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_NE(window, nullptr);
+    auto ret = window->GetCompatibleModeInPc();
+    EXPECT_EQ(false, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: IsPcOrPadCapabilityEnabled
  * @tc.desc: IsPcOrPadCapabilityEnabled
  * @tc.type: FUNC
@@ -2672,6 +2701,34 @@ HWTEST_F(WindowTest, UnregisterMainWindowCloseListeners, Function | SmallTest | 
     ASSERT_NE(window, nullptr);
     sptr<IMainWindowCloseListener> listener = sptr<IMainWindowCloseListener>::MakeSptr();
     auto ret = window->UnregisterMainWindowCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: RegisterWindowWillCloseListeners
+ * @tc.desc: RegisterWindowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, RegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
+    auto ret = window->RegisterWindowWillCloseListeners(listener);
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
+    EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: UnRegisterWindowWillCloseListeners
+ * @tc.desc: UnRegisterWindowWillCloseListeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, UnRegisterWindowWillCloseListeners, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    sptr<IWindowWillCloseListener> listener = sptr<IWindowWillCloseListener>::MakeSptr();
+    auto ret = window->UnRegisterWindowWillCloseListeners(listener);
     EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
 }
@@ -2735,6 +2792,19 @@ HWTEST_F(WindowTest, GetIsMidScene, Function | SmallTest | Level2)
     EXPECT_EQ(WMError::WM_OK, res);
     ASSERT_EQ(isMidScene, false);
     EXPECT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
+ * @tc.name: GetLayoutTransform
+ * @tc.desc: get
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, GetLayoutTransform, Function | SmallTest | Level2)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    Transform trans;
+    ASSERT_EQ(trans, window->GetLayoutTransform());
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
 } // namespace
 } // namespace Rosen

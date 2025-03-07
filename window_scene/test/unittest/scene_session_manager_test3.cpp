@@ -18,6 +18,8 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -977,24 +979,26 @@ HWTEST_F(SceneSessionManagerTest3, IsNeedChangeLifeCycleOnUserSwitch4, Function 
 }
 
 /**
- * @tc.name: NotifySwitchingUser
+ * @tc.name: HandleUserSwitch
  * @tc.desc: SceneSesionManager notify switching user
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch, Function | SmallTest | Level3)
 {
     int ret = 0;
-    ssm_->NotifySwitchingUser(true);
-    ssm_->NotifySwitchingUser(false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, true);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, true);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, false);
     ASSERT_EQ(ret, 0);
 }
 
 /**
- * @tc.name: NotifySwitchingUser1
+ * @tc.name: HandleUserSwitch1
  * @tc.desc: notify switching user on PC
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser1, Function | SmallTest | Level3)
+HWTEST_F(SceneSessionManagerTest3, HandleUserSwitch1, Function | SmallTest | Level3)
 {
     ASSERT_NE(nullptr, ssm_);
     ssm_->systemConfig_.backgroundswitch = true;
@@ -1012,7 +1016,8 @@ HWTEST_F(SceneSessionManagerTest3, NotifySwitchingUser1, Function | SmallTest | 
     sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), nullptr });
-    ssm_->NotifySwitchingUser(false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHING, false);
+    ssm_->HandleUserSwitch(UserSwitchEventType::SWITCHED, false);
 }
 
 /**
@@ -1270,7 +1275,7 @@ HWTEST_F(SceneSessionManagerTest3, HandleHideNonSystemFloatingWindows, Function 
 HWTEST_F(SceneSessionManagerTest3, UpdateBrightness, Function | SmallTest | Level3)
 {
     int32_t persistentId = 10086;
-    WSError result01 = ssm_->UpdateBrightness(persistentId);
+    WSError result01 = ssm_->UpdateBrightness(persistentId, false);
     EXPECT_EQ(result01, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1319,10 +1324,10 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, Function | SmallTest | L
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, INVALID_SESSION_ID);
     int32_t persistentId = INVALID_SESSION_ID;
-    WSError result01 = ssm_->SetFocusedSessionId(persistentId);
+    WSError result01 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
     persistentId = 10086;
-    WSError result02 = ssm_->SetFocusedSessionId(persistentId);
+    WSError result02 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result02, WSError::WS_OK);
     ASSERT_EQ(ssm_->GetFocusedSessionId(), 10086);
 }
@@ -1358,6 +1363,22 @@ HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: RequestFocusStatusBySA
+ * @tc.desc: SceneSesionManager request focus status by SA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, RequestFocusStatusBySA, Function | SmallTest | Level3)
+{
+    int32_t persistentId = 3;
+    bool isFocused = true;
+    bool byForeground = true;
+    FocusChangeReason reason = FocusChangeReason::CLICK;
+    auto result = ssm_->SceneSessionManager::RequestFocusStatusBySA(
+        persistentId, isFocused, byForeground, reason);
+    ASSERT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
  * @tc.name: NotifyRequestFocusStatusNotifyManager
  * @tc.desc: NotifyRequestFocusStatusNotifyManager test.
  * @tc.type: FUNC
@@ -1386,10 +1407,10 @@ HWTEST_F(SceneSessionManagerTest3, NotifyRequestFocusStatusNotifyManager, Functi
 HWTEST_F(SceneSessionManagerTest3, GetTopNearestBlockingFocusSession, Function | SmallTest | Level3)
 {
     uint32_t zOrder = 9999;
-    sptr<SceneSession> session = ssm_->GetTopNearestBlockingFocusSession(zOrder, true);
+    sptr<SceneSession> session = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, zOrder, true);
     EXPECT_EQ(session, nullptr);
 
-    session = ssm_->GetTopNearestBlockingFocusSession(zOrder, false);
+    session = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, zOrder, false);
     EXPECT_EQ(session, nullptr);
 }
 
@@ -1421,16 +1442,29 @@ HWTEST_F(SceneSessionManagerTest3, ShiftAppWindowFocus, Function | SmallTest | L
 {
     int32_t focusedSession = ssm_->GetFocusedSessionId();
     EXPECT_EQ(focusedSession, 10086);
-    int32_t sourcePersistentId = INVALID_SESSION_ID;
-    int32_t targetPersistentId = INVALID_SESSION_ID;
+    int32_t sourcePersistentId = 1;
+    int32_t targetPersistentId = 10086;
     WSError result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION);
+    SessionInfo info;
+    info.abilityName_ = "ShiftAppWindowFocus";
+    info.bundleName_ = "ShiftAppWindowFocus";
+    auto sourceSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sourceSceneSession->persistentId_ = 1;
+    sourceSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, sourceSceneSession));
+    result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
     EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_OPERATION);
-    targetPersistentId = 1;
+
+    auto targetSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    targetSceneSession->persistentId_ = 10086;
+    targetSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ssm_->sceneSessionMap_.insert(std::make_pair(10086, targetSceneSession));
+    result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
+    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_OPERATION);
+    sourcePersistentId = 10086;
     WSError result02 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_OPERATION);
-    sourcePersistentId = 1;
-    WSError result03 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(result02, WSError::WS_DO_NOTHING);
 }
 
 /**

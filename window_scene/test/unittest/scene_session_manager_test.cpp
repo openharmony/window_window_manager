@@ -20,6 +20,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "screen_fold_data.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -1645,6 +1646,42 @@ HWTEST_F(SceneSessionManagerTest, TestIsEnablePiPCreate, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: TestIsPiPForbidden
+ * @tc.desc: Test if pip window is forbidden to use;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, Function | SmallTest | Level3)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestIsPiPForbidden start";
+    int32_t persistentId = 1001;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetParentPersistentId(persistentId);
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = persistentId;
+    sessionInfo.bundleName_ = "test1";
+    sessionInfo.abilityName_ = "test2";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    property->SetDisplayId(-1ULL);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+
+    uint64_t displayId = 1001;
+    property->SetDisplayId(displayId);
+    sceneSession->SetSessionProperty(property);
+    ssm_->sceneSessionMap_[persistentId] = sceneSession;
+    sptr<ScreenSession> screenSession = new ScreenSession();
+    screenSession->SetName("HiCar");
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({displayId, screenSession});
+    ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FLOAT));
+}
+
+/**
  * @tc.name: GetAllMainWindowInfos
  * @tc.desc: GetAllMainWindowInfos
  * @tc.type: FUNC
@@ -2444,6 +2481,23 @@ HWTEST_F(SceneSessionManagerTest, GetAppDragResizeType, Function | SmallTest | L
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
     DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
     ASSERT_EQ(ssm_->GetAppDragResizeType(info.bundleName_, dragResizeType), WMError::WM_OK);
+}
+
+/**
+ * @tc.name: BuildCancelPointerEvent
+ * @tc.desc: test function : BuildCancelPointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, BuildCancelPointerEvent, Function | SmallTest | Level3)
+{
+    auto pointerEvent = MMI::PointerEvent::Create();
+    ssm_->BuildCancelPointerEvent(pointerEvent, 0, MMI::PointerEvent::POINTER_ACTION_DOWN, 2);
+    int32_t pointerId = 99999999;
+    ASSERT_EQ(pointerEvent->GetId(), pointerId);
+    ASSERT_EQ(pointerEvent->GetTargetWindowId(), 2);
+    ASSERT_EQ(pointerEvent->GetPointerId(), 0);
+    ASSERT_EQ(pointerEvent->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_CANCEL);
+    ASSERT_EQ(pointerEvent->GetSourceType(), MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
 }
 }
 } // namespace Rosen

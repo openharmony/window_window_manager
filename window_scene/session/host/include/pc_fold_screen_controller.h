@@ -30,16 +30,17 @@ public:
     PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId);
     ~PcFoldScreenController();
     void OnConnect();
-    void FoldStatusChangeForFullScreenWaterfallMode(
-        DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
-    void FoldStatusChangeForSupportEnterWaterfallMode(
-        DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     bool IsHalfFolded(DisplayId displayId);
     bool IsAllowThrowSlip(DisplayId displayId);
     bool NeedFollowHandAnimation();
     void RecordStartMoveRect(const WSRect& rect, bool isStartFullScreen);
+    void RecordStartMoveRectDirectly(const WSRect& rect, const WSRectF& velocity, bool isStartFullScreen);
+    void ResetRecords();
     void RecordMoveRects(const WSRect& rect);
     bool ThrowSlip(DisplayId displayId, WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
+    void ThrowSlipFloatingRectDirectly(WSRect& rect, const WSRect& floatingRect,
+        int32_t topAvoidHeight, int32_t botAvoidHeight);
+    bool IsThrowSlipDirectly() const;
     bool IsStartFullScreen();
     void ResizeToFullScreen(WSRect& rect, int32_t topAvoidHeight, int32_t botAvoidHeight);
 
@@ -55,24 +56,41 @@ public:
     void RegisterFullScreenWaterfallModeChangeCallback(std::function<void(bool isWaterfallMode)>&& func);
     void UnregisterFullScreenWaterfallModeChangeCallback();
     void UpdateSupportEnterWaterfallMode();
+    void MaskSupportEnterWaterfallMode();
 
 private:
     int32_t GetPersistentId() const;
     DisplayId GetDisplayId();
     int32_t GetTitleHeight() const;
     WSRectF CalculateMovingVelocity();
+    void ThrowSlipHiSysEvent(const std::string& bundleName, ScreenSide startSide,
+        ThrowSlipWindowMode startWindowMode, ThrowSlipMode throwMode) const;
+
+    bool IsSupportEnterWaterfallMode(SuperFoldStatus status, bool hasSystemKeyboard) const;
+    void FoldStatusChangeForFullScreenWaterfallMode(
+        DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void FoldStatusChangeForSupportEnterWaterfallMode(
+        DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
+    void SystemKeyboardStatusChangeForFullScreenWaterfallMode(
+        DisplayId displayId, bool hasSystemKeyboard);
+    void SystemKeyboardStatusChangeForSupportEnterWaterfallMode(
+        DisplayId displayId, bool hasSystemKeyboard);
 
     wptr<SceneSession> weakSceneSession_ = nullptr;
     int32_t persistentId_;
 
     // use queue to calculate velocity
-    std::mutex moveMutex_;
+    mutable std::mutex moveMutex_;
     WSRect startMoveRect_;
     bool isStartFullScreen_ { false };
+    bool isStartWaterfallMode_ { false };
     RectRecordsVector movingRectRecords_;
+    bool isStartDirectly_ { false };
+    WSRectF startVelocity_;
     // Above guarded by moveMutex_
 
     std::shared_ptr<FoldScreenStatusChangeCallback> onFoldScreenStatusChangeCallback_;
+    std::shared_ptr<SystemKeyboardStatusChangeCallback> onSystemKeyboardStatusChangeCallback_;
 
     /*
      * Waterfall Mode
@@ -82,6 +100,7 @@ private:
     bool isFullScreenWaterfallMode_ { false };
     bool lastSupportEnterWaterfallMode_ { false };
     bool supportEnterWaterfallMode_ { false };
+    bool maskSupportEnterWaterfallMode_ { false };
     std::function<void(bool isWaterfallMode)> fullScreenWaterfallModeChangeCallback_ { nullptr };
 };
 } // namespace OHOS::Rosen

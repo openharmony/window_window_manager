@@ -90,6 +90,10 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_PEN = 41,
     STATE_CHANGE_REASON_SHUT_DOWN = 42,
     STATE_CHANGE_REASON_SCREEN_CONNECT = 43,
+    STATE_CHANGE_REASON_HIBERNATE = 45,
+    STATE_CHANGE_REASON_EX_SCREEN_INIT = 46,
+    STATE_CHANGE_REASON_ABNORMAL_SCREEN_CONNECT = 47,
+    STATE_CHANGE_REASON_ROLLBACK_HIBERNATE = 48,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -116,6 +120,10 @@ enum class ScreenPropertyChangeType : uint32_t {
     ROTATION_END,
     /* Only update screen rotation property info to DMS. */
     ROTATION_UPDATE_PROPERTY_ONLY,
+    /* Only update screen rotation property info not notify. */
+    ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY,
+    /* Undefined. */
+    UNDEFINED,
 };
 
 /**
@@ -124,6 +132,17 @@ enum class ScreenPropertyChangeType : uint32_t {
 enum class ScreenShape : uint32_t {
     RECTANGLE = 0,
     ROUND = 1,
+};
+
+/**
+ * @brief displayed soure mode
+ */
+enum class DisplaySourceMode : uint32_t {
+    NONE = 0,
+    MAIN = 1,
+    MIRROR = 2,
+    EXTEND = 3,
+    ALONE = 4,
 };
 
 /**
@@ -352,6 +371,7 @@ enum class DisplayStateChangeType : uint32_t {
     DISPLAY_COMPRESS,
     UPDATE_SCALE,
     UNKNOWN,
+    RESOLUTION_CHANGE,
 };
 
 /**
@@ -406,6 +426,15 @@ enum class SuperFoldStatus : uint32_t {
 };
 
 /**
+ * @brief Enumerates the extend screen connect status.
+ */
+enum class ExtendScreenConnectStatus: uint32_t {
+    UNKNOWN = 0,
+    CONNECT,
+    DISCONNECT,
+};
+
+/**
  * @brief Enumerates the fold display mode.
  */
 enum class FoldDisplayMode: uint32_t {
@@ -442,6 +471,17 @@ enum class LowTempMode: int32_t {
     UNKNOWN = -1,
     LowTempOff = 0,
     LowTempOn = 1,
+};
+
+/**
+ * @brief Enumerates the virtual screen type.
+ */
+enum class VirtualScreenType: uint32_t {
+    UNKNOWN = 0,
+    SCREEN_CASTING,
+    SCREEN_RECORDING,
+    SUPER_DESKTOP,
+    HICAR,
 };
 
 struct Point {
@@ -542,6 +582,17 @@ struct DMRect {
     {
         return {0, 0, 0, 0};
     }
+};
+
+/**
+ * @brief Session option when connect
+ */
+struct SessionOption {
+    ScreenId rsId_;
+    std::string name_;
+    bool isExtend_;
+    std::string innerName_;
+    ScreenId screenId_;
 };
 }
 }

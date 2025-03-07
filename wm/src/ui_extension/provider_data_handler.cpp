@@ -20,13 +20,13 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen::Extension {
-sptr<SessionProxy> ProviderDataHandler::GetRemoteProxy()
+sptr<ISession> ProviderDataHandler::GetRemoteProxy()
 {
     std::lock_guard lock(mutex_);
     if (remoteProxy_ == nullptr) {
         return nullptr;
     }
-    return iface_cast<SessionProxy>(remoteProxy_);
+    return iface_cast<ISession>(remoteProxy_);
 }
 
 DataHandlerErr ProviderDataHandler::SendData(const AAFwk::Want& toSend, AAFwk::Want& reply,

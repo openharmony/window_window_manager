@@ -46,7 +46,7 @@ public:
     virtual WMError DestroyWindow(uint32_t windowId);
     virtual WMError RequestFocus(uint32_t windowId);
     virtual WMError GetAvoidAreaByType(uint32_t windowId, AvoidAreaType type, AvoidArea& avoidRect,
-        const Rect& rect = {0, 0, 0, 0});
+        const Rect& rect = Rect::EMPTY_RECT);
     virtual WMError GetTopWindowId(uint32_t mainWinId, uint32_t& topWinId);
     virtual WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId);
     virtual void NotifyServerReadyToMoveOrDrag(uint32_t windowId, sptr<WindowProperty>& windowProperty,
@@ -75,6 +75,7 @@ public:
 
     virtual WMError GetAccessibilityWindowInfo(std::vector<sptr<AccessibilityWindowInfo>>& infos);
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
+    virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
     virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual void MinimizeWindowsByLauncher(std::vector<uint32_t> windowIds, bool isAnimated,
@@ -94,7 +95,7 @@ public:
         std::vector<sptr<RSWindowAnimationTarget>>& targets);
     virtual void SetMaximizeMode(MaximizeMode maximizeMode);
     virtual MaximizeMode GetMaximizeMode();
-    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
     virtual WMError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener);
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
@@ -113,10 +114,12 @@ public:
     virtual WMError SetSessionGravity(int32_t persistentId, SessionGravity gravity, uint32_t percent);
     virtual WMError BindDialogSessionTarget(uint64_t persistentId, sptr<IRemoteObject> targetToken);
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused);
+    virtual WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST);
     virtual void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId);
+        const sptr<IRemoteObject>& token, uint64_t surfaceNodeId, bool isConstrainedModal = false);
     virtual void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
-        const sptr<IRemoteObject>& token);
+        const sptr<IRemoteObject>& token, bool isConstrainedModal = false);
     virtual void UpdateModalExtensionRect(const sptr<IRemoteObject>& token, Rect rect);
     virtual void ProcessModalExtensionPointDown(const sptr<IRemoteObject>& token, int32_t posX, int32_t posY);
     virtual WMError AddOrRemoveSecureSession(int32_t persistentId, bool shouldHide);
@@ -165,9 +168,13 @@ public:
 
 private:
     static inline SingletonDelegator<WindowAdapter> delegator;
-    void OnUserSwitch();
     bool InitWMSProxy();
     bool InitSSMProxy();
+
+    /*
+     * Multi User
+     */
+    void OnUserSwitch();
 
     /*
      * Window Recover

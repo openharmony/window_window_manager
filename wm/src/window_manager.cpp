@@ -27,6 +27,7 @@
 #include "window_manager_hilog.h"
 #include "window_display_change_adapter.h"
 #include "wm_common.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -101,7 +102,7 @@ public:
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
     {
         std::shared_lock<std::shared_mutex> lock(listenerMutex_);
@@ -389,7 +390,7 @@ WMError WindowManager::RegisterWMSConnectionChangedListener(const sptr<IWMSConne
         TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS connection changed listener registered could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "Register enter");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "Register enter");
     {
         std::unique_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
         if (pImpl_->wmsConnectionChangedListener_) {
@@ -428,7 +429,7 @@ WMError WindowManager::RegisterFocusChangedListener(const sptr<IFocusChangedList
     if (pImpl_->focusChangedListenerAgent_ == nullptr) {
         pImpl_->focusChangedListenerAgent_ = new WindowManagerAgent();
     }
-    ret = SingletonContainer::Get<WindowAdapter>().RegisterWindowManagerAgent(
+    ret = WindowAdapter::GetInstance().RegisterWindowManagerAgent(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_FOCUS, pImpl_->focusChangedListenerAgent_);
     if (ret != WMError::WM_OK) {
         WLOGFW("RegisterWindowManagerAgent failed!");
@@ -1033,9 +1034,9 @@ WMError WindowManager::NotifyDisplayInfoChange(const sptr<IRemoteObject>& token,
     return WMError::WM_OK;
 }
 
-void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
-    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo);
+    SingletonContainer::Get<WindowAdapter>().GetFocusWindowInfo(focusInfo, displayId);
 }
 
 void WindowManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const
@@ -1115,6 +1116,20 @@ WMError WindowManager::GetUnreliableWindowInfo(int32_t windowId,
     WMError ret = SingletonContainer::Get<WindowAdapter>().GetUnreliableWindowInfo(windowId, infos);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "get unreliable window info failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
+    std::vector<sptr<WindowInfo>>& infos) const
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowInfoOption: %{public}u %{public}u %{public}" PRIu64" %{public}d",
+        static_cast<WindowInfoFilterOptionDataType>(windowInfoOption.windowInfoFilterOption),
+        static_cast<WindowInfoTypeOptionDataType>(windowInfoOption.windowInfoTypeOption),
+        windowInfoOption.displayId, windowInfoOption.windowId);
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ListWindowInfo(windowInfoOption, infos);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
     return ret;
 }
@@ -1507,6 +1522,24 @@ WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_
         sourceWindowId, targetWindowId);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::RequestFocus(int32_t persistentId, bool isFocused,
+    bool byForeground, WindowFocusChangeReason reason)
+{
+    int32_t curReason = static_cast<int32_t>(reason);
+    int32_t reasonStart = static_cast<int32_t>(FocusChangeReason::DEFAULT);
+    int32_t reasonEnd = static_cast<int32_t>(FocusChangeReason::MAX);
+    if (curReason < reasonStart || curReason > reasonEnd) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "could not find focus reason");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    WMError ret = SingletonContainer::Get<WindowAdapter>().RequestFocusStatusBySA(persistentId,
+        isFocused, byForeground, static_cast<FocusChangeReason>(curReason));
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "failed");
     }
     return ret;
 }

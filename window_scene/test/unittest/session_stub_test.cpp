@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <ipc_types.h>
 #include <pointer_event.h>
 #include "iremote_object_mocker.h"
@@ -399,6 +400,10 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_EXTENSION_EVENT_ASYNC), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
+    ASSERT_EQ(data.WriteFloat(1.0f), true);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
 }
 
 /**
@@ -464,6 +469,7 @@ HWTEST_F(SessionStubTest, sessionStubTest03, Function | SmallTest | Level2)
     ASSERT_EQ(data.WriteInt32(0), true);
     ASSERT_EQ(data.WriteInt32(10), true);
     ASSERT_EQ(data.WriteInt32(10), true);
+    ASSERT_EQ(data.WriteInt32(12), true);
     res = session_->HandleGetAvoidAreaByType(data, reply);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteFloat(2.0f), true);
@@ -628,10 +634,14 @@ HWTEST_F(SessionStubTest, HandleSetAutoStartPiP, Function | SmallTest | Level2)
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
     bool isAutoStartValid = true;
     uint32_t priority = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
     data.WriteInt32(10);
     ASSERT_EQ(ERR_INVALID_DATA, session_->HandleSetAutoStartPiP(data, reply));
     data.WriteBool(isAutoStartValid);
     data.WriteUint32(priority);
+    data.WriteUint32(width);
+    data.WriteUint32(height);
     ASSERT_EQ(ERR_NONE, session_->HandleSetAutoStartPiP(data, reply));
 }
 
@@ -804,6 +814,184 @@ HWTEST_F(SessionStubTest, GetIsMidScene, Function | SmallTest | Level2)
 
     auto result = session_->HandleGetIsMidScene(data, reply);
     ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleNotifyFrameLayoutFinish
+ * @tc.desc: sessionStub HandleNotifyFrameLayoutFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyFrameLayoutFinish, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleNotifyFrameLayoutFinish(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSyncSessionEvent
+ * @tc.desc: sessionStub HandleSyncSessionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSyncSessionEvent, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleSyncSessionEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandlePendingSessionActivation
+ * @tc.desc: sessionStub HandlePendingSessionActivation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandlePendingSessionActivation, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandlePendingSessionActivation(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetGlobalScaledRect
+ * @tc.desc: sessionStub HandleGetGlobalScaledRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetGlobalScaledRect, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetGlobalScaledRect(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetAllAvoidAreas
+ * @tc.desc: sessionStub HandleGetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetAllAvoidAreas, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetAllAvoidAreas(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleIsStartMoving
+ * @tc.desc: sessionStub HandleIsStartMoving
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsStartMoving, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleIsStartMoving(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon01
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon01, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::shared_ptr<Media::PixelMap> icon = std::make_shared<Media::PixelMap>();
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon02
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon02, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_INVALID_DATA, res);
+}
+
+/**
+ * @tc.name: HandleSetSessionLabelAndIcon03
+ * @tc.desc: HandleSetSessionLabelAndIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetSessionLabelAndIcon03, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string label = "demo label";
+    data.WriteString(label);
+    const uint32_t color[] = {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    uint32_t len = sizeof(color) / sizeof(color[0]);
+    Media::InitializationOptions opts;
+    opts.size.width = 2;
+    opts.size.height = 3;
+    opts.pixelFormat = Media::PixelFormat::UNKNOWN;
+    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    std::shared_ptr<Media::PixelMap> icon = Media::PixelMap::Create(color, len, 0, opts.size.width, opts);
+    data.WriteParcelable(icon.get());
+
+    auto res = session_->HandleSetSessionLabelAndIcon(data, reply);
+    ASSERT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetCrossAxisState
+ * @tc.desc: HandleGetCrossAxisState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetCrossAxisState, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    EXPECT_CALL(*session, GetCrossAxisState(_)).
+        WillOnce(DoAll(SetArgReferee<0>(CrossAxisState::STATE_CROSS), Return(WSError::WS_OK)));
+    session->HandleGetCrossAxisState(data, reply);
+    uint32_t state = 0;
+    reply.ReadUint32(state);
+    ASSERT_EQ(state, static_cast<uint32_t>(CrossAxisState::STATE_CROSS));
+}
+
+/**
+ * @tc.name: HandleContainerModalEvent
+ * @tc.desc: sessionStub HandleContainerModalEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleContainerModalEvent, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("name");
+    data.WriteString("value");
+    auto result = session_->HandleContainerModalEvent(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    result = session_->HandleContainerModalEvent(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_DATA);
 }
 }
 } // namespace Rosen

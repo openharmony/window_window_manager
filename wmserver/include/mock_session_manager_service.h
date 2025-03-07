@@ -29,23 +29,31 @@ class MockSessionManagerService : public SystemAbility, public MockSessionManage
 DECLARE_SYSTEM_ABILITY(MockSessionManagerService);
 WM_DECLARE_SINGLE_INSTANCE_BASE(MockSessionManagerService);
 public:
-    bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
-    void NotifySceneBoardAvailable() override;
-    sptr<IRemoteObject> GetSessionManagerService() override;
     sptr<IRemoteObject> GetScreenSessionManagerLite() override;
     sptr<IRemoteObject> GetSceneSessionManager();
+    void OnStart() override;
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
+    void GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
+        const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
+
+    /*
+     * Multi User
+     */
+    bool SetSessionManagerService(const sptr<IRemoteObject>& sessionManagerService);
+    sptr<IRemoteObject> GetSessionManagerService() override;
+    void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
+    void NotifyNotKillService() {}
+
+    /*
+     * Window Recover
+     */
+    void NotifySceneBoardAvailable() override;
     void RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener) override;
     void UnregisterSMSRecoverListener() override;
     void UnregisterSMSRecoverListener(int32_t userId, int32_t pid);
     void RegisterSMSLiteRecoverListener(const sptr<IRemoteObject>& listener) override;
     void UnregisterSMSLiteRecoverListener() override;
     void UnregisterSMSLiteRecoverListener(int32_t userId, int32_t pid);
-    void OnStart() override;
-    int Dump(int fd, const std::vector<std::u16string>& args) override;
-    void NotifyWMSConnected(int32_t userId, int32_t screenId, bool isColdStart);
-    void NotifyNotKillService() {}
-    void GetProcessSurfaceNodeIdByPersistentId(const int32_t pid,
-        const std::vector<uint64_t>& windowIdList, std::vector<uint64_t>& surfaceNodeIds);
 
     /*
      * Window Snapshot
@@ -60,6 +68,9 @@ protected:
     virtual ~MockSessionManagerService() = default;
 
 private:
+    /*
+     * Multi User
+     */
     class SMSDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         explicit SMSDeathRecipient(int32_t userId);
@@ -84,6 +95,7 @@ private:
     void NotifyWMSConnectionChanged(int32_t wmsUserId, int32_t screenId, bool isConnected);
     void NotifyWMSConnectionChangedToClient(int32_t wmsUserId, int32_t screenId, bool isConnected);
     void NotifyWMSConnectionChangedToLiteClient(int32_t wmsUserId, int32_t screenId, bool isConnected);
+
     int DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo);
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
@@ -102,29 +114,31 @@ private:
     sptr<IRemoteObject> screenSessionManager_;
     sptr<IRemoteObject> sceneSessionManager_;
 
+    /*
+     * Multi User
+     */
+    int32_t currentWMSUserId_;
+    int32_t currentScreenId_;
     std::shared_mutex smsDeathRecipientMapLock_;
     std::map<int32_t, sptr<SMSDeathRecipient>> smsDeathRecipientMap_;
-
     std::shared_mutex sessionManagerServiceMapLock_;
     std::map<int32_t, sptr<IRemoteObject>> sessionManagerServiceMap_;
-
-    std::shared_mutex smsRecoverListenerLock_;
-    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsRecoverListenerMap_;
-
-    std::shared_mutex smsLiteRecoverListenerLock_;
-    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
-
     std::mutex wmsConnectionStatusLock_;
     std::map<int32_t, bool> wmsConnectionStatusMap_;
+
+    /*
+     * Window Recover
+     */
+    std::shared_mutex smsRecoverListenerLock_;
+    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsRecoverListenerMap_;
+    std::shared_mutex smsLiteRecoverListenerLock_;
+    std::map<int32_t, std::map<int32_t, sptr<ISessionManagerServiceRecoverListener>>> smsLiteRecoverListenerMap_;
 
     /*
      * Window Snapshot
      */
     std::mutex userIdBundleNamesMapLock_;
     std::unordered_map<int32_t, std::vector<std::string>> userIdBundleNamesMap_;
-
-    int32_t currentWMSUserId_;
-    int32_t currentScreenId_;
 };
 } // namespace Rosen
 } // namespace OHOS

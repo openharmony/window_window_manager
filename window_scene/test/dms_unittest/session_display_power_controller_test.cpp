@@ -22,6 +22,7 @@
 #include "session_manager.h"
 #include "session_display_power_controller.h"
 #include "zidl/window_manager_agent_interface.h"
+#include "screen_session_manager/include/screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -166,11 +167,8 @@ HWTEST_F(SessionDisplayPowerControllerTest, SuspendBegin, Function | SmallTest |
 HWTEST_F(SessionDisplayPowerControllerTest, WaitScreenOffNotify, Function | SmallTest | Level1)
 {
     DisplayState state = DisplayState::ON_SUSPEND;
-    SessionDisplayPowerController controller([](DisplayId id, sptr<DisplayInfo> info, const std::map<DisplayId,
-        sptr<DisplayInfo>>& infos, DisplayStateChangeType type) {
-        EXPECT_TRUE(true);
-    });
-    EXPECT_EQ(state, DisplayState::ON_SUSPEND);
+    ScreenSessionManager::GetInstance().sessionDisplayPowerController_->WaitScreenOffNotify(state);
+    EXPECT_NE(state, DisplayState::UNKNOWN);
 }
 
 }

@@ -21,11 +21,7 @@ module_output_path = "window_manager/window_manager"
 ohos_fuzztest("ScreenFuzzTest") {
   fuzz_config_file = "."
   module_out_path = module_output_path
-  include_dirs = [
-    "../../../../interfaces/innerkits/dm",
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
-  ]
+  include_dirs = [ "../../../../interfaces/innerkits/dm" ]
 
   configs = [
     "../..:configs_cc_ld",
@@ -38,10 +34,10 @@ ohos_fuzztest("ScreenFuzzTest") {
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
   external_deps = [
     "c_utils:utils",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
   ]
 }

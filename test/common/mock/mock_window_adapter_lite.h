@@ -23,7 +23,7 @@ namespace OHOS {
 namespace Rosen {
 class MockWindowAdapterLite : public WindowAdapterLite {
 public:
-    MOCK_METHOD(void, GetFocusWindowInfo, (FocusChangeInfo& focusInfo));
+    MOCK_METHOD(void, GetFocusWindowInfo, (FocusChangeInfo& focusInfo, DisplayId displayId));
     MOCK_METHOD(void, ClearWindowAdapter, ());
     MOCK_METHOD2(RegisterWindowManagerAgent, WMError(WindowManagerAgentType type,
         const sptr<IWindowManagerAgent>& windowManagerAgent));

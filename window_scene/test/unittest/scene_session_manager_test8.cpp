@@ -50,7 +50,7 @@ void SceneSessionManagerTest8::TearDownTestCase()
 
 void SceneSessionManagerTest8::SetUp()
 {
-    ssm_ = sptr<SceneSessionManager>::MakeSptr();
+    ssm_ = &SceneSessionManager::GetInstance();
     EXPECT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
 }
@@ -164,7 +164,8 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus, Function | SmallTest | Leve
 HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Level3)
 {
     ssm_->sceneSessionMap_.clear();
-    ssm_->focusedSessionId_ = 0;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(0);
 
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "PostProcessFocus01";
@@ -180,7 +181,7 @@ HWTEST_F(SceneSessionManagerTest8, PostProcessFocus01, Function | SmallTest | Le
     ssm_->sceneSessionMap_.emplace(1, sceneSession);
     ssm_->PostProcessFocus();
 
-    EXPECT_NE(1, ssm_->focusedSessionId_);
+    EXPECT_NE(1, focusGroup->GetFocusedSessionId());
 }
 
 /**
@@ -307,9 +308,14 @@ HWTEST_F(SceneSessionManagerTest8, DestroyExtensionSession, Function | SmallTest
     extensionWindowFlags.privacyModeFlag = false;
     sceneSession->combinedExtWindowFlags_ = extensionWindowFlags;
     EXPECT_EQ(false, sceneSession->combinedExtWindowFlags_.privacyModeFlag);
-    ssm_->DestroyExtensionSession(iRemoteObjectMocker);
+    int len = sceneSession->modalUIExtensionInfoList_.size();
+    ssm_->DestroyExtensionSession(iRemoteObjectMocker, true);
     constexpr uint32_t DES_WAIT_SYNC_IN_NS = 500000;
     usleep(DES_WAIT_SYNC_IN_NS);
+    EXPECT_EQ(len, sceneSession->modalUIExtensionInfoList_.size());
+    ssm_->DestroyExtensionSession(iRemoteObjectMocker, false);
+    usleep(DES_WAIT_SYNC_IN_NS);
+    EXPECT_EQ(len, sceneSession->modalUIExtensionInfoList_.size());
 }
 
 /**
@@ -556,7 +562,7 @@ HWTEST_F(SceneSessionManagerTest8, SetBrightness, Function | SmallTest | Level3)
     ssm_->Init();
     ASSERT_NE(nullptr, ssm_->eventHandler_);
 
-    ssm_->SetFocusedSessionId(2024);
+    ssm_->SetFocusedSessionId(2024, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(2024, ssm_->GetFocusedSessionId());
 
     ret = ssm_->SetBrightness(sceneSession, 3.15f);
@@ -719,9 +725,55 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, Function | SmallTest | Lev
     info.abilityName_ = "GetHostWindowRect";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
     ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::EXPANDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     auto ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::KEYBOARD,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = {0, 100, 0, 0};
+    ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, 100);
+
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    sceneSession->winRect_ = {0, 1000, 100, 100};
+    ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, 1000);
+    sceneSession->winRect_ = {0, 2000, 100, 100};
+    ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    WSRect hostRect = {0, 2000, 100, 100};
+    sceneSession->TransformGlobalRectToRelativeRect(hostRect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, hostRect.posY_);
+
+    sceneSession->GetSessionProperty()->SetIsSystemKeyboard(false);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::UNKNOWN,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = {0, 0, 0, 0};
+    ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, 0);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    sceneSession->winRect_ = {0, 100, 0, 0};
+    ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, 100);
+
+    sceneSession->GetSessionProperty()->SetIsSystemKeyboard(true);
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(0, SuperFoldStatus::HALF_FOLDED,
+        { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
+    sceneSession->winRect_ = {0, 1000, 100, 100};
+    ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, 1000);
 }
 
 /**
@@ -768,7 +820,7 @@ HWTEST_F(SceneSessionManagerTest8, GetAppMainSceneSession, Function | SmallTest 
     sceneSession->property_ = property;
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    auto ret = ssm_->GetAppMainSceneSession(sceneSession, 1);
+    auto ret = ssm_->GetAppMainSceneSession(1, sceneSession);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
 }
 
@@ -831,7 +883,6 @@ HWTEST_F(SceneSessionManagerTest8, IsInDefaultScreen, Function | SmallTest | Lev
     info.abilityName_ = "IsInDefaultScreen";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     auto ret = ssm_->IsInDefaultScreen(sceneSession);
     EXPECT_EQ(false, ret);
 }
@@ -891,7 +942,6 @@ HWTEST_F(SceneSessionManagerTest8, OnSessionStateChange01, Function | SmallTest 
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     ssm_->OnSessionStateChange(100, state);
-    
     auto ret = ssm_->UpdateMaximizeMode(1, true);
     EXPECT_EQ(WSError::WS_OK, ret);
     constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
@@ -1004,7 +1054,6 @@ HWTEST_F(SceneSessionManagerTest8, UnregisterSpecificSessionCreateListener, Func
     info.abilityName_ = "UnregisterSpecificSessionCreateListener";
     sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession->property_ = nullptr;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     ssm_->HandleHideNonSystemFloatingWindows(property, sceneSession);

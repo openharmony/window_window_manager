@@ -20,18 +20,6 @@
 
 namespace OHOS::Rosen {
 /**
- * @enum WindowVisibilityState
- *
- * @brief Visibility state of a window
- */
-enum WindowVisibilityState : uint32_t {
-    WINDOW_VISIBILITY_STATE_NO_OCCLUSION = 0,
-    WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
-    WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
-    WINDOW_LAYER_STATE_MAX
-};
-
-/**
  * @enum WindowLayerState
  *
  * @brief Layer state of a window

@@ -443,12 +443,12 @@ HWTEST_F(ScreenSessionTest, UpdateToInputManager, Function | SmallTest | Level2)
     int rotation = 90;
     int deviceRotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::FULL;
-    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode, false);
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     rotation = 0;
     foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode);
+    screenSession->UpdateToInputManager(bounds, rotation, deviceRotation, foldDisplayMode, false);
     GTEST_LOG_(INFO) << "UpdateToInputManager end";
 }
 
@@ -472,7 +472,7 @@ HWTEST_F(ScreenSessionTest, UpdatePropertyAfterRotation, Function | SmallTest | 
     bounds.rect_.height_ = 2772;
     int rotation = 90;
     FoldDisplayMode foldDisplayMode = FoldDisplayMode::MAIN;
-    screenSession->UpdatePropertyAfterRotation(bounds, rotation, foldDisplayMode);
+    screenSession->UpdatePropertyAfterRotation(bounds, rotation, foldDisplayMode, false);
     GTEST_LOG_(INFO) << "UpdatePropertyAfterRotation end";
 }
 

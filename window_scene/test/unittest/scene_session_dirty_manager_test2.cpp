@@ -595,7 +595,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithSameInfo, Function | Sm
     std::vector<MMI::WindowInfo> currWindowInfoList;
     currDisplayInfos.emplace_back(currDisplayedInfo);
     currWindowInfoList.emplace_back(currWindowInfo);
-    ssm_->focusedSessionId_ = focusedSession;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = true;
     // check the same information
     checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
@@ -631,7 +632,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithPidDiff, Function | Sma
     std::vector<MMI::WindowInfo> currWindowInfoList;
     currDisplayInfos.emplace_back(currDisplayedInfo);
     currWindowInfoList.emplace_back(currWindowInfo);
-    ssm_->focusedSessionId_ = focusedSession;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
     checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
@@ -666,7 +668,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithAreaDiff, Function | Sm
     std::vector<MMI::WindowInfo> currWindowInfoList;
     currDisplayInfos.emplace_back(currDisplayedInfo);
     currWindowInfoList.emplace_back(currWindowInfo);
-    ssm_->focusedSessionId_ = focusedSession;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
     checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);
@@ -701,7 +704,8 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithzOrderDiff, Function | 
     std::vector<MMI::WindowInfo> currWindowInfoList;
     currDisplayInfos.emplace_back(currDisplayedInfo);
     currWindowInfoList.emplace_back(currWindowInfo);
-    ssm_->focusedSessionId_ = focusedSession;
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    focusGroup->SetFocusedSessionId(focusedSession);
     bool checkNeedUpdateFlag = false;
     checkNeedUpdateFlag = sim_->CheckNeedUpdate(currDisplayInfos, currWindowInfoList);
     ASSERT_EQ(checkNeedUpdateFlag, true);

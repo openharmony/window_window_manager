@@ -173,6 +173,18 @@ HWTEST_F(PictureInPictureOptionTest, TypeNodeRef, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: GetPipContentCallbackRef
+ * @tc.desc: RegisterPipContentListenerWithType/GetPipContentCallbackRef
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureOptionTest, GetPipContentCallbackRef, Function | SmallTest | Level2)
+{
+    sptr<PipOption> option = sptr<PipOption>::MakeSptr();
+    option->RegisterPipContentListenerWithType("nodeUpdate", nullptr);
+    ASSERT_EQ(option->GetPipContentCallbackRef("nodeUpdate"), nullptr);
+}
+
+/**
  * @tc.name: TypeNodeEnabled
  * @tc.desc: SetTypeNodeEnabled/IsTypeNodeEnabled
  * @tc.type: FUNC

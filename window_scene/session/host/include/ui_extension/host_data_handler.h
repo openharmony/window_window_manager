@@ -25,7 +25,7 @@ public:
     DataHandlerErr SendData(const AAFwk::Want& toSend, AAFwk::Want& reply, const DataTransferConfig& config) override;
 
 private:
-    sptr<SessionStageProxy> GetRemoteProxy();
+    sptr<ISessionStage> GetRemoteProxy();
     bool WriteInterfaceToken(MessageParcel& data) override;
 };
 }  // namespace OHOS::Rosen::Extension

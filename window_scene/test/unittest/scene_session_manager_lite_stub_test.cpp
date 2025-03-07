@@ -44,11 +44,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError GetFocusSessionToken(sptr<IRemoteObject>& token) override
+    WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId) override
     {
         return WSError::WS_OK;
     }
-    WSError GetFocusSessionElement(AppExecFwk::ElementName& element) override
+    WSError GetFocusSessionElement(AppExecFwk::ElementName& element, DisplayId displayId) override
     {
         return WSError::WS_OK;
     }
@@ -127,7 +127,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo) override
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId) override
     {
     }
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override
@@ -207,6 +207,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         const std::vector<AppUseControlInfo>& controlList) override { return WSError::WS_OK; }
     WMError MinimizeMainSession(const std::string& bundleName,
         int32_t appIndex, int32_t userId) override { return WMError::WM_OK; }
+    WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
+        bool& hasFloatingShowing) override { return WMError::WM_OK; }
+    WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
+        bool isLock) override { return WMError::WM_OK; }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {
@@ -451,9 +455,24 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionToken, Function |
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint64(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionToken1
+ * @tc.desc: test function : HandleGetFocusSessionToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionToken1, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionToken(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -465,9 +484,24 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement, Function
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint64(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionElement1
+ * @tc.desc: test function : HandleGetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionElement1, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionElement(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -686,9 +720,24 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionInfo, Function | 
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint64(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionInfo1
+ * @tc.desc: test function : HandleGetFocusSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetFocusSessionInfo1, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
 }
 
 /**
@@ -983,6 +1032,32 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleMinimizeMainSession, Function | 
     data.WriteInt32(userId);
 
     auto res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleMinimizeMainSession(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
+ * @tc.name: HandleLockSessionByAbilityInfo
+ * @tc.desc: test function : HandleLockSessionByAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleLockSessionByAbilityInfo, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "appbundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t appIndex = 0;
+    bool isLock = true;
+
+    data.WriteString(bundleName);
+    data.WriteString(moduleName);
+    data.WriteString(abilityName);
+    data.WriteInt32(appIndex);
+    data.WriteBool(isLock);
+
+    auto res =
+        sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleLockSessionByAbilityInfo(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
 }

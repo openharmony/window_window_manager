@@ -22,6 +22,7 @@
 #include <cinttypes>
 #include <set>
 
+#include "screen_edid_parse.h"
 #include "setting_observer.h"
 #include "dm_common.h"
 
@@ -34,6 +35,9 @@ public:
     static bool GetSettingDpi(uint32_t& dpi, const std::string& key = SETTING_DPI_KEY);
     static bool SetSettingDefaultDpi(uint32_t& dpi, const std::string& key);
     static bool GetSettingValue(uint32_t& value, const std::string& key);
+    static bool SetSettingValue(const std::string& key, uint32_t value);
+    static bool GetSettingValue(const std::string& key, std::string& value);
+    static bool SetSettingValue(const std::string& key, const std::string& value);
     static void RegisterSettingCastObserver(SettingObserver::UpdateFunc func);
     static void UnregisterSettingCastObserver();
     static bool GetSettingCast(bool& enable, const std::string& key = SETTING_CAST_KEY);
@@ -46,29 +50,35 @@ public:
     static std::string RemoveInvalidChar(const std::string& input);
     static bool SplitString(std::vector<std::string>& splitValues, const std::string& input, char delimiter = ',');
     static bool IsNumber(const std::string& str);
-    static uint32_t GetDataFromString(MultiScreenRecoverOption& option, const std::string& inputString);
-    static bool GetSettingRecoveryResolutionString(std::vector<std::string>& resolutionStrings,
-        const std::string& key = SETTING_RECOVERY_RESOLUTION_KEY);
-    static bool GetSettingRecoveryResolutionSet(std::set<ScreenId>& restoredScreenId);
-    static bool GetSettingScreenModeString(std::vector<std::string>& screenModeStrings,
-        const std::string& key = SETTING_SCREEN_MODE_KEY);
-    static bool GetSettingScreenModeMap(std::map<ScreenId, uint32_t>& screenMode);
-    static bool GetSettingRelativePositionString(std::vector<std::string>& relativePositionStrings,
-        const std::string& key = SETTING_RELATIVE_POSITION_KEY);
-    static bool GetSettingRelativePositionMap(std::map<ScreenId, std::pair<uint32_t, uint32_t>>& relativePosition);
+    static std::map<std::string, MultiScreenInfo> GetMultiScreenInfo(const std::string& key = SETTING_SCREEN_MODE_KEY);
+    static bool GetScreenMode(MultiScreenInfo& info, const std::string& inputString);
+    static bool UpdateScreenMode(MultiScreenInfo& info, uint32_t mode, bool isExternal);
+    static bool GetScreenRelativePosition(MultiScreenInfo& info, const std::string& inputString);
     static ScreenShape GetScreenShape(ScreenId screenId);
+    static void RegisterSettingHalfScreenObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingHalfScreenObserver();
+    static bool GetHalfScreenSwitchState(const std::string& key = SETTING_HALF_SCREEN_SWITCH_KEY);
+    static void RegisterSettingscreenSkipProtectedWindowObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingscreenSkipProtectedWindowObserver();
+    static bool GetSettingscreenSkipProtectedWindow(bool& enable,
+        const std::string& key = SETTING_SCREEN_SHARE_PROTECT_KEY);
+    static void RegisterSettingWireCastObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingWireCastObserver();
 
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
     static const constexpr char* SETTING_ROTATION_KEY {"screen_rotation_value"};
     static const constexpr char* SETTING_ROTATION_SCREEN_ID_KEY {"screen_rotation_screen_id_value"};
-    static const constexpr char* SETTING_RECOVERY_RESOLUTION_KEY {"user_set_recovery_resolution"};
-    static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_last_screen_mode"};
-    static const constexpr char* SETTING_RELATIVE_POSITION_KEY {"user_set_relative_position"};
+    static const constexpr char* SETTING_SCREEN_MODE_KEY {"user_set_screen_mode_edid"};
+    static const constexpr char* SETTING_HALF_SCREEN_SWITCH_KEY {"half_screen_display"};
+    static const constexpr char* SETTING_SCREEN_SHARE_PROTECT_KEY {"spamshield_screenshare_protect"};
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> castObserver_;
     static sptr<SettingObserver> rotationObserver_;
+    static sptr<SettingObserver> halfScreenObserver_;
+    static sptr<SettingObserver> screenSkipProtectedWindowObserver_;
+    static sptr<SettingObserver> wireCastObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -180,7 +180,8 @@ WMError WindowNodeContainer::AddWindowNodeOnWindowTree(sptr<WindowNode>& node, c
 WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
 {
     if (node->currentVisibility_) {
-        WLOGFE("current window is visible, windowId: %{public}u", node->GetWindowId());
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "current window is visible, windowId: %{public}u",
+            node->GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
 
@@ -193,7 +194,7 @@ WMError WindowNodeContainer::ShowStartingWindow(sptr<WindowNode>& node)
     StartingWindow::AddNodeOnRSTree(node, layoutPolicy_->IsMultiDisplay());
     AssignZOrder();
     layoutPolicy_->PerformWindowLayout(node, WindowUpdateType::WINDOW_UPDATE_ADDED);
-    WLOGI("ShowStartingWindow windowId: %{public}u end", node->GetWindowId());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "windowId: %{public}u end", node->GetWindowId());
     return WMError::WM_OK;
 }
 
@@ -725,16 +726,19 @@ bool WindowNodeContainer::AddAppSurfaceNodeOnRSTree(sptr<WindowNode>& node)
      */
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AddAppSurfaceNodeOnRSTree(%u)", node->GetWindowId());
     if (!WindowHelper::IsMainWindow(node->GetWindowType())) {
-        WLOGFE("id:%{public}u not main app window but has start window", node->GetWindowId());
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "id:%{public}u not main app window but has start window",
+            node->GetWindowId());
         return false;
     }
     if (!node->leashWinSurfaceNode_ || !node->surfaceNode_) {
-        WLOGFE("id:%{public}u leashWinSurfaceNode or surfaceNode is null but has start window!", node->GetWindowId());
+        TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "id:%{public}u leashWinSurfaceNode or surfaceNode is null "
+            "but has start window!", node->GetWindowId());
         return false;
     }
-    WLOGI("AddAppSurfaceNodeOnRSTree Id: %{public}d", node->GetWindowId());
+    TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "Id: %{public}d", node->GetWindowId());
     if (!node->currentVisibility_) {
-        WLOGI("id: %{public}d is invisible, no need update RS tree", node->GetWindowId());
+        TLOGI(WmsLogTag::WMS_STARTUP_PAGE, "id: %{public}d is invisible, no need update RS tree",
+            node->GetWindowId());
         return false;
     }
     node->leashWinSurfaceNode_->AddChild(node->surfaceNode_, -1);

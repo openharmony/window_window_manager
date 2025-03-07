@@ -551,6 +551,22 @@ HWTEST_F(WindowOptionTest, SetIsDensityFollowHost, Function | SmallTest | Level3
     option->SetIsDensityFollowHost(true);
     ASSERT_EQ(true, option->GetIsDensityFollowHost());
 }
+
+/**
+ * @tc.name: SetConstrainedModal
+ * @tc.desc: test SetConstrainedModal and GetIsDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetConstrainedModal, Function | SmallTest | Level3)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_EQ(false, option->IsConstrainedModal());
+    option->SetConstrainedModal(true);
+    ASSERT_EQ(false, option->IsConstrainedModal());
+    option->SetUIExtensionUsage(static_cast<uint32_t>(UIExtensionUsage::MODAL));
+    option->SetConstrainedModal(true);
+    ASSERT_EQ(false, option->IsConstrainedModal());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

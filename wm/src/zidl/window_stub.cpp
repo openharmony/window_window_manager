@@ -289,6 +289,11 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
             NotifyForegroundInteractiveStatus(interactive);
             break;
         }
+        case WindowMessage::TRANS_ID_NOTIFY_MMI_SERVICE_ONLINE: {
+            uint32_t winId = data.ReadUint32();
+            NotifyMMIServiceOnline(winId);
+            break;
+        }
         default:
             WLOGFW("unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

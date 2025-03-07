@@ -773,7 +773,7 @@ HWTEST_F(ExtensionSessionTest, UpdateAvoidArea, Function | SmallTest | Level1)
  */
 HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1)
 {
-    MockFunction<AvoidArea(AvoidAreaType type)> mockNotifyGetAvoidAreaByTypeFunc;
+    MockFunction<AvoidArea(AvoidAreaType type, int32_t apiVersion)> mockNotifyGetAvoidAreaByTypeFunc;
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = mockNotifyGetAvoidAreaByTypeFunc.AsStdFunction();
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     AvoidAreaType typeSystem = AvoidAreaType::TYPE_SYSTEM;
@@ -783,7 +783,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
     AvoidAreaType typeNavigationIndicator = AvoidAreaType::TYPE_NAVIGATION_INDICATOR;
     AvoidArea expectedAvoidArea;
     expectedAvoidArea.topRect_ = {10, 20, 30, 40};
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(5).WillRepeatedly(Return(expectedAvoidArea));
     auto res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, expectedAvoidArea);
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -797,7 +797,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
 
     extSessionEventCallback_->notifyGetAvoidAreaByTypeFunc_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(0);
     res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, AvoidArea());
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -811,7 +811,7 @@ HWTEST_F(ExtensionSessionTest, GetAvoidAreaByType, Function | SmallTest | Level1
 
     extSessionEventCallback_ = nullptr;
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
-    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_)).Times(0);
+    EXPECT_CALL(mockNotifyGetAvoidAreaByTypeFunc, Call(_, _)).Times(0);
     res = extensionSession_->GetAvoidAreaByType(typeSystem);
     ASSERT_EQ(res, AvoidArea());
     res = extensionSession_->GetAvoidAreaByType(typeCutout);
@@ -924,6 +924,27 @@ HWTEST_F(ExtensionSessionTest, GetStatusBarHeight, Function | SmallTest | Level1
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     EXPECT_CALL(mockGetStatusBarHeightFunc, Call()).Times(0);
     extensionSession_->GetStatusBarHeight();
+}
+
+/**
+ * @tc.name: TryUpdateExtensionPersistentId
+ * @tc.desc: test function : TryUpdateExtensionPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ExtensionSessionTest";
+    info.bundleName_ = "ExtensionSessionTest";
+    info.persistentId_ = INVALID_SESSION_ID;
+    sptr<ExtensionSession> extensionSessionA = sptr<ExtensionSession>::MakeSptr(info);
+    info.persistentId_ = extensionSessionA->GetPersistentId();
+    sptr<ExtensionSession> extensionSessionB = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_EQ(info.persistentId_ + 1, extensionSessionB->GetPersistentId());
+    extensionSessionA.clear();
+    info.persistentId_ += 4096;
+    sptr<ExtensionSession> extensionSessionC = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_EQ(info.persistentId_, extensionSessionC->GetPersistentId());
 }
 }
 }

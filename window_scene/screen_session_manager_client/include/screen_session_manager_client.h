@@ -39,14 +39,23 @@ public:
     virtual void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) = 0;
 };
 
+class IScreenConnectionChangeListener : public RefBase {
+public:
+    virtual void OnScreenConnected(const sptr<ScreenSession>& screenSession) = 0;
+    virtual void OnScreenDisconnected(const sptr<ScreenSession>& screenSession) = 0;
+};
+
 class ScreenSessionManagerClient : public ScreenSessionManagerClientStub {
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManagerClient)
 
 public:
     void RegisterScreenConnectionListener(IScreenConnectionListener* listener);
     void RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener);
+    void RegisterScreenConnectionChangeListener(const sptr<IScreenConnectionChangeListener>& listener);
+    void ExtraDestroyScreen(ScreenId screenId);
 
     sptr<ScreenSession> GetScreenSession(ScreenId screenId) const;
+    sptr<ScreenSession> GetScreenSessionExtra(ScreenId screenId) const;
     std::map<ScreenId, ScreenProperty> GetAllScreensProperties() const;
     FoldDisplayMode GetFoldDisplayMode() const;
 
@@ -66,12 +75,16 @@ public:
         std::vector<uint64_t>& surfaceNodeIds, bool isBlackList = false) override;
     void OnUpdateFoldDisplayMode(FoldDisplayMode displayMode) override;
     void UpdateAvailableArea(ScreenId screenId, DMRect area);
+    void UpdateSuperFoldAvailableArea(ScreenId screenId, DMRect bArea, DMRect cArea);
+    void UpdateSuperFoldExpandAvailableArea(ScreenId screenId, DMRect area);
     int32_t SetScreenOffDelayTime(int32_t delay);
     int32_t SetScreenOnDelayTime(int32_t delay);
     void SetCameraStatus(int32_t cameraStatus, int32_t cameraPosition);
     void NotifyFoldToExpandCompletion(bool foldToExpand);
+    void RecordEventFromScb(std::string description, bool needRecordEvent);
     FoldStatus GetFoldStatus();
     SuperFoldStatus GetSuperFoldStatus();
+    ExtendScreenConnectStatus GetExtendScreenConnectStatus();
     std::shared_ptr<Media::PixelMap> GetScreenSnapshot(ScreenId screenId, float scaleX, float scaleY);
     DeviceScreenConfig GetDeviceScreenConfig();
     sptr<ScreenSession> GetScreenSessionById(const ScreenId id);
@@ -79,9 +92,11 @@ public:
     bool IsFoldable();
     void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
     void UpdateDisplayHookInfo(int32_t uid, bool enable, const DMHookInfo& hookInfo);
+    void GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo);
 
     void RegisterSwitchingToAnotherUserFunction(std::function<void()>&& func);
     void SwitchingCurrentUser();
+    void DisconnectAllExternalScreen();
     void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) override;
 
     void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) override;
@@ -94,9 +109,8 @@ protected:
 
 private:
     void ConnectToServer();
-    bool CheckIfNeedConnectScreen(ScreenId screenId, ScreenId rsId, const std::string& name);
-    void OnScreenConnectionChanged(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenId rsId, const std::string& name, bool isExtend) override;
+    bool CheckIfNeedConnectScreen(SessionOption option);
+    void OnScreenConnectionChanged(SessionOption option, ScreenEvent screenEvent) override;
     void OnPropertyChanged(ScreenId screenId,
         const ScreenProperty& property, ScreenPropertyChangeReason reason) override;
     void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
@@ -105,21 +119,32 @@ private:
     void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) override;
     void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) override;
     void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) override;
+    void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) override;
     void OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId) override;
     void OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus) override;
+    void OnSecondaryReflexionChanged(ScreenId screenId, bool isSecondaryReflexion) override;
+    void OnExtendScreenConnectStatusChanged(ScreenId screenId,
+        ExtendScreenConnectStatus extendScreenConnectStatus) override;
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
 
+    void NotifyScreenConnect(const sptr<ScreenSession>& screenSession);
+    void NotifyScreenDisconnect(const sptr<ScreenSession>& screenSession);
+    void UpdatePropertyWhenSwitchUser(const sptr <ScreenSession>& screenSession,
+        float rotation, RRect bounds, ScreenId screenId);
     mutable std::mutex screenSessionMapMutex_;
     std::map<ScreenId, sptr<ScreenSession>> screenSessionMap_;
+    std::map<ScreenId, sptr<ScreenSession>> extraScreenSessionMap_;
     std::function<void()> switchingToAnotherUserFunc_ = nullptr;
 
     sptr<IScreenSessionManager> screenSessionManager_;
 
     IScreenConnectionListener* screenConnectionListener_;
+    sptr<IScreenConnectionChangeListener> screenConnectionChangeListener_;
     sptr<IDisplayChangeListener> displayChangeListener_;
     FoldDisplayMode displayMode_ = FoldDisplayMode::UNKNOWN;
+    SuperFoldStatus currentstate_ = SuperFoldStatus::UNKNOWN;
 };
 } // namespace OHOS::Rosen
 

@@ -82,6 +82,7 @@ void DisplayManagerService::OnStart()
     if (!Publish(sptr<DisplayManagerService>(this))) {
         WLOGFE("Publish failed");
     }
+    SetDisplayState(DisplayState::ON);
     WLOGFI("end");
 }
 
@@ -200,6 +201,16 @@ sptr<DisplayInfo> DisplayManagerService::GetDefaultDisplayInfo()
 }
 
 sptr<DisplayInfo> DisplayManagerService::GetDisplayInfoById(DisplayId displayId)
+{
+    sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
+    if (display == nullptr) {
+        WLOGFE("fail to get displayInfo by id: invalid display");
+        return nullptr;
+    }
+    return display->ConvertToDisplayInfo();
+}
+
+sptr<DisplayInfo> DisplayManagerService::GetVisibleAreaDisplayInfoById(DisplayId displayId)
 {
     sptr<AbstractDisplay> display = abstractDisplayController_->GetAbstractDisplay(displayId);
     if (display == nullptr) {

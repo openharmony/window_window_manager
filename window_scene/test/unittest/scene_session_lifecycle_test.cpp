@@ -959,44 +959,6 @@ HWTEST_F(SceneSessionLifecycleTest, PendingSessionActivation, Function | SmallTe
  */
 HWTEST_F(SceneSessionLifecycleTest, TerminateSession, Function | SmallTest | Level2)
 {
-    SessionInfo info;
-    info.abilityName_ = "TerminateSession";
-    info.bundleName_ = "TerminateSession";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-
-    sptr<AAFwk::SessionInfo> info1 = nullptr;
-    WSError result = sceneSession->TerminateSession(info1);
-    ASSERT_EQ(result, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = true;
-    result = sceneSession->TerminateSession(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
-    sceneSession->isTerminating_ = false;
-
-    result = sceneSession->TerminateSession(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: TerminateSession01
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | Level2)
-{
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
     OHOS::Rosen::Session session(info);
@@ -1009,39 +971,13 @@ HWTEST_F(SceneSessionLifecycleTest, TerminateSession01, Function | SmallTest | L
         [](const SessionInfo& info, bool needStartCaller, bool isFromBroker){};
     session.isTerminating_ = false;
     ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
-}
-
-/**
- * @tc.name: NotifySessionException
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionException, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifySessionException";
-    info.bundleName_ = "NotifySessionException";
-    sptr<Rosen::ISession> session_;
-    sptr<SceneSession::SpecificSessionCallback> specificCallback =
-            sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(specificCallback, nullptr);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isActive_ = true;
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    sceneSession->SetSessionProperty(property);
-
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
 
     sptr<AAFwk::SessionInfo> info1 = nullptr;
-    WSError result = sceneSession->NotifySessionException(info1);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-
-    result = sceneSession->NotifySessionException(abilitySessionInfo);
-    ASSERT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(info1));
+    sceneSession->isTerminating_ = true;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
+    sceneSession->isTerminating_ = false;
+    ASSERT_EQ(WSError::WS_OK, sceneSession->TerminateSession(abilitySessionInfo));
 }
 
 /**
@@ -1053,13 +989,11 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionException01, Function | SmallTe
 {
     sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
     OHOS::Rosen::Session session(info);
     session.isTerminating_ = true;
-    sceneSession->NotifySessionException(abilitySessionInfo, needRemoveSession);
-    sceneSession->GetLastSafeRect();
-    WSRect rect;
-    sceneSession->SetLastSafeRect(rect);
+    ExceptionInfo exceptionInfo;
+    WSError ret = sceneSession->NotifySessionException(abilitySessionInfo, exceptionInfo);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PERMISSION, ret);
 }
 
 /**
@@ -1146,51 +1080,6 @@ HWTEST_F(SceneSessionLifecycleTest, NotifySessionBackground, Function | SmallTes
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->NotifySessionBackground(reason, withAnimation, isFromInnerkits);
     ASSERT_EQ(ret, 1);
-}
-
-/**
- * @tc.name: NotifySessionExceptionInner
- * @tc.desc: NotifySessionExceptionInner
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLifecycleTest, NotifySessionExceptionInner, Function | SmallTest | Level2)
-{
-    sptr<AAFwk::SessionInfo> abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
-    ASSERT_NE(nullptr, abilitySessionInfo);
-    bool needRemoveSession = true;
-
-    SessionInfo info;
-    info.abilityName_ = "NotifySessionExceptionInner";
-    info.bundleName_ = "NotifySessionExceptionInner";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->isTerminating_ = false;
-    auto res = sceneSession->NotifySessionExceptionInner(nullptr, needRemoveSession, true);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->clientIdentityToken_ = "session1";
-    abilitySessionInfo->identityToken = "session2";
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, true);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = true;
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->isTerminating_ = false;
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
-
-    sceneSession->sessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    ASSERT_NE(nullptr, sceneSession->sessionExceptionFunc_);
-    sceneSession->jsSceneSessionExceptionFunc_ = [](const SessionInfo& info, bool removeSession, bool startFail) {};
-    ASSERT_NE(nullptr, sceneSession->jsSceneSessionExceptionFunc_);
-    res = sceneSession->NotifySessionExceptionInner(abilitySessionInfo, needRemoveSession, false);
-    ASSERT_EQ(res, WSError::WS_OK);
 }
 }
 }

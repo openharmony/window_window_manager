@@ -63,13 +63,14 @@ void ScreenSessionManagerClientProxyTest::TearDown()
  */
 HWTEST_F(ScreenSessionManagerClientProxyTest, OnScreenConnectionChanged, Function | SmallTest | Level2)
 {
-    ScreenId screenId = 0;
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
-    ScreenId rsId = 0;
-    std::string name;
-
+    SessionOption option = {
+        .rsId_ = 0,
+        .isExtend_ = false,
+        .screenId_ = 0,
+    };
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->OnScreenConnectionChanged(screenId, screenEvent, rsId, name, false);
+    screenSessionManagerClientProxy_->OnScreenConnectionChanged(option, screenEvent);
 }
 
 /**

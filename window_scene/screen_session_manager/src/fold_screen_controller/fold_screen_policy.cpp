@@ -119,4 +119,6 @@ Drawing::Rect FoldScreenPolicy::GetScreenSnapshotRect()
     Drawing::Rect snapshotRect = {0, 0, 0, 0};
     return snapshotRect;
 }
+
+void FoldScreenPolicy::SetMainScreenRegion(DMRect& mainScreenRegion) {}
 } // namespace OHOS::Rosen

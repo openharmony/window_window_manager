@@ -16,6 +16,8 @@
 #include "window_scene_config.h"
 
 #include "config_policy_utils.h"
+#include "libxml/parser.h"
+#include "libxml/tree.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 
@@ -51,6 +53,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "appWindows",                                   WindowSceneConfig::ValueType::MAP },
     { "cornerRadius",                                 WindowSceneConfig::ValueType::MAP },
     { "shadow",                                       WindowSceneConfig::ValueType::MAP },
+    { "shadowDark",                                   WindowSceneConfig::ValueType::MAP },
     { "focused",                                      WindowSceneConfig::ValueType::MAP },
     { "unfocused",                                    WindowSceneConfig::ValueType::MAP },
     { "decor",                                        WindowSceneConfig::ValueType::MAP },

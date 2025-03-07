@@ -77,7 +77,7 @@ public:
 
 void WindowManagerLite::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
 {
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "WMS connected [userId:%{public}d; screenId:%{public}d]", userId, screenId);
     sptr<IWMSConnectionChangedListener> wmsConnectionChangedListener;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -389,10 +389,10 @@ WMError WindowManagerLite::UnregisterVisibilityChangedListener(const sptr<IVisib
     return ret;
 }
 
-void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo)
+void WindowManagerLite::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId)
 {
     WLOGFD("In");
-    SingletonContainer::Get<WindowAdapterLite>().GetFocusWindowInfo(focusInfo);
+    SingletonContainer::Get<WindowAdapterLite>().GetFocusWindowInfo(focusInfo, displayId);
 }
 
 void WindowManagerLite::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChangeInfo, bool focused) const
@@ -656,7 +656,7 @@ WMError WindowManagerLite::RegisterWMSConnectionChangedListener(const sptr<IWMSC
         TLOGE(WmsLogTag::WMS_MULTI_USER, "WMS connection changed listener registered could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_MULTI_USER, "Register enter");
+    TLOGD(WmsLogTag::WMS_MULTI_USER, "Register enter");
     {
         std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
         if (pImpl_->wmsConnectionChangedListener_) {

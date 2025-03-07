@@ -21,12 +21,16 @@
 #include "mock_display_manager_adapter.h"
 #include "singleton_mocker.h"
 #include "scene_board_judgement.h"
+#include "../../../window_scene/screen_session_manager/include/screen_scene_config.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
+}
 using Mocker = SingletonMocker<ScreenManagerAdapter, MockScreenManagerAdapter>;
 class ScreenTest : public testing::Test {
 public:
@@ -42,12 +46,14 @@ public:
 sptr<Display> ScreenTest::defaultDisplay_ = nullptr;
 ScreenId ScreenTest::defaultScreenId_ = SCREEN_ID_INVALID;
 sptr<Screen> ScreenTest::screen_ = nullptr;
+bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 
 void ScreenTest::SetUpTestCase()
 {
     defaultDisplay_ = DisplayManager::GetInstance().GetDefaultDisplay();
     defaultScreenId_ = static_cast<ScreenId>(defaultDisplay_->GetId());
     screen_ = ScreenManager::GetInstance().GetScreenById(defaultScreenId_);
+    usleep(SLEEP_TIME_IN_US);
 }
 
 void ScreenTest::TearDownTestCase()
@@ -254,7 +260,11 @@ HWTEST_F(ScreenTest, GetOrientation, Function | SmallTest | Level2)
     sptr<ScreenInfo> screenInfo = screen_->GetScreenInfo();
     screenInfo->SetParentId(0);
     EXPECT_CALL(m->Mock(), GetScreenInfo(_)).Times(1).WillOnce(Return(screenInfo));
-    ASSERT_EQ(Orientation::BEGIN, screen_->GetOrientation());
+    if (g_isPcDevice) {
+        ASSERT_EQ(Orientation::VERTICAL, screen_->GetOrientation());
+    } else {
+        ASSERT_EQ(Orientation::BEGIN, screen_->GetOrientation());
+    }
 }
 
 /**
@@ -442,6 +452,25 @@ HWTEST_F(ScreenTest, GetDensityInCurResolution, Function | SmallTest | Level2)
     float virtualPixelRatio;
     auto res = screen_->GetDensityInCurResolution(virtualPixelRatio);
     ASSERT_EQ(DMError::DM_OK, res);
+}
+
+/**
+ * @tc.name: SetDefaultDensityDpi01
+ * @tc.desc: SetDefaultDensityDpi
+ * @tc.type: FUNC
+ *
+ */
+HWTEST_F(ScreenTest, SetDefaultDensityDpi, Function | SmallTest | Level2)
+{
+    auto res = screen_->SetDefaultDensityDpi(DOT_PER_INCH_MAXIMUM_VALUE + 1);
+    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, res);
+
+    res = screen_->SetDefaultDensityDpi(100);
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(DMError::DM_OK, res);
+    } else {
+        ASSERT_NE(DMError::DM_OK, res);
+    }
 }
 }
 } // namespace Rosen

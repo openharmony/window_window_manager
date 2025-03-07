@@ -87,7 +87,7 @@ public:
      * @param focusInfo Focus window info.
      * @return FocusChangeInfo object about focus window.
      */
-    void GetFocusWindowInfo(FocusChangeInfo& focusInfo);
+    void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
 
     /**
      * @brief Register drawingcontent changed listener.

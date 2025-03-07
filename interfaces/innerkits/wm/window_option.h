@@ -218,6 +218,13 @@ public:
     void SetSubWindowTitle(const std::string& subWindowTitle);
 
     /**
+     * @brief Set is subwindow support maximize.
+     *
+     * @param maximizeSupported true means support default not support.
+     */
+    void SetSubWindowMaximizeSupported(bool maximizeSupported);
+
+    /**
      * @brief Set subwindow decor enable.
      *
      * @param subWindowDecorEnable the subwindow decor enable.
@@ -463,6 +470,13 @@ public:
     bool GetWindowTopmost() const;
 
     /**
+     * @brief Get subwindow maximizeSupported
+     *
+     * @return true means subwindow support maximize, otherwise not.
+     */
+    bool GetSubWindowMaximizeSupported() const;
+
+    /**
      * @brief Get the real parent id of UIExtension
      *
      * @return Return the real parent id of UIExtension
@@ -534,6 +548,22 @@ public:
      */
     bool GetIsDensityFollowHost() const;
 
+    /**
+     * @brief Set whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @param isConstrainedModal true - is a constrained modal UIExtension,
+     *                           false - is not a constrained modal UIExtension,
+     */
+    void SetConstrainedModal(bool isConstrainedModal);
+
+    /**
+     * @brief Get whether this modal UIExt is a constrained modal UIExtension.
+     *
+     * @return true - is a constrained modal UIExtension,
+     *         false - is not a constrained modal UIExtension,
+     */
+    bool IsConstrainedModal() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -560,6 +590,7 @@ private:
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
+    bool subWindowMaximizeSupported_ = false;
     bool onlySupportSceneBoard_ = false;
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };
@@ -576,6 +607,7 @@ private:
     WindowType parentWindowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
     float density_ = 1.0f;
     bool isDensityFollowHost_ = false;
+    bool isConstrainedModal_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS

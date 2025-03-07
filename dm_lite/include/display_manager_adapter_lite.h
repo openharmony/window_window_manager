@@ -90,6 +90,7 @@ public:
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
     virtual ScreenPowerState GetScreenPower();
+    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
 private:
     static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;
 };

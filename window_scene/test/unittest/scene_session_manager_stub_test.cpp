@@ -279,11 +279,31 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo, Function | Sma
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
     uint32_t code =
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: TransIdGetFocusSessionInfo1
+ * @tc.desc: test TransIdGetFocusSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionInfo1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code =
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -412,12 +432,31 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken, Function | Sm
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-
+    data.WriteUint64(0);
     uint32_t code =
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: TransIdGetFocusSessionToken1
+ * @tc.desc: test TransIdGetFocusSessionToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionToken1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code =
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_TOKEN);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -432,12 +471,31 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement, Function | 
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-
+    data.WriteUint64(0);
     uint32_t code =
         static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT);
 
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: TransIdGetFocusSessionElement1
+ * @tc.desc: test TransIdGetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, TransIdGetFocusSessionElement1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    uint32_t code =
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_ELEMENT);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1183,6 +1241,29 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatus, Function | Small
 }
 
 /**
+ * @tc.name: HandleRequestFocusStatusBySA
+ * @tc.desc: test HandleRequestFocusStatusBySA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleRequestFocusStatusBySA, Function | SmallTest | Level2)
+{
+    if (stub_ == nullptr) {
+        return;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t persistentId = 65535;
+    data.WriteInt32(persistentId);
+    bool isFocused = true;
+    data.WriteBool(isFocused);
+
+    int res = stub_->HandleRequestFocusStatusBySA(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleRegisterWindowManagerAgent
  * @tc.desc: test HandleRegisterWindowManagerAgent
  * @tc.type: FUNC
@@ -1246,9 +1327,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo, Function | Smal
 {
     MessageParcel data;
     MessageParcel reply;
-
+    data.WriteUint64(0);
     int res = stub_->HandleGetFocusSessionInfo(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionInfo1
+ * @tc.desc: test HandleGetFocusSessionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleGetFocusSessionInfo(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1260,8 +1354,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement, Function | S
 {
     MessageParcel data;
     MessageParcel reply;
+    data.WriteUint64(0);
     int res = stub_->HandleGetFocusSessionElement(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionElement1
+ * @tc.desc: test HandleGetFocusSessionElement
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionElement1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleGetFocusSessionElement(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1420,9 +1528,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken, Function | Sma
 {
     MessageParcel data;
     MessageParcel reply;
-
+    data.WriteUint64(0);
     int res = stub_->HandleGetFocusSessionToken(data, reply);
     EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleGetFocusSessionToken1
+ * @tc.desc: test HandleGetFocusSessionToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionToken1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = stub_->HandleGetFocusSessionToken(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**
@@ -1854,6 +1975,14 @@ HWTEST_F(SceneSessionManagerStubTest, HandleAddExtensionWindowStageToSCB, Functi
     data.WriteRemoteObject(token);
     data.WriteUint64(12345);
     res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteRemoteObject(sessionStage->AsObject());
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteUint64(12345);
+    data.WriteBool(false);
+    res = stub_->HandleAddExtensionWindowStageToSCB(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1878,6 +2007,15 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRemoveExtensionWindowStageFromSCB, F
     stub->remoteExtSessionMap_.clear();
     stub->remoteExtSessionMap_.insert(std::make_pair(sessionStage->AsObject(), token));
     int res = stub->HandleRemoveExtensionWindowStageFromSCB(data, reply);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    ASSERT_NE(sessionStage, nullptr);
+    data.WriteRemoteObject(sessionStage->AsObject());
+    ASSERT_NE(token, nullptr);
+    data.WriteRemoteObject(token);
+    data.WriteBool(false);
+    res = stub->HandleRemoveExtensionWindowStageFromSCB(data, reply);
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(res, ERR_NONE);
 }

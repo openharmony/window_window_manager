@@ -59,10 +59,10 @@ FoldScreenController::FoldScreenController(std::recursive_mutex& displayInfoMute
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         SecondaryFoldSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
         SecondaryFoldSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
-        return;
+    } else {
+        FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
+        FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
     }
-    FoldScreenSensorManager::GetInstance().SetFoldScreenPolicy(foldScreenPolicy_);
-    FoldScreenSensorManager::GetInstance().SetSensorFoldStateManager(sensorFoldStateManager_);
 #endif
 }
 
@@ -189,13 +189,22 @@ bool FoldScreenController::GetTentMode()
     return sensorFoldStateManager_->IsTentMode();
 }
 
-void FoldScreenController::OnTentModeChanged(bool isTentMode)
+bool FoldScreenController::GetCameraMode()
+{
+    if (sensorFoldStateManager_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "GetCameraMode: sensorFoldStateManager_ is null");
+        return false;
+    }
+    return sensorFoldStateManager_->IsCameraMode();
+}
+
+void FoldScreenController::OnTentModeChanged(bool isTentMode, int32_t hall)
 {
     if (sensorFoldStateManager_ == nullptr) {
         TLOGW(WmsLogTag::DMS, "OnTentModeChanged: sensorFoldStateManager_ is null");
         return;
     }
-    return sensorFoldStateManager_->HandleTentChange(isTentMode, foldScreenPolicy_);
+    return sensorFoldStateManager_->HandleTentChange(isTentMode, foldScreenPolicy_, hall);
 }
 
 sptr<FoldCreaseRegion> FoldScreenController::GetCurrentFoldCreaseRegion()
@@ -260,7 +269,11 @@ bool FoldScreenController::GetModeChangeRunningStatus()
 
 void FoldScreenController::SetdisplayModeChangeStatus(bool status)
 {
-    foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        foldScreenPolicy_->SetSecondaryDisplayModeChangeStatus(status);
+    } else {
+        foldScreenPolicy_->SetdisplayModeChangeStatus(status);
+    }
 }
 
 bool FoldScreenController::GetdisplayModeRunningStatus()
@@ -290,5 +303,14 @@ Drawing::Rect FoldScreenController::GetScreenSnapshotRect()
         return snapshotRect;
     }
     return foldScreenPolicy_->GetScreenSnapshotRect();
+}
+
+void FoldScreenController::SetMainScreenRegion(DMRect& mainScreenRegion)
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "foldScreenPolicy_ is null");
+        return;
+    }
+    foldScreenPolicy_->SetMainScreenRegion(mainScreenRegion);
 }
 } // namespace OHOS::Rosen

@@ -44,7 +44,7 @@ public:
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError TerminateSession(const sptr<AAFwk::SessionInfo> abilitySessionInfo) override;
     WSError NotifySessionException(
-        const sptr<AAFwk::SessionInfo> abilitySessionInfo, bool needRemoveSession = false) override;
+        const sptr<AAFwk::SessionInfo> abilitySessionInfo, const ExceptionInfo& exceptionInfo) override;
     WSError OnSessionEvent(SessionEvent event) override;
     WSError SyncSessionEvent(SessionEvent event) override;
     WSError OnLayoutFullScreenChange(bool isLayoutFullScreen) override;
@@ -60,7 +60,8 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError OnNeedAvoid(bool status) override;
-    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = {0, 0, 0, 0}) override;
+    AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
+        int32_t apiVersion = API_VERSION_INVALID) override;
     WSError GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoidAreas) override;
     WSError RequestSessionBack(bool needMoveToBackground) override;
     WSError MarkProcessed(int32_t eventId) override;
@@ -73,6 +74,8 @@ public:
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;
+    WSError SetSessionLabelAndIcon(const std::string& label,
+        const std::shared_ptr<Media::PixelMap>& icon) override;
 
     /*
      * UIExtension
@@ -87,12 +90,12 @@ public:
     void NotifyExtensionTimeout(int32_t errorCode) override;
     void TriggerBindModalUIExtension() override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
-    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
     void NotifyPiPWindowPrepareClose() override;
     WSError UpdatePiPRect(const Rect& rect, SizeChangeReason reason) override;
     WSError UpdatePiPControlStatus(WsPiPControlType controlType, WsPiPControlStatus status) override;
-    WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority) override;
+    WSError SetAutoStartPiP(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height) override;
 
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     WSError SendPointEventForMoveDrag(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -102,6 +105,7 @@ public:
     void SetCallingSessionId(uint32_t callingSessionId) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
+    WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
@@ -125,8 +129,31 @@ public:
      */
     WSError RemoveStartingWindow() override;
 
+    /*
+     * Window Property
+     */
+    WSError SetWindowCornerRadius(float cornerRadius) override;
+
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
+    WSError GetCrossAxisState(CrossAxisState& state) override;
+
+    /*
+     * PC Window
+     */
+    WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) override;
+    WSError OnContainerModalEvent(const std::string& eventName, const std::string& eventValue) override;
+
+    /*
+     * Window Pattern
+     */
+    void NotifyWindowAttachStateListenerRegistered(bool registered) override;
+
+    /**
+     * Window layout
+     */
+    WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;

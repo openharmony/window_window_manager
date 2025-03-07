@@ -80,6 +80,7 @@ enum class WSError : int32_t {
     WS_ERROR_MIN_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_TERMINATE_UI_EXTENSION_ABILITY_FAILED,
     WS_ERROR_PRE_HANDLE_COLLABORATOR_FAILED,
+    WS_ERROR_START_UI_ABILITY_TIMEOUT,
 
     WS_ERROR_EDM_CONTROLLED = 2097215, // enterprise limit
 };
@@ -133,6 +134,12 @@ enum ContinueState {
 enum class StartMethod : int32_t {
     START_NORMAL,
     START_CALL
+};
+
+enum class SingleHandMode : int32_t {
+    LEFT = 0,
+    RIGHT,
+    MIDDLE
 };
 
 /**
@@ -290,6 +297,16 @@ enum class FocusChangeReason {
     VOICE_INTERACTION,
 
     /**
+     * focus change for SA requerst.19
+     */
+    SA_REQUEST,
+
+    /**
+     * focus on previous window for system keyboard
+     */
+    SYSTEM_KEYBOARD,
+
+    /**
      * focus change max.
      */
     MAX,
@@ -310,6 +327,19 @@ struct SessionViewportConfig {
     uint64_t displayId_ = 0;
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
+};
+
+struct WindowSizeLimits {
+    uint32_t maxWindowWidth = 0;
+    uint32_t minWindowWidth = 0;
+    uint32_t maxWindowHeight = 0;
+    uint32_t minWindowHeight = 0;
+
+    bool operator==(const WindowSizeLimits& sizeLimits) const
+    {
+        return (maxWindowWidth == sizeLimits.maxWindowWidth && minWindowWidth == sizeLimits.minWindowWidth &&
+            maxWindowHeight == sizeLimits.maxWindowHeight && minWindowHeight == sizeLimits.minWindowHeight);
+    }
 };
 
 struct SessionInfo {
@@ -368,7 +398,8 @@ struct SessionInfo {
     bool isPcOrPadEnableActivation_ = false;
     bool canStartAbilityFromBackground_ = false;
     bool isFoundationCall_ = false;
-    int32_t specifiedId = 0;
+    int32_t requestId = 0;
+    std::string specifiedFlag_ = "";
 
     /*
      * App Use Control
@@ -394,6 +425,7 @@ struct SessionInfo {
      * PC Window
      */
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+    WindowSizeLimits windowSizeLimits;
 };
 
 enum class SessionFlag : uint32_t {
@@ -431,6 +463,9 @@ enum class SizeChangeReason : uint32_t {
     PIP_RESTORE,
     UPDATE_DPI_SYNC,
     DRAG_MOVE,
+    AVOID_AREA_CHANGE,
+    MAXIMIZE_TO_SPLIT,
+    SPLIT_TO_MAXIMIZE,
     END,
 };
 
@@ -555,7 +590,11 @@ struct WSRectT {
             width_ << " " << height_ << "]";
         return ss.str();
     }
+    static const WSRectT<T> EMPTY_RECT;
 };
+
+template<typename T>
+inline constexpr WSRectT<T> WSRectT<T>::EMPTY_RECT { 0, 0, 0, 0 };
 
 using WSRect = WSRectT<int32_t>;
 using WSRectF = WSRectT<float>;
@@ -635,6 +674,8 @@ struct AppWindowSceneConfig {
     std::string rotationMode_ = "windowRotation";
     WindowShadowConfig focusedShadow_;
     WindowShadowConfig unfocusedShadow_;
+    WindowShadowConfig focusedShadowDark_;
+    WindowShadowConfig unfocusedShadowDark_;
     KeyboardSceneAnimationConfig keyboardAnimationIn_;
     KeyboardSceneAnimationConfig keyboardAnimationOut_;
     WindowAnimationConfig windowAnimation_;
@@ -706,6 +747,9 @@ enum class SystemAnimatedSceneType : uint32_t {
     SCENE_ENTER_WIND_RECOVER, // Enter win+D in recover mode
     SCENE_ENTER_RECENTS, // Enter recents
     SCENE_EXIT_RECENTS, // Exit recent.
+    SCENE_LOCKSCREEN_TO_LAUNCHER, // Unlock screen.
+    SCENE_ENTER_MIN_WINDOW, // Enter the window minimization state
+    SCENE_RECOVER_MIN_WINDOW, // Recover minimized window
     SCENE_OTHERS, // 1.Default state 2.The state in which the animation ends
 };
 

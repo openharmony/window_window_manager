@@ -249,6 +249,20 @@ HWTEST_F(ScenePersistenceTest, HasSnapshot, Function | SmallTest | Level1)
     scenePersistence->SetHasSnapshot(false);
     ASSERT_EQ(scenePersistence->HasSnapshot(), false);
 }
+
+/**
+ * @tc.name: ResetSnapshotCache
+ * @tc.desc: test function: ResetSnapshotCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScenePersistenceTest, ResetSnapshotCache, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    scenePersistence->ResetSnapshotCache();
+    ASSERT_EQ(scenePersistence->isSavingSnapshot_, false);
+}
 }
 }
 }
