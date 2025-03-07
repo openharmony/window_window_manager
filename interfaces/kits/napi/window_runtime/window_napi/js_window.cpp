@@ -537,6 +537,22 @@ napi_value JsWindow::SetWindowTopmost(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnSetWindowTopmost(env, info) : nullptr;
 }
 
+/** @note @window.hierarchy */
+napi_value JsWindow::SetSubWindowZLevel(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetSubWindowZLevel(env, info) : nullptr;
+}
+
+/** @note @window.hierarchy */
+napi_value JsWindow::GetSubWindowZLevel(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnGetSubWindowZLevel(env, info) : nullptr;
+}
+
 napi_value JsWindow::SetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[NAPI]");
@@ -4059,6 +4075,84 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
     }
     return result;
+}
+
+/** @note @window.hierarchy */
+napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNOMALLY);
+    }
+    if (!WindowHelper::IsSubWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "not allowed since window is not sub window");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+    }
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1 || argv[0] == nullptr) { // 1: params num
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int32_t zLevel = 0;
+    if (errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[0], zLevel)) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to zLevel");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), zLevel, env,
+        task = napiAsyncTask, where = __func__] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
+            return;
+        }
+        WMErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
+        if (ret != WMError::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set sub window zLevel failed"));
+        }
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s end. Window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
+            where, window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "send event failed"));
+    }
+    return result;
+}
+
+/** @note @window.hierarchy */
+napi_value JsWindow::OnGetSubWindowZLevel(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 1) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (windowToken_ == nullptr) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNOMALLY);
+    }
+    int32_t zLevel = 0;
+    WMErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->GetSubWindowZLevel(zLevel));
+    if (ret != WMError::WM_OK) {
+        return NapiThrowError(env, ret);
+    }
+    napi_value objValue = nullptr;
+    napi_set_named_property(env, objValue, "zLevel", CreateJsValue(env, zLevel));
+    if (objValue != nullptr) {
+        return objValue;
+    } else {
+        return NapiThrowError(env, WMErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
 }
 
 napi_value JsWindow::OnSetWindowDelayRaiseOnDrag(napi_env env, napi_callback_info info)
@@ -7952,6 +8046,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setBrightness", moduleName, JsWindow::SetBrightness);
     BindNativeFunction(env, object, "setWindowBrightness", moduleName, JsWindow::SetWindowBrightness);
     BindNativeFunction(env, object, "setTopmost", moduleName, JsWindow::SetTopmost);
+    BindNativeFunction(env, object, "setSubWindowZLevel", moduleName, JsWindow::SetSubWindowZLevel);
+    BindNativeFunction(env, object, "getSubWindowZLevel", moduleName, JsWindow::GetSubWindowZLevel);
     BindNativeFunction(env, object, "setWindowTopmost", moduleName, JsWindow::SetWindowTopmost);
     BindNativeFunction(env, object, "setWindowDelayRaiseOnDrag", moduleName, JsWindow::SetWindowDelayRaiseOnDrag);
     BindNativeFunction(env, object, "setDimBehind", moduleName, JsWindow::SetDimBehind);

@@ -104,6 +104,7 @@ public:
     bool IsTopmost() const override;
     WMError SetMainWindowTopmost(bool isTopmost) override;
     bool IsMainWindowTopmost() const override;
+    void SetSubWindowZLevelToProperty();
 
     WMError SetResizeByDragEnabled(bool dragEnabled) override;
     WMError SetRaiseByClickEnabled(bool raiseEnabled) override;

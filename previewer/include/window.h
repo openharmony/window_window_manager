@@ -422,6 +422,29 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    /**
+     * @brief Set sub window zLevel
+     * 
+     * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows.
+     * @return WM_OK means success, others mean set failed.
+     */
+    virtual WMError SetSubWindowZLevel(int32_t zLevel)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Get sub window zLevel
+     * 
+     * @param zLevel sub window zLevel
+     * @return WM_OK means success, others mean get failed.
+     */
+    virtual WMError GetSubWindowZLevel(int32_t& zLevel)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
     virtual WMError Recover(uint32_t reason = 0) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     virtual WMError Maximize(MaximizePresentation present) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }

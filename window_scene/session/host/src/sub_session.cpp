@@ -286,4 +286,36 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
         return WMError::WM_OK;
     }, __func__);
 }
+
+WSError SetSubWindowZLevel(int32_t zLevel)
+{
+    PostTask([weakThis = wptr(this), zLevel]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_HIERARCHY, "session is null");
+            return;
+        }
+        auto property = session->GetSessionProperty();
+        if (property) {
+            TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session zLevel change, id: %{public}d, zLevel: %{public}d,",
+            session->GetPersistentId(), zLevel);
+            property->SetSubWindowZLevel(zLevel);
+            if (session->onSubSessionZLevelChange_) {
+                session->onSubSessionZLevelChange_(zLevel);
+            }
+        }
+    }, "SetSubWindowZLevel");
+    return WSError::WS_OK;
+}
+
+int32_t GetSubWindowZLevel() const
+{
+    int32_t zLevel = 0;
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty) {
+        zLevel = sessionProperty->GetSubWindowZLevel();
+    }
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "zLevel: %{public}d",zLevel);
+}
+
 } // namespace OHOS::Rosen

@@ -226,6 +226,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
     property_->SetCallingSessionId(option->GetCallingWindow());
     property_->SetIsUIExtFirstSubWindow(option->GetIsUIExtFirstSubWindow());
     property_->SetTopmost(option->GetWindowTopmost());
+    property_->SetSubWindowZLevel(option->GetSubWindowZLevel());
     property_->SetRealParentId(option->GetRealParentId());
     property_->SetParentWindowType(option->GetParentWindowType());
     property_->SetUIExtensionUsage(static_cast<UIExtensionUsage>(option->GetUIExtensionUsage()));
@@ -288,6 +289,14 @@ void WindowSessionImpl::MakeSubOrDialogWindowDragableAndMoveble()
             TLOGI(WmsLogTag::WMS_PC, "create dialogWindow, title: %{public}s, decorEnable: %{public}d",
                 dialogTitle_.c_str(), dialogDecorEnable);
         }
+    }
+}
+
+void WindowSessionImpl::SetSubWindowZLevelToProperty()
+{
+    WindowType type = property_->GetWindowType();
+    if (WindowHelper::IsSubWindow(type) || WindowHelper::IsDialogWindow(type)) {
+        property_->SetSubWindowZLevel(windowOption_->GetSubWindowZLevel());
     }
 }
 
@@ -2408,6 +2417,11 @@ WMError WindowSessionImpl::SetSubWindowModal(bool isModal, ModalityType modality
         subWindowModalType = modalityType == ModalityType::WINDOW_MODALITY ?
             SubWindowModalType::TYPE_WINDOW_MODALITY :
             SubWindowModalType::TYPE_APPLICATION_MODALITY;
+    }
+    if (!(property_->GetSubWindowZLevel() <= MAXIMUM_Z_LEVEL && !isModal)) {
+        int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), IsTopmost());
+        property_->SetSubWindowZLevel(zLevel);
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_SUB_WINDOW_Z_LEVEL);
     }
     hostSession->NotifySubModalTypeChange(subWindowModalType);
     return modalRet;

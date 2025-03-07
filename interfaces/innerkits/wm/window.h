@@ -697,6 +697,16 @@ public:
     static sptr<Window> Find(const std::string& windowName);
 
     /**
+     * @brief get sub window zlevel by window flags
+     *
+     * @param type Window type
+     * @param windowFlags Window flag
+     * @param isTopmost True means window is topmost
+     * @return int32_t Return the sub window zLevel
+     */
+    static int32_t GetSubWindowZLevelByFlags(WindowType type, uint32_t windowFlags, bool isTopmost);
+
+    /**
      * @brief Get parent main windowId, which is used for mainWindow,subWindow or dialog
      *
      * @param windowId window id that need to get parent main window
@@ -938,6 +948,22 @@ public:
      * @return True means main window is topmost
      */
     virtual bool IsMainWindowTopmost() const { return false; }
+
+    /**
+     * @brief Set sub window zLevel
+     * 
+     * @param zLevel zLevel of sub window to specify the hierarchical relationship among sub windows.
+     * @return WM_OK means success, others mean set failed.
+     */
+    virtual WMError SetSubWindowZLevel(int32_t zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    
+    /**
+     * @brief Get sub window zLevel
+     * 
+     * @param zLevel sub window zLevel
+     * @return WM_OK means success, others mean get failed.
+     */
+    virtual WMError GetSubWindowZLevel(int32_t& zLevel) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set alpha of window.

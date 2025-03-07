@@ -55,8 +55,14 @@ public:
         const RectAnimationConfig& rectAnimationConfig = {}) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
 
+    /*
+     * Window Hierarchy
+     */
     WMError RaiseToAppTop() override;
     WMError RaiseAboveTarget(int32_t subWindowId) override;
+    WMError SetSubWindowZLevel(int32_t zLevel) override;
+    WMError GetSubWindowZLevel(int32_t& zLevel) override;
+
     void PerformBack() override;
     WMError SetAspectRatio(float ratio) override;
     WMError ResetAspectRatio() override;
