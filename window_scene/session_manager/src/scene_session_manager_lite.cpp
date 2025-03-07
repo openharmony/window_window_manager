@@ -307,13 +307,13 @@ WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteO
         hasOrNot);
 }
 
-WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerById(const sptr<ISessionLifecycleListener>& listener,
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
     const std::vector<int32_t>& persistentIdList)
 {
     return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, persistentIdList);
 }
 
-WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundle(
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
     const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
 {
     return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleNameList);

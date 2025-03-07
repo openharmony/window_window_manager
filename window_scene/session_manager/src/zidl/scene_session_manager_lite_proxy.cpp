@@ -1604,7 +1604,7 @@ WMError SceneSessionManagerLiteProxy::HasFloatingWindowForeground(const sptr<IRe
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerById(
+WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByIds(
     const sptr<ISessionLifecycleListener>& listener, const std::vector<int32_t>& persistentIdList)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
@@ -1629,7 +1629,7 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerById(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_ID),
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1642,7 +1642,7 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerById(
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByBundle(
+WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByBundles(
     const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
@@ -1667,7 +1667,7 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByBundle(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLE),
+        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
         return WMError::WM_ERROR_IPC_FAILED;

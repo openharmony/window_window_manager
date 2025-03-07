@@ -56,7 +56,7 @@
 #include "window_focus_controller.h"
 #include "window_scene_config.h"
 #include "wm_single_instance.h"
-#include "session_lifecycle_listener_interface.h"
+#include "zidl/session_lifecycle_listener_interface.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;

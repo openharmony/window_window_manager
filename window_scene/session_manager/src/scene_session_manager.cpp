@@ -13404,7 +13404,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(
     }
     taskScheduler_->PostAsyncTask([this, listener, persistentIdList, where = __func__] {
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, persistentIdList);
-        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:&{public}d", where, ret);
+        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
     }, __func__);
     return WMError::WM_OK;
 }
@@ -13422,7 +13422,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(
     }
     taskScheduler_->PostAsyncTask([this, listener, bundleNameList, where = __func__] {
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, bundleNameList);
-        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:&{public}d", where, ret);
+        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
     }, __func__);
     return WMError::WM_OK;
 }
@@ -13439,7 +13439,7 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
     }
     taskScheduler_->PostAsyncTask([this, listener, where = __func__] {
         WMError ret = listenerController_->UnregisterSessionLifecycleListener(listener);
-        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:&{public}d", where, ret);
+        TLOGI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
     }, __func__);
     return WMError::WM_OK;
 }

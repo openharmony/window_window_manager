@@ -109,7 +109,7 @@ private:
     */
     void ConstructPayload(ISessionLifecycleListener::LifecycleEventPayload& payload, const SessionInfo& sessionInfo);
     void OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote);
-    void RemoveSessionLifecycleListener(const sptr<IRemoteObjcet>& target);
+    void RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target);
 
     template <typename KeyType, typename MapType>
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,

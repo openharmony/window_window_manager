@@ -137,11 +137,12 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleLockSessionByAbilityInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO):
             return HandleGetCallingWindowInfo(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_ID):
-            return HandleRegisterSessionLifecycleListenerById(data, reply);
         case static_cast<uint32_t>(
-            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLE):
-            return HandleRegisterSessionLifecycleListenerByBundle(data, reply);
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS):
+            return HandleRegisterSessionLifecycleListenerByIds(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES):
+            return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
             return HandleUnregisterSessionLifecycleListener(data, reply);
         default:
@@ -1021,7 +1022,7 @@ int SceneSessionManagerLiteStub::HandleHasFloatingWindowForeground(MessageParcel
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerById(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByIds(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
@@ -1039,14 +1040,14 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerById(Mess
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read persistentIdList");
         return ERR_INVALID_DATA;
     }
-    WMError ret = RegisterSessionLifecycleListenerById(listener, persistentIdList);
+    WMError ret = RegisterSessionLifecycleListenerByIds(listener, persistentIdList);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundle(
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundles(
     MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
@@ -1065,7 +1066,7 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundle(
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleNameList");
         return ERR_INVALID_DATA;
     }
-    WMError ret = RegisterSessionLifecycleListenerByBundle(listener, bundleNameList);
+    WMError ret = RegisterSessionLifecycleListenerByBundles(listener, bundleNameList);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }
