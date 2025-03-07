@@ -3606,6 +3606,8 @@ bool ScreenSessionManager::SetRotation(ScreenId screenId, Rotation rotationAfter
     TLOGI(WmsLogTag::DMS, "set orientation. rotation %{public}u", rotationAfter);
     SetDisplayBoundary(screenSession);
     screenSession->SetRotation(rotationAfter);
+    screenSession->SetPhysicalRotation(0);
+    screenSession->SetScreenComponentRotation(0);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
     NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
     NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_ROTATION);
