@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <string_ex.h>
 #include <unique_fd.h>
+#include "input_manager.h"
 
 #include <hitrace_meter.h>
 #ifdef DEVICE_STATUS_ENABLE
@@ -6783,6 +6784,8 @@ void ScreenSessionManager::SetDisplayNodeScreenId(ScreenId screenId, ScreenId di
 #ifdef DEVICE_STATUS_ENABLE
     SetDragWindowScreenId(screenId, displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SetMultiWindowScreenId");
+    MMI::InputManager::GetInstance()->SetMultiWindowScreenId(screenId, displayNodeScreenId);
 }
 
 #ifdef DEVICE_STATUS_ENABLE
