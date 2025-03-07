@@ -97,6 +97,8 @@ public:
         std::vector<sptr<WindowDisplayChangeAdapter>>> displayInfoChangedListeners_;
     std::vector<sptr<IWindowPidVisibilityChangedListener>> windowPidVisibilityListeners_;
     sptr<WindowManagerAgent> windowPidVisibilityListenerAgent_;
+    std::vector<sptr<IKeyboardCallingWindowDisplayChangeListener>> callingDisplayChangedListeners_;
+    sptr<WindowManagerAgent> callingDisplayListenerAgent_;
 };
 
 void WindowManager::Impl::NotifyWMSConnected(int32_t userId, int32_t screenId)
