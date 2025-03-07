@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
+#include "ani_embeddable_window_stage.h"
 
 #include "ani.h"
 #include "window_manager_hilog.h"
-
-#include "ani_embeddable_window_stage.h"
-
 
 namespace OHOS {
 namespace Rosen {
@@ -58,15 +56,15 @@ ani_object CreateAniEmbeddableWindowStage(ani_env* env, sptr<Rosen::Window> wind
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
     if (env == nullptr) {
-        WLOGFE("[ANI] null env");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env");
         return nullptr;
     }
-    WLOGFD("[ANI] create wstage");
+    TLOGD(WmsLogTag::WMS_UIEXT, "[ANI] create wstage");
 
     ani_status ret;
     ani_class cls = nullptr;
     if ((ret = env->FindClass("L@ohos/window/window/WindowStageInternal;", &cls)) != ANI_OK) {
-        WLOGFE("[ANI] null env %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env %{public}u", ret);
         return cls;
     }
 
@@ -76,23 +74,23 @@ ani_object CreateAniEmbeddableWindowStage(ani_env* env, sptr<Rosen::Window> wind
 
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeWindowStage", &contextField)) != ANI_OK) {
-        WLOGFE("[ANI] get field fail %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] get field fail %{public}u", ret);
         return nullptr;
     }
 
     ani_method initFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
-        WLOGFE("[ANI] get ctor fail %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
     ani_object obj = nullptr;
     if ((ret = env->Object_New(cls, initFunc, &obj)) != ANI_OK) {
-        WLOGFE("[ANI] obj new fail %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] obj new fail %{public}u", ret);
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
-        WLOGFE("[ANI] get ctor fail %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
     env->Object_CallMethod_Void(obj, setObjFunc, aniEmbeddableWindowStage.get());
@@ -106,12 +104,12 @@ AniEmbeddableWindowStage* GetEmbeddableWindowStageFromEnv(ani_env* env, ani_clas
     ani_field nativeObjName {};
     ani_status ret;
     if ((ret = env->Class_FindField(cls, "nativeObj", &nativeObjName)) != ANI_OK) {
-        WLOGFE("[ANI] obj fetch field %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] obj fetch field %{public}u", ret);
         return nullptr;
     }
     ani_long nativeObj {};
     if ((ret = env->Object_GetField_Long(obj, nativeObjName, &nativeObj)) != ANI_OK) {
-        WLOGFE("[ANI] obj fetch long %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] obj fetch long %{public}u", ret);
         return nullptr;
     }
     return reinterpret_cast<AniEmbeddableWindowStage*>(nativeObj);
@@ -124,17 +122,16 @@ ANI_EXPORT ani_status ExtensionWindow_ANI_Constructor(ani_vm *vm, uint32_t *resu
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     using namespace OHOS::Rosen;
-    constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, OHOS::Rosen::HILOG_DOMAIN_WINDOW, "AniExtWindow"};
     ani_status ret;
     ani_env *env;
     if ((ret = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        WLOGFE("[ANI] null env");
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env");
         return ANI_NOT_FOUND;
     }
 
     ani_class cls = nullptr;
     if ((ret = env->FindClass("L@ohos/window/window/WindowStage;", &cls)) != ANI_OK) {
-        WLOGFE("[ANI] null env %{public}u", ret);
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     *result = ANI_VERSION_1;

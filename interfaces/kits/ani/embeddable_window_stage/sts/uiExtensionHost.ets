@@ -15,9 +15,6 @@
 
 import window from '@ohos.window';
 
-interface Area { type: window.AvoidAreaType, area: window.AvoidArea }
-type Callback_Area = (data: Area) => void;
-type Callback_Size = (data: window.Size) => void;
 /**
  * uiExtensionHost.
  *
@@ -28,18 +25,26 @@ type Callback_Size = (data: window.Size) => void;
  */
 namespace uiExtensionHost {
   export native function createExtentionWindow(win: long, hostId: int): UIExtensionHostWindowProxy;
+
+  // internal class and function
+  export type CallbackSize = (size: window.Size) => void;
+  export type CallbackArea = (area: window.AvoidAreaOptions) => void;
+
+  function callBack(fn: object, fnArg: object): void {
+      let f = fn as (d: object) => void;
+      f(fnArg);
+  }
+
+  class UIESize implements window.Size {
+    width: double;
+    height: double;
+  }
   class UIERect implements window.Rect {
     left: double;
     top: double;
     width: double;
     height: double;
   };
-  class UIEProperties implements UIExtensionHostWindowProxyProperties {
-    constructor() {
-        this.uiExtensionHostWindowProxyRect = new UIERect();
-    }
-    uiExtensionHostWindowProxyRect: window.Rect;
-  }
   class UIEAvoidArea implements window.AvoidArea {
     constructor() {
         this.leftRect = new UIERect();
@@ -53,6 +58,18 @@ namespace uiExtensionHost {
     rightRect: window.Rect;
     bottomRect: window.Rect;
   }
+  class UIEAreaAndType {
+    type: window.AvoidAreaType;
+    area: UIEAvoidArea;
+  }
+  class UIEProperties implements UIExtensionHostWindowProxyProperties {
+    constructor() {
+        this.uiExtensionHostWindowProxyRect = new UIERect();
+    }
+    uiExtensionHostWindowProxyRect: window.Rect;
+  }
+
+  // API implementation
   export class UIExtensionHostInternal implements UIExtensionHostWindowProxy {
     static { loadLibrary("embeddablewindowstageani_kit.z") }
     private nativeObj: long = 0;
@@ -66,10 +83,10 @@ namespace uiExtensionHost {
     public native getProperties(nativeObj: long, property: object): int;
     public native setProperties(nativeObj: long, property: object): int;
     public native getWindowAvoidArea(nativeObj: long, type: int, area: object): int;
-    public native onAvoidAreaChange(nativeObj: long, callback: Callback_Area): void;
-    public native offAvoidAreaChange(nativeObj: long, callback?: Callback_Area): void;
-    public native onWindowSizeChange(nativeObj: long, callback: Callback_Size): void;
-    public native offWindowSizeChange(nativeObj: long, callback?: Callback_Size): void;
+    public native onAvoidAreaChange(nativeObj: long, callback: object, callbackData: object): int;
+    public native offAvoidAreaChange(nativeObj: long, callback?: object): int;
+    public native onWindowSizeChange(nativeObj: long, callback: object, callbackData: object): int;
+    public native offWindowSizeChange(nativeObj: long, callback?: object): int;
 
     get properties(): UIExtensionHostWindowProxyProperties {
         let property = new UIEProperties();
@@ -79,18 +96,20 @@ namespace uiExtensionHost {
     set properties(property: UIExtensionHostWindowProxyProperties) {
         this.setProperties(this.nativeObj, property as object);
     }
-    on(type: 'avoidAreaChange' | 'windowSizeChange', callback: Callback_Size | Callback_Area): void {
+    public on(type: 'avoidAreaChange' | 'windowSizeChange', callback: CallbackSize | CallbackArea) : void {
         if (type == 'avoidAreaChange') {
-            this.onAvoidAreaChange(this.nativeObj, callback as Callback_Area);
+            let area = new UIEAreaAndType();
+            this.onAvoidAreaChange(this.nativeObj, callback as object, area as object);
         } else {
-            this.onWindowSizeChange(this.nativeObj, callback as Callback_Size);
+            let size: window.Size = new UIESize();
+            this.onWindowSizeChange(this.nativeObj, callback as object, size as object);
         }
     }
-    off(type: 'windowSizeChange' | 'avoidAreaChange', callback?: Callback_Size | Callback_Area): void {
+    public off(type: 'windowSizeChange' | 'avoidAreaChange', callback?: CallbackArea | CallbackSize): void {
         if (type == 'avoidAreaChange') {
-            this.offAvoidAreaChange(this.nativeObj, callback as Callback_Area);
+            this.offAvoidAreaChange(this.nativeObj, callback);
         } else {
-            this.offWindowSizeChange(this.nativeObj, callback as Callback_Size);
+            this.offWindowSizeChange(this.nativeObj, callback);
         }
     }
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
@@ -108,184 +127,10 @@ namespace uiExtensionHost {
    * @since 11
    */
   export interface UIExtensionHostWindowProxy {
-    /**
-     * Get the avoid area
-     *
-     * @param { window.AvoidAreaType } type - Type of the area
-     * @returns { window.AvoidArea } Area where the window cannot be displayed.
-     * @throws { BusinessError } 401 - Parameter error.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 11
-     */
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea;
-
-    /**
-     * Register the callback of avoidAreaChange
-     *
-     * @param { 'avoidAreaChange' } type - The value is fixed at 'avoidAreaChange',
-     * indicating the event of changes to the avoid area.
-     * @param { Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }> }
-     * callback - Callback used to return the area.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 11
-     */
-
-    /**
-     * Register the callback of windowSizeChange
-     *
-     * @param { 'windowSizeChange' } type - The value is fixed at 'windowSizeChange',
-     * indicating the window size change event.
-     * @param { Callback<window.Size> } callback - Callback used to return the window size.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 11
-     */
-    on(type: 'avoidAreaChange' | 'windowSizeChange', callback: Callback_Size | Callback_Area): void;
-
-    /**
-     * Unregister the callback of avoidAreaChange
-     *
-     * @param { 'avoidAreaChange' } type - The value is fixed at 'avoidAreaChange',
-     * indicating the event of changes to the avoid area.
-     * @param { Callback<{ type: window.AvoidAreaType, area: window.AvoidArea }> }
-     * callback - Callback used to return the area.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 11
-     */
-
-    /**
-     * Unregister the callback of windowSizeChange
-     *
-     * @param { 'windowSizeChange' } type - The value is fixed at 'windowSizeChange',
-     * indicating the window size change event.
-     * @param { Callback<window.Size> } callback - Callback used to return the window size.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 11
-     */
-    off(type: 'avoidAreaChange', callback?: Callback_Area): void;
-
-    /**
-     * The properties of the UIExtension window
-     *
-     * @type { UIExtensionHostWindowProxyProperties }
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 11
-     */
+    on(type: 'avoidAreaChange' | 'windowSizeChange', callback: CallbackSize | CallbackArea): void;
+    off(type: 'avoidAreaChange' | 'windowSizeChange', callback?: CallbackArea | CallbackSize): void;
     properties: UIExtensionHostWindowProxyProperties;
-
-    /**
-     * Hide the non-secure windows
-     *
-     * @param { boolean } shouldHide - Hide the non-secure windows if true, otherwise means the opposite.
-     * @returns { Promise<void> } - The promise returned by the function.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 11
-     */
-    /**
-     * Hide the non-secure windows.
-     * When called by modal UIExtension and shouldHide == false, the "ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS"
-     * permission is required.
-     *
-     * @permission ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS
-     * @param { boolean } shouldHide - Hide the non-secure windows if true, otherwise means the opposite.
-     * @returns { Promise<void> } - The promise returned by the function.
-     * @throws { BusinessError } 202 - Permission verification failed. A non-system application calls a system API.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @throws { BusinessError } 1300002 - Abnormal state. Possible causes:
-     * <br> 1. Permission denied. Interface caller does not have permission
-     * "ohos.permission.ALLOW_SHOW_NON_SECURE_WINDOWS".
-     * <br> 2. The UIExtension window proxy is abnormal.
-     * @throws { BusinessError } 1300003 - This window manager service works abnormally.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 12
-     */
-    //hideNonSecureWindows(shouldHide: boolean): Promise<void>;
-
-    /**
-     * Create sub window.
-     *
-     * @param { string } name - window name of sub window
-     * @param { window.SubWindowOptions } subWindowOptions - options of sub window creation
-     * @returns { Promise<window.Window> } Promise used to return the subwindow.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @throws { BusinessError } 801 - Capability not supported. Failed to call
-     * the API due to limited device capabilities.
-     * @throws { BusinessError } 1300002 - This window state is abnormal.
-     * @throws { BusinessError } 1300005 - This window proxy is abnormal.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @StageModelOnly
-     * @since 12
-     */
-     //createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
-
-     /**
-     * Set the watermark flag on the UIExtension window
-     *
-     * @param { boolean } enable - Add water mark flag to the UIExtension window if true, or remove flag if false
-     * @returns { Promise<void> } - The promise returned by the function
-     * @throws { BusinessError } 1300002 - The UIExtension window proxy is abnormal.
-     * @throws { BusinessError } 1300003 - This window manager service works abnormally.
-     * @throws { BusinessError } 1300008 - The display device is abnormal.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 12
-     */
-    //setWaterMarkFlag(enable: boolean): Promise<void>;
-
-    /**
-     * Hide the display content when snapshot.
-     *
-     * @param { boolean } shouldHide - Hide the display content of UIExtensionAbility when the
-     * host application takes snapshots if true,
-     * otherwise means the opposite.
-     * @returns { Promise<void> } - The promise returned by the function.
-     * @throws { BusinessError } 202 - Permission verification failed. A non-system application calls a system API.
-     * @throws { BusinessError } 401 - Parameter error. Possible causes:
-     * <br> 1. Mandatory parameters are left unspecified.
-     * <br> 2. Incorrect parameters types.
-     * <br> 3. Parameter verification failed.
-     * @throws { BusinessError } 1300002 - Abnormal state. Possible causes:
-     * <br> 1. The UIExtension window proxy is abnormal.
-     * <br> 2. Not the UIExtensionAbility process calling.
-     * @syscap SystemCapability.ArkUI.ArkUI.Full
-     * @systemapi
-     * @since 13
-     */
-    //hidePrivacyContentForHost(shouldHide: boolean): Promise<void>;
   }
 
   /**
