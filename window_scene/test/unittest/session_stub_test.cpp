@@ -507,6 +507,20 @@ HWTEST_F(SessionStubTest, HandleSetSystemEnableDrag_TestReadBool, Function | Sma
 }
 
 /**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: sessionStub GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleGetIsMidScene(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetSessionLabelAndIcon01
  * @tc.desc: HandleSetSessionLabelAndIcon
  * @tc.type: FUNC

@@ -130,15 +130,9 @@ HWTEST_F(KeyboardSessionTest, GetKeyboardGravity, Function | SmallTest | Level1)
     info.abilityName_ = "GetKeyboardGravity";
     info.bundleName_ = "GetKeyboardGravity";
     sptr<SceneSession::SpecificSessionCallback> specificCb =
-        new (std::nothrow) SceneSession::SpecificSessionCallback();
-    EXPECT_NE(specificCb, nullptr);
-    sptr<KeyboardSession> keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, nullptr);
-    ASSERT_TRUE((keyboardSession != nullptr));
-    keyboardSession->property_ = nullptr;
-    ASSERT_EQ(SessionGravity::SESSION_GRAVITY_DEFAULT, keyboardSession->GetKeyboardGravity());
- 
-    sptr<WindowSessionProperty> windowSessionProperty = new (std::nothrow) WindowSessionProperty();
-    EXPECT_NE(windowSessionProperty, nullptr);
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, specificCb, nullptr);
+    sptr<WindowSessionProperty> windowSessionProperty = sptr<WindowSessionProperty>::MakeSptr();
     keyboardSession->property_ = windowSessionProperty;
     ASSERT_EQ(SessionGravity::SESSION_GRAVITY_BOTTOM, keyboardSession->GetKeyboardGravity());
 }
@@ -540,14 +534,14 @@ HWTEST_F(KeyboardSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     EXPECT_NE(sceneSession, nullptr);
     WSRect rect({0, 0, 0, 0});
     sceneSession->winRect_ = rect;
-    sceneSession->specificCallback_->onGetSceneSessionVectorByType_ =
+    sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType, uint64_t)->std::vector<sptr<SceneSession>>
         {
             std::vector<sptr<SceneSession>> vec;
             vec.push_back(nullptr);
             return vec;
         };
-    EXPECT_NE(specificCb->onGetSceneSessionVectorByType_, nullptr);
+    EXPECT_NE(specificCb->onGetSceneSessionVectorByTypeAndDisplayId_, nullptr);
     statusBarHeight = keyboardSession->GetStatusBarHeight();
     ASSERT_EQ(statusBarHeight, 0);
 
@@ -559,7 +553,7 @@ HWTEST_F(KeyboardSessionTest, GetStatusBarHeight, Function | SmallTest | Level1)
     EXPECT_NE(keyboardCb, nullptr);
     keyboardSession = new (std::nothrow) KeyboardSession(info, specificCb, keyboardCb);
     EXPECT_NE(keyboardSession, nullptr);
-    sceneSession->specificCallback_->onGetSceneSessionVectorByType_ =
+    sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType, uint64_t)->std::vector<sptr<SceneSession>>
         {
             std::vector<sptr<SceneSession>> vec;
@@ -590,7 +584,7 @@ HWTEST_F(KeyboardSessionTest, GetStatusBarHeight02, Function | SmallTest | Level
     sceneSession->property_ = windowSessionProperty;
     WSRect rect3({0, 0, 0, 1});
     sceneSession->winRect_ = rect3;
-    sceneSession->specificCallback_->onGetSceneSessionVectorByType_ =
+    sceneSession->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ =
         [&](WindowType, uint64_t)->std::vector<sptr<SceneSession>>
         {
             std::vector<sptr<SceneSession>> vec;

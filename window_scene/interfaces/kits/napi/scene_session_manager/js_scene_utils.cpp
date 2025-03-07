@@ -853,7 +853,7 @@ bool ConvertDragResizeTypeFromJs(napi_env env, napi_value value, DragResizeType&
     return true;
 }
 
-bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string> &vector)
+bool ParseArrayStringValue(napi_env env, napi_value array, std::vector<std::string>& vector)
 {
     if (array == nullptr) {
         WLOGFE("array is nullptr!");
@@ -994,6 +994,7 @@ napi_value CreateJsSessionRecoverInfo(
     WSRect wsRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     napi_set_named_property(env, objValue, "recoverRect", CreateJsSessionRect(env, wsRect));
     napi_set_named_property(env, objValue, "mainWindowTopmost", CreateJsValue(env, property->IsMainWindowTopmost()));
+    napi_set_named_property(env, objValue, "layoutFullScreen", CreateJsValue(env, property->IsLayoutFullScreen()));
     return objValue;
 }
 
@@ -1129,6 +1130,29 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 
+    return objValue;
+}
+
+napi_value CreateJsRSUIFirstSwitch(napi_env env)
+{
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "Failed to get object");
+        return nullptr;
+    }
+    napi_set_named_property(env, objValue, "NONE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::NONE)));
+    napi_set_named_property(env, objValue, "MODAL_WINDOW_CLOSE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::MODAL_WINDOW_CLOSE)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE)));
+    napi_set_named_property(env, objValue, "FORCE_ENABLE_LIMIT", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_ENABLE_LIMIT)));
+    napi_set_named_property(env, objValue, "FORCE_DISABLE_NONFOCUS", CreateJsValue(env,
+        static_cast<int32_t>(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS)));
     return objValue;
 }
 
@@ -1450,6 +1474,10 @@ napi_value CreateJsKeyboardLayoutParams(napi_env env, const KeyboardLayoutParams
         return nullptr;
     }
 
+    napi_set_named_property(env, objValue, "landscapeAvoidHeight",
+        CreateJsValue(env, params.landscapeAvoidHeight_));
+    napi_set_named_property(env, objValue, "portraitAvoidHeight",
+        CreateJsValue(env, params.portraitAvoidHeight_));
     napi_set_named_property(env, objValue, "landscapeKeyboardRect",
         CreateJsSessionRect(env, params.LandscapeKeyboardRect_));
     napi_set_named_property(env, objValue, "portraitKeyboardRect",
@@ -1589,6 +1617,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_DIVIDER", JsSessionType::TYPE_DIVIDER);
     SetTypeProperty(objValue, env, "TYPE_TRANSPARENT_VIEW", JsSessionType::TYPE_TRANSPARENT_VIEW);
     SetTypeProperty(objValue, env, "TYPE_WALLET_SWIPE_CARD", JsSessionType::TYPE_WALLET_SWIPE_CARD);
+    SetTypeProperty(objValue, env, "TYPE_SCREEN_CONTROL", JsSessionType::TYPE_SCREEN_CONTROL);
     return objValue;
 }
 

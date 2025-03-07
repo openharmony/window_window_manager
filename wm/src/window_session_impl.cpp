@@ -249,7 +249,7 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option)
 
 bool WindowSessionImpl::IsPcWindow() const
 {
-    return (windowSystemConfig_.uiType_ == UI_TYPE_PC);
+    return windowSystemConfig_.uiType_ == UI_TYPE_PC;
 }
 
 bool WindowSessionImpl::IsPcOrPadCapabilityEnabled() const
@@ -1164,7 +1164,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
               rect.width_, rect.height_, GetPersistentId());
         return;
     }
-    auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetRotation());
+    auto rotation =  ONE_FOURTH_FULL_CIRCLE_DEGREE * static_cast<uint32_t>(displayInfo->GetOriginRotation());
     auto deviceRotation = static_cast<uint32_t>(displayInfo->GetDefaultDeviceRotationOffset());
     uint32_t transformHint = (rotation + deviceRotation) % FULL_CIRCLE_DEGREE;
     float density = GetVirtualPixelRatio(displayInfo);
@@ -1299,7 +1299,9 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
     WindowSetUIContentType setUIContentType, BackupAndRestoreType restoreType, AppExecFwk::Ability* ability,
     OHOS::Ace::UIContentErrorCode& aceRet)
 {
-    DestroyExistUIContent();
+    {
+        DestroyExistUIContent();
+    }
     std::unique_ptr<Ace::UIContent> uiContent = ability != nullptr ? Ace::UIContent::Create(ability) :
         Ace::UIContent::Create(context_.get(), reinterpret_cast<NativeEngine*>(env));
     if (uiContent == nullptr) {
@@ -1326,7 +1328,8 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, napi_en
             break;
         }
         case WindowSetUIContentType::RESTORE:
-            aceRet = uiContent->Restore(this, contentInfo, storage, GetAceContentInfoType(restoreType));
+            aceRet = uiContent->Restore(this, contentInfo, storage, restoreType == BackupAndRestoreType::CONTINUATION ?
+                Ace::ContentInfoType::CONTINUATION : Ace::ContentInfoType::APP_RECOVERY);
             break;
         case WindowSetUIContentType::BY_NAME:
             aceRet = uiContent->InitializeByName(this, contentInfo, storage);
@@ -1878,25 +1881,27 @@ Orientation WindowSessionImpl::GetRequestedOrientation()
 
 std::string WindowSessionImpl::GetContentInfo(BackupAndRestoreType type)
 {
-    WLOGFD("GetContentInfo");
+    WLOGFD("in");
     if (type == BackupAndRestoreType::NONE) {
         return "";
     }
+
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}d", GetPersistentId());
         return "";
     }
+
     return uiContent->GetContentInfo(GetAceContentInfoType(type));
 }
-
+ 
 WMError WindowSessionImpl::SetRestoredRouterStack(const std::string& routerStack)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Set restored router stack.");
     restoredRouterStack_ = routerStack;
     return WMError::WM_OK;
 }
-
+ 
 std::string WindowSessionImpl::GetRestoredRouterStack()
 {
     TLOGD(WmsLogTag::WMS_LIFE, "Get restored router stack.");
@@ -2198,7 +2203,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
     }
     if (height == -1) {
         height = 0;
-        TLOGD(WmsLogTag::WMS_DECOR, "Get app window decor height failed");
+        TLOGW(WmsLogTag::WMS_DECOR, "Get app window decor height failed");
         return WMError::WM_OK;
     }
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -2871,6 +2876,17 @@ WMError WindowSessionImpl::SetTitleButtonVisible(bool isMaximizeVisible, bool is
     }
     windowTitleVisibleFlags_ = { isMaximizeVisible, isMinimizeVisible, isSplitVisible, isCloseVisible };
     UpdateTitleButtonVisibility();
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::GetIsMidScene(bool& isMidScene)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->GetIsMidScene(isMidScene);
     return WMError::WM_OK;
 }
 
@@ -3755,6 +3771,9 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
         }
         return;
     }
+    if (FilterPointerEvent(pointerEvent)) {
+        return;
+    }
 
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent != nullptr) {
@@ -3775,21 +3794,49 @@ void WindowSessionImpl::NotifyPointerEvent(const std::shared_ptr<MMI::PointerEve
 
 WMError WindowSessionImpl::SetKeyEventFilter(KeyEventFilterFunc filter)
 {
-    std::unique_lock<std::shared_mutex> lock(keyEventFilterMutex_);
+    std::unique_lock<std::mutex> lock(keyEventFilterMutex_);
     keyEventFilter_ = std::move(filter);
     return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::ClearKeyEventFilter()
 {
-    std::unique_lock<std::shared_mutex> lock(keyEventFilterMutex_);
+    std::unique_lock<std::mutex> lock(keyEventFilterMutex_);
     keyEventFilter_ = nullptr;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetMouseEventFilter(MouseEventFilterFunc filter)
+{
+    std::unique_lock<std::mutex> lock(mouseEventFilterMutex_);
+    mouseEventFilter_ = std::move(filter);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::ClearMouseEventFilter()
+{
+    std::unique_lock<std::mutex> lock(mouseEventFilterMutex_);
+    mouseEventFilter_ = nullptr;
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SetTouchEventFilter(TouchEventFilterFunc filter)
+{
+    std::unique_lock<std::mutex> lock(touchEventFilterMutex_);
+    touchEventFilter_ = std::move(filter);
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::ClearTouchEventFilter()
+{
+    std::unique_lock<std::mutex> lock(touchEventFilterMutex_);
+    touchEventFilter_ = nullptr;
     return WMError::WM_OK;
 }
 
 bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    std::shared_lock<std::shared_mutex> lock(keyEventFilterMutex_);
+    std::lock_guard<std::mutex> lock(keyEventFilterMutex_);
     if (keyEventFilter_ != nullptr) {
         bool isFilter = keyEventFilter_(*keyEvent.get());
         TLOGE(WmsLogTag::WMS_SYSTEM, "keyCode:%{public}d isFilter:%{public}d",
@@ -3800,6 +3847,33 @@ bool WindowSessionImpl::FilterKeyEvent(const std::shared_ptr<MMI::KeyEvent>& key
         }
     }
     return false;
+}
+
+bool WindowSessionImpl::FilterPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    bool isFiltered = false;
+    auto sourceType = pointerEvent->GetSourceType();
+    auto action = pointerEvent->GetPointerAction();
+    if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+        std::lock_guard<std::mutex> lock(touchEventFilterMutex_);
+        if (touchEventFilter_ == nullptr) {
+            return false;
+        }
+        isFiltered = touchEventFilter_(*pointerEvent.get());
+    } else if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+               (action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+                action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE &&
+                action != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_END)) {
+        std::lock_guard<std::mutex> lock(mouseEventFilterMutex_);
+        if (mouseEventFilter_ == nullptr) {
+            return false;
+        }
+        isFiltered = mouseEventFilter_(*pointerEvent.get());
+    }
+    if (isFiltered) {
+        pointerEvent->MarkProcessed();
+    }
+    return isFiltered;
 }
 
 void WindowSessionImpl::DispatchKeyEventCallback(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)

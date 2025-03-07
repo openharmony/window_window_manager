@@ -18,6 +18,7 @@
 
 #include "screen_session_manager_client.h"
 #include "screen_session_manager_client_interface.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -405,9 +406,12 @@ HWTEST_F(ScreenSessionManagerClientStubTest, OnRemoteRequest16, Function | Small
     data.WriteInterfaceToken(ScreenSessionManagerClientStub::GetDescriptor());
 
     uint32_t code = static_cast<uint32_t>(20);
-    screenSessionManagerClientStub_->OnRemoteRequest(code, data, reply, option);
-    int res = 0;
-    EXPECT_EQ(res, 0);
+    auto res = screenSessionManagerClientStub_->OnRemoteRequest(code, data, reply, option);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_NE(res, 0);
+    } else {
+        EXPECT_EQ(res, 0);
+    }
 }
 
 /**

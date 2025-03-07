@@ -598,6 +598,23 @@ HWTEST_F(SessionProxyTest, NotifyMainModalTypeChange, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, GetIsMidScene, Function | SmallTest | Level2)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene start";
+    sptr<SessionProxy> sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+
+    bool isMidScene = false;
+    WSError res = sProxy->GetIsMidScene(isMidScene);
+    ASSERT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    ASSERT_EQ(isMidScene, false);
+    GTEST_LOG_(INFO) << "SessionProxyTest: GetIsMidScene end";
+}
+
+/**
  * @tc.name: SetSessionLabelAndIcon
  * @tc.desc: SetSessionLabelAndIcon
  * @tc.type: FUNC

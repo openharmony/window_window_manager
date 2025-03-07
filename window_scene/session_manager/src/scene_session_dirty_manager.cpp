@@ -35,49 +35,8 @@ constexpr int POINTER_CHANGE_AREA_FIVE = 5;
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
 constexpr int UPDATE_TASK_DURATION = 10;
 const std::string UPDATE_WINDOW_INFO_TASK = "UpdateWindowInfoTask";
-static int32_t g_screenRotationOffset = system::GetIntParameter<int32_t>("const.fold.screen_rotation.offset", 0);
 constexpr float ZORDER_UIEXTENSION_INDEX = 0.1;
 
-void AdjustMMIRotationFromDisplayMode(MMI::DisplayMode displayMode, MMI::Direction& rotation)
-{
-    if (displayMode == MMI::DisplayMode::FULL && g_screenRotationOffset != 0) {
-        switch (rotation) {
-            case MMI::DIRECTION0:
-                rotation = MMI::DIRECTION90;
-                break;
-            case MMI::DIRECTION90:
-                rotation = MMI::DIRECTION180;
-                break;
-            case MMI::DIRECTION180:
-                rotation = MMI::DIRECTION270;
-                break;
-            case MMI::DIRECTION270:
-                rotation = MMI::DIRECTION0;
-                break;
-            default:
-                rotation = MMI::DIRECTION0;
-                break;
-        }
-    } else if (displayMode == MMI::DisplayMode::MAIN && FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
-        switch (rotation) {
-            case MMI::DIRECTION0:
-                rotation = MMI::DIRECTION270;
-                break;
-            case MMI::DIRECTION90:
-                rotation = MMI::DIRECTION0;
-                break;
-            case MMI::DIRECTION180:
-                rotation = MMI::DIRECTION90;
-                break;
-            case MMI::DIRECTION270:
-                rotation = MMI::DIRECTION180;
-                break;
-            default:
-                rotation = MMI::DIRECTION0;
-                break;
-        }
-    }
-}
 } // namespace
 
 static bool operator==(const MMI::Rect& left, const MMI::Rect& right)
@@ -85,7 +44,7 @@ static bool operator==(const MMI::Rect& left, const MMI::Rect& right)
     return ((left.x == right.x) && (left.y == right.y) && (left.width == right.width) && (left.height == right.height));
 }
 
-MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode displayMode)
+MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
     MMI::Direction rotation = MMI::DIRECTION0;
     if (NearEqual(degree, DIRECTION0)) {
@@ -97,7 +56,6 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree, MMI::DisplayMode display
     } else if (NearEqual(degree, DIRECTION270)) {
         rotation = MMI::DIRECTION270;
     }
-    AdjustMMIRotationFromDisplayMode(displayMode, rotation);
     return rotation;
 }
 
@@ -162,15 +120,13 @@ void SceneSessionDirtyManager::CalNotRotateTransform(const sptr<SceneSession>& s
         return;
     }
     auto displayId = sessionProperty->GetDisplayId();
-    auto displayMode = Rosen::ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     std::map<ScreenId, ScreenProperty> screensProperties =
         Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     if (screensProperties.find(displayId) == screensProperties.end()) {
         return;
     }
     auto screenProperty = screensProperties[displayId];
-    MMI::Direction displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetRotation(),
-        static_cast<MMI::DisplayMode>(displayMode));
+    MMI::Direction displayRotation = ConvertDegreeToMMIRotation(screenProperty.GetPhysicalRotation());
     float width = screenProperty.GetBounds().rect_.GetWidth();
     float height = screenProperty.GetBounds().rect_.GetHeight();
     Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
@@ -197,8 +153,10 @@ void SceneSessionDirtyManager::CalTransform(const sptr<SceneSession>& sceneSessi
     auto displayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     if (isRotate || !sceneSession->GetSessionInfo().isSystem_ ||
         static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::FULL ||
+        displayMode == FoldDisplayMode::GLOBAL_FULL ||
         (static_cast<MMI::DisplayMode>(displayMode) == MMI::DisplayMode::MAIN &&
-         FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice())) {
+         (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+         FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()))) {
         Vector2f scale(sceneSession->GetScaleX(), sceneSession->GetScaleY());
         Vector2f translate = sceneSession->GetSessionGlobalPosition(useUIExtension);
         if (!NearZero(singleHandData.singleHandY)) {
@@ -259,6 +217,40 @@ void SceneSessionDirtyManager::UpdateDefaultHotAreas(sptr<SceneSession> sceneSes
     pointerHotAreas.emplace_back(pointerRect);
 }
 
+static void UpdateKeyboardHotAreasInner(const sptr<SceneSession>& sceneSession, std::vector<Rect>& hotAreas)
+{
+    sptr<SceneSession> session = (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) ?
+        sceneSession->GetKeyboardSession() : sceneSession;
+    if (sceneSession == nullptr) {
+        WLOGFE("sceneSession is nullptr");
+        return;
+    }
+    WSRect windowRect = sceneSession->GetSessionGlobalRect();
+    auto sessionProperty = session->GetSessionProperty();
+    KeyboardTouchHotAreas keyboardTouchHotAreas = sessionProperty->GetKeyboardTouchHotAreas();
+    auto displayId = sessionProperty->GetDisplayId();
+    std::map<ScreenId, ScreenProperty> screensProperties =
+        Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+    if (screensProperties.find(displayId) == screensProperties.end()) {
+        return;
+    }
+    const auto& screenProperty = screensProperties[displayId];
+    bool isLandscape = screenProperty.GetBounds().rect_.GetWidth() > screenProperty.GetBounds().rect_.GetHeight();
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        if (keyboardTouchHotAreas.isKeyboardEmpty()) {
+            return;
+        }
+        hotAreas = isLandscape ? keyboardTouchHotAreas.landscapeKeyboardHotAreas_ :
+            keyboardTouchHotAreas.portraitKeyboardHotAreas_;
+    } else if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        if (keyboardTouchHotAreas.isPanelEmpty()) {
+            return;
+        }
+        hotAreas = isLandscape ? keyboardTouchHotAreas.landscapePanelHotAreas_ :
+            keyboardTouchHotAreas.portraitPanelHotAreas_;
+    }
+}
+
 void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, std::vector<MMI::Rect>& touchHotAreas,
     std::vector<MMI::Rect>& pointerHotAreas) const
 {
@@ -267,7 +259,11 @@ void SceneSessionDirtyManager::UpdateHotAreas(sptr<SceneSession> sceneSession, s
         return;
     }
     WSRect windowRect = sceneSession->GetSessionGlobalRect();
-    const std::vector<Rect>& hotAreas = sceneSession->GetTouchHotAreas();
+    std::vector<Rect> hotAreas = sceneSession->GetTouchHotAreas();
+    if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT ||
+        sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_KEYBOARD_PANEL) {
+        UpdateKeyboardHotAreasInner(sceneSession, hotAreas);
+    }
     for (auto area : hotAreas) {
         MMI::Rect rect;
         rect.x = area.posX_;
@@ -752,6 +748,9 @@ SingleHandData SceneSessionDirtyManager::GetSingleHandData(const sptr<SceneSessi
     SingleHandData singleHandData;
     auto sessionProperty = sceneSession->GetSessionProperty();
     auto displayId = sessionProperty->GetDisplayId();
+    if (displayId != ScreenSessionManagerClient::GetInstance().GetDefaultScreenId()) {
+        return singleHandData;
+    }
     const std::map<ScreenId, ScreenProperty>& screensProperties =
         ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     auto screenPropertyIter = screensProperties.find(displayId);

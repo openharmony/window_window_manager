@@ -773,7 +773,7 @@ napi_value OnGetFoldDisplayMode(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM)));
         return NapiGetUndefined(env);
     }
-    FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayMode();
+    FoldDisplayMode mode = SingletonContainer::Get<DisplayManager>().GetFoldDisplayModeForExternal();
     WLOGD("[NAPI]" PRIu64", getFoldDisplayMode = %{public}u", mode);
     return CreateJsValue(env, mode);
 }
@@ -795,13 +795,22 @@ napi_value OnSetFoldDisplayMode(napi_env env, napi_callback_info info)
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
         return NapiGetUndefined(env);
     }
+    std::string reason = "";
+    if (argc == ARGC_TWO) {
+        if (!ConvertFromJsValue(env, argv[INDEX_ONE], reason)) {
+            WLOGFE("[NAPI]Failed to convert parameter to reason");
+            std::string errMsg = "Failed to convert parameter to reason";
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_PARAM), errMsg));
+            return NapiGetUndefined(env);
+        }
+    }
     DmErrorCode errCode = DM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode));
+        SingletonContainer::Get<DisplayManager>().SetFoldDisplayModeFromJs(mode, reason));
+    WLOGI("[NAPI]setFoldDisplayMode, %{public}d", static_cast<int32_t>(errCode));
     if (errCode != DmErrorCode::DM_OK) {
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode)));
         return NapiGetUndefined(env);
     }
-    WLOGI("[NAPI]" PRIu64", setFoldDisplayMode");
     return NapiGetUndefined(env);
 }
 
@@ -1038,6 +1047,18 @@ napi_value InitFoldStatus(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLDED)));
     napi_set_named_property(env, objValue, "FOLD_STATUS_HALF_FOLDED",
         CreateJsValue(env, static_cast<uint32_t>(FoldStatus::HALF_FOLD)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_EXPANDED_WITH_SECOND_EXPANDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_EXPANDED_WITH_SECOND_HALF_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_FOLDED_WITH_SECOND_EXPANDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_FOLDED_WITH_SECOND_HALF_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_EXPANDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND)));
+    napi_set_named_property(env, objValue, "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_HALF_FOLDED",
+        CreateJsValue(env, static_cast<uint32_t>(FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED)));
     return objValue;
 }
 

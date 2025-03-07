@@ -945,8 +945,7 @@ HWTEST_F(SceneSessionTest, GetKeyboardAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
-        uint64_t displayId) -> std::vector<sptr<SceneSession>> {
+    specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type) -> std::vector<sptr<SceneSession>> {
         std::vector<sptr<SceneSession>> backgroundSession;
         return backgroundSession;
     };
@@ -1089,7 +1088,7 @@ HWTEST_F(SceneSessionTest, GetAvoidAreaByType, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback_ =
         new (std::nothrow) SceneSession::SpecificSessionCallback();
     EXPECT_NE(specificCallback_, nullptr);
-        specificCallback_->onGetSceneSessionVectorByType_ = [](WindowType type,
+        specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = [](WindowType type,
             uint64_t displayId)-> std::vector<sptr<SceneSession>>
     {
         SessionInfo info_;
@@ -1389,6 +1388,42 @@ HWTEST_F(SceneSessionTest, DumpSessionInfo, Function | SmallTest | Level2)
     std::vector<std::string> infos;
     scensession->DumpSessionInfo(infos);
     ASSERT_FALSE(infos.empty());
+}
+
+/**
+ * @tc.name: CalcRectForStatusBar
+ * @tc.desc: CalcRectForStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, CalcRectForStatusBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "CalcRectForStatusBar";
+    info.bundleName_ = "CalcRectForStatusBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    uint32_t width = sceneSession->CalcRectForStatusBar().width_;
+    uint32_t height = sceneSession->CalcRectForStatusBar().height_;
+    EXPECT_EQ(width, 0);
+    EXPECT_EQ(height, 0);
+}
+
+/**
+ * @tc.name: InitializeMoveInputBar
+ * @tc.desc: InitializeMoveInputBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, InitializeMoveInputBar, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "InitializeMoveInputBar";
+    info.bundleName_ = "InitializeMoveInputBar";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto property = sceneSession->GetSessionProperty();
+    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_STATUS_BAR);
+    property->SetDisplayId(1);
+
+    auto result = sceneSession->InitializeMoveInputBar();
+    EXPECT_EQ(result, WSError::WS_ERROR_INVALID_OPERATION);
 }
 
 /**
@@ -2011,6 +2046,73 @@ HWTEST_F(SceneSessionTest, SetIsStatusBarVisibleInner01, Function | SmallTest | 
 
     sceneSession->specificCallback_ = nullptr;
     EXPECT_EQ(sceneSession->SetIsStatusBarVisibleInner(false), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: SetMousePointerDownEventStatus
+ * @tc.desc: SetMousePointerDownEventStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetMousePointerDownEventStatus, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetMousePointerDownEventStatus";
+    info.bundleName_ = "SetMousePointerDownEventStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetMousePointerDownEventStatus(true);
+    EXPECT_EQ(sceneSession->GetMousePointerDownEventStatus(), true);
+}
+
+/**
+ * @tc.name: SetFingerPointerDownStatus
+ * @tc.desc: SetFingerPointerDownStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetFingerPointerDownStatus, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetFingerPointerDownStatus";
+    info.bundleName_ = "SetFingerPointerDownStatus";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->SetFingerPointerDownStatus(0);
+    sceneSession->SetFingerPointerDownStatus(1);
+    auto fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 2);
+    sceneSession->RemoveFingerPointerDownStatus(0);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 1);
+
+    sceneSession->RemoveFingerPointerDownStatus(1);
+    fingerPointerDownStatusList = sceneSession->GetFingerPointerDownStatusList();
+    EXPECT_EQ(fingerPointerDownStatusList.size(), 0);
+}
+
+/**
+ * @tc.name: SetUIFirstSwitch
+ * @tc.desc: SetUIFirstSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, SetUIFirstSwitch, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetUIFirstSwitch";
+    info.bundleName_ = "SetUIFirstSwitch";
+    info.windowType_ = 1;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetUIFirstSwitch(RSUIFirstSwitch::FORCE_DISABLE_NONFOCUS);
 }
 } // namespace
 } // Rosen

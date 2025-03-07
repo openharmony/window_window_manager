@@ -826,6 +826,27 @@ HWTEST_F(ExtensionSessionTest, NotifyDumpInfo, Function | SmallTest | Level1)
     res = extensionSession_->NotifyDumpInfo(params, info);
     ASSERT_EQ(WSError::WS_ERROR_NULLPTR, res);
 }
+
+/**
+ * @tc.name: TryUpdateExtensionPersistentId
+ * @tc.desc: test function : TryUpdateExtensionPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, TryUpdateExtensionPersistentId, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ExtensionSessionTest";
+    info.bundleName_ = "ExtensionSessionTest";
+    info.persistentId_ = INVALID_SESSION_ID;
+    sptr<ExtensionSession> extensionSessionA = sptr<ExtensionSession>::MakeSptr(info);
+    info.persistentId_ = extensionSessionA->GetPersistentId();
+    sptr<ExtensionSession> extensionSessionB = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_EQ(info.persistentId_ + 1, extensionSessionB->GetPersistentId());
+    extensionSessionA.clear();
+    info.persistentId_ += 4096;
+    sptr<ExtensionSession> extensionSessionC = sptr<ExtensionSession>::MakeSptr(info);
+    ASSERT_EQ(info.persistentId_, extensionSessionC->GetPersistentId());
+}
 }
 }
 }

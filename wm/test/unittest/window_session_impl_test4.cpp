@@ -200,13 +200,17 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, Function | SmallTest | Le
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowTopmost");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    WMError res = window->SetMainWindowTopmost(false);
+
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->state_ = WindowState::STATE_CREATED;
-    WMError res = window->SetMainWindowTopmost(true);
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
+    window->windowSystemConfig_.uiType_ = UI_TYPE_PC;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    res = window->SetMainWindowTopmost(true);
+    ASSERT_EQ(WMError::WM_OK, res);
 }
 
 /**
@@ -685,7 +689,7 @@ HWTEST_F(WindowSessionImplTest4, PreNotifyKeyEvent, Function | SmallTest | Level
     std::shared_ptr<MMI::PointerEvent> pointerEvent;
     window->ConsumePointerEvent(pointerEvent);
 
-    std::shared_ptr<MMI::KeyEvent> keyEvent;
+    std::shared_ptr<MMI::KeyEvent> keyEvent = MMI::KeyEvent::Create();
     window->ConsumeKeyEvent(keyEvent);
     ASSERT_EQ(nullptr, window->GetUIContentSharedPtr());
     ASSERT_EQ(false, window->PreNotifyKeyEvent(keyEvent));
@@ -1706,6 +1710,28 @@ HWTEST_F(WindowSessionImplTest4, NotifySystemDensityChange01, Function | SmallTe
     float density = 1.5f;
     auto ret = window->NotifySystemDensityChange(density);
     ASSERT_EQ(WSError::WS_OK, ret);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+}
+
+/**
+ * @tc.name: GetIsMidScene
+ * @tc.desc: GetIsMidScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest4, GetIsMidScene, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetIsMidScene");
+
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
+
+    bool isMidScene = false;
+    auto ret = window->GetIsMidScene(isMidScene);
+    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
+    ASSERT_EQ(false, isMidScene);
     ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
 }
 

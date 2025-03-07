@@ -66,6 +66,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM,
     TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE,
     TRANS_ID_NOTIFY_PIPSIZE_CHANGE,
+    TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE,
 };
 }   // namespace Rosen
 }   // namespace OHOS

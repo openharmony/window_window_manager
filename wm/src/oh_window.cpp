@@ -433,7 +433,7 @@ int32_t OH_WindowManager_GetWindowProperties(
         windowProperties->isTransparent = window->IsTransparent();
         windowProperties->id = window->GetWindowId();
         windowProperties->displayId = window->GetDisplayId();
-        Rect drawableRect;
+        Rect drawableRect = { 0, 0, 0, 0 };
         auto uicontent = window->GetUIContent();
         if (uicontent == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s uicontent is null, windowId:%{public}d", where, windowId);

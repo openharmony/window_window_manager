@@ -292,6 +292,7 @@ public:
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;
     WMError IsWindowRectAutoSave(const std::string& key, bool& enabled) override;
     void SetIsWindowRectAutoSave(const std::string& key, bool enabled);
+    WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -509,8 +510,10 @@ public:
     /*
      * Window Pattern
      */
+    void InitSnapshotCache();
     void VisitSnapshotFromCache(int32_t persistentId);
     void PutSnapshotToCache(int32_t persistentId);
+    void RemoveSnapshotFromCache(int32_t persistentId);
 
 protected:
     SceneSessionManager();
@@ -565,6 +568,13 @@ private:
         const std::vector<std::pair<uint64_t, WindowVisibilityState>>& currVisibleData);
 
     /*
+     * Window Input Event
+     */
+    void SendCancelEventBeforeEraseSession(const sptr<SceneSession>& sceneSession);
+    void BuildCancelPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t fingerId,
+                                 int32_t action, int32_t wid);
+    
+    /*
      * Window Pipeline
      */
     void ProcessFocusZOrderChange(uint32_t dirty);
@@ -577,6 +587,11 @@ private:
     bool isUserAuthPassed_ {false};
     sptr<SceneSession> GetSceneSessionBySessionInfo(const SessionInfo& sessionInfo);
 
+    /*
+     * Window Focus
+     */
+    std::mutex highlightIdsMutex_;
+    std::unordered_set<int32_t> highlightIds_;
     std::vector<std::pair<int32_t, sptr<SceneSession>>> GetSceneSessionVector(CmpFunc cmp);
     void TraverseSessionTree(TraverseFunc func, bool isFromTopToBottom);
     void TraverseSessionTreeFromTopToBottom(TraverseFunc func);
@@ -600,12 +615,6 @@ private:
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
-
-    /*
-     * Window Focus
-     */
-    std::mutex highlightIdsMutex_;
-    std::unordered_set<int32_t> highlightIds_;
     sptr<SceneSession> GetNextFocusableSession(int32_t persistentId);
     sptr<SceneSession> GetTopNearestBlockingFocusSession(uint32_t zOrder, bool includingAppSession);
     sptr<SceneSession> GetTopFocusableNonAppSession();
@@ -631,7 +640,8 @@ private:
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void UpdateFocusableProperty(int32_t persistentId);
     WMError UpdateTopmostProperty(const sptr<WindowSessionProperty>& property, const sptr<SceneSession>& sceneSession);
-    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type, uint64_t displayId);
+    std::vector<sptr<SceneSession>> GetSceneSessionVectorByTypeAndDisplayId(WindowType type, uint64_t displayId);
+    std::vector<sptr<SceneSession>> GetSceneSessionVectorByType(WindowType type);
     void UpdateOccupiedAreaIfNeed(const int32_t& persistentId);
     void NotifyMMIWindowPidChange(int32_t windowId, bool startMoving);
     void UpdateHighlightStatus(const sptr<SceneSession>& preSceneSession, const sptr<SceneSession>& currSceneSession,
@@ -640,6 +650,12 @@ private:
     void AddHighlightSessionIds(const sptr<SceneSession>& sceneSession, bool needBlockHighlightNotify);
     void RemoveHighlightSessionIds(const sptr<SceneSession>& sceneSession);
     std::string GetHighlightIdsStr();
+
+    /*
+     * PC Window
+     */
+    WMError ShiftAppWindowPointerEventInner(
+        int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
 
     /**
      * Window Immersive
@@ -725,7 +741,6 @@ private:
     void NotifyAllAccessibilityInfo();
     void SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNodeId, bool isSkip);
     void RegisterSecSurfaceInfoListener();
-    void RegisterConstrainedModalUIExtInfoListener();
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
 
     /**
@@ -738,6 +753,7 @@ private:
     /**
      * PiP Window
      */
+    void RegisterConstrainedModalUIExtInfoListener();
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
 
     /*
@@ -812,6 +828,7 @@ private:
     std::vector<VisibleWindowNumInfo> lastInfo_ = {};
     std::shared_mutex lastInfoMutex_;
 
+    std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     sptr<AppAnrListener> appAnrListener_;
@@ -1025,6 +1042,7 @@ private:
      * Window Pattern
      */
     std::unique_ptr<LRUCache> snapshotLRUCache_;
+    std::size_t snapshotCapacity_ = 0;
 };
 } // namespace OHOS::Rosen
 
