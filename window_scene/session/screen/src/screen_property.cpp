@@ -31,8 +31,8 @@ constexpr float SECONDARY_ROTATION_180 = 180.0F;
 constexpr float SECONDARY_ROTATION_270 = 270.0F;
 constexpr int32_t SECONDARY_MAIN_OFFSETY = -2176;
 constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
-constexpr float MAIN_STATUS_WIDTH = 1008;
 constexpr float FULL_STATUS_WIDTH = 2048;
+constexpr float MAIN_STATUS_WIDTH = 1008;
 constexpr float SCREEN_HEIGHT = 2232;
 }
 
