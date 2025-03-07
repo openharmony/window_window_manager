@@ -5210,9 +5210,9 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
         state < static_cast<int32_t>(CrossAxisState::STATE_END);
 }
 
-bool WindowSessionImpl::IsSubWindowMaximizeSupported(WindowType windowType) const
+bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
 {
-    if (!WindowHelper::IsSubWindow(windowType)) {
+    if (!WindowHelper::IsSubWindow(GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Maximize fail not subwindow");
         return false;
     }
