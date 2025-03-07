@@ -41,7 +41,7 @@ bool DisplayInfo::Marshalling(Parcel &parcel) const
         parcel.WriteUint32(availableHeight_) && parcel.WriteFloat(scaleX_) &&
         parcel.WriteFloat(scaleY_) && parcel.WriteFloat(pivotX_) && parcel.WriteFloat(pivotY_) &&
         parcel.WriteFloat(translateX_) && parcel.WriteFloat(translateY_) &&
-        parcel.WriteUint32(static_cast<uint32_t>(originRotation_));;
+        parcel.WriteUint32(static_cast<uint32_t>(originRotation_));
 }
 
 DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
