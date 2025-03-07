@@ -537,7 +537,9 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
         rectChangeReason = JS_SIZE_CHANGE_REASON.at(reason);
     }
-    if (currentReason_ != RectChangeReason::DRAG && rectChangeReason == RectChangeReason::DRAG_END) {
+    if (rectChangeReason == RectChangeReason::DRAG_END &&
+        currentReason_ != RectChangeReason::DRAG_START && currentReason_ != RectChangeReason::DRAG) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event");
         rectChangeReason = RectChangeReason::MOVE;
     }
     // js callback should run in js thread
@@ -570,7 +572,11 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         return;
     }
     currRect_ = rect;
-    currentReason_ = rectChangeReason;
+    if (rectChangeReason == RectChangeReason::UNDEFINED) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "ignore undefined reason to change last reason");
+    } else {
+        currentReason_ = rectChangeReason;
+    }
 }
 
 void JsWindowListener::OnSubWindowClose(bool& terminateCloseProcess)

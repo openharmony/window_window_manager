@@ -2865,6 +2865,7 @@ void SceneSession::OnMoveDragCallback(const SizeChangeReason& reason)
         HandleCompatibleModeMoveDrag(rect, reason, isSupportDragInPcCompatibleMode);
     } else {
         if (IsDragResizeWhenEnd(reason)) {
+            UpdateSizeChangeReason(reason);
             OnSessionEvent(SessionEvent::EVENT_DRAG);
             return;
         }
