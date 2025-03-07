@@ -159,7 +159,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionBackground(const sptr<Ex
     auto abilitySessionInfo = SetAbilitySessionInfo(extSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
     auto task = [this, weakExtSession, callback = std::move(resultCallback),
-        extSessionInfo = std::move(abilitySessionInfo),]() {
+        extSessionInfo = std::move(abilitySessionInfo)]() {
         auto extSession = weakExtSession.promote();
         if (extSession == nullptr) {
             WLOGFE("session is nullptr");
