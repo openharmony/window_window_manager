@@ -962,10 +962,12 @@ struct CallingWindowInfo : public Parcelable {
 
     static CallingWindowInfo* Unmarshalling(Parcel& parcel)
     {
-        sptr<CallingWindowInfo> callingWindowInfo = sptr<CallingWindowInfo>::MakeSptr();
-        if (!(parcel.ReadInt32(callingWindowInfo->windowId_) && parcel.ReadInt32(callingWindowInfo->callingPid_) &&
-            parcel.ReadUint64(callingWindowInfo->displayId_) && parcel.ReadInt32(callingWindowInfo->userId_))) {
-            callingWindowInfo = nullptr;
+        CallingWindowInfo* callingWindowInfo = new CallingWindowInfo();
+        bool res = parcel.ReadInt32(callingWindowInfo->windowId_) && parcel.ReadInt32(callingWindowInfo->callingPid_) &&
+                   parcel.ReadUint64(callingWindowInfo->displayId_) && parcel.ReadInt32(callingWindowInfo->userId_);
+        if (!res) {
+            delete callingWindowInfo;
+            return nullptr;
         }
         return callingWindowInfo;
     }

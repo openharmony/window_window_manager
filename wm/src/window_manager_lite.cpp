@@ -74,7 +74,7 @@ public:
     sptr<WindowManagerAgentLite> windowStyleListenerAgent_;
     std::vector<sptr<IPiPStateChangedListener>> pipStateChangedListeners_;
     sptr<WindowManagerAgentLite> pipStateChangedListenerAgent_;
-    std::vector<sptr<IKeyboardCallingWindowDisplayChangeListener>>callingDisplayChangedListeners_;
+    std::vector<sptr<IKeyboardCallingWindowDisplayChangeListener>> callingDisplayChangedListeners_;
     sptr<WindowManagerAgentLite> callingDisplayListenerAgent_;
 };
 

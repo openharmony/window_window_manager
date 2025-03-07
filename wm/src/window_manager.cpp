@@ -1234,6 +1234,11 @@ WMError WindowManager::NotifyWindowStyleChange(WindowStyleType type)
     return WMError::WM_OK;
 }
 
+WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo)
+{
+    return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 WMError WindowManager::RegisterDrawingContentChangedListener(const sptr<IDrawingContentChangedListener>& listener)
 {
     if (listener == nullptr) {
