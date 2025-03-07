@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../windowmanager_aafwk.gni")
 
-module_out_path = "window_manager/wms"
+module_out_path = "window_manager/window_manager/wms"
 
 group("systemtest") {
   testonly = true
