@@ -6777,7 +6777,7 @@ napi_value JsWindow::OnIsFocused(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_FOCUS, "window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-
+    
     bool isFocused = window->IsFocused();
     TLOGI(WmsLogTag::WMS_FOCUS, "window [%{public}u, %{public}s] get isFocused end, isFocused = %{public}u",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), isFocused);
