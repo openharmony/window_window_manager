@@ -78,6 +78,7 @@ protected:
 private:
     sptr<SceneSession> GetSceneSession(uint32_t persistentId);
     int32_t GetFocusedSessionId();
+    WSRect GetPanelRect() const;
 
     void SetCallingSessionId(uint32_t callingSessionId) override;
 

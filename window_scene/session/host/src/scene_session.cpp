@@ -6996,4 +6996,43 @@ void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
 {
     SetNeedNotifyAttachState(registered);
 }
+
+void SceneSession::NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& panelRect)
+{
+    PostTask([weakThis = wptr(this), isShowAnimation, panelRect, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s session is null", where);
+            return;
+        }
+        if (session->sessionStage_ == nullptr) {
+            TLOGNI(WmsLogTag::WMS_KEYBOARD, "%{public}s sessionStage_ is null, id: %{public}d",
+                where, session->GetPersistentId());
+            return;
+        }
+        if (isShowAnimation && !session->isKeyboardDidShowRegistered_.load()) {
+            TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did show listener is not registered");
+            return;
+        }
+        if (!isShowAnimation && !session->isKeyboardDidHideRegistered_.load()) {
+            TLOGND(WmsLogTag::WMS_KEYBOARD, "keyboard did hide listener is not registered");
+            return;
+        }
+    
+        KeyboardPanelInfo keyboardPanelInfo;
+        keyboardPanelInfo.rect_ = SessionHelper::TransferToRect(panelRect);
+        keyboardPanelInfo.isShowing_ = isShowAnimation;
+        session->sessionStage_->NotifyKeyboardAnimationCompleted(keyboardPanelInfo);
+    }, __func__);
+}
+
+void SceneSession::NotifyKeyboardDidShowRegistered(bool registered)
+{
+    isKeyboardDidShowRegistered_.store(registered);
+}
+
+void SceneSession::NotifyKeyboardDidHideRegistered(bool registered)
+{
+    isKeyboardDidHideRegistered_.store(registered);
+}
 } // namespace OHOS::Rosen
