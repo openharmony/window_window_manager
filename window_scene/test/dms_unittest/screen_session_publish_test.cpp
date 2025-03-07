@@ -187,7 +187,7 @@ HWTEST_F(ScreenSessionPublishTest, RegisterLowTempSubscriber, Function | SmallTe
 HWTEST_F(ScreenSessionPublishTest, UnRegisterLowTempSubscriber, Function | SmallTest | Level3)
 {
     auto screenSessionPublish = ScreenSessionPublish::GetInstance();
-    screenSessionPublish.RegisterLowTempSubscriber()
+    screenSessionPublish.RegisterLowTempSubscriber();
     ASSERT_EQ(screenSessionPublish.UnRegisterLowTempSubscriber(), true);
     screenSessionPublish.subscriber_ = nullptr;
     ASSERT_EQ(screenSessionPublish.UnRegisterLowTempSubscriber(), false);
