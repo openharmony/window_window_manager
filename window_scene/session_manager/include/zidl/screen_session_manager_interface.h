@@ -170,6 +170,8 @@ public:
     virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
     virtual void RecordEventFromScb(std::string description, bool needRecordEvent) {}
+    virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate) override { return DMError::DM_OK; }
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
     {
         return DMError::DM_OK;
@@ -183,8 +185,6 @@ public:
         return DMError::DM_OK;
     }
     virtual DeviceScreenConfig GetDeviceScreenConfig() { return {}; }
-    virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
-        uint32_t& actualRefreshRate) override { return DMError::DM_OK; }
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}) override {}
     virtual void DisablePowerOffRenderControl(ScreenId screenId) override {}
@@ -204,6 +204,7 @@ public:
         *errorCode = DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT;
         return nullptr;
     }
+    virtual ScreenCombination GetScreenCombination(ScreenId screenId) { return ScreenCombination::SCREEN_ALONE; }
 };
 } // namespace Rosen
 } // namespace OHOS
