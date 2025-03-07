@@ -3890,6 +3890,70 @@ HWTEST_F(ScreenSessionManagerTest, UnregisterSettingWireCastObserver, Function |
     ssm_->screenSessionMap_[id] = newSession;
     ssm_->UnregisterSettingWireCastObserver(id);
 }
+
+/**
+ * @tc.name: MultiScreenChangeOuter
+ * @tc.desc: MultiScreenChangeOuter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, MultiScreenChangeOuter, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    EXPECT_EQ(ssm_->clientProxy_, nullptr);
+    std::string outerFlag = "2";
+    ssm_->MultiScreenChangeOuter(outerFlag);
+    outerFlag = "0";
+    ssm_->MultiScreenChangeOuter(outerFlag);
+    outerFlag = "1";
+    ssm_->MultiScreenChangeOuter(outerFlag);
+}
+
+/**
+ * @tc.name: UpdateValidArea
+ * @tc.desc: UpdateValidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, UpdateValidArea, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->UpdateValidArea(2000, 800, 1000);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+
+    int32_t originValidWidth = screenSession->GetValidWidth();
+    int32_t originValidHeight = screenSession->GetValidHeight();
+    ssm_->UpdateValidArea(screenId, 800, 1000);
+    EXPECT_EQ(800, screenSession->GetValidWidth());
+    EXPECT_EQ(1000, screenSession->GetValidHeight());
+    ssm_->UpdateValidArea(screenId, originValidWidth, originValidHeight);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: GetIsRealScreen
+ * @tc.desc: GetIsRealScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetIsRealScreen, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    EXPECT_EQ(ssm_->GetIsRealScreen(2000), false);
+
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
+    screenSession->SetIsRealScreen(true);
+    ASSERT_EQ(ssm_->GetIsRealScreen(screenId), true);
+    screenSession->SetIsRealScreen(false);
+    ASSERT_EQ(ssm_->GetIsRealScreen(screenId), false);
+    ssm_->DestroyVirtualScreen(screenId);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
