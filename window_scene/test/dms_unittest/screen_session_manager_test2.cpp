@@ -174,7 +174,7 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpPictureFrameBlock, Function | SmallTest
      ssm_->pictureFrameBreak_ = true;
      bool result = ssm_->BlockScreenWaitPictureFrameByCV(true);
      ASSERT_EQ(result, true);
-     result = ssm_->WakeUpPictureFrameBlock(false);
+     result = ssm_->BlockScreenWaitPictureFrameByCV(false);
      ASSERT_EQ(result, true);
 
      ASSERT_EQ(ssm_->pictureFrameReady_, false);
