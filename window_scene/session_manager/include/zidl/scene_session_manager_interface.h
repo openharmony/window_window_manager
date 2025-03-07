@@ -131,6 +131,7 @@ public:
         TRANS_ID_WATCH_FOCUS_ACTIVE_CHANGE,
         TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT,
         TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA,
+        TRANS_ID_GET_WINDOW_UI_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
