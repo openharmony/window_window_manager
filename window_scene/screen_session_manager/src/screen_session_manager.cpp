@@ -8612,4 +8612,13 @@ bool ScreenSessionManager::GetIsRealScreen(ScreenId screenId)
     }
     return screenSession->GetIsRealScreen();
 }
+
+DMError ScreenSessionManager::SetSystemKeyboardOn(bool isOn)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    SuperFoldStateManager::GetInstance().SetSystemKeyboardOn(isOn);
+    return DMError::DM_OK;
+#endif // FOLD_ABILITY_ENABLE
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
 } // namespace OHOS::Rosen

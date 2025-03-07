@@ -260,7 +260,9 @@ void SceneInputManager::ConstructDisplayInfos(std::vector<MMI::DisplayInfo>& dis
             .validHeight = screenProperty.GetValidHeight(),
             .fixedDirection = ConvertDegreeToMMIRotation(screenProperty.GetDefaultDeviceRotationOffset()),
             .physicalWidth = screenProperty.GetPhyWidth(),
-            .physicalHeight = screenProperty.GetPhyHeight()
+            .physicalHeight = screenProperty.GetPhyHeight(),
+            .pointerActiveWidth = screenProperty.GetPointerActiveWidth(),
+            .pointerActiveHeight = screenProperty.GetPointerActiveHeight()
         };
         displayInfos.emplace_back(displayInfo);
     }
