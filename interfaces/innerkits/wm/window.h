@@ -66,6 +66,8 @@ using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
 using KeyEventFilterFunc = std::function<bool(MMI::KeyEvent&)>;
+using MouseEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
+using TouchEventFilterFunc = std::function<bool(MMI::PointerEvent&)>;
 class RSSurfaceNode;
 class RSTransaction;
 class ISession;
@@ -129,6 +131,17 @@ public:
 };
 
 /**
+ * @class IWindowAttachStateChangeListner
+ *
+ * @brief IWindowAttachStateChangeListner is used to observe the window attach or detach state changed.
+ */
+class IWindowAttachStateChangeListner : virtual public RefBase {
+public:
+    virtual void AfterAttached() {}
+    virtual void AfterDetached() {}
+};
+
+/**
  * @class IWindowChangeListener
  *
  * @brief IWindowChangeListener is used to observe the window size or window mode when window changed.
@@ -151,6 +164,16 @@ public:
      * @param hasDeco Window has decoration or not.
      */
     virtual void OnModeChange(WindowMode mode, bool hasDeco = true) {}
+};
+
+class IWindowCrossAxisListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window cross screen axis state changed.
+     *
+     * @param state is window across screen axis.
+     */
+    virtual void OnCrossAxisChange(CrossAxisState state) {}
 };
 
 /**
@@ -1583,6 +1606,13 @@ public:
      */
     virtual WMError SetTouchHotAreas(const std::vector<Rect>& rects) { return WMError::WM_OK; }
     /**
+     * @brief Set keyboard touch hot areas.
+     *
+     * @param hotAreas keyboard hot areas of touching.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) { return WMError::WM_OK; }
+    /**
      * @brief Get requested touch hot areas.
      *
      * @param rects Hot areas of touching.
@@ -1691,11 +1721,28 @@ public:
     virtual bool IsStartMoving() { return false; }
 
     /**
-     * @brief Start move window. It is called by application.
+     * @brief Start moving window. It is called by application.
      *
      * @return Errorcode of window.
      */
     virtual WmErrorCode StartMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Start moving window. It is called by application.
+     *
+     * @param offsetX expected pointer position x-axis offset in window when start moving.
+     * @param offsetY expected pointer position y-axis offset in window when start moving.
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX,
+        int32_t offsetY) { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Stop moving window. It is called by application. Support pc window and pad free multi-window.
+     *
+     * @return Error code of window.
+     */
+    virtual WmErrorCode StopMoveWindow() { return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set flag that need remove window input channel.
@@ -2474,6 +2521,42 @@ public:
     virtual WMError ClearKeyEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;}
 
     /**
+     * @brief register mouseEvent filter.
+     *
+     * @param mouseEventFilterFunc callback func when window receive mouseEvent
+     * @return WMError
+     */
+    virtual WMError SetMouseEventFilter(MouseEventFilterFunc mouseEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear mouseEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearMouseEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief register touchEvent filter.
+     *
+     * @param touchEventFilterFunc callback func when window receive touchEvent
+     * @return WMError
+     */
+    virtual WMError SetTouchEventFilter(TouchEventFilterFunc touchEventFilterFunc)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief clear touchEvent filter.
+     *
+     * @return WMError
+     */
+    virtual WMError ClearTouchEventFilter() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Register window rect change listener.
      *
      * @param listener IWindowRectChangeListener.
@@ -2652,6 +2735,13 @@ public:
     virtual std::string GetClassType() const { return "Window"; }
 
     /**
+     * @brief Get whether is mid scene.
+     *
+     * @return True - is mid scene, false - is not mid scene.
+     */
+    virtual WMError GetIsMidScene(bool& isMidScene) { return WMError::WM_OK; }
+
+    /**
      * @brief Get layoutTransform of window uiContent.
      *
      * @return UiContent of layoutTransform.
@@ -2724,6 +2814,56 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register window scene attach or detach framenode listener.
+     *
+     * @param listener IWindowAttachStateChangeListner.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowAttachStateChangeListener(const sptr<IWindowAttachStateChangeListner>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window scene attach or detach framenode listener.
+     *
+     * @return WM_OK means unregister success
+     */
+    virtual WMError UnregisterWindowAttachStateChangeListener()
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Get cross screen axis state.
+     *
+     * @return The cross screen axis state of the Window.
+     */
+    virtual CrossAxisState GetCrossAxisState() { return CrossAxisState::STATE_INVALID; }
+
+    /**
+     * @brief Register window screen axis state change listener.
+     *
+     * @param listener IWindowCrossAxisChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister window screen axis state change listener.
+     *
+     * @param listener IWindowCrossAxisChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowCrossAxisListener(const sptr<IWindowCrossAxisListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }

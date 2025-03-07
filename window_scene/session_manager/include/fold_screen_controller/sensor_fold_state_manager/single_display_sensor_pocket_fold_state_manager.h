@@ -47,9 +47,11 @@ public:
     void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) override {};
     sptr<IRemoteObject> AsObject() override { return nullptr; };
     std::string GetForegroundApp();
+    void RegisterCameraForegroundChanged(std::function<void()> callback);
 
 private:
     std::string foregroundBundleName_ {""};
+    std::function<void()> onCameraForegroundChanged_ { nullptr };
 };
 class SingleDisplaySensorPocketFoldStateManager : public SensorFoldStateManager {
 public:
@@ -58,7 +60,7 @@ public:
 
     void HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
     void HandleHallChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) override;
-    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy) override;
+    void HandleTentChange(bool isTent, sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall = -1) override;
     void RegisterApplicationStateObserver() override;
 
 private:

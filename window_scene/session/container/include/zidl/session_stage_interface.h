@@ -178,6 +178,7 @@ public:
     }
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
     virtual WSError SetDragActivated(bool dragActivated) = 0;
+    virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

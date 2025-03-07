@@ -49,9 +49,10 @@ SCBSystemSession::~SCBSystemSession()
 
 void SCBSystemSession::RegisterBufferAvailableCallback(const SystemSessionBufferAvailableCallback& func)
 {
-    if (surfaceNode_) {
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Set buffer available callback");
-        surfaceNode_->SetBufferAvailableCallback(func);
+        surfaceNode->SetBufferAvailableCallback(func);
     } else {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "surfaceNode_ is null");
     }
@@ -220,15 +221,6 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         return WSError::WS_OK;
     };
     PostTask(task, "SetSkipSelf");
-}
-
-std::shared_ptr<RSSurfaceNode> SCBSystemSession::GetSurfaceNode()
-{
-    if (!surfaceNode_) {
-        TLOGE(WmsLogTag::WMS_SCB, "surfaceNode_ is null");
-        return nullptr;
-    }
-    return surfaceNode_;
 }
 
 bool SCBSystemSession::IsVisibleForeground() const

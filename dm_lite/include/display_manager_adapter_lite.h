@@ -87,6 +87,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason);
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId);
+    virtual ScreenPowerState GetScreenPower();
 private:
     static inline SingletonDelegator<ScreenManagerAdapterLite> delegator;
 };

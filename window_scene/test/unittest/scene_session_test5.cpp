@@ -196,11 +196,11 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     session->specificCallback_ = specificCallback;
-    session->specificCallback_->onGetSceneSessionVectorByType_ = nullptr;
+    session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = nullptr;
     session->GetSystemAvoidArea(rect, avoidArea);
 
     systemConfig.uiType_ = "phone";
-    GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
         return vSession;
@@ -209,7 +209,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea, Function | SmallTest | Level2)
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(2024, screenSession));
-    session->specificCallback_->onGetSceneSessionVectorByType_ = func;
+    session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
     session->GetSystemAvoidArea(rect, avoidArea);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 }
@@ -242,7 +242,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
     session->specificCallback_ = specificCallback;
 
     systemConfig.uiType_ = "phone";
-    GetSceneSessionVectorByTypeCallback func = [&session](WindowType type, uint64_t displayId) {
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func = [&session](WindowType type, uint64_t displayId) {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
         return vSession;
@@ -251,7 +251,7 @@ HWTEST_F(SceneSessionTest5, GetSystemAvoidArea01, Function | SmallTest | Level2)
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(2024, screenSession));
-    session->specificCallback_->onGetSceneSessionVectorByType_ = func;
+    session->specificCallback_->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
 
     session->property_->SetDisplayId(1024);
@@ -441,19 +441,27 @@ HWTEST_F(SceneSessionTest5, OnLayoutFullScreenChange, Function | SmallTest | Lev
     info.bundleName_ = "OnLayoutFullScreenChange";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
+    session->onLayoutFullScreenChangeFunc_ = func;
     EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+}
 
-    sptr<SceneSession::SessionChangeCallback> sessionChangeCallback =
-        sptr<SceneSession::SessionChangeCallback>::MakeSptr();
-    session->RegisterSessionChangeCallback(sessionChangeCallback);
-    sessionChangeCallback->onLayoutFullScreenChangeFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+/**
+ * @tc.name: RegisterLayoutFullScreenChangeCallback
+ * @tc.desc: test RegisterLayoutFullScreenChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, RegisterLayoutFullScreenChangeCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "RegisterLayoutFullScreenChangeCallback";
+    info.bundleName_ = "RegisterLayoutFullScreenChangeCallback";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->onLayoutFullScreenChangeFunc_ = nullptr;
+    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {};
 
-    NotifyLayoutFullScreenChangeFunc func = [](bool isLayoutFullScreen) {
-        return;
-    };
-    sessionChangeCallback->onLayoutFullScreenChangeFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnLayoutFullScreenChange(true));
+    sceneSession->RegisterLayoutFullScreenChangeCallback(std::move(func));
+    ASSERT_NE(sceneSession->onLayoutFullScreenChangeFunc_, nullptr);
 }
 
 /**
@@ -868,18 +876,18 @@ HWTEST_F(SceneSessionTest5, UpdateWinRectForSystemBar, Function | SmallTest | Le
     EXPECT_NE(session, nullptr);
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCallback->onGetSceneSessionVectorByType_ = nullptr;
+    specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = nullptr;
     session->specificCallback_ = specificCallback;
     WSRect rect = { 1, 10, 3, 4 };
     session->UpdateWinRectForSystemBar(rect);
-    GetSceneSessionVectorByTypeCallback func = [session](WindowType type, uint64_t displayId)->
+    GetSceneSessionVectorByTypeAndDisplayIdCallback func = [session](WindowType type, uint64_t displayId)->
         std::vector<sptr<SceneSession>>
     {
         std::vector<sptr<SceneSession>> vSession;
         vSession.push_back(session);
         return vSession;
     };
-    specificCallback->onGetSceneSessionVectorByType_ = func;
+    specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
     session->UpdateWinRectForSystemBar(rect);
 
     session->isVisible_ = true;
@@ -1623,6 +1631,50 @@ HWTEST_F(SceneSessionTest5, MarkSystemSceneUIFirst, Function | SmallTest | Level
     session->leashWinSurfaceNode_ = surfaceNode;
     session->MarkSystemSceneUIFirst(true, true);
     EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate_01
+ * @tc.desc: StartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_01, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = nullptr;
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate_02
+ * @tc.desc: StartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_02, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    sceneSession->moveDragController_->isStartMove_ = true;
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    EXPECT_EQ(result, WSError::WS_ERROR_REPEAT_OPERATION);
+}
+
+/**
+ * @tc.name: StartMovingWithCoordinate_03
+ * @tc.desc: StartMovingWithCoordinate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, StartMovingWithCoordinate_03, Function | SmallTest | Level2)
+{
+    const SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(2024);
+    sceneSession->moveDragController_->isStartMove_ = false;
+    WSError result = sceneSession->StartMovingWithCoordinate(100, 50, 300, 500);
+    EXPECT_EQ(result, WSError::WS_OK);
 }
 
 /**

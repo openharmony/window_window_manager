@@ -25,6 +25,15 @@ constexpr float ELSE_SCREEN_DENSITY = 1.5f;
 constexpr float INCH_2_MM = 25.4f;
 constexpr int32_t HALF_VALUE = 2;
 constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
+constexpr float SECONDARY_ROTATION_0 = 0.0F;
+constexpr float SECONDARY_ROTATION_90 = 90.0F;
+constexpr float SECONDARY_ROTATION_180 = 180.0F;
+constexpr float SECONDARY_ROTATION_270 = 270.0F;
+constexpr int32_t SECONDARY_MAIN_OFFSETY = -2176;
+constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
+constexpr float MAIN_STATUS_WIDTH = 1008;
+constexpr float FULL_STATUS_WIDTH = 2048;
+constexpr float SCREEN_HEIGHT = 2232;
 }
 
 void ScreenProperty::SetRotation(float rotation)
@@ -462,5 +471,67 @@ void ScreenProperty::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffs
 uint32_t ScreenProperty::GetDefaultDeviceRotationOffset() const
 {
     return defaultDeviceRotationOffset_;
+}
+
+RRect ScreenProperty::GetPhysicalTouchBounds()
+{
+    return physicalTouchBounds_;
+}
+
+void ScreenProperty::SetPhysicalTouchBounds(bool isSecondaryDevice)
+{
+    if (!isSecondaryDevice) {
+        physicalTouchBounds_.rect_.width_ = bounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = bounds_.rect_.height_;
+        return;
+    }
+    if (rotation_ == SECONDARY_ROTATION_90 || rotation_ == SECONDARY_ROTATION_270) {
+        physicalTouchBounds_.rect_.width_ = phyBounds_.rect_.width_;
+        physicalTouchBounds_.rect_.height_ = phyBounds_.rect_.height_;
+    } else {
+        physicalTouchBounds_.rect_.width_ = phyBounds_.rect_.height_;
+        physicalTouchBounds_.rect_.height_ = phyBounds_.rect_.width_;
+    }
+}
+
+int32_t ScreenProperty::GetInputOffsetX()
+{
+    return inputOffsetX_;
+}
+
+int32_t ScreenProperty::GetInputOffsetY()
+{
+    return inputOffsetY_;
+}
+
+static inline bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
+{
+    return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
+}
+
+void ScreenProperty::SetInputOffsetY(bool isSecondaryDevice, FoldDisplayMode foldDisplayMode)
+{
+    inputOffsetY_ = 0;
+    if (!isSecondaryDevice) {
+        return;
+    }
+    if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(),
+        MAIN_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        foldDisplayMode = FoldDisplayMode::MAIN;
+    } else if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(),
+        FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
+        foldDisplayMode = FoldDisplayMode::FULL;
+    } else {
+        return;
+    }
+    if (foldDisplayMode == FoldDisplayMode::FULL) {
+        if (rotation_ == SECONDARY_ROTATION_0 || rotation_ == SECONDARY_ROTATION_90) {
+            inputOffsetY_ = SECONDARY_FULL_OFFSETY;
+        }
+    } else if (foldDisplayMode == FoldDisplayMode::MAIN) {
+        if (rotation_ == SECONDARY_ROTATION_180 || rotation_ == SECONDARY_ROTATION_270) {
+            inputOffsetY_ = SECONDARY_MAIN_OFFSETY;
+        }
+    }
 }
 } // namespace OHOS::Rosen

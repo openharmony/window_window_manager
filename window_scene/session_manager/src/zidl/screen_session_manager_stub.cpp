@@ -120,6 +120,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             reply.WriteUint32(static_cast<uint32_t>(GetScreenPower(dmsScreenId)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_SCREEN_POWER_AUTO: {
+            reply.WriteUint32(static_cast<uint32_t>(GetScreenPower()));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_TRY_TO_CANCEL_SCREEN_OFF: {
             reply.WriteBool(TryToCancelScreenOff());
             break;
@@ -191,6 +195,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             bool isForShot = data.ReadBool();
             std::vector<uint64_t> missionIds;
             data.ReadUInt64Vector(&missionIds);
+            VirtualScreenType virtualScreenType = static_cast<VirtualScreenType>(data.ReadUint32());
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -207,7 +212,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
                 .surface_ = surface,
                 .flags_ = flags,
                 .isForShot_ = isForShot,
-                .missionIds_ = missionIds
+                .missionIds_ = missionIds,
+                .virtualScreenType_ = virtualScreenType
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             reply.WriteUint64(static_cast<uint64_t>(screenId));
@@ -253,6 +259,24 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             DMError ret = MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
             reply.WriteInt32(static_cast<int32_t>(ret));
             reply.WriteUint64(static_cast<uint64_t>(screenGroupId));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_WITH_REGION: {
+            ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<ScreenId> mirrorScreenId;
+            if (!data.ReadUInt64Vector(&mirrorScreenId)) {
+                WLOGE("fail to receive mirror screen in stub. screen:%{public}" PRIu64"", mainScreenId);
+                break;
+            }
+            int32_t posX = data.ReadInt32();
+            int32_t posY = data.ReadInt32();
+            uint32_t width = data.ReadUint32();
+            uint32_t height = data.ReadUint32();
+            DMRect mainScreenRegion = { posX, posY, width, height };
+            ScreenId screenGroupId = INVALID_SCREEN_ID;
+            DMError ret = MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion, screenGroupId);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SCREEN_STOP_MIRROR: {
@@ -571,7 +595,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         }
         case DisplayManagerMessage::TRANS_ID_SET_FOLD_DISPLAY_MODE_FROM_JS: {
             FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
-            DMError ret = SetFoldDisplayModeFromJs(displayMode);
+            std::string reason = data.ReadString();
+            DMError ret = SetFoldDisplayModeFromJs(displayMode, reason);
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
@@ -846,6 +871,12 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             int32_t cameraStatus = data.ReadInt32();
             int32_t cameraPosition = data.ReadInt32();
             SetCameraStatus(cameraStatus, cameraPosition);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_RECORD_EVENT_FROM_SCB: {
+            std::string description = data.ReadString();
+            bool needRecordEvent = data.ReadBool();
+            RecordEventFromScb(description, needRecordEvent);
             break;
         }
         default:

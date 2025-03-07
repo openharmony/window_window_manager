@@ -252,20 +252,21 @@ void PictureInPictureManager::DoControlEvent(PiPControlType controlType, PiPCont
 void PictureInPictureManager::AutoStartPipWindow()
 {
     TLOGI(WmsLogTag::WMS_PIP, "in");
-    if (autoStartController_ == nullptr) {
+    auto autoStartController = autoStartController_.promote();
+    if (autoStartController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "autoStartController is null");
         return;
     }
-    if (autoStartController_->GetPiPNavigationId().empty() || autoStartController_->IsTypeNodeEnabled()) {
+    if (autoStartController->GetPiPNavigationId().empty() || autoStartController->IsTypeNodeEnabled()) {
         TLOGI(WmsLogTag::WMS_PIP, "No use navigation for auto start");
-        autoStartController_->StartPictureInPicture(StartPipType::AUTO_START);
+        autoStartController->StartPictureInPicture(StartPipType::AUTO_START);
         return;
     }
     sptr<WindowSessionImpl> mainWindow = WindowSceneSessionImpl::GetMainWindowWithId(
-        autoStartController_->GetMainWindowId());
+        autoStartController->GetMainWindowId());
     if (mainWindow) {
         auto navController = NavigationController::GetNavigationController(mainWindow->GetUIContent(),
-            autoStartController_->GetPiPNavigationId());
+            autoStartController->GetPiPNavigationId());
         if (!navController) {
             TLOGE(WmsLogTag::WMS_PIP, "navController is nullptr");
             return;
@@ -277,7 +278,11 @@ void PictureInPictureManager::AutoStartPipWindow()
                 TLOGE(WmsLogTag::WMS_PIP, "GetNavController info error, %{public}d not registered", handleId);
                 return;
             }
-            auto pipController = autoStartControllerMap_[handleId];
+            auto pipController = autoStartControllerMap_[handleId].promote();
+            if (!pipController) {
+                TLOGE(WmsLogTag::WMS_PIP, "pipController is nullptr");
+                return;
+            }
             pipController->StartPictureInPicture(StartPipType::AUTO_START);
         } else {
             TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");

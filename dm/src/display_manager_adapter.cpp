@@ -290,6 +290,12 @@ ScreenPowerState ScreenManagerAdapter::GetScreenPower(ScreenId dmsScreenId)
     return displayManagerServiceProxy_->GetScreenPower(dmsScreenId);
 }
 
+ScreenPowerState ScreenManagerAdapter::GetScreenPower()
+{
+    INIT_PROXY_CHECK_RETURN(ScreenPowerState::INVALID_STATE);
+    return displayManagerServiceProxy_->GetScreenPower();
+}
+
 DMError ScreenManagerAdapter::SetOrientation(ScreenId screenId, Orientation orientation)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
@@ -465,11 +471,19 @@ void BaseAdapter::Clear()
 }
 
 DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
-                                         ScreenId& screenGroupId)
+    ScreenId& screenGroupId)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, screenGroupId);
+}
+
+DMError ScreenManagerAdapter::MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+    DMRect mainScreenRegion, ScreenId& screenGroupId)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    return displayManagerServiceProxy_->MakeMirror(mainScreenId, mirrorScreenId, mainScreenRegion, screenGroupId);
 }
 
 DMError ScreenManagerAdapter::StopMirror(const std::vector<ScreenId>& mirrorScreenIds)
@@ -607,11 +621,11 @@ void DisplayManagerAdapter::SetFoldDisplayMode(const FoldDisplayMode mode)
     return displayManagerServiceProxy_->SetFoldDisplayMode(mode);
 }
 
-DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode)
+DMError DisplayManagerAdapter::SetFoldDisplayModeFromJs(const FoldDisplayMode mode, std::string reason)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
-    return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode);
+    return displayManagerServiceProxy_->SetFoldDisplayModeFromJs(mode, reason);
 }
 
 void DisplayManagerAdapter::SetDisplayScale(ScreenId screenId,

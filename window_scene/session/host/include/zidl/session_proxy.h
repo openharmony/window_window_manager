@@ -68,6 +68,7 @@ public:
     WSError SetAspectRatio(float ratio) override;
     WSError UpdateWindowAnimationFlag(bool needDefaultAnimationFlag) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
+    WSError GetIsMidScene(bool& isMidScene) override;
     WSError UpdateWindowSceneAfterCustomAnimation(bool isAdd) override;
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseAppMainWindowToTop() override;
@@ -124,6 +125,11 @@ public:
      */
     WSError RemoveStartingWindow() override;
 
+    /*
+     * PC Window
+     */
+    WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
+        int32_t pointerPosX, int32_t pointerPosY) override;
     WSError NotifySupportWindowModesChange(
         const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) override;
 

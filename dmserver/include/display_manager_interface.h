@@ -118,6 +118,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) = 0;
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) = 0;
+    virtual ScreenPowerState GetScreenPower() { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) = 0;
     virtual DisplayState GetDisplayState(DisplayId displayId) = 0;
     virtual bool TryToCancelScreenOff() = 0;
@@ -132,6 +133,11 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) = 0;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) = 0;
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId,
+        DMRect mainScreenRegion, ScreenId& screenGroupId)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
         ScreenId& screenGroupId) = 0;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) = 0;
@@ -161,7 +167,7 @@ public:
 
     virtual void SetFoldDisplayMode(const FoldDisplayMode) {}
 
-    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode) { return DMError::DM_OK; }
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "") { return DMError::DM_OK; }
 
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) {}
 

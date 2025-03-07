@@ -45,6 +45,7 @@ public:
         TRANS_ID_ON_FOLDSTATUS_CHANGED_REPORT_UE,
         TRANS_ID_ON_HOVER_STATUS_CHANGED,
         TRANS_ID_ON_SCREEN_CAPTURE_NOTIFY,
+        TRANS_ID_ON_CAMERA_BACKSELFIE_CHANGED,
     };
 
     virtual void SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid) = 0;
@@ -55,7 +56,7 @@ public:
     virtual void OnPowerStatusChanged(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) = 0;
     virtual void OnSensorRotationChanged(ScreenId screenId, float sensorRotation) = 0;
-    virtual void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus) = 0;
+    virtual void OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate = true) = 0;
     virtual void OnScreenOrientationChanged(ScreenId screenId, float screenOrientation) = 0;
     virtual void OnScreenRotationLockedChanged(ScreenId screenId, bool isLocked) = 0;
 
@@ -70,6 +71,7 @@ public:
     virtual void SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) = 0;
     virtual void OnFoldStatusChangedReportUE(const std::vector<std::string>& screenFoldInfo) = 0;
     virtual void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) = 0;
+    virtual void OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie) = 0;
 };
 } // namespace OHOS::Rosen
 

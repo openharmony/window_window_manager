@@ -113,6 +113,18 @@ public:
     DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
 
     /**
+     * @brief Make screen as mirror-screen for region of main screen.
+     *
+     * @param mainScreenId Main screen id.
+     * @param mirrorScreenId Mirror screen ids.
+     * @param mainScreenRegion Region of main screen.
+     * @param screenGroupId Screen group id.
+     * @return DM_OK means make mirror success, others means make mirror failed.
+     */
+    DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, DMRect mainScreenRegion,
+        ScreenId& screenGroupId);
+
+    /**
     * @brief Make screens as unique-screen.
     *
     * @param screenIds Unique screen ids.
@@ -231,6 +243,13 @@ public:
      * @return Power state of screen.
      */
     ScreenPowerState GetScreenPower(ScreenId screenId);
+
+    /**
+     * @brief Get screen power state.
+     *
+     * @return Power state of screen.
+     */
+    ScreenPowerState GetScreenPower();
 
     /**
      * @brief Set screen rotation lock status.

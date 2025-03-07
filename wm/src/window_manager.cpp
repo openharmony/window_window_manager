@@ -1403,5 +1403,15 @@ WMError WindowManager::GetAppDragResizeType(const std::string& bundleName, DragR
     }
     return ret;
 }
+
+WMError WindowManager::ShiftAppWindowPointerEvent(int32_t sourceWindowId, int32_t targetWindowId)
+{
+    WMError ret = SingletonContainer::Get<WindowAdapter>().ShiftAppWindowPointerEvent(
+        sourceWindowId, targetWindowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PC, "failed");
+    }
+    return ret;
+}
 } // namespace Rosen
 } // namespace OHOS

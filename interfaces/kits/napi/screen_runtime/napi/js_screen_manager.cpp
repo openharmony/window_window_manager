@@ -33,7 +33,9 @@ using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
+constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
+constexpr int32_t INDEX_TWO = 2;
 constexpr uint32_t MAX_SCREENS_NUM = 1000;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "JsScreenManager"};
@@ -74,6 +76,12 @@ static napi_value MakeMirror(napi_env env, napi_callback_info info)
 {
     JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
     return (me != nullptr) ? me->OnMakeMirror(env, info) : nullptr;
+}
+
+static napi_value MakeMirrorWithRegion(napi_env env, napi_callback_info info)
+{
+    JsScreenManager* me = CheckParamsAndGetThis<JsScreenManager>(env, info);
+    return (me != nullptr) ? me->OnMakeMirrorWithRegion(env, info) : nullptr;
 }
 
 static napi_value MakeExpand(napi_env env, napi_callback_info info)
@@ -430,6 +438,57 @@ napi_value OnMakeMirror(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value OnMakeMirrorWithRegion(napi_env env, napi_callback_info info)
+{
+    WLOGI("OnMakeMirrorWithRegion is called");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_THREE) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Invalid args count, need 3 args at least!");
+    }
+    int64_t mainScreenId;
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], mainScreenId)) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to mainScreenId");
+    }
+    napi_value array = argv[INDEX_ONE];
+    if (array == nullptr) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to get mirrorScreen, is nullptr");
+    }
+    uint32_t size = 0;
+    napi_get_array_length(env, array, &size);
+    std::vector<ScreenId> mirrorScreenIds;
+    for (uint32_t i = 0; i < size; i++) {
+        uint32_t screenId;
+        napi_value value = nullptr;
+        napi_get_element(env, array, i, &value);
+        if (!ConvertFromJsValue(env, value, screenId)) {
+            return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert parameter to ScreenId");
+        }
+        mirrorScreenIds.emplace_back(static_cast<ScreenId>(screenId));
+    }
+    DMRect mainScreenRegion;
+    if (GetRectFromJs(env, argv[INDEX_TWO], mainScreenRegion) == -1) {
+        return NapiThrowError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert to mainScreenRegion");
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [mainScreenId, mirrorScreenIds, mainScreenRegion, env, task = napiAsyncTask.get()]() {
+        ScreenId screenGroupId = INVALID_SCREEN_ID;
+        DmErrorCode ret = DM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<ScreenManager>().MakeMirror(mainScreenId,
+            mirrorScreenIds, mainScreenRegion, screenGroupId));
+        if (ret == DmErrorCode::DM_OK) {
+            task->Resolve(env, CreateJsValue(env, static_cast<uint32_t>(screenGroupId)));
+        } else {
+            task->Reject(env,
+                CreateJsError(env, static_cast<int32_t>(ret), "JsScreenManager::OnMakeMirrorWithRegion failed."));
+        }
+    };
+    NapiSendDmsEvent(env, asyncTask, napiAsyncTask);
+    return result;
+}
+
 napi_value OnMakeExpand(napi_env env, napi_callback_info info)
 {
     WLOGI("OnMakeExpand is called");
@@ -616,6 +675,40 @@ static int32_t GetExpandOptionFromJs(napi_env env, napi_value optionObject, Expa
         return -1;
     }
     option = {screenId, startX, startY};
+    return 0;
+}
+
+static int32_t GetRectFromJs(napi_env env, napi_value optionObject, DMRect& rect)
+{
+    napi_value leftValue = nullptr;
+    napi_value topValue = nullptr;
+    napi_value widthValue = nullptr;
+    napi_value heightValue = nullptr;
+    int32_t left;
+    int32_t top;
+    uint32_t width;
+    uint32_t height;
+    napi_get_named_property(env, optionObject, "left", &leftValue);
+    napi_get_named_property(env, optionObject, "top", &topValue);
+    napi_get_named_property(env, optionObject, "width", &widthValue);
+    napi_get_named_property(env, optionObject, "height", &heightValue);
+    if (!ConvertFromJsValue(env, leftValue, left)) {
+        WLOGFE("Failed to convert leftValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, topValue, top)) {
+        WLOGFE("Failed to convert topValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, widthValue, width)) {
+        WLOGFE("Failed to convert widthValue to callbackType");
+        return -1;
+    }
+    if (!ConvertFromJsValue(env, heightValue, height)) {
+        WLOGFE("Failed to convert heightValue to callbackType");
+        return -1;
+    }
+    rect = {left, top, width, height};
     return 0;
 }
 
@@ -911,6 +1004,40 @@ napi_value OnSetScreenRotationLocked(napi_env env, napi_callback_info info)
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
+
+void NapiSendDmsEvent(napi_env env, std::function<void()> asyncTask,
+    std::unique_ptr<AbilityRuntime::NapiAsyncTask>& napiAsyncTask)
+{
+    if (!env) {
+        WLOGFE("env is null");
+        return;
+    }
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+        napiAsyncTask->Reject(env, CreateJsError(env,
+                static_cast<int32_t>(DmErrorCode::DM_ERROR_INVALID_SCREEN), "Send event failed!"));
+    } else {
+        napiAsyncTask.release();
+        WLOGFE("send event success");
+    }
+}
+
+std::unique_ptr<NapiAsyncTask> CreateEmptyAsyncTask(napi_env env, napi_value lastParam, napi_value* result)
+{
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, lastParam, &type);
+    if (lastParam == nullptr || type != napi_function) {
+        napi_deferred nativeDeferred = nullptr;
+        napi_create_promise(env, &nativeDeferred, result);
+        return std::make_unique<NapiAsyncTask>(nativeDeferred, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    } else {
+        napi_get_undefined(env, result);
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, lastParam, 1, &callbackRef);
+        return std::make_unique<NapiAsyncTask>(callbackRef, std::unique_ptr<NapiAsyncTask::ExecuteCallback>(),
+            std::unique_ptr<NapiAsyncTask::CompleteCallback>());
+    }
+}
 };
 
 napi_value InitScreenOrientation(napi_env env)
@@ -1068,6 +1195,7 @@ napi_value JsScreenManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "on", moduleName, JsScreenManager::RegisterScreenManagerCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsScreenManager::UnregisterScreenMangerCallback);
     BindNativeFunction(env, exportObj, "makeMirror", moduleName, JsScreenManager::MakeMirror);
+    BindNativeFunction(env, exportObj, "makeMirrorWithRegion", moduleName, JsScreenManager::MakeMirrorWithRegion);
     BindNativeFunction(env, exportObj, "makeExpand", moduleName, JsScreenManager::MakeExpand);
     BindNativeFunction(env, exportObj, "stopMirror", moduleName, JsScreenManager::StopMirror);
     BindNativeFunction(env, exportObj, "stopExpand", moduleName, JsScreenManager::StopExpand);

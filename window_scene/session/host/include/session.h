@@ -200,13 +200,34 @@ public:
     virtual WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) { return WSError::WS_OK; }
 
     int32_t GetPersistentId() const;
+    void SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode);
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+
+    /*
+     * Window Scene Snapshot
+     */
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> Snapshot(bool runInFfrt = false, const float scaleParam = 0.0f) const;
     void ResetSnapshot();
     void SaveSnapshot(bool useFfrt);
+    void SetSaveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(saveSnapshotCallbackMutex_);
+            saveSnapshotCallback_ = std::move(task);
+        }
+    }
+
+    void SetRemoveSnapshotCallback(Task&& task)
+    {
+        if (task) {
+            std::lock_guard lock(removeSnapshotCallbackMutex_);
+            removeSnapshotCallback_ = std::move(task);
+        }
+    }
+
     SessionState GetSessionState() const;
     virtual void SetSessionState(SessionState state);
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
@@ -376,6 +397,7 @@ public:
      */
     void SetIsMidScene(bool isMidScene);
     bool GetIsMidScene() const;
+    WSError GetIsMidScene(bool& isMidScene) override;
 
     /*
      * Keyboard Window
@@ -611,6 +633,7 @@ protected:
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
+    mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     mutable std::mutex snapshotMutex_;
     std::shared_ptr<Media::PixelMap> snapshot_;
@@ -850,6 +873,14 @@ private:
      * Screen Lock
      */
     bool isScreenLockWindow_ { false };
+
+    /*
+     * Window Scene Snapshot
+     */
+    Task saveSnapshotCallback_ = []() {};
+    Task removeSnapshotCallback_ = []() {};
+    std::mutex saveSnapshotCallbackMutex_;
+    std::mutex removeSnapshotCallbackMutex_;
 };
 } // namespace OHOS::Rosen
 

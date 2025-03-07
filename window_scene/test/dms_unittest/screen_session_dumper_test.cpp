@@ -17,6 +17,7 @@
 
 #include "screen_session_dumper.h"
 #include "screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -25,6 +26,14 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr uint32_t SLEEP_TIME_US = 100000;
+constexpr uint32_t SIZE_TWO = 2;
+constexpr uint32_t SIZE_THREE = 3;
+constexpr float POSTURE_FIRST = 93;
+constexpr float POSTURE_SECOND = 180;
+constexpr float POSTURE_THIRD = 0;
+constexpr uint16_t HALL_TEST = 1;
+const std::string TEST_SECONDARY_SRNSOR_POSTURE = "posture:93,180,0";
+const std::string TEST_SECONDARY_SRNSOR_HALL = "hall:1,1";
 }
 class ScreenSessionDumperTest : public testing::Test {
 public:

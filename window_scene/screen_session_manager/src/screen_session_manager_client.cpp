@@ -197,14 +197,14 @@ void ScreenSessionManagerClient::OnSensorRotationChanged(ScreenId screenId, floa
     screenSession->SensorRotationChange(sensorRotation);
 }
 
-void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus)
+void ScreenSessionManagerClient::OnHoverStatusChanged(ScreenId screenId, int32_t hoverStatus, bool needRotate)
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         WLOGFE("screenSession is null");
         return;
     }
-    screenSession->HandleHoverStatusChange(hoverStatus);
+    screenSession->HandleHoverStatusChange(hoverStatus, needRotate);
 }
 
 void ScreenSessionManagerClient::OnScreenOrientationChanged(ScreenId screenId, float screenOrientation)
@@ -225,6 +225,16 @@ void ScreenSessionManagerClient::OnScreenRotationLockedChanged(ScreenId screenId
         return;
     }
     screenSession->SetScreenRotationLocked(isLocked);
+}
+
+void ScreenSessionManagerClient::OnCameraBackSelfieChanged(ScreenId screenId, bool isCameraBackSelfie)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        WLOGFE("screenSession is null");
+        return;
+    }
+    screenSession->HandleCameraBackSelfieChange(isCameraBackSelfie);
 }
 
 void ScreenSessionManagerClient::RegisterDisplayChangeListener(const sptr<IDisplayChangeListener>& listener)
@@ -317,6 +327,7 @@ void ScreenSessionManagerClient::UpdateScreenRotationProperty(ScreenId screenId,
     screenSession->SetScreenComponentRotation(directionInfo.screenRotation_);
     screenSession->UpdateToInputManager(bounds, directionInfo.notifyRotation_, directionInfo.rotation_,
         foldDisplayMode);
+    screenSession->UpdateTouchBoundsAndOffset(foldDisplayMode);
 }
 
 void ScreenSessionManagerClient::SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId)
@@ -424,6 +435,15 @@ void ScreenSessionManagerClient::NotifyFoldToExpandCompletion(bool foldToExpand)
         return;
     }
     screenSessionManager_->NotifyFoldToExpandCompletion(foldToExpand);
+}
+
+void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
+{
+    if (!screenSessionManager_) {
+        WLOGFE("screenSessionManager_ is null");
+        return;
+    }
+    screenSessionManager_->RecordEventFromScb(description, needRecordEvent);
 }
 
 void ScreenSessionManagerClient::SwitchUserCallback(std::vector<int32_t> oldScbPids, int32_t currentScbPid)

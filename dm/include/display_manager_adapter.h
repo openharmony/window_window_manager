@@ -85,7 +85,7 @@ public:
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
-    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode);
+    virtual DMError SetFoldDisplayModeFromJs(const FoldDisplayMode, std::string reason = "");
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     virtual void SetFoldStatusLocked(bool locked);
     virtual DMError SetFoldStatusLockedFromJs(bool locked);
@@ -124,6 +124,8 @@ public:
     virtual sptr<ScreenGroupInfo> GetScreenGroupInfoById(ScreenId screenId);
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos);
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, ScreenId& screenGroupId);
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenId, DMRect mainScreenRegion,
+        ScreenId& screenGroupId);
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoint, ScreenId& screenGroupId);
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds);
     virtual DMError StopExpand(const std::vector<ScreenId>& expandScreenIds);
@@ -163,6 +165,7 @@ public:
     virtual DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval);
     virtual DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate);
+    virtual ScreenPowerState GetScreenPower();
 private:
     static inline SingletonDelegator<ScreenManagerAdapter> delegator;
 };

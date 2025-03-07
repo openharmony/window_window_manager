@@ -41,8 +41,6 @@ public:
     void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip) override;
     void SyncScenePanelGlobalPosition(bool needSync) override;
     bool IsNeedSyncScenePanelGlobalPosition() override { return isNeedSyncGlobalPos_; }
-    std::shared_ptr<RSSurfaceNode> GetSurfaceNode();
-
     bool IsVisibleForeground() const override;
 
     /*

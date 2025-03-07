@@ -49,7 +49,7 @@ public:
     ScreenRotationProperty() = delete;
     ~ScreenRotationProperty() = default;
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
-    static void HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus);
+    static void HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus, bool needRotate = true);
 private:
     static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
 };

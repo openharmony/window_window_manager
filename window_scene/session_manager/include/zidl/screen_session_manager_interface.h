@@ -90,6 +90,7 @@ public:
     virtual bool SetSpecifiedScreenPower(ScreenId, ScreenPowerState, PowerStateChangeReason) override { return false; }
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override { return false; }
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) override { return ScreenPowerState::INVALID_STATE; }
+    virtual ScreenPowerState GetScreenPower() override { return ScreenPowerState::INVALID_STATE; }
     virtual bool SetDisplayState(DisplayState state) override { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) override {return DisplayState::UNKNOWN; }
     virtual bool TryToCancelScreenOff() override { return false; }
@@ -104,6 +105,8 @@ public:
     virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override { return DMError::DM_OK; }
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId) override { return DMError::DM_OK; }
+    virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
+        DMRect mainScreenRegion, ScreenId& screenGroupId) override { return DMError::DM_OK; }
     virtual DMError MakeExpand(std::vector<ScreenId> screenId, std::vector<Point> startPoints,
         ScreenId& screenGroupId) override { return DMError::DM_OK; }
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override { return DMError::DM_OK; }
@@ -129,7 +132,8 @@ public:
     virtual void DumpSpecialScreenInfo(ScreenId id, std::string& dumpInfo) {}
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override {}
-    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode) override { return DMError::DM_OK; }
+    DMError SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode,
+        std::string reason = "") override { return DMError::DM_OK; }
 
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY) override {}
 
@@ -165,7 +169,7 @@ public:
     virtual void SetPrivacyStateByDisplayId(DisplayId id, bool hasPrivate) {}
     virtual void SetScreenPrivacyWindowList(DisplayId id, std::vector<std::string> privacyWindowList) {}
     virtual void NotifyFoldToExpandCompletion(bool foldToExpand) {}
-
+    virtual void RecordEventFromScb(std::string description, bool needRecordEvent) {}
     DMError SetVirtualScreenRefreshRate(ScreenId screenId, uint32_t refreshInterval) override
     {
         return DMError::DM_OK;

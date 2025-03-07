@@ -60,7 +60,7 @@ float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation
     return sensorRotation;
 }
 
-void ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus)
+void ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus, bool needRotate)
 {
     static DeviceHoverStatus lastHoverStatusConverted_ = DeviceHoverStatus::INVALID;
     TLOGI(WmsLogTag::DMS, "DeviceHoverStatus: %{public}d, "
@@ -74,7 +74,7 @@ void ScreenRotationProperty::HandleHoverStatusEventInput(DeviceHoverStatus hover
         TLOGW(WmsLogTag::DMS, "screenSession is null, sensor rotation status handle failed");
         return;
     }
-    screenSession->HandleHoverStatusChange(static_cast<int32_t>(hoverStatus));
+    screenSession->HandleHoverStatusChange(static_cast<int32_t>(hoverStatus), needRotate);
 }
 } // Rosen
 } // OHOS

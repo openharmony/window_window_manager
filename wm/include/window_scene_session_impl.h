@@ -46,7 +46,6 @@ public:
     WMError Recover(uint32_t reason) override;
     void StartMove() override;
     bool IsStartMoving() override;
-    WmErrorCode StartMoveWindow() override;
     WindowMode GetMode() const override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false) override;
     WMError MoveToAsync(int32_t x, int32_t y) override;
@@ -106,6 +105,7 @@ public:
     virtual WMError SetSnapshotSkip(bool isSkip) override;
     virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
+    WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
     virtual WMError SetCallingWindow(uint32_t callingSessionId) override;
     WMError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
@@ -159,6 +159,13 @@ public:
     WMError SetWindowRectAutoSave(bool enabled) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
 
+    /*
+     * PC Window Layout
+     */
+    WmErrorCode StartMoveWindow() override;
+    WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
+    WmErrorCode StopMoveWindow() override;
+
     WSError SwitchFreeMultiWindow(bool enable) override;
     virtual bool GetFreeMultiWindowModeEnabledState() override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
@@ -184,12 +191,19 @@ public:
     WMError SetCustomDensity(float density) override;
     WMError GetWindowDensityInfo(WindowDensityInfo& densityInfo) override;
 
-    /**
+    /*
      * Window Decor
      */
     WMError SetWindowTitle(const std::string& title) override;
     WMError Close() override;
     WMError CloseDirectly() override;
+
+    /*
+     * Window Scene
+     */
+    WMError RegisterWindowAttachStateChangeListener(
+        const sptr<IWindowAttachStateChangeListner>& listener) override;
+    WMError UnregisterWindowAttachStateChangeListener() override;
 
 protected:
     WMError CreateAndConnectSpecificSession();
@@ -257,6 +271,7 @@ private:
      * PC Window Layout
      */
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
 
     /**
      * Window Immersive
@@ -281,6 +296,11 @@ private:
     bool gestureBackEnabled_ = true;
 
     /*
+     * Move Drag
+     */
+    bool CalcWindowShouldMove();
+    
+    /*
      * Window Property
      */
     void InitSystemSessionDragEnable();
@@ -304,6 +324,13 @@ private:
     std::unordered_map<int32_t, std::vector<bool>> eventMapTriggerByDisplay_;
     std::unordered_map<int32_t, std::vector<int32_t>> eventMapDeltaXByDisplay_;
     std::unordered_map<int32_t, std::vector<PointInfo>> downPointerByDisplay_;
+
+    /*
+     * Window Scene
+     */
+    static std::mutex windowAttachStateChangeListenerMutex_;
+    sptr<IWindowAttachStateChangeListner> windowAttachStateChangeListener_;
+    WSError NotifyWindowAttachStateChange(bool isAttach) override;
 };
 } // namespace Rosen
 } // namespace OHOS

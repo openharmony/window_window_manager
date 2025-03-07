@@ -126,6 +126,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 uint32_t WindowSceneSessionImpl::maxFloatingWindowSize_ = 1920;
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
+std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
 {
@@ -774,8 +775,8 @@ bool WindowSceneSessionImpl::HandlePointDownEvent(const std::shared_ptr<MMI::Poi
             hostSession->SendPointEventForMoveDrag(pointerEvent);
             needNotifyEvent = false;
         } else if (WindowHelper::IsMainWindow(windowType) ||
-                   WindowHelper::IsSubWindow(windowType) ||
-                   WindowHelper::IsSystemWindow(windowType)) {
+            WindowHelper::IsSubWindow(windowType) ||
+            WindowHelper::IsSystemWindow(windowType)) {
             hostSession->SendPointEventForMoveDrag(pointerEvent);
         } else {
             hostSession->ProcessPointDownSession(pointerItem.GetDisplayX(), pointerItem.GetDisplayY());
@@ -796,6 +797,7 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     if (property_->GetCompatibleModeEnableInPad()) {
         HandleEventForCompatibleMode(pointerEvent, pointerItem);
     }
+    lastPointerEvent_ = pointerEvent;
     if (isPointDown) {
         auto displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(property_->GetDisplayId());
         if (displayInfo == nullptr) {
@@ -1280,33 +1282,6 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
     return res;
 }
 
-WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
-{
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
-        static_cast<uint32_t>(mode));
-    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    if (mode == property_->GetKeyboardViewMode()) {
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "The mode is same.");
-        return WMError::WM_DO_NOTHING;
-    }
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is invalid!");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (state_ != WindowState::STATE_SHOWN) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-
-    property_->SetKeyboardViewMode(mode);
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    return static_cast<WMError>(hostSession->ChangeKeyboardViewMode(mode));
-}
-
 WMError WindowSceneSessionImpl::NotifyDrawingCompleted()
 {
     if (IsWindowSessionInvalid()) {
@@ -1395,6 +1370,13 @@ void WindowSceneSessionImpl::SetDefaultProperty()
         }
         case WindowType::WINDOW_TYPE_POINTER: {
             property_->SetFocusable(false);
+            break;
+        }
+        case WindowType::WINDOW_TYPE_SCREEN_CONTROL: {
+            property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+            property_->SetTouchable(false);
+            property_->SetFocusable(false);
+            SetAlpha(0);
             break;
         }
         default:
@@ -2729,10 +2711,24 @@ WMError WindowSceneSessionImpl::MainWindowCloseInner()
     return WMError::WM_OK;
 }
 
+bool WindowSceneSessionImpl::CalcWindowShouldMove()
+{
+    WindowType windowType = GetType();
+    if (WindowHelper::IsInputWindow(windowType)) {
+        if (windowSystemConfig_.uiType_ == UI_TYPE_PAD || windowSystemConfig_.uiType_ == UI_TYPE_PHONE) {
+            return true;
+        }
+    }
+
+    if (IsPcOrPadFreeMultiWindowMode()) {
+        return true;
+    }
+    return false;
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
-    if (!(isPC || IsFreeMultiWindowMode())) {
+    if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -2755,6 +2751,73 @@ WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
         TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is nullptr");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
+}
+
+WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
+{
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    const auto& windowRect = GetRect();
+    if (offsetX < 0 || offsetX > static_cast<int32_t>(windowRect.width_) ||
+        offsetY < 0 || offsetY > static_cast<int32_t>(windowRect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "offset not in window");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+    WSError errorCode;
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (lastPointerEvent_ != nullptr &&
+        lastPointerEvent_->GetPointerItem(lastPointerEvent_->GetPointerId(), pointerItem)) {
+        int32_t lastDisplayX = pointerItem.GetDisplayX();
+        int32_t lastDisplayY = pointerItem.GetDisplayY();
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "offsetX:%{public}d offsetY:%{public}d lastDisplayX:%{public}d"
+            " lastDisplayY:%{public}d", offsetX, offsetY, lastDisplayX, lastDisplayY);
+        errorCode = hostSession->StartMovingWithCoordinate(offsetX, offsetY, lastDisplayX, lastDisplayY);
+    } else {
+        errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    switch (errorCode) {
+        case WSError::WS_ERROR_REPEAT_OPERATION: {
+            return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+        }
+        case WSError::WS_ERROR_NULLPTR: {
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        }
+        default: {
+            return WmErrorCode::WM_OK;
+        }
+    }
+}
+
+WmErrorCode WindowSceneSessionImpl::StopMoveWindow()
+{
+    auto isPC = windowSystemConfig_.uiType_ == UI_TYPE_PC;
+    if (!(isPC || IsFreeMultiWindowMode())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
+        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "hostSession is nullptr");
+        return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    }
+    WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_END_MOVE);
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "id:%{public}d, errorCode:%{public}d",
+          GetPersistentId(), static_cast<int>(errorCode));
+    return errorCode == WSError::WS_ERROR_NULLPTR ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : WmErrorCode::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::Close()
@@ -3694,6 +3757,21 @@ WMError WindowSceneSessionImpl::SetTouchHotAreas(const std::vector<Rect>& rects)
     return result;
 }
 
+WMError WindowSceneSessionImpl::SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas)
+{
+    if (GetType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
+    KeyboardTouchHotAreas lastKeyboardTouchHotAreas = property_->GetKeyboardTouchHotAreas();
+    property_->SetKeyboardTouchHotAreas(hotAreas);
+    WMError result = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_KEYBOARD_TOUCH_HOT_AREA);
+    if (result != WMError::WM_OK) {
+        property_->SetKeyboardTouchHotAreas(lastKeyboardTouchHotAreas);
+        TLOGE(WmsLogTag::WMS_EVENT, "errCode:%{public}d", static_cast<int32_t>(result));
+    }
+    return result;
+}
+
 WmErrorCode WindowSceneSessionImpl::KeepKeyboardOnFocus(bool keepKeyboardFlag)
 {
     if (property_ == nullptr) {
@@ -3725,6 +3803,33 @@ WMError WindowSceneSessionImpl::SetCallingWindow(uint32_t callingSessionId)
     }
     property_->SetCallingSessionId(callingSessionId);
     return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::ChangeKeyboardViewMode(KeyboardViewMode mode)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Start change keyboard view mode to %{public}u",
+        static_cast<uint32_t>(mode));
+    if (mode >= KeyboardViewMode::VIEW_MODE_END) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Invalid view mode!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (mode == property_->GetKeyboardViewMode()) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "The mode is same.");
+        return WMError::WM_DO_NOTHING;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is invalid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ != WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "The keyboard is not show status.");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+
+    property_->SetKeyboardViewMode(mode);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return static_cast<WMError>(hostSession->ChangeKeyboardViewMode(mode));
 }
 
 void WindowSceneSessionImpl::DumpSessionElementInfo(const std::vector<std::string>& params)
@@ -4274,6 +4379,44 @@ WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::RegisterWindowAttachStateChangeListener(
+    const sptr<IWindowAttachStateChangeListner>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "id: %{public}d, listener is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+    windowAttachStateChangeListener_ = listener;
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d listener registered", GetPersistentId());
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
+{
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+    windowAttachStateChangeListener_ = nullptr;
+    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    return WMError::WM_OK;
+}
+
+WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(windowAttachStateChangeListenerMutex_);
+    if (!windowAttachStateChangeListener_) {
+        TLOGW(WmsLogTag::WMS_SUB, "listener is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    if (isAttach) {
+        windowAttachStateChangeListener_->AfterAttached();
+    } else {
+        windowAttachStateChangeListener_->AfterDetached();
+    }
+    return WSError::WS_OK;
+}
+
 WMError WindowSceneSessionImpl::UnregisterKeyboardPanelInfoChangeListener(
     const sptr<IKeyboardPanelInfoChangeListener>& listener)
 {
@@ -4392,11 +4535,13 @@ WMError WindowSceneSessionImpl::MoveAndResizeKeyboard(const KeyboardLayoutParams
 
 WMError WindowSceneSessionImpl::AdjustKeyboardLayout(const KeyboardLayoutParams& params)
 {
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "adjust keyboard layout, gravity: %{public}u, LandscapeKeyboardRect: %{public}s, "
-        "PortraitKeyboardRect: %{public}s, LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s",
-        static_cast<uint32_t>(params.gravity_), params.LandscapeKeyboardRect_.ToString().c_str(),
-        params.PortraitKeyboardRect_.ToString().c_str(), params.LandscapePanelRect_.ToString().c_str(),
-        params.PortraitPanelRect_.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "gravity: %{public}u, "
+        "landscapeAvoidHeight: %{public}d, portraitAvoidHeight: %{public}d "
+        "LandscapeKeyboardRect: %{public}s, PortraitKeyboardRect: %{public}s, "
+        "LandscapePanelRect: %{public}s, PortraitPanelRect: %{public}s",
+        static_cast<uint32_t>(params.gravity_), params.landscapeAvoidHeight_, params.portraitAvoidHeight_,
+        params.LandscapeKeyboardRect_.ToString().c_str(), params.PortraitKeyboardRect_.ToString().c_str(),
+        params.LandscapePanelRect_.ToString().c_str(), params.PortraitPanelRect_.ToString().c_str());
     if (property_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "property is nullptr");
         return WMError::WM_ERROR_NULLPTR;
