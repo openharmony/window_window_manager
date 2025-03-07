@@ -2984,8 +2984,7 @@ WMError SceneSessionManagerProxy::GetWindowUIType(WindowUIType& windowUIType)
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    WindowUIType type = static_cast<WindowUIType>(reply.ReadUint32());
-    windowUIType = type;
+    windowUIType = static_cast<WindowUIType>(reply.ReadUint32());
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Read ret failed");
