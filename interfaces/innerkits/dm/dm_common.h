@@ -465,6 +465,15 @@ enum class MultiScreenMode : uint32_t {
 };
 
 /**
+ * @brief Enumerates the low temp mode.
+ */
+enum class LowTempMode: int32_t {
+    UNKNOWN = -1,
+    LowTempOff = 0,
+    LowTempOn = 1,
+};
+
+/**
  * @brief Enumerates the virtual screen type.
  */
 enum class VirtualScreenType: uint32_t {
