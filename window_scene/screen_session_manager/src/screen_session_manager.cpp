@@ -7070,11 +7070,13 @@ void ScreenSessionManager::SetPhysicalRotationClientInner(ScreenId screenId, int
             screenId);
         return;
     }
+    if (rotation == screenSession->GetPhysicalRotation()) {
+        TLOGE(WmsLogTag::DMS, "PhysicalRotation not changed. screen %{public}" PRIu64" rotation %{public}u",
+            screenId, rotation);
+        return;
+    }
     screenSession->SetPhysicalRotation(rotation);
     screenSession->SetScreenComponentRotation(rotation);
-    screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::ROTATION);
-    NotifyScreenChanged(screenSession->ConvertToScreenInfo(), ScreenChangeEvent::UPDATE_ROTATION);
-    NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::UPDATE_ROTATION);
     TLOGI(WmsLogTag::DMS, "SetPhysicalRotationClientInner end");
 }
 
