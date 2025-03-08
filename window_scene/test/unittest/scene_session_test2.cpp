@@ -1035,7 +1035,6 @@ HWTEST_F(SceneSessionTest2, NotifyTouchOutside, Function | SmallTest | Level2)
     SessionInfo info;
     info.abilityName_ = "NotifyTouchOutside";
     info.bundleName_ = "NotifyTouchOutside";
-
     sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
 
     sceneSession->sessionStage_ = new SessionStageMocker();

@@ -406,7 +406,7 @@ HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, Function | SmallTest | Level2
  * @tc.name: SetWindowModeSupportType
  * @tc.desc: SetWindowModeSupportType test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetWindowModeSupportType, Function | SmallTest | Level2)
 {
     uint32_t windowModeSupportType = 1234567890;
@@ -457,15 +457,15 @@ HWTEST_F(WindowSessionPropertyTest, SetTouchHotAreas, Function | SmallTest | Lev
  * @tc.name: SetKeyboardTouchHotAreas
  * @tc.desc: SetKeyboardTouchHotAreas test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, SetKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas hotAreas;
     Rect rect { 4, 4, 4, 4 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
-    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
     hotAreas.landscapePanelHotAreas_.push_back(rect);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
     hotAreas.portraitPanelHotAreas_.push_back(rect);
     property->SetPersistentId(0);
     property->SetSessionPropertyChangeCallback(nullptr);
@@ -480,8 +480,8 @@ HWTEST_F(WindowSessionPropertyTest, SetKeyboardTouchHotAreas, Function | SmallTe
 
     Rect rect1 { 5, 5, 5, 5 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect1);
-    hotAreas.portraitKeyboardHotAreas_.push_back(rect1);
     hotAreas.landscapePanelHotAreas_.push_back(rect1);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect1);
     hotAreas.portraitPanelHotAreas_.push_back(rect1);
     property->SetKeyboardTouchHotAreas(hotAreas);
 }
@@ -532,16 +532,16 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingTouchHotAreas, Function | Small
  * @tc.name: UnmarshallingKeyboardTouchHotAreas
  * @tc.desc: UnmarshallingKeyboardTouchHotAreas test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
     Parcel parcel;
-    WindowSessionProperty *property = sptr<WindowSessionProperty>::MakeSptr();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     KeyboardTouchHotAreas hotAreas;
     Rect rect { 4, 4, 4, 4 };
     hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
-    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
     hotAreas.landscapePanelHotAreas_.push_back(rect);
+    hotAreas.portraitKeyboardHotAreas_.push_back(rect);
     hotAreas.portraitPanelHotAreas_.push_back(rect);
     WindowSessionProperty windowSessionProperty;
     windowSessionProperty.SetKeyboardTouchHotAreas(hotAreas);
@@ -1098,7 +1098,7 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingTouchHotAreas, Function | SmallTe
  * @tc.name: MarshallingKeyboardTouchHotAreas
  * @tc.desc: MarshallingKeyboardTouchHotAreas test
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(WindowSessionPropertyTest, MarshallingKeyboardTouchHotAreas, Function | SmallTest | Level2)
 {
     Parcel parcel;
@@ -1107,8 +1107,8 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingKeyboardTouchHotAreas, Function |
     for (int i = 0; i < 55; i++) {
         Rect rect { i, i, i, i };
         hotAreas.landscapeKeyboardHotAreas_.push_back(rect);
-        hotAreas.portraitKeyboardHotAreas_.push_back(rect);
         hotAreas.landscapePanelHotAreas_.push_back(rect);
+        hotAreas.portraitKeyboardHotAreas_.push_back(rect);
         hotAreas.portraitPanelHotAreas_.push_back(rect);
     }
     property->SetKeyboardTouchHotAreas(hotAreas);
