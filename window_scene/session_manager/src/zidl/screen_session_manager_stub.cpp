@@ -879,6 +879,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             RecordEventFromScb(description, needRecordEvent);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPABILITY: {
+            reply.WriteString(GetDisplayCapability());
+            break;
+        }
         default:
             WLOGFW("unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

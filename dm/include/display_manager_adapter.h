@@ -96,6 +96,7 @@ public:
         std::vector<uint64_t> surfaceIdList = {});
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
+    virtual std::string GetDisplayCapability();
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList);
     virtual std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
