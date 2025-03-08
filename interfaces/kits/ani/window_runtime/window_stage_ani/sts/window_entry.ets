@@ -1,6 +1,6 @@
 import window from '@ohos.window';
 import {
-  AsyncCallback,
+  AsyncCallbackVoid,
   BaseContext,
   LocalStorage,
   Callback,
@@ -11,7 +11,7 @@ import {
 function main() {
     loadLibrary('windowstageani_kit.z')
     let ws = window.CreateWindowStage(0);
-    let callback:AsyncCallback<int> = (err, data: int) => {
+    let callback:AsyncCallbackVoid = (err) => {
       if (err.code) {
         console.error(`Failed to load the content. Cause code: ${err.code}, message: ${err.message}`);
         return;
@@ -80,8 +80,8 @@ function main() {
       let err = e as BusinessError;
       console.println('[ANI] in code:' + err?.code + ' err:' + err?.message);
     });
-    w.setColorSpace(window.ColorSpace.DEFAULT, (err, data) => {
-      console.println('[ANI] setColorSpace data:' + data + ' err:' + err);
+    w.setColorSpace(window.ColorSpace.DEFAULT, (err) => {
+      console.println('[ANI] setColorSpace err:' + err);
     });
     w.setPreferredOrientation(window.Orientation.UNSPECIFIED);
     w.setWindowPrivacyMode(true);
