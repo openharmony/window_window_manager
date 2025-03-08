@@ -233,7 +233,7 @@ public:
     {
         return WSError::WS_OK;
     }
-    
+
     virtual WSError LinkKeyFrameCanvasNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) = 0;
 
     virtual WSError SetSplitButtonVisible(bool isVisible) = 0;

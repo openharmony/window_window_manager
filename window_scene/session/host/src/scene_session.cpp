@@ -3115,11 +3115,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect,
         SetSurfaceBounds(globalRect, isGlobal, needFlush);
     }
     UpdateSizeChangeReason(reason);
-    if (reason != SizeChangeReason::DRAG_MOVE) {
-        if (KeyFrameNotifyFilter(rect, reason)) {
-            TLOGI(WmsLogTag::WMS_LAYOUT, "filter by KeyFrameNotifyFilter: %{public}d", reason);
-            return;
-        }
+    if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
         std::shared_ptr<VsyncCallback> nextVsyncDragCallback = std::make_shared<VsyncCallback>();
         nextVsyncDragCallback->onCallback = [weakThis = wptr(this), where = __func__](int64_t, int64_t) {
@@ -3501,10 +3497,12 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
 
 bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason reason)
 {
+    TLOGD(WmsLogTag::WMS_LAYOUT, "reason in: %{public}d", reason);
     if (!keyFramePolicy_.running_) {
         return false;
     }
     if (reason == SizeChangeReason::DRAG_START) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "ensure start reason send");
         NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
         return true;
     }
