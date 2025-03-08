@@ -178,6 +178,7 @@ public:
         std::vector<uint64_t> surfaceIdList = {}) override;
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
+    std::string GetDisplayCapability() override;
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
