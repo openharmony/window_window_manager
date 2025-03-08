@@ -50,8 +50,12 @@ public:
     ~ScreenRotationProperty() = default;
     static void HandleSensorEventInput(DeviceRotation deviceRotation);
     static void HandleHoverStatusEventInput(DeviceHoverStatus hoverStatus, bool needRotate = true);
+
+    static bool isDeviceHorizontal();
 private:
     static float ConvertDeviceToFloat(DeviceRotation deviceRotation);
+    
+    static bool isDeviceHorizontal_;
 };
 } // Rosen
 } // OHOS
