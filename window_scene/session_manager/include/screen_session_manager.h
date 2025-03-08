@@ -306,6 +306,12 @@ public:
 
     void ReportFoldStatusToScb(std::vector<std::string>& screenFoldInfo);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
+    std::string GetDisplayCapability() override;
+    nlohmann::ordered_json GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,
+        std::vector<std::string> rotation, std::vector<std::string> orientation);
+    std::string GetSecondaryDisplayCapability();
+    std::string GetFoldableDeviceCapability();
+    std::string GetSuperFoldCapability();
     void NotifyCastWhenScreenConnectChange(bool isConnected);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void SetCoordinationFlag(bool isCoordinationFlag);

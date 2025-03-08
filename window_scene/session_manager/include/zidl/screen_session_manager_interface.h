@@ -193,6 +193,10 @@ public:
     {
         return std::vector<DisplayPhysicalResolution> {};
     }
+    virtual std::string GetDisplayCapability() override
+    {
+        return std::string {};
+    }
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override
     {
