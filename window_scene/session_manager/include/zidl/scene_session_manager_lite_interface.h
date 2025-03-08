@@ -211,8 +211,8 @@ public:
      * @param bundleNameList The list of bundle for which the listener should be registered
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
-    virtual WMError RegisterSessionLifecycleListenerByIds(
-        const sptr<ISessionLifecycleListener>& listener, const std::vector<int32_t>& persistentIdList) = 0;
+    virtual WMError RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList) = 0;
 
     /**
      * @brief Register a session lifecycle listener for specific bundles
@@ -227,8 +227,8 @@ public:
      * @param bundleNameList The list of bundle for which the listener should be registered
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
-    virtual WMError RegisterSessionLifecycleListenerByBundles(
-        const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList) = 0;
+    virtual WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList) = 0;
 
     /**
      * @brief Unregister a session lifecycle listener

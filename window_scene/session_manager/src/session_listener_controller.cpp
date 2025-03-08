@@ -22,7 +22,8 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "SessionListenerController"};
 }
-constexpr int32_t MAX_LIFECYCLE_LISTENER_LIMIT = 256;
+constexpr int32_t MAX_LIFECYCLE_LISTENER_LIMIT = 16;
+constexpr int32_t MAX_LISTEN_TARGET_LIMIT = 512;
 const std::string DEFAULT_ALL = "defaultAll";
 
 WSError SessionListenerController::AddSessionListener(const sptr<ISessionListener>& listener)
@@ -193,10 +194,10 @@ void SessionListenerController::OnListenerDied(const wptr<IRemoteObject>& remote
 
 void SessionListenerController::OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote)
 {
-    WLOGFD("in");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     auto remoteObj = remote.promote();
     if (!remoteObj) {
-        WLOGFD("invalid remote object");
+        TLOGD(WmsLogTag::WMS_LIFE, "invalid remote object");
         return;
     }
     remoteObj->RemoveDeathRecipient(lifecycleListenerDeathRecipient_);
@@ -229,16 +230,16 @@ void SessionListenerController::ConstructPayload(
     payload.persistentId_ = sessionInfo.persistentId_;
 }
 
-WMError SessionListenerController::RegisterSessionLifecycleListener(
-    const sptr<ISessionLifecycleListener>& listener, const std::vector<int32_t>& persistentIdList)
+WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+    const std::vector<int32_t>& persistentIdList)
 {
     if (!listener) {
-        WLOGFE("listener is invalid.");
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     std::lock_guard guard(lifecycleListenerLock_);
-    if (listenerMapById_.size() >= MAX_LIFECYCLE_LISTENER_LIMIT) {
-        WLOGFW("The number of listeners has reached the upper limit.");
+    if (listenerMapById_.size() >= MAX_LISTEN_TARGET_LIMIT) {
+        TLOGW(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     if (!lifecycleListenerDeathRecipient_) {
@@ -254,14 +255,14 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(
         listenerObject->AddDeathRecipient(lifecycleListenerDeathRecipient_);
     }
     for (const int32_t id : persistentIdList) {
-        if (!SceneSessionManager::GetInstance().isMainWindowByPersistentId(id)) {
-            WLOGFW("invalid persistentId");
+        if (!SceneSessionManager::GetInstance().IsMainWindowByPersistentId(id)) {
+            TLOGW(WmsLogTag::WMS_LIFE, "invalid persistentId");
             continue;
         }
         auto it = listenerMapById_.find(id);
         if (it != listenerMapById_.end()) {
             if (it->second.size() >= MAX_LIFECYCLE_LISTENER_LIMIT) {
-                WLOGFE("The number of listeners has reached the upper limit.");
+                TLOGE(WmsLogTag::WMS_LIFE, "The number of listen target has reached the upper limit.");
                 return WMError::WM_ERROR_INVALID_OPERATION;
             }
             it->second.emplace_back(listener);
@@ -271,20 +272,20 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(
             listenerMapById_.emplace(id, newListenerList);
         }
     }
-    WLOGFI("Register SessionLifecycleListener Finished.");
+    TLOGI(WmsLogTag::WMS_LIFE, "Register SessionLifecycleListener By Id Finished.");
     return WMError::WM_OK;
 }
 
-WMError SessionListenerController::RegisterSessionLifecycleListener(
-    const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
+WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+    const std::vector<std::string>& bundleNameList)
 {
     if (!listener) {
-        WLOGFE("listener is invalid.");
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     std::lock_guard guard(lifecycleListenerLock_);
-    if (listenerMapById_.size() >= MAX_LIFECYCLE_LISTENER_LIMIT) {
-        WLOGFW("The number of listeners has reached the upper limit.");
+    if (listenerMapById_.size() >= MAX_LISTEN_TARGET_LIMIT) {
+        TLOGW(WmsLogTag::WMS_LIFE, "The number of listen target has reached the upper limit.");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     if (!lifecycleListenerDeathRecipient_) {
@@ -304,14 +305,14 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(
         targetBundleList.emplace_back(DEFAULT_ALL);
     }
     for (const std::string bundleName : targetBundleList) {
-        if (bundleName.empty()) {
-            WLOGFW("invalid bundleName");
+        if (bundleName.empty() || bundleName.size() > 256) {
+            TLOGW(WmsLogTag::WMS_LIFE, "invalid bundleName");
             continue;
         }
         auto it = listenerMapByBundle_.find(bundleName);
         if (it != listenerMapByBundle_.end()) {
             if (it->second.size() >= MAX_LIFECYCLE_LISTENER_LIMIT) {
-                WLOGFE("The number of listeners has reached the upper limit.");
+                TLOGE(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
                 return WMError::WM_ERROR_INVALID_OPERATION;
             }
             it->second.emplace_back(listener);
@@ -321,23 +322,23 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(
             listenerMapByBundle_.emplace(bundleName, newListenerList);
         }
     }
-    WLOGFI("Register SessionLifecycleListener By Bundle Finished.");
+    TLOGI(WmsLogTag::WMS_LIFE, "Register SessionLifecycleListener By Bundle Finished.");
     return WMError::WM_OK;
 }
 
 WMError SessionListenerController::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
 {
     if (!listener) {
-        WLOGFE("listener is invalid.");
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     const sptr<IRemoteObject> target = listener->AsObject();
     if (!target) {
-        WLOGFE("remote listener is invalid.");
+        TLOGE(WmsLogTag::WMS_LIFE, "remote listener is invalid.");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     RemoveSessionLifecycleListener(target);
-    WLOGFI("Session Lifecycle Listener Unregister Finished.");
+    TLOGI(WmsLogTag::WMS_LIFE, "Session Lifecycle Listener Unregister Finished.");
     return WMError::WM_OK;
 }
 
@@ -367,7 +368,7 @@ void SessionListenerController::RemoveSessionLifecycleListener(const sptr<IRemot
             ++it;
         }
     }
-    WLOGFI("Remove listeners from map success.");
+    TLOGI(WmsLogTag::WMS_LIFE, "Remove listeners from map success.");
 }
 
 void SessionListenerController::NotifySessionLifecycleEvent(
@@ -376,13 +377,13 @@ void SessionListenerController::NotifySessionLifecycleEvent(
     std::string bundleName = sessionInfo.bundleName_;
     int32_t persistentId = sessionInfo.persistentId_;
     if (persistentId == -1) {
-        WLOGFE("invalid persistentId!");
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid persistentId!");
         return;
     }
     ISessionLifecycleListener::LifecycleEventPayload payload;
     ConstructPayload(payload, sessionInfo);
     NotifyMissionEvent(event, persistentId);
-    WLOGFI("start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d",
+    TLOGI(WmsLogTag::WMS_LIFE, "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d",
         bundleName.c_str(), persistentId, event);
 
     std::lock_guard guard(lifecycleListenerLock_);
@@ -391,7 +392,7 @@ void SessionListenerController::NotifySessionLifecycleEvent(
     if (itById != listenerMapById_.end()) {
         const std::vector<sptr<ISessionLifecycleListener>>& listeners = itById->second;
         for (const auto& listener : listeners) {
-            WLOGFI("notify listener by id");
+            TLOGI(WmsLogTag::WMS_LIFE, "notify listener by id");
             listener->OnLifecycleEvent(event, payload);
         }
     }
@@ -400,7 +401,7 @@ void SessionListenerController::NotifySessionLifecycleEvent(
     if (itByBundle != listenerMapByBundle_.end()) {
         const std::vector<sptr<ISessionLifecycleListener>>& listeners = itByBundle->second;
         for (const auto& listener : listeners) {
-            WLOGFI("notify listener by bundle");
+            TLOGI(WmsLogTag::WMS_LIFE, "notify listener by bundle");
             listener->OnLifecycleEvent(event, payload);
         }
     }
@@ -409,7 +410,7 @@ void SessionListenerController::NotifySessionLifecycleEvent(
     if (itByAllBundles != listenerMapByBundle_.end()) {
         const std::vector<sptr<ISessionLifecycleListener>>& listeners = itByAllBundles->second;
         for (const auto& listener : listeners) {
-            WLOGFI("notify listener of all bundles");
+            TLOGI(WmsLogTag::WMS_LIFE, "notify listener of all bundles");
             listener->OnLifecycleEvent(event, payload);
         }
     }

@@ -1386,7 +1386,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return nullptr;
 }
 
-bool SceneSessionManager::isMainWindowByPersistentId(int32_t persistentId)
+bool SceneSessionManager::IsMainWindowByPersistentId(int32_t persistentId)
 {
     if (persistentId == -1) {
         return false;
@@ -13387,8 +13387,8 @@ void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId
     sceneSession->RemoveLifeCycleTask(taskType);
 }
 
-WMError SceneSessionManager::RegisterSessionLifecycleListener(
-    const sptr<ISessionLifecycleListener>& listener, const std::vector<int32_t>& persistentIdList)
+WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+    const std::vector<int32_t>& persistentIdList)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
@@ -13409,8 +13409,8 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::RegisterSessionLifecycleListener(
-    const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
+WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+    const std::vector<std::string>& bundleNameList)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
