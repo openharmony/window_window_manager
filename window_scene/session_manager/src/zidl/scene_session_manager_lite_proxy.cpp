@@ -1615,6 +1615,10 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByIds(
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    if (listener == nullptr || listener->AsObject() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     if (!data.WriteRemoteObject(listener->AsObject())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write lifecycle listener failed.");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1653,6 +1657,10 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByBundles(
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    if (listener == nullptr || listener->AsObject() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     if (!data.WriteRemoteObject(listener->AsObject())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write lifecycle listener failed.");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -1689,6 +1697,10 @@ WMError SceneSessionManagerLiteProxy::UnregisterSessionLifecycleListener(
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (listener == nullptr || listener->AsObject() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteRemoteObject(listener->AsObject())) {
