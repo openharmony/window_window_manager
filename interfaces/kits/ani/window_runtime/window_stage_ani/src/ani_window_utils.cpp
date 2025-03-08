@@ -97,13 +97,13 @@ ani_object AniWindowUtils::CreateAniUndefined(ani_env* env)
     return static_cast<ani_object>(aniRef);
 }
 
-ani_object AniWindowUtils::AniThrowError(ani_env* env, WMError errorCode, std::string msg)
+ani_object AniWindowUtils::AniThrowError(ani_env* env, WMError errorCode, const std::string& msg)
 {
     AniErrUtils::ThrowBusinessError(env, errorCode, msg);
     return AniWindowUtils::CreateAniUndefined(env);
 }
 
-ani_object AniWindowUtils::AniThrowError(ani_env* env, WmErrorCode errorCode, std::string msg)
+ani_object AniWindowUtils::AniThrowError(ani_env* env, WmErrorCode errorCode, const std::string& msg)
 {
     AniErrUtils::ThrowBusinessError(env, errorCode, msg);
     return AniWindowUtils::CreateAniUndefined(env);
