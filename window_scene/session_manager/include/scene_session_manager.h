@@ -48,6 +48,7 @@
 #include "session/host/include/session.h"
 #include "session/host/include/root_scene_session.h"
 #include "session_listener_controller.h"
+#include "session_manager/include/ffrt_queue_helper.h"
 #include "session_manager/include/window_manager_lru.h"
 #include "session_manager/include/zidl/scene_session_manager_stub.h"
 #include "thread_safety_annotations.h"
@@ -276,6 +277,8 @@ public:
         FocusChangeReason reason = FocusChangeReason::DEFAULT) override;
     WMError RequestFocusStatusBySCB(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT);
+    WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST) override;
     void RequestAllAppSessionUnfocus();
     WSError UpdateFocus(int32_t persistentId, bool isFocused);
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
@@ -345,6 +348,7 @@ public:
     int32_t ChangeUIAbilityVisibilityBySCB(const sptr<SceneSession>& sceneSession, bool visibility,
         bool isFromClient = true);
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId) override;
+    void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
 
     std::map<int32_t, sptr<SceneSession>>& GetSessionMapByScreenId(ScreenId id);
     void UpdatePrivateStateAndNotify(uint32_t persistentId);
@@ -506,6 +510,7 @@ public:
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    WMError GetWindowUIType(WindowUIType& windowUIType) override;
 
     /*
      * Multi Window
@@ -707,6 +712,8 @@ private:
     sptr<AAFwk::SessionInfo> SetAbilitySessionInfo(const sptr<SceneSession>& sceneSession);
     void ResetWantInfo(const sptr<SceneSession>& sceneSession);
     void ResetSceneSessionInfoWant(const sptr<AAFwk::SessionInfo>& sceneSessionInfo);
+    int32_t StartUIAbilityBySCBTimeoutCheck(const sptr<AAFwk::SessionInfo>& abilitySessionInfo,
+        const uint32_t& windowStateChangeReason, bool& isColdStart);
 
     /*
      * Window Focus
@@ -1311,12 +1318,13 @@ private:
     NotifyAppUseControlListFunc notifyAppUseControlListFunc_;
     std::unordered_map<int32_t, int32_t> visibleWindowCountMap_ GUARDED_BY(SCENE_GUARD);
     std::unordered_set<std::string> sessionLockedStateCacheSet_;
+    std::shared_ptr<FfrtQueueHelper> ffrtQueueHelper_ = nullptr;
 
     /*
      * Window Pattern
      */
-    std::unique_ptr<LRUCache> snapshotLRUCache_;
-    std::size_t snapCapacity_ = 0;
+    std::unique_ptr<LruCache> snapshotLruCache_;
+    std::size_t snapshotCapacity_ = 0;
 };
 } // namespace OHOS::Rosen
 

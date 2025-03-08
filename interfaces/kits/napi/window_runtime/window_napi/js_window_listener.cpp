@@ -264,47 +264,99 @@ void JsWindowListener::AfterDestroyed()
 void JsWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
-    WLOGI("OccupiedAreaChangeInfo, type: %{public}u, input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
+    TLOGI(WmsLogTag::WMS_KEYBOARD,
+        "OccupiedAreaChangeInfo, type: %{public}u, input rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
         static_cast<uint32_t>(info->type_),
         info->rect_.posX_, info->rect_.posY_, info->rect_.width_, info->rect_.height_);
     // js callback should run in js thread
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_, info, eng = env_] (napi_env env,
-            NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr || eng == nullptr) {
-                WLOGFE("this listener or eng is nullptr");
-                return;
-            }
-            napi_value argv[] = {CreateJsValue(eng, info->rect_.height_)};
-            thisListener->CallJsMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    auto jsCallback = [self = weakRef_, info, env = env_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
         }
-    );
+        napi_value argv[] = {CreateJsValue(env, info->rect_.height_)};
+        thisListener->CallJsMethod(KEYBOARD_HEIGHT_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_high) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "failed to send event");
+    }
+}
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnSizeChange",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+void JsWindowListener::OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_SHOW_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
+    }
+}
+
+void JsWindowListener::OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Called");
+    auto jsCallback = [self = weakRef_, env = env_, rect = keyboardPanelInfo.rect_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to create js object", funcName);
+            return;
+        }
+        napi_value rectObjValue = GetRectAndConvertToJsValue(env, rect);
+        if (rectObjValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s failed to convert rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "rect", rectObjValue);
+        napi_value argv[] = { objValue };
+        thisListener->CallJsMethod(KEYBOARD_DID_HIDE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_immediate) != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnTouchOutside() const
 {
     WLOGI("CALLED");
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
-                return;
-            }
-            thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
+    auto jsCallback = [self = weakRef_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnOutsidePressed",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        thisListener->CallJsMethod(TOUCH_OUTSIDE_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnScreenshot()
@@ -329,40 +381,31 @@ void JsWindowListener::OnScreenshot()
 
 void JsWindowListener::OnDialogTargetTouch() const
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
-                return;
-            }
-            thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
+    auto jsCallback = [self = weakRef_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnDialogTargetTouch",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        thisListener->CallJsMethod(DIALOG_TARGET_TOUCH_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnDialogDeathRecipient() const
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
+    auto asyncTask = [self = weakRef_] {
+        auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
+                TLOGE(WmsLogTag::WMS_SYSTEM, "this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr, 0);
-        }
-    );
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnDialogDeathRecipient",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_send_event(env_, asyncTask, napi_eprio_immediate);
 }
 
 void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)
@@ -417,21 +460,17 @@ int64_t JsWindowListener::GetTimeout() const
 
 void JsWindowListener::OnWindowNoInteractionCallback()
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
-            if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
-                return;
-            }
-            thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
+    auto jsCallback = [self = weakRef_] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr) {
+            WLOGFE("this listener is nullptr");
+            return;
         }
-    );
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnWindowNoInteractionCallback", env_,
-        std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        thisListener->CallJsMethod(WINDOW_NO_INTERACTION_DETECT_CB.c_str(), nullptr, 0);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, jsCallback, napi_eprio_high)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to send event");
+    }
 }
 
 void JsWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
@@ -543,9 +582,9 @@ void JsWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         !(reason == WindowSizeChangeReason::MAXIMIZE && rect.posX_ != 0)) {
         rectChangeReason = JS_SIZE_CHANGE_REASON.at(reason);
     }
-    if (rectChangeReason == RectChangeReason::DRAG_END && currentReason_ == RectChangeReason::MOVE) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event: last change reason: %{public}d, "
-            "this window change reason: %{public}d", currentReason_, reason);
+    if (rectChangeReason == RectChangeReason::DRAG_END &&
+        currentReason_ != RectChangeReason::DRAG_START && currentReason_ != RectChangeReason::DRAG) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "drag end change to move event");
         rectChangeReason = RectChangeReason::MOVE;
     }
     // js callback should run in js thread

@@ -123,6 +123,8 @@ private:
 
     // Keyboard
     int HandleChangeKeyboardViewMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardDidShowRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyKeyboardDidHideRegistered(MessageParcel& data, MessageParcel& reply);
 
     // Window Property
     int HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply);

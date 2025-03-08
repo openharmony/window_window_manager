@@ -52,6 +52,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleDestroyAndDisconnectSpcificSessionWithDetachCallback(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS):
             return HandleRequestFocusStatus(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REQUEST_FOCUS_STATUS_BY_SA):
+            return HandleRequestFocusStatusBySA(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_REGISTER_WINDOW_MANAGER_AGENT):
             return HandleRegisterWindowManagerAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_UNREGISTER_WINDOW_MANAGER_AGENT):
@@ -207,6 +209,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleWatchFocusActiveChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SHIFT_APP_WINDOW_POINTER_EVENT):
             return HandleShiftAppWindowPointerEvent(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_UI_TYPE):
+            return HandleGetWindowUIType(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -251,6 +255,7 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     reply.WriteParcelable(&systemConfig);
     reply.WriteUint32(property->GetSubWindowLevel());
     reply.WriteFloat(property->GetWindowCornerRadius());
+    reply.WriteUint64(property->GetDisplayId());
     reply.WriteUint32(static_cast<uint32_t>(WSError::WS_OK));
     return ERR_NONE;
 }
@@ -379,6 +384,35 @@ int SceneSessionManagerStub::HandleRequestFocusStatus(MessageParcel& data, Messa
         return ERR_INVALID_DATA;
     }
     WMError ret = RequestFocusStatus(persistentId, isFocused, true, FocusChangeReason::CLIENT_REQUEST);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleRequestFocusStatusBySA(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "run");
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isFocused = false;
+    if (!data.ReadBool(isFocused)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read isFocused failed");
+        return ERR_INVALID_DATA;
+    }
+    bool byForeground = false;
+    if (!data.ReadBool(byForeground)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read byForeground failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t reason = static_cast<int32_t>(FocusChangeReason::SA_REQUEST);
+    if (!data.ReadInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "read reason failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RequestFocusStatusBySA(persistentId, isFocused, byForeground,
+        static_cast<FocusChangeReason>(reason));
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -1755,6 +1789,22 @@ int SceneSessionManagerStub::HandleShiftAppWindowPointerEvent(MessageParcel& dat
     }
     WMError errCode = ShiftAppWindowPointerEvent(sourcePersistentId, targetPersistentId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetWindowUIType(MessageParcel& data, MessageParcel& reply)
+{
+    WindowUIType type = WindowUIType::INVALID_WINDOW;
+    WMError errCode = GetWindowUIType(type);
+    TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "WindowUIType:%{public}d!", static_cast<int32_t>(type));
+    if (!reply.WriteUint32(static_cast<int32_t>(type))) {
+        TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "Write WindowUIType failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 } // namespace OHOS::Rosen

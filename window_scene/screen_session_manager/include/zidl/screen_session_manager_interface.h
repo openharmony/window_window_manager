@@ -134,6 +134,10 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio) override
+    {
+        return DMError::DM_OK;
+    }
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
         float virtualPixelRatio) override { return DMError::DM_OK; }
     virtual DMError GetDensityInCurResolution(ScreenId screenId,
@@ -215,6 +219,10 @@ public:
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override
     {
         return std::vector<DisplayPhysicalResolution> {};
+    }
+    virtual std::string GetDisplayCapability() override
+    {
+        return std::string {};
     }
     virtual bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override { return false; }
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,

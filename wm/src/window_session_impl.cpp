@@ -60,8 +60,8 @@ namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
 constexpr int32_t FORCE_SPLIT_MODE = 5;
-constexpr int32_t API_VERSION_15 = 15;
-constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 16;
+constexpr int32_t API_VERSION_18 = 18;
+constexpr uint32_t LIFECYCLE_ISOLATE_VERSION = 18;
 
 /*
  * DFX
@@ -112,6 +112,8 @@ std::map<int32_t, std::vector<sptr<IAvoidAreaChangedListener>>> WindowSessionImp
 std::map<int32_t, std::vector<sptr<IDialogDeathRecipientListener>>> WindowSessionImpl::dialogDeathRecipientListeners_;
 std::map<int32_t, std::vector<sptr<IDialogTargetTouchListener>>> WindowSessionImpl::dialogTargetTouchListener_;
 std::map<int32_t, std::vector<sptr<IOccupiedAreaChangeListener>>> WindowSessionImpl::occupiedAreaChangeListeners_;
+std::map<int32_t, std::vector<sptr<IKeyboardDidShowListener>>> WindowSessionImpl::keyboardDidShowListeners_;
+std::map<int32_t, std::vector<sptr<IKeyboardDidHideListener>>> WindowSessionImpl::keyboardDidHideListeners_;
 std::map<int32_t, std::vector<sptr<IScreenshotListener>>> WindowSessionImpl::screenshotListeners_;
 std::map<int32_t, std::vector<sptr<ITouchOutsideListener>>> WindowSessionImpl::touchOutsideListeners_;
 std::map<int32_t, std::vector<IWindowVisibilityListenerSptr>> WindowSessionImpl::windowVisibilityChangeListeners_;
@@ -136,6 +138,8 @@ std::recursive_mutex WindowSessionImpl::avoidAreaChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::dialogDeathRecipientListenerMutex_;
 std::recursive_mutex WindowSessionImpl::dialogTargetTouchListenerMutex_;
 std::recursive_mutex WindowSessionImpl::occupiedAreaChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::keyboardDidShowListenerMutex_;
+std::recursive_mutex WindowSessionImpl::keyboardDidHideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::screenshotListenerMutex_;
 std::recursive_mutex WindowSessionImpl::touchOutsideListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
@@ -150,7 +154,7 @@ std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::mutex WindowSessionImpl::highlightChangeListenerMutex_;
 std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
-std::map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> WindowSessionImpl::waterfallModeChangeListeners_;
+std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> WindowSessionImpl::waterfallModeChangeListeners_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
@@ -1326,8 +1330,7 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     if (IsPcOrPadCapabilityEnabled() && (isSubWindow || isDialogWindow)) {
-        TLOGD(WmsLogTag::WMS_DECOR, "hide other buttons except close");
-        uiContent->HideWindowTitleButton(true, true, true, false);
+        uiContent->HideWindowTitleButton(true, !windowOption_->GetSubWindowMaximizeSupported(), true, false);
         return;
     }
     auto windowModeSupportType = property_->GetWindowModeSupportType();
@@ -1343,14 +1346,15 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     TLOGI(WmsLogTag::WMS_DECOR, "[hideSplit, hideMaximize, hideMinimizeButton, hideCloseButton]:"
         "[%{public}d, %{public}d, %{public}d, %{public}d]",
         hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
+    bool isSuperFoldDisplayDevice = FoldScreenStateInternel::IsSuperFoldDisplayDevice();
     if (property_->GetCompatibleModeInPc() && !property_->GetIsAtomicService()) {
-        uiContent->HideWindowTitleButton(true, false, hideMinimizeButton, hideCloseButton);
+        uiContent->HideWindowTitleButton(true, isSuperFoldDisplayDevice, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent("scb_back_visibility", "true");
     } else {
         uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, hideMinimizeButton, hideCloseButton);
         uiContent->OnContainerModalEvent("scb_back_visibility", "false");
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (isSuperFoldDisplayDevice) {
         handler_->PostTask([weakThis = wptr(this), where = __func__] {
             auto window = weakThis.promote();
             if (window == nullptr) {
@@ -1854,6 +1858,10 @@ WMError WindowSessionImpl::SetWindowDelayRaiseEnabled(bool isEnabled)
         TLOGE(WmsLogTag::WMS_FOCUS, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    if (!WindowHelper::IsAppWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "window type is not supported");
+        return WMError::WM_ERROR_INVALID_TYPE;
+    }
     property_->SetWindowDelayRaiseEnabled(isEnabled);
     TLOGI(WmsLogTag::WMS_FOCUS, "isEnabled: %{public}d", isEnabled);
     return WMError::WM_OK;
@@ -2191,6 +2199,62 @@ WMError WindowSessionImpl::UnregisterOccupiedAreaChangeListener(const sptr<IOccu
     return UnregisterListener(occupiedAreaChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(keyboardDidShowListenerMutex_);
+    WMError ret = RegisterListener(keyboardDidShowListeners_[GetPersistentId()], listener);
+    if (ret == WMError::WM_OK && isKeyboardDidShowRegistered_ == false) {
+        auto hostSession = GetHostSession();
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+        hostSession->NotifyKeyboardDidShowRegistered(true);
+        isKeyboardDidShowRegistered_ = true;
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(keyboardDidShowListenerMutex_);
+    WMError ret = UnregisterListener(keyboardDidShowListeners_[GetPersistentId()], listener);
+    if (keyboardDidShowListeners_[GetPersistentId()].empty()) {
+        auto hostSession = GetHostSession();
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+        hostSession->NotifyKeyboardDidShowRegistered(false);
+        isKeyboardDidShowRegistered_ = false;
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(keyboardDidHideListenerMutex_);
+    WMError ret = RegisterListener(keyboardDidHideListeners_[GetPersistentId()], listener);
+    if (ret == WMError::WM_OK && isKeyboardDidHideRegistered_ == false) {
+        auto hostSession = GetHostSession();
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+        hostSession->NotifyKeyboardDidHideRegistered(true);
+        isKeyboardDidHideRegistered_ = true;
+    }
+    return ret;
+}
+
+WMError WindowSessionImpl::UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(keyboardDidHideListenerMutex_);
+    WMError ret = UnregisterListener(keyboardDidHideListeners_[GetPersistentId()], listener);
+    if (keyboardDidHideListeners_[GetPersistentId()].empty()) {
+        auto hostSession = GetHostSession();
+        CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+        hostSession->NotifyKeyboardDidHideRegistered(false);
+        isKeyboardDidHideRegistered_ = false;
+    }
+    return ret;
+}
+
 WMError WindowSessionImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener)
 {
     WLOGFD("in");
@@ -2405,7 +2469,7 @@ WMError WindowSessionImpl::GetDecorHeight(int32_t& height)
         return err;
     }
     height = static_cast<int32_t>(height / vpr);
-    if (GetTargetAPIVersion() >= 15) { // 15: isolated version
+    if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
         // SetDecorHeight and GetDecorHeight round down twice, resulting in a 1vp precision loss.
         if (decorHeight_ - height == 1) {
             height = decorHeight_;
@@ -2474,7 +2538,7 @@ WMError WindowSessionImpl::GetTitleButtonArea(TitleButtonRect& titleButtonRect)
     res = uiContent->GetContainerModalButtonsRect(decorRect, titleButtonLeftRect);
     if (!res) {
         TLOGE(WmsLogTag::WMS_DECOR, "GetContainerModalButtonsRect failed");
-        if (GetTargetAPIVersion() >= API_VERSION_15) { // 15: isolated version
+        if (GetTargetAPIVersion() >= API_VERSION_18) { // 18: isolated version
             titleButtonRect.ResetRect();
         }
         return WMError::WM_OK;
@@ -2535,7 +2599,7 @@ WMError WindowSessionImpl::RegisterWindowTitleButtonRectChangeListener(
                 return;
             }
             TitleButtonRect titleButtonRect;
-            if (window->GetTargetAPIVersion() >= API_VERSION_15 && // 15: isolated version
+            if (window->GetTargetAPIVersion() >= API_VERSION_18 && // 18: isolated version
                 titleButtonLeftRect.IsUninitializedRect()) {
                 window->NotifyWindowTitleButtonRectChange(titleButtonRect);
                 return;
@@ -3023,6 +3087,26 @@ EnableIfSame<T, IOccupiedAreaChangeListener,
 }
 
 template<typename T>
+EnableIfSame<T, IKeyboardDidShowListener, std::vector<sptr<IKeyboardDidShowListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListeners;
+    for (auto& listener : keyboardDidShowListeners_[GetPersistentId()]) {
+        keyboardDidShowListeners.push_back(listener);
+    }
+    return keyboardDidShowListeners;
+}
+
+template<typename T>
+EnableIfSame<T, IKeyboardDidHideListener, std::vector<sptr<IKeyboardDidHideListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListeners;
+    for (auto& listener : keyboardDidHideListeners_[GetPersistentId()]) {
+        keyboardDidHideListeners.push_back(listener);
+    }
+    return keyboardDidHideListeners;
+}
+
+template<typename T>
 WMError WindowSessionImpl::RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener)
 {
     if (listener == nullptr) {
@@ -3143,6 +3227,14 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::recursive_mutex> lockListener(occupiedAreaChangeListenerMutex_);
         ClearUselessListeners(occupiedAreaChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(keyboardDidShowListenerMutex_);
+        ClearUselessListeners(keyboardDidShowListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(keyboardDidHideListenerMutex_);
+        ClearUselessListeners(keyboardDidHideListeners_, persistentId);
     }
     {
         std::lock_guard<std::mutex> lockListener(highlightChangeListenerMutex_);
@@ -3919,18 +4011,18 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
 
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    auto task = [this, avoidArea, type] {
-        if (lastAvoidAreaMap_[type] != *avoidArea) {
-            lastAvoidAreaMap_[type] = *avoidArea;
-            NotifyAvoidAreaChange(avoidArea, type);
-            UpdateViewportConfig(GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
+    auto task = [weak = wptr(this), avoidArea, type] {
+        auto window = weak.promote();
+        if (!window) {
+            return;
+        }
+        if (window->lastAvoidAreaMap_[type] != *avoidArea) {
+            window->lastAvoidAreaMap_[type] = *avoidArea;
+            window->NotifyAvoidAreaChange(avoidArea, type);
+            window->UpdateViewportConfig(window->GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
         }
     };
-    if (handler_->GetEventRunner()->IsCurrentRunnerThread()) {
-        task();
-    } else {
-        handler_->PostSyncTask(std::move(task), __func__);
-    }
+    handler_->PostImmediateTask(std::move(task), __func__);
     return WSError::WS_OK;
 }
 
@@ -4775,6 +4867,51 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
     handler_->PostTask(task, "WMS_WindowSessionImpl_NotifyOccupiedAreaChangeInfo");
 }
 
+void WindowSessionImpl::NotifyKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    std::lock_guard<std::recursive_mutex> lockListener(keyboardDidShowListenerMutex_);
+    auto keyboardDidShowListeners = GetListeners<IKeyboardDidShowListener>();
+    for (const auto& listener : keyboardDidShowListeners) {
+        if (listener != nullptr) {
+            listener->OnKeyboardDidShow(keyboardPanelInfo);
+        }
+    }
+}
+
+void WindowSessionImpl::NotifyKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    std::lock_guard<std::recursive_mutex> lockListener(keyboardDidHideListenerMutex_);
+    auto keyboardDidHideListeners = GetListeners<IKeyboardDidHideListener>();
+    for (const auto& listener : keyboardDidHideListeners) {
+        if (listener != nullptr) {
+            listener->OnKeyboardDidHide(keyboardPanelInfo);
+        }
+    }
+}
+
+void WindowSessionImpl::NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo)
+{
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "isShowAnimation: %{public}d, panelRect: %{public}s",
+        keyboardPanelInfo.isShowing_, keyboardPanelInfo.rect_.ToString().c_str());
+    if (handler_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "handler is nullptr");
+        return;
+    }
+    auto task = [weak = wptr(this), keyboardPanelInfo]() {
+        auto window = weak.promote();
+        if (!window) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "window is nullptr, notify keyboard animation completed failed.");
+            return;
+        }
+        if (keyboardPanelInfo.isShowing_) {
+            window->NotifyKeyboardDidShow(keyboardPanelInfo);
+        } else {
+            window->NotifyKeyboardDidHide(keyboardPanelInfo);
+        }
+    };
+    handler_->PostTask(task, __func__);
+}
+
 KeyboardAnimationConfig WindowSessionImpl::GetKeyboardAnimationConfig()
 {
     return { windowSystemConfig_.animationIn_, windowSystemConfig_.animationOut_ };
@@ -5291,6 +5428,18 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
 {
     return state >= static_cast<int32_t>(CrossAxisState::STATE_INVALID) &&
         state < static_cast<int32_t>(CrossAxisState::STATE_END);
+}
+
+bool WindowSessionImpl::IsSubWindowMaximizeSupported() const
+{
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Maximize fail not subwindow");
+        return false;
+    }
+    if (windowOption_ != nullptr) {
+        return windowOption_->GetSubWindowMaximizeSupported();
+    }
+    return false;
 }
 } // namespace Rosen
 } // namespace OHOS

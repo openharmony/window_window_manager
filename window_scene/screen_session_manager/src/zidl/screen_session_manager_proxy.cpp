@@ -131,6 +131,33 @@ DMError ScreenSessionManagerProxy::SetVirtualPixelRatioSystem(ScreenId screenId,
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+DMError ScreenSessionManagerProxy::SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        WLOGFW("SetDefaultDensity: remote is nullptr");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        WLOGFE("WriteInterfaceToken failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint64(screenId) || !data.WriteFloat(virtualPixelRatio)) {
+        WLOGFE("write screenId/virtualPixelRatio failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SET_DEFAULT_DENSITY_DPI),
+        data, reply, option) != ERR_NONE) {
+        WLOGFE("SendRequest failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    return static_cast<DMError>(reply.ReadInt32());
+}
+
 DMError ScreenSessionManagerProxy::SetResolution(ScreenId screenId, uint32_t width, uint32_t height,
     float virtualPixelRatio)
 {
@@ -3640,6 +3667,29 @@ std::vector<DisplayPhysicalResolution> ScreenSessionManagerProxy::GetAllDisplayP
         allPhysicalSize.emplace_back(physicalItem);
     }
     return allPhysicalSize;
+}
+
+std::string ScreenSessionManagerProxy::GetDisplayCapability()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return std::string {};
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return std::string {};
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPABILITY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return std::string {};
+    }
+    return reply.ReadString();
 }
 
 bool ScreenSessionManagerProxy::SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus)

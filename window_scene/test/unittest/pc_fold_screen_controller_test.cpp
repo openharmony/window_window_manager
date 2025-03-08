@@ -1000,10 +1000,12 @@ HWTEST_F(PcFoldScreenControllerTest, RegisterFullScreenWaterfallModeChangeCallba
 HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, Function | SmallTest | Level3)
 {
     controller_->lastSupportEnterWaterfallMode_ = false;
+    controller_->maskSupportEnterWaterfallMode_ = true;
     controller_->supportEnterWaterfallMode_ = true;
     controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_NE(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    controller_->maskSupportEnterWaterfallMode_ = false;
     mainSession_->sessionStage_ = mockSessionStage;
     controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_EQ(controller_->lastSupportEnterWaterfallMode_, controller_->supportEnterWaterfallMode_);

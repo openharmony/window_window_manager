@@ -218,6 +218,13 @@ public:
     void SetSubWindowTitle(const std::string& subWindowTitle);
 
     /**
+     * @brief Set is subwindow support maximize.
+     *
+     * @param maximizeSupported true means support default not support.
+     */
+    void SetSubWindowMaximizeSupported(bool maximizeSupported);
+
+    /**
      * @brief Set subwindow decor enable.
      *
      * @param subWindowDecorEnable the subwindow decor enable.
@@ -463,6 +470,13 @@ public:
     bool GetWindowTopmost() const;
 
     /**
+     * @brief Get subwindow maximizeSupported
+     *
+     * @return true means subwindow support maximize, otherwise not.
+     */
+    bool GetSubWindowMaximizeSupported() const;
+
+    /**
      * @brief Get the real parent id of UIExtension
      *
      * @return Return the real parent id of UIExtension
@@ -576,6 +590,7 @@ private:
     Orientation requestedOrientation_ { Orientation::UNSPECIFIED };
     std::string subWindowTitle_ = { "" };
     bool subWindowDecorEnable_ = false;
+    bool subWindowMaximizeSupported_ = false;
     bool onlySupportSceneBoard_ = false;
     bool dialogDecorEnable_ = false;
     std::string dialogTitle_ = { "" };

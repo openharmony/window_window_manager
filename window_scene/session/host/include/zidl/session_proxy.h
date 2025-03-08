@@ -103,6 +103,8 @@ public:
     bool IsStartMoving() override;
     WSError UpdateRectChangeListenerRegistered(bool isRegister) override;
     void SetCallingSessionId(uint32_t callingSessionId) override;
+    void NotifyKeyboardDidShowRegistered(bool registered) override;
+    void NotifyKeyboardDidHideRegistered(bool registered) override;
     void SetCustomDecorHeight(int32_t height) override;
     WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) override;
     WSError ChangeKeyboardViewMode(KeyboardViewMode mode) override;
