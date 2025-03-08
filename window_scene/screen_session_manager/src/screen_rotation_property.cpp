@@ -18,6 +18,13 @@
 
 namespace OHOS {
 namespace Rosen {
+bool ScreenRotationProperty::isDeviceHorizontal_ = false;
+
+bool ScreenRotationProperty::isDeviceHorizontal()
+{
+    return isDeviceHorizontal_;
+}
+
 void ScreenRotationProperty::HandleSensorEventInput(DeviceRotation deviceRotation)
 {
     static DeviceRotation lastSensorRotationConverted_ = DeviceRotation::INVALID;
@@ -41,15 +48,19 @@ float ScreenRotationProperty::ConvertDeviceToFloat(DeviceRotation deviceRotation
     switch (deviceRotation) {
         case DeviceRotation::ROTATION_PORTRAIT:
             sensorRotation = 0.0f; // degree 0
+            isDeviceHorizontal_ = false;
             break;
         case DeviceRotation::ROTATION_LANDSCAPE:
             sensorRotation = 90.0f; // degree 90
+            isDeviceHorizontal_ = true;
             break;
         case DeviceRotation::ROTATION_PORTRAIT_INVERTED:
             sensorRotation = 180.0f; // degree 180
+            isDeviceHorizontal_ = false;
             break;
         case DeviceRotation::ROTATION_LANDSCAPE_INVERTED:
             sensorRotation = 270.0f; // degree 270
+            isDeviceHorizontal_ = true;
             break;
         case DeviceRotation::INVALID:
             sensorRotation = -1.0f; // keep before degree

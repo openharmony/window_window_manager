@@ -156,7 +156,10 @@ void SuperFoldSensorManager::NotifyFoldAngleChanged(float foldAngle)
     std::vector<float> foldAngles;
     foldAngles.push_back(foldAngle);
     ScreenSessionManager::GetInstance().NotifyFoldAngleChanged(foldAngles);
-    HandleSuperSensorChange(events);
+    if (!ScreenRotationProperty::isDeviceHorizontal() ||
+        events == SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED) {
+        HandleSuperSensorChange(events);
+    }
 }
 
 void SuperFoldSensorManager::HandleHallData(const SensorEvent * const event)
