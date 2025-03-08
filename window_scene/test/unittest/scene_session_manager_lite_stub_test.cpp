@@ -146,6 +146,10 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         infos.push_back(mainWindowInfo);
         return WMError::WM_OK;
     }
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override
+    {
+        return WMError::WM_OK;
+    }
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds,
         std::vector<int32_t>& clearFailedIds) override
     {

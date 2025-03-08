@@ -135,6 +135,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleHasFloatingWindowForeground(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_LOCK_SESSION_BY_ABILITY_INFO):
             return HandleLockSessionByAbilityInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO):
+            return HandleGetCallingWindowInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -694,6 +696,31 @@ int SceneSessionManagerLiteStub::HandleGetMainWinodowInfo(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
 
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetCallingWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "In");
+    int32_t persistentId;
+    int32_t userId;
+    if (!data.ReadInt32(persistentId) || !data.ReadInt32(userId)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Read persistentId and userId failed.");
+        return ERR_INVALID_DATA;
+    }
+    CallingWindowInfo callingWindowInfo;
+    callingWindowInfo.windowId_ = persistentId;
+    callingWindowInfo.userId_ = userId;
+    WMError ret = GetCallingWindowInfo(callingWindowInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, failed to get calling window info", persistentId);
+        return ERR_INVALID_DATA;
+    }
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    reply.WriteInt32(callingWindowInfo.windowId_);
+    reply.WriteInt32(callingWindowInfo.callingPid_);
+    reply.WriteUint64(callingWindowInfo.displayId_);
+    reply.WriteInt32(callingWindowInfo.userId_);
     return ERR_NONE;
 }
 
