@@ -46,6 +46,7 @@ public:
 private:
     void ShowHelpInfo();
     void ShowAllScreenInfo();
+    void ShowVisibleAreaDisplayInfo();
     void DumpFoldStatus();
     void DumpTentMode();
     void DumpFoldCreaseRegion();
@@ -57,6 +58,7 @@ private:
         const OHOS::Rosen::DMRect& areaRect, const std::string& label);
     void DumpCutoutInfoById(ScreenId id);
     void DumpScreenInfoById(ScreenId id);
+    void DumpVisibleAreaDisplayInfoById(DisplayId id);
     void DumpScreenPropertyById(ScreenId id);
     void ExecuteInjectCmd();
     void ExecuteInjectCmd2();
