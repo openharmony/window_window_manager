@@ -7139,6 +7139,7 @@ void ScreenSessionManager::SetClientInner()
         if (isModeChanged && isReset) {
             TLOGI(WmsLogTag::DMS, "screen(id:%{public}" PRIu64 ") current is not default mode, reset it", iter.first);
             SetRotation(iter.first, Rotation::ROTATION_0, false);
+            SetPhysicalRotationClientInner(iter.first, 0);
             iter.second->SetDisplayBoundary(RectF(0, 0, phyWidth, phyHeight), 0);
         }
         if (!clientProxy_) {
@@ -7161,6 +7162,19 @@ void ScreenSessionManager::SetClientInner()
             RecoverMultiScreenMode(iter.second);
         }
     }
+}
+
+void ScreenSessionManager::SetPhysicalRotationClientInner(ScreenId screenId, int rotation)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "fail, cannot find screen %{public}" PRIu64"",
+            screenId);
+        return;
+    }
+    screenSession->SetPhysicalRotation(rotation);
+    screenSession->SetScreenComponentRotation(rotation);
+    TLOGI(WmsLogTag::DMS, "SetPhysicalRotationClientInner end");
 }
 
 void ScreenSessionManager::RecoverMultiScreenMode(sptr<ScreenSession> screenSession)
