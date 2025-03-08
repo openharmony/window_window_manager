@@ -34,6 +34,9 @@ public:
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
 
+    SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
+    WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId) override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
@@ -53,6 +56,11 @@ protected:
     bool IsTopmost() const override;
     bool IsModal() const override;
     bool IsApplicationModal() const override;
+
+    /*
+     * Sub Window
+     */
+    NotifySetParentSessionFunc setParentSessionFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SUB_SESSION_H

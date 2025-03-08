@@ -350,8 +350,11 @@ public:
     /*
      * Sub Window
      */
-    void SetParentSessionCallback(NotifySetParentSessionFunc&& func);
-    WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId);
+    virtual SetParentSessionCallback(NotifySetParentSessionFunc&& func) {}
+    virtual WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId)
+    {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     void UpdateSubWindowLevel(uint32_t subWindowLevel);
     int GetMaxSubWindowLevel();
 
@@ -1103,11 +1106,6 @@ private:
      * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
-
-    /*
-     * Sub Window
-     */
-    NotifySetParentSessionFunc setParentSessionFunc_;
 
     /*
      * Window Property
