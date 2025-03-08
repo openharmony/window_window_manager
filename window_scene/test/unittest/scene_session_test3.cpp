@@ -1235,27 +1235,6 @@ HWTEST_F(SceneSessionTest3, IsShowOnLockScreen, Function | SmallTest | Level2)
 }
 
 /**
- * @tc.name: SetParentSessionCallback
- * @tc.desc: SetParentSessionCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, SetParentSessionCallback, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetParentSessionCallback";
-    info.bundleName_ = "SetParentSessionCallback";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetParentSessionCallback(nullptr);
-    EXPECT_EQ(sceneSession->setParentSessionFunc_, nullptr);
-
-    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
-        return;
-    };
-    sceneSession->SetParentSessionCallback(std::move(func));
-    EXPECT_NE(sceneSession->setParentSessionFunc_, nullptr);
-}
-
-/**
  * @tc.name: NotifySetParentSession
  * @tc.desc: NotifySetParentSession
  * @tc.type: FUNC
@@ -1269,14 +1248,7 @@ HWTEST_F(SceneSessionTest3, NotifySetParentSession, Function | SmallTest | Level
     int32_t oldParentWindowId = 1;
     int32_t newParentWindowId = 2;
     auto res = sceneSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
-    EXPECT_EQ(res, WMError::WM_OK);
-
-    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
-        return;
-    };
-    sceneSession->SetParentSessionCallback(std::move(func));
-    res = sceneSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
-    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**

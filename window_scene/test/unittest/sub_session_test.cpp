@@ -418,6 +418,51 @@ HWTEST_F(SubSessionTest, IsVisibleForeground, Function | SmallTest | Level2)
     parentSession->isVisible_ = true;
     EXPECT_EQ(subSession_->IsVisibleForeground(), true);
 }
+
+/**
+ * @tc.name: SetParentSessionCallback
+ * @tc.desc: SetParentSessionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, SetParentSessionCallback, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetParentSessionCallback";
+    info.bundleName_ = "SetParentSessionCallback";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    subSession->SetParentSessionCallback(nullptr);
+    EXPECT_EQ(subSession->setParentSessionFunc_, nullptr);
+
+    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
+        return;
+    };
+    subSession->SetParentSessionCallback(std::move(func));
+    EXPECT_NE(subSession->setParentSessionFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NotifySetParentSession
+ * @tc.desc: NotifySetParentSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, NotifySetParentSession, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifySetParentSession";
+    info.bundleName_ = "NotifySetParentSession";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    int32_t oldParentWindowId = 1;
+    int32_t newParentWindowId = 2;
+    auto res = subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_OK);
+
+    NotifySetParentSessionFunc func = [](int32_t oldParentWindowId, int32_t newParentWindowId) {
+        return;
+    };
+    subSession->SetParentSessionCallback(std::move(func));
+    res = subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
 }
 }
 }

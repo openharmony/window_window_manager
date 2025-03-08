@@ -6923,39 +6923,6 @@ WSError SceneSession::SetWindowCornerRadius(float cornerRadius)
     return WSError::WS_OK;
 }
 
-void SceneSession::SetParentSessionCallback(NotifySetParentSessionFunc&& func)
-{
-    const char* const where = __func__;
-    PostTask([weakThis = wptr(this), where, func = std::move(func)] {
-        auto session = weakThis.promote();
-        if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session or func is nullptr", where);
-            return;
-        }
-        session->setParentSessionFunc_ = std::move(func);
-        TLOGND(WmsLogTag::WMS_SUB, "%{public}s id: %{public}d", where,
-            session->GetPersistentId());
-    }, __func__);
-}
-
-WMError SceneSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId)
-{
-    return PostSyncTask([weakThis = wptr(this), oldParentWindowId, newParentWindowId, where = __func__] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is nullptr", where);
-            return WMError::WM_ERROR_INVALID_WINDOW;
-        }
-        if (session->setParentSessionFunc_) {
-            session->setParentSessionFunc_(oldParentWindowId, newParentWindowId);
-            TLOGND(WmsLogTag::WMS_SUB, "%{public}s id: %{public}d oldParentWindowId: %{public}d "
-                "newParentWindowId: %{public}d", where, session->GetPersistentId(), oldParentWindowId,
-                newParentWindowId);
-        }
-        return WMError::WM_OK;
-    }, __func__);
-}
-
 void SceneSession::UpdateSubWindowLevel(uint32_t subWindowLevel)
 {
     GetSessionProperty()->SetSubWindowLevel(subWindowLevel);
