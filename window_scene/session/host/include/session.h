@@ -813,13 +813,9 @@ protected:
     bool scbKeepKeyboardFlag_ = false;
     mutable std::shared_mutex dialogVecMutex_;
     std::vector<sptr<Session>> dialogVec_;
-    sptr<IWindowEventChannel> windowEventChannel_;
-
-    /*
-     * Sub Window
-     */
-    mutable std::recursive_mutex parentSessionMutex_;
+    mutable std::shared_mutex parentSessionMutex_;
     sptr<Session> parentSession_;
+    sptr<IWindowEventChannel> windowEventChannel_;
 
     mutable std::mutex pointerEventMutex_;
     mutable std::shared_mutex keyEventMutex_;
