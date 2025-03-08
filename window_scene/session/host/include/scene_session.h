@@ -350,7 +350,7 @@ public:
     /*
      * Sub Window
      */
-    virtual SetParentSessionCallback(NotifySetParentSessionFunc&& func) {}
+    virtual void SetParentSessionCallback(NotifySetParentSessionFunc&& func) {}
     virtual WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId)
     {
         return WMError::WM_ERROR_INVALID_WINDOW;
