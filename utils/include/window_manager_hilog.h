@@ -67,6 +67,8 @@ enum class WmsLogTag : uint8_t {
     WMS_LAYOUT_PC,             // C0421A
     WMS_STARTUP_PAGE,          // C0421B
     WMS_COMPAT,                // C0421C
+    WMS_ROTATION,              // C0421D
+    WMS_ANIMATION,             // C0421E
     END = 256,                 // Last one, do not use
 };
 
