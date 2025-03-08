@@ -154,7 +154,8 @@ std::mutex WindowSessionImpl::windowWillCloseListenersMutex_;
 std::mutex WindowSessionImpl::switchFreeMultiWindowListenerMutex_;
 std::mutex WindowSessionImpl::highlightChangeListenerMutex_;
 std::mutex WindowSessionImpl::waterfallModeChangeListenerMutex_;
-std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>> WindowSessionImpl::waterfallModeChangeListeners_;
+std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
+    WindowSessionImpl::waterfallModeChangeListeners_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
