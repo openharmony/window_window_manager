@@ -3954,6 +3954,30 @@ HWTEST_F(ScreenSessionManagerTest, GetIsRealScreen, Function | SmallTest | Level
     ASSERT_EQ(ssm_->GetIsRealScreen(screenId), false);
     ssm_->DestroyVirtualScreen(screenId);
 }
+
+/**
+ * @tc.name: SetSystemKeyboardOn
+ * @tc.desc: SetSystemKeyboardOn with true as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetSystemKeyboardOn01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetSystemKeyboardOn(true);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
+ 
+/**
+ * @tc.name: SetSystemKeyboardOn
+ * @tc.desc: SetSystemKeyboardOn with false as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetSystemKeyboardOn02, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto ret = ssm_->SetSystemKeyboardOn(false);
+    ASSERT_EQ(ret, DMError::DM_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
