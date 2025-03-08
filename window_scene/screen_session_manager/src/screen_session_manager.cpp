@@ -131,6 +131,7 @@ const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotat
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
+constexpr float EXTEND_SCREEN_DPI_PARAMETER = 0.85f;
 static const constexpr char* SET_SETTING_DPI_KEY {"default_display_dpi"};
 const std::vector<std::string> ROTATION_DEFAULT = {"0", "1", "2", "3"};
 const std::vector<std::string> ORIENTATION_DEFAULT = {"0", "1", "2", "3"};
@@ -2285,12 +2286,12 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     float extendDensity = screenSession->GetScreenProperty().GetDensity();
     float curResolution = screenSession->GetScreenProperty().GetDensityInCurResolution();
     TLOGW(WmsLogTag::DMS, "extendDensity = %{public}f", extendDensity);
-    session->SetVirtualPixelRatio(extendDensity);
-    session->SetDefaultDensity(extendDensity);
+    session->SetVirtualPixelRatio(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
+    session->SetDefaultDensity(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
     session->SetDensityInCurResolution(curResolution);
     ScreenId screenId = session->GetScreenId();
-    property.SetVirtualPixelRatio(extendDensity);
-    property.SetDefaultDensity(extendDensity);
+    property.SetVirtualPixelRatio(extendDensity * EXTEND_SCREEN_DPI_PARAMETER);
+    property.SetDefaultDensity(extendDensity* EXTEND_SCREEN_DPI_PARAMETER);
     property.SetDensityInCurResolution(curResolution);
     {
         std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
@@ -3289,7 +3290,7 @@ void ScreenSessionManager::SetDpiFromSettingData()
         ScreenId defaultScreenId = GetDefaultScreenId();
         SetVirtualPixelRatio(defaultScreenId, dpi);
         if (g_isPcDevice) {
-            SetExtendPixelRatio(dpi);
+            SetExtendPixelRatio(dpi * EXTEND_SCREEN_DPI_PARAMETER);
         }
     } else {
         TLOGE(WmsLogTag::DMS, "setting dpi error, settingDpi: %{public}d", settingDpi);
