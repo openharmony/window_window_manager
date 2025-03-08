@@ -34,7 +34,7 @@ public:
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     bool IsVisibleForeground() const override;
 
-    SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
+    void SetParentSessionCallback(NotifySetParentSessionFunc&& func) override;
     WMError NotifySetParentSession(int32_t oldParentWindowId, int32_t newParentWindowId) override;
 
 protected:
