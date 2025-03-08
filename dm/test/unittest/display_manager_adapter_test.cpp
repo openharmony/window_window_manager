@@ -853,6 +853,17 @@ HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, Function | SmallTest 
     sptr<DisplayInfo> displayInfo = displayManagerAdapter.GetPrimaryDisplayInfo();
     ASSERT_NE(displayInfo, nullptr);
 }
+
+/**
+ * @tc.name: GetDisplayCapability
+ * @tc.desc: GetDisplayCapability test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, Function | SmallTest | Level2)
+{
+    std::string info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability();
+    ASSERT_NE(info, "");
+}
 }
 }
 }

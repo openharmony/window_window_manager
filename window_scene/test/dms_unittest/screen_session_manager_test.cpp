@@ -2287,6 +2287,70 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenCaptureNotify, Function | SmallTest |
     std::string clientName = "test";
     ssm->OnScreenCaptureNotify(screenId, uid, clientName);
 }
+
+/**
+ * @tc.name: GetDisplayCapability
+ * @tc.desc: GetDisplayCapability test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayCapability, Function | SmallTest | Level3)
+{
+    std::string info {""};
+    if (ssm_ != nullptr) {
+        info = ssm_->GetDisplayCapability();
+        ASSERT_NE(info, "");
+    } else {
+        ASSERT_EQ(info, "");
+    }
+}
+
+/**
+ * @tc.name: GetSecondaryDisplayCapability
+ * @tc.desc: GetSecondaryDisplayCapability test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSecondaryDisplayCapability, Function | SmallTest | Level3)
+{
+    std::string info {""};
+    if (ssm_ != nullptr) {
+        info = ssm_->GetSecondaryDisplayCapability();
+        ASSERT_NE(info, "");
+    } else {
+        ASSERT_EQ(info, "");
+    }
+}
+
+/**
+ * @tc.name: GetSuperFoldCapability
+ * @tc.desc: GetSuperFoldCapability test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSuperFoldCapability, Function | SmallTest | Level3)
+{
+    std::string info {""};
+    if (ssm_ != nullptr) {
+        info = ssm_->GetSuperFoldCapability();
+        ASSERT_NE(info, "");
+    } else {
+        ASSERT_EQ(info, "");
+    }
+}
+
+/**
+ * @tc.name: GetFoldableDeviceCapability
+ * @tc.desc: GetFoldableDeviceCapability test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetFoldableDeviceCapability, Function | SmallTest | Level3)
+{
+    std::string info {""};
+    if (ssm_ != nullptr) {
+        info = ssm_->GetFoldableDeviceCapability();
+        ASSERT_NE(info, "");
+    } else {
+        ASSERT_EQ(info, "");
+    }
+}
 }
 } // namespace Rosen
 } // namespace OHOS
