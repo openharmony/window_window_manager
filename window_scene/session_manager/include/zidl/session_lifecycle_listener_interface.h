@@ -38,7 +38,7 @@ public:
     };
 
     struct LifecycleEventPayload : public Parcelable {
-        virtual bool Marshalling(Parcel& parcel) const override
+        bool Marshalling(Parcel& parcel) const override
         {
             return parcel.WriteString(bundleName_) &&
                    parcel.WriteString(moduleName_) &&

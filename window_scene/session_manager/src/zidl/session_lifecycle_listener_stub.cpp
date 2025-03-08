@@ -35,7 +35,7 @@ int SessionLifecycleListenerStub::HandleOnLifecycleEvent(MessageParcel& data, Me
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     auto event = data.ReadInt32();
     if (event < static_cast<int32_t>(SessionLifecycleEvent::CREATED) ||
-        event > static_cast<int32_t>(SessionLifecycleEvent::EVENT_END)) {
+        event >= static_cast<int32_t>(SessionLifecycleEvent::EVENT_END)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Invalid lifecycle event");
         return ERR_INVALID_DATA;
     }

@@ -28,6 +28,7 @@
 #include "ws_common.h"
 #include "wm_common.h"
 #include "zidl/session_lifecycle_listener_interface.h"
+#include "task_scheduler.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,6 +36,7 @@ using ISessionListener = AAFwk::IMissionListener;
 class SessionListenerController : public std::enable_shared_from_this<SessionListenerController> {
 public:
     SessionListenerController() = default;
+    SessionListenerController(const std::shared_ptr<TaskScheduler>& taskScheduler);
     ~SessionListenerController() = default;
 
     WSError AddSessionListener(const sptr<ISessionListener>& listener);
@@ -115,10 +117,11 @@ private:
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,
         const ISessionLifecycleListener::SessionLifecycleEvent event,
         ISessionLifecycleListener::LifecycleEventPayload& payload);
-    std::mutex lifecycleListenerLock_;
+    std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
     std::map<int32_t, std::vector<sptr<ISessionLifecycleListener>>> listenerMapById_;
     std::map<std::string, std::vector<sptr<ISessionLifecycleListener>>> listenerMapByBundle_;
+    std::vector<sptr<ISessionLifecycleListener>> listenersOfAllBundles_;
 };
 }  // namespace Rosen
 }  // namespace OHOS

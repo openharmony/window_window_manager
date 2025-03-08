@@ -199,16 +199,16 @@ public:
         bool& hasOrNot) = 0;
 
     /**
-     * @brief Register a session lifecycle listener for specific persistentIds
+     * @brief Register a main session lifecycle listener for specific persistentIds
      *
-     * This function is used to register a session lifecycle listener for a list of specific persistentIds.
+     * This function is used to register a main session lifecycle listener for a list of specific persistentIds.
      * The listener will be notified when lifecycle events occur for the specified persistentId
      *
      * @caller SA
      * @permission SA permission
      *
      * @param listener The session lifecycle listener to be registered
-     * @param bundleNameList The list of bundle for which the listener should be registered
+     * @param persistentIdList The list of persistentId for which the listener should be registered
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
     virtual WMError RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,

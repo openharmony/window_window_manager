@@ -337,7 +337,7 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
 
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
 
-    listenerController_ = std::make_shared<SessionListenerController>();
+    listenerController_ = std::make_shared<SessionListenerController>(taskScheduler_);
     windowFocusController_ = sptr<WindowFocusController>::MakeSptr();
     ffrtQueueHelper_ = std::make_shared<FfrtQueueHelper>();
 }
@@ -1388,7 +1388,7 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
 
 bool SceneSessionManager::IsMainWindowByPersistentId(int32_t persistentId)
 {
-    if (persistentId == -1) {
+    if (persistentId <= INVALID_SESSION_ID) {
         return false;
     }
     if (auto sceneSession = GetSceneSession(persistentId)) {

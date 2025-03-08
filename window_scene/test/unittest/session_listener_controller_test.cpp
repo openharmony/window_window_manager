@@ -122,6 +122,7 @@ class SessionListenerControllerTest : public testing::Test {
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<SessionListenerController> slController;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
