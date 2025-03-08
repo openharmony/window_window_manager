@@ -13,31 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ROSEN_LRUCACHE_H
-#define OHOS_ROSEN_LRUCACHE_H
+#ifndef OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
+#define OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H
 
-#include <list>
-#include <mutex>
-#include <unordered_map>
+#include "timeout_future.h"
+
+namespace ffrt {
+class queue;
+} // namespace ffrt
 
 namespace OHOS::Rosen {
-namespace {
-constexpr int32_t UNDEFINED_REMOVED_KEY = -1;
-} // namespace
-class LruCache {
+class FfrtQueueHelper {
 public:
-    LruCache(std::size_t capacity) : capacity_(capacity) {}
-
-    bool Visit(int32_t key);
-    int32_t Put(int32_t key);
-    void Remove(int32_t key);
+    FfrtQueueHelper();
+    ~FfrtQueueHelper();
+    bool SubmitTaskAndWait(std::function<void()>&& task, uint64_t timeout);
 
 private:
-    bool LocalVisit(int32_t key);
-    const std::size_t capacity_;
-    std::list<int32_t> cacheList_;
-    std::unordered_map<int32_t, std::list<int32_t>::iterator> cacheMap_;
-    mutable std::mutex lruCacheMutex_;
+    std::unique_ptr<ffrt::queue> ffrtQueue_;
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_ROSEN_LRUCACHE_H
+
+#endif // OHOS_ROSEN_WINDOW_SCENE_FFRT_QUEUE_HELPER_H

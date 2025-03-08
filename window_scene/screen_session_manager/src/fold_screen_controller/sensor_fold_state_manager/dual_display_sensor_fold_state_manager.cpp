@@ -61,6 +61,7 @@ constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr float ANGLE_MIN_VAL = 0.0F;
 constexpr float INWARD_FOLDED_LOWER_THRESHOLD = 10.0F;
 constexpr float INWARD_FOLDED_UPPER_THRESHOLD = 20.0F;
+constexpr float HALL_ZERO_INVALID_POSTURE = 170.0F;
 } // namespace
 
 DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager()
@@ -87,6 +88,9 @@ void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
     if (std::islessequal(angle, INWARD_FOLDED_THRESHOLD) && hall == HALL_THRESHOLD) {
         return;
     }
+    if (std::isgreaterequal(angle, HALL_ZERO_INVALID_POSTURE) && hall == HALL_FOLDED_THRESHOLD) {
+        return;
+    }
     if (std::isless(angle, ANGLE_MIN_VAL)) {
         return;
     }
@@ -94,6 +98,9 @@ void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
         angle = ANGLE_MIN_VAL;
     }
     FoldStatus nextState = GetNextFoldState(angle, hall);
+    if (nextState != GetCurrentState()) {
+        TLOGI(WmsLogTag::DMS, "angle: %{public}f, hall: %{public}d.", angle, hall);
+    }
     UpdateHallSwitchAppInfo(nextState);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }
@@ -112,6 +119,9 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
         angle = INWARD_HALF_FOLDED_MIN_THRESHOLD + 1.0f;
     }
     FoldStatus nextState = GetNextFoldState(angle, hall);
+    if (nextState != GetCurrentState()) {
+        TLOGI(WmsLogTag::DMS, "angle: %{public}f, hall: %{public}d.", angle, hall);
+    }
     UpdateHallSwitchAppInfo(nextState);
     HandleSensorChange(nextState, angle, foldScreenPolicy);
 }

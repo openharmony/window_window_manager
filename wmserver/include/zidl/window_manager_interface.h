@@ -205,6 +205,11 @@ public:
     {
         return WMError::WM_OK;
     }
+    virtual WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
+        bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
     {
         return WMError::WM_OK;
@@ -271,6 +276,7 @@ public:
         int32_t targetPersistentId) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) { return WMError::WM_OK; }
+    virtual WMError GetWindowUIType(WindowUIType& windowUIType) { return WMError::WM_OK; }
 };
 }
 }

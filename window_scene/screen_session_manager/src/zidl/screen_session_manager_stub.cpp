@@ -448,6 +448,13 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_DEFAULT_DENSITY_DPI: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            float virtualPixelRatio = data.ReadFloat();
+            DMError ret = SetDefaultDensityDpi(screenId, virtualPixelRatio);
+            static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_RESOLUTION: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             uint32_t width = data.ReadUint32();
@@ -1043,6 +1050,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& 
         case DisplayManagerMessage::TRANS_ID_GET_IS_REAL_SCREEN: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             reply.WriteBool(GetIsRealScreen(screenId));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_CAPABILITY: {
+            reply.WriteString(GetDisplayCapability());
             break;
         }
         default:

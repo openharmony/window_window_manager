@@ -656,6 +656,9 @@ public:
     void ActivateKeyboardAvoidArea(bool active, bool recalculateAvoid);
     bool IsKeyboardAvoidAreaActive() const;
     virtual void SetKeyboardViewModeChangeListener(const NotifyKeyboarViewModeChangeFunc& func) {};
+    void NotifyKeyboardAnimationCompleted(bool isShowAnimation, const WSRect& panelRect);
+    void NotifyKeyboardDidShowRegistered(bool registered) override;
+    void NotifyKeyboardDidHideRegistered(bool registered) override;
 
     /*
      * Window Focus
@@ -757,7 +760,6 @@ protected:
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
     sptr<MoveDragController> moveDragController_ = nullptr;
-    std::mutex followParentRectFuncMutex_;
     NotifyFollowParentRectFunc followParentRectFunc_ = nullptr;
     std::mutex registerNotifySurfaceBoundsChangeMutex_;
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> notifySurfaceBoundsChangeFuncMap_;
@@ -808,6 +810,8 @@ protected:
     virtual void EnableCallingSessionAvoidArea() {}
     virtual void RestoreCallingSession(const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) {}
     bool keyboardAvoidAreaActive_ = true;
+    std::atomic<bool> isKeyboardDidShowRegistered_ = false;
+    std::atomic<bool> isKeyboardDidHideRegistered_ = false;
 
 private:
     void NotifyAccessibilityVisibilityChange();

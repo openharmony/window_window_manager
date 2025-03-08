@@ -682,7 +682,7 @@ HWTEST_F(MultiScreenManagerTest, UniqueSwitch02, Function | SmallTest | Level1)
     std::vector<ScreenId> screenIds = {1001, 1002};
     std::vector<DisplayId> displayIds;
     DMError ret = MultiScreenManager::GetInstance().UniqueSwitch(screenIds, displayIds);
-    EXPECT_EQ(ret, DMError::DM_OK);
+    EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
 
 /**

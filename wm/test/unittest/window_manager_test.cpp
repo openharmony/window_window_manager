@@ -1527,6 +1527,27 @@ HWTEST_F(WindowManagerTest, GetAppDragResizeType, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: EffectiveDragResizeType
+ * @tc.desc: test EffectiveDragResizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, EffectiveDragResizeType, Function | SmallTest | Level2)
+{
+    DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    const std::string bundleName = "test";
+
+    DragResizeType globalDragResizeType = DragResizeType::RESIZE_WHEN_DRAG_END;
+    DragResizeType appDragResizeType = DragResizeType::RESIZE_EACH_FRAME;
+    WindowManager::GetInstance().SetGlobalDragResizeType(globalDragResizeType);
+    WindowManager::GetInstance().SetAppDragResizeType(bundleName, appDragResizeType);
+    WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(dragResizeType, globalDragResizeType);
+    WindowManager::GetInstance().SetGlobalDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
+    WindowManager::GetInstance().GetAppDragResizeType(bundleName, dragResizeType);
+    ASSERT_EQ(dragResizeType, appDragResizeType);
+}
+
+/**
  * @tc.name: NotifyWMSConnected
  * @tc.desc: check NotifyWMSConnected
  * @tc.type: FUNC
@@ -1583,6 +1604,23 @@ HWTEST_F(WindowManagerTest, OnWMSConnectionChanged, Function | SmallTest | Level
     WMError ret_2 = WindowManager::GetInstance().ShiftAppWindowFocus(0, 1);
     ASSERT_NE(WMError::WM_OK, ret_2);
     WindowManager::GetInstance().OnWMSConnectionChanged(userId, screenId, isConnected);
+}
+
+/**
+ * @tc.name: RequestFocus
+ * @tc.desc: check RequestFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, RequestFocus, Function | SmallTest | Level2)
+{
+    WindowManager windowManager;
+    int32_t persistentId = 1;
+    bool isFocused = true;
+    bool byForeground = true;
+    WindowFocusChangeReason reason = WindowFocusChangeReason::CLICK;
+    auto result = windowManager.RequestFocus(
+        persistentId, isFocused, byForeground, reason);
+    ASSERT_NE(result, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

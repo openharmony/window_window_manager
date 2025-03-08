@@ -276,6 +276,7 @@ enum class ScreenChangeEvent : uint32_t {
     UPDATE_ROTATION,
     CHANGE_MODE,
     VIRTUAL_PIXEL_RATIO_CHANGED,
+    SCREEN_SOURCE_MODE_CHANGE,
     SCREEN_SWITCH_CHANGE,
     UNKNOWN,
 };
@@ -462,6 +463,15 @@ enum class ScreenCombination : uint32_t {
 enum class MultiScreenMode : uint32_t {
     SCREEN_MIRROR = 0,
     SCREEN_EXTEND = 1,
+};
+
+/**
+ * @brief Enumerates the low temp mode.
+ */
+enum class LowTempMode: int32_t {
+    UNKNOWN = -1,
+    LOW_TEMP_OFF = 0,
+    LOW_TEMP_ON = 1,
 };
 
 /**

@@ -123,8 +123,8 @@ bool ScreenSessionManagerClient::CheckIfNeedConnectScreen(SessionOption option)
     }
     if (screenSessionManager_->GetScreenProperty(option.screenId_).GetScreenType() == ScreenType::VIRTUAL) {
         if (option.name_ == "HiCar" || option.name_ == "SuperLauncher" || option.name_ == "CastEngine" ||
-            option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen") {
-            WLOGFI("HiCar or SuperLauncher or CastEngine or DevEcoViewer, need to connect the screen");
+            option.name_ == "DevEcoViewer" || option.innerName_ == "CustomScbScreen" || option.name_ == "CeliaView") {
+            WLOGFI("HiCar or SuperLauncher or CastEngine or DevEcoViewer or CeliaView, need to connect the screen");
             return true;
         } else {
             WLOGFE("ScreenType is virtual, no need to connect the screen");
@@ -603,6 +603,27 @@ void ScreenSessionManagerClient::SwitchingCurrentUser()
     }
     screenSessionManager_->SwitchUser();
     WLOGFI("switch to current user end");
+}
+
+void ScreenSessionManagerClient::DisconnectAllExternalScreen()
+{
+    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+    for (auto sessionIt = screenSessionMap_.rbegin(); sessionIt != screenSessionMap_.rend(); ++sessionIt) {
+        auto screenSession = sessionIt->second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::REAL && screenSession->GetIsExtend()) {
+            TLOGI(WmsLogTag::DMS, "disconnect extend screen, screenId = %{public}" PRIu64, sessionIt->first);
+            screenSession->DestroyScreenScene();
+            NotifyScreenDisconnect(screenSession);
+            ScreenId screenId = sessionIt->first;
+            screenSessionMap_.erase(screenId);
+            screenSession->Disconnect();
+            break;
+        }
+    }
 }
 
 FoldStatus ScreenSessionManagerClient::GetFoldStatus()

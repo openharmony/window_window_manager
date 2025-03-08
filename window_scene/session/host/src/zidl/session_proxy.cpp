@@ -2417,7 +2417,7 @@ WSError SessionProxy::SetFollowParentWindowLayoutEnabled(bool isFollow)
     TLOGD(WmsLogTag::WMS_SUB, "isFollow: %{public}d", isFollow);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_SUB, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
@@ -2438,7 +2438,7 @@ WSError SessionProxy::SetFollowParentWindowLayoutEnabled(bool isFollow)
     }
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_MAIN, "read ret failed");
+        TLOGE(WmsLogTag::WMS_SUB, "read ret failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);
@@ -2586,6 +2586,54 @@ void SessionProxy::NotifyWindowAttachStateListenerRegistered(bool registered)
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_LISTENER_REGISTERED),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_MAIN, "SendRequest failed");
+    }
+}
+
+void SessionProxy::NotifyKeyboardDidShowRegistered(bool registered)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "writeInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write registered failed.");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_SHOW_REGISTERED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
+    }
+}
+
+void SessionProxy::NotifyKeyboardDidHideRegistered(bool registered)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "writeInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteBool(registered)) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Write registered failed.");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "Remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_KEYBOARD_DID_HIDE_REGISTERED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "SendRequest failed");
     }
 }
 } // namespace OHOS::Rosen

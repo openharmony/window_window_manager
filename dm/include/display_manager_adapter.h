@@ -100,6 +100,7 @@ public:
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
     virtual DMError ResetAllFreezeStatus();
     virtual std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
+    virtual std::string GetDisplayCapability();
     virtual DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList);
     virtual std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
@@ -147,6 +148,7 @@ public:
     virtual sptr<ScreenInfo> GetScreenInfo(ScreenId screenId);
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio);
     virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio);
+    virtual DMError SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio);
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio);
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio);
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height);

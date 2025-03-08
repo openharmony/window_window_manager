@@ -38,6 +38,8 @@ const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_EVENT_CB = "windowEvent";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
+const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
 const std::string SCREENSHOT_EVENT_CB = "screenshot";
 const std::string DIALOG_TARGET_TOUCH_CB = "dialogTargetTouch";
@@ -61,6 +63,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IAvoidAreaChangedListener,
                          public IWindowLifeCycle,
                          public IOccupiedAreaChangeListener,
+                         public IKeyboardDidShowListener,
+                         public IKeyboardDidHideListener,
                          public ITouchOutsideListener,
                          public IScreenshotListener,
                          public IDialogTargetTouchListener,
@@ -96,6 +100,8 @@ public:
     void AfterDestroyed() override;
     void OnSizeChange(const sptr<OccupiedAreaChangeInfo>& info,
         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) override;
+    void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnTouchOutside() const override;
     void OnScreenshot() override;
     void OnDialogTargetTouch() const override;
@@ -142,7 +148,7 @@ private:
     void LifeCycleCallBack(LifeCycleEventType eventType);
     int64_t noInteractionTimeout_ = 0;
     napi_env env_ = nullptr;
-    NativeReference* jsCallBack_;
+    NativeReference* jsCallBack_ = nullptr;
     CaseType caseType_ = CaseType::CASE_WINDOW;
     wptr<JsWindowListener> weakRef_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;

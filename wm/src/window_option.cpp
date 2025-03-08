@@ -239,6 +239,16 @@ const std::string WindowOption::GetBundleName() const
     return bundleName_;
 }
 
+void WindowOption::SetSubWindowMaximizeSupported(bool maximizeSupported)
+{
+    subWindowMaximizeSupported_ = maximizeSupported;
+}
+
+bool WindowOption::GetSubWindowMaximizeSupported() const
+{
+    return subWindowMaximizeSupported_;
+}
+
 void WindowOption::SetSubWindowTitle(const std::string& subWindowTitle)
 {
     subWindowTitle_ = subWindowTitle;

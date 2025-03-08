@@ -334,6 +334,34 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualPixelRatioSystem, Function | S
 }
 
 /**
+ * @tc.name: SetDefaultDensityDpi
+ * @tc.desc: SetDefaultDensityDpi
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetDefaultDensityDpi, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    ScreenId id = 1001;
+    float virtualPixelRatio = 1.0;
+
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+
+
+    DMError res = DMError::DM_ERROR_NOT_SYSTEM_APP;
+    std::function<void()> func = [&]()
+    {
+        res = screenSessionManagerProxy->SetDefaultDensityDpi(id, virtualPixelRatio);
+    };
+    func();
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(res, DMError::DM_ERROR_IPC_FAILED);
+    } else {
+        ASSERT_EQ(res, DMError::DM_ERROR_IPC_FAILED);
+    }
+}
+
+/**
  * @tc.name: SetResolution
  * @tc.desc: SetResolution
  * @tc.type: FUNC
@@ -1835,13 +1863,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, MakeUniqueScreen, Function | SmallTest |
     
     const std::vector<ScreenId> screenIds {1001, 1002, 1003};
     std::vector<DisplayId> displayIds;
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_NE(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
-    } else {
-        EXPECT_EQ(DMError::DM_ERROR_NULLPTR,
-            screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
-    }
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, screenSessionManagerProxy->MakeUniqueScreen(screenIds, displayIds));
 }
 
 /**
@@ -2331,6 +2353,26 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetScreenSkipProtectedWindow, Function |
     };
     func();
     ASSERT_EQ(resultValue, 1);
+}
+
+/**
+ * @tc.name: GetDisplayCapability
+ * @tc.desc: GetDisplayCapability test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayCapability, Function | SmallTest | Level1)
+{
+    SingletonContainer::Get<ScreenManagerAdapter>().InitDMSProxy();
+    sptr<IRemoteObject> impl = SingletonContainer::Get<ScreenManagerAdapter>().displayManagerServiceProxy_->AsObject();
+    sptr<ScreenSessionManagerProxy> screenSessionManagerProxy = new ScreenSessionManagerProxy(impl);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    std::string res = "";
+    std::function<void()> func = [&]() {
+        res = screenSessionManagerProxy->GetDisplayCapability();
+    };
+    func();
+    ASSERT_NE(res, "");
 }
 }
 }

@@ -33,6 +33,7 @@ public:
     virtual DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     virtual DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
+    virtual DMError SetDefaultDensityDpi(ScreenId screenId, float virtualPixelRatio) override;
     virtual DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     virtual DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
 
@@ -198,6 +199,7 @@ public:
     DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy) override;
     DMError ResetAllFreezeStatus() override;
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution() override;
+    std::string GetDisplayCapability() override;
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;

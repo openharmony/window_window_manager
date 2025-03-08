@@ -601,7 +601,7 @@ HWTEST_F(DisplayManagerAdapterTest, MakeMirror, Function | SmallTest | Level2)
     ScreenId screenGroupId;
     DMError err = SingletonContainer::Get<ScreenManagerAdapter>().MakeMirror(0,
         mirrorScreenId, screenGroupId);
-    ASSERT_EQ(err, DMError::DM_ERROR_INVALID_PARAM);
+    ASSERT_EQ(err, DMError::DM_ERROR_NULLPTR);
 }
 
 /**
@@ -858,6 +858,17 @@ HWTEST_F(DisplayManagerAdapterTest, SetScreenSkipProtectedWindow, Function | Sma
     bool isEnable = true;
     auto result = SingletonContainer::Get<ScreenManagerAdapter>().SetScreenSkipProtectedWindow(screenIds, isEnable);
     ASSERT_EQ(result, DMError::DM_OK);
+}
+
+/**
+ * @tc.name: GetDisplayCapability
+ * @tc.desc: GetDisplayCapability test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayCapability, Function | SmallTest | Level2)
+{
+    std::string info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayCapability();
+    ASSERT_NE(info, "");
 }
 }
 }

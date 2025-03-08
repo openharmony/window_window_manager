@@ -511,12 +511,12 @@ public:
     virtual WMError IsWindowHighlighted(bool& highlighted) const { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
-     * @brief Get the api version.
+     * @brief Get the api compatible version.
      *
-     * @return Api version
+     * @return Api compatible version
      */
-    virtual uint32_t GetApiVersion() const { return 0; }
-    
+    virtual uint32_t GetApiCompatibleVersion() const { return 0; }
+
     /**
      * @brief Set the feature of subwindow follow the layout of the parent window.
      *
@@ -524,6 +524,13 @@ public:
      * @return WM_OK means set success.
      */
     virtual WMError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WMError::WM_ERROR_SYSTEM_ABNORMALLY; }
+
+      /**
+     * @brief Get is subwindow support maximize.
+     *
+     * @return true means subwindow support maximize, others means do not support.
+     */
+    virtual bool IsSubWindowMaximizeSupported() const { return false; }
 };
 }
 }
