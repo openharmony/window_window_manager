@@ -878,7 +878,7 @@ HWTEST_F(WindowSceneSessionImplTest2, BindDialogTarget01, Function | SmallTest |
     windowSceneSession->hostSession_ = session;
     sptr<IRemoteObject> targetToken;
     WMError ret = windowSceneSession->BindDialogTarget(targetToken);
-    ASSERT_EQ(ret, WMError::WM_OK);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
@@ -1652,6 +1652,25 @@ HWTEST_F(WindowSceneSessionImplTest2, RegisterSessionRecoverListenerSuccess02, F
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
     window->RegisterSessionRecoverListener(true); // true is sub window
+}
+
+/**
+ * @tc.name: SyncDestroyAndDisconnectSpecificSession
+ * @tc.desc: SyncDestroyAndDisconnectSpecificSession test
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSceneSessionImplTest2, SyncDestroyAndDisconnectSpecificSession, Function | SmallTest | Level2)
+{
+    sptr option = new WindowOption();
+    ASSERT_NE(option, nullptr);
+    option->SetWindowName("SyncDestroyAndDisconnectSpecificSession");
+    sptr window = new (std::nothrow) WindowSceneSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    WMError ret = window->SyncDestroyAndDisconnectSpecificSession(100);
+    ASSERT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 }
 
 /**
