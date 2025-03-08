@@ -18,10 +18,10 @@
 
 namespace OHOS {
 namespace Rosen {
-void ScreenTentProperty::HandleSensorEventInput(bool isTentMode, int32_t hall)
+void ScreenTentProperty::HandleSensorEventInput(int tentType, int32_t hall)
 {
-    TLOGI(WmsLogTag::DMS, "Tent mode: %{public}s", isTentMode ? "ON" : "OFF");
-    ScreenSessionManager::GetInstance().OnTentModeChanged(isTentMode, hall);
+    TLOGI(WmsLogTag::DMS, "Tent mode: %{public}d", tentType);
+    ScreenSessionManager::GetInstance().OnTentModeChanged(tentType, hall);
 }
 } // Rosen
 } // OHOS

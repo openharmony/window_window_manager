@@ -42,6 +42,7 @@ enum class DeviceHoverStatus: int32_t {
     TENT_STATUS_CANCEL,
     CAMERA_STATUS,
     CAMERA_STATUS_CANCEL,
+    TENT_STATUS_HOVER,
 };
 
 class ScreenRotationProperty : public RefBase {
