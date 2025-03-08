@@ -32,7 +32,7 @@ int SessionLifecycleListenerStub::OnRemoteRequest(
 
 int SessionLifecycleListenerStub::HandleOnLifecycleEvent(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGE(WmsLogTag::WMS_LIFE, "in");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     auto event = data.ReadInt32();
     if (event < static_cast<int32_t>(SessionLifecycleEvent::CREATED) ||
         event > static_cast<int32_t>(SessionLifecycleEvent::EVENT_END)) {

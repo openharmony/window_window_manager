@@ -47,11 +47,11 @@ public:
     void NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent event,
         const SessionInfo& sessionInfo);
 
-    WMError RegisterSessionLifecycleListener(
-        const sptr<ISessionLifecycleListener>& listener, const std::vector<int32_t>& persistentIdList);
+    WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList);
         
-    WMError RegisterSessionLifecycleListener(
-        const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList);
+    WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList);
 
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
 
