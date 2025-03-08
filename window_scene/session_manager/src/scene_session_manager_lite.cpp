@@ -217,6 +217,11 @@ WMError SceneSessionManagerLite::GetMainWindowInfos(int32_t topNum, std::vector<
     return SceneSessionManager::GetInstance().GetMainWindowInfos(topNum, topNInfo);
 }
 
+WMError SceneSessionManagerLite::GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo)
+{
+    return SceneSessionManager::GetInstance().GetCallingWindowInfo(callingWindowInfo);
+}
+
 WMError SceneSessionManagerLite::GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos)
 {
     return SceneSessionManager::GetInstance().GetAllMainWindowInfos(infos);
