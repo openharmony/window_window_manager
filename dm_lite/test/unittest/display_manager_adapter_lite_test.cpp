@@ -172,6 +172,28 @@ HWTEST_F(DisplayManagerAdapterLiteTest, GetVirtualScreenFlag, Function | SmallTe
         ASSERT_EQ(ret, VirtualScreenFlag::DEFAULT);
     }
 }
+
+/**
+ * @tc.name: SetSystemKeyboardOn
+ * @tc.desc: SetSystemKeyboardOn with true as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardOn01, Function | SmallTest | Level1)
+{
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardOn(true);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
+ 
+/**
+ * @tc.name: SetSystemKeyboardOn
+ * @tc.desc: SetSystemKeyboardOn with false as parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterLiteTest, SetSystemKeyboardOn02, Function | SmallTest | Level1)
+{
+    auto ret = SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardOn(false);
+    ASSERT_NE(ret, DMError::DM_OK);
+}
 }
 }
 }
