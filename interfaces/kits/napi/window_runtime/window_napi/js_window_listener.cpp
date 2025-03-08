@@ -126,7 +126,6 @@ void JsWindowListener::OnSystemBarPropertyChange(DisplayId displayId, const Syst
             WLOGFE("this listener or eng is nullptr");
             return;
         }
-        HandleScope handleScope(env);
         napi_value propertyValue = nullptr;
         napi_create_object(env, &propertyValue);
         if (propertyValue == nullptr) {
