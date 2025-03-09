@@ -801,6 +801,12 @@ private:
         int32_t sourceWindowId, int32_t targetWindowId, DisplayId targetDisplayId);
 
     /*
+     * Sub Window
+     */
+    WMError SetParentWindowInner(const sptr<SceneSession>& subSession,
+        const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession);
+
+    /*
      * Window Immersive
      */
     void UpdateAvoidSessionAvoidArea(WindowType type);

@@ -13445,6 +13445,34 @@ WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISess
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subSession,
+        const sptr<SceneSession>& oldParentSession, const sptr<SceneSession>& newParentSession)
+{
+    uint32_t oldSubWindowLevel = oldParentSession->GetSessionProperty()->GetSubWindowLevel();
+    uint32_t newSubWindowLevel = newParentSession->GetSessionProperty()->GetSubWindowLevel();
+    if (oldSubWindowLevel < newSubWindowLevel &&
+        subSession->GetMaxSubWindowLevel() + newSubWindowLevel > MAX_SUB_WINDOW_LEVEL) {
+        TLOGE(WmsLogTag::WMS_SUB, "newParentSession sub level limit");
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    int32_t oldParentWindowId = oldParentSession->GetPersistentId();
+    int32_t newParentWindowId = newParentSession->GetPersistentId();
+    subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
+    int32_t subWindowId = subSession->GetPersistentId();
+    oldParentSession->RemoveSubSession(subWindowId);
+    newParentSession->AddSubSession(subSession);
+    subSession->SetParentSession(newParentSession);
+    subSession->SetParentPersistentId(newParentWindowId);
+    subSession->UpdateSubWindowLevel(newSubWindowLevel + 1);
+    if (oldSubWindowLevel == 0) {
+        oldParentSession->UnregisterNotifySurfaceBoundsChangeFunc(subWindowId);
+        if (newSubWindowLevel == 0 && subSession->GetIsFollowParentLayout()) {
+            subSession->SetFollowParentWindowLayoutEnabled(true);
+        }
+    }
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newParentWindowId)
 {
     return taskScheduler_->PostSyncTask([this, subWindowId, newParentWindowId, where = __func__] {
@@ -13476,20 +13504,7 @@ WMError SceneSessionManager::SetParentWindow(int32_t subWindowId, int32_t newPar
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession is subsession ancestor", where);
             return WMError::WM_ERROR_INVALID_PARENT;
         }
-        uint32_t oldSubWindowLevel = oldParentSession->GetSessionProperty()->GetSubWindowLevel();
-        uint32_t newSubWindowLevel = newParentSession->GetSessionProperty()->GetSubWindowLevel();
-        if (oldSubWindowLevel < newSubWindowLevel &&
-            subSession->GetMaxSubWindowLevel() + newSubWindowLevel > MAX_SUB_WINDOW_LEVEL) {
-            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s newParentSession sub level limit", where);
-            return WMError::WM_ERROR_INVALID_PARENT;
-        }
-        subSession->NotifySetParentSession(oldParentWindowId, newParentWindowId);
-        oldParentSession->RemoveSubSession(subWindowId);
-        newParentSession->AddSubSession(subSession);
-        subSession->SetParentSession(newParentSession);
-        subSession->SetParentPersistentId(newParentWindowId);
-        subSession->UpdateSubWindowLevel(newSubWindowLevel + 1);
-        return WMError::WM_OK;
+        return SetParentWindowInner(subSession, oldParentSession, newParentSession);
     });
 }
 } // namespace OHOS::Rosen
