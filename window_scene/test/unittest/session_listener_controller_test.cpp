@@ -21,6 +21,7 @@
 #include "display_manager_adapter.h"
 #include "mission_listener_stub.h"
 #include "singleton_container.h"
+#include "zidl/session_lifecycle_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -121,10 +122,20 @@ class SessionListenerControllerTest : public testing::Test {
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<SessionListenerController> slController;
+
 private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
+class MySessionLifecycleListener : public Rosen::SessionLifecycleListenerStub {
+public:
+    MySessionLifecycleListener() = default;
+    ~MySessionLifecycleListener() override = default;
+    void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override
+    {
+        return;
+    }
+};
 
 void SessionListenerControllerTest::SetUpTestCase()
 {
@@ -317,12 +328,17 @@ HWTEST_F(SessionListenerControllerTest, NotifySessionUnfocused, Function | Small
  */
 HWTEST_F(SessionListenerControllerTest, NotifySessionClosed, Function | SmallTest | Level2)
 {
-    int32_t persistentId = -1;
-    slController->NotifySessionClosed(persistentId);
+    SessionInfo info;
+    info.bundleName_ = "bundleName";
+    info.moduleName_ = "moduleName";
+    info.abilityName_ = "abilityName";
+    info.appIndex_ = 0;
+    info.persistentId_ = -1;
+    slController->NotifySessionClosed(info);
 
-    persistentId = 1;
-    slController->NotifySessionClosed(persistentId);
-    ASSERT_EQ(persistentId, 1);
+    info.persistentId_ = 1;
+    slController->NotifySessionClosed(info);
+    ASSERT_EQ(info.persistentId_, 1);
 }
 
 /**
@@ -418,6 +434,64 @@ HWTEST_F(SessionListenerControllerTest, ListenerDeathRecipient, Function | Small
         EXPECT_NE(nullptr, remote);
     }
     GTEST_LOG_(INFO) << "TaskSchedulerText: task_scheduler_test001 end";
+}
+
+/**
+ * @tc.name: Register
+ * @tc.desc: Register By Bundle
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByBundles, Function | SmallTest | Level2)
+{
+    std::vector<std::string> bundleNameList1 = {"bundle1", "bundle2"};
+    WMError res = slController->RegisterSessionLifecycleListener(nullptr, bundleNameList1);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+    res = slController->RegisterSessionLifecycleListener(listener, bundleNameList1);
+    ASSERT_EQ(res, WMError::WM_OK);
+
+    std::vector<std::string> bundleNameList2;
+    res = slController->RegisterSessionLifecycleListener(listener, bundleNameList2);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: Register
+ * @tc.desc: Register By Id
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, Function | SmallTest | Level2)
+{
+    std::vector<int32_t> persistentIdList1 = {1, 2};
+    WMError res = slController->RegisterSessionLifecycleListener(nullptr, persistentIdList1);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+    res = slController->RegisterSessionLifecycleListener(listener, persistentIdList1);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    std::vector<int32_t> persistentIdList2;
+    res = slController->RegisterSessionLifecycleListener(listener, persistentIdList2);
+    ASSERT_EQ(res, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: UnregisterSessionLifecycleListener
+ * @tc.desc: UnregisterSessionLifecycleListener
+ * @tc.type: CLASS
+ */
+HWTEST_F(SessionListenerControllerTest, UnregisterSessionLifecycleListener, Function | SmallTest | Level2)
+{
+    WMError res = slController->UnregisterSessionLifecycleListener(nullptr);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+    res = slController->UnregisterSessionLifecycleListener(listener);
+    ASSERT_EQ(res, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

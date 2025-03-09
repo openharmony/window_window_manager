@@ -93,6 +93,11 @@ public:
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) override;
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override;
+    WMError RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList) override;
+    WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList) override;
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);
