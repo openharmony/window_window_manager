@@ -290,7 +290,7 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void NotifyScreenMagneticStateChanged(bool isMagneticState);
-    void OnTentModeChanged(bool isTentMode, int32_t hall = -1);
+    void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
     void RegisterSettingscreenSkipProtectedWindowObserver();
@@ -461,6 +461,7 @@ private:
     void SetClientInner();
     void RecoverMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
+    void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);

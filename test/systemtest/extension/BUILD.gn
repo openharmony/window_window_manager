@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-module_out_path = "window_manager/extension"
+module_out_path = "window_manager/window_manager/extension"
 
 group("systemtest") {
   testonly = true

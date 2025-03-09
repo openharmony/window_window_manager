@@ -396,21 +396,16 @@ void JsWindowListener::OnDialogTargetTouch() const
 
 void JsWindowListener::OnDialogDeathRecipient() const
 {
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback> (
-        [self = weakRef_] (napi_env env, NapiAsyncTask& task, int32_t status) {
-            auto thisListener = self.promote();
+    auto asyncTask = [self = weakRef_] {
+        auto thisListener = self.promote();
             if (thisListener == nullptr) {
-                WLOGFE("this listener is nullptr");
+                TLOGE(WmsLogTag::WMS_SYSTEM, "this listener is nullptr");
                 return;
             }
             thisListener->CallJsMethod(DIALOG_DEATH_RECIPIENT_CB.c_str(), nullptr, 0);
-        }
-    );
+    };
 
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsWindowListener::OnDialogDeathRecipient",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_send_event(env_, asyncTask, napi_eprio_immediate);
 }
 
 void JsWindowListener::OnGestureNavigationEnabledUpdate(bool enable)

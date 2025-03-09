@@ -194,6 +194,21 @@ public:
 };
 
 /**
+ * @class IKeyboardCallingWindowDisplayChangeListener
+ *
+ * @brief Observe the display change of keyboard callingWindow.
+ */
+class IKeyboardCallingWindowDisplayChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when calling window display changed.
+     *
+     * @param callingWindowInfo The information about the calling window.
+     */
+    virtual void OnCallingWindowDisplayChanged(CallingWindowInfo callingWindowInfo) = 0;
+};
+
+/**
  * @class IWindowPidVisibilityChangedListener
  *
  * @brief Listener to observe window visibility that in same pid.
@@ -921,6 +936,30 @@ public:
     WMError UnregisterWindowStyleChangedListener(const sptr<IWindowStyleChangedListener>& listener);
 
     /**
+     * @brief Register keyboard calling window display change listener.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangeListener
+     * @return WM_OK means register success, others means unregister failed.
+     */
+    WMError RegisterCallingWindowDisplayChangeListener(
+        const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    
+    /**
+     * @brief Unregister keyboard calling window display change listener.
+     *
+     * @param listener IKeyboardCallingWindowDisplayChangeListener
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterCallingWindowDisplayChangeListener(
+        const sptr<IKeyboardCallingWindowDisplayChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Skip Snapshot for app process.
      *
      * @param pid process id
@@ -1066,6 +1105,7 @@ private:
     void NotifyGestureNavigationEnabledResult(bool enable) const;
     void UpdateVisibleWindowNum(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     WMError NotifyWindowStyleChange(WindowStyleType type);
+    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) const;
 };
 } // namespace Rosen
