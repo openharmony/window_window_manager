@@ -56,6 +56,7 @@
 #include "window_focus_controller.h"
 #include "window_scene_config.h"
 #include "wm_single_instance.h"
+#include "zidl/session_lifecycle_listener_interface.h"
 
 namespace OHOS::AAFwk {
 class SessionInfo;
@@ -619,6 +620,7 @@ public:
     int32_t StartUIAbilityBySCB(sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     int32_t StartUIAbilityBySCB(sptr<SceneSession>& sceneSessions);
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     WMError TerminateSessionByPersistentId(int32_t persistentId);
@@ -627,6 +629,12 @@ public:
     void GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
         std::vector<sptr<SceneSession>>& mainSessions) const;
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock);
+    WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList);
+    WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList);
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
+    bool IsMainWindowByPersistentId(int32_t persistentId);
 
     /*
      * Window Pattern
