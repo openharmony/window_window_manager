@@ -704,7 +704,7 @@ void ScreenSessionManagerClient::UpdateDisplayHookInfo(int32_t uid, bool enable,
     screenSessionManager_->UpdateDisplayHookInfo(uid, enable, hookInfo);
 }
 
-void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo)
+void ScreenSessionManagerClient::GetDisplayHookInfo(int32_t uid, DMHookInfo& hookInfo) const
 {
     if (!screenSessionManager_) {
         WLOGFE("screenSessionManager_ is null");

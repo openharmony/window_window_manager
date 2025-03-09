@@ -2191,7 +2191,8 @@ void SceneSession::GetAINavigationBarArea(WSRect rect, AvoidArea& avoidArea) con
     CalculateAvoidAreaRect(rect, barArea, avoidArea);
 }
 
-void SceneSession::HookAvoidAreaInCompatibleMode(WSRect& rect, AvoidArea& avoidArea, AvoidAreaType avoidAreaType) const
+void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidArea& avoidArea,
+    AvoidAreaType avoidAreaType) const
 {
     WindowMode mode = GetWindowMode();
     if (!GetSessionProperty()->GetCompatibleModeInPc() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
