@@ -221,9 +221,7 @@ void WindowSceneSessionImpl::AddSubWindowMapForExtensionWindow()
     // update subWindowSessionMap_
     auto extensionWindow = FindExtensionWindowWithContext();
     if (extensionWindow != nullptr) {
-        auto parentWindowId = extensionWindow->GetPersistentId();
-        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-        subWindowSessionMap_[parentWindowId].push_back(this);
+        subWindowSessionMap_[extensionWindow->GetPersistentId()].push_back(this);
     } else {
         TLOGE(WmsLogTag::WMS_SUB, "name: %{public}s not found parent extension window",
             property_->GetWindowName().c_str());
@@ -301,17 +299,13 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         property_->SetDisplayId(parentSession->GetDisplayId());
         // set parent persistentId
-        auto parentWindowId = parentSession->GetPersistentId();
-        property_->SetParentPersistentId(parentWindowId);
+        property_->SetParentPersistentId(parentSession->GetPersistentId());
         property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         // creat sub session by parent session
         SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
             surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        {
-            std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-            // update subWindowSessionMap_
-            subWindowSessionMap_[parentWindowId].push_back(this);
-        }
+        // update subWindowSessionMap_
+        subWindowSessionMap_[parentSession->GetPersistentId()].push_back(this);
         SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
@@ -587,25 +581,23 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
     return ret;
 }
 
-void WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId, sptr<WindowSessionImpl>& newParentWindow)
+void WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
+    const sptr<WindowSessionImpl>& newParentWindow)
 {
     auto newParentWindowId = newParentWindow->GetProperty()->GetPersistentId();
     auto subWindowId = property_->GetPersistentId();
-    {
-        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-        auto subIter = subWindowSessionMap_.find(oldParentWindowId);
-        if (subIter != subWindowSessionMap_.end()) {
-            auto& subWindows = subIter->second;
-            for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
-                auto subWindow = *iter;
-                if (subWindow != nullptr && subWindow->GetPersistentId() == subWindowId) {
-                    subWindows.erase(iter);
-                    break;
-                }
+    auto subIter = subWindowSessionMap_.find(oldParentWindowId);
+    if (subIter != subWindowSessionMap_.end()) {
+        auto& subWindows = subIter->second;
+        for (auto iter = subWindows.begin(); iter != subWindows.end(); iter++) {
+            auto subWindow = *iter;
+            if (subWindow != nullptr && subWindow->GetPersistentId() == subWindowId) {
+                subWindows.erase(iter);
+                break;
             }
         }
-        subWindowSessionMap_[newParentWindowId].push_back(this);
     }
+    subWindowSessionMap_[newParentWindowId].push_back(this);
     property_->SetParentPersistentId(newParentWindowId);
     UpdateSubWindowLevel(newParentWindow->GetProperty()->GetSubWindowLevel() + 1);
     if (state_ == WindowState::STATE_SHOWN &&
@@ -3351,16 +3343,10 @@ void WindowSceneSessionImpl::UpdateConfiguration(const std::shared_ptr<AppExecFw
         uiContent->UpdateConfiguration(configuration);
     }
     UpdateDefaultStatusBarColor();
-    auto persistentId = GetPersistentId();
-    std::vector<sptr<WindowSessionImpl>> subWindows;
-    {
-        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-        if (subWindowSessionMap_.count(persistentId) == 0) {
-            return;
-        }
-        subWindows = subWindowSessionMap_.at(persistentId);
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        return;
     }
-    for (auto& subWindowSession : subWindows) {
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
         subWindowSession->UpdateConfiguration(configuration);
     }
 }

@@ -158,7 +158,6 @@ std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> WindowSessionImpl::windowExtensionSessionSet_;
 std::shared_mutex WindowSessionImpl::windowExtensionSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
-std::recursive_mutex WindowSessionImpl::subWindowSessionMutex_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
 
@@ -525,17 +524,12 @@ bool WindowSessionImpl::NotifyOnKeyPreImeEvent(const std::shared_ptr<MMI::KeyEve
 
 void WindowSessionImpl::UpdateSubWindowStateAndNotify(int32_t parentPersistentId, const WindowState newState)
 {
-    std::vector<sptr<WindowSessionImpl>> subWindows;
-    {
-        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-        auto iter = subWindowSessionMap_.find(parentPersistentId);
-        if (iter == subWindowSessionMap_.end()) {
-            TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d has no child node", parentPersistentId);
-            return;
-        }
-        subWindows = iter->second;
+    auto iter = subWindowSessionMap_.find(parentPersistentId);
+    if (iter == subWindowSessionMap_.end()) {
+        TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d has no child node", parentPersistentId);
+        return;
     }
-
+    const auto& subWindows = iter->second;
     if (subWindows.empty()) {
         TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d, its subWindowMap is empty", parentPersistentId);
         return;
@@ -629,7 +623,6 @@ void WindowSessionImpl::DestroySubWindow()
     }
     TLOGI(WmsLogTag::WMS_SUB, "Id: %{public}d, parentId: %{public}d", persistentId, parentPersistentId);
     // remove from subWindowMap_ when destroy sub window
-    std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     auto subIter = subWindowSessionMap_.find(parentPersistentId);
     if (subIter != subWindowSessionMap_.end()) {
         auto& subWindows = subIter->second;
@@ -1086,16 +1079,10 @@ sptr<WindowSessionImpl> WindowSessionImpl::FindExtensionWindowWithContext()
 
 void WindowSessionImpl::SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio)
 {
-    auto persistentId = GetPersistentId();
-    std::vector<sptr<WindowSessionImpl>> subWindows;
-    {
-        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-        if (subWindowSessionMap_.count(persistentId) == 0) {
-            return;
-        }
-        subWindows = subWindowSessionMap_.at(persistentId);
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        return;
     }
-    for (auto& subWindowSession : subWindows) {
+    for (auto& subWindowSession : subWindowSessionMap_.at(GetPersistentId())) {
         subWindowSession->SetUniqueVirtualPixelRatio(useUniqueDensity, virtualPixelRatio);
     }
 }
@@ -4705,7 +4692,6 @@ sptr<Window> WindowSessionImpl::FindWindowById(uint32_t winId)
 
 std::vector<sptr<Window>> WindowSessionImpl::GetSubWindow(int parentId)
 {
-    std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     auto iter = subWindowSessionMap_.find(parentId);
     if (iter == subWindowSessionMap_.end()) {
         return std::vector<sptr<Window>>();
@@ -5360,19 +5346,10 @@ bool WindowSessionImpl::IsValidCrossState(int32_t state) const
 
 void WindowSessionImpl::UpdateSubWindowLevel(uint32_t subWindowLevel)
 {
-    property_->SetSubWindowLevel(subWindowLevel);
-    auto persistentId = GetPersistentId();
-    std::vector<sptr<WindowSessionImpl>> subWindows;
-    {
-        std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-        auto iter = subWindowSessionMap_.find(persistentId);
-        if (iter == subWindowSessionMap_.end()) {
-            TLOGD(WmsLogTag::WMS_SUB, "parent window: %{public}d has no child node", persistentId);
-            return;
-        }
-        subWindows = iter->second;
+    if (subWindowSessionMap_.count(GetPersistentId()) == 0) {
+        return;
     }
-    for (auto subWindow : subWindows) {
+    for (auto subWindow : subWindowSessionMap_.at(GetPersistentId())) {
         if (subWindow != nullptr) {
             subWindow->UpdateSubWindowLevel(subWindowLevel + 1);
         }
