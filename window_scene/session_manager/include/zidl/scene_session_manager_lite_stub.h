@@ -80,6 +80,9 @@ private:
     int HandleMinimizeMainSession(MessageParcel& data, MessageParcel& reply);
     int HandleLockSessionByAbilityInfo(MessageParcel& data, MessageParcel& reply);
     int HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterSessionLifecycleListenerByIds(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterSessionLifecycleListenerByBundles(MessageParcel& data, MessageParcel& reply);
+    int HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply);
 
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

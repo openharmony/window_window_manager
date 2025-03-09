@@ -137,6 +137,14 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleLockSessionByAbilityInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_CALLING_WINDOW_INFO):
             return HandleGetCallingWindowInfo(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS):
+            return HandleRegisterSessionLifecycleListenerByIds(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES):
+            return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
+            return HandleUnregisterSessionLifecycleListener(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1009,6 +1017,77 @@ int SceneSessionManagerLiteStub::HandleHasFloatingWindowForeground(MessageParcel
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Write errCode failed.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByIds(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<int32_t> persistentIdList;
+    if (!data.ReadInt32Vector(&persistentIdList)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read persistentIdList");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RegisterSessionLifecycleListenerByIds(listener, persistentIdList);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundles(
+    MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<std::string> bundleNameList;
+    if (!data.ReadStringVector(&bundleNameList)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleNameList");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RegisterSessionLifecycleListenerByBundles(listener, bundleNameList);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UnregisterSessionLifecycleListener(listener);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

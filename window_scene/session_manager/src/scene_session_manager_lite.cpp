@@ -306,4 +306,21 @@ WMError SceneSessionManagerLite::HasFloatingWindowForeground(const sptr<IRemoteO
     return SceneSessionManager::GetInstance().HasFloatingWindowForeground(abilityToken,
         hasOrNot);
 }
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+    const std::vector<int32_t>& persistentIdList)
+{
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, persistentIdList);
+}
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
+    const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
+{
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleNameList);
+}
+
+WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
+{
+    return SceneSessionManager::GetInstance().UnregisterSessionLifecycleListener(listener);
+}
 } // namespace OHOS::Rosen
