@@ -436,8 +436,6 @@ void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objVal
         JsSceneSession::OpenKeyboardSyncTransaction);
     BindNativeFunction(env, objValue, "closeKeyboardSyncTransaction", moduleName,
         JsSceneSession::CloseKeyboardSyncTransaction);
-    BindNativeFunction(env, objValue, "notifyTargetScreenWidthAndHeight", moduleName,
-        JsSceneSession::NotifyTargetScreenWidthAndHeight);
     BindNativeFunction(env, objValue, "notifyKeyboardAnimationCompleted", moduleName,
         JsSceneSession::NotifyKeyboardAnimationCompleted);
 }
@@ -2007,13 +2005,6 @@ napi_value JsSceneSession::CloseKeyboardSyncTransaction(napi_env env, napi_callb
     return (me != nullptr) ? me->OnCloseKeyboardSyncTransaction(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::NotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]");
-    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnNotifyTargetScreenWidthAndHeight(env, info) : nullptr;
-}
-
 napi_value JsSceneSession::NotifyKeyboardAnimationCompleted(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_KEYBOARD, "[NAPI]");
@@ -3096,51 +3087,6 @@ napi_value JsSceneSession::OnCloseKeyboardSyncTransaction(napi_env env, napi_cal
         return NapiGetUndefined(env);
     }
     session->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, isRotating);
-    return NapiGetUndefined(env);
-}
-
-napi_value JsSceneSession::OnNotifyTargetScreenWidthAndHeight(napi_env env, napi_callback_info info)
-{
-    size_t argc = ARG_COUNT_4;
-    napi_value argv[ARG_COUNT_4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_COUNT_3) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
-    bool isScreenAngleMismatch = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], isScreenAngleMismatch)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to bool");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
-    uint32_t screenWidth = 0;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], screenWidth)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to uint32_t");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
-    uint32_t screenHeight = 0;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], screenHeight)) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "Failed to convert parameter to uint32_t");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-
-    auto session = weakSession_.promote();
-    if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr, id:%{public}d", persistentId_);
-        return NapiGetUndefined(env);
-    }
-    session->NotifyTargetScreenWidthAndHeight(isScreenAngleMismatch, screenWidth, screenHeight);
     return NapiGetUndefined(env);
 }
 
