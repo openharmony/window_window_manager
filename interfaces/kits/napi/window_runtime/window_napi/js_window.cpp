@@ -4112,14 +4112,14 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is nullptr."));
             return;
         }
-        WMErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
         if (ret != WmErrorCode::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Set sub window zLevel failed"));
         } else {
             task->Resolve(env, NapiGetUndefined(env));
         }
-        TLOGNI(WmsLogTag::WMS_HIERARCHY, "%{public}s end. Window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
-            where, window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
+        TLOGNI(WmsLogTag::WMS_HIERARCHY, "Window [%{public}u, %{public}s], zLevel = %{public}d, ret = %{public}d",
+            window->GetWindowId(), window->GetWindowName().c_str(), zLevel, ret);
     };
     if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
         napiAsyncTask->Reject(env,
@@ -4142,8 +4142,8 @@ napi_value JsWindow::OnGetSubWindowZLevel(napi_env env, napi_callback_info info)
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     int32_t zLevel = 0;
-    WMErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetSubWindowZLevel(zLevel));
-    if (ret != WMErrorCode::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetSubWindowZLevel(zLevel));
+    if (ret != WmErrorCode::WM_OK) {
         return NapiThrowError(env, ret);
     }
     napi_value objValue = nullptr;
@@ -4151,7 +4151,7 @@ napi_value JsWindow::OnGetSubWindowZLevel(napi_env env, napi_callback_info info)
     if (objValue != nullptr) {
         return objValue;
     } else {
-        return NapiThrowError(env, WMErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
 

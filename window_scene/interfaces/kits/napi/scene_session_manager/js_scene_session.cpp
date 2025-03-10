@@ -1437,7 +1437,7 @@ void JsSceneSession::ProcessSubWindowZLevelChangeRegister()
     session->RegisterSubSessionZLevelChangeCallback([weakThis = wptr(this)](int32_t zLevel) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnSubSessionZLevelChange(zLevel);

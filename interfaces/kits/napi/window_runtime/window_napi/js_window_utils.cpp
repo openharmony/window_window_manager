@@ -1343,7 +1343,7 @@ static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowO
     return true;
 }
 
-static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<windowOption> &windowOption)
+static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<WindowOption> &windowOption)
 {
     int32_t zLevel = 0;
     bool isModal = false;

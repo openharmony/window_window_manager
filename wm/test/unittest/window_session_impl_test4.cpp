@@ -2704,7 +2704,7 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowZLevelToProperty, Function | SmallT
     sptr<WindowSessionImpl> subWindowSessionImpl = sptr<WindowSessionImpl>::MakeSptr(option);
     subWindowSessionImpl->SetSubWindowZLevelToProperty();
     zLevel = subWindowSessionImpl->property_->zLevel_;
-    EXPECT_EQ(1, zLevel); 
+    EXPECT_EQ(1, zLevel);
 }
 } // namespace
 } // namespace Rosen

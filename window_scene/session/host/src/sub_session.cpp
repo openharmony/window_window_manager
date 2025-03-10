@@ -297,8 +297,8 @@ WSError SetSubWindowZLevel(int32_t zLevel)
         }
         auto property = session->GetSessionProperty();
         if (property) {
-            TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session zLevel change, id: %{public}d, zLevel: %{public}d,",
-            session->GetPersistentId(), zLevel);
+            TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session zLevel change, id: %{public}d, zLevel: %{public}d",
+                session->GetPersistentId(), zLevel);
             property->SetSubWindowZLevel(zLevel);
             if (session->onSubSessionZLevelChange_) {
                 session->onSubSessionZLevelChange_(zLevel);
