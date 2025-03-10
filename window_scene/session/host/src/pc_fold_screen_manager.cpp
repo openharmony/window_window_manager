@@ -93,14 +93,11 @@ void PcFoldScreenManager::SetDisplayRects(
     foldCreaseRect_ = foldCreaseRect;
 }
 
-bool PcFoldScreenManager::IsPcFoldDevice() const
+bool PcFoldScreenManager::IsSuperFoldDevice() const
 {
     auto currScreenFoldStatus = GetScreenFoldStatus();
-    if (currScreenFoldStatus == SuperFoldStatus::UNKNOWN || currScreenFoldStatus == SuperFoldStatus::FOLDED) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Error status");
-        return false;
-    }
-    return true;
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "status: %{public}u", currScreenFoldStatus);
+    return currScreenFoldStatus != SuperFoldStatus::UNKNOWN && currScreenFoldStatus != SuperFoldStatus::FOLDED;
 }
 
 SuperFoldStatus PcFoldScreenManager::GetScreenFoldStatus() const
