@@ -57,9 +57,22 @@ void AniWindowStage::LoadContent(ani_env* env, const std::string& content)
 
 ani_object AniWindowStage::GetMainWindow(ani_env* env)
 {
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] Get main window");
     std::shared_ptr<WindowScene> weakScene = windowScene_.lock();
-    ani_object aniMainWindow = CreateAniWindowStage(env, weakScene);
-    return aniMainWindow;
+    if (weakScene == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] WindowScene_ is nullptr");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+
+    sptr<Window> windowScene = weakScene->GetMainWindow();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Get main window failed");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] Get main window [%{public}u, %{public}s]",
+        windowScene->GetWindowId(), windowScene->GetWindowName().c_str());
+    
+    return CreateAniWindowObject(env, windowScene);
 }
 
 void DropWindowStageByAni(ani_object aniObj)
