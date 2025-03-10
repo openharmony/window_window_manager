@@ -55,7 +55,6 @@ WM_DECLARE_SINGLE_INSTANCE(PcFoldScreenManager);
 public:
     void UpdateFoldScreenStatus(DisplayId displayId, SuperFoldStatus status,
         const WSRect& defaultDisplayRect, const WSRect& virtualDisplayRect, const WSRect& foldCreaseRect);
-    bool IsSuperFoldDevice() const;
     SuperFoldStatus GetScreenFoldStatus() const;
     SuperFoldStatus GetScreenFoldStatus(DisplayId displayId) const;
     bool IsHalfFolded(DisplayId displayId) const;
