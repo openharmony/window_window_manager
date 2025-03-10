@@ -347,7 +347,7 @@ public:
     void SetSidebarMaskColorModifier(bool needBlur);
     WSError UpdateDensity();
     void UpdateNewSizeForPCWindow();
-    void CalcNewWindowRect(WSRect& windowRect, DMRect& availableArea, float currVpr, float newVpr);
+    void CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr);
 
     /*
      * PC Window Layout

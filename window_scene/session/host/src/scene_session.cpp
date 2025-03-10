@@ -7097,66 +7097,76 @@ void SceneSession::UpdateNewSizeForPCWindow()
         moveDragController_->SetMoveDragHotAreaCrossDisplay(false);
         return;
     }
-    auto property = GetSessionProperty();
-    DisplayId displayId = property->GetDisplayId();
-    auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
-    float currVpr = 1.0f;
-    if (sessionStage_) {
-        sessionStage_->GetClientVpr(currVpr);
-    }
-    float newVpr = display->GetVirtualPixelRatio();
-    if (!MathHelper::NearZero(currVpr - newVpr) && !MathHelper::NearZero(currVpr)) {
-        WSRect& windowRect = winRect_;
-        DMRect availableArea = { 0, 0, 0, 0 };
-        DMError ret = display->GetAvailableArea(availableArea);
-        if (availableArea.IsUninitializedRect()) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "availableArea is uninitialized");
+
+    if (auto property = GetSessionProperty()) {
+        DisplayId displayId = property->GetDisplayId();
+        auto display = DisplayManager::GetInstance().GetDisplayById(displayId);
+        if (display == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
             return;
         }
-        CalcNewWindowRect(windowRect, availableArea, currVpr, newVpr);
-        SetSessionRequestRect(windowRect);
-        UpdateSessionRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
-        sessionStage_->UpdateRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
-            "height: %{public}u, Id: %{public}u", windowRect.posX_, windowRect.posY_,windowRect.width_,
-            windowRect.height_, GetPersistentId());
+
+        DMRect availableArea = { 0, 0, 0, 0 };
+        DMError ret = display->GetAvailableArea(availableArea);
+        if (ret != DMError::DM_OK || availableArea.IsUninitializedRect()) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "get available area failed!");
+            return;
+        }
+
+        float newVpr = display->GetVirtualPixelRatio();
+        WSRect& windowRect = winRect_;
+        if (CalcNewWindowRectIfNeed(windowRect, availableArea, newVpr)) {
+            SetSessionRequestRect(windowRect);
+            UpdateSessionRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            sessionStage_->UpdateRect(windowRect, SizeChangeReason::UPDATE_DPI_SYNC);
+            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "left: %{public}d, top: %{public}d, width: %{public}u, "
+                "height: %{public}u, Id: %{public}u", windowRect.posX_, windowRect.posY_,windowRect.width_,
+                windowRect.height_, GetPersistentId());
+        }
     }
     displayChangedByMoveDrag_ = false;
 }
 
-void SceneSession::CalcNewWindowRect(WSRect& windowRect, DMRect& availableArea, float currVpr, float newVpr)
+bool SceneSession::CalcNewWindowRectIfNeed(WSRect& windowRect, DMRect& availableArea, float newVpr)
 {
-    int32_t left = windowRect.posX_;
-    int32_t top = windowRect.posY_;
-    uint32_t width = windowRect.width_;
-    uint32_t height = windowRect.height_;
-    const uint32_t statusBarHeight = GetStatusBarHeight();
-    width = static_cast<uint32_t>(width * newVpr / currVpr);
-    height = static_cast<uint32_t>(height * newVpr / currVpr);
-    width = MathHelper::Min(width, availableArea.width_);
-    height = MathHelper::Min(height, availableArea.height_);
-    bool needMove = top < static_cast<int32_t>(statusBarHeight) || left < 0 ||
-        top > static_cast<int32_t>(availableArea.height_ - height) ||
-        left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
-
-    if (displayChangedByMoveDrag_ && moveDragController_) {
-        int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
-        left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
-    } else {
-        top = MathHelper::Min(top, static_cast<int32_t>(availableArea.height_ - height));
-        top = MathHelper::Max(top, static_cast<int32_t>(statusBarHeight));
-        left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
-        left = MathHelper::Max(left, 0);
+    float currVpr = 1.0f;
+    if (sessionStage_ && sessionStage_->GetClientVpr(currVpr) == WSError::WS_OK) {
+        if (MathHelper::NearZero(currVpr - newVpr) || MathHelper::NearZero(currVpr)) {
+            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "need not update new rect, currVpr: %{public}f , newVpr: %{public}f, "
+                "Id: %{public}u", currVpr, newVpr, GetPersistentId());
+            return false;
+        }
+        int32_t left = windowRect.posX_;
+        int32_t top = windowRect.posY_;
+        uint32_t width = static_cast<uint32_t>(windowRect.width_ * newVpr / currVpr);
+        uint32_t height = static_cast<uint32_t>(windowRect.height_ * newVpr / currVpr);
+        const uint32_t statusBarHeight = isStatusBarVisible_ ? GetStatusBarHeight() : 0;
+        width = MathHelper::Min(width, availableArea.width_);
+        height = MathHelper::Min(height, availableArea.height_);
+        bool needMove = top < static_cast<int32_t>(statusBarHeight) || left < 0 ||
+            top > static_cast<int32_t>(availableArea.height_ - height) ||
+            left > static_cast<int32_t>(availableArea.width_ - width) || displayChangedByMoveDrag_;
+        if (displayChangedByMoveDrag_ && moveDragController_) {
+            int32_t pointerPosX = moveDragController_->GetLastMovePointerPosX();
+            left = pointerPosX - static_cast<int32_t>((pointerPosX -left) * newVpr / currVpr);
+        } else {
+            top = MathHelper::Min(top, static_cast<int32_t>(availableArea.height_ - height));
+            top = MathHelper::Max(top, static_cast<int32_t>(statusBarHeight));
+            left = MathHelper::Min(left, static_cast<int32_t>(availableArea.width_ - width));
+            left = MathHelper::Max(left, 0);
+        }
+        windowRect.width_ = width;
+        windowRect.height_ = height;
+        winRect_.width_ = width;
+        winRect_.height_ = height;
+        if (needMove) {
+            windowRect.posX_ = left;
+            windowRect.posY_ = top;
+            winRect_.posX_ = left;
+            winRect_.posY_ = top;
+        }
+        return true;
     }
-    windowRect.width_ = width;
-    windowRect.height_ = height;
-    winRect_.width_ = width;
-    winRect_.height_ = height;
-    if (needMove) {
-        windowRect.posX_ = left;
-        windowRect.posY_ = top;
-        winRect_.posX_ = left;
-        winRect_.posY_ = top;
-    }
+    return false;
 }
 } // namespace OHOS::Rosen
