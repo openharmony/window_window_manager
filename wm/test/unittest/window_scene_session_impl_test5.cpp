@@ -789,6 +789,7 @@ HWTEST_F(WindowSceneSessionImplTest5, GetParentWindow01, Function | SmallTest | 
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("GetParentWindow01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     sptr<Window> parentWindow = nullptr;
     auto res = window->GetParentWindow(parentWindow);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
@@ -867,6 +868,7 @@ HWTEST_F(WindowSceneSessionImplTest5, SetParentWindow01, Function | SmallTest | 
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetParentWindow01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     int32_t newParentWindowId = 2;
     auto res = window->SetParentWindow(newParentWindowId);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
