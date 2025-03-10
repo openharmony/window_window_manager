@@ -134,6 +134,10 @@ public:
     void HandleStartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY, const WSRect& winRect);
     void StopMoving();
+    int32_t GetLastMovePointerPosX() const;
+    void SetLastMovePointerPosX(int32_t lastMovePointerPosX);
+    int32_t IsMoveDragHotAreaCrossDisplay() const;
+    void SetMoveDragHotAreaCrossDisplay(bool isMoveDragHotAreaCrossDisplay);
 
 private:
     struct MoveDragProperty {
@@ -335,6 +339,8 @@ private:
     DMRect moveAvailableArea_ = {0, 0, 0, 0};
     DisplayId moveInputBarStartDisplayId_ = DISPLAY_ID_INVALID;
     ScreenSizeProperty screenSizeProperty_;
+    int32_t lastMovePointerPosX_ = -1;
+    bool isMoveDragHotAreaCrossDisplay_ = false;
     // Above guarded by displayIdSetDuringMoveDragMutex_
 };
 } // namespace OHOS::Rosen

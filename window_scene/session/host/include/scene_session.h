@@ -760,6 +760,8 @@ protected:
     NotifySubModalTypeChangeFunc onSubModalTypeChange_;
     NotifyMainModalTypeChangeFunc onMainModalTypeChange_;
     NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
+    WSError UpdateDensity();
+    WSError UpdateNewSizeForPCWindow(const sptr<Display>& info, const DMRect& availableArea);
 
     /*
      * PiP Window
@@ -1105,6 +1107,8 @@ private:
      * PC Window Layout
      */
     bool isLayoutFullScreen_ { false };
+    bool displayChangedByMoveDrag_ = false;
+    float lastClientVpr_ = 1.5f;
 
     /*
      * Window Property
