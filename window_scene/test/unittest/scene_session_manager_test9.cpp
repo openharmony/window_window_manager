@@ -46,6 +46,16 @@ void NotifyRecoverSceneSessionFuncTest(const sptr<SceneSession>& session, const 
 {
 }
 
+bool getStateFalse(const ManagerState key)
+{
+    return false;
+}
+
+bool getStateTrue(const ManagerState key)
+{
+    return true;
+}
+
 bool TraverseFuncTest(const sptr<SceneSession>& session)
 {
     return true;
@@ -662,6 +672,71 @@ HWTEST_F(SceneSessionManagerTest9, GetSessionRSVisible, Function | SmallTest | L
 
     bool actual = ssm_->GetSessionRSVisible(sceneSession01, currVisibleData);
     EXPECT_EQ(actual, true);
+}
+
+/**
+ * @tc.name: CheckUIExtensionCreation
+ * @tc.desc: CheckUIExtensionCreation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppExecFwk::ElementName element;
+    int32_t windowId = 5;
+    uint32_t callingTokenId = 0;
+    int32_t pid = 0;
+    bool isSystemCalling = SessionPermission::IsSystemCalling();
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
+    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_ERROR_INVALID_WINDOW : WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
+    windowId = 0;
+
+    Session session(info);
+    session.getStateFromManagerFunc_ = getStateFalse;
+    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_OK : WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    session.getStateFromManagerFunc_ = getStateTrue;
+    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+}
+
+/**
+ * @tc.name: CheckUIExtensionCreation01
+ * @tc.desc: CheckUIExtensionCreation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, CheckUIExtensionCreation01, Function | SmallTest | Level3)
+{
+    ASSERT_NE(ssm_, nullptr);
+    AppExecFwk::ElementName element;
+    int32_t windowId = 0;
+    uint32_t callingTokenId = 0;
+    int32_t pid = 0;
+    bool isSystemCalling = SessionPermission::IsSystemCalling();
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::ACTION;
+
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
+    ssm_->sceneSessionMap_.insert(std::pair<int32_t, sptr<SceneSession>>(0, sceneSession));
+    Session session(info);
+    session.getStateFromManagerFunc_ = getStateTrue;
+    auto ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+
+    session.property_ = nullptr;
+    ret = ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_OK : WMError::WM_ERROR_NOT_SYSTEM_APP);
+
+    sceneSession->IsShowOnLockScreen(0);
+    session.zOrder_ = 1;
+    ssm_->CheckUIExtensionCreation(windowId, callingTokenId, element, extensionAbilityType, pid);
+    ASSERT_EQ(ret, isSystemCalling ? WMError::WM_OK : WMError::WM_ERROR_NOT_SYSTEM_APP);
 }
 }
 } // namespace Rosen
