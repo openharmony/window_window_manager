@@ -64,6 +64,7 @@ public:
     DMError SetScreenActiveMode(ScreenId screenId, uint32_t modeId) override;
     DMError SetVirtualPixelRatio(ScreenId screenId, float virtualPixelRatio) override;
     DMError SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio) override;
+    DMError SetDefaultDensityDpi(ScreenId screenId, float densityDpi) override;
     DMError SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio) override;
     DMError GetDensityInCurResolution(ScreenId screenId, float& virtualPixelRatio) override;
     void NotifyScreenChanged(sptr<ScreenInfo> screenInfo, ScreenChangeEvent event);
@@ -216,6 +217,7 @@ public:
     sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId) override;
     DMError HasImmersiveWindow(ScreenId screenId, bool& immersive) override;
     void SetDisplayBoundary(const sptr<ScreenSession> screenSession);
+    void SetLowTemp(LowTempMode lowTemp);
 
     /**
      * On/Off screen
@@ -288,7 +290,7 @@ public:
     void NotifyDisplayModeChanged(FoldDisplayMode displayMode);
     void NotifyDisplayChangeInfoChanged(const sptr<DisplayChangeInfo>& info) override;
     void NotifyScreenMagneticStateChanged(bool isMagneticState);
-    void OnTentModeChanged(bool isTentMode, int32_t hall = -1);
+    void OnTentModeChanged(int tentType, int32_t hall = -1);
     void RegisterSettingDpiObserver();
     void RegisterSettingRotationObserver();
     void RegisterSettingscreenSkipProtectedWindowObserver();
@@ -387,9 +389,11 @@ public:
      */
     void SwitchUser() override;
     void SwitchScbNodeHandle(int32_t userId, int32_t newScbPid, bool coldBoot);
+    void HotSwitch(int32_t newUserId, int32_t newScbPid);
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
+    void RecoverMultiScreenModeWhenSwitchUser();
     int32_t GetCurrentUserId();
 
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
@@ -457,6 +461,7 @@ private:
     void SetClientInner();
     void RecoverMultiScreenMode(sptr<ScreenSession> screenSession);
     void GetCurrentScreenPhyBounds(float& phyWidth, float& phyHeight, bool& isReset, const ScreenId& screenid);
+    void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
 
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
@@ -671,6 +676,9 @@ private:
     bool IsFakeDisplayExist();
     DMError DoMakeUniqueScreenOld(const std::vector<ScreenId>& allUniqueScreenIds, std::vector<DisplayId>& displayIds,
         bool isCallingByThirdParty);
+
+    LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
+    std::mutex lowTempMutex_;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {

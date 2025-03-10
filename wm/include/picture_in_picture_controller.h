@@ -82,6 +82,7 @@ public:
     void RestorePictureInPictureWindow();
     void PrepareSource();
     void LocateSource();
+    void GetPipPossible(bool& pipPossible);
     WMError RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener);
     WMError RegisterPiPActionObserver(const sptr<IPiPActionObserver>& listener);
     WMError RegisterPiPControlObserver(const sptr<IPiPControlObserver>& listener);

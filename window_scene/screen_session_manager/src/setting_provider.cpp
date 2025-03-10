@@ -315,7 +315,7 @@ std::shared_ptr<DataShare::DataShareHelper> SettingProvider::CreateDataShareHelp
     std::string uriString = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
-        WLOGFD("current userId: %{public}d", userId);
+        WLOGFI("current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
         uriString = SETTING_MULTI_USER_URI + SETTING_MULTI_USER_TABLE + userIdString +
             SETTING_MULTI_USER_PROXY;
@@ -351,7 +351,7 @@ Uri SettingProvider::AssembleUriMultiUser(const std::string& key)
     std::string uriString = "";
     int32_t userId = ScreenSessionManager::GetInstance().GetCurrentUserId();
     if (userId > 0) {
-        WLOGFD("current userId: %{public}d", userId);
+        WLOGFI("current userId: %{public}d", userId);
         std::string userIdString = std::to_string(userId);
         uriString = SETTING_MULTI_USER_URI + SETTING_MULTI_USER_TABLE + userIdString +
             SETTING_MULTI_USER_PROXY + "&key=" + key;

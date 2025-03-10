@@ -285,7 +285,7 @@ bool ScreenSettingHelper::SplitString(std::vector<std::string>& splitValues, con
         return false;
     }
     std::stringstream stream(input);
-    std::string token;
+    std::string token = "";
     while (std::getline(stream, token, delimiter)) {
         splitValues.push_back(token);
     }
@@ -325,8 +325,8 @@ bool ScreenSettingHelper::IsNumber(const std::string& str)
 
 std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(const std::string& key)
 {
-    std::map<std::string, MultiScreenInfo> multiScreenInfoMap;
-    std::string value;
+    std::map<std::string, MultiScreenInfo> multiScreenInfoMap = {};
+    std::string value = "";
     SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
     if (ret != ERR_OK) {
@@ -334,20 +334,20 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
         return multiScreenInfoMap;
     }
     std::string validString = RemoveInvalidChar(value);
-    std::vector<std::string> restoredScreen;
+    std::vector<std::string> restoredScreen = {};
     bool split = SplitString(restoredScreen, validString, ',');
     if (!split) {
         TLOGE(WmsLogTag::DMS, "split screen failed");
         return multiScreenInfoMap;
     }
     for (auto infoString : restoredScreen) {
-        std::vector<std::string> infoVector;
+        std::vector<std::string> infoVector = {};
         split = SplitString(infoVector, infoString, ';');
         if (!split || infoVector.size() != VALID_MULTI_SCREEN_INFO_SIZE) {
             TLOGE(WmsLogTag::DMS, "split info failed");
             continue;
         }
-        MultiScreenInfo info;
+        MultiScreenInfo info = {};
         if (!GetScreenMode(info, infoVector[INDEX_SCREEN_MODE])) {
             continue;
         }
@@ -368,7 +368,7 @@ std::map<std::string, MultiScreenInfo> ScreenSettingHelper::GetMultiScreenInfo(c
 
 bool ScreenSettingHelper::GetScreenMode(MultiScreenInfo& info, const std::string& inputString)
 {
-    std::vector<std::string> screenMode;
+    std::vector<std::string> screenMode = {};
     bool split = SplitString(screenMode, inputString, ' ');
     uint32_t dataSize = screenMode.size();
     if (!split || dataSize != EXPECT_SCREEN_MODE_SIZE) {
@@ -376,7 +376,7 @@ bool ScreenSettingHelper::GetScreenMode(MultiScreenInfo& info, const std::string
         return false;
     }
 
-    uint32_t mode;
+    uint32_t mode = 0;
     if (!IsNumber(screenMode[DATA_INDEX_ZERO])) {
         TLOGE(WmsLogTag::DMS, "not number");
         return false;
@@ -417,7 +417,7 @@ bool ScreenSettingHelper::UpdateScreenMode(MultiScreenInfo& info, uint32_t mode,
 
 bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const std::string& inputString)
 {
-    std::vector<std::string> relativePosition;
+    std::vector<std::string> relativePosition = {};
     bool split = SplitString(relativePosition, inputString, ' ');
     uint32_t dataSize = relativePosition.size();
     if (!split || dataSize != EXPECT_RELATIVE_POSITION_SIZE) {
@@ -425,9 +425,9 @@ bool ScreenSettingHelper::GetScreenRelativePosition(MultiScreenInfo& info, const
         return false;
     }
 
-    ScreenId screenId;
-    uint32_t startX;
-    uint32_t startY;
+    ScreenId screenId = SCREEN_ID_INVALID;
+    uint32_t startX = 0;
+    uint32_t startY = 0;
     if (!IsNumber(relativePosition[DATA_INDEX_ZERO])) {
         TLOGE(WmsLogTag::DMS, "not number");
         return false;

@@ -17,6 +17,7 @@
 
 #include "screen_session_manager/include/fold_screen_controller/fold_screen_controller.h"
 #include "screen_session_manager/include/screen_session_manager.h"
+#include "fold_screen_state_internel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -567,12 +568,13 @@ namespace {
      */
     HWTEST_F(FoldScreenControllerTest, OnTentModeChanged01, Function | SmallTest | Level1)
     {
-        if (ssm_.IsFoldable()) {
-            bool isTentMode = false;
-            ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
-
-            ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), false);
+        if (!FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()||
+            !FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
+            GTEST_SKIP();
         }
+        bool isTentMode = false;
+        ssm_.foldScreenController_->OnTentModeChanged(isTentMode);
+        ASSERT_EQ(ssm_.foldScreenController_->GetTentMode(), false);
     }
 
     /**

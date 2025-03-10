@@ -877,11 +877,10 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARG_COUNT_TWO) { // 1: maximum params num
+    if (argc != ARG_COUNT_TWO) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
@@ -892,13 +891,10 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     }
     bool isEnableSpecified = false;
     if (ConvertFromJsValue(env, argv[INDEX_ONE], isEnableSpecified)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Success to convert parameter to isEnabledSpecified: %{public}d"
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Success to convert parameter to isEnabledSpecified: %{public}d",
             isEnableSpecified);
         return this->OnSetWindowRectAutoSaveEnableSpecified(env, enabled, isEnableSpecified);
     }
-
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to isEnabledSpecified: %{public}d"
-            isEnableSpecified);
     auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
     napi_value result = nullptr;
@@ -914,8 +910,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s enable recover position failed!", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env,
-                ret, "window recover position failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "window recover position failed."));
         } else {
             task->Resolve(env, NapiGetUndefined(env));
         }
@@ -951,8 +946,7 @@ napi_value JsWindowStage::OnSetWindowRectAutoSaveEnableSpecified(napi_env env, b
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled, isEnableSpecified));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s enable recover position failed!", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env,
-                ret, "window recover position failed."));
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "window recover position failed."));
         } else {
             task->Resolve(env, NapiGetUndefined(env));
         }

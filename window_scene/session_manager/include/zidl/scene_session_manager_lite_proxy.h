@@ -73,6 +73,7 @@ public:
     WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) override;
     WMError GetWindowModeType(WindowModeType& windowModeType) override;
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo) override;
+    WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo) override;
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) override;
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override;
     WSError RaiseWindowToTop(int32_t persistentId) override;
@@ -92,6 +93,11 @@ public:
     WMError LockSessionByAbilityInfo(const AbilityInfoBase& abilityInfo, bool isLock) override;
     WMError HasFloatingWindowForeground(const sptr<IRemoteObject>& abilityToken,
         bool& hasOrNot) override;
+    WMError RegisterSessionLifecycleListenerByIds(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<int32_t>& persistentIdList) override;
+    WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
+        const std::vector<std::string>& bundleNameList) override;
+    WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);

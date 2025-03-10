@@ -608,7 +608,6 @@ public:
     SingleHandTransform GetSingleHandTransform() const;
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
-    void UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId);
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
 

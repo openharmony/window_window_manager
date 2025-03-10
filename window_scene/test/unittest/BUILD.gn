@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("../../../windowmanager_aafwk.gni")
-module_out_path = "window_manager/window_scene"
+module_out_path = "window_manager/window_manager/window_scene"
 
 group("unittest") {
   testonly = true
@@ -525,6 +525,7 @@ ohos_unittest("ws_scene_session_manager_lifecycle_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
   ]
 }
@@ -1711,6 +1712,7 @@ ohos_unittest("ws_dfx_hisysevent_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
   ]
 }
 
