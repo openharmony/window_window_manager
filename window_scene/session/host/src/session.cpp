@@ -3970,16 +3970,4 @@ void Session::SetClientDisplayId(DisplayId displayid)
 {
     clientDisplayId_ = displayid;
 }
-
-void Session::UpdateDisplayIdByParentSession(DisplayId& updatedDisplayId)
-{
-    if (auto parentSession = GetParentSession()) {
-        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, parentWinId: %{public}d, parentClientDisplay: %{public}" PRIu64,
-            GetPersistentId(), parentSession->GetPersistentId(), parentSession->GetClientDisplayId());
-        updatedDisplayId = parentSession->GetClientDisplayId();
-    } else if (GetClientDisplayId() == VIRTUAL_DISPLAY_ID) {
-        TLOGI(WmsLogTag::WMS_MAIN, "winId: %{public}d, no parentSession, but init virtual display", GetPersistentId());
-        updatedDisplayId = VIRTUAL_DISPLAY_ID;
-    }
-}
 } // namespace OHOS::Rosen
