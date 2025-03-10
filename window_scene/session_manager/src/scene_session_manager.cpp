@@ -4251,10 +4251,16 @@ void SceneSessionManager::HandleKeepScreenOn(const sptr<SceneSession>& sceneSess
         if (scnSession->keepScreenLock_ == nullptr) {
             return;
         }
-        bool shouldLock = requireLock && IsSessionVisibleForeground(scnSession);
-        TLOGNI(WmsLogTag::DEFAULT, "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d]",
+        auto curScreenId = scnSession->GetSessionInfo().screenId_;
+        auto sourceMode = ScreenSourceMode::SCREEN_ALONE;
+        if (auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(curScreenId)) {
+            sourceMode = screenSession->GetSourceMode();
+        }
+        bool shouldLock = requireLock && IsSessionVisibleForeground(scnSession) && sourceMode != ScreenSourceMode::SCREEN_UNIQUE;
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
+            "keep screen on: [%{public}s, %{public}d, %{public}d, %{public}d, %{public}d, %{public}" PRIu64 ", %{public}d]",
             scnSession->GetWindowName().c_str(), scnSession->GetSessionState(),
-            scnSession->IsVisible(), requireLock, shouldLock);
+            scnSession->IsVisible(), requireLock, shouldLock, curScreenId, sourceMode);
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:HandleKeepScreenOn");
         ErrCode res;
         std::string identity = IPCSkeleton::ResetCallingIdentity();
