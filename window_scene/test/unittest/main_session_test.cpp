@@ -377,16 +377,17 @@ HWTEST_F(MainSessionTest, OnSetWindowRectAutoSave, Function | SmallTest | Level2
     info.bundleName_ = "OnSetWindowRectAutoSave";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true, false));
 
     session->onSetWindowRectAutoSaveFunc_ = nullptr;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true, false));
 
-    NotifySetWindowRectAutoSaveFunc func = [](bool enabled) {
+    NotifySetWindowRectAutoSaveFunc func = [](bool enabled, bool isEnableSpecificed) {
         return;
     };
     session->onSetWindowRectAutoSaveFunc_ = func;
-    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true));
+    EXPECT_EQ(WSError::WS_OK, session->OnSetWindowRectAutoSave(true, false));
+    EXPECT_EQ(false, seesion->GetSessionProperty()->GetIsEnableSpecified());
 }
 
 /**

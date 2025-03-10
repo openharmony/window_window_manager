@@ -100,6 +100,7 @@ private:
     napi_value OnSetWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnIsWindowRectAutoSave(napi_env env, napi_callback_info info);
     napi_value OnSetSupportedWindowModes(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowRectAutoSaveEnableSpecified(napi_env env, bool enabled, bool isEnableSpecified);
 
     std::weak_ptr<WindowScene> windowScene_;
 };

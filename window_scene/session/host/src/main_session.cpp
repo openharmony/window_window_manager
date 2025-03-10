@@ -282,16 +282,20 @@ WSError MainSession::OnRestoreMainWindow()
     return WSError::WS_OK;
 }
 
-WSError MainSession::OnSetWindowRectAutoSave(bool enabled)
+WSError MainSession::OnSetWindowRectAutoSave(bool enabled, bool isEnableSpecified)
 {
-    PostTask([weakThis = wptr(this), enabled] {
+    const char* const where = __func__;
+    PostTask([weakThis = wptr(this), enabled, isEnableSpecified, where] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MAIN, "session is null");
             return;
         }
+        seesion->GetSessionProperty()->SetIsEnableSpecified(isEnableSpecified);
         if (session->onSetWindowRectAutoSaveFunc_) {
-            session->onSetWindowRectAutoSaveFunc_(enabled);
+            session->onSetWindowRectAutoSaveFunc_(enabled, isEnableSpecified);
+            TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s id %{public}d isEnableSpecified: %{public}d",
+                where, session->GetPersistentId(), isEnableSpecified);
         }
     }, __func__);
     return WSError::WS_OK;

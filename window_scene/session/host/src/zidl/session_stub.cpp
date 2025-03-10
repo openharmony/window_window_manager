@@ -1421,8 +1421,13 @@ int SessionStub::HandleSetWindowRectAutoSave(MessageParcel& data, MessageParcel&
         TLOGE(WmsLogTag::WMS_MAIN, "Read enable failed.");
         return ERR_INVALID_DATA;
     }
-    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d", enabled);
-    OnSetWindowRectAutoSave(enabled);
+    bool isEnableSpecified = false;
+    if (!data.ReadBool(isEnableSpecified)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Read isEnableSpecified failed.");
+        return ERR_INVALID_DATA;
+    }
+    TLOGD(WmsLogTag::WMS_MAIN, "enabled: %{public}d, isEnableSpecified: %{public}d", enabled, isEnableSpecified);
+    OnSetWindowRectAutoSave(enabled, isEnableSpecified);
     return ERR_NONE;
 }
 

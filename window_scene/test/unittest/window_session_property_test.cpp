@@ -1451,6 +1451,19 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, Function | SmallTest | L
     auto result = property->GetIsAtomicService();
     ASSERT_EQ(result, isAtomicService);
 }
+
+/**
+ * @tc.name: SetIsEnableSpecified
+ * @tc.desc: SetIsEnableSpecified
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetIsEnableSpecified, Function | SmallTest | Level2)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool isEnableSpecified = false;
+    property->SetIsEnableSpecified(isEnableSpecified);
+    ASSERT_EQ(isEnableSpecified, property->GetIsEnableSpecified());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

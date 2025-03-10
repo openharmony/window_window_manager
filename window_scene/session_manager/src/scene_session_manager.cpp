@@ -13026,7 +13026,10 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
         TLOGE(WmsLogTag::WMS_MAIN, "sceneSession %{public}d is nullptr", persistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    std::string specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+    std::string specifiedKey = key;
+    if (sceneSession->GetSessionProperty()->GetIsEnableSpecified()) {
+        specifiedKey = key + sceneSession->GetSessionInfo().specifiedFlag_;
+    }
     TLOGD(WmsLogTag::WMS_MAIN, "windowId: %{public}d, specifiedKey: %{public}s", persistentId, specifiedKey.c_str());
     std::unique_lock<std::mutex> lock(isWindowRectAutoSaveMapMutex_);
     if (auto iter = isWindowRectAutoSaveMap_.find(specifiedKey); iter != isWindowRectAutoSaveMap_.end()) {

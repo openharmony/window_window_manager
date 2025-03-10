@@ -144,7 +144,7 @@ public:
     WMError Restore() override;
     WMError SetTitleAndDockHoverShown(bool isTitleHoverShown = true,
         bool isDockHoverShown = true) override;
-    WMError SetWindowRectAutoSave(bool enabled) override;
+    WMError SetWindowRectAutoSave(bool enabled, bool isEnableSpecified = false) override;
     WMError IsWindowRectAutoSave(bool& enabled) override;
     WMError MaximizeFloating() override;
     WMError Maximize() override;

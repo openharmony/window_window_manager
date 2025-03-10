@@ -393,6 +393,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest07, Function | SmallTest | Lev
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TITLE_AND_DOCK_HOVER_SHOW_CHANGE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);
     ASSERT_EQ(data.WriteBool(true), true);
+    ASSERT_EQ(data.WriteBool(false), true);
     res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_RECT_AUTO_SAVE), data, reply, option);
     ASSERT_EQ(ERR_NONE, res);

@@ -24,7 +24,9 @@ namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 const int CONTENT_STORAGE_ARG = 2;
+constexpr size_t ARG_COUNT_TWO = 2;
 constexpr size_t INDEX_ZERO = 0;
+constexpr size_t INDEX_ONE = 1;
 constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
 } // namespace
@@ -873,25 +875,30 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-        return NapiGetUndefined(env);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != 1) { // 1: maximum params num
+    if (argc != ARG_COUNT_TWO) { // 1: maximum params num
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Argc is invalid: %{public}zu", argc);
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool enabled = false;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enabled)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to enabled");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
-        return NapiGetUndefined(env);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    bool isEnableSpecified = false;
+    if (ConvertFromJsValue(env, argv[INDEX_ONE], isEnableSpecified)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Success to convert parameter to isEnabledSpecified: %{public}d"
+            isEnableSpecified);
+        return this->OnSetWindowRectAutoSaveEnableSpecified(env, enabled, isEnableSpecified);
     }
 
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to isEnabledSpecified: %{public}d"
+            isEnableSpecified);
     auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
     napi_value result = nullptr;
@@ -905,6 +912,43 @@ napi_value JsWindowStage::OnSetWindowRectAutoSave(napi_env env, napi_callback_in
             return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled));
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s enable recover position failed!", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env,
+                ret, "window recover position failed."));
+        } else {
+            task->Resolve(env, NapiGetUndefined(env));
+        }
+    };
+    if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
+        napiAsyncTask->Reject(env,
+            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
+    }
+    return result;
+}
+
+napi_value JsWindowStage::OnSetWindowRectAutoSaveEnableSpecified(napi_env env, bool enabled, bool isEnableSpecified)
+{
+    auto windowScene = windowScene_.lock();
+    if (windowScene == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WindowScene is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+
+    const char* const where = __func__;
+    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "isEnableSpecified: %{public}d", isEnableSpecified);
+    auto window = windowScene->GetMainWindow();
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask, enabled, isEnableSpecified] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr", where);
+            WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
+            task->Reject(env, JsErrUtils::CreateJsError(env, wmErroeCode, "window is nullptr."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowRectAutoSave(enabled, isEnableSpecified));
         if (ret != WmErrorCode::WM_OK) {
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s enable recover position failed!", where);
             task->Reject(env, JsErrUtils::CreateJsError(env,

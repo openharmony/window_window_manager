@@ -1161,6 +1161,16 @@ bool WindowSessionProperty::GetIsAtomicService() const
     return isAtomicService_;
 }
 
+void WindowSessionProperty::SetIsEnableSpecified(bool isEnableSpecified)
+{
+    isEnableSpecified_ = isEnableSpecified;
+}
+
+bool WindowSessionProperty::GetIsEnableSpecified() const
+{
+    return isEnableSpecified_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     return parcel.WriteString(windowName_) && parcel.WriteInt32(windowRect_.posX_) &&
