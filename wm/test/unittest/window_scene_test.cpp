@@ -493,7 +493,7 @@ HWTEST_F(WindowSceneTest, GoResume01, Function | SmallTest | Level2)
 
 /**
  * @tc.name: GoResume02
- * @tc.desc: GoResume02 without mainWindow
+ * @tc.desc: GoResume02 with mainWindow
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneTest, GoResume02, Function | SmallTest | Level2)
