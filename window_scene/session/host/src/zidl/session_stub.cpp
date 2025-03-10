@@ -17,6 +17,7 @@
 
 #include "ability_start_setting.h"
 #include <ipc_types.h>
+#include <transaction/rs_transaction.h>
 #include <ui/rs_canvas_node.h>
 #include <ui/rs_surface_node.h>
 #include "want.h"
@@ -1547,7 +1548,13 @@ int SessionStub::HandleUpdateKeyFrameCloneNode(MessageParcel& data, MessageParce
         TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsCanvasNode");
         return ERR_INVALID_DATA;
     }
-    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode);
+    auto tranaction = data.ReadParcelable<RSTransaction>();
+    if (!tranaction) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "fail get rsTransaction");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<RSTransaction> rsTransaction(tranaction);
+    const WSError errCode = UpdateKeyFrameCloneNode(rsCanvasNode, rsTransaction);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

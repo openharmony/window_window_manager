@@ -609,7 +609,8 @@ public:
     DMRect CalcRectForStatusBar();
     WSError SetMoveAvailableArea(DisplayId displayId);
     // KeyFrame
-    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode) override;
+    WSError UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+        std::shared_ptr<RSTransaction>& rsTransaction) override;
     void SetKeyFramePolicy(const KeyFramePolicy& keyFramePolicy);
     WSError GetKeyFramePolicy(KeyFramePolicy& keyFramePolicy) override;
     void UpdateKeyFrameState(SizeChangeReason reason, const WSRect& rect);

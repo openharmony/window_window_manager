@@ -2497,7 +2497,8 @@ WSError SessionProxy::KeyFrameAnimateEnd()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode)
+WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsCanvasNode,
+    std::shared_ptr<RSTransaction>& rsTransaction)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2513,6 +2514,10 @@ WSError SessionProxy::UpdateKeyFrameCloneNode(std::shared_ptr<RSCanvasNode>& rsC
     }
     if (!rsCanvasNode || !rsCanvasNode->Marshalling(data)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write rsCanvasNode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!rsTransaction || !data.WriteParcelable(rsTransaction.get())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write rsTransaction failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_KEY_FRAME_CLONE_NODE),
