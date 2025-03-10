@@ -161,8 +161,8 @@ public:
     bool HandleFoldScreenSessionCreate(ScreenId screenId);
 
     void ChangeScreenGroup(sptr<ScreenSessionGroup> group, const std::vector<ScreenId>& screens,
-             const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,
-             DMRect mainScreenRegion = DMRect::NONE());
+        const std::vector<Point>& startPoints, bool filterScreen, ScreenCombination combination,
+        DMRect mainScreenRegion = DMRect::NONE());
 
     bool RemoveChildFromGroup(sptr<ScreenSession> screen, sptr<ScreenSessionGroup> screenGroup);
 
@@ -312,10 +312,13 @@ public:
     std::string GetSecondaryDisplayCapability();
     std::string GetFoldableDeviceCapability();
     std::string GetSuperFoldCapability();
+
     void NotifyCastWhenScreenConnectChange(bool isConnected);
     void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void SetCoordinationFlag(bool isCoordinationFlag);
+    DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
+        uint32_t& actualRefreshRate) override;
 
     /*
      * multi user
@@ -325,8 +328,6 @@ public:
     void AddScbClientDeathRecipient(const sptr<IScreenSessionManagerClient>& scbClient, int32_t scbPid);
     void ScbClientDeathCallback(int32_t deathScbPid);
     void ScbStatusRecoveryWhenSwitchUser(std::vector<int32_t> oldScbPids, int32_t newScbPid);
-    DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
-        uint32_t& actualRefreshRate) override;
     std::shared_ptr<Media::PixelMap> GetScreenCapture(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr) override;
     void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
@@ -387,7 +388,7 @@ private:
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount);
-    std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(ScreenId screenId);
+    std::shared_ptr<RSDisplayNode> GetDisplayNodeByDisplayId(DisplayId displayId);
     void RefreshMirrorScreenRegion(ScreenId screenId);
 #ifdef DEVICE_STATUS_ENABLE
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
@@ -464,9 +465,9 @@ private:
     bool isAutoRotationOpen_ = false;
     bool isExpandCombination_ = false;
     bool isScreenShot_ = false;
+    bool isCoordinationFlag_ = false;
     bool isFoldScreenOuterScreenReady_ = false;
     bool isCameraBackSelfie_ = false;
-    bool isCoordinationFlag_ = false;
     uint32_t hdmiScreenCount_ = 0;
     uint32_t virtualScreenCount_ = 0;
     sptr<AgentDeathRecipient> deathRecipient_ { nullptr };

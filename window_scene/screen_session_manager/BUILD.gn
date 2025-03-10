@@ -44,6 +44,7 @@ ohos_shared_library("screen_session_manager_client") {
   public_configs = [ ":screen_session_manager_client_public_config" ]
 
   deps = [
+    "${window_base_path}/etc:wms_etc",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/session:screen_session",
