@@ -2081,6 +2081,13 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 {
     auto task = [this, sessionInfo, property, where = __func__] {
         if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
+            if (PcFoldScreenManager::GetInstance().IsPcFoldDevice() && session->GetScreenId() == VIRTUAL_DISPLAY_ID &&
+                session->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+                    TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " to %{public}" PRIu64,
+                        sessionInfo.bundleName_.c_str(), VIRTUAL_DISPLAY_ID, sessionInfo.screenId_);
+                session->SetScreenId(sessionInfo.screenId_);
+                session->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
+            }
             NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             return session;
         }
