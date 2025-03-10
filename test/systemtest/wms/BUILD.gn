@@ -31,6 +31,7 @@ group("systemtest") {
     ":wms_window_multi_ability_test",
     ":wms_window_nointeraction_listener_test",
     ":wms_window_occupied_area_change_test",
+    ":wms_window_pc_test",
     ":wms_window_raisetoapptop_test",
     ":wms_window_recover_test",
     ":wms_window_rotation_test",
@@ -620,6 +621,29 @@ ohos_systemtest("wms_window_specialwindow_test") {
   sources = [ "window_specialwindow_test.cpp" ]
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
+
+  deps = [
+    ":wms_systemtest_common",
+    "${window_base_path}/window_scene/common:window_scene_common",
+    "${window_base_path}/window_scene/session:scene_session",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "power_manager:powermgr_client",
+  ]
+}
+
+ohos_systemtest("wms_window_pc_test") {
+  module_out_path = module_out_path
+
+  sources = [ "window_pc_test.cpp" ]
+
+  include_dirs = [
+    "${window_base_path}/window_scene/test/mock",
+    "${window_base_path}/test/common/mock",
+  ]
 
   deps = [
     ":wms_systemtest_common",
