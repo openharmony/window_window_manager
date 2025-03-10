@@ -477,15 +477,13 @@ bool SceneSessionDirtyManager::GetLastConstrainedModalUIExtInfo(const sptr<Scene
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
         return false;
     }
-    auto surfaceNode = sceneSession->GetSurfaceNode();
-    if (surfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "surfaceNode is nullptr");
+    auto surfaceNodeId = sceneSession->GetSurfaceNodeId();
+    if (!surfaceNodeId) {
         return false;
     }
-    auto surfaceNodeId = surfaceNode->GetId();
     {
         std::shared_lock<std::shared_mutex> lock(constrainedModalUIExtInfoMutex_);
-        auto iter = constrainedModalUIExtInfoMap_.find(surfaceNodeId);
+        auto iter = constrainedModalUIExtInfoMap_.find(*surfaceNodeId);
         if (iter == constrainedModalUIExtInfoMap_.end()) {
             return false;
         }
