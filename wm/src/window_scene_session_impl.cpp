@@ -540,10 +540,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         property_->SetWindowFlags(property_->GetWindowFlags() &
             (~(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED))));
     }
-    const auto& type = GetType();
-    uint32_t windowFlags = property_->GetWindowFlags();
-    bool isTopmost = property_->IsTopmost();
-    int32_t zLevel = GetSubWindowZLevelByFlags(type, windowFlags, isTopmost);
+    int32_t zLevel = GetSubWindowZLevelByFlags(GetType(), GetWindowFlags(), isTopmost());
     if (zLevel != NORMAL_SUB_WINDOW_Z_LEVEL) {
         property_->SetSubWindowZLevel(zLevel);
     }
@@ -556,8 +553,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
         TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
-        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", type);
+        TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", GetType());
         isSpecificSession = true;
+        const auto& type = GetType();
         if (WindowHelper::IsSystemWindow(type)) {
             // Not valid system window type for session should return WMError::WM_OK;
             if (!IsValidSystemWindowType(type)) {

@@ -1343,7 +1343,7 @@ static bool ParseRectParam(napi_env env, napi_value jsObject, const sptr<WindowO
     return true;
 }
 
-static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<WindowOption> &windowOption)
+static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<WindowOption>& windowOption)
 {
     int32_t zLevel = 0;
     bool isModal = false;
@@ -1358,7 +1358,7 @@ static bool ParseZLevelParam(napi_env env, napi_value jsObject, const sptr<Windo
                 return false;
             }
         }
-    windowOption->SetSubWindowZLevel(zLevel);
+        windowOption->SetSubWindowZLevel(zLevel);
     }
     TLOGI(WmsLogTag::WMS_SUB, "zLevel: %{public}d", zLevel);
     return true;

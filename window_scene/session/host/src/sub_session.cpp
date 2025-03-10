@@ -296,13 +296,11 @@ WSError SetSubWindowZLevel(int32_t zLevel)
             return;
         }
         auto property = session->GetSessionProperty();
-        if (property) {
-            TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session zLevel change, id: %{public}d, zLevel: %{public}d",
-                session->GetPersistentId(), zLevel);
-            property->SetSubWindowZLevel(zLevel);
-            if (session->onSubSessionZLevelChange_) {
-                session->onSubSessionZLevelChange_(zLevel);
-            }
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "Notify session zLevel change, id: %{public}d, zLevel: %{public}d",
+            session->GetPersistentId(), zLevel);
+        property->SetSubWindowZLevel(zLevel);
+        if (session->onSubSessionZLevelChange_) {
+            session->onSubSessionZLevelChange_(zLevel);
         }
     }, "SetSubWindowZLevel");
     return WSError::WS_OK;
@@ -312,10 +310,7 @@ int32_t GetSubWindowZLevel() const
 {
     int32_t zLevel = 0;
     auto sessionProperty = GetSessionProperty();
-    if (sessionProperty) {
-        zLevel = sessionProperty->GetSubWindowZLevel();
-    }
+    zLevel = sessionProperty->GetSubWindowZLevel();
     TLOGI(WmsLogTag::WMS_HIERARCHY, "zLevel: %{public}d",zLevel);
 }
-
 } // namespace OHOS::Rosen
