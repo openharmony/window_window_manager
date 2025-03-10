@@ -4270,7 +4270,7 @@ bool SceneSessionManager::GetStartupPageFromResource(const AppExecFwk::AbilityIn
     return true;
 }
 
-const bool SceneSessionManager::GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath)
+bool SceneSessionManager::GetIconFromDesk(const SessionInfo& sessionInfo, std::string& startupPagePath)
 {
     auto& want = sessionInfo.want;
     if (want == nullptr) {
