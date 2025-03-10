@@ -6542,6 +6542,10 @@ void ScreenSessionManager::SetIsExtendScreenConnected(bool isExtendScreenConnect
 void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
     SetIsExtendScreenConnected(true);
     SuperFoldSensorManager::GetInstance().HandleScreenConnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::CONNECT);
@@ -6552,6 +6556,10 @@ void ScreenSessionManager::HandleExtendScreenConnect(ScreenId screenId)
 void ScreenSessionManager::HandleExtendScreenDisconnect(ScreenId screenId)
 {
 #ifdef FOLD_ABILITY_ENABLE
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        TLOGI(WmsLogTag::DMS, "not super fold display device.");
+        return;
+    }
     SetIsExtendScreenConnected(false);
     SuperFoldSensorManager::GetInstance().HandleScreenDisconnectChange();
     OnExtendScreenConnectStatusChange(screenId, ExtendScreenConnectStatus::DISCONNECT);
