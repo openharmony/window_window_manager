@@ -3005,21 +3005,21 @@ WMError SceneSessionManagerProxy::MinimizeByWindowId(const std::vector<int32_t>&
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteInt32Vector(windowIds)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write int32Vector failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Write int32Vector failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Remote is null");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_BY_WINDOW_ID),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     return static_cast<WMError>(reply.ReadInt32());
