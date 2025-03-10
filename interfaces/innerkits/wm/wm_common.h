@@ -943,7 +943,7 @@ struct KeyboardPanelInfo : public Parcelable {
 /**
  * @struct CallingWindowInfo
  *
- * @brief Info of keyboard calling window
+ * @brief Information of keyboard calling window.
  */
 struct CallingWindowInfo : public Parcelable {
     int32_t windowId_ = 0;
