@@ -6094,6 +6094,17 @@ DMError ScreenSessionManager::SetVirtualScreenSecurityExemption(ScreenId screenI
     return ret == 0 ? DMError::DM_OK : DMError::DM_ERROR_UNKNOWN;
 }
 
+void ScreenSessionManager::SwitchScrollParam(FoldDisplayMode displayMode)
+{
+    std::map<FoldDisplayMode, ScrollableParam> scrollableParams = ScreenSceneConfig::GetAllScrollableParam();
+    std::string srollVelocityScale = scrollableParams.count(displayMode) != 0 ?
+        scrollableParams[displayMode].velocityScale_ : "0";
+    std::string srollFriction = scrollableParams.count(displayMode) != 0 ?
+        scrollableParams[displayMode].friction_ : "0";
+    system::SetParameter("persist.scrollable.velocityScale", srollVelocityScale);
+    system::SetParameter("persist.scrollable.friction", srollFriction);
+}
+
 void ScreenSessionManager::OnTentModeChanged(bool isTentMode, int32_t hall)
 {
     if (!foldScreenController_) {

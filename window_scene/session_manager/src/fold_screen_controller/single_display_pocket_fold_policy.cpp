@@ -119,6 +119,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         currentDisplayMode_ = displayMode;
     }
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
 }
 
 void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayModeProc(sptr<ScreenSession> screenSession,
