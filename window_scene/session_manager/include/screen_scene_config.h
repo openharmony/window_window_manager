@@ -46,6 +46,7 @@ public:
     static bool IsSupportRotateWithSensor();
     static std::string GetExternalScreenDefaultMode();
     static std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalConfig();
+    static std::map<FoldDisplayMode, ScrollableParam> GetAllScrollableParam();
     static bool IsSupportCapture();
 
 private:
@@ -60,6 +61,7 @@ private:
     static bool isScreenCompressionEnableInLandscape_;
     static uint32_t curvedAreaInLandscape_;
     static std::vector<DisplayPhysicalResolution> displayPhysicalResolution_;
+    static std::map<FoldDisplayMode, ScrollableParam> scrollableParams_;
     static bool isSupportCapture_;
 
     static bool IsValidNode(const xmlNode& currNode);
@@ -74,6 +76,7 @@ private:
     static bool IsNumber(std::string str);
     static DMRect CalcCutoutBoundaryRect(const std::string svgPath);
     static void ReadPhysicalDisplayConfigInfo(const xmlNodePtr& currNode);
+    static void ReadScrollableParam(const xmlNodePtr& currNode);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_SCREEN_SCENE_CONFIG_H

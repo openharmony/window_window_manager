@@ -313,6 +313,7 @@ public:
     std::string GetFoldableDeviceCapability();
     std::string GetSuperFoldCapability();
     void NotifyCastWhenScreenConnectChange(bool isConnected);
+    void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent);
     void SetCoordinationFlag(bool isCoordinationFlag);
 
