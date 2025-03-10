@@ -2081,14 +2081,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
 {
     auto task = [this, sessionInfo, property, where = __func__] {
         if (auto session = GetSceneSessionBySessionInfo(sessionInfo)) {
-            if (PcFoldScreenManager::GetInstance().IsSuperFoldDevice() &&
-                session->GetScreenId() == VIRTUAL_DISPLAY_ID &&
-                session->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
-                TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " from %{public}" PRIu64,
-                    sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, VIRTUAL_DISPLAY_ID);
-                session->SetScreenId(sessionInfo.screenId_);
-                session->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
-            }
+            UpdateSessionDisplayIdBySessionInfo(session, sessionInfo);
             NotifySessionUpdate(sessionInfo, ActionType::SINGLE_START);
             return session;
         }
@@ -13321,6 +13314,21 @@ DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<W
         ", clientDisplayId: %{public}" PRIu64, property->GetWindowName().c_str(), property->GetWindowType(),
         property->GetDisplayId(), initClientDisplayId);
     return initClientDisplayId;
+}
+
+void SceneSessionManager::UpdateSessionDisplayIdBySessionInfo(
+    sptr<SceneSession> sceneSession, const SessionInfo& sessionInfo)
+{
+    if (PcFoldScreenManager::GetInstance().IsSuperFoldDevice()) {
+        return;
+    }
+    if (session->GetScreenId() == VIRTUAL_DISPLAY_ID &&
+        session->GetSessionProperty()->GetDisplayId() == VIRTUAL_DISPLAY_ID) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s move display %{public}" PRIu64 " from %{public}" PRIu64,
+               sessionInfo.bundleName_.c_str(), sessionInfo.screenId_, VIRTUAL_DISPLAY_ID);
+        session->SetScreenId(sessionInfo.screenId_);
+        session->GetSessionProperty()->SetDisplayId(sessionInfo.screenId_);
+    }
 }
 
 void SceneSessionManager::RemoveLifeCycleTaskByPersistentId(int32_t persistentId,
