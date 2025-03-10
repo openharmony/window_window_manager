@@ -452,6 +452,7 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
         TLOGE(WmsLogTag::WMS_RECOVER, "want is nullptr!");
     }
     property_->SetWindowState(state_);
+    property_->SetIsFullScreenWaterfallMode(isFullScreenWaterfallMode_.load());
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> iWindowEventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
     sptr<IRemoteObject> token = context_ ? context_->GetToken() : nullptr;

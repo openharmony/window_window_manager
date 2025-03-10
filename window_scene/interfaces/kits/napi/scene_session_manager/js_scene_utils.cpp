@@ -1042,6 +1042,8 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue, "recoverRect", CreateJsSessionRect(env, wsRect));
     napi_set_named_property(env, objValue, "layoutFullScreen", CreateJsValue(env, property->IsLayoutFullScreen()));
     napi_set_named_property(env, objValue, "mainWindowTopmost", CreateJsValue(env, property->IsMainWindowTopmost()));
+    napi_set_named_property(env, objValue, "isFullScreenWaterfallMode",
+        CreateJsValue(env, property->GetIsFullScreenWaterfallMode()));
     return objValue;
 }
 
