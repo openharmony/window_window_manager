@@ -9601,7 +9601,11 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
                 NotifySessionAINavigationBarChange(persistentId);
             }
             bool isLastFrameLayoutFinished = true;
-            IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
+            WSError ret = IsLastFrameLayoutFinished(isLastFrameLayoutFinished);
+            if (ret != WSError::WS_OK) {
+                TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc failed, ret %{public}d", ret);
+                return;
+            }
             TLOGI(WmsLogTag::WMS_IMMS, "rootscene layout finished %{public}d", isLastFrameLayoutFinished);
             if (isLastFrameLayoutFinished) {
                 rootSceneSession_->UpdateAvoidArea(
